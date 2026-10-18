@@ -75,6 +75,14 @@ sono tracciati su GitHub Projects:
 
 - [Backlog Progetto-SAD](https://github.com/users/CapHello/projects/2)
 
+<!-- BURNDOWN:START — grafico dello sprint in corso, aggiornato ogni sera dal workflow "burndown"; non modificare il link -->
+## 📉 Avanzamento dello sprint
+
+![Burndown dello sprint in corso](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/raw/burndown-data/burndown-latest.svg)
+
+*Aggiornato ogni sera. Gli sprint precedenti sono nel branch [`burndown-data`](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/tree/burndown-data).*
+<!-- BURNDOWN:END -->
+
 ## 🚀 Avvio locale
 
 Le istruzioni di avvio saranno completate quando sarà disponibile
