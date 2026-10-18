@@ -1,0 +1,77 @@
+# Da copiare nel repository del progetto come .github/workflows/burndown.yml
+# insieme a scripts/burndown.py (output/burndown/burndown.py del wiki).
+# NON TESTATO su un project reale: lanciarlo a mano con "Run workflow" prima di fidarsi.
+#
+# Prerequisiti (Settings -> Secrets and variables -> Actions):
+#  - secret    PROJECT_TOKEN   token personale CLASSICO con scope `project` e `repo`
+#                              (impostare una scadenza oltre il 17/12/2026, altrimenti il workflow smette di funzionare)
+#  - variabile PROJECT_NUMBER  numero del project (dall'URL .../projects/<numero>)
+#
+# Risultato: sul branch burndown-data, il file burndown-latest.svg (sprint in corso, nome fisso, usato dal README),
+# un burndown-<sprint>.svg/.csv per ogni sprint e l'artefatto «burndown» di ogni esecuzione.
+name: burndown
+
+on:
+  schedule:
+    - cron: "50 23 * * *"       # ogni giorno alle 23:50 UTC, appena prima del cambio di giorno
+  workflow_dispatch:
+    inputs:
+      iteration_title:
+        description: "Titolo dell'iterazione (vuoto = quella in corso). Es. 'S1 - Preparazione'"
+        required: false
+        default: ""
+
+permissions:
+  contents: write                # serve per pubblicare sul branch burndown-data
+
+concurrency:
+  group: burndown                # evita due esecuzioni insieme che si contendono il push
+  cancel-in-progress: false
+
+jobs:
+  burndown:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Calcola il burndown
+        env:
+          PROJECT_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          PROJECT_OWNER: CapHello
+          PROJECT_NUMBER: ${{ vars.PROJECT_NUMBER }}
+          OWNER_TYPE: user
+          ITERATION_TITLE: ${{ github.event.inputs.iteration_title }}
+          ITERATION_FIELD: Iteration
+          STATUS_FIELD: Status
+          DONE_VALUE: Done
+          POINTS_FIELD: Estimate   # campo Number del project; se un task non ce l'ha si usa la mappatura di Size, poi 1
+          SIZE_FIELD: Size
+          OUT_DIR: ${{ runner.temp }}/out
+        run: python scripts/burndown.py
+
+      - name: Conserva come artefatto
+        uses: actions/upload-artifact@v4
+        with:
+          name: burndown
+          path: ${{ runner.temp }}/out
+
+      # main è protetto: i file vanno su un branch dedicato, non su main
+      - name: Pubblica sul branch burndown-data
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin burndown-data >/dev/null; then
+            git fetch origin burndown-data
+            git checkout -B burndown-data origin/burndown-data
+          else
+            git checkout --orphan burndown-data
+            git rm -rf . >/dev/null
+          fi
+          cp "$RUNNER_TEMP"/out/* .
+          git add -A
+          git commit -m "chore: aggiorna burndown" || echo "nessuna modifica"
+          git push origin burndown-data
