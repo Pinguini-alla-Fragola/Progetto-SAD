@@ -1,0 +1,86 @@
+name: Story
+description: Funzionalità dal punto di vista di un utente, con criteri verificabili.
+title: "[STORY] "
+type: Story
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gli assistiti sono stakeholder, non utenti applicativi. Una nuova
+        formulazione funzionale resta proposta finché non viene concordata.
+        Priorità, assegnatari e iterazione si gestiscono nel Project.
+  - type: textarea
+    id: user_story
+    attributes:
+      label: Ruolo, obiettivo e beneficio
+      placeholder: |
+        Come [ruolo applicativo],
+        voglio [obiettivo],
+        affinché [beneficio].
+    validations:
+      required: true
+  - type: input
+    id: epic
+    attributes:
+      label: Epic e identificatore della Story
+      description: Collegare l'Epic e indicare l'ID stabile della Story, se già assegnato.
+    validations:
+      required: true
+  - type: textarea
+    id: stakeholders
+    attributes:
+      label: Stakeholder e valore
+      description: Chi beneficia, chi è coinvolto e perché il risultato è utile.
+    validations:
+      required: true
+  - type: dropdown
+    id: requirement_status
+    attributes:
+      label: Stato della formulazione
+      options:
+        - Proposta da validare
+        - Ipotesi provvisoria
+        - Richiesta esplicita della fonte da formalizzare
+        - Requisito concordato con evidenza
+      default: 0
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Fonte o evidenza dell'accordo
+      description: Citare documento/pagina, verbale o risposta tracciata del committente.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Criteri di accettazione
+      description: Risultati osservabili, casi negativi pertinenti, ruoli e visibilità.
+      placeholder: |
+        AC-01: Dato ... Quando ... Allora ...
+        AC-02: Dato ... Quando ... Allora ...
+    validations:
+      required: true
+  - type: textarea
+    id: invest
+    attributes:
+      label: Valutazione INVEST
+      description: Motivare indipendenza, negoziabilità, valore, stimabilità, dimensione e verificabilità.
+      placeholder: |
+        I - Indipendente:
+        N - Negoziabile:
+        V - Di valore:
+        E - Stimabile:
+        S - Piccola:
+        T - Verificabile:
+        Raffinamenti o suddivisioni necessari:
+    validations:
+      required: true
+  - type: textarea
+    id: assumptions
+    attributes:
+      label: Ipotesi, dipendenze e qualità
+      description: Collegare domande, altre Story e scenari di qualità; indicare Nessuna se pertinente.
+    validations:
+      required: true

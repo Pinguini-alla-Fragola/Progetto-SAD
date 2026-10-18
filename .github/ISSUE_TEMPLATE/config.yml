@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Segnalazioni di sicurezza
+    url: https://github.com/Pinguini-alla-Fragola/Progetto-SAD/security/policy
+    about: Leggere la policy e usare un canale privato per vulnerabilità o credenziali esposte.

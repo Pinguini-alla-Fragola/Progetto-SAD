@@ -1,0 +1,16 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      timezone: Europe/Rome
+    # Preparato per futuri aggiornamenti: nessuna PR automatica di versione.
+    # Gli aggiornamenti sono eseguiti da membri umani, come da workflow del team.
+    open-pull-requests-limit: 0
+
+# Aggiungere Maven dopo l'introduzione del pom.xml, concordando prima la policy
+# sugli aggiornamenti. Gli alert si abilitano nelle impostazioni del repository.
+# Le PR di sicurezza sono una funzionalita' separata: per mantenere contributi
+# solo umani, lasciare disattivato anche "Dependabot security updates" in Settings.

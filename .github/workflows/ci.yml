@@ -1,0 +1,56 @@
+name: Java CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: java-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build e test Java
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Verifica presenza del progetto Maven
+        id: project
+        shell: bash
+        run: |
+          if [[ ! -f pom.xml ]]; then
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "Progetto Maven non ancora presente: build e test NON eseguiti." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          for file in mvnw mvnw.cmd .mvn/wrapper/maven-wrapper.properties; do
+            if [[ ! -f "$file" ]]; then
+              echo "::error::Progetto Maven incompleto: manca $file"
+              exit 1
+            fi
+          done
+          echo "present=true" >> "$GITHUB_OUTPUT"
+
+      - name: Configura Java 25
+        if: steps.project.outputs.present == 'true'
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+          cache-dependency-path: '**/pom.xml'
+
+      - name: Build e test con Maven Wrapper
+        if: steps.project.outputs.present == 'true'
+        shell: bash
+        run: bash ./mvnw --batch-mode --no-transfer-progress verify

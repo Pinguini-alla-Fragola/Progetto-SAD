@@ -1,0 +1,45 @@
+name: Epic
+description: Area funzionale ampia e valore atteso per gli stakeholder.
+title: "[EPIC] "
+type: Epic
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Descrivi un'area del prodotto. Un'Epic non determina automaticamente un
+        modulo architetturale. Usa solo dati sintetici e cerca eventuali duplicati.
+  - type: textarea
+    id: objective
+    attributes:
+      label: Obiettivo e valore
+      description: Problema, beneficio atteso e stakeholder interessati.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Perimetro
+      description: Risultati inclusi, esclusioni e confini funzionali da chiarire.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Fonti e stato dei requisiti
+      description: Documento e pagina o artefatto; distinguere fonte, accordi e proposte.
+    validations:
+      required: true
+  - type: textarea
+    id: stories
+    attributes:
+      label: Story e risultati verificabili
+      description: Collegare le Story esistenti e indicare come verificarne il valore.
+    validations:
+      required: false
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Ipotesi, dipendenze e questioni aperte
+      description: Riportare i riferimenti pertinenti oppure indicare Nessuna.
+    validations:
+      required: true

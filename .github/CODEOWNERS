@@ -1,0 +1,7 @@
+# Revisione ordinaria del progetto: il team deve essere visibile e avere Write.
+* @Pinguini-alla-Fragola/developers
+
+# Le regole specifiche vengono per ultime: prevalgono sul proprietario generale.
+# Solo questi due account sono code owner della configurazione del repository.
+/.gitignore @CapHello @giob22
+/.github/ @CapHello @giob22
