@@ -1,0 +1,21 @@
+# Controlli strutturali leggeri, senza imporre lunghezza righe o stile delle tabelle.
+config:
+  default: false
+  MD001: true
+  MD003:
+    style: atx
+  MD009:
+    br_spaces: 2
+  MD010: true
+  MD018: true
+  MD019: true
+  MD022: true
+  MD023: true
+  MD031: true
+  MD032: true
+  MD037: true
+  MD038: true
+  MD039: true
+  MD040: true
+  MD047: true
+fix: false

@@ -19,6 +19,119 @@
 *.tar.gz
 *.rar
 
+# Keep the Maven Wrapper bootstrap JAR versionable, including in future modules.
+!**/.mvn/wrapper/maven-wrapper.jar
+
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# Maven build output and local dependency caches
+target/
+.m2/
+.mvn/timing.properties
+
+# IDE and operating-system state
+.idea/
+*.iml
+*.iws
+*.ipr
+.classpath
+.project
+.settings/
+.history/
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editor, Office and document-rendering temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*~
+~$*
+.~lock.*#
+/tmp/
+/temp/
+
+# Local environment files; commit only examples containing dummy values.
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+.direnv/
+.secrets/
+*.key
+*.pem
+*.p12
+*.pfx
+*.jks
+*.keystore
+settings-security.xml
+settings.local.xml
+application-local.properties
+application-local.yml
+application-local.yaml
+application-secrets.properties
+application-secrets.yml
+application-secrets.yaml
+
+# Agent scratch space and local worktrees. Put disposable output here.
+/.ai-local/
+/.agent-tmp/
+/.agent-work/
+/.worktrees/
+
+# Codex local authentication, histories, logs and runtime databases
+/.codex/auth.json
+/.codex/auth.json.*
+/.codex/config.local.toml
+/.codex/history.jsonl
+/.codex/history/
+/.codex/sessions/
+/.codex/archived_sessions/
+/.codex/log/
+/.codex/logs/
+/.codex/tmp/
+/.codex/shell_snapshots/
+/.codex/*.sqlite*
+/.codex/*.db*
+
+# Claude Code personal overrides and local session state
+CLAUDE.local.md
+AGENTS.local.md
+/.claude/settings.local.json
+/.claude/history.jsonl
+/.claude/projects/
+/.claude/debug/
+/.claude/session-env/
+/.claude/shell-snapshots/
+/.claude/todos/
+/.claude/cache/
+
+# Cursor and Continue local chats, indexes and caches
+/.cursor/chats/
+/.cursor/cache/
+/.cursor/*.log
+/.continue/sessions/
+/.continue/index/
+/.continue/logs/
+/.continue/config.local.*
+
+# Aider conversation history and repository index
+.aider.chat.history.md
+.aider.input.history
+.aider.tags.cache*/
+
+# Python/Node caches from local agent utilities; keep source and lockfiles.
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+node_modules/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
