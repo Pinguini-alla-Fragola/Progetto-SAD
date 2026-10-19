@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coming Soon</title>
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --text-primary: #f0f6fc;
+            --text-secondary: #8b949e;
+            --accent-color: #58a6ff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            overflow-x: hidden;
+        }
+
+        /* Layout Desktop */
+        .container {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: clamp(3rem, 5vw, 6.5rem);
+            width: min(88vw, 1700px);
+        }
+
+        .logo-wrapper {
+            flex: 0 1 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .logo-wrapper img {
+            width: clamp(340px, 25vw, 560px);
+            max-height: 60vh;
+            height: auto;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .content {
+            flex: 1;
+            max-width: 1050px;
+            display: flex;
+            flex-direction: column;
+            gap: clamp(1.5rem, 2vw, 2.2rem);
+        }
+
+        h1 {
+            font-size: clamp(2.4rem, 3.6vw, 4.2rem);
+            font-weight: 800;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+        }
+
+        p {
+            font-size: clamp(1.25rem, 1.8vw, 2rem);
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        a {
+            color: var(--text-primary);
+            text-decoration: none;
+            border-bottom: 3px solid var(--accent-color);
+            padding-bottom: 3px;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: color 0.2s ease, border-color 0.2s ease;
+        }
+
+        a:hover {
+            color: var(--accent-color);
+        }
+
+        .mobile-break {
+            display: none;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-14px); }
+        }
+
+        /* Layout Mobile */
+        @media (max-width: 768px) {
+            body {
+                padding: 2rem;
+            }
+            .container {
+                flex-direction: column;
+                text-align: center;
+                gap: 2.5rem;
+                width: 100%;
+            }
+            .logo-wrapper img {
+                width: 100%;
+                max-width: 200px;
+                max-height: none;
+            }
+            .content {
+                gap: 1.2rem;
+            }
+            h1 {
+                font-size: clamp(2rem, 4vw, 3.5rem);
+                line-height: 1.15;
+            }
+            p {
+                font-size: clamp(1rem, 2vw, 1.25rem);
+            }
+            a {
+                border-bottom-width: 2px;
+                padding-bottom: 2px;
+            }
+            .mobile-break {
+                display: inline;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <main class="container">
+        <div class="logo-wrapper">
+            <img src="logo.svg" alt="Project Logo">
+        </div>
+        <div class="content">
+            <h1>Hold on, we're almost ready to shine.</h1>
+            <p>
+                While you wait, take a look at our <br class="mobile-break"><a href="https://github.com/CapHello/Progetto-SAD" target="_blank" rel="noopener noreferrer">GitHub Page</a>.
+            </p>
+        </div>
+    </main>
+
+</body>
+</html>
