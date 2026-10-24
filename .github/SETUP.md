@@ -41,24 +41,16 @@ Riferimento: [code owner e protezioni](https://docs.github.com/en/repositories/m
 
 ## Issue e Project
 
-Nelle impostazioni dell'organizzazione mantenere i tipi **Epic, Story, Task,
-Bug, Question**. I cinque form in `ISSUE_TEMPLATE/` usano esattamente quei nomi.
-`blocked` resta una label, con motivo e dipendenza espliciti nell'issue.
+I form seguono le sette categorie del template del corso: Epic, User Story,
+Quality Scenario, Architecture Task, Technical Task, Spike e Bug.
+Verificare che il tipo nativo `Epic` esista prima di usare il relativo form.
+Le etichette sono elencate in [labels.yml](labels.yml); il file è un elenco
+di riferimento e non le crea automaticamente su GitHub.
 
-I form non impongono assegnatari, priorità o sprint. Questi valori si gestiscono
-nel Project e nel planning. Durante la migrazione assegnare prima il tipo
-nativo alle issue, poi aggiornare i filtri e infine rimuovere le label `type:*`
-diventate ridondanti.
-
-- Vista Story: usare `type:"Story"` al posto di `label:"type:story"`.
-- Vista domande: usare `type:"Question"` al posto di `label:"type:question"`.
-- Vista sprint: mantenere il filtro sull'iterazione concordata.
-- Mostrare il campo Type e verificare la presenza degli elementi già migrati.
-
-Il numero del nuovo Project non viene presunto: configurare l'auto-add nel
-Project dell'organizzazione, limitandolo a questa repository. Verificare i
-collegamenti eventualmente ancora diretti al Project personale precedente.
-Il workflow delle issue non va confuso con gli stati di dominio delle richieste PICUS.
+L'allineamento dei campi, delle viste e dei filtri del Project e le eventuali
+automazioni di classificazione saranno concordati insieme alla configurazione
+di collaborazione. I form non assegnano persone o sprint automaticamente.
+Non modificare gli elementi esistenti del backlog senza una revisione del team.
 
 ## Workflow e dipendenze
 
@@ -70,8 +62,8 @@ questi controlli non ne verificano l'impaginazione.
 
 [Java CI](workflows/ci.yml) dichiara esplicitamente l'assenza di build e test
 finché non esiste `pom.xml`. Quando il POM compare, esige il Maven Wrapper e
-usa Java 25 con `verify`. Concordare la configurazione delle eventuali prove
-con MySQL prima di aggiungere test che dipendono da un database.
+usa Java 25 con `verify`. La revisione dei workflow è rinviata al confronto
+sulla CI e sulla collaborazione.
 
 In **Settings → Actions → General** mantenere il token di default in sola
 lettura, limitare le Action consentite a quelle revisionate e non abilitare
@@ -101,16 +93,3 @@ necessari e limitare il ruolo Admin ai maintainer che gestiscono la repository.
 Credenziali CI eventuali vanno in GitHub Secrets; non in file, template o issue.
 
 Riferimento: [impostazioni di sicurezza](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-security-and-analysis-settings-for-your-repository).
-
-## Documenti condivisi e agenti
-
-[CONTRIBUTING.md](CONTRIBUTING.md) raccoglie il workflow pubblicabile;
-[copilot-instructions.md](copilot-instructions.md) lo richiama per l'assistenza IA.
-L'eventuale `AGENTS.md` nella cartella padre del workspace resta locale e non
-viene incluso nel clone. Non spostarlo automaticamente o presumere che altri
-cloni lo abbiano disponibile.
-
-Gli agenti preparano modifiche su nuovi branch locali e non creano commit,
-push, PR o attribuzioni da contributore. I workflow qui presenti fanno controlli
-e non pubblicano modifiche. Le modalità di agente cloud con commit o push
-automatici non sono compatibili con questa regola.

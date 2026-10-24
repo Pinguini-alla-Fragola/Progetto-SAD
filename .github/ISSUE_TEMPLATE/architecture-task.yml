@@ -1,0 +1,35 @@
+name: Architecture Task
+description: Record work that creates or validates an architectural decision.
+title: "[ARCHITECTURE] "
+body:
+  - type: textarea
+    id: concern
+    attributes:
+      label: Architectural concern
+      description: Describe the decision, risk or structure to be addressed.
+    validations:
+      required: true
+  - type: textarea
+    id: drivers
+    attributes:
+      label: Architectural drivers
+      description: Reference requirements, constraints and quality scenarios.
+    validations:
+      required: true
+  - type: textarea
+    id: deliverables
+    attributes:
+      label: Expected deliverables
+      placeholder: |
+        - [ ] ADR
+        - [ ] Updated diagram
+        - [ ] Validation evidence
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation approach
+      description: Explain how the decision or architecture will be evaluated.
+    validations:
+      required: true

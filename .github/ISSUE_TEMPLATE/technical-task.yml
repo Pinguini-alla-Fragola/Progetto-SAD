@@ -1,0 +1,30 @@
+name: Technical Task
+description: Define implementation, testing, refactoring or tooling work.
+title: "[TECHNICAL TASK] "
+body:
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective
+      description: Describe the technical outcome, not only the activity.
+    validations:
+      required: true
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Rationale
+      description: Explain why the work is needed and link related backlog items.
+    validations:
+      required: true
+  - type: textarea
+    id: completion
+    attributes:
+      label: Completion criteria
+      placeholder: |
+        - [ ] ...
+    validations:
+      required: true
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risks and dependencies
