@@ -1,16 +1,15 @@
-# Progetto SAD
+# PICUS
 
-Applicazione web per la gestione di un **ente di beneficenza**, sviluppata
-per l’esame di **Software Architecture Design** — a.a. 2026/27.
+Progetto di Software Architecture Design del gruppo **Pinguini alla Fragola**,
+a.a. 2026/27, Università degli Studi di Napoli Federico II.
 
-**Docente:** Prof. Anna Rita Fasolino  
-**Corso:** Laurea Magistrale in Ingegneria Informatica  
-**Università:** Università degli Studi di Napoli Federico II
+**Docente:** Prof. Anna Rita Fasolino.
 
-Il progetto è in fase di avvio. I moduli funzionali e il relativo perimetro
-saranno definiti attraverso le User Story del backlog.
+PICUS supporta il Banco nel coordinamento delle Organizzazioni Partner
+Territoriali, delle richieste di misure di accompagnamento e del monitoraggio.
+Il gruppo sta definendo i processi as-is e to-be nell'iterazione preparatoria.
 
-## 👥 Team
+## Team
 
 | Nome | GitHub | Scrum Role |
 |------|--------|------------|
@@ -23,50 +22,57 @@ saranno definiti attraverso le User Story del backlog.
 | Giovanni Fragola | [@giob22](https://github.com/giob22) | Developer |
 | Roberta Giovengo 🍓 | [@bobby273](https://github.com/bobby273) | Developer |
 
-## 🏗️ Architettura
+## Documentazione
 
-L’architettura prevista è un **monolite modulare** basato sul pattern
-**MVC (Model–View–Controller)**.
+- [Requisiti e modelli di analisi](docs/requirements/README.md)
+- [Scenari di qualità](docs/quality-scenarios/README.md)
+- [Architettura](docs/architecture/README.md)
+- [Registro delle decisioni](docs/adr/README.md)
+- [Review delle iterazioni](docs/reviews/README.md)
+- [Documento di progetto Word](docs/Documentazione_SAD_2026.docx)
+- [Esportazione PDF del documento](docs/Documentazione_SAD_2026.pdf)
+- [Regole di contribuzione](.github/CONTRIBUTING.md)
 
-I moduli mantengono confini espliciti e comunicano attraverso interfacce
-dedicate e DTO. Questa organizzazione prepara l’estrazione di un
-sottosistema in un **microservizio**, prevista nelle ultime iterazioni
-Scrum, con comunicazione tramite **gRPC e Protocol Buffers**.
+Il Word conserva l'analisi già redatta; le cartelle raccolgono i relativi modelli
+e riepiloghi. Il PDF presente è un'esportazione precedente e sarà riallineato
+al Word durante la prossima revisione documentale. Il Product Backlog resta
+la fonte operativa per il lavoro pianificato.
 
-La progettazione applica i principi **GRASP** e i design pattern **GoF**
-dove appropriato.
+## Prerequisiti
 
-## 🛠️ Stack tecnologico previsto
+- Java **25 LTS**.
+- Maven **3.9 o successivo**; il Maven Wrapper permette di usare la versione
+  fissata per il progetto senza installare Maven separatamente.
+- Spring Boot **4.1.2**, fissato nel POM come base della linea **4.1+**.
+- JUnit Jupiter **5 o successivo**, nella versione gestita da Spring Boot.
 
-| Area | Tecnologie |
-|------|------------|
-| Linguaggio e build | Java 25, Maven e Maven Wrapper |
-| Backend | Spring Boot, Spring Web MVC |
-| Persistenza | MySQL, Spring Data JPA / Hibernate |
-| Validazione | Jakarta Bean Validation |
-| Interfaccia web | HTML5, CSS3, JavaScript vanilla, template lato server |
-| Testing | JUnit 5, senza Mockito |
-| Comunicazione con il microservizio | gRPC, Protocol Buffers — fase successiva |
-| Containerizzazione | Docker, Docker Compose |
-| Predisposizione al deployment | Architettura pronta per Kubernetes |
-| Modellazione UML | Visual Paradigm |
-| Documentazione | Markdown, Microsoft Word / PDF |
-| Versioning e project management | GitHub, GitHub Projects |
+## Build e test
 
-Il motore di template lato server deve essere confermato:
-Thymeleaf è una delle opzioni indicate nelle linee guida.
+```bash
+mvn verify
+```
 
-## 🧭 Principi di sviluppo
+Con il Maven Wrapper:
 
-- Separazione delle responsabilità tra Controller, Model e View.
-- Logica di business nel dominio e nel livello applicativo.
-- Uso di DTO per gli input e gli output dei Controller, senza esporre
-  direttamente le entità JPA.
-- Comunicazione tra moduli attraverso interfacce dedicate, senza accessi
-  diretti ai repository o relazioni JPA tra moduli differenti.
-- Dependency injection tramite costruttore.
-- Configurazione esterna tramite proprietà e variabili d’ambiente.
-- Test con JUnit 5 e Fake/Stub scritti a mano quando necessari.
+```bash
+bash ./mvnw verify
+```
+
+In PowerShell:
+
+```powershell
+.\mvnw.cmd verify
+```
+
+## Avvio locale
+
+```bash
+mvn spring-boot:run
+```
+
+Lo scheletro contiene la classe di avvio Spring Boot e il test di caricamento
+del contesto del template. La configurazione iniziale contiene soltanto
+`spring.application.name: picus`; le funzionalità di dominio sono da realizzare.
 
 ## 🏭 Project management
 
@@ -82,9 +88,3 @@ sono tracciati su GitHub Projects:
 
 *Aggiornato ogni sera. Gli sprint precedenti sono nel branch [`burndown-data`](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/tree/burndown-data).*
 <!-- BURNDOWN:END -->
-
-## 🚀 Avvio locale
-
-Le istruzioni di avvio saranno completate quando sarà disponibile
-lo scheletro eseguibile dell’applicazione. Includeranno i prerequisiti,
-la configurazione di MySQL, le variabili d’ambiente e i comandi di avvio.

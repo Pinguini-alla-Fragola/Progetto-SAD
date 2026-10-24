@@ -1,0 +1,61 @@
+name: User Story
+description: Describe functionality that provides value to a stakeholder.
+title: "[USER STORY] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Complete the story and make every acceptance criterion objectively verifiable.
+        Use synthetic data only; do not include identifying data about assisted persons.
+  - type: textarea
+    id: story
+    attributes:
+      label: User story
+      description: Use the standard role-goal-benefit formulation.
+      placeholder: As a ... I want ... so that ...
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context and value
+      description: Explain the need, expected value and relevant assumptions.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Prefer Given/When/Then or a checklist of observable outcomes.
+      placeholder: |
+        - [ ] Given ..., when ..., then ...
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies and notes
+      description: Reference related Issues, constraints, mockups or open questions.
+  - type: input
+    id: epic
+    attributes:
+      label: Parent Epic
+      description: Reference the parent Epic Issue or its stable identifier.
+  - type: textarea
+    id: source
+    attributes:
+      label: Source and requirement status
+      description: Cite the source or stakeholder feedback and distinguish proposals, assumptions and agreed requirements.
+  - type: checkboxes
+    id: ready
+    attributes:
+      label: Definition of Ready
+      options:
+        - label: The value and intended user are clear.
+          required: true
+        - label: Acceptance criteria are testable.
+          required: true
+        - label: The story is small enough for one iteration.
+          required: true
+        - label: The team has enough information to estimate it.
+          required: true

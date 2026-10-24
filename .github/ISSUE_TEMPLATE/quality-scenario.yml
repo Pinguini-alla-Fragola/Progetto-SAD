@@ -1,0 +1,62 @@
+name: Quality Scenario
+description: Define a measurable quality requirement or its validation work.
+title: "[QUALITY] "
+body:
+  - type: dropdown
+    id: attribute
+    attributes:
+      label: Quality attribute
+      options:
+        - Availability
+        - Performance
+        - Security
+        - Privacy
+        - Modifiability
+        - Usability
+        - Testability
+        - Interoperability
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Source of stimulus
+    validations:
+      required: true
+  - type: input
+    id: stimulus
+    attributes:
+      label: Stimulus
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+    validations:
+      required: true
+  - type: input
+    id: artifact
+    attributes:
+      label: Artifact
+    validations:
+      required: true
+  - type: textarea
+    id: response
+    attributes:
+      label: Expected response
+    validations:
+      required: true
+  - type: textarea
+    id: measure
+    attributes:
+      label: Response measure
+      description: Specify an objective measure, its unit and threshold; mark any unconfirmed target as a proposal.
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation method
+      description: Describe the test, experiment or evidence that will be used.

@@ -1,0 +1,42 @@
+name: Spike
+description: Time-boxed investigation intended to reduce uncertainty.
+title: "[SPIKE] "
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: Question to answer
+      description: State the uncertainty or decision that blocks progress.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Reference related stories, risks or architectural concerns.
+    validations:
+      required: true
+  - type: input
+    id: timebox
+    attributes:
+      label: Time-box
+      placeholder: e.g. 4 hours or 1 day
+    validations:
+      required: true
+  - type: textarea
+    id: outputs
+    attributes:
+      label: Expected outputs
+      placeholder: |
+        - Recommendation
+        - Evidence or prototype
+        - Follow-up Issues
+    validations:
+      required: true
+  - type: textarea
+    id: decision
+    attributes:
+      label: Decision criteria
+      description: Explain how alternatives will be compared.
+    validations:
+      required: true

@@ -24,7 +24,7 @@ dichiaralo e motivalo: non presentarlo come superato. -->
 
 ## Impatto e punti aperti
 
-<!-- Requisiti, ADR/UML, confini dei moduli, configurazione, privacy,
+<!-- Requisiti, dati, configurazione, privacy,
 dipendenze o attività successive. Scrivi "Nessuno" se pertinente. -->
 
 ## Checklist comune
@@ -34,7 +34,7 @@ dipendenze o attività successive. Scrivi "Nessuno" se pertinente. -->
 - [ ] Documenti, esempi e log non contengono credenziali o dati personali reali.
 - [ ] Fonti, requisiti concordati, proposte e ipotesi sono distinguibili.
 - [ ] La documentazione e gli altri artefatti coinvolti sono coerenti.
-- [ ] Ho esaminato il diff, inclusi eventuali contenuti preparati con assistenza IA.
+- [ ] Ho esaminato il diff.
 
 ## Verifiche specifiche
 
@@ -42,8 +42,6 @@ dipendenze o attività successive. Scrivi "Nessuno" se pertinente. -->
 Le caselle non applicabili non devono essere spuntate come se fossero verificate. -->
 
 - [ ] Codice: compilazione e test pertinenti superati con Maven Wrapper.
-- [ ] Codice: JUnit 5 senza Mockito; per un bug è provata la regressione.
-- [ ] Architettura: MVC, DTO, isolamento dei moduli e decisioni GRASP/GoF rispettati.
-- [ ] Architettura: ADR e diagrammi Visual Paradigm aggiornati quando necessario.
+- [ ] Codice: test JUnit Jupiter 5 o successivo aggiunti o aggiornati dove necessario.
 - [ ] Documentazione: fonti, terminologia, link e tracciabilità verificati.
 - [ ] `.github/` o `.gitignore`: richiesta la review a `@CapHello` o `@giob22`.

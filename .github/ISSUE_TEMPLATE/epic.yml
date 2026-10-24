@@ -1,0 +1,53 @@
+name: Epic
+description: Define a large functional objective to be decomposed into User Stories.
+title: "[EPIC] "
+type: Epic
+body:
+  - type: markdown
+    attributes:
+      value: |
+        An Epic represents a broad functional objective.
+        It must be decomposed into smaller User Stories linked as sub-issues.
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective
+      description: Describe the overall objective addressed by the Epic.
+      placeholder: Describe the capability or business objective.
+    validations:
+      required: true
+  - type: textarea
+    id: stakeholders
+    attributes:
+      label: Stakeholders and value
+      description: Identify the stakeholders and explain the expected value.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: Describe what is included in this Epic.
+    validations:
+      required: true
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: Out of scope
+      description: Clarify what is explicitly excluded.
+  - type: textarea
+    id: completion
+    attributes:
+      label: Epic completion criteria
+      description: State the conditions under which the Epic can be considered complete.
+      placeholder: |
+        - [ ] All required User Stories have been completed
+        - [ ] The end-to-end flow has been demonstrated
+        - [ ] Relevant quality scenarios have been verified
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies, risks and constraints
+      description: Reference related Issues, architectural concerns and known constraints.

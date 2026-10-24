@@ -79,54 +79,10 @@ application-secrets.properties
 application-secrets.yml
 application-secrets.yaml
 
-# Agent scratch space and local worktrees. Put disposable output here.
-/.ai-local/
-/.agent-tmp/
-/.agent-work/
+# Local worktrees
 /.worktrees/
 
-# Codex local authentication, histories, logs and runtime databases
-/.codex/auth.json
-/.codex/auth.json.*
-/.codex/config.local.toml
-/.codex/history.jsonl
-/.codex/history/
-/.codex/sessions/
-/.codex/archived_sessions/
-/.codex/log/
-/.codex/logs/
-/.codex/tmp/
-/.codex/shell_snapshots/
-/.codex/*.sqlite*
-/.codex/*.db*
-
-# Claude Code personal overrides and local session state
-CLAUDE.local.md
-AGENTS.local.md
-/.claude/settings.local.json
-/.claude/history.jsonl
-/.claude/projects/
-/.claude/debug/
-/.claude/session-env/
-/.claude/shell-snapshots/
-/.claude/todos/
-/.claude/cache/
-
-# Cursor and Continue local chats, indexes and caches
-/.cursor/chats/
-/.cursor/cache/
-/.cursor/*.log
-/.continue/sessions/
-/.continue/index/
-/.continue/logs/
-/.continue/config.local.*
-
-# Aider conversation history and repository index
-.aider.chat.history.md
-.aider.input.history
-.aider.tags.cache*/
-
-# Python/Node caches from local agent utilities; keep source and lockfiles.
+# Python and Node build environments and caches
 __pycache__/
 *.py[cod]
 .venv/
