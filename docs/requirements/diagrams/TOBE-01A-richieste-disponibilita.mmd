@@ -1,0 +1,27 @@
+%% TOBE-01A v0.1 - 25/10/2026
+%% Proposta del team: Epic #20. Confine del ciclo di vita aperto nella #29.
+%% Fonti F02, F06, F07; ipotesi IP-01 e IP-02 del documento v0.5.
+sequenceDiagram
+    autonumber
+    participant R as OPT richiedente
+    participant S as Sistema PICUS
+    participant B as Banco
+    participant E as Erogatore OPT o Operatore
+
+    Note over R,S: Percorso principale con dati validi<br/>Gli errori tornano al modulo senza creare richieste
+    R->>S: Invia misura e bisogno non identificativo
+        S->>S: Valida e registra ID, data e In programmazione
+        S-->>R: Mostra ID e stato della propria richiesta
+        loop Ricerca fino a disponibilita o alternative esaurite
+            B->>S: Consulta la coda e seleziona un erogatore
+            S->>E: Inoltra la richiesta del Banco
+            E->>S: Conferma disponibilita oppure rifiuta
+            S-->>B: Mostra la risposta e la sua provenienza
+        end
+        Note over B,E: Un rifiuto singolo permette un altro tentativo<br/>In assenza di risposta si resta in attesa
+        alt Disponibilita trovata
+            Note over R,E: Prosegue nel diagramma TOBE-01B<br/>La disponibilita non equivale ad Accettata
+        else Nessun erogatore disponibile
+            B->>S: Registra il rifiuto della richiesta e il motivo
+            S-->>R: Mostra Rifiutata
+        end

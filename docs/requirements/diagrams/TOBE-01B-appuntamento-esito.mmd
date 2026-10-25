@@ -1,0 +1,24 @@
+%% TOBE-01B v0.1 - 25/10/2026
+%% Modello proposto: chiusura del coordinamento, non esito della prestazione.
+%% IP-01: Accettata dopo conferma appuntamento. Da validare nella #29.
+%% IP-02: Banco registra dettagli concordati, senza assumere che fissi l'agenda.
+sequenceDiagram
+    autonumber
+    participant R as OPT richiedente
+    participant S as Sistema PICUS
+    participant B as Banco
+    participant E as Erogatore OPT o Operatore
+
+    Note over B,E: Disponibilita positiva ottenuta in TOBE-01A
+    loop Fino alla conferma dei dettagli concordati
+        B->>S: Registra una proposta di appuntamento
+        S->>E: Richiede conferma di data, ora e luogo oppure link
+        E->>S: Conferma o chiede una correzione
+        S-->>B: Mostra conferma o correzione richiesta
+    end
+    Note over B,E: IP-02: chi fissa o propone resta da chiarire<br/>Il Banco registra i dettagli concordati
+    B->>S: Pubblica i dettagli confermati alla OPT
+    S->>S: Chiude il coordinamento come Accettata
+    S-->>R: Mostra appuntamento, riferimento ed esito
+    R->>R: Informa la persona fuori da PICUS
+    Note over S,E: IP-01, proposta Epic 20 da validare nella domanda 29<br/>Esito della prestazione esterno a questo flusso<br/>Completata e regole di Annullata restano aperte

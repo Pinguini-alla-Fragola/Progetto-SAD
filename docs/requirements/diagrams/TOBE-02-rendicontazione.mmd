@@ -1,0 +1,25 @@
+%% TOBE-02 v0.1 - 25/10/2026
+%% F02 §5.5 e appendice B, F06, F07. Processo distinto dalle richieste.
+sequenceDiagram
+    autonumber
+    participant O as Operatore interno PICUS o esterno
+    participant S as Sistema PICUS
+    participant B as Banco
+    participant M as Portale ministeriale
+
+    Note over O,B: Processo trimestrale indipendente dai ticket PICUS<br/>Perimetro degli operatori da confermare in Q-11
+    O->>S: Apre la propria scheda del trimestre
+    S-->>O: Mostra i campi della scheda
+    O->>S: Compila e invia dati operatore e conteggi aggregati
+    alt Campi formalmente non validi
+        S-->>O: Evidenzia gli errori e torna alla compilazione
+    else Scheda valida
+        S->>S: Registra la scheda inviata
+        S-->>O: Conferma la ricezione della scheda
+        S-->>B: Rende disponibile la scheda ricevuta
+        B->>S: Consulta le schede del trimestre
+        S-->>B: Mostra schede e conteggi autorizzati
+        B->>M: Inserisce manualmente i dati nel portale
+    end
+    Note over O,B: Categorie sovrapponibili ammesse<br/>Nessun identificativo degli assistiti<br/>Nessuna approvazione obbligatoria aggiunta
+    Note over S,M: Nessuna integrazione applicativa con il portale<br/>Formato di eventuali export da concordare

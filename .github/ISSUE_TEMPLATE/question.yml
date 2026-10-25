@@ -1,0 +1,11 @@
+name: Domanda al committente
+description: Scrivi una domanda o una richiesta di chiarimento sul progetto.
+type: Question
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: Domanda
+      placeholder: Scrivi qui la domanda per il committente.
+    validations:
+      required: true
