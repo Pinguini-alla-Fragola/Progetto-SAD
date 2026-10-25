@@ -3,11 +3,13 @@
 
 Legge gli item della iterazione scelta, calcola i punti rimanenti giorno per giorno
 (scope - completati) e scrive un CSV e un grafico SVG con la linea ideale.
+Esclude Pull Request, issue di tipo nativo Epic e contenuti non disponibili.
+L'appartenenza al Project e all'iterazione non viene modificata.
 Solo libreria standard: nessuna dipendenza da installare nella CI.
 
 Variabili d'ambiente (le prime tre servono, le altre hanno un default):
   PROJECT_TOKEN     token personale classico con scope `project` e `repo`
-  PROJECT_OWNER     login proprietario del project (es. CapHello)
+  PROJECT_OWNER     login proprietario del project (es. Pinguini-alla-Fragola)
   PROJECT_NUMBER    numero del project (dall'URL .../projects/<numero>)
   OWNER_TYPE        user | organization                      (default: user)
   ITERATION_TITLE   titolo dell'iterazione; vuoto = quella in corso oggi
@@ -54,7 +56,7 @@ query($login:String!, $num:Int!, $after:String) {
           createdAt updatedAt
           content {
             __typename
-            ... on Issue { number title closedAt }
+            ... on Issue { number title closedAt issueType { name } }
             ... on PullRequest { number title closedAt }
             ... on DraftIssue { title }
           }
@@ -96,8 +98,20 @@ def parse_ts(s):
     return datetime.fromisoformat(s.replace("Z", "+00:00")) if s else None
 
 
+def exclusion_reason(content):
+    """Classifica il contenuto con i tipi GitHub, senza dedurli dal titolo."""
+    if not content:
+        return "Contenuto non disponibile"
+    if content.get("__typename") == "PullRequest":
+        return "Pull Request"
+    issue_type = (content.get("issueType") or {}).get("name", "")
+    if content.get("__typename") == "Issue" and issue_type.strip().casefold() == "epic":
+        return "Epic"
+    return None
+
+
 def normalize(nodes, cfg):
-    """Trasforma gli item grezzi in dizionari semplici (iterazione, punti, date)."""
+    """Normalizza gli item; mantiene i metadati degli esclusi per scegliere l'iterazione."""
     items = []
     for n in nodes:
         f = {"iter": None, "status": None, "points": None, "size": None}
@@ -118,7 +132,8 @@ def normalize(nodes, cfg):
         # data di completamento: chiusura dell'issue se c'è, altrimenti ultimo aggiornamento
         done_at = (parse_ts(c.get("closedAt")) or parse_ts(n["updatedAt"])) if done else None
         items.append({"title": c.get("title", "?"), "iter": f["iter"], "points": float(points),
-                      "created": parse_ts(n["createdAt"]), "done_at": done_at})
+                      "created": parse_ts(n["createdAt"]), "done_at": done_at,
+                      "excluded": exclusion_reason(c)})
     return items
 
 
@@ -132,6 +147,8 @@ def pick_iteration(items, title, today):
         if title not in iters:
             raise SystemExit(f"Iterazione «{title}» non trovata. Disponibili: {sorted(iters)}")
         return title, *iters[title]
+    if not iters:
+        raise SystemExit("Nessuna iterazione trovata negli item del Project.")
     for t, (s, d) in iters.items():
         if s <= today < s + timedelta(days=d):
             return t, s, d
@@ -141,7 +158,7 @@ def pick_iteration(items, title, today):
 
 def compute(items, title, start, days, now):
     """Serie (giorni dall'inizio, scope, completati, rimanenti) a ogni mezzanotte e adesso."""
-    mine = [i for i in items if i["iter"] and i["iter"]["title"] == title]
+    mine = [i for i in items if not i.get("excluded") and i["iter"] and i["iter"]["title"] == title]
     t0 = datetime.combine(start, datetime.min.time(), UTC)
     stops = [t0 + timedelta(days=k) for k in range(days + 1) if t0 + timedelta(days=k) <= now]
     if now < t0 + timedelta(days=days):
@@ -312,6 +329,12 @@ def inspect(ptitle, nodes):
                                                        if "startDate" in v else "?")
             seen.setdefault((name, v["__typename"].replace("ProjectV2ItemField", "")), set()).add(str(val))
     print(f"Project «{ptitle}»: {len(nodes)} item")
+    counted_nodes = [n for n in nodes if not exclusion_reason(n["content"])]
+    print(f"Item conteggiabili: {len(counted_nodes)}; esclusi: {len(nodes) - len(counted_nodes)}")
+    for n in nodes:
+        reason = exclusion_reason(n["content"])
+        if reason:
+            print(f"  escluso [{reason}]: {(n['content'] or {}).get('title', '?')}")
     for (name, kind), vals in sorted(seen.items()):
         print(f"  campo «{name}» [{kind}]: {sorted(vals)}")
     iters = {}
@@ -329,7 +352,7 @@ def inspect(ptitle, nodes):
     print(f"Task per iterazione e stima (campo Number «{pf}», altrimenti taglia «{sf}», altrimenti 1 punto):")
     for t in sorted(iters, key=lambda k: iters[k][0]):
         tot = no = 0
-        for n in nodes:
+        for n in counted_nodes:
             vals = n["fieldValues"]["nodes"]
             if not any("startDate" in v and v["title"] == t for v in vals):
                 continue
@@ -342,7 +365,7 @@ def inspect(ptitle, nodes):
         print(f"  «{t}»: {tot} task, {no} senza stima" + ("  <- contati come 1 punto" if no else ""))
         stf = os.environ.get("STATUS_FIELD", "Status")
         somma = 0.0
-        for n in nodes:
+        for n in counted_nodes:
             vals = n["fieldValues"]["nodes"]
             if not any("startDate" in v and v["title"] == t for v in vals):
                 continue
@@ -396,7 +419,7 @@ def main():
     (out / f"burndown-{slug}.svg").write_text(svg, encoding="utf-8")
     # copia con nome fisso: il README punta sempre a questo file, che mostra lo sprint in corso
     (out / "burndown-latest.svg").write_text(svg, encoding="utf-8")
-    print(f"{title}: {len(mine)} task, base {base:g} punti, rimanenti {rows[-1][3]:g}" if rows else "nessun dato")
+    print(f"{title}: {len(mine)} item conteggiati, base {base:g} punti, rimanenti {rows[-1][3]:g}" if rows else "nessun dato")
 
 
 if __name__ == "__main__":

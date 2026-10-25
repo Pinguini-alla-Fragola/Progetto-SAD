@@ -33,9 +33,8 @@ Il gruppo sta definendo i processi as-is e to-be nell'iterazione preparatoria.
 - [Esportazione PDF del documento](docs/Documentazione_SAD_2026.pdf)
 - [Regole di contribuzione](.github/CONTRIBUTING.md)
 
-Il Word conserva l'analisi già redatta; le cartelle raccolgono i relativi modelli
-e riepiloghi. Il PDF presente è un'esportazione precedente e sarà riallineato
-al Word durante la prossima revisione documentale. Il Product Backlog resta
+Il Word e il PDF conservano la documentazione del progetto; le cartelle
+raccolgono i relativi modelli e riepiloghi. Il Product Backlog resta
 la fonte operativa per il lavoro pianificato.
 
 ## Prerequisiti
@@ -79,7 +78,7 @@ del contesto del template. La configurazione iniziale contiene soltanto
 Il team adotta **Scrum**. User Story, attività e stato di avanzamento
 sono tracciati su GitHub Projects:
 
-- [Backlog Progetto-SAD](https://github.com/users/CapHello/projects/2)
+- [Backlog Progetto-SAD](https://github.com/orgs/Pinguini-alla-Fragola/projects/2)
 
 <!-- BURNDOWN:START — grafico dello sprint in corso, aggiornato ogni sera dal workflow "burndown"; non modificare il link -->
 ## 📉 Avanzamento dello sprint
@@ -87,4 +86,8 @@ sono tracciati su GitHub Projects:
 ![Burndown dello sprint in corso](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/raw/burndown-data/burndown-latest.svg)
 
 *Aggiornato ogni sera. Gli sprint precedenti sono nel branch [`burndown-data`](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/tree/burndown-data).*
+
+Il calcolo esclude le Pull Request e le issue di tipo nativo `Epic`, anche
+quando appartengono all'iterazione. Gli altri item mantengono la stima del
+Project: `Estimate`, altrimenti `Size`, altrimenti 1 punto.
 <!-- BURNDOWN:END -->

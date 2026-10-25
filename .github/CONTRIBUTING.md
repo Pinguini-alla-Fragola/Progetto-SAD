@@ -11,6 +11,9 @@ Architecture Task, Technical Task, Spike e Bug. Le etichette di riferimento
 sono elencate in [labels.yml](labels.yml). Il form Epic mantiene il tipo
 nativo `Epic`; l'allineamento dei campi del Project sarà concordato dal team.
 
+Per le domande al committente usare il form **Domanda al committente**:
+assegna il tipo nativo `Question` e richiede soltanto il testo della domanda.
+
 La label `blocked` segnala un impedimento e si accompagna al motivo e alla
 dipendenza nell'issue. Il tipo rimane quello del lavoro da svolgere.
 

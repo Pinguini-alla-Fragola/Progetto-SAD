@@ -44,6 +44,9 @@ Riferimento: [code owner e protezioni](https://docs.github.com/en/repositories/m
 I form seguono le sette categorie del template del corso: Epic, User Story,
 Quality Scenario, Architecture Task, Technical Task, Spike e Bug.
 Verificare che il tipo nativo `Epic` esista prima di usare il relativo form.
+In aggiunta è disponibile [Domanda al committente](ISSUE_TEMPLATE/question.yml),
+con tipo nativo `Question` e un solo campo di testo obbligatorio. Verificare
+che `Question` sia abilitato nell'organizzazione e disponibile nella repository.
 Le etichette sono elencate in [labels.yml](labels.yml); il file è un elenco
 di riferimento e non le crea automaticamente su GitHub.
 
@@ -82,9 +85,32 @@ e [opzioni Dependabot](https://docs.github.com/en/code-security/reference/supply
 
 ## Sicurezza e accesso
 
-In **Settings → Advanced Security**, verificare secret scanning e push
-protection. Abilitare **Private vulnerability reporting** affinché il canale
-descritto nella [Security policy](SECURITY.md) sia disponibile.
+### CFG-05: secret scanning e segnalazioni private
+
+Con un account amministratore della repository, aprire
+[Settings → Advanced Security](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/settings/security_analysis).
+
+1. Cercare **Secret Protection** o **Secret scanning**. Se compare **Enable**,
+   abilitare la funzione e confermare. Nelle repository pubbliche la scansione
+   è gratuita; se risulta già **Enabled**, non occorre riattivarla. La sola
+   assenza di alert non dimostra che la scansione sia disattivata.
+2. Nella stessa pagina, abilitare **Private vulnerability reporting**. È
+   l'impostazione che rende operativo il canale della
+   [Security policy](SECURITY.md).
+3. Verificare in **Security → Secret scanning** che la funzione sia attiva.
+   In **Security → Advisories** verificare il pulsante **Report a vulnerability**,
+   disponibile ai segnalanti quando le segnalazioni private sono abilitate.
+
+Se un'impostazione è bloccata da una configurazione dell'organizzazione,
+deve intervenire un owner o security manager dell'organizzazione.
+La **Push protection** è una protezione aggiuntiva da verificare nella stessa
+pagina: il suo stato non coincide con quello del secret scanning.
+
+Riferimenti: [abilitare secret scanning](https://docs.github.com/en/code-security/how-tos/secure-your-secrets/detect-secret-leaks/enable-secret-scanning)
+e [configurare le segnalazioni private](https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/configure-vulnerability-reporting/configure-for-a-repository).
+
+### Altri controlli di sicurezza
+
 Abilitare la scansione del codice quando sarà presente codice supportato,
 verificando la compatibilità degli strumenti con Java 25.
 
@@ -93,3 +119,22 @@ necessari e limitare il ruolo Admin ai maintainer che gestiscono la repository.
 Credenziali CI eventuali vanno in GitHub Secrets; non in file, template o issue.
 
 Riferimento: [impostazioni di sicurezza](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-security-and-analysis-settings-for-your-repository).
+
+## Burndown: esclusioni e aggiornamento
+
+Il [calcolo](../scripts/burndown.py) esclude le Pull Request e le issue di tipo
+nativo `Epic` da scope, completati e rimanenti. Gli item restano nel Project
+e possono mantenere l'iterazione; non occorre spostarli per correggere il grafico.
+Gli altri tipi e le bozze mantengono il criterio di stima già previsto.
+
+Dopo aver integrato i file in `main`, aprire **Actions → burndown → Run workflow**,
+selezionare `main` e lasciare vuoto il titolo per aggiornare l'iterazione corrente.
+Il workflow verifica il filtro prima di generare CSV e SVG e pubblica il grafico
+su `burndown-data`. Il README mostrerà la nuova versione dopo l'esecuzione;
+gli sprint già conclusi non vengono rigenerati dal normale aggiornamento.
+
+Per controllare i test in locale:
+
+```bash
+python -m unittest discover -s scripts -p 'test_burndown.py'
+```
