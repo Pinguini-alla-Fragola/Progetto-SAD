@@ -41,6 +41,14 @@ restano da chiarire con gli interlocutori competenti.
 - To-be della richiesta: [Mermaid](diagrams/TOBE-01A-richieste-disponibilita.mmd), [PNG](diagrams/TOBE-01A-richieste-disponibilita.png), [SVG](diagrams/TOBE-01A-richieste-disponibilita.svg)
 - To-be dell'appuntamento: [Mermaid](diagrams/TOBE-01B-appuntamento-esito.mmd), [PNG](diagrams/TOBE-01B-appuntamento-esito.png), [SVG](diagrams/TOBE-01B-appuntamento-esito.svg)
 - To-be della rendicontazione: [Mermaid](diagrams/TOBE-02-rendicontazione.mmd), [PNG](diagrams/TOBE-02-rendicontazione.png), [SVG](diagrams/TOBE-02-rendicontazione.svg)
+- Sequence diagram delle storie dell'epica IAM (#18), versione 0.1 del 31/10/2026:
+  - #24 caricamento CSV delle OPT: [Mermaid](diagrams/IAM-24-caricamento-csv-opt.mmd), [PNG](diagrams/IAM-24-caricamento-csv-opt.png), [SVG](diagrams/IAM-24-caricamento-csv-opt.svg)
+  - #25 accesso con email e password: [Mermaid](diagrams/IAM-25-accesso.mmd), [PNG](diagrams/IAM-25-accesso.png), [SVG](diagrams/IAM-25-accesso.svg)
+  - #26 revoca di una OPT: [Mermaid](diagrams/IAM-26-revoca-opt.mmd), [PNG](diagrams/IAM-26-revoca-opt.png), [SVG](diagrams/IAM-26-revoca-opt.svg)
+  - #27 creazione e attivazione di un Operatore: [Mermaid](diagrams/IAM-27-creazione-operatore.mmd), [PNG](diagrams/IAM-27-creazione-operatore.png), [SVG](diagrams/IAM-27-creazione-operatore.svg)
+  - #28 accessi per ruolo e appartenenza: [Mermaid](diagrams/IAM-28-accessi-per-ruolo.mmd), [PNG](diagrams/IAM-28-accessi-per-ruolo.png), [SVG](diagrams/IAM-28-accessi-per-ruolo.svg)
+  - #30 revoca di un Operatore: [Mermaid](diagrams/IAM-30-revoca-operatore.mmd), [PNG](diagrams/IAM-30-revoca-operatore.png), [SVG](diagrams/IAM-30-revoca-operatore.svg)
+  - #33 recupero della password: [Mermaid](diagrams/IAM-33-recupero-password.mmd), [PNG](diagrams/IAM-33-recupero-password.png), [SVG](diagrams/IAM-33-recupero-password.svg)
 - [Verifica dopo il confronto con lo stakeholder](../reviews/2026-10-21-coerenza-stakeholder-context.md)
 
 CTX-01 è aggiornato alla **versione 0.3 del 25/10/2026**, incorporata anche nel
