@@ -6,11 +6,11 @@ sequenceDiagram
     participant B as Banco
     participant M as Portale ministeriale
 
-    Note over O,M: Processo trimestrale indipendente dalle richieste di servizio
+    Note over O,M: Indipendente dalle richieste di servizio
     O->>O: Compila la scheda del trimestre
-    Note right of O: Dati personali e amministrativi operatore<br/>Conteggi aggregati degli assistiti<br/>Anche attivita senza richiesta PICUS
+    Note right of O: Dati operatore e conteggi aggregati
     O->>B: Trasmette la scheda con gli strumenti attuali
-    Note over O,B: Documenti e schede non integrati<br/>Canale specifico e verifiche attuali da precisare
+    Note over O,B: Documenti e schede non integrati
     B->>B: Raccoglie le schede e prepara la rendicontazione
     B->>M: Inserisce manualmente i dati nel portale
-    Note over O,B: Gli operatori e volontari interni alle OPT<br/>non inviano la scheda personale al Banco
+    Note over O,M: Il personale interno alle OPT non invia la scheda
