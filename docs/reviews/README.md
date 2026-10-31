@@ -16,3 +16,7 @@ il completamento di una task non attesta l'implementazione della funzionalità.
 ## Verifiche documentali
 
 - [Coerenza dopo il confronto con lo stakeholder del 21 ottobre 2026](2026-10-21-coerenza-stakeholder-context.md)
+
+## Preparazione della review
+
+- [Scaletta proposta della review del 5 novembre](2026-11-05-scaletta-review.md)
