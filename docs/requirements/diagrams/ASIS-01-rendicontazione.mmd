@@ -1,3 +1,8 @@
+---
+config:
+  sequence:
+    noteAlign: left
+---
 %% ASIS-01B v0.1 - 25/10/2026
 %% Fonti F02 §4, §5.5 e appendice B; F06; F07 Scheda trimestrale.
 sequenceDiagram
@@ -6,11 +11,10 @@ sequenceDiagram
     participant B as Banco
     participant M as Portale ministeriale
 
-    Note over O,M: Indipendente dalle richieste di servizio
+    Note over O,M: Il personale interno alle OPT non invia la scheda
     O->>O: Compila la scheda del trimestre
-    Note right of O: Dati operatore e conteggi aggregati
+    Note over O,B: Dati da inserire:<br/>• Dati personali e amministrativi<br/>• Conteggi aggregati degli assistiti<br/>• Anche attività senza richiesta PICUS
     O->>B: Trasmette la scheda con gli strumenti attuali
-    Note over O,B: Documenti e schede non integrati
+    Note over O,M: Oggi le schede trimestrali e i documenti circolano<br/>come file separati e l'operatore li manda al Banco
     B->>B: Raccoglie le schede e prepara la rendicontazione
     B->>M: Inserisce manualmente i dati nel portale
-    Note over O,M: Il personale interno alle OPT non invia la scheda
