@@ -9,9 +9,11 @@ sequenceDiagram
     actor A as Persona o nucleo
 
     R->>B: Richiede una misura con contatti manuali
+    Note over R,E: CRITICITA - Informazioni sparse<br/>Lo stato della richiesta e diviso fra telefonate, messaggi,<br/>documenti e schede separate.<br/>Rischio: gli stessi dati si duplicano e non restano allineati<br/>(rischio motivato dalle fonti, non misurato)
         loop Fino a disponibilita o alternative esaurite
             B->>E: Individua e contatta un possibile erogatore
             E-->>B: Comunica disponibilita oppure rifiuto
+            Note over E,A: CRITICITA - Ricerca a tentativi<br/>Nessuna vista unica delle disponibilita:<br/>il Banco contatta un erogatore alla volta.<br/>Rischio: attese, richieste ripetute<br/>e solleciti (non quantificati)
         end
         alt Erogatore disponibile
             B->>E: Coordina i dettagli dell'appuntamento
