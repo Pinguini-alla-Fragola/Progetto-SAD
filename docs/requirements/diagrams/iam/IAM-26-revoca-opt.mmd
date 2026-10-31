@@ -6,12 +6,15 @@ sequenceDiagram
     participant S as Sistema PICUS
     participant O as OPT
 
+    Note over B,O: Revoca dell'accesso
     B->>S: Revoca l'accesso della OPT
     S->>S: Imposta lo stato Revocato
     S->>S: Chiude subito le sessioni aperte della OPT
     S-->>B: Conferma la revoca
-    Note over B,S: Richieste e storico non vengono cancellati
+    Note over B,O: Richieste e storico non vengono cancellati
+    Note over B,O: Dopo la revoca: la OPT prova ad accedere
     O->>S: Tenta di accedere con le sue credenziali
     S-->>O: Nega l'accesso
+    Note over B,O: Dopo la revoca: i dati già registrati
     B->>S: Consulta i dati della OPT
     S-->>B: Richieste e storico risultano invariati

@@ -6,14 +6,17 @@ sequenceDiagram
     participant S as Sistema PICUS
     participant O as Operatore
 
+    Note over B,O: Revoca dell'account
     B->>S: Conferma la revoca dell'account Operatore
     S->>S: Imposta lo stato Revocato
     S->>S: Invalida sessioni e link di attivazione o recupero ancora validi
     S-->>B: Conferma la revoca
     Note over B,O: Appuntamenti e richieste pendenti non vengono chiusi né riassegnati
+    Note over B,O: Dopo la revoca: l'Operatore prova a rientrare
     O->>S: Tenta di accedere o di riusare una sessione precedente
     S-->>O: Nega l'accesso
-    O->>S: Richiede il recupero della password
+    O->>S: Richiede il recupero della password o un nuovo link di attivazione
     S->>S: Non invia nessun link
+    Note over B,O: Dopo la revoca: le schede già inviate
     B->>S: Consulta le schede inviate prima della revoca
     S-->>B: Le schede risultano disponibili e invariate

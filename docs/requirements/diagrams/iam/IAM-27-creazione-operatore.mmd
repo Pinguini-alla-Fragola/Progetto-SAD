@@ -8,6 +8,7 @@ sequenceDiagram
     participant M as Servizio email
     participant O as Operatore
 
+    Note over B,O: Creazione dell'account
     B->>S: Inserisce i dati dell'Operatore, le misure e il territorio
     alt Dati non validi o email già associata a un account non revocato
         S-->>B: Non crea l'account e indica cosa correggere
@@ -23,9 +24,15 @@ sequenceDiagram
         S->>S: Attiva l'account
         S-->>O: Consente l'accesso
     else Link scaduto o già usato
-        S-->>O: Non permette di impostare la password
-        Note over O,B: L'Operatore chiede il reinvio al Banco
-        B->>S: Richiede il reinvio del link
-        S->>M: Richiede un nuovo link
-        M-->>O: Invia il nuovo link, il precedente non vale più
+        S-->>O: Segnala che il link non è più valido e propone di richiederne uno nuovo
+        Note over B,O: Se serve un nuovo link, l'Operatore lo chiede direttamente al Sistema
+        O->>S: Richiede un nuovo link indicando la propria email
+        alt Account in attesa di attivazione
+            S->>S: Invalida il link precedente e ne genera uno nuovo
+            S->>M: Richiede l'invio del nuovo link
+            M-->>O: Invia il nuovo link, valido 72 ore
+        else Email non registrata, account attivo o revocato
+            S->>S: Non invia nessun link
+        end
+        S-->>O: Mostra lo stesso messaggio di conferma
     end

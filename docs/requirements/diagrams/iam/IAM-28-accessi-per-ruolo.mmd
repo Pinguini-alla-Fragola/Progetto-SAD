@@ -7,7 +7,8 @@ sequenceDiagram
     participant S as Sistema PICUS
 
     U->>S: Invia una richiesta su una risorsa
-    S->>S: Ricava l'identità dalla sessione e ignora ruolo e titolare indicati dal client
+    S->>S: Identifica l'utente dalla sessione, non dai dati scritti nella richiesta
+    Note over U,S: Esempio: la richiesta dice OPT B<br/>ma la sessione è della OPT A<br/>Vale la sessione: OPT A
     alt Sessione assente, scaduta o non valida
         S-->>U: UNAUTHORIZED, senza dati né modifiche
     else Sessione valida
