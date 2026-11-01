@@ -1,6 +1,6 @@
 # Registro dei chiarimenti e delle ipotesi
 
-Versione 0.1 del 25/10/2026. Registro documentale della v0.5; collegamenti operativi da mantenere insieme al Word. Dieci quesiti prioritari, con ID precedenti conservati.
+Versione 0.1 del 25/10/2026. Registro documentale della v0.5; collegamenti operativi da mantenere insieme al Word. Dodici quesiti prioritari, con ID precedenti conservati.
 
 ## Q-04 Confine della richiesta e stati
 
@@ -95,6 +95,26 @@ Quali tempi e regole di conservazione, cancellazione ed eventuale accesso ai dat
 **Ipotesi provvisoria:** La revoca blocca gli accessi e non cancella automaticamente i dati storici. Nessun termine di conservazione è inventato dal team.
 
 **Impatto:** US-26, US-D02, schede e registri; interlocutore privacy. **Referente proposto:** PO e referente privacy del committente.
+
+## Q-14 Cancellazione delle schede dopo il trimestre
+
+Dopo il trimestre, tutte le schede inserite all’interno del rendiconto possono essere cancellate?
+
+**Priorità proposta:** P2. **Fonte e stato:** Emersa nella revisione della storia sulla revoca degli Operatori; nessuna risposta del committente.
+
+**Ipotesi provvisoria:** Nessuna cancellazione automatica delle schede inviate; il termine di conservazione non è inventato dal team e si definisce insieme a Q-05.
+
+**Impatto:** Q-05, rendicontazione trimestrale, schede e registri; interlocutore privacy. **Referente proposto:** PO e referente privacy del committente.
+
+## Q-15 Riattivazione e riuso dell’email di un Operatore
+
+Se un Operatore revocato torna a collaborare, si può riattivare il suo account o riusare la stessa email per un nuovo account? In quel caso le schede dei due account vanno collegate?
+
+**Priorità proposta:** P2. **Fonte e stato:** Emersa nella revisione della storia sulla revoca degli Operatori; nessuna risposta del committente.
+
+**Ipotesi provvisoria:** La revoca non prevede riattivazione né riuso dell’email; il caso si definisce prima di implementare la creazione di un nuovo account per la stessa persona.
+
+**Impatto:** Creazione e revoca degli account Operatore, schede storiche. **Referente proposto:** PO con il committente.
 
 ## Q-02 Campi non identificativi della richiesta
 

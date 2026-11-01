@@ -1,24 +1,26 @@
 %% ASIS-01A v0.1 - 25/10/2026
 %% Ricostruzione del processo dalle fonti F02 §§2-4 e 5.3, F06 e F07.
-%% Non rappresenta funzionalita gia implementate in PICUS.
+%% Non rappresenta funzionalità già implementate in PICUS.
 sequenceDiagram
     autonumber
     participant R as OPT richiedente
     participant B as Banco
-    participant E as Erogatore OPT o operatore
-    actor A as Persona o nucleo
+    participant E as Erogatore OPT o operatore (interno PICUS o esterno)
+    actor A as Persona o nucleo assistito
 
     R->>B: Richiede una misura con contatti manuali
-        loop Fino a disponibilita o alternative esaurite
+    Note over B,E: Stato sparso fra telefonate e messaggi: rischio di duplicazioni
+        loop Fino a disponibilità o alternative esaurite
             B->>E: Individua e contatta un possibile erogatore
-            E-->>B: Comunica disponibilita oppure rifiuto
+            E-->>B: Comunica disponibilità o rifiuto
+            Note over E,A: Il Banco contatta un erogatore per volta<br/>e ne attende la risposta:<br/>rischio di attese e solleciti
         end
         alt Erogatore disponibile
             B->>E: Coordina i dettagli dell'appuntamento
             B-->>R: Comunica data, ora e luogo oppure link
-            R-->>A: Informa la persona e ne cura il contatto
+            R-->>A: Informa l'assistito e ne cura il contatto
             A->>E: Fruisce della misura fuori dall'applicazione
             B->>B: Conferma il completamento della richiesta
         else Nessun erogatore disponibile
-            B-->>R: Comunica che non puo soddisfare la richiesta
+            B-->>R: Comunica che non può soddisfare la richiesta
         end
