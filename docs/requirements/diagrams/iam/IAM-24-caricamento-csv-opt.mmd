@@ -1,0 +1,28 @@
+%% IAM-24 v0.1 - 31/10/2026
+%% Storia #24: caricamento massivo e provisioning delle utenze OPT tramite CSV.
+%% Tracciato del file e gestione dei duplicati sono proposte del team.
+sequenceDiagram
+    autonumber
+    participant B as Banco
+    participant S as Sistema PICUS
+    participant M as Servizio email
+    participant O as OPT
+
+    B->>S: Carica il file CSV e conferma
+    alt File non leggibile o colonna obbligatoria mancante
+        S-->>B: Non importa nessuna riga e indica il problema
+    else File valido
+        loop Per ogni riga del file
+            alt Riga non valida, ripetuta nel file o riferita a una OPT revocata
+                S->>S: Scarta la riga e annota il motivo
+            else OPT già registrata
+                S->>S: Aggiorna solo nome e comune
+            else Nuova OPT
+                S->>S: Crea l'account In attesa di attivazione
+                S->>M: Richiede il link di attivazione
+                M-->>O: Invia il link monouso all'email indicata
+            end
+        end
+        S-->>B: Mostra il report con righe importate e scartate
+    end
+    Note over B,M: Le OPT assenti dal file restano invariate, senza revoca automatica

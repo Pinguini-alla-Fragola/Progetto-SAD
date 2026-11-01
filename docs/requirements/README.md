@@ -31,16 +31,24 @@ restano da chiarire con gli interlocutori competenti.
 
 ## Modelli disponibili
 
-- [Context diagram modificabile](<diagrams/Context Diagram.drawio>)
-- [Esportazione del context diagram](<diagrams/Context Diagram.drawio.png>)
-- [Schema iniziale di contesto, non diagramma as-is](diagrams/DiagrammaIniziale_PICUS.png)
+- [Context diagram modificabile](<diagrams/contesto/Context Diagram.drawio>)
+- [Esportazione del context diagram](<diagrams/contesto/Context Diagram.drawio.png>)
+- [Schema iniziale di contesto, non diagramma as-is](diagrams/contesto/DiagrammaIniziale_PICUS.png)
 - As-is delle richieste: [Mermaid](diagrams/ASIS-01-richieste.mmd),
   [PNG](diagrams/ASIS-01-richieste.png), [SVG](diagrams/ASIS-01-richieste.svg)
 - As-is della rendicontazione: [Mermaid](diagrams/ASIS-01-rendicontazione.mmd),
   [PNG](diagrams/ASIS-01-rendicontazione.png), [SVG](diagrams/ASIS-01-rendicontazione.svg)
-- To-be della richiesta: [Mermaid](diagrams/TOBE-01A-richieste-disponibilita.mmd), [PNG](diagrams/TOBE-01A-richieste-disponibilita.png), [SVG](diagrams/TOBE-01A-richieste-disponibilita.svg)
-- To-be dell'appuntamento: [Mermaid](diagrams/TOBE-01B-appuntamento-esito.mmd), [PNG](diagrams/TOBE-01B-appuntamento-esito.png), [SVG](diagrams/TOBE-01B-appuntamento-esito.svg)
-- To-be della rendicontazione: [Mermaid](diagrams/TOBE-02-rendicontazione.mmd), [PNG](diagrams/TOBE-02-rendicontazione.png), [SVG](diagrams/TOBE-02-rendicontazione.svg)
+- To-be della richiesta: [Mermaid](diagrams/to-be/TOBE-01A-richieste-disponibilita.mmd), [PNG](diagrams/to-be/TOBE-01A-richieste-disponibilita.png), [SVG](diagrams/to-be/TOBE-01A-richieste-disponibilita.svg)
+- To-be dell'appuntamento: [Mermaid](diagrams/to-be/TOBE-01B-appuntamento-esito.mmd), [PNG](diagrams/to-be/TOBE-01B-appuntamento-esito.png), [SVG](diagrams/to-be/TOBE-01B-appuntamento-esito.svg)
+- To-be della rendicontazione: [Mermaid](diagrams/to-be/TOBE-02-rendicontazione.mmd), [PNG](diagrams/to-be/TOBE-02-rendicontazione.png), [SVG](diagrams/to-be/TOBE-02-rendicontazione.svg)
+- Sequence diagram delle storie dell'epica IAM (#18), versione 0.1 del 31/10/2026:
+  - #24 caricamento CSV delle OPT: [Mermaid](diagrams/iam/IAM-24-caricamento-csv-opt.mmd), [PNG](diagrams/iam/IAM-24-caricamento-csv-opt.png), [SVG](diagrams/iam/IAM-24-caricamento-csv-opt.svg)
+  - #25 accesso con email e password: [Mermaid](diagrams/iam/IAM-25-accesso.mmd), [PNG](diagrams/iam/IAM-25-accesso.png), [SVG](diagrams/iam/IAM-25-accesso.svg)
+  - #26 revoca di una OPT: [Mermaid](diagrams/iam/IAM-26-revoca-opt.mmd), [PNG](diagrams/iam/IAM-26-revoca-opt.png), [SVG](diagrams/iam/IAM-26-revoca-opt.svg)
+  - #27 creazione e attivazione di un Operatore: [Mermaid](diagrams/iam/IAM-27-creazione-operatore.mmd), [PNG](diagrams/iam/IAM-27-creazione-operatore.png), [SVG](diagrams/iam/IAM-27-creazione-operatore.svg)
+  - #28 accessi per ruolo e appartenenza: [Mermaid](diagrams/iam/IAM-28-accessi-per-ruolo.mmd), [PNG](diagrams/iam/IAM-28-accessi-per-ruolo.png), [SVG](diagrams/iam/IAM-28-accessi-per-ruolo.svg)
+  - #30 revoca di un Operatore: [Mermaid](diagrams/iam/IAM-30-revoca-operatore.mmd), [PNG](diagrams/iam/IAM-30-revoca-operatore.png), [SVG](diagrams/iam/IAM-30-revoca-operatore.svg)
+  - #33 recupero della password: [Mermaid](diagrams/iam/IAM-33-recupero-password.mmd), [PNG](diagrams/iam/IAM-33-recupero-password.png), [SVG](diagrams/iam/IAM-33-recupero-password.svg)
 - [Verifica dopo il confronto con lo stakeholder](../reviews/2026-10-21-coerenza-stakeholder-context.md)
 
 CTX-01 è aggiornato alla **versione 0.3 del 25/10/2026**, incorporata anche nel

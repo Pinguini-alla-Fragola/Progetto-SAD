@@ -1,0 +1,38 @@
+%% IAM-27 v0.1 - 31/10/2026
+%% Storia #27: creazione e attivazione dell'account di un Operatore.
+%% Campi del modulo e durata del link (72 ore) sono proposte del team.
+sequenceDiagram
+    autonumber
+    participant B as Banco
+    participant S as Sistema PICUS
+    participant M as Servizio email
+    participant O as Operatore
+
+    Note over B,O: Creazione dell'account
+    B->>S: Inserisce i dati dell'Operatore, le misure e il territorio
+    alt Dati non validi o email già associata a un account non revocato
+        S-->>B: Non crea l'account e indica cosa correggere
+    else Dati validi
+        S->>S: Crea l'account In attesa di attivazione
+        S->>M: Richiede il link di attivazione
+        M-->>O: Invia il link monouso, valido 72 ore
+        S-->>B: Mostra l'account con misure, territorio e stato
+    end
+    Note over B,O: Quando l'Operatore apre il link
+    O->>S: Imposta la password
+    alt Link valido e mai usato
+        S->>S: Attiva l'account
+        S-->>O: Consente l'accesso
+    else Link scaduto o già usato
+        S-->>O: Segnala che il link non è più valido e propone di richiederne uno nuovo
+        Note over B,O: Se serve un nuovo link, l'Operatore lo chiede direttamente al Sistema
+        O->>S: Richiede un nuovo link indicando la propria email
+        alt Account in attesa di attivazione
+            S->>S: Invalida il link precedente e ne genera uno nuovo
+            S->>M: Richiede l'invio del nuovo link
+            M-->>O: Invia il nuovo link, valido 72 ore
+        else Email non registrata, account attivo o revocato
+            S->>S: Non invia nessun link
+        end
+        S-->>O: Mostra lo stesso messaggio di conferma
+    end

@@ -8,9 +8,9 @@ del team, con ipotesi da validare e senza approvazioni del committente presunte.
 
 | ID | Contenuto | File |
 | --- | --- | --- |
-| TOBE-01A | Invio valido, coda, ricerca manuale e risposta dell'erogatore | [Mermaid](diagrams/TOBE-01A-richieste-disponibilita.mmd), [PNG](diagrams/TOBE-01A-richieste-disponibilita.png), [SVG](diagrams/TOBE-01A-richieste-disponibilita.svg) |
-| TOBE-01B | Conferma dei dettagli e chiusura del coordinamento | [Mermaid](diagrams/TOBE-01B-appuntamento-esito.mmd), [PNG](diagrams/TOBE-01B-appuntamento-esito.png), [SVG](diagrams/TOBE-01B-appuntamento-esito.svg) |
-| TOBE-02 | Scheda trimestrale e inserimento ministeriale manuale | [Mermaid](diagrams/TOBE-02-rendicontazione.mmd), [PNG](diagrams/TOBE-02-rendicontazione.png), [SVG](diagrams/TOBE-02-rendicontazione.svg) |
+| TOBE-01A | Invio valido, coda, ricerca manuale e risposta dell'erogatore | [Mermaid](diagrams/to-be/TOBE-01A-richieste-disponibilita.mmd), [PNG](diagrams/to-be/TOBE-01A-richieste-disponibilita.png), [SVG](diagrams/to-be/TOBE-01A-richieste-disponibilita.svg) |
+| TOBE-01B | Conferma dei dettagli e chiusura del coordinamento | [Mermaid](diagrams/to-be/TOBE-01B-appuntamento-esito.mmd), [PNG](diagrams/to-be/TOBE-01B-appuntamento-esito.png), [SVG](diagrams/to-be/TOBE-01B-appuntamento-esito.svg) |
+| TOBE-02 | Scheda trimestrale e inserimento ministeriale manuale | [Mermaid](diagrams/to-be/TOBE-02-rendicontazione.mmd), [PNG](diagrams/to-be/TOBE-02-rendicontazione.png), [SVG](diagrams/to-be/TOBE-02-rendicontazione.svg) |
 
 I diagrammi di sequenza mostrano chi scambia quali informazioni e in quale
 ordine. TOBE-01A e TOBE-01B sono due viste consecutive dello stesso percorso.

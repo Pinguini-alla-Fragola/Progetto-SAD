@@ -1,0 +1,21 @@
+%% IAM-25 v0.1 - 31/10/2026
+%% Storia #25: accesso con email e password.
+%% Limite di tentativi proposto dal team: cinque in cinque minuti, attesa di 60 secondi.
+sequenceDiagram
+    autonumber
+    participant U as Utente (Banco, OPT o Operatore)
+    participant S as Sistema PICUS
+
+    U->>S: Invia email e password
+    alt Cinque tentativi falliti negli ultimi cinque minuti
+        S-->>U: Rifiuta il tentativo e chiede di attendere
+    else Tentativi entro il limite
+        S->>S: Verifica credenziali e stato dell'account
+        alt Credenziali corrette e account attivo
+            S->>S: Avvia la sessione
+            S-->>U: Apre l'area consentita al suo ruolo
+        else Credenziali errate o account revocato
+            S-->>U: Nega l'accesso con un messaggio generico
+        end
+    end
+    Note over U,S: Il messaggio non rivela se l'email esiste
