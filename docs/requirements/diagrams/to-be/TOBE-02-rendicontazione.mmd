@@ -1,25 +1,33 @@
+---
+config:
+  sequence:
+    noteAlign: left
+---
 %% TOBE-02 v0.1 - 25/10/2026
 %% F02 §5.5 e appendice B, F06, F07. Processo distinto dalle richieste.
+%% Account: esterni con credenziali personali; interni (Banco e OPT) con la credenziale della propria organizzazione.
+%% Gli interni all'OPT non usano PICUS per la scheda: la inseriscono direttamente nel portale ministeriale.
 sequenceDiagram
     autonumber
-    participant O as Operatore interno PICUS o esterno
+    participant O as Operatore esterno o interno al Banco
     participant S as Sistema PICUS
     participant B as Banco
     participant M as Portale ministeriale
 
-    Note over O,B: Processo trimestrale indipendente dai ticket PICUS<br/>Perimetro degli operatori da confermare in Q-11
+    Note over O,B: Processo trimestrale indipendente dalle richieste fatte in PICUS<br/>La scheda include anche servizi non richiesti tramite l'applicazione<br/>Gli operatori interni all'OPT non inviano la scheda a PICUS:<br/>la inseriscono direttamente nel portale ministeriale
     O->>S: Apre la propria scheda del trimestre
     S-->>O: Mostra i campi della scheda
-    O->>S: Compila e invia dati operatore e conteggi aggregati
+    O->>S: Compila e invia dati operatore<br/>e conteggi aggregati
     alt Campi formalmente non validi
-        S-->>O: Evidenzia gli errori e torna alla compilazione
+        S-->>O: Evidenzia gli errori<br/>e torna alla compilazione
     else Scheda valida
         S->>S: Registra la scheda inviata
         S-->>O: Conferma la ricezione della scheda
+        Note over O,S: Nessuna approvazione<br/>obbligatoria della scheda
         S-->>B: Rende disponibile la scheda ricevuta
         B->>S: Consulta le schede del trimestre
+        Note over S,M: PROPRIETÀ DEI DATI MOSTRATI<br/>• Aggregati: solo conteggi per categoria<br/>• Anonimi: nessun dato identificativo degli assistiti<br/>• Sovrapponibili: una persona può essere in più categorie<br/>• Non sommabili: le categorie non sono gruppi distinti
         S-->>B: Mostra schede e conteggi autorizzati
-        B->>M: Inserisce manualmente i dati nel portale
+        B->>M: Inserisce manualmente<br/>i dati nel portale
+        Note over B,M: Nessuna integrazione applicativa<br/>con il portale
     end
-    Note over O,B: Categorie sovrapponibili ammesse<br/>Nessun identificativo degli assistiti<br/>Nessuna approvazione obbligatoria aggiunta
-    Note over S,M: Nessuna integrazione applicativa con il portale<br/>Formato di eventuali export da concordare
