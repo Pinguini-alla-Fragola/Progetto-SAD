@@ -4,14 +4,14 @@ config:
     noteAlign: left
 ---
 %% TOBE-02 v0.2 - 03/11/2026
-%% F02 §5.5 e appendice B, F06, F07; risposte del cliente (seconda tornata) e scelte del gruppo del 03/11/2026.
+%% F02 §5.5 e appendice B, F06, F07; risposte del cliente (seconda tornata) e scelte del gruppo registrate il 03/11/2026.
 %% Compilano la scheda solo gli operatori interni del Banco e gli esterni pagati dal Banco, ciascuno con account personale.
 %% Volontari, personale e operatori esterni messi a disposizione dalle OPT non la compilano.
 %% La OPT inserisce i dati quantitativi dell'organizzazione; l'attivita' degli esterni delle OPT in quei dati e' da definire.
 sequenceDiagram
     autonumber
     participant R as OPT
-    participant O as Operatore del Banco<br/>(interno o esterno)
+    participant O as Operatore pagato<br/>dal Banco
     participant S as Sistema PICUS
     participant B as Banco
     participant M as Portale ministeriale

@@ -1,7 +1,7 @@
 # Lettura dei diagrammi del processo to be
 
 Guida v0.3 del **03/11/2026**. Aggiorna la v0.2 del 25/10/2026 alle risposte del
-cliente della seconda tornata e alle scelte del gruppo del 03/11/2026. Il documento
+cliente della seconda tornata e alle scelte del gruppo registrate il 03/11/2026. Il documento
 Word v0.5 va riallineato. I diagrammi sono prodotti in Mermaid e incorporati in A3.
 Sono una proposta del team, con ipotesi da validare e senza approvazioni del
 committente presunte.
@@ -63,7 +63,7 @@ OPT può erogare una misura: da chiarire con il PO.
 
 ## Appuntamento e responsabilità
 
-**IP-02, collegata a Q-09, scelta del gruppo del 03/11/2026 da validare con il PO:**
+**IP-02, collegata a Q-09, scelta del gruppo registrata il 03/11/2026 da validare con il PO:**
 Banco ed erogatore concordano i dettagli; il Banco rappresenta le esigenze
 dell'assistito e, dopo l'accordo, è il solo a registrarli e a confermare nell'app.
 Non sono previsti una seconda approvazione dell'erogatore né una decisione della
@@ -99,6 +99,8 @@ della scheda e formato degli export non sono introdotti come requisiti.
 - Motivo del rifiuto della richiesta: non richiesto nelle fonti, non rappresentato.
 - Conteggio dell'attività degli esterni delle OPT nei dati quantitativi, scadenze,
   correzioni e controlli di coerenza (Q-06 e Q-13).
+- Chi consulta le viste trimestrale e cumulativa dei dati delle OPT: il diagramma le
+  mostra al Banco, che raccoglie il monitoraggio, ma le fonti non lo dicono.
 
 ## Aggiornamento dopo i chiarimenti
 

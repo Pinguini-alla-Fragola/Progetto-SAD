@@ -1,5 +1,5 @@
 %% TOBE-01A v0.2 - 03/11/2026
-%% Proposta del team: Epic #20. Allineato alle risposte del cliente (seconda tornata) e alle scelte del gruppo del 03/11/2026.
+%% Proposta del team: Epic #20. Allineato alle risposte del cliente (seconda tornata) e alle scelte del gruppo registrate il 03/11/2026.
 %% Il Banco lavora le richieste in ordine di arrivo e interpella un candidato per volta.
 %% Il sistema puo' suggerire l'ordine dei candidati; la scelta resta al Banco.
 sequenceDiagram
@@ -16,7 +16,7 @@ sequenceDiagram
         S-->>R: Mostra ID e stato della propria richiesta
         B->>S: Consulta le richieste<br/>in ordine di arrivo
         S-->>B: Mostra tutti i candidati compatibili<br/>con l'ordine suggerito
-        Note over S,E: CRITERI SUGGERITI DAL SISTEMA (la scelta resta al Banco)<br/>• Solo erogatori della misura richiesta<br/>• Stesso comune, poi comuni confinanti<br/>• A parità: operatori del programma, poi OPT erogatrici<br/>• Poi chi ha meno appuntamenti assegnati<br/>• Senza nessuno in zona: Centro PICUS da remoto
+        Note over S,E: CRITERI SUGGERITI DAL SISTEMA (la scelta resta al Banco)<br/>• Solo erogatori della misura richiesta<br/>• Stesso comune, poi comuni confinanti<br/>• A parità di distanza: operatori del programma, poi OPT erogatrici<br/>• Poi chi ha meno appuntamenti assegnati<br/>• Senza nessuno in zona: Centro PICUS da remoto, se la misura lo consente
         loop Un candidato per volta, fino a<br/>disponibilità o candidati esauriti
             B->>S: Sceglie il candidato da interpellare
             S->>E: Notifica la richiesta di disponibilità
