@@ -1,8 +1,7 @@
-%% TOBE-01B v0.1 - 25/10/2026
-%% Modello proposto: chiusura del coordinamento, non esito della prestazione.
-%% IP-01: Accettata dopo conferma appuntamento. Da validare nella #29.
-%% Q-09: l'erogatore, accettando la richiesta, propone data, ora e luogo; la OPT richiedente
-%% accetta o rifiuta la proposta; PICUS pubblica.
+%% TOBE-01B v0.2 - 03/11/2026
+%% Allineato alle scelte del gruppo del 03/11/2026: Banco ed erogatore concordano i dettagli, solo il Banco li registra e conferma.
+%% Stato finale positivo Confermata: attesta l'accordo, non l'erogazione. Dopo la conferma i dettagli non cambiano.
+%% Annullata: solo per evento eccezionale, con motivo obbligatorio, da parte del soggetto legato all'erogatore assegnato.
 sequenceDiagram
     autonumber
     participant R as OPT richiedente
@@ -10,15 +9,22 @@ sequenceDiagram
     participant B as Banco
     participant E as Erogatore OPT o Operatore
 
-    Note over S,E: L'erogatore ha accettato la richiesta<br/>e proposto data, ora e luogo (TOBE-01A)
-    S-->>R: Mostra la proposta di data,<br/>ora e luogo oppure link
-    alt La OPT accetta
-        R->>S: Accetta la proposta
-        S->>S: Pubblica<br/>l'appuntamento e<br/>chiude come Accettata
+    Note over B,E: Un candidato ha dato la disponibilità (TOBE-01A)<br/>Le controproposte di data e ora<br/>lasciano la richiesta In programmazione
+    B->>E: Concorda data, ora e luogo oppure link,<br/>rappresentando le esigenze dell'assistito
+    E-->>B: Accetta, contropropone<br/>o non trova l'accordo
+    alt Accordo raggiunto
+        B->>S: Registra i dettagli concordati<br/>e conferma l'accordo
+        S->>S: Verifica i dati necessari<br/>e porta la richiesta<br/>a Confermata<br/>(dettagli non modificabili)
         S-->>R: Mostra appuntamento,<br/>riferimento ed esito
         R->>R: Informa la persona<br/>fuori da PICUS
-    else La OPT rifiuta
-        R->>S: Rifiuta la proposta
-        S-->>B: Mostra il rifiuto della OPT
-        Note over S,B: Il Banco cerca un'alternativa<br/>(si riparte da TOBE-01A)
+        opt Evento eccezionale dopo la conferma
+            alt Erogatore legato a una OPT
+                E->>S: La OPT segnala l'evento<br/>e il motivo
+            else Operatore del Banco
+                B->>S: Segnala l'evento e il motivo
+            end
+            S->>S: Porta la richiesta<br/>ad Annullata<br/>senza riaprire la ricerca
+        end
+    else Mancato accordo con il candidato
+        Note over B,E: Il Banco cerca il candidato successivo<br/>(si riparte da TOBE-01A)
     end

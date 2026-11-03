@@ -65,8 +65,9 @@ Per ogni modello mantenere identificativo, versione, data, fonte modificabile
 e collegamenti alle issue pertinenti. Non registrare come completati o validati
 modelli e decisioni ancora in discussione.
 
-TOBE-01A/B e TOBE-02 sono alla **versione 0.1 del 25/10/2026**. Accettata
-chiude il coordinamento nella proposta IP-01, dopo conferma dell'appuntamento;
-Completata e le regole di Annullata restano da riconciliare con F07 nella #29.
+TOBE-01A/B e TOBE-02 sono alla **versione 0.2 del 03/11/2026**. Confermata
+(Accettata nelle fonti precedenti) chiude il coordinamento nella proposta IP-01,
+dopo la conferma del Banco; Annullata è prevista solo per eventi eccezionali.
+Completata resta da riconciliare con F07 nella #29.
 Il monitoraggio trimestrale è un processo indipendente. Non è attestata una
 validazione del committente o una revisione del gruppo già svolta.

@@ -3,18 +3,20 @@ config:
   sequence:
     noteAlign: left
 ---
-%% TOBE-02 v0.1 - 25/10/2026
-%% F02 §5.5 e appendice B, F06, F07. Processo distinto dalle richieste.
-%% Account: esterni con credenziali personali; interni (Banco e OPT) con la credenziale della propria organizzazione.
-%% Gli interni all'OPT non usano PICUS per la scheda: la inseriscono direttamente nel portale ministeriale.
+%% TOBE-02 v0.2 - 03/11/2026
+%% F02 §5.5 e appendice B, F06, F07; risposte del cliente (seconda tornata) e scelte del gruppo del 03/11/2026.
+%% Compilano la scheda solo gli operatori interni del Banco e gli esterni pagati dal Banco, ciascuno con account personale.
+%% Volontari, personale e operatori esterni messi a disposizione dalle OPT non la compilano.
+%% La OPT inserisce i dati quantitativi dell'organizzazione; l'attivita' degli esterni delle OPT in quei dati e' da definire.
 sequenceDiagram
     autonumber
-    participant O as Operatore esterno o interno al Banco
+    participant R as OPT
+    participant O as Operatore del Banco<br/>(interno o esterno)
     participant S as Sistema PICUS
     participant B as Banco
     participant M as Portale ministeriale
 
-    Note over O,B: Processo trimestrale indipendente dalle richieste fatte in PICUS<br/>La scheda include anche servizi non richiesti tramite l'applicazione<br/>Gli operatori interni all'OPT non inviano la scheda a PICUS:<br/>la inseriscono direttamente nel portale ministeriale
+    Note over O,B: Processo trimestrale indipendente dalle richieste fatte in PICUS<br/>La scheda include anche servizi non richiesti tramite l'applicazione<br/>Non la compilano volontari, personale e operatori esterni delle OPT
     O->>S: Apre la propria scheda del trimestre
     S-->>O: Mostra i campi della scheda
     O->>S: Compila e invia dati operatore<br/>e conteggi aggregati
@@ -31,3 +33,7 @@ sequenceDiagram
         B->>M: Inserisce manualmente<br/>i dati nel portale
         Note over B,M: Nessuna integrazione applicativa<br/>con il portale
     end
+    Note over R,S: DATI QUANTITATIVI DELL'ORGANIZZAZIONE (distinti dalla scheda dell'operatore)<br/>Comprendono l'attività di volontari e personale della OPT
+    R->>S: Inserisce le persone raggiunte<br/>per misura e categoria del periodo
+    S->>S: Registra i dati del periodo
+    S-->>B: Rende disponibili le viste<br/>trimestrale e cumulativa
