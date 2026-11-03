@@ -19,9 +19,9 @@ sequenceDiagram
         R->>R: Informa la persona<br/>fuori da PICUS
         opt Evento eccezionale dopo la conferma
             alt Erogatore legato a una OPT
-                E->>S: La OPT segnala l'evento<br/>e il motivo
-            else Operatore del Banco
-                B->>S: Segnala l'evento e il motivo
+                E->>S: L'account della OPT segnala<br/>l'evento e il motivo
+            else Erogatore del Banco
+                B->>S: L'account Banco (coordinamento)<br/>segnala l'evento e il motivo
             end
             S->>S: Porta la richiesta<br/>ad Annullata<br/>senza riaprire la ricerca
         end

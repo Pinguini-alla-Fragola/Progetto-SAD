@@ -42,6 +42,9 @@ Lo segnala l'account legato all'erogatore assegnato:
 | Operatore esterno di una OPT | Account della OPT di appartenenza |
 | Operatore interno o esterno pagato dal Banco | Account del Banco con ruolo di coordinamento |
 
+Gli operatori hanno un account personale, ma non registrano l'annullamento:
+nel diagramma agisce l'account della OPT o quello del Banco, non il singolo operatore.
+
 F07 conserva l'alternativa **In programmazione, Completata, Annullata, Rifiutata**
 e la verifica della prestazione svolta. Il gruppo ha scelto di non seguire
 l'erogazione nel ciclo della richiesta; la scelta va validata nella #29.
@@ -90,6 +93,8 @@ della scheda e formato degli export non sono introdotti come requisiti.
 ## Punti non definiti dalle fonti
 
 - Canale con cui Banco ed erogatore concordano i dettagli: nell'app o fuori.
+- Cosa si intende per evento eccezionale che giustifica l'annullamento e in quale
+  forma si registra il motivo: le fonti lo richiedono, ma non lo definiscono.
 - Se la OPT richiedente viene informata dell'annullamento e se vede il motivo.
 - Motivo del rifiuto della richiesta: non richiesto nelle fonti, non rappresentato.
 - Conteggio dell'attività degli esterni delle OPT nei dati quantitativi, scadenze,
