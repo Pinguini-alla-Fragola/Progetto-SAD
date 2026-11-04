@@ -101,8 +101,8 @@
         .on-dark .hd.pink, .pink { --c: var(--pink); }
         .mint { --c: var(--mint); }
 
-        /* Una riga per volta: il JS divide i testi su più righe in <span class="ln"> */
-        .ln { display: block; }
+        /* Una riga per volta: il JS divide i testi in parole (.w) e dà a ciascuna il numero della sua riga */
+        .w { display: inline-block; }
 
         /* ---------- Voci numerate (epic, storie, passi) ---------- */
         .item {
@@ -235,12 +235,16 @@
             animation: arrowHead .2s ease-out calc(var(--t0) + .32s) both;
         }
 
-        /* testi su più righe: la riga si scrive dopo l'altra */
-        .slide[data-state="active"] [data-a="lines"] { animation: none; }
-        .slide[data-state="active"] [data-a="lines"] .ln {
-            animation: up .7s var(--out) both;
+        /* testi: le parole di una stessa riga compaiono insieme, una riga dopo l'altra */
+        .slide[data-state="active"] [data-a="words"] { animation: none; }
+        .slide[data-state="active"] [data-a="words"] .w {
+            animation-duration: .7s;
+            animation-timing-function: var(--out);
+            animation-fill-mode: both;
             animation-delay: calc(var(--t0) + var(--l, 0) * .16s);
         }
+        [data-wa="up"] .w   { animation-name: up; }
+        [data-wa="left"] .w { animation-name: left; }
 
         /* riquadri: prima si traccia il contorno, poi si riempie e compare il testo */
         .slide[data-state="active"] .box[data-a="build"] {
@@ -344,8 +348,7 @@
             .t, .item, .tbl, .mascot { position: static; width: auto; height: auto; }
             .box, .arrow { position: relative; left: auto; top: auto; height: auto; }
             .t { white-space: normal; line-height: max(var(--lh, 1.15), 1.3); }
-            .ln { display: inline; }
-            .slide[data-state="active"] [data-a="lines"] .ln { animation-name: fade; }
+            [data-a="words"] br { display: none; }
             br.d, .tbl br { display: none; }
 
             .slide > * + * { margin-top: 10px; }
@@ -410,7 +413,7 @@
         @media (prefers-reduced-motion: reduce) {
             .slide, .slide[data-state="active"] { transition: opacity .25s linear !important; transform: none !important; }
             .slide[data-state="active"] [data-a],
-            .slide[data-state="active"] [data-a="lines"] .ln,
+            .slide[data-state="active"] [data-a="words"] .w,
             .slide[data-state="active"] .box .trace rect,
             .slide[data-state="active"] [data-a="arrow"]::before,
             .slide[data-state="active"] [data-a="arrow"]::after,
@@ -510,20 +513,20 @@
 
             <h3 class="t hd" style="--x:95;--y:206;--fs:36.3;--t:.4s" data-a="up">Cinque Epic del prodotto</h3>
             <span class="hl" style="--x:84;--y:481;--w:520;--h:94;--t:2.7s" data-a="reveal" aria-hidden="true"></span>
-            <div class="item" style="--x:95;--y:294;--nw:100;--fs:30;--lh:1.3;--t:.8s" data-a="left"><span class="num">#18</span><span class="txt">Account e accessi</span></div>
-            <div class="item" style="--x:95;--y:391;--nw:100;--fs:30;--lh:1.3;--t:1.1s" data-a="left"><span class="num">#19</span><span class="txt">Catalogo, offerta e monitoraggio <br>delle OPT</span></div>
-            <div class="item on" style="--x:95;--y:489;--nw:100;--fs:30;--lh:1.3;--t:1.4s" data-a="left"><span class="num">#20</span><span class="txt b">Richieste e coordinamento <br>degli appuntamenti</span></div>
-            <div class="item" style="--x:95;--y:586;--nw:100;--fs:30;--lh:1.3;--t:1.7s" data-a="left"><span class="num">#22</span><span class="txt">Comunicazioni e conferme <br>di ricezione</span></div>
-            <div class="item" style="--x:95;--y:684;--nw:100;--fs:30;--lh:1.3;--t:2s" data-a="left"><span class="num">#23</span><span class="txt">Schede trimestrali degli operatori <br>e rendicontazione</span></div>
+            <div class="item" style="--x:95;--y:294;--nw:100;--fs:30;--lh:1.3;--t:.8s" data-a="left" data-cascade="epics"><span class="num">#18</span><span class="txt">Account e accessi</span></div>
+            <div class="item" style="--x:95;--y:391;--nw:100;--fs:30;--lh:1.3;--t:1.1s" data-a="left" data-cascade="epics"><span class="num">#19</span><span class="txt">Catalogo, offerta e monitoraggio <br>delle OPT</span></div>
+            <div class="item on" style="--x:95;--y:489;--nw:100;--fs:30;--lh:1.3;--t:1.4s" data-a="left" data-cascade="epics"><span class="num">#20</span><span class="txt b">Richieste e coordinamento <br>degli appuntamenti</span></div>
+            <div class="item" style="--x:95;--y:586;--nw:100;--fs:30;--lh:1.3;--t:1.7s" data-a="left" data-cascade="epics"><span class="num">#22</span><span class="txt">Comunicazioni e conferme <br>di ricezione</span></div>
+            <div class="item" style="--x:95;--y:684;--nw:100;--fs:30;--lh:1.3;--t:2s" data-a="left" data-cascade="epics"><span class="num">#23</span><span class="txt">Schede trimestrali degli operatori <br>e rendicontazione</span></div>
 
             <h3 class="t hd" style="--x:775;--y:215;--fs:36.3;--t:3.1s" data-a="up">Storia #48</h3>
             <h4 class="t strong" style="--x:775;--y:288;--fs:33.8;--t:3.4s" data-a="up">Invio di una richiesta di misura</h4>
             <p class="t" style="--x:775;--y:356;--fs:32.5;--lh:1.33;--t:3.7s" data-a="up">Come referente OPT voglio richiedere <br>una misura per una persona o un nucleo <br>che non posso assistere autonomamente.</p>
             <h3 class="t hd" style="--x:775;--y:510;--fs:33.8;--t:4.6s" data-a="up">Criteri di accettazione</h3>
             <ul class="t list" style="--x:775;--y:575" aria-label="Criteri di accettazione">
-                <li data-a="up" style="--t:5s">Invio valido: ID, data e stato iniziale</li>
-                <li data-a="up" style="--t:5.3s">Presenza nella coda del Banco</li>
-                <li data-a="up" style="--t:5.6s">Campi non ammessi: invio respinto</li>
+                <li data-a="up" data-cascade="criteri" style="--t:5s">Invio valido: ID, data e stato iniziale</li>
+                <li data-a="up" data-cascade="criteri" style="--t:5.3s">Presenza nella coda del Banco</li>
+                <li data-a="up" data-cascade="criteri" style="--t:5.6s">Campi non ammessi: invio respinto</li>
             </ul>
 
             <p class="t mu" style="--x:95;--y:788;--fs:28.8;--t:6.3s" data-a="up">Le storie selezionate per il primo percorso compongono l’MVP</p>
@@ -552,19 +555,19 @@
             <p class="t strong" style="--x:95;--y:189;--fs:37.5;--t:.3s" data-a="up">Percorso minimo: richiesta, accordo confermato o rifiuto finale</p>
 
             <h3 class="t hd" style="--x:95;--y:286;--fs:36.3;--t:.8s" data-a="up">Sei storie incluse</h3>
-            <div class="item" style="--x:95;--y:358;--nw:111;--fs:31.3;--nfs:32.5;--t:1.2s" data-a="left"><span class="num">#25</span><span class="txt">Accesso con email e password</span></div>
-            <div class="item" style="--x:95;--y:419;--nw:111;--fs:31.3;--nfs:32.5;--t:1.5s" data-a="left"><span class="num">#28</span><span class="txt">Accesso ai dati in base al ruolo e alle assegnazioni</span></div>
-            <div class="item" style="--x:95;--y:480;--nw:111;--fs:31.3;--nfs:32.5;--t:1.8s" data-a="left"><span class="num">#48</span><span class="txt">Invio di una richiesta di misura</span></div>
-            <div class="item" style="--x:95;--y:541;--nw:111;--fs:31.3;--nfs:32.5;--t:2.1s" data-a="left"><span class="num">#49</span><span class="txt">Scelta dell’erogatore e richiesta di disponibilità</span></div>
-            <div class="item" style="--x:95;--y:602;--nw:111;--fs:31.3;--nfs:32.5;--t:2.4s" data-a="left"><span class="num">#51</span><span class="txt">Risposta alla richiesta di disponibilità</span></div>
-            <div class="item" style="--x:95;--y:664;--nw:111;--fs:31.3;--nfs:32.5;--t:2.7s" data-a="left"><span class="num">#52</span><span class="txt">Conferma dell’accordo o rifiuto della richiesta</span></div>
+            <div class="item" style="--x:95;--y:358;--nw:111;--fs:31.3;--nfs:32.5;--t:1.2s" data-a="left" data-cascade="storie"><span class="num">#25</span><span class="txt">Accesso con email e password</span></div>
+            <div class="item" style="--x:95;--y:419;--nw:111;--fs:31.3;--nfs:32.5;--t:1.5s" data-a="left" data-cascade="storie"><span class="num">#28</span><span class="txt">Accesso ai dati in base al ruolo e alle assegnazioni</span></div>
+            <div class="item" style="--x:95;--y:480;--nw:111;--fs:31.3;--nfs:32.5;--t:1.8s" data-a="left" data-cascade="storie"><span class="num">#48</span><span class="txt">Invio di una richiesta di misura</span></div>
+            <div class="item" style="--x:95;--y:541;--nw:111;--fs:31.3;--nfs:32.5;--t:2.1s" data-a="left" data-cascade="storie"><span class="num">#49</span><span class="txt">Scelta dell’erogatore e richiesta di disponibilità</span></div>
+            <div class="item" style="--x:95;--y:602;--nw:111;--fs:31.3;--nfs:32.5;--t:2.4s" data-a="left" data-cascade="storie"><span class="num">#51</span><span class="txt">Risposta alla richiesta di disponibilità</span></div>
+            <div class="item" style="--x:95;--y:664;--nw:111;--fs:31.3;--nfs:32.5;--t:2.7s" data-a="left" data-cascade="storie"><span class="num">#52</span><span class="txt">Conferma dell’accordo o rifiuto della richiesta</span></div>
 
             <h3 class="t hd" style="--x:1105;--y:286;--fs:33.8;--t:3.2s" data-a="up">Incrementi successivi</h3>
             <ul class="t list" style="--x:1105;--y:389;--fs:30;--gap:13.5px" aria-label="Incrementi successivi">
-                <li data-a="up" style="--t:3.6s">Amministrazione completa</li>
-                <li data-a="up" style="--t:3.9s">Comunicazioni generali</li>
-                <li data-a="up" style="--t:4.2s">Rendicontazione</li>
-                <li data-a="up" style="--t:4.5s">Annullamento eccezionale</li>
+                <li data-a="up" data-cascade="incrementi" style="--t:3.6s">Amministrazione completa</li>
+                <li data-a="up" data-cascade="incrementi" style="--t:3.9s">Comunicazioni generali</li>
+                <li data-a="up" data-cascade="incrementi" style="--t:4.2s">Rendicontazione</li>
+                <li data-a="up" data-cascade="incrementi" style="--t:4.5s">Annullamento eccezionale</li>
             </ul>
 
             <p class="t mu" style="--x:95;--y:760;--fs:28.8;--t:5s" data-a="up">Prerequisiti: account, catalogo e offerta predisposti per il prototipo.</p>
@@ -656,13 +659,79 @@
 
             /* ---- preparazione delle animazioni di costruzione ---- */
 
-            // I testi su più righe compaiono una riga dopo l'altra.
-            stage.querySelectorAll('[data-a]:not(.box):not(ul)').forEach((el) => {
-                if (!el.querySelector(':scope > br')) return;
-                const lines = el.innerHTML.split(/<br\s*\/?>/i);
-                el.innerHTML = lines.map((line, i) => `<span class="ln" style="--l:${i}">${line.trim()}</span>`).join(' ');
-                el.dataset.a = 'lines';
+            // I testi compaiono una riga dopo l'altra, in base a come vanno davvero a capo
+            // (sul palco 16:9 coincide con le righe del PPT, sul telefono con quelle che si formano).
+            // Le voci di uno stesso elenco (data-cascade) formano un'unica sequenza di righe.
+            function makeWords(container) {
+                const frag = document.createDocumentFragment();
+                const words = [];
+                container.childNodes.forEach((node) => {
+                    if (node.nodeType === Node.TEXT_NODE) {
+                        node.textContent.split(/\s+/).filter(Boolean).forEach((word) => {
+                            const span = document.createElement('span');
+                            span.className = 'w';
+                            span.textContent = word;
+                            frag.appendChild(span);
+                            frag.appendChild(document.createTextNode(' '));
+                            words.push(span);
+                        });
+                    } else if (node.nodeName === 'BR') {
+                        frag.appendChild(node.cloneNode());
+                    }
+                });
+                container.textContent = '';
+                container.appendChild(frag);
+                return words;
+            }
+
+            const groups = new Map();
+            let singles = 0;
+            stage.querySelectorAll('[data-a="up"], [data-a="left"]').forEach((el) => {
+                const isLeaf = ![...el.children].some((c) => c.tagName !== 'BR');
+                let words;
+                if (isLeaf) {
+                    if (!el.textContent.trim()) return;
+                    words = makeWords(el);
+                } else if (el.dataset.cascade) {
+                    words = [...el.querySelectorAll(':scope > .num, :scope > .txt')].flatMap((c) => makeWords(c));
+                } else {
+                    return;
+                }
+                el.dataset.wa = el.dataset.a;
+                el.dataset.a = 'words';
+                const key = el.dataset.cascade || `solo-${singles++}`;
+                if (!groups.has(key)) groups.set(key, { els: [], words: [] });
+                groups.get(key).els.push(el);
+                groups.get(key).words.push(...words);
             });
+            // le voci di un elenco partono tutte dallo stesso istante: le righe si susseguono
+            groups.forEach((g) => {
+                const base = g.els[0].style.getPropertyValue('--t');
+                g.els.forEach((el) => el.style.setProperty('--t', base));
+            });
+
+            // Posizione verticale di una parola dentro la slide, senza tener conto delle animazioni in corso.
+            function topInSlide(node) {
+                let y = 0;
+                while (node && !node.classList.contains('slide')) { y += node.offsetTop; node = node.offsetParent; }
+                return y;
+            }
+
+            // Numero di riga visiva di ogni parola (cambia con la larghezza della finestra).
+            function assignLines() {
+                groups.forEach((g) => {
+                    const ys = g.words.map(topInSlide);
+                    const starts = [];
+                    [...new Set(ys)].sort((a, b) => a - b).forEach((y) => {
+                        if (!starts.length || y - starts[starts.length - 1] > 8) starts.push(y);
+                    });
+                    g.words.forEach((w, i) => {
+                        let line = 0;
+                        starts.forEach((y, n) => { if (ys[i] >= y - 2) line = n; });
+                        w.style.setProperty('--l', line);
+                    });
+                });
+            }
 
             // Contorno che si traccia attorno ai riquadri del flusso prima del riempimento.
             const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -698,6 +767,7 @@
                 const s = Math.min(window.innerWidth / 1600, window.innerHeight / 900);
                 stage.style.setProperty('--s', s);
                 sizeTraces();
+                assignLines();
             }
 
             /* ---- slide corrente ---- */
@@ -799,6 +869,7 @@
 
             /* ---- avvio ---- */
             fit();
+            if (document.fonts && document.fonts.ready) document.fonts.ready.then(assignLines);
             const start = parseInt(location.hash.slice(1), 10);
             go(Number.isNaN(start) ? 0 : start - 1);
             wake();
