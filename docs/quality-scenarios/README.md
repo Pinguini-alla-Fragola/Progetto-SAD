@@ -1,6 +1,6 @@
 # Quality scenarios
 
-Catalogo v0.3 del **04/11/2026**; la v0.1 del 25/10/2026 è incorporata in A5 del Word **v0.5**, da riallineare. Ogni scheda segue il template della professoressa: una tabella con Source, Stimulus, Environment, Artifact, Response e Response measure, accompagnata da attributo di qualità, priorità, motivazione e approccio di verifica.
+Catalogo v0.3 del **04/11/2026**, allineato ad A5 del documento **v0.7**. Il PDF è pubblicato nella repository. Ogni scheda segue il template: una tabella con Source, Stimulus, Environment, Artifact, Response e Response measure, accompagnata da attributo di qualità, priorità, motivazione e approccio di verifica.
 
 **Stato:** proposte da validare. Le soglie introdotte dal team non sono SLA concordati o risultati di prove software già eseguite.
 
@@ -17,4 +17,4 @@ Gli scenari si verificano a fine costruzione, sull'applicazione completa: QS-01 
 
 Q-07 raccoglie la validazione dei carichi e delle soglie. Il numero delle OPT (circa 450) dimensiona i dati di prova, non la concorrenza; i profili non sono dedotti dal dato 230.000 utenti. QS-06 valuta la modificabilità limitatamente agli aggiornamenti del catalogo tramite configurazione.
 
-[Documento Word](../Documentazione_SAD_2026.docx) · [Proposta di MVP](../requirements/proposta-mvp.md) · [Registro dei chiarimenti](../requirements/open-questions.md)
+[Documento PDF](../Documentazione_SAD_2026.pdf) · [Proposta di MVP](../requirements/proposta-mvp.md) · [Registro dei chiarimenti](../requirements/open-questions.md)
