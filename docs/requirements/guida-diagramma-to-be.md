@@ -10,7 +10,7 @@ committente presunte.
 
 | ID | Contenuto | File |
 | --- | --- | --- |
-| TOBE-01A | Validazione dei dati, ricerca dell'erogatore un candidato per volta e rifiuto | [Mermaid](diagrams/to-be/TOBE-01A-richieste-disponibilita.mmd), [PNG](diagrams/to-be/TOBE-01A-richieste-disponibilita.png), [SVG](diagrams/to-be/TOBE-01A-richieste-disponibilita.svg) |
+| TOBE-01A | Validazione dei dati, ricerca dell'erogatore uno per volta e rifiuto | [Mermaid](diagrams/to-be/TOBE-01A-richieste-disponibilita.mmd), [PNG](diagrams/to-be/TOBE-01A-richieste-disponibilita.png), [SVG](diagrams/to-be/TOBE-01A-richieste-disponibilita.svg) |
 | TOBE-01B | Accordo fra Banco ed erogatore, conferma del Banco e annullamento eccezionale | [Mermaid](diagrams/to-be/TOBE-01B-appuntamento-esito.mmd), [PNG](diagrams/to-be/TOBE-01B-appuntamento-esito.png), [SVG](diagrams/to-be/TOBE-01B-appuntamento-esito.svg) |
 | TOBE-02 | Scheda trimestrale degli operatori del Banco, dati quantitativi della OPT e inserimento ministeriale manuale | [Mermaid](diagrams/to-be/TOBE-02-rendicontazione.mmd), [PNG](diagrams/to-be/TOBE-02-rendicontazione.png), [SVG](diagrams/to-be/TOBE-02-rendicontazione.svg) |
 
@@ -51,7 +51,7 @@ l'erogazione nel ciclo della richiesta; la scelta va validata nella #29.
 
 ## Ricerca dell'erogatore
 
-Risposte del cliente: il Banco vede tutti i candidati compatibili con la misura e
+Risposte del cliente: il Banco vede tutti gli erogatori compatibili con la misura e
 ne interpella **uno per volta**, senza invii in parallelo. Il sistema può suggerire
 l'ordine con i criteri riportati nel diagramma; scelta e assegnazione restano al
 Banco. Servono la distanza fra comuni (stesso comune, confinanti) e il conteggio

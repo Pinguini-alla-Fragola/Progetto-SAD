@@ -1,7 +1,7 @@
 %% TOBE-01A v0.2 - 03/11/2026
 %% Proposta del team: Epic #20. Allineato alle risposte del cliente (seconda tornata) e alle scelte del gruppo registrate il 03/11/2026.
-%% Il Banco lavora le richieste in ordine di arrivo e interpella un candidato per volta.
-%% Il sistema puo' suggerire l'ordine dei candidati; la scelta resta al Banco.
+%% Il Banco lavora le richieste in ordine di arrivo e interpella un erogatore per volta.
+%% Il sistema puo' suggerire l'ordine degli erogatori; la scelta resta al Banco.
 sequenceDiagram
     autonumber
     participant R as OPT richiedente
@@ -15,16 +15,16 @@ sequenceDiagram
         S->>S: Registra ID, data e titolare<br/>e mette la richiesta<br/>nello stato<br/>In programmazione
         S-->>R: Mostra ID e stato della propria richiesta
         B->>S: Consulta le richieste<br/>in ordine di arrivo
-        S-->>B: Mostra tutti i candidati compatibili<br/>con l'ordine suggerito
+        S-->>B: Mostra tutti gli erogatori compatibili<br/>con l'ordine suggerito
         Note over S,E: CRITERI SUGGERITI DAL SISTEMA (la scelta resta al Banco)<br/>• Solo erogatori della misura richiesta<br/>• Stesso comune, poi comuni confinanti<br/>• A parità di distanza: operatori del programma, poi OPT erogatrici<br/>• Poi chi ha meno appuntamenti assegnati<br/>• Senza nessuno in zona: Centro PICUS da remoto, se la misura lo consente
-        loop Un candidato per volta, fino a<br/>disponibilità o candidati esauriti
-            B->>S: Sceglie il candidato da interpellare
+        loop Un erogatore per volta, fino a<br/>disponibilità o erogatori esauriti
+            B->>S: Sceglie l'erogatore da interpellare
             S->>E: Notifica la richiesta di disponibilità
-            E->>S: Risponde se è disponibile
+            E->>S: Conferma o rifiuta
             S-->>B: Mostra la risposta
-            alt Candidato disponibile
+            alt Erogatore disponibile
                 Note over S,E: Prosegue nel diagramma TOBE-01B<br/>La richiesta resta In programmazione
-            else Candidati esauriti
+            else Erogatori esauriti
                 break Uscita dal loop
                     B->>S: Rifiuta la richiesta<br/>(nessuna soluzione praticabile)
                     S->>S: Registra Rifiutata
