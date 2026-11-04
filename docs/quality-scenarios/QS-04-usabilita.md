@@ -1,34 +1,30 @@
 # QS-04 Uso dei flussi principali da smartphone
 
-Versione 0.1 del 25/10/2026. Stato: **proposta da validare**; nessuna prova software già attestata.
-
-**Area e priorità proposta:** Usabilità / P1
-
-**Fonti e collegamenti:** F02 §§3 e 7; US-25 e US-D05–US-D08.
+**Area e priorità:** Usabilità / P1
 
 ## Sorgente
 
-Un referente OPT con familiarità digitale ordinaria.
+Un referente OPT, oppure un operatore che risponde a una richiesta di disponibilità, con familiarità digitale ordinaria.
 
 ## Stimolo
 
-Accede, invia una richiesta e consulta i dettagli di un appuntamento già predisposto per la prova.
+Il referente OPT accede, invia una richiesta e consulta i dettagli di un appuntamento già predisposto per la prova; l’operatore apre la notifica di una richiesta di disponibilità e risponde.
 
 ## Ambiente
 
-Viewport di 360 × 800 CSS pixel e dati sintetici; cinque partecipanti rappresentativi, se disponibili. Le attese del Banco e dell’erogatore sono escluse dal tempo delle azioni di interfaccia.
+Viewport di 360 × 800 CSS pixel e dati sintetici; cinque partecipanti rappresentativi per ciascun ruolo. Le attese del Banco e dell’erogatore sono escluse dal tempo delle azioni di interfaccia.
 
 ## Artefatto
 
-Accesso, modulo di richiesta e consultazione dei propri appuntamenti.
+Accesso, modulo di richiesta, consultazione dei propri appuntamenti e risposta alla richiesta di disponibilità.
 
 ## Risposta
 
-L’utente riconosce le azioni, completa il modulo, comprende errori e conferme e ritrova la propria richiesta senza assistenza del facilitatore.
+L’utente riconosce le azioni, completa il modulo o la risposta alla richiesta di disponibilità, comprende errori e conferme e ritrova la propria richiesta senza assistenza del facilitatore.
 
 ## Misura della risposta
 
-Soglie proposte: almeno 4 partecipanti su 5 completano accesso e invio entro 3 minuti e trovano i dettagli predisposti entro 1 minuto, senza aiuto. Nessuno scorrimento orizzontale a 360 CSS pixel; campi, etichette e pulsanti restano raggiungibili.
+Soglie proposte: almeno 4 utilizzatori su 5 completano accesso e invio entro 3 minuti e trovano i dettagli predisposti entro 1 minuto, senza aiuto. Almeno 4 operatori su 5 rispondono alla richiesta di disponibilità entro 1 minuto dall’apertura della notifica, senza aiuto. Nessuno scorrimento orizzontale a 360 CSS pixel; campi, etichette e pulsanti restano raggiungibili.
 
 ## Stato delle soglie
 
@@ -36,4 +32,4 @@ Esigenza mobile dalle fonti; viewport, campione e tempi sono proposte da validar
 
 ## Metodo di verifica previsto
 
-Usare un protocollo con le stesse consegne e registrare tempi, errori e richieste di aiuto. Verificare anche il ridimensionamento su desktop. La prova utenti avverrà su software disponibile, non è simulata nella review S1.
+Usare un protocollo con le stesse consegne e registrare tempi, errori e richieste di aiuto. Verificare anche il ridimensionamento su desktop. La prova utenti avverrà sull’applicazione completa a fine costruzione; non è simulata nella review S1.

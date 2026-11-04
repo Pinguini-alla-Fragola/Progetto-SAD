@@ -1,10 +1,6 @@
 # QS-01 Isolamento degli accessi
 
-Versione 0.1 del 25/10/2026. Stato: **proposta da validare**; nessuna prova software già attestata.
-
-**Area e priorità proposta:** Sicurezza / P1
-
-**Fonti e collegamenti:** F02 §§3 e 7; US-28; tutte le storie del percorso MVP.
+**Area e priorità:** Sicurezza / P1
 
 ## Sorgente
 
@@ -12,11 +8,11 @@ Un utente OPT o Operatore, autenticato oppure privo di una sessione valida.
 
 ## Stimolo
 
-Tenta di leggere o modificare una richiesta, un appuntamento o una scheda di un altro titolare, anche alterando l’identificativo inviato al server.
+Tenta di leggere o modificare una richiesta, un appuntamento o una scheda di un altro titolare, anche alterando l’identificativo inviato al server. Un erogatore interpellato per una richiesta tenta di consultare altre pratiche della OPT richiedente; un account tenta di annullare una richiesta Confermata che non spetta al suo erogatore.
 
 ## Ambiente
 
-Funzionamento ordinario con due OPT A/B, due Operatori X/Y e un utente Banco; dati sintetici assegnati a titolari distinti. Le prove si aggiungono quando ciascuna risorsa è disponibile.
+Funzionamento ordinario con due OPT A/B, un operatore esterno collegato alla OPT A, un operatore interno e uno esterno pagati dal Banco e un utente Banco con ruolo di coordinamento; dati sintetici assegnati a titolari distinti.
 
 ## Artefatto
 
@@ -24,7 +20,7 @@ Controlli di autenticazione, autorizzazione e appartenenza sulle risorse protett
 
 ## Risposta
 
-Il server nega gli accessi non consentiti prima di restituire dati o applicare modifiche. La sessione determina ruolo e titolare. Il Banco mantiene la visibilità necessaria al coordinamento.
+Il server nega gli accessi non consentiti prima di restituire dati o applicare modifiche. La sessione determina ruolo e titolare. Il Banco mantiene la visibilità necessaria al coordinamento. Essere interpellato come erogatore non dà accesso alle altre pratiche della OPT richiedente. L’annullamento è consentito solo all’account legato all’erogatore assegnato (OPT, OPT di appartenenza dell’operatore esterno, Banco).
 
 ## Misura della risposta
 
