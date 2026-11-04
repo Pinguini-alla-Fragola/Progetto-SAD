@@ -1,6 +1,6 @@
 # Quality scenarios
 
-Catalogo v0.3 del **04/11/2026**; la v0.1 del 25/10/2026 è incorporata in A5 del Word **v0.5**, da riallineare. Ogni scheda segue il template della professoressa: una tabella con Source, Stimulus, Environment, Artifact, Response e Response measure, accompagnata da attributo di qualità, priorità, motivazione, stato delle soglie e approccio di verifica.
+Catalogo v0.3 del **04/11/2026**; la v0.1 del 25/10/2026 è incorporata in A5 del Word **v0.5**, da riallineare. Ogni scheda segue il template della professoressa: una tabella con Source, Stimulus, Environment, Artifact, Response e Response measure, accompagnata da attributo di qualità, priorità, motivazione e approccio di verifica.
 
 **Stato:** proposte da validare. Le soglie introdotte dal team non sono SLA concordati o risultati di prove software già eseguite.
 
