@@ -1,6 +1,7 @@
-%% TOBE-01A v0.1 - 25/10/2026
-%% Proposta del team: Epic #20. Confine del ciclo di vita aperto nella #29.
-%% Fonti F02, F06, F07; ipotesi IP-01 e IP-02 del documento v0.5.
+%% TOBE-01A v0.2 - 03/11/2026
+%% Proposta del team: Epic #20. Allineato alle risposte del cliente (seconda tornata) e alle scelte del gruppo registrate il 03/11/2026.
+%% Il Banco lavora le richieste in ordine di arrivo e interpella un candidato per volta.
+%% Il sistema puo' suggerire l'ordine dei candidati; la scelta resta al Banco.
 sequenceDiagram
     autonumber
     participant R as OPT richiedente
@@ -8,20 +9,29 @@ sequenceDiagram
     participant B as Banco
     participant E as Erogatore OPT o Operatore
 
-    Note over R,S: Percorso principale con dati validi<br/>Gli errori tornano al modulo senza creare richieste
-    R->>S: Invia misura e bisogno non identificativo
-        S->>S: Valida e registra ID, data e In programmazione
+    R->>S: Invia misura, persona o nucleo e comune<br/>(nessun dato identificativo)
+    S->>S: Valida i dati
+    alt Dati validi
+        S->>S: Registra ID, data e titolare<br/>e mette la richiesta<br/>nello stato<br/>In programmazione
         S-->>R: Mostra ID e stato della propria richiesta
-        loop Ricerca fino a disponibilita o alternative esaurite
-            B->>S: Consulta la coda e seleziona un erogatore
-            S->>E: Inoltra la richiesta del Banco
-            E->>S: Conferma disponibilita oppure rifiuta
-            S-->>B: Mostra la risposta e la sua provenienza
+        B->>S: Consulta le richieste<br/>in ordine di arrivo
+        S-->>B: Mostra tutti i candidati compatibili<br/>con l'ordine suggerito
+        Note over S,E: CRITERI SUGGERITI DAL SISTEMA (la scelta resta al Banco)<br/>• Solo erogatori della misura richiesta<br/>• Stesso comune, poi comuni confinanti<br/>• A parità di distanza: operatori del programma, poi OPT erogatrici<br/>• Poi chi ha meno appuntamenti assegnati<br/>• Senza nessuno in zona: Centro PICUS da remoto, se la misura lo consente
+        loop Un candidato per volta, fino a<br/>disponibilità o candidati esauriti
+            B->>S: Sceglie il candidato da interpellare
+            S->>E: Notifica la richiesta di disponibilità
+            E->>S: Risponde se è disponibile
+            S-->>B: Mostra la risposta
+            alt Candidato disponibile
+                Note over S,E: Prosegue nel diagramma TOBE-01B<br/>La richiesta resta In programmazione
+            else Candidati esauriti
+                break Uscita dal loop
+                    B->>S: Rifiuta la richiesta<br/>(nessuna soluzione praticabile)
+                    S->>S: Registra Rifiutata
+                    S-->>R: Mostra Rifiutata
+                end
+            end
         end
-        Note over B,E: Un rifiuto singolo permette un altro tentativo<br/>In assenza di risposta si resta in attesa
-        alt Disponibilita trovata
-            Note over R,E: Prosegue nel diagramma TOBE-01B<br/>La disponibilita non equivale ad Accettata
-        else Nessun erogatore disponibile
-            B->>S: Registra il rifiuto della richiesta e il motivo
-            S-->>R: Mostra Rifiutata
-        end
+    else Dati non validi
+        S-->>R: Mostra gli errori<br/>e riporta al modulo<br/>senza creare la richiesta
+    end
