@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PICUS – Sprint Review del 5 novembre</title>
+    <meta name="description" content="Presentazione della prima Sprint Review del gruppo Pinguini alla Fragola per il progetto PICUS.">
+    <meta name="theme-color" content="#163441">
+    <link rel="icon" type="image/svg+xml" href="../logo.svg">
+
+    <style>
+        :root {
+            --ink: #163441;
+            --red: #E54B54;
+            --muted: #596B70;
+            --cream: #FFF8EC;
+            --mint: #C5D7D4;
+            --pink: #FF858B;
+            --sand: #E7DCCB;
+            --line: #DDD4C7;
+            --blush: #FDEDEF;
+            --dur: .85s;
+            --ease: cubic-bezier(.65, 0, .35, 1);
+            --out: cubic-bezier(.2, .75, .2, 1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body { height: 100%; overflow: hidden; }
+
+        body {
+            background: var(--page-bg, var(--cream));
+            transition: background-color .85s ease;
+            font-family: Arial, Helvetica, "Liberation Sans", sans-serif;
+            color: var(--ink);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body.idle { cursor: none; }
+
+        .sr-only {
+            position: absolute; width: 1px; height: 1px; overflow: hidden;
+            clip: rect(0 0 0 0); white-space: nowrap;
+        }
+
+        /* ---------- Palcoscenico 16:9 (1600 × 900), scalato dal JS ---------- */
+        #stage {
+            position: absolute; left: 50%; top: 50%;
+            width: 1600px; height: 900px; margin: -450px 0 0 -800px;
+            transform: scale(var(--s, 1));
+            transform-origin: center center;
+            overflow: hidden;
+        }
+
+        /* ---------- Slide e transizioni ---------- */
+        .slide {
+            position: absolute; inset: 0;
+            background: var(--bg);
+            opacity: 0; visibility: hidden; z-index: 1;
+            transition: transform var(--dur) var(--ease),
+                        opacity .55s ease .3s,
+                        visibility 0s linear var(--dur);
+        }
+
+        /* La slide entrante si dissolve sopra quella uscente, che resta opaca
+           finché non è coperta: nessun passaggio "sbiadito" a metà. */
+        .slide[data-state="active"] {
+            opacity: 1; visibility: visible; z-index: 2;
+            transition: transform var(--dur) var(--ease),
+                        opacity .7s ease 0s,
+                        visibility 0s;
+        }
+
+        #stage.no-anim .slide { transition: none !important; }
+
+        /* Dissolvenza (predefinita): solo opacità */
+        #stage[data-fx="fade"] .slide { transform: none; }
+
+        /* Scorri: la slide entra dal lato verso cui si avanza */
+        #stage[data-fx="slide"] .slide[data-state="before"] { transform: translateX(-14%); }
+        #stage[data-fx="slide"] .slide[data-state="after"]  { transform: translateX(14%); }
+
+        /* Zoom: la slide uscente si ingrandisce, quella entrante arriva da lontano */
+        #stage[data-fx="zoom"] .slide[data-state="before"] { transform: scale(1.18); }
+        #stage[data-fx="zoom"] .slide[data-state="after"]  { transform: scale(.86); }
+
+        .bg-cream { --bg: var(--cream); --pn: var(--muted); }
+        .bg-white { --bg: #fff;         --pn: var(--muted); }
+        .bg-blush { --bg: var(--blush); --pn: var(--muted); }
+        .bg-dark  { --bg: var(--ink);   --pn: var(--mint); }
+
+        /* ---------- Testi ---------- */
+        .t {
+            position: absolute;
+            left: calc(var(--x) * 1px);
+            top: calc(var(--y) * 1px);
+            width: calc(var(--w) * 1px);
+            font-size: calc(var(--fs, 31.3) * 1px);
+            line-height: var(--lh, 1.15);
+            font-weight: var(--fw, 400);
+            color: var(--c, var(--ink));
+            white-space: nowrap;
+        }
+
+        .ttl  { --x: 90; --y: 72; --fs: 60; --fw: 700; letter-spacing: -.005em; }
+        .on-dark .ttl { --c: var(--cream); }
+        .hd   { --fw: 700; --c: var(--red); }
+        .bd   { --lh: 1.31; }
+        .mu   { --c: var(--muted); }
+        .strong { --fw: 700; }
+        .pn   { --x: 1388; --y: 830; --w: 125; --fs: 22.5; --c: var(--pn); text-align: right; }
+
+        .on-dark .hd.pink, .pink { --c: var(--pink); }
+        .mint { --c: var(--mint); }
+
+        /* Una riga per volta: il JS divide i testi su più righe in <span class="ln"> */
+        .ln { display: block; }
+
+        /* ---------- Riquadri del flusso ---------- */
+        .box {
+            position: absolute;
+            left: calc(var(--x) * 1px); top: calc(var(--y) * 1px);
+            width: calc(var(--w) * 1px); height: calc(var(--h) * 1px);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; white-space: nowrap;
+            font-size: calc(var(--fs) * 1px); font-weight: 700; line-height: 1.29;
+            background: var(--fill); color: var(--tc, var(--ink));
+            border-radius: 14px;
+        }
+
+        /* contorno che si disegna prima del riempimento (aggiunto dal JS) */
+        .trace { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+        .trace rect {
+            fill: none; stroke: var(--st, var(--red)); stroke-width: 3;
+            stroke-dasharray: 1; stroke-dashoffset: 1;
+        }
+
+        /* Freccia: ::before è la linea (si disegna), ::after è la punta (compare in fondo) */
+        .arrow {
+            position: absolute;
+            left: calc(var(--x) * 1px); top: calc(var(--y) * 1px - 1.5px);
+            width: calc(var(--w) * 1px); height: 3px;
+        }
+        .arrow::before {
+            content: ""; position: absolute; left: 0; right: 6px; top: 0; height: 3px;
+            border-radius: 2px; background: var(--ac);
+            transform-origin: left center;
+        }
+        .arrow::after {
+            content: ""; position: absolute; right: -1px; top: -5px;
+            border-left: 10px solid var(--ac);
+            border-top: 6.5px solid transparent; border-bottom: 6.5px solid transparent;
+        }
+
+        /* ---------- Elementi di struttura ---------- */
+        .hl {
+            position: absolute; left: calc(var(--x) * 1px); top: calc(var(--y) * 1px);
+            width: calc(var(--w) * 1px); height: calc(var(--h) * 1px);
+            background: rgba(229, 75, 84, .13); border-radius: 10px;
+        }
+        .vline, .vseg {
+            position: absolute; left: calc(var(--x) * 1px); top: calc(var(--y) * 1px);
+            height: calc(var(--h) * 1px); width: 3px; border-radius: 2px;
+            background: var(--vc); transform-origin: top center;
+        }
+        .vline { --vc: rgba(22, 52, 65, .16); }
+        .vseg  { --vc: rgba(255, 133, 139, .6); }
+
+        /* ---------- Liste ---------- */
+        .list { list-style: none; }
+        .list li { position: relative; padding-left: 26px; margin-bottom: var(--gap, 15px); }
+        .list li::before { content: "•"; position: absolute; left: 4px; top: 0; }
+
+        /* ---------- Tabelle (a griglia, per poter animare le celle) ---------- */
+        .tbl {
+            position: absolute; left: calc(var(--x) * 1px); top: calc(var(--y) * 1px);
+        }
+        .tr { display: grid; grid-template-columns: var(--cols); height: calc(var(--rh) * 1px); }
+        .tr.head { height: calc(var(--hh, var(--rh)) * 1px); }
+        .tr > div {
+            display: flex; align-items: center; padding: 0 12px;
+            border-right: 1px solid var(--tb); border-bottom: 1px solid var(--tb);
+            font-size: 30px; line-height: 1.2; white-space: nowrap;
+        }
+        /* i bordi esterni stanno nelle celle, così la cornice compare insieme alle righe */
+        .tr > div:first-child { border-left: 1px solid var(--tb); }
+        .tr:first-child > div { border-top: 1px solid var(--tb); }
+        .tr > div:nth-child(2) { --ci: 1; }
+        .tr > div:nth-child(3) { --ci: 2; }
+
+        .tbl.states { --tb: var(--mint); --cols: 325px 615px; --rh: 53.75; }
+        .tbl.states .tr > div:first-child { background: var(--cream); color: var(--ink); font-weight: 700; }
+        .tbl.states .tr > div:last-child  { background: var(--ink);   color: var(--cream); }
+
+        .tbl.qs { --tb: var(--line); --cols: 275px 585px 555px; --rh: 125; --hh: 67.5; }
+        .tbl.qs .tr > div { background: var(--cream); color: var(--ink); }
+        .tbl.qs .tr > div:first-child { font-weight: 700; }
+        .tbl.qs .tr.head > div { background: var(--ink); color: var(--cream); font-weight: 700; font-size: 31.3px; }
+
+        /* ---------- Mascotte ---------- */
+        .mascot { position: absolute; left: calc(var(--x) * 1px); top: calc(var(--y) * 1px); width: calc(var(--w) * 1px); }
+        .mascot img { display: block; width: 100%; height: auto; }
+        .slide[data-state="active"] .mascot img { animation: float 3.4s ease-in-out 1.6s infinite; }
+
+        /* ==========================================================
+           Animazioni di ingresso: ogni elemento parte al secondo --t
+           (dopo 0,3 s dall'arrivo della slide) e la slide si "costruisce".
+           ========================================================== */
+        .slide[data-state="active"] [data-a] {
+            --t0: calc(.3s + var(--t, 0s));
+            animation-duration: .8s;
+            animation-timing-function: var(--out);
+            animation-fill-mode: both;
+            animation-delay: var(--t0);
+        }
+        [data-a="up"]   { animation-name: up; }
+        [data-a="left"] { animation-name: left; }
+        [data-a="fade"] { animation-name: fade; }
+        [data-a="pop"]  { animation-name: pop; }
+        [data-a="reveal"] { animation-name: reveal; transform-origin: left center; }
+        [data-a="grow"] { animation-name: grow; }
+        .slide[data-state="active"] [data-a="pop"]  { animation-timing-function: cubic-bezier(.34, 1.45, .64, 1); }
+        .slide[data-state="active"] [data-a="reveal"] { animation-duration: .5s; animation-timing-function: ease-out; }
+        .slide[data-state="active"] [data-a="grow"] { animation-duration: .7s; animation-timing-function: ease-in-out; }
+
+        /* frecce: prima si traccia la linea, a fine corsa compare la punta; nulla è visibile prima */
+        .slide[data-state="active"] [data-a="arrow"]::before {
+            animation: arrowLine .4s ease-out var(--t0) both;
+        }
+        .slide[data-state="active"] [data-a="arrow"]::after {
+            animation: arrowHead .2s ease-out calc(var(--t0) + .32s) both;
+        }
+
+        /* testi su più righe: la riga si scrive dopo l'altra */
+        .slide[data-state="active"] [data-a="lines"] { animation: none; }
+        .slide[data-state="active"] [data-a="lines"] .ln {
+            animation: up .7s var(--out) both;
+            animation-delay: calc(var(--t0) + var(--l, 0) * .16s);
+        }
+
+        /* riquadri: prima si traccia il contorno, poi si riempie e compare il testo */
+        .slide[data-state="active"] .box[data-a="build"] {
+            animation-name: boxFill;
+            animation-duration: .45s;
+            animation-timing-function: ease-out;
+            animation-delay: calc(var(--t0) + .32s);
+        }
+        .slide[data-state="active"] .box .trace rect {
+            animation: trace .5s ease-in-out var(--t0) both,
+                       traceOut .3s ease calc(var(--t0) + .5s) both;
+        }
+        /* il riquadro evidenziato pulsa una volta, a costruzione conclusa */
+        .slide[data-state="active"] .box.hot[data-a="build"] {
+            animation-name: boxFill, pulse;
+            animation-duration: .45s, 1.5s;
+            animation-timing-function: ease-out, ease-out;
+            animation-delay: calc(var(--t0) + .32s), calc(var(--t0) + .9s);
+        }
+
+        /* tabelle: ogni riga si costruisce cella dopo cella, da sinistra a destra */
+        .slide[data-state="active"] .tbl .tr > div {
+            animation: cellWipe .55s var(--out) both;
+            animation-delay: calc(.3s + var(--t, 0s) + var(--ci, 0) * .16s);
+        }
+
+        @keyframes up       { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
+        @keyframes left     { from { opacity: 0; transform: translateX(-40px); } to { opacity: 1; transform: none; } }
+        @keyframes fade     { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pop      { from { opacity: 0; transform: scale(.8); } to { opacity: 1; transform: none; } }
+        @keyframes reveal   { from { opacity: 0; transform: scaleX(0); } to { opacity: 1; transform: none; } }
+        @keyframes arrowLine { 0% { opacity: 0; transform: scaleX(0); } 8% { opacity: 1; } 100% { opacity: 1; transform: scaleX(1); } }
+        @keyframes arrowHead { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: none; } }
+        @keyframes grow     { from { transform: scaleY(0); } to { transform: none; } }
+        @keyframes cellWipe { from { clip-path: inset(0 100% 0 0); opacity: 0; } to { clip-path: inset(0 0 0 0); opacity: 1; } }
+        @keyframes boxFill  { from { background-color: transparent; color: transparent; } to { background-color: var(--fill); color: var(--tc, var(--ink)); } }
+        @keyframes trace    { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+        @keyframes traceOut { from { opacity: 1; } to { opacity: 0; } }
+        @keyframes pulse    { 0% { box-shadow: 0 0 0 0 rgba(229, 75, 84, .6); } 100% { box-shadow: 0 0 0 30px rgba(229, 75, 84, 0); } }
+        @keyframes float    { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+
+        /* ---------- Barra di avanzamento ---------- */
+        .progress {
+            position: fixed; left: 0; bottom: 0; height: 5px; width: 100%; z-index: 20;
+            background: var(--red); transform-origin: left center;
+            transform: scaleX(var(--p, 0)); transition: transform var(--dur) var(--ease);
+        }
+
+        /* ---------- Comandi ---------- */
+        .ui {
+            position: fixed; z-index: 30;
+            display: flex; align-items: center; gap: 4px; padding: 6px;
+            background: rgba(22, 52, 65, .92); color: var(--cream);
+            border-radius: 999px; box-shadow: 0 8px 28px rgba(0, 0, 0, .28);
+            -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+            font: 600 14px/1 Arial, Helvetica, sans-serif;
+            transition: opacity .35s ease, transform .35s ease;
+        }
+        .ui-bar  { left: 50%; bottom: 22px; transform: translateX(-50%); }
+        body.idle .ui:not(:focus-within) { opacity: 0; pointer-events: none; }
+        body.idle .ui-bar:not(:focus-within) { transform: translateX(-50%) translateY(10px); }
+
+        .ui button, .ui a {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            min-width: 42px; height: 42px; padding: 0 12px;
+            border: 0; border-radius: 999px; background: transparent;
+            color: inherit; font: inherit; text-decoration: none; cursor: pointer;
+            transition: background-color .2s ease;
+        }
+        .ui button:hover, .ui a:hover { background: rgba(255, 255, 255, .14); }
+        .ui button:focus-visible, .ui a:focus-visible { outline: 2px solid var(--pink); outline-offset: 1px; }
+        .ui button:disabled { opacity: .35; cursor: default; background: transparent; }
+        .ui svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .ui .count { min-width: 56px; text-align: center; font-variant-numeric: tabular-nums; color: var(--mint); }
+        .ui .sep { width: 1px; height: 22px; background: rgba(255, 255, 255, .22); margin: 0 4px; }
+
+        .toast {
+            position: fixed; z-index: 40; left: 50%; top: 24px;
+            transform: translate(-50%, -12px); opacity: 0; pointer-events: none;
+            padding: 10px 18px; border-radius: 999px;
+            background: rgba(22, 52, 65, .94); color: var(--cream);
+            font: 600 15px/1 Arial, Helvetica, sans-serif;
+            transition: opacity .3s ease, transform .3s ease;
+        }
+        .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+        @media (max-width: 640px) {
+            .ui .label { display: none; }
+            .ui-bar { bottom: 12px; }
+        }
+
+        /* ---------- Movimento ridotto ---------- */
+        @media (prefers-reduced-motion: reduce) {
+            .slide, .slide[data-state="active"] { transition: opacity .25s linear !important; transform: none !important; }
+            .slide[data-state="active"] [data-a],
+            .slide[data-state="active"] [data-a="lines"] .ln,
+            .slide[data-state="active"] .box .trace rect,
+            .slide[data-state="active"] [data-a="arrow"]::before,
+            .slide[data-state="active"] [data-a="arrow"]::after,
+            .slide[data-state="active"] .tbl .tr > div,
+            .slide[data-state="active"] .mascot img { animation: none !important; }
+            body, .progress { transition: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1 class="sr-only">PICUS – Sprint Review del 5 novembre – Pinguini alla Fragola</h1>
+    <noscript><p style="padding:2rem;font:18px Arial,sans-serif">Questa presentazione richiede JavaScript.</p></noscript>
+
+    <main id="stage" data-fx="fade" class="no-anim" aria-roledescription="presentazione">
+
+        <!-- 1 ───────────────────────────── Obiettivo e contesto -->
+        <section class="slide bg-cream" data-bg="#FFF8EC" aria-label="Slide 1 di 8: PICUS, obiettivo e contesto">
+            <p class="t hd" style="--x:90;--y:60" data-a="left">Pinguini alla Fragola</p>
+            <div class="mascot" style="--x:1320;--y:46;--w:188;--t:.2s" data-a="pop"><img src="pinguino.png" alt="Mascotte del gruppo: un pinguino che abbraccia una fragola" width="200" height="200"></div>
+            <h2 class="t ttl" style="--y:135;--fs:55;--t:.15s" data-a="left">PICUS: obiettivo e contesto</h2>
+            <p class="t strong" style="--x:95;--y:242;--fs:40;--lh:1.3;--t:.6s" data-a="up">Supportare il Banco nel coordinamento delle richieste OPT<br>fino all’accordo confermato con un erogatore</p>
+
+            <h3 class="t hd" style="--x:95;--y:386;--fs:40;--lh:1.4;--t:1.3s" data-a="up">OPT</h3>
+            <p class="t bd" style="--x:95;--y:450;--t:1.45s" data-a="up">Invia richieste.<br>Mantiene il contatto<br>con l’assistito.</p>
+            <span class="arrow" style="--x:240;--y:414;--w:310;--ac:var(--red);--t:2s" data-a="arrow" aria-hidden="true"></span>
+            <h3 class="t hd" style="--x:585;--y:386;--fs:40;--lh:1.4;--t:2.45s" data-a="up">Banco</h3>
+            <p class="t bd" style="--x:585;--y:450;--t:2.6s" data-a="up">Individua l’erogatore.<br>Coordina i dettagli.<br>Conferma l’accordo.</p>
+            <span class="arrow" style="--x:760;--y:414;--w:290;--ac:var(--red);--t:3.15s" data-a="arrow" aria-hidden="true"></span>
+            <h3 class="t hd" style="--x:1075;--y:386;--fs:40;--lh:1.4;--t:3.6s" data-a="up">Erogatori</h3>
+            <p class="t bd" style="--x:1075;--y:450;--t:3.75s" data-a="up">Operatori del Banco,<br>professionisti esterni<br>delle OPT e OPT erogatrici.</p>
+
+            <p class="t strong" style="--x:95;--y:648;--t:4.6s" data-a="up">Assistiti senza account e senza dati identificativi nell’app</p>
+            <p class="t pn" data-a="fade" style="--t:5s">01 / 08</p>
+        </section>
+
+        <!-- 2 ───────────────────────────── Il processo attuale -->
+        <section class="slide bg-white" data-bg="#FFFFFF" aria-label="Slide 2 di 8: il processo attuale">
+            <h2 class="t ttl" data-a="left">Il processo attuale</h2>
+            <p class="t mu" style="--x:94;--y:179;--t:.2s" data-a="up">Ricostruzione as-is di sintesi</p>
+
+            <div class="box" style="--x:92;--y:289;--w:312;--h:145;--fs:33.8;--fill:var(--sand);--st:var(--red);--t:0.5s" data-a="build">OPT<br>Segnala il<br>bisogno</div>
+            <span class="arrow" style="--x:405;--y:361;--w:55;--ac:var(--red);--t:1.15s" data-a="arrow" aria-hidden="true"></span>
+            <div class="box" style="--x:460;--y:289;--w:312;--h:145;--fs:33.8;--fill:var(--sand);--st:var(--red);--t:1.4s" data-a="build">Banco<br>Cerca un<br>erogatore</div>
+            <span class="arrow" style="--x:772;--y:361;--w:55;--ac:var(--red);--t:2.05s" data-a="arrow" aria-hidden="true"></span>
+            <div class="box" style="--x:828;--y:289;--w:312;--h:145;--fs:33.8;--fill:var(--sand);--st:var(--red);--t:2.3s" data-a="build">Erogatore<br>Risponde al<br>contatto</div>
+            <span class="arrow" style="--x:1140;--y:361;--w:55;--ac:var(--red);--t:2.95s" data-a="arrow" aria-hidden="true"></span>
+            <div class="box" style="--x:1195;--y:289;--w:312;--h:145;--fs:33.8;--fill:var(--sand);--st:var(--red);--t:3.2s" data-a="build">OPT<br>Informa<br>l’assistito</div>
+
+            <p class="t mu" style="--x:95;--y:462;--fs:30;--t:4.2s" data-a="up">Il Banco coordina i dettagli prima della comunicazione alla OPT</p>
+
+            <h3 class="t hd" style="--x:95;--y:578;--fs:35;--t:4.7s" data-a="up">Informazioni distribuite</h3>
+            <p class="t bd" style="--x:95;--y:648;--t:4.85s" data-a="up">Telefonate, messaggi e schede<br>restano su canali separati.</p>
+            <h3 class="t hd" style="--x:585;--y:578;--fs:35;--t:5.2s" data-a="up">Contatti da ripetere</h3>
+            <p class="t bd" style="--x:585;--y:648;--t:5.35s" data-a="up">La ricerca richiede verifiche<br>con i possibili erogatori.</p>
+            <h3 class="t hd" style="--x:1075;--y:578;--fs:35;--t:5.7s" data-a="up">Stato da ricostruire</h3>
+            <p class="t bd" style="--x:1075;--y:648;--t:5.85s" data-a="up">Risposte e dettagli non hanno<br>una vista applicativa comune.</p>
+            <p class="t pn" data-a="fade" style="--t:6.4s">02 / 08</p>
+        </section>
+
+        <!-- 3 ───────────────────────────── Il processo proposto -->
+        <section class="slide bg-dark on-dark" data-bg="#163441" aria-label="Slide 3 di 8: il processo proposto">
+            <h2 class="t ttl" data-a="left">Il processo proposto</h2>
+            <p class="t mint" style="--x:95;--y:186;--fs:35;--t:.2s" data-a="up">Richiesta tracciabile, risposte raccolte e dettagli consultabili</p>
+
+            <div class="box" style="--x:90;--y:288;--w:214;--h:141;--fs:28.8;--fill:var(--cream);--st:var(--mint);--t:0.5s" data-a="build">OPT<br>Invia<br>richiesta</div>
+            <span class="arrow" style="--x:304;--y:358;--w:28;--ac:var(--mint);--t:1.12s" data-a="arrow" aria-hidden="true"></span>
+            <div class="box" style="--x:331;--y:288;--w:214;--h:141;--fs:28.8;--fill:var(--cream);--st:var(--mint);--t:1.35s" data-a="build">Banco<br>Cerca<br>candidati</div>
+            <span class="arrow" style="--x:545;--y:358;--w:28;--ac:var(--mint);--t:1.97s" data-a="arrow" aria-hidden="true"></span>
+            <div class="box" style="--x:572;--y:288;--w:214;--h:141;--fs:28.8;--fill:var(--cream);--st:var(--mint);--t:2.2s" data-a="build">Banco<br>Contatta uno<br>per volta</div>
+            <span class="arrow" style="--x:786;--y:358;--w:28;--ac:var(--mint);--t:2.82s" data-a="arrow" aria-hidden="true"></span>
+            <div class="box" style="--x:814;--y:288;--w:214;--h:141;--fs:28.8;--fill:var(--cream);--st:var(--mint);--t:3.05s" data-a="build">Erogatore<br>Risponde</div>
+            <span class="arrow" style="--x:1028;--y:358;--w:28;--ac:var(--mint);--t:3.67s" data-a="arrow" aria-hidden="true"></span>
+            <div class="box hot" style="--x:1055;--y:288;--w:214;--h:141;--fs:28.8;--fill:var(--red);--tc:#fff;--st:var(--pink);--t:3.9s" data-a="build">Banco<br>Concorda e<br>conferma</div>
+            <span class="arrow" style="--x:1269;--y:358;--w:28;--ac:var(--mint);--t:4.52s" data-a="arrow" aria-hidden="true"></span>
+            <div class="box" style="--x:1296;--y:288;--w:214;--h:141;--fs:28.8;--fill:var(--cream);--st:var(--mint);--t:4.75s" data-a="build">OPT<br>Consulta<br>esito</div>
+
+            <p class="t mint" style="--x:95;--y:450;--fs:27.5;--lh:1.34;--t:5.6s" data-a="up">Priorità: stesso comune, confinanti, tipo di erogatore e minor carico.<br>Se manca disponibilità in zona: Centro PICUS a distanza, se la misura lo consente.</p>
+
+            <h3 class="t strong" style="--x:95;--y:553;--fs:33.8;--c:var(--cream);--t:6.0s" data-a="up">I quattro stati della richiesta</h3>
+            <div class="tbl states" role="table" aria-label="Stati della richiesta" style="--x:95;--y:617">
+                <div class="tr" role="row" style="--t:6.3s"><div role="rowheader">In programmazione</div><div role="cell">Ricerca e negoziazione</div></div>
+                <div class="tr" role="row" style="--t:6.6s"><div role="rowheader">Confermata</div><div role="cell">Accordo confermato dal Banco</div></div>
+                <div class="tr" role="row" style="--t:6.9s"><div role="rowheader">Rifiutata</div><div role="cell">Nessuna soluzione praticabile</div></div>
+                <div class="tr" role="row" style="--t:7.2s"><div role="rowheader">Annullata</div><div role="cell">Evento eccezionale, con motivo</div></div>
+            </div>
+
+            <h3 class="t mint strong" style="--x:1128;--y:575;--fs:32.5;--t:6.4s" data-a="up">Note operative</h3>
+            <p class="t mint" style="--x:1128;--y:638;--fs:28.8;--lh:1.28;--t:6.7s" data-a="up">Rifiuto del candidato:<br>la richiesta resta<br>In programmazione.</p>
+            <p class="t mint" style="--x:1128;--y:756;--fs:28.8;--lh:1.28;--t:7.3s" data-a="up">Dopo la conferma:<br>dettagli fissi e nessuna<br>riapertura automatica.</p>
+            <p class="t pn" data-a="fade" style="--t:7.8s">03 / 08</p>
+        </section>
+
+        <!-- 4 ───────────────────────────── Product Backlog -->
+        <section class="slide bg-cream" data-bg="#FFF8EC" aria-label="Slide 4 di 8: Product Backlog">
+            <h2 class="t ttl" data-a="left">Product Backlog</h2>
+
+            <h3 class="t hd" style="--x:95;--y:206;--fs:36.3;--t:.4s" data-a="up">Cinque aree funzionali</h3>
+            <span class="hl" style="--x:84;--y:392;--w:416;--h:52;--t:2.7s" data-a="reveal" aria-hidden="true"></span>
+            <p class="t hd" style="--x:96;--y:285;--fs:28.8;--t:.8s" data-a="left">01</p><p class="t" style="--x:170;--y:282;--fs:33.8;--t:.8s" data-a="left">Accessi e profili</p>
+            <p class="t hd" style="--x:96;--y:342;--fs:28.8;--t:1.1s" data-a="left">02</p><p class="t" style="--x:170;--y:340;--fs:33.8;--t:1.1s" data-a="left">Catalogo e offerta</p>
+            <p class="t hd" style="--x:96;--y:400;--fs:28.8;--t:1.4s" data-a="left">03</p><p class="t strong" style="--x:170;--y:398;--fs:33.8;--t:1.4s" data-a="left">Richieste e accordi</p>
+            <p class="t hd" style="--x:96;--y:458;--fs:28.8;--t:1.7s" data-a="left">04</p><p class="t" style="--x:170;--y:455;--fs:33.8;--t:1.7s" data-a="left">Comunicazioni</p>
+            <p class="t hd" style="--x:96;--y:515;--fs:28.8;--t:2s" data-a="left">05</p><p class="t" style="--x:170;--y:512;--fs:33.8;--t:2s" data-a="left">Monitoraggio</p>
+
+            <h3 class="t hd" style="--x:775;--y:215;--fs:36.3;--t:3.1s" data-a="up">Esempio di storia #48</h3>
+            <p class="t strong" style="--x:775;--y:294;--fs:35;--lh:1.31;--t:3.4s" data-a="up">Come OPT voglio inviare una richiesta<br>di misura per avviare il coordinamento<br>con il Banco.</p>
+            <h3 class="t hd" style="--x:775;--y:486;--fs:33.8;--t:4.4s" data-a="up">Criteri di accettazione</h3>
+            <ul class="t list" style="--x:775;--y:558" aria-label="Criteri di accettazione">
+                <li data-a="up" style="--t:4.8s">Invio valido: ID, data e stato iniziale</li>
+                <li data-a="up" style="--t:5.1s">Presenza nella coda del Banco</li>
+                <li data-a="up" style="--t:5.4s">Campi non ammessi: invio respinto</li>
+            </ul>
+
+            <p class="t mu" style="--x:95;--y:788;--fs:28.8;--t:6.1s" data-a="up">Le storie selezionate per il primo percorso compongono l’MVP</p>
+            <p class="t pn" data-a="fade" style="--t:6.4s">04 / 08</p>
+        </section>
+
+        <!-- 5 ───────────────────────────── Scenari di qualità -->
+        <section class="slide bg-white" data-bg="#FFFFFF" aria-label="Slide 5 di 8: scenari di qualità">
+            <h2 class="t ttl" data-a="left">Scenari di qualità</h2>
+            <p class="t mu" style="--x:95;--y:189;--fs:35;--t:.3s" data-a="up">Tre scenari prioritari collegati al percorso MVP</p>
+
+            <div class="tbl qs" role="table" aria-label="Scenari di qualità prioritari" style="--x:95;--y:278">
+                <div class="tr head" role="row" style="--t:.8s"><div role="columnheader">Scenario</div><div role="columnheader">Stimolo</div><div role="columnheader">Misura attesa</div></div>
+                <div class="tr" role="row" style="--t:1.7s"><div role="rowheader">QS-01<br>Sicurezza</div><div role="cell">Una OPT tenta di leggere o modificare<br>una richiesta estranea.</div><div role="cell">0 dati riservati restituiti.<br>0 modifiche non consentite.</div></div>
+                <div class="tr" role="row" style="--t:2.6s"><div role="rowheader">QS-02<br>Privacy</div><div role="cell">Invio di campi identificativi degli<br>assistiti non previsti dal modulo.</div><div role="cell">20 invii su 20 respinti.<br>Valori assenti da dati e log.</div></div>
+                <div class="tr" role="row" style="--t:3.5s"><div role="rowheader">QS-04<br>Usabilità</div><div role="cell">Un referente OPT accede e invia<br>una richiesta da smartphone.</div><div role="cell">Almeno 4 su 5 entro 3 minuti,<br>senza aiuto, a 360 × 800 px.</div></div>
+            </div>
+
+            <p class="t mu" style="--x:95;--y:761;--fs:27.5;--t:4.5s" data-a="up">Altri scenari: performance, ripristino del servizio e modifica del catalogo</p>
+            <p class="t pn" data-a="fade" style="--t:4.9s">05 / 08</p>
+        </section>
+
+        <!-- 6 ───────────────────────────── Il primo MVP -->
+        <section class="slide bg-blush" data-bg="#FDEDEF" aria-label="Slide 6 di 8: il primo MVP">
+            <h2 class="t ttl" data-a="left">Il primo MVP</h2>
+            <p class="t strong" style="--x:95;--y:189;--fs:37.5;--t:.3s" data-a="up">Percorso minimo: richiesta, accordo confermato o rifiuto finale</p>
+
+            <h3 class="t hd" style="--x:95;--y:286;--fs:36.3;--t:.8s" data-a="up">Storie incluse</h3>
+            <p class="t hd" style="--x:95;--y:360;--fs:32.5;--t:1.2s" data-a="left">#25</p><p class="t" style="--x:206;--y:360;--t:1.2s" data-a="left">Accesso con email e password</p>
+            <p class="t hd" style="--x:95;--y:414;--fs:32.5;--t:1.5s" data-a="left">#28</p><p class="t" style="--x:206;--y:414;--t:1.5s" data-a="left">Permessi su richieste e assegnazioni</p>
+            <p class="t hd" style="--x:95;--y:468;--fs:32.5;--t:1.8s" data-a="left">#48</p><p class="t" style="--x:206;--y:468;--t:1.8s" data-a="left">Invio della richiesta</p>
+            <p class="t hd" style="--x:95;--y:521;--fs:32.5;--t:2.1s" data-a="left">#49</p><p class="t" style="--x:206;--y:521;--t:2.1s" data-a="left">Coda e contatto sequenziale dei candidati</p>
+            <p class="t hd" style="--x:95;--y:575;--fs:32.5;--t:2.4s" data-a="left">#51</p><p class="t" style="--x:206;--y:575;--t:2.4s" data-a="left">Risposta e ricerca di un’alternativa</p>
+            <p class="t hd" style="--x:95;--y:629;--fs:32.5;--t:2.7s" data-a="left">#52</p><p class="t" style="--x:206;--y:629;--t:2.7s" data-a="left">Registrazione dei dettagli concordati</p>
+            <p class="t hd" style="--x:95;--y:682;--fs:32.5;--t:3s" data-a="left">#53</p><p class="t" style="--x:206;--y:682;--t:3s" data-a="left">Conferma o rifiuto consultabile dalla OPT</p>
+
+            <h3 class="t hd" style="--x:1105;--y:286;--fs:33.8;--t:3.5s" data-a="up">Incrementi successivi</h3>
+            <ul class="t list" style="--x:1105;--y:389;--fs:30;--gap:13.5px" aria-label="Incrementi successivi">
+                <li data-a="up" style="--t:3.9s">Amministrazione completa</li>
+                <li data-a="up" style="--t:4.2s">Comunicazioni generali</li>
+                <li data-a="up" style="--t:4.5s">Rendicontazione</li>
+                <li data-a="up" style="--t:4.8s">Annullamento eccezionale</li>
+            </ul>
+
+            <p class="t mu" style="--x:95;--y:760;--fs:28.8;--t:5.4s" data-a="up">Prerequisiti: account, catalogo e offerta predisposti per il prototipo.</p>
+            <p class="t pn" data-a="fade" style="--t:5.8s">06 / 08</p>
+        </section>
+
+        <!-- 7 ───────────────────────────── Questione aperta -->
+        <section class="slide bg-blush" data-bg="#FDEDEF" aria-label="Slide 7 di 8: questione aperta, disponibilità degli erogatori">
+            <h2 class="t ttl" style="--y:65;--fs:55;--lh:1.4" data-a="left">Questione aperta:<br>disponibilità degli erogatori</h2>
+            <p class="t mu" style="--x:95;--y:239;--t:.7s" data-a="up">Quanto dettaglio serve per rappresentare e aggiornare la disponibilità?</p>
+
+            <span class="vline" style="--x:817;--y:300;--h:455;--t:1.1s" data-a="grow" aria-hidden="true"></span>
+
+            <h3 class="t hd" style="--x:95;--y:295;--fs:36.3;--t:1.4s" data-a="up">Indicazioni generali e contatto</h3>
+            <h4 class="t strong" style="--x:95;--y:366;--fs:32.5;--t:1.7s" data-a="up">Proposta per il primo MVP</h4>
+            <p class="t" style="--x:95;--y:440;--lh:1.33;--t:2s" data-a="up">Indicazioni generali sulla capacità<br>di erogazione, poi verifica del Banco<br>con un candidato per volta.<br>Orari concordati durante il contatto.</p>
+            <p class="t mu" style="--x:95;--y:666;--fs:30;--lh:1.3;--t:3s" data-a="up">Richiede risposte puntuali e<br>coordinamento del Banco.</p>
+
+            <h3 class="t hd" style="--x:880;--y:295;--fs:36.3;--t:2.2s" data-a="up">Calendari con fasce o slot</h3>
+            <h4 class="t strong" style="--x:880;--y:366;--fs:32.5;--t:2.5s" data-a="up">Alternativa da valutare</h4>
+            <p class="t" style="--x:880;--y:440;--lh:1.33;--t:2.8s" data-a="up">Disponibilità strutturate per misura<br>o erogatore, consultabili dal Banco.<br>Gli slot possono supportare<br>la proposta dell’appuntamento.</p>
+            <p class="t mu" style="--x:880;--y:666;--fs:30;--lh:1.3;--t:3.8s" data-a="up">Richiede aggiornamento costante<br>e regole di prenotazione.</p>
+
+            <p class="t strong" style="--x:95;--y:781;--t:4.6s" data-a="up">In entrambe le opzioni il Banco registra e conferma l’accordo</p>
+            <p class="t pn" data-a="fade" style="--t:5s">07 / 08</p>
+        </section>
+
+        <!-- 8 ───────────────────────────── Conclusioni e prossimi passi -->
+        <section class="slide bg-dark on-dark" data-bg="#163441" aria-label="Slide 8 di 8: conclusioni e prossimi passi">
+            <h2 class="t ttl" data-a="left">Conclusioni e prossimi passi</h2>
+
+            <p class="t hd pink" style="--x:96;--y:254;--fs:48.8;--t:.6s" data-a="pop">01</p>
+            <h3 class="t strong" style="--x:212;--y:254;--fs:41.3;--c:var(--cream);--t:.8s" data-a="up">Feedback sulla disponibilità</h3>
+            <p class="t bd mint" style="--x:212;--y:326;--t:1s" data-a="up">Validare il dettaglio utile al Banco e agli erogatori.</p>
+
+            <span class="vseg" style="--x:122;--y:308;--h:104;--t:1.5s" data-a="grow" aria-hidden="true"></span>
+
+            <p class="t hd pink" style="--x:96;--y:410;--fs:48.8;--t:1.9s" data-a="pop">02</p>
+            <h3 class="t strong" style="--x:212;--y:410;--fs:41.3;--c:var(--cream);--t:2.1s" data-a="up">Backlog e modelli coerenti</h3>
+            <p class="t bd mint" style="--x:212;--y:482;--t:2.3s" data-a="up">Recepire il feedback nelle storie e nei processi dell’MVP.</p>
+
+            <span class="vseg" style="--x:122;--y:464;--h:104;--t:2.8s" data-a="grow" aria-hidden="true"></span>
+
+            <p class="t hd pink" style="--x:96;--y:566;--fs:48.8;--t:3.2s" data-a="pop">03</p>
+            <h3 class="t strong" style="--x:212;--y:566;--fs:41.3;--c:var(--cream);--t:3.4s" data-a="up">Prima iterazione di costruzione</h3>
+            <p class="t bd mint" style="--x:212;--y:639;--t:3.6s" data-a="up">Avviare accessi, permessi e invio della richiesta,<br>poi estendere il percorso.</p>
+
+            <h3 class="t hd pink" style="--x:98;--y:750;--fs:33.8;--t:4.4s" data-a="up">Risultato atteso</h3>
+            <p class="t" style="--x:98;--y:818;--c:var(--cream);--t:4.7s" data-a="up">Un percorso verificabile fino all’accordo confermato o al rifiuto finale.</p>
+
+            <div class="mascot" style="--x:1265;--y:430;--w:244;--t:1.2s" data-a="pop"><img src="pinguino.png" alt="Mascotte del gruppo: un pinguino che abbraccia una fragola" width="200" height="200"></div>
+            <p class="t pn" data-a="fade" style="--t:5.1s">08 / 08</p>
+        </section>
+    </main>
+
+    <div class="progress" aria-hidden="true"></div>
+
+    <div class="ui ui-bar" role="toolbar" aria-label="Comandi della presentazione">
+        <a href="../index.html" id="home" title="Torna alla home" aria-label="Torna alla home">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7"/><path d="M6 10v9h12v-9"/></svg>
+        </a>
+        <span class="sep" aria-hidden="true"></span>
+        <button type="button" id="prev" title="Slide precedente (←)" aria-label="Slide precedente">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+        </button>
+        <span class="count" id="count" aria-live="off">1 / 8</span>
+        <button type="button" id="next" title="Slide successiva (→)" aria-label="Slide successiva">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+        <span class="sep" aria-hidden="true"></span>
+        <button type="button" id="fx" title="Cambia effetto di transizione (T)" aria-label="Cambia effetto di transizione">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>
+            <span class="label" id="fx-label">Dissolvenza</span>
+        </button>
+        <button type="button" id="full" title="Schermo intero (F)" aria-label="Schermo intero">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+        </button>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script>
+        (() => {
+            const stage = document.getElementById('stage');
+            const slides = [...stage.querySelectorAll('.slide')];
+            const total = slides.length;
+            const progress = document.querySelector('.progress');
+            const count = document.getElementById('count');
+            const prevBtn = document.getElementById('prev');
+            const nextBtn = document.getElementById('next');
+            const fxBtn = document.getElementById('fx');
+            const fxLabel = document.getElementById('fx-label');
+            const fullBtn = document.getElementById('full');
+            const toast = document.getElementById('toast');
+
+            const effects = [
+                { id: 'fade', label: 'Dissolvenza' },
+                { id: 'slide', label: 'Scorri' },
+                { id: 'zoom', label: 'Zoom' }
+            ];
+
+            let current = -1;
+            let fxIndex = 0;
+
+            try {
+                const saved = effects.findIndex(e => e.id === localStorage.getItem('picus-review-fx-v2'));
+                if (saved >= 0) fxIndex = saved;
+            } catch (e) { /* localStorage non disponibile: si usa l'effetto predefinito */ }
+
+            /* ---- preparazione delle animazioni di costruzione ---- */
+
+            // Contorno che si traccia attorno ai riquadri del flusso prima del riempimento.
+            const SVG_NS = 'http://www.w3.org/2000/svg';
+            stage.querySelectorAll('.box').forEach((box) => {
+                const w = parseFloat(box.style.getPropertyValue('--w'));
+                const h = parseFloat(box.style.getPropertyValue('--h'));
+                if (!w || !h) return;
+                const svg = document.createElementNS(SVG_NS, 'svg');
+                svg.setAttribute('class', 'trace');
+                svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+                svg.setAttribute('aria-hidden', 'true');
+                const rect = document.createElementNS(SVG_NS, 'rect');
+                rect.setAttribute('x', '1.5');
+                rect.setAttribute('y', '1.5');
+                rect.setAttribute('width', String(w - 3));
+                rect.setAttribute('height', String(h - 3));
+                rect.setAttribute('rx', '13');
+                rect.setAttribute('pathLength', '1');
+                svg.appendChild(rect);
+                box.appendChild(svg);
+            });
+
+            // I testi su più righe compaiono una riga dopo l'altra.
+            stage.querySelectorAll('.t[data-a]:not(ul)').forEach((el) => {
+                if (!el.querySelector('br')) return;
+                const lines = el.innerHTML.split(/<br\s*\/?>/i);
+                el.innerHTML = lines.map((line, i) => `<span class="ln" style="--l:${i}">${line}</span>`).join('');
+                el.dataset.a = 'lines';
+            });
+
+            /* ---- adattamento 16:9 alla finestra ---- */
+            function fit() {
+                const s = Math.min(window.innerWidth / 1600, window.innerHeight / 900);
+                stage.style.setProperty('--s', s);
+            }
+
+            /* ---- slide corrente ---- */
+            function go(n) {
+                n = Math.max(0, Math.min(total - 1, n));
+                if (n === current) return;
+                current = n;
+
+                slides.forEach((slide, i) => {
+                    const state = i < n ? 'before' : i > n ? 'after' : 'active';
+                    slide.dataset.state = state;
+                    slide.setAttribute('aria-hidden', state === 'active' ? 'false' : 'true');
+                    if (state === 'active') slide.removeAttribute('inert'); else slide.setAttribute('inert', '');
+                });
+
+                document.body.style.setProperty('--page-bg', slides[n].dataset.bg);
+                progress.style.setProperty('--p', (n + 1) / total);
+                count.textContent = (n + 1) + ' / ' + total;
+                prevBtn.disabled = n === 0;
+                nextBtn.disabled = n === total - 1;
+
+                const hash = '#' + (n + 1);
+                if (location.hash !== hash) {
+                    try { history.replaceState(null, '', hash); } catch (e) { /* ignorato */ }
+                }
+            }
+
+            const next = () => go(current + 1);
+            const prev = () => go(current - 1);
+
+            /* ---- effetti ---- */
+            function applyEffect(announce) {
+                const fx = effects[fxIndex];
+                stage.dataset.fx = fx.id;
+                fxLabel.textContent = fx.label;
+                try { localStorage.setItem('picus-review-fx-v2', fx.id); } catch (e) { /* ignorato */ }
+                if (announce) showToast('Transizione: ' + fx.label);
+            }
+
+            let toastTimer;
+            function showToast(text) {
+                toast.textContent = text;
+                toast.classList.add('show');
+                clearTimeout(toastTimer);
+                toastTimer = setTimeout(() => toast.classList.remove('show'), 1400);
+            }
+
+            function cycleEffect() {
+                fxIndex = (fxIndex + 1) % effects.length;
+                applyEffect(true);
+            }
+
+            function toggleFullscreen() {
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                } else if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen().catch(() => {});
+                }
+            }
+
+            /* ---- comandi e tastiera ---- */
+            prevBtn.addEventListener('click', prev);
+            nextBtn.addEventListener('click', next);
+            fxBtn.addEventListener('click', cycleEffect);
+            fullBtn.addEventListener('click', toggleFullscreen);
+
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey || e.metaKey || e.altKey) return;
+                switch (e.key) {
+                    case 'ArrowRight': case 'ArrowDown': case 'PageDown': case ' ': case 'Enter':
+                        if (e.target.closest && e.target.closest('button, a')) {
+                            if (e.key === ' ' || e.key === 'Enter') return; // lascia agire il pulsante in focus
+                        }
+                        e.preventDefault(); next(); break;
+                    case 'ArrowLeft': case 'ArrowUp': case 'PageUp': case 'Backspace':
+                        e.preventDefault(); prev(); break;
+                    case 'Home': e.preventDefault(); go(0); break;
+                    case 'End': e.preventDefault(); go(total - 1); break;
+                    case 'f': case 'F': toggleFullscreen(); break;
+                    case 't': case 'T': cycleEffect(); break;
+                    default:
+                        if (/^[1-9]$/.test(e.key)) go(Number(e.key) - 1);
+                }
+            });
+
+            /* ---- gesti touch ---- */
+            let touchX = null;
+            document.addEventListener('touchstart', (e) => { touchX = e.touches[0].clientX; }, { passive: true });
+            document.addEventListener('touchend', (e) => {
+                if (touchX === null) return;
+                const dx = e.changedTouches[0].clientX - touchX;
+                touchX = null;
+                if (Math.abs(dx) > 50) { dx < 0 ? next() : prev(); }
+            }, { passive: true });
+
+            /* ---- comandi che si nascondono quando non servono ---- */
+            let idleTimer;
+            function wake() {
+                document.body.classList.remove('idle');
+                clearTimeout(idleTimer);
+                idleTimer = setTimeout(() => document.body.classList.add('idle'), 2600);
+            }
+            ['mousemove', 'mousedown', 'touchstart', 'keydown'].forEach(ev => document.addEventListener(ev, wake, { passive: true }));
+
+            window.addEventListener('resize', fit);
+            window.addEventListener('hashchange', () => {
+                const n = parseInt(location.hash.slice(1), 10);
+                if (!Number.isNaN(n)) go(n - 1);
+            });
+
+            /* ---- avvio ---- */
+            fit();
+            applyEffect(false);
+            const start = parseInt(location.hash.slice(1), 10);
+            go(Number.isNaN(start) ? 0 : start - 1);
+            wake();
+            requestAnimationFrame(() => requestAnimationFrame(() => stage.classList.remove('no-anim')));
+
+            if (window.innerHeight > window.innerWidth && window.innerWidth < 700) {
+                showToast('Ruota lo schermo per leggere meglio le slide');
+            }
+        })();
+    </script>
+</body>
+</html>

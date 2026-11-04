@@ -98,6 +98,35 @@
             display: none;
         }
 
+        /* Link alla presentazione della Sprint Review */
+        .cta {
+            align-self: flex-start;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6em;
+            margin-top: 0.4rem;
+            padding: 0.7em 1.3em;
+            border: 2px solid var(--accent-color);
+            border-radius: 999px;
+            color: var(--accent-color);
+            font-size: clamp(1.1rem, 1.5vw, 1.6rem);
+            transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+        }
+
+        .cta:hover {
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+            transform: translateY(-2px);
+        }
+
+        .cta-arrow {
+            transition: transform 0.2s ease;
+        }
+
+        .cta:hover .cta-arrow {
+            transform: translateX(4px);
+        }
+
         @keyframes float {
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-14px); }
@@ -136,6 +165,12 @@
             .mobile-break {
                 display: inline;
             }
+            .cta {
+                align-self: center;
+                font-size: 1rem;
+                white-space: normal;
+                text-align: center;
+            }
         }
     </style>
 </head>
@@ -150,6 +185,7 @@
             <p>
                 While you wait, take a look at our <br class="mobile-break"><a href="https://github.com/CapHello/Progetto-SAD" target="_blank" rel="noopener noreferrer">GitHub Page</a>.
             </p>
+            <a class="cta" href="review/index.html">Sprint Review del 5 novembre <span class="cta-arrow" aria-hidden="true">→</span></a>
         </div>
     </main>
 
