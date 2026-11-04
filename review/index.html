@@ -204,6 +204,9 @@
         /* ---------- Mascotte ---------- */
         .mascot { position: absolute; left: calc(var(--x) * 1px); top: calc(var(--y) * 1px); width: calc(var(--w) * 1px); }
         .mascot img { display: block; width: 100%; height: auto; }
+        .mascot .home-link { display: block; border-radius: 16px; cursor: pointer; transition: transform .2s ease; }
+        .mascot .home-link:hover { transform: scale(1.07) rotate(-4deg); }
+        .mascot .home-link:focus-visible { outline: 3px solid var(--red); outline-offset: 4px; }
         .slide[data-state="active"] .mascot img { animation: float 3.4s ease-in-out 1.6s infinite; }
 
         /* ==========================================================
@@ -438,7 +441,7 @@
         <!-- 1 ───────────────────────────── Obiettivo e contesto -->
         <section class="slide bg-cream" data-bg="#FFF8EC" aria-label="Slide 1 di 8: PICUS, obiettivo e contesto">
             <p class="t hd" style="--x:90;--y:60" data-a="left">Pinguini alla Fragola</p>
-            <div class="mascot m-right" style="--x:1320;--y:46;--w:188;--t:.2s" data-a="pop"><img src="pinguino.png" alt="Mascotte del gruppo: un pinguino che abbraccia una fragola" width="200" height="200"></div>
+            <div class="mascot m-right" style="--x:1320;--y:46;--w:188;--t:.2s" data-a="pop"><a class="home-link" href="../index.html" title="Torna alla pagina iniziale" aria-label="Torna alla pagina iniziale"><img src="pinguino.png" alt="" width="200" height="200"></a></div>
             <h2 class="t ttl" style="--y:135;--fs:55;--t:.15s" data-a="left">PICUS: obiettivo e contesto</h2>
             <p class="t strong" style="--x:95;--y:242;--fs:40;--lh:1.3;--t:.6s" data-a="up">Supportare il Banco nel coordinamento delle richieste OPT <br>fino all’accordo confermato con un erogatore</p>
 
@@ -626,7 +629,7 @@
             <h3 class="t hd pink" style="--x:98;--y:750;--fs:33.8;--t:4.4s" data-a="up">Risultato atteso</h3>
             <p class="t" style="--x:98;--y:818;--c:var(--cream);--t:4.7s" data-a="up">Un percorso verificabile fino all’accordo confermato o al rifiuto finale.</p>
 
-            <div class="mascot m-center" style="--x:1265;--y:430;--w:244;--t:1.2s" data-a="pop"><img src="pinguino.png" alt="Mascotte del gruppo: un pinguino che abbraccia una fragola" width="200" height="200"></div>
+            <div class="mascot m-center" style="--x:1265;--y:430;--w:244;--t:1.2s" data-a="pop"><a class="home-link" href="../index.html" title="Torna alla pagina iniziale" aria-label="Torna alla pagina iniziale"><img src="pinguino.png" alt="" width="200" height="200"></a></div>
             <p class="t pn" data-a="fade" style="--t:5.1s">08 / 08</p>
         </section>
     </main>
