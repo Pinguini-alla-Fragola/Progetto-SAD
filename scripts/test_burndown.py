@@ -31,7 +31,7 @@ def node(title, kind="Issue", issue_type="Task", points=3, done=False):
 
 class BurndownScopeTests(unittest.TestCase):
     def calculate(self, nodes):
-        return burndown.compute(burndown.normalize(nodes, CFG), ITERATION["title"], START, 21, NOW)
+        return burndown.calcola(burndown.normalizza(nodes, CFG), ITERATION["title"], START, 21, NOW)
 
     def test_epics_and_pull_requests_affect_neither_scope_nor_completed(self):
         nodes = [node("Task conclusa", points=3, done=True),
@@ -71,14 +71,14 @@ class BurndownScopeTests(unittest.TestCase):
         self.assertEqual(rows[-1][1:], (2, 0, 2))
 
     def test_iteration_with_only_excluded_items_still_produces_zero_chart(self):
-        items = burndown.normalize([node("Epic", issue_type="Epic"),
+        items = burndown.normalizza([node("Epic", issue_type="Epic"),
                                    node("PR", kind="PullRequest", done=True)], CFG)
-        title, start, days = burndown.pick_iteration(items, "", NOW.date())
-        mine, base, rows = burndown.compute(items, title, start, days, NOW)
+        title, start, days = burndown.scegli_iterazione(items, "", NOW.date())
+        mine, base, rows = burndown.calcola(items, title, start, days, NOW)
         self.assertEqual(mine, [])
         self.assertEqual(base, 0)
         self.assertTrue(all(row[1:] == (0, 0, 0) for row in rows))
-        self.assertIn("nessun task", burndown.render_svg(title, start, days, base, rows, NOW))
+        self.assertIn("nessun task", burndown.disegna_svg(title, start, days, base, rows, NOW))
 
     def test_estimate_zero_and_size_fallback_are_preserved(self):
         sized = node("Con taglia", points=None)
@@ -91,7 +91,7 @@ class BurndownScopeTests(unittest.TestCase):
     def test_inspect_uses_same_filter_as_chart(self):
         output = io.StringIO()
         with contextlib.redirect_stdout(output):
-            burndown.inspect("PICUS", [node("Task", points=3),
+            burndown.ispeziona("PICUS", [node("Task", points=3),
                                       node("Epic", issue_type="Epic", points=8, done=True),
                                       node("PR", kind="PullRequest", points=5, done=True)])
         text = output.getvalue()
