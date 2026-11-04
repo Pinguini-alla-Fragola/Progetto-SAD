@@ -217,12 +217,17 @@
             animation-fill-mode: both;
             animation-delay: var(--t0);
         }
-        [data-a="up"]   { animation-name: up; }
-        [data-a="left"] { animation-name: left; }
-        [data-a="fade"] { animation-name: fade; }
-        [data-a="pop"]  { animation-name: pop; }
-        [data-a="reveal"] { animation-name: reveal; transform-origin: left center; }
-        [data-a="grow"] { animation-name: grow; }
+        /* Il nome dell'animazione si assegna SOLO quando la slide è attiva: così l'animazione
+           nasce (e riparte da capo) a ogni arrivo sulla slide. Se il nome valesse sempre, ogni
+           elemento avrebbe già un'animazione "finita" creata al caricamento della pagina e,
+           all'arrivo sulla slide, il browser ne aggiornerebbe solo i tempi, saltandola. */
+        .slide[data-state="active"] [data-a="up"]   { animation-name: up; }
+        .slide[data-state="active"] [data-a="left"] { animation-name: left; }
+        .slide[data-state="active"] [data-a="fade"] { animation-name: fade; }
+        .slide[data-state="active"] [data-a="pop"]  { animation-name: pop; }
+        .slide[data-state="active"] [data-a="reveal"] { animation-name: reveal; }
+        .slide[data-state="active"] [data-a="grow"] { animation-name: grow; }
+        [data-a="reveal"] { transform-origin: left center; }
         .slide[data-state="active"] [data-a="pop"]  { animation-timing-function: cubic-bezier(.34, 1.45, .64, 1); }
         .slide[data-state="active"] [data-a="reveal"] { animation-duration: .5s; animation-timing-function: ease-out; }
         .slide[data-state="active"] [data-a="grow"] { animation-duration: .7s; animation-timing-function: ease-in-out; }
@@ -243,8 +248,8 @@
             animation-fill-mode: both;
             animation-delay: calc(var(--t0) + var(--l, 0) * .16s);
         }
-        [data-wa="up"] .w   { animation-name: up; }
-        [data-wa="left"] .w { animation-name: left; }
+        .slide[data-state="active"] [data-wa="up"] .w   { animation-name: up; }
+        .slide[data-state="active"] [data-wa="left"] .w { animation-name: left; }
 
         /* riquadri: prima si traccia il contorno, poi si riempie e compare il testo */
         .slide[data-state="active"] .box[data-a="build"] {
