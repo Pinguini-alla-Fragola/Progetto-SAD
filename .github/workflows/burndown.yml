@@ -1,20 +1,18 @@
-# Da copiare nel repository del progetto come .github/workflows/burndown.yml
-# insieme a scripts/burndown.py (output/burndown/burndown.py del wiki).
-# NON TESTATO su un project reale: lanciarlo a mano con "Run workflow" prima di fidarsi.
+# Calcola il burndown dello sprint in corso e lo pubblica sul branch burndown-data.
 #
-# Prerequisiti (Settings -> Secrets and variables -> Actions):
-#  - secret    PROJECT_TOKEN   token personale CLASSICO con scope `project` e `repo`
-#                              (impostare una scadenza oltre il 17/12/2026, altrimenti il workflow smette di funzionare)
-#  - variabile PROJECT_NUMBER  numero del project (dall'URL .../projects/<numero>)
-#  - (facoltative) variabili PROJECT_OWNER e OWNER_TYPE: di default il project è dell'organizzazione Pinguini-alla-Fragola
+# Da impostare in Settings -> Secrets and variables -> Actions:
+#  - secret PROJECT_TOKEN: token personale classico (scope project e repo) per leggere il project.
+#    La scadenza va messa oltre il 17/12/2026, altrimenti il workflow si ferma
+#  - variabile PROJECT_NUMBER: numero del project, lo trovi nell'URL .../projects/<numero>
+#  - PROJECT_OWNER e OWNER_TYPE (facoltative): di default il project è di Pinguini-alla-Fragola
 #
-# Risultato: sul branch burndown-data, il file burndown-latest.svg (sprint in corso, nome fisso, usato dal README),
-# un burndown-<sprint>.svg/.csv per ogni sprint e l'artefatto «burndown» di ogni esecuzione.
+# Output su burndown-data: burndown-latest.svg (sprint in corso, lo legge il README)
+# e svg/csv di ogni sprint. Ogni esecuzione salva anche l'artefatto «burndown».
 name: burndown
 
 on:
   schedule:
-    - cron: "50 23 * * *"       # ogni giorno alle 23:50 UTC, appena prima del cambio di giorno
+    - cron: "50 23 * * *"       # 23:50 UTC, ma GitHub lo avvia con ore di ritardo
   workflow_dispatch:
     inputs:
       iteration_title:
@@ -24,10 +22,10 @@ on:
         default: ""
 
 permissions:
-  contents: write                # serve per pubblicare sul branch burndown-data
+  contents: write                # serve per il push su burndown-data
 
 concurrency:
-  group: burndown                # evita due esecuzioni insieme che si contendono il push
+  group: burndown                # una esecuzione alla volta
   cancel-in-progress: false
 
 jobs:
@@ -46,14 +44,14 @@ jobs:
       - name: Calcola il burndown
         env:
           PROJECT_TOKEN: ${{ secrets.PROJECT_TOKEN }}
-          PROJECT_OWNER: ${{ vars.PROJECT_OWNER || 'Pinguini-alla-Fragola' }}   # login di chi possiede il project
+          PROJECT_OWNER: ${{ vars.PROJECT_OWNER || 'Pinguini-alla-Fragola' }}   # chi possiede il project
           PROJECT_NUMBER: ${{ vars.PROJECT_NUMBER }}
-          OWNER_TYPE: ${{ vars.OWNER_TYPE || 'organization' }}                  # organization oppure user
+          OWNER_TYPE: ${{ vars.OWNER_TYPE || 'organization' }}                  # organization o user
           ITERATION_TITLE: ${{ github.event.inputs.iteration_title }}
           ITERATION_FIELD: Iteration
           STATUS_FIELD: Status
           DONE_VALUE: Done
-          POINTS_FIELD: Estimate   # campo Number del project; se un task non ce l'ha si usa la mappatura di Size, poi 1
+          POINTS_FIELD: Estimate   # campo Number; se manca si usa Size (XS1 S2 M3 L5 XL8), poi 1
           SIZE_FIELD: Size
           OUT_DIR: ${{ runner.temp }}/out
         run: python scripts/burndown.py
@@ -64,7 +62,7 @@ jobs:
           name: burndown
           path: ${{ runner.temp }}/out
 
-      # main è protetto: i file vanno su un branch dedicato, non su main
+      # main è protetto, quindi push su un branch a parte
       - name: Pubblica sul branch burndown-data
         run: |
           git config user.name "github-actions"
