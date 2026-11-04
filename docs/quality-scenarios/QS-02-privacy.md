@@ -1,10 +1,6 @@
 # QS-02 Minimizzazione e riservatezza dei dati
 
-Versione 0.1 del 25/10/2026. Stato: **proposta da validare**; nessuna prova software già attestata.
-
-**Area e priorità proposta:** Privacy / P1
-
-**Fonti e collegamenti:** F02 §§1, 5 e 7; F06 del 22/10; US-28, US-D05 e US-D13.
+**Area e priorità:** Privacy / P1
 
 ## Sorgente
 
@@ -16,19 +12,19 @@ Invia campi identificativi degli assistiti non previsti dallo schema oppure tent
 
 ## Ambiente
 
-MVP con campi strutturati e senza testo libero o allegati relativi agli assistiti; controlli estesi a schede ed export quando introdotti. Dataset di prova interamente sintetici.
+Form con campi strutturati e senza testo libero o allegati relativi agli assistiti; controlli estesi a schede e dati quantitativi delle OPT. Dataset di prova interamente sintetici.
 
 ## Artefatto
 
-Schema dei moduli e delle richieste, validazione sul server, registri applicativi, viste e future esportazioni.
+Schema dei moduli e delle richieste, validazione sul server, registri applicativi, viste ed eventuali esportazioni.
 
 ## Risposta
 
-PICUS non offre campi anagrafici degli assistiti; rifiuta i campi non ammessi senza riprodurne il contenuto nei log o nei messaggi. Dati personali dell’operatore accessibili solo al Banco autorizzato e all’operatore titolare.
+PICUS non offre campi anagrafici degli assistiti; rifiuta i campi non ammessi senza riprodurne il contenuto nei log o nei messaggi. Dati personali ed economici dell’operatore (anagrafica, tipologia contrattuale, costo orario lordo) accessibili solo al Banco autorizzato e all’operatore titolare. Nome e telefono del referente dell’erogatore, mostrati nell’appuntamento in presenza, sono ammessi e non riguardano gli assistiti.
 
 ## Misura della risposta
 
-0 campi identificativi degli assistiti nel modello e nei contratti. Tutti i payload di prova con campi non ammessi sono respinti senza persistenza o eco del valore. Nessun identificativo di assistito rilevato nei dati, log ed export campionati; 100% degli accessi non consentiti ai dati degli operatori negati.
+0 campi identificativi degli assistiti nel modello e nei contratti. Tutti i payload di prova con campi non ammessi sono respinti senza persistenza o eco del valore. Nessun identificativo di assistito rilevato nei dati, log ed export campionati; 100% degli accessi non consentiti ai dati personali ed economici degli operatori negati.
 
 ## Stato delle soglie
 
