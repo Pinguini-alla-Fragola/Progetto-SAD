@@ -9,7 +9,7 @@ sequenceDiagram
     participant B as Banco
     participant E as Erogatore OPT o Operatore
 
-    Note over B,E: Un candidato ha dato la disponibilità (TOBE-01A)<br/>Le controproposte di data e ora<br/>lasciano la richiesta In programmazione
+    Note over B,E: Un erogatore ha dato la disponibilità (TOBE-01A)<br/>Le controproposte di data e ora<br/>lasciano la richiesta In programmazione
     B->>E: Concorda data, ora e luogo oppure link,<br/>rappresentando le esigenze dell'assistito
     E-->>B: Accetta, contropropone<br/>o non trova l'accordo
     alt Accordo raggiunto
@@ -25,6 +25,6 @@ sequenceDiagram
             end
             S->>S: Porta la richiesta<br/>ad Annullata<br/>senza riaprire la ricerca
         end
-    else Mancato accordo con il candidato
-        Note over B,E: Il Banco cerca il candidato successivo<br/>(si riparte da TOBE-01A)
+    else Mancato accordo con l'erogatore
+        Note over B,E: Il Banco cerca l'erogatore successivo<br/>(si riparte da TOBE-01A)
     end
