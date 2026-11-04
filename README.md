@@ -29,13 +29,9 @@ Il gruppo sta definendo i processi as-is e to-be nell'iterazione preparatoria.
 - [Architettura](docs/architecture/README.md)
 - [Registro delle decisioni](docs/adr/README.md)
 - [Review delle iterazioni](docs/reviews/README.md)
-- [Documento di progetto Word](docs/Documentazione_SAD_2026.docx)
 - [Esportazione PDF del documento](docs/Documentazione_SAD_2026.pdf)
 - [Regole di contribuzione](.github/CONTRIBUTING.md)
 
-Il Word e il PDF conservano la documentazione del progetto; le cartelle
-raccolgono i relativi modelli e riepiloghi. Il Product Backlog resta
-la fonte operativa per il lavoro pianificato.
 
 ## Prerequisiti
 

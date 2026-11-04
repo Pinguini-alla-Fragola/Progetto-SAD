@@ -91,3 +91,6 @@ node_modules/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+
+# Il sorgente Word si mantiene nell’area OneDrive condivisa.
+Documentazione_SAD_2026.docx

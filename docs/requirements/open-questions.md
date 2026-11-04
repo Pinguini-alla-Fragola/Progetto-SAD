@@ -1,149 +1,184 @@
 # Registro dei chiarimenti e delle ipotesi
 
-Versione 0.1 del 25/10/2026. Registro documentale della v0.5; collegamenti operativi da mantenere insieme al Word. Dodici quesiti prioritari, con ID precedenti conservati.
+Versione 0.3 del **04/11/2026**, dopo il riscontro del team. Conservati Q-01–Q-17; aggiunti Q-18–Q-20 per casi operativi circoscritti. Le risposte delle issue chiuse e le scelte del gruppo non sono riproposte come quesiti generici. Le nuove domande elencate sono bozze, non issue già pubblicate.
 
-## Q-04 Confine della richiesta e stati
+## Riferimenti e stato
 
-PICUS termina il coordinamento quando l’appuntamento è confermato, oppure il Banco deve registrare anche l’avvenuta erogazione? Quali annullamenti devono essere trattati e da chi?
+Le risposte della seconda tornata e i chiarimenti GitHub #21/#29/#36/#40/#45 aggiornano le fonti precedenti. La revisione del 4 novembre recepisce come scelte del gruppo conferma del solo Banco, immutabilità, matrice annullamento, modulo minimo, pulsante di ricezione e viste OPT. Non si attribuisce alla professoressa un’approvazione puntuale e non si usa una scelta del gruppo come prova di risposta del cliente.
 
-**Priorità proposta:** P1. **Fonte e stato:** F07 e proposta #20; domanda GitHub #29, aperta senza risposta alla consultazione della v0.5.
+La differenza sulla disponibilità preventiva resta esplicita in Q-03: la fonte richiedeva il dato temporale, il gruppo propone di non mostrarlo. [Regole funzionali](regole-funzionali.md), [accessi](regole-accessi.md) e [tracciati](tracciati-monitoraggio.md) sono i riferimenti locali delle regole e delle proposte tecniche. Stato e assegnatari del Project non sono dedotti dalle checklist.
 
-**Ipotesi provvisoria:** IP-01: Accettata chiude il coordinamento dopo la conferma dell’appuntamento; Completata resta una variante sospesa. Non sono definite transizioni di annullamento.
+## Q-04 Confine e annullamento eccezionale
 
-**Impatto:** TOBE-01A/B, US-D08–US-D10, MVP e criteri di chiusura. **Referente proposto:** PO per il follow-up con il committente.
+**Stato corrente:** Definito il ciclo da #29 e dalla scelta di progetto: In programmazione, Confermata, Rifiutata, Annullata. Solo il Banco conferma; accordo e non prestazione. Matrice di annullamento e immutabilità nelle regole funzionali.
 
-[Domanda #29](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/29)
+**Residuo:** Restano esempi di evento eccezionale, forma/visibilità del motivo e avvisi alle parti. Non riaprire matrice, conferma o ricerca automatica.
 
-## Q-09 Responsabilità sull’appuntamento
+**Impatto e collegamenti:** #20/#52/#54; #29 e #37 chiuse.
 
-Il Banco può fissare data e luogo oppure propone e registra dettagli concordati con l’erogatore? Chi dà la conferma finale?
+## Q-09 Negoziazione dell’appuntamento
 
-**Priorità proposta:** P1. **Fonte e stato:** F07 descrive il coordinamento dei dettagli; F06 del 22/10 limita il Banco alla proposta.
+**Stato corrente:** Banco ed erogatore concordano; il solo Banco registra e conferma nell’app. Dettagli immutabili dopo conferma.
 
-**Ipotesi provvisoria:** IP-02: il Banco registra una proposta concordata e la pubblica solo dopo conferma dell’erogatore, senza assumere una gestione autonoma della sua agenda.
+**Residuo:** Canale del coordinamento, controproposte e preferenze prima dell’accordo: #38. Non è richiesta una seconda approvazione finale nell’app.
 
-**Impatto:** TOBE-01B, US-D08 e dimostrazione MVP. **Referente proposto:** PO con committente ed erogatori.
+**Impatto e collegamenti:** #49/#51/#52; #38 aperta.
 
-## Q-03 Territorio disponibilità e vicinanza
+## Q-03 Disponibilità preventiva
 
-Il divieto di associare OPT per distanza riguarda solo l’abbinamento automatico? Quali rappresentazioni di territorio e disponibilità sono utili al Banco?
+**Stato corrente:** Il gruppo sceglie offerta senza disponibilità preventive e contatto sulla singola richiesta. F10 richiedeva invece anche quando la OPT può erogare.
 
-**Priorità proposta:** P1. **Fonte e stato:** F02 §5.3 e F07 citano vicinanza; F06 del 22/10 contiene un divieto da precisare.
+**Residuo:** Confronto col PO/committente: la semplificazione può sostituire il dato richiesto o occorre una forma minima? Divergenza esplicita, non una risposta del cliente né un obbligo di calendario a slot.
 
-**Ipotesi provvisoria:** Scelta manuale dell’erogatore da parte del Banco, per misura e informazioni territoriali disponibili; nessun ordinamento automatico per distanza.
+**Impatto e collegamenti:** #19/#47/#49; nuova domanda proposta, non pubblicata.
 
-**Impatto:** #19, #20, US-D04 e US-D06. **Referente proposto:** Responsabile analisi con il committente.
+## Q-10 Priorità degli erogatori
 
-## Q-10 Preferenza fra erogatori
+**Stato corrente:** Misura, stesso comune/limitrofi, operatori prima delle OPT a pari prossimità, minor carico, remoto PICUS compatibile; Banco decide e contatta uno alla volta.
 
-Esiste una precedenza fra operatori interni PICUS, professionisti esterni e OPT erogatrici?
+**Residuo:** Definire periodo/stati del carico e spareggi col PO. Non riaprire la precedenza generale.
 
-**Priorità proposta:** P2. **Fonte e stato:** Domanda presente in F07 senza risposta; appunti F06 non consolidati su questo punto.
+**Impatto e collegamenti:** #49/#51; regola da seconda tornata.
 
-**Ipotesi provvisoria:** Nessuna precedenza obbligatoria; il Banco sceglie manualmente e interpella un erogatore per volta.
+## Q-08 Ricezione delle comunicazioni
 
-**Impatto:** US-D06–US-D07; regole di selezione. **Referente proposto:** PO con il committente.
+**Stato corrente:** #21 chiarisce tutti o gruppi OPT/Operatori. Scelta di progetto: Confermo la ricezione, prima data/ora per account/comunicazione, visibile al Banco; sola apertura insufficiente.
 
-## Q-08 Destinatari e conferma delle comunicazioni
+**Residuo:** Limiti allegati e composizione dei gruppi da dettagliare nelle #22/#55. Automazione dei promemoria non introdotta.
 
-È ammesso inviare lo stesso avviso a tutte le OPT? La conferma richiesta è un gesto esplicito dell’OPT, un riscontro tecnico o una distinta conferma di lettura?
+**Impatto e collegamenti:** #55/#56; quesito generale sul riscontro superato dalla scelta del gruppo.
 
-**Priorità proposta:** P2. **Fonte e stato:** F06 del 20/10; #21 aperta sul broadcast. La semantica della conferma è un chiarimento aggiuntivo da registrare.
+## Q-11 Account degli operatori
 
-**Ipotesi provvisoria:** Destinatari selezionati e dicitura conferma di ricezione; nessun divieto assoluto di invio a tutte le OPT viene assunto senza risposta.
+**Stato corrente:** #40/#45 chiuse: personali per interni Banco, esterni Banco ed esterni OPT. Gli ultimi hanno OPT di appartenenza e nessuna rendicontazione. Personale proprio/volontari OPT non censiti.
 
-**Impatto:** #22, US-D11–US-D12 e diagramma delle comunicazioni, fuori dal primo MVP. **Referente proposto:** Referente di #9 con il committente.
+**Residuo:** Il trattamento delle attività degli esterni OPT nei conteggi rimane in Q-13, non l’account o il divieto della scheda personale.
 
-[Domanda #21](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/21)
-
-## Q-11 Operatori con accesso e scheda
-
-Quali categorie di operatori interni PICUS ed esterni ricevono un account e inviano la scheda trimestrale? Il personale interno delle OPT resta sempre escluso dal censimento individuale?
-
-**Priorità proposta:** P1. **Fonte e stato:** F07 conferma l’accesso personale; alcuni sottoquesiti sulla rendicontazione esterna non hanno risposta esplicita. F06 esclude il personale interno delle OPT.
-
-**Ipotesi provvisoria:** Account personali per gli erogatori accreditati individuati dal Banco; personale OPT non censito. Il perimetro definitivo della scheda resta da confermare.
-
-**Impatto:** US-27, US-D02, US-D13 e TOBE-02. **Referente proposto:** Referenti IAM e rendicontazione con il committente.
+**Impatto e collegamenti:** #18/#27/#28/#58.
 
 ## Q-12 Utenze del Banco
 
-Quante persone del Banco useranno l’applicazione e chi crea o revoca le loro utenze?
+**Stato corrente:** Operatore interno e ruolo Banco distinti; account sintetico per la sola dimostrazione.
 
-**Priorità proposta:** P1. **Fonte e stato:** F02 attribuisce al Banco funzioni amministrative, ma non definisce il bootstrap dei suoi account.
+**Residuo:** Quante persone usano coordinamento/rendicontazione, chi ne amministra le utenze e come si gestisce chi svolge anche attività Operatore?
 
-**Ipotesi provvisoria:** Per la sola dimostrazione MVP si predispone un account Banco sintetico tramite configurazione iniziale; la politica operativa reale non è data per risolta.
+**Impatto e collegamenti:** #18/#25/#27/#28; nuova domanda proposta, non pubblicata.
 
-**Impatto:** #18, US-25, avvio della dimostrazione e successiva gestione utenti. **Referente proposto:** PO con il referente del Banco.
+## Q-13 Dati quantitativi OPT
 
-## Q-13 Informazioni e monitoraggio delle OPT
+**Stato corrente:** Registrazione per anno/trimestre e viste trimestrale/cumulativa scelte dal gruppo, stessa base dati senza doppio inserimento. Non implica scadenza di invio.
 
-Quali campi dell’anagrafica OPT sono necessari? Sono richiesti dati quantitativi o una specifica scheda dell’organizzazione, distinta da quella personale dell’operatore?
+**Residuo:** #41: voci, persone/accessi, zero/mancanti, attività degli esterni OPT, correzioni e versione valida. Regole per misure non più offerte in Q-20.
 
-**Priorità proposta:** P2. **Fonte e stato:** F02 §5.2 e §6; F06 del 20/10; punti sospesi di #19.
+**Impatto e collegamenti:** #43 e nuova consultazione OPT; TM-OPT-01 bozza v0.1.
 
-**Ipotesi provvisoria:** Solo i campi necessari ad account, misura e territorio; la raccolta quantitativa dell’OPT è rinviata fino a definizione di contenuti e responsabilità.
+## Q-05 Storico dopo revoca
 
-**Impatto:** US-24, US-D01, #19 e schemi dati. **Referente proposto:** Referenti catalogo e rendicontazione con il committente.
+**Stato corrente:** Revoca blocca accessi e conserva i dati senza cancellazione implicita.
 
-## Q-05 Dati dopo la revoca
+**Residuo:** #42: tempi, accessi e cancellazione, senza conservazione illimitata. Operatività delle pratiche in Q-18.
 
-Quali tempi e regole di conservazione, cancellazione ed eventuale accesso ai dati storici si applicano dopo la revoca di OPT e Operatori?
+**Impatto e collegamenti:** #26/#30 e dati collegati.
 
-**Priorità proposta:** P2. **Fonte e stato:** F02 §§5.1 e 7–8; F06 conferma revoca manuale e credenziali senza scadenza, non una conservazione illimitata.
+## Q-02 Modulo minimo della richiesta
 
-**Ipotesi provvisoria:** La revoca blocca gli accessi e non cancella automaticamente i dati storici. Nessun termine di conservazione è inventato dal team.
+**Stato corrente:** Scelti misura, persona/nucleo e comune; sistema gestisce ID/data/titolare/stato. Nessun testo libero, allegato o identificativo assistito nel modulo minimo.
 
-**Impatto:** US-26, US-D02, schede e registri; interlocutore privacy. **Referente proposto:** PO e referente privacy del committente.
+**Residuo:** Validazioni di dettaglio in progettazione; eventuali preferenze prima dell’accordo nella #38. #41 riguarda ora i tracciati del monitoraggio.
 
-## Q-14 Cancellazione delle schede dopo il trimestre
+**Impatto e collegamenti:** #48; scelta del gruppo recepita, non domanda generica da riaprire.
 
-Dopo il trimestre, tutte le schede inserite all’interno del rendiconto possono essere cancellate?
+## Q-01 Continuità del referente OPT
 
-**Priorità proposta:** P2. **Fonte e stato:** Emersa nella revisione della storia sulla revoca degli Operatori; nessuna risposta del committente.
+**Stato corrente:** Account ed email unici per OPT confermati. Creazione manuale distinta da CSV.
 
-**Ipotesi provvisoria:** Nessuna cancellazione automatica delle schede inviate; il termine di conservazione non è inventato dal team e si definisce insieme a Q-05.
+**Residuo:** Chi modifica referente/email e come si conserva continuità e storico? Integrare la nuova domanda sui profili con Q-15.
 
-**Impatto:** Q-05, rendicontazione trimestrale, schede e registri; interlocutore privacy. **Referente proposto:** PO e referente privacy del committente.
+**Impatto e collegamenti:** #24/#44; domanda proposta non pubblicata.
 
-## Q-15 Riattivazione e riuso dell’email di un Operatore
+## Q-06 Scheda personale e controlli
 
-Se un Operatore revocato torna a collaborare, si può riattivare il suo account o riusare la stessa email per un nuovo account? In quel caso le schede dei due account vanno collegate?
+**Stato corrente:** Compilatori e campi iniziali noti in TM-OP-01; categorie sovrapponibili, nessun collegamento obbligatorio alle richieste.
 
-**Priorità proposta:** P2. **Fonte e stato:** Emersa nella revisione della storia sulla revoca degli Operatori; nessuna risposta del committente.
+**Residuo:** #41: firma, obbligatorietà, controlli, correzioni, invii ripetuti e quali voci aggregare.
 
-**Ipotesi provvisoria:** La revoca non prevede riattivazione né riuso dell’email; il caso si definisce prima di implementare la creazione di un nuovo account per la stessa persona.
+**Impatto e collegamenti:** #57/#58; bozza v0.1, non tracciato definitivo.
 
-**Impatto:** Creazione e revoca degli account Operatore, schede storiche. **Referente proposto:** PO con il committente.
+## Q-07 Qualità e dimensionamento
 
-## Q-02 Campi non identificativi della richiesta
+**Stato corrente:** Sei QS con soglie del team; nessuna prova completa eseguita o SLA approvato.
 
-Quale insieme minimo di informazioni permette al Banco di lavorare una richiesta senza identificare la persona o il nucleo?
+**Residuo:** Confermare picchi, priorità di ripristino e tempi accettabili; poi eseguire le prove sui moduli disponibili.
 
-**Priorità proposta:** P1. **Fonte e stato:** F02 §5.3 e §8; F06 del 22/10; F07.
+**Impatto e collegamenti:** QS-01–QS-06; 50 sessioni, campioni e 4 ore restano proposte.
 
-**Ipotesi provvisoria:** IP-03: misura di catalogo, indicazione persona/nucleo e comune scelto da elenco. Nessun testo libero o allegato dell’assistito nel primo MVP.
+## Q-14 Conservazione delle schede
 
-**Impatto:** US-D05, QS-02 e contratto del modulo di richiesta. **Referente proposto:** Referenti #20 con il committente.
+**Stato corrente:** Inserimento ministeriale non decide la sorte delle copie PICUS.
 
-## Risposte parziali e validazioni residue
+**Residuo:** #42 con referente amministrativo/privacy, per tutti i dati e anche dopo revoca.
 
-**Q-01 Account OPT e cambio del referente**. Risposta parziale: unico account ed email unica per OPT confermati da F06/F07. Resta da precisare la continuità al cambio di referente; non si riapre il numero degli account. Recupero e gestione del referente: dettaglio da consolidare in S2.
+**Impatto e collegamenti:** #43/#57/#58; trattare insieme a Q-05.
 
-**Q-06 Definizioni della scheda e controlli**. Risposta parziale: categorie sovrapponibili confermate da F07. Restano regole su ore, periodo, totali e correzioni; nessuna somma obbligatoria delle categorie al totale. Prima di implementare US-D13 e l’aggregazione.
+## Q-15 Riattivazione e manutenzione profili
 
-**Q-07 Carichi e soglie di qualità**. Aperta: le esigenze sono nelle fonti; 50 sessioni, viewport 360, tempi e ripristino di 4 ore sono proposte dei sei QS, non misure eseguite o SLA concordati. Validare priorità e soglie prima delle prove in costruzione.
+**Stato corrente:** Nessuna riattivazione automatica da CSV; identità e storico non si ricreano implicitamente.
 
-## Ipotesi provvisorie
+**Residuo:** Ritorno dopo revoca, riuso email, modifica recapiti/misure/territorio e passaggio dell’esterno fra OPT. Definire chi modifica cosa; poi valutare una storia di manutenzione, senza inventarne i permessi.
 
-**IP-01**. Chiusura del coordinamento come Accettata solo dopo conferma dell’appuntamento; Rifiutata quando non si trova soluzione. Nessuna gestione dell’esito della prestazione nel flusso principale. Proposta temporanea collegata a Q-04 / #29. Riesaminare alla risposta; se serve Completata, aggiornare stati, TOBE-01B, US-D09 e MVP.
+**Impatto e collegamenti:** #24/#27/#30/#44; nuova domanda proposta insieme a Q-01.
 
-**IP-02**. Il Banco registra dettagli concordati e attende conferma dell’erogatore prima della pubblicazione. Proposta collegata a Q-09. Non attribuisce al Banco il potere autonomo di fissare l’agenda.
+## Q-16 Credenziali e link
 
-**IP-03**. Richiesta strutturata con misura, persona/nucleo e comune; assenza di testo libero e allegati degli assistiti nel primo MVP. Proposta collegata a Q-02 e QS-02. Aggiornare lo schema alla validazione dei campi.
+**Stato corrente:** #34 non definisce soglie approvate. Regole comuni propongono 12 caratteri, attivazione 72 ore, recupero 15 minuti e limiti ai tentativi.
 
-**IP-04**. Utenti, catalogo iniziale e offerta precaricati come dati sintetici per la dimostrazione. Prerequisito tecnico del prototipo; gestione completa degli account e dell’offerta non è dichiarata implementata. Q-12 per le utenze reali del Banco.
+**Residuo:** Il team propone e un referente competente valida policy e vincoli applicabili; non chiedere al cliente di inventare i parametri.
 
-**IP-05**. Il dato 230.000 utenti non viene usato per dimensionare account o concorrenza. Significato e periodo da chiarire. Le soglie di QS-03 restano un profilo di prova proposto.
+**Impatto e collegamenti:** #24/#25/#27/#33/#44; #34 aperta.
 
-**IP-06**. Non si introducono timeout, priorità di urgenza, assegnazione automatica per distanza o ordine obbligatorio fra erogatori. Ordine cronologico confermato per le richieste; altre regole richiedono Q-03/Q-10 e confronto con il committente.
+## Q-17 Indicazione del rifiuto
+
+**Stato corrente:** #36 chiusa: mostrare Nessun erogatore disponibile; messaggio automatico ammesso.
+
+**Residuo:** Nessun motivo libero obbligatorio per il rifiuto. Il motivo dell’annullamento è un requisito distinto.
+
+**Impatto e collegamenti:** #52, già #53; recepita anche in TOBE-01A.
+
+## Q-18 Pratiche e account collegati dopo revoca
+
+**Stato corrente:** La revoca invalida l’utenza; non assegna automaticamente le pratiche e non revoca a cascata gli esterni OPT.
+
+**Residuo:** Chi subentra su richieste aperte o accordi Confermati? Quale sorte hanno gli account personali esterni quando si revoca la OPT?
+
+**Impatto e collegamenti:** #26/#30/#49/#54; nuova domanda proposta, non pubblicata.
+
+## Q-19 Erogatore senza risposta
+
+**Stato corrente:** Un contatto per volta e nessun timeout obbligatorio.
+
+**Residuo:** Il Banco può ritirare il contatto e passare al successivo? Come avvisare il primo e gestire risposte tardive?
+
+**Impatto e collegamenti:** #49/#51; nuova domanda proposta, non pubblicata.
+
+## Q-20 Catalogo ritirato e attività pregresse
+
+**Stato corrente:** Il ritiro dell’offerta o la disattivazione non cancellano riferimenti registrati.
+
+**Residuo:** Definire prosecuzione delle richieste già aperte e registrazione delle attività effettive del trimestre se misura/offerta non è più attiva.
+
+**Impatto e collegamenti:** #46/#47/#43; raffinamento col PO, non una nuova issue obbligatoria.
+
+## Ipotesi e decisioni recepite
+
+| ID | Riferimento corrente | Stato |
+| --- | --- | --- |
+| IP-01 | Quattro stati; accordo confermato, non prestazione svolta | #29 e baseline del gruppo; Accettata/Completata restano storici |
+| IP-02 | Solo il Banco registra/conferma i dettagli concordati; immutabili dopo conferma | Scelta del gruppo; #38 limitata alla negoziazione precedente |
+| IP-03 | Modulo misura, persona/nucleo e comune, più metadati del sistema | Scelta del gruppo; nessun identificativo assistito |
+| IP-04 | Account, catalogo e offerta sintetici della demo | Prerequisito tecnico, non gestione completa implementata |
+| IP-05 | 230.000 utenti non dimensiona account/concorrenza | Significato storico da precisare; QS con profili proposti |
+| IP-06 | Ordine territoriale/tipo/carico e contatto sequenziale | Risposte seconda tornata; dati preventivi oggetto di Q-03 |
+
+## Aggiornamento GitHub da eseguire
+
+Bozze per #34/#38/#41/#42 e nuovi quesiti nel pacchetto preparato per la revisione. #52 assorbe #53; conservare quest’ultima come riferimento storico dopo l’aggiornamento dei link. Nuova consultazione OPT sotto #19 senza numero finché non creata. Non riaprire #21/#29/#36/#37/#40/#45 per argomenti già risolti; registrare soltanto i residui pertinenti. Non risultano stime o prove software da questa revisione.

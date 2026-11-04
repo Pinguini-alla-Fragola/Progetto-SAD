@@ -52,10 +52,10 @@ body:
       label: Definition of Ready
       options:
         - label: The value and intended user are clear.
-          required: true
+          required: false
         - label: Acceptance criteria are testable.
-          required: true
+          required: false
         - label: The story is small enough for one iteration.
-          required: true
+          required: false
         - label: The team has enough information to estimate it.
-          required: true
+          required: false
