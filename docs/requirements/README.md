@@ -51,10 +51,12 @@ restano da chiarire con gli interlocutori competenti.
   - #33 recupero della password: [Mermaid](diagrams/iam/IAM-33-recupero-password.mmd), [PNG](diagrams/iam/IAM-33-recupero-password.png), [SVG](diagrams/iam/IAM-33-recupero-password.svg)
 - [Verifica dopo il confronto con lo stakeholder](../reviews/2026-10-21-coerenza-stakeholder-context.md)
 
-CTX-01 è aggiornato alla **versione 0.3 del 25/10/2026**, incorporata anche nel
-Word e nel PDF. La revisione del gruppo resta da registrare. Il diagramma
-qualifica gli operatori, indica il CSV come opzionale, uniforma la conferma di
-ricezione e include la creazione/revoca degli account degli operatori.
+CTX-01 è aggiornato alla **versione 0.4 del 04/11/2026**; il Word e il PDF
+incorporano ancora la versione 0.3 del 25/10/2026, da riallineare. La revisione
+del gruppo resta da registrare. Il diagramma distingue gli operatori pagati dal
+Banco da quelli esterni delle OPT, indica il CSV come opzionale, uniforma la
+conferma di ricezione e include la creazione/revoca degli account degli
+operatori, la conferma del Banco e l'annullamento.
 
 ASIS-01A/B sono alla **versione 0.1 del 25/10/2026**, con sorgenti Mermaid
 ed esportazioni incorporate nella versione 0.5 del Word. I canali puntuali
