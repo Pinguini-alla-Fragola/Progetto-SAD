@@ -22,11 +22,11 @@ Variabili d'ambiente (le prime tre servono, le altre hanno un default):
 
 Il grafico ha riquadri di stato, previsione a fine sprint e area colorata (rosa = in ritardo,
 azzurra = in anticipo rispetto alla linea ideale).
-Scrive solo l'iterazione in corso (e la copia `burndown-latest.svg` per il README): i file degli sprint conclusi restano com'erano, cosi'
-i task non finiti e spostati nello sprint successivo non alterano la storia (un file per sprint).
+Scrive solo l'iterazione in corso (e la copia `burndown-latest.svg` per il README): i file degli
+sprint conclusi restano com'erano, così i task spostati nello sprint successivo non alterano la storia.
 
 I punti di un task: campo Number se presente, altrimenti mappatura della taglia
-(SIZE_POINTS qui sotto), altrimenti 1.  Prova senza API:  python burndown.py --demo
+(PUNTI_PER_TAGLIA qui sotto), altrimenti 1.  Prova senza API:  python burndown.py --demo
 Controlla i nomi dei campi sul project reale:  python burndown.py --inspect
 """
 import csv
@@ -39,15 +39,16 @@ import urllib.request
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
-SIZE_POINTS = {"XS": 1, "S": 2, "M": 3, "L": 5, "XL": 8}   # mappatura da concordare nel team
+PUNTI_PER_TAGLIA = {"XS": 1, "S": 2, "M": 3, "L": 5, "XL": 8}   # mappatura da concordare nel team
 # Calendario del progetto PICUS (presentazione, slide 11-12): data di inizio -> durata in giorni.
 # La preparatoria dura 3 settimane (eccezione); le tre iterazioni di costruzione 2 settimane.
-PIANO = {date(2026, 10, 15): 21, date(2026, 11, 5): 14, date(2026, 11, 19): 14, date(2026, 12, 3): 14}
+PIANO_SPRINT = {date(2026, 10, 15): 21, date(2026, 11, 5): 14, date(2026, 11, 19): 14, date(2026, 12, 3): 14}
 UTC = timezone.utc
 
+# TIPO_PROPRIETARIO diventa "user" o "organization"
 QUERY = """
 query($login:String!, $num:Int!, $after:String) {
-  OWNER(login:$login) {
+  TIPO_PROPRIETARIO(login:$login) {
     projectV2(number:$num) {
       title
       items(first:100, after:$after) {
@@ -76,350 +77,354 @@ query($login:String!, $num:Int!, $after:String) {
 """
 
 
-def graphql(token, owner_type, login, num):
-    query = QUERY.replace("OWNER", "organization" if owner_type == "organization" else "user")
-    nodes, after = [], None
+def scarica_righe(token, tipo_proprietario, login, numero):
+    tipo = "organization" if tipo_proprietario == "organization" else "user"
+    query = QUERY.replace("TIPO_PROPRIETARIO", tipo)
+    righe, cursore = [], None
     while True:
-        body = json.dumps({"query": query, "variables": {"login": login, "num": num, "after": after}}).encode()
-        req = urllib.request.Request("https://api.github.com/graphql", data=body, headers={
+        corpo = json.dumps({"query": query, "variables": {"login": login, "num": numero, "after": cursore}}).encode()
+        richiesta = urllib.request.Request("https://api.github.com/graphql", data=corpo, headers={
             "Authorization": f"Bearer {token}", "Content-Type": "application/json"})
-        with urllib.request.urlopen(req) as r:
-            data = json.load(r)
-        if "errors" in data:
-            raise SystemExit(f"Errore GraphQL: {data['errors']}")
-        proj = data["data"][owner_type if owner_type == "organization" else "user"]["projectV2"]
-        nodes += proj["items"]["nodes"]
-        if not proj["items"]["pageInfo"]["hasNextPage"]:
-            return proj["title"], nodes
-        after = proj["items"]["pageInfo"]["endCursor"]
+        with urllib.request.urlopen(richiesta) as risposta:
+            dati = json.load(risposta)
+        if "errors" in dati:
+            raise SystemExit(f"Errore GraphQL: {dati['errors']}")
+        project = dati["data"][tipo]["projectV2"]
+        righe += project["items"]["nodes"]
+        if not project["items"]["pageInfo"]["hasNextPage"]:
+            return project["title"], righe
+        cursore = project["items"]["pageInfo"]["endCursor"]
 
 
-def parse_ts(s):
-    return datetime.fromisoformat(s.replace("Z", "+00:00")) if s else None
+def leggi_data(testo):
+    return datetime.fromisoformat(testo.replace("Z", "+00:00")) if testo else None
 
 
-def exclusion_reason(content):
+def motivo_esclusione(contenuto):
     """Classifica il contenuto con i tipi GitHub, senza dedurli dal titolo."""
-    if not content:
+    if not contenuto:
         return "Contenuto non disponibile"
-    if content.get("__typename") == "PullRequest":
+    if contenuto.get("__typename") == "PullRequest":
         return "Pull Request"
-    issue_type = (content.get("issueType") or {}).get("name", "")
-    if content.get("__typename") == "Issue" and issue_type.strip().casefold() == "epic":
+    tipo_issue = (contenuto.get("issueType") or {}).get("name", "")
+    if contenuto.get("__typename") == "Issue" and tipo_issue.strip().casefold() == "epic":
         return "Epic"
     return None
 
 
-def normalize(nodes, cfg):
+def normalizza(righe, config):
     """Normalizza gli item; mantiene i metadati degli esclusi per scegliere l'iterazione."""
-    items = []
-    for n in nodes:
-        f = {"iter": None, "status": None, "points": None, "size": None}
-        for v in n["fieldValues"]["nodes"]:
-            name = (v.get("field") or {}).get("name")
-            if v["__typename"] == "ProjectV2ItemFieldIterationValue" and name == cfg["iter_field"]:
-                f["iter"] = v
-            elif v["__typename"] == "ProjectV2ItemFieldSingleSelectValue":
-                if name == cfg["status_field"]:
-                    f["status"] = v["name"]
-                elif name == cfg["size_field"]:
-                    f["size"] = v["name"]
-            elif v["__typename"] == "ProjectV2ItemFieldNumberValue" and name == cfg["points_field"]:
-                f["points"] = v["number"]
-        c = n["content"] or {}
-        points = f["points"] if f["points"] is not None else SIZE_POINTS.get(f["size"], 1)
-        done = f["status"] == cfg["done_value"]
+    elementi = []
+    for riga in righe:
+        campi = {"iter": None, "stato": None, "punti": None, "taglia": None}
+        for valore in riga["fieldValues"]["nodes"]:
+            nome = (valore.get("field") or {}).get("name")
+            if valore["__typename"] == "ProjectV2ItemFieldIterationValue" and nome == config["iter_field"]:
+                campi["iter"] = valore
+            elif valore["__typename"] == "ProjectV2ItemFieldSingleSelectValue":
+                if nome == config["status_field"]:
+                    campi["stato"] = valore["name"]
+                elif nome == config["size_field"]:
+                    campi["taglia"] = valore["name"]
+            elif valore["__typename"] == "ProjectV2ItemFieldNumberValue" and nome == config["points_field"]:
+                campi["punti"] = valore["number"]
+        contenuto = riga["content"] or {}
+        punti = campi["punti"] if campi["punti"] is not None else PUNTI_PER_TAGLIA.get(campi["taglia"], 1)
+        fatto = campi["stato"] == config["done_value"]
         # data di completamento: chiusura dell'issue se c'è, altrimenti ultimo aggiornamento
-        done_at = (parse_ts(c.get("closedAt")) or parse_ts(n["updatedAt"])) if done else None
-        items.append({"title": c.get("title", "?"), "iter": f["iter"], "points": float(points),
-                      "created": parse_ts(n["createdAt"]), "done_at": done_at,
-                      "excluded": exclusion_reason(c)})
-    return items
+        fatto_il = (leggi_data(contenuto.get("closedAt")) or leggi_data(riga["updatedAt"])) if fatto else None
+        elementi.append({"title": contenuto.get("title", "?"), "iter": campi["iter"], "points": float(punti),
+                         "created": leggi_data(riga["createdAt"]), "done_at": fatto_il,
+                         "excluded": motivo_esclusione(contenuto)})
+    return elementi
 
 
-def pick_iteration(items, title, today):
-    iters = {}
-    for it in items:
-        v = it["iter"]
-        if v:
-            iters[v["title"]] = (date.fromisoformat(v["startDate"]), int(v["duration"]))
-    if title:
-        if title not in iters:
-            raise SystemExit(f"Iterazione «{title}» non trovata. Disponibili: {sorted(iters)}")
-        return title, *iters[title]
-    if not iters:
+def scegli_iterazione(elementi, titolo, oggi):
+    iterazioni = {}
+    for el in elementi:
+        it = el["iter"]
+        if it:
+            iterazioni[it["title"]] = (date.fromisoformat(it["startDate"]), int(it["duration"]))
+    if titolo:
+        if titolo not in iterazioni:
+            raise SystemExit(f"Iterazione «{titolo}» non trovata. Disponibili: {sorted(iterazioni)}")
+        return titolo, *iterazioni[titolo]
+    if not iterazioni:
         raise SystemExit("Nessuna iterazione trovata negli item del Project.")
-    for t, (s, d) in iters.items():
-        if s <= today < s + timedelta(days=d):
-            return t, s, d
-    t = max(iters, key=lambda k: iters[k][0])      # nessuna in corso: l'ultima
-    return t, *iters[t]
+    for t, (inizio, durata) in iterazioni.items():
+        if inizio <= oggi < inizio + timedelta(days=durata):
+            return t, inizio, durata
+    t = max(iterazioni, key=lambda k: iterazioni[k][0])      # nessuna in corso: l'ultima
+    return t, *iterazioni[t]
 
 
-def compute(items, title, start, days, now):
+def calcola(elementi, titolo, inizio, giorni, adesso):
     """Serie (giorni dall'inizio, scope, completati, rimanenti) a ogni mezzanotte e adesso."""
-    mine = [i for i in items if not i.get("excluded") and i["iter"] and i["iter"]["title"] == title]
-    t0 = datetime.combine(start, datetime.min.time(), UTC)
-    stops = [t0 + timedelta(days=k) for k in range(days + 1) if t0 + timedelta(days=k) <= now]
-    if now < t0 + timedelta(days=days):
-        stops.append(now)                           # punto «adesso» se lo sprint è in corso
-    # I task aggiunti al project nel primo giorno dello sprint (planning) contano come scope iniziale:
-    # solo quelli aggiunti dopo sono «aumento di perimetro».
-    grace = t0 + timedelta(days=1)
-    added = lambda i: t0 if i["created"] < grace else i["created"]
-    rows = []
-    for t in stops:
-        scope = sum(i["points"] for i in mine if added(i) <= t)
-        done = sum(i["points"] for i in mine if i["done_at"] and i["done_at"] <= t)
-        rows.append(((t - t0).total_seconds() / 86400, scope, done, scope - done))
-    base = rows[0][1] if rows and rows[0][1] > 0 else sum(i["points"] for i in mine)
-    return mine, base, rows
+    miei = [e for e in elementi if not e.get("excluded") and e["iter"] and e["iter"]["title"] == titolo]
+    t0 = datetime.combine(inizio, datetime.min.time(), UTC)
+    istanti = [t0 + timedelta(days=k) for k in range(giorni + 1) if t0 + timedelta(days=k) <= adesso]
+    if adesso < t0 + timedelta(days=giorni):
+        istanti.append(adesso)                      # punto «adesso» se lo sprint è in corso
+    # i task aggiunti al project nel primo giorno (planning) fanno parte dello scope iniziale:
+    # solo quelli aggiunti dopo sono «aumento di perimetro»
+    tolleranza = t0 + timedelta(days=1)
+    aggiunto = lambda e: t0 if e["created"] < tolleranza else e["created"]
+    righe = []
+    for t in istanti:
+        scope = sum(e["points"] for e in miei if aggiunto(e) <= t)
+        fatti = sum(e["points"] for e in miei if e["done_at"] and e["done_at"] <= t)
+        righe.append(((t - t0).total_seconds() / 86400, scope, fatti, scope - fatti))
+    base = righe[0][1] if righe and righe[0][1] > 0 else sum(e["points"] for e in miei)
+    return miei, base, righe
 
 
-def _nice_step(ymax):
-    for s in (1, 2, 5, 10, 20, 50, 100):
-        if ymax / s <= 8:
-            return s
+def _passo_griglia(massimo):
+    for passo in (1, 2, 5, 10, 20, 50, 100):
+        if massimo / passo <= 8:
+            return passo
     return 100
 
 
-def render_svg(title, start, days, base, rows, now):
+def disegna_svg(titolo, inizio, giorni, base, righe, adesso):
     """Grafico in stile dashboard (riquadri di stato, previsione) con l'area colorata tra reale e ideale."""
     W, H = 960, 600
-    x_now = rows[-1][0] if rows else 0.0
-    scope, done, rem = (rows[-1][1], rows[-1][2], rows[-1][3]) if rows else (0.0, 0.0, 0.0)
-    finished = x_now >= days
-    ideal = lambda x: base * (1 - x / days)
-    behind = rem - ideal(x_now)
-    left = max(0.0, days - x_now)
-    velocity = done / x_now if x_now > 0 else 0.0
-    forecast_end = rem if finished else max(0.0, rem - velocity * left)
-    ymax = max([base, scope, 1.0] + [r[1] for r in rows]) * 1.12
-    px0, py0, pw, ph = 100, 220, 790, 280
-    X = lambda d: px0 + pw * d / days
-    Y = lambda v: py0 + ph * (1 - v / ymax)
+    giorno_ora = righe[-1][0] if righe else 0.0
+    scope, fatti, rimanenti = (righe[-1][1], righe[-1][2], righe[-1][3]) if righe else (0.0, 0.0, 0.0)
+    concluso = giorno_ora >= giorni
+    ideale = lambda g: base * (1 - g / giorni)
+    scarto = rimanenti - ideale(giorno_ora)          # > 0 in ritardo, < 0 in anticipo
+    giorni_rimasti = max(0.0, giorni - giorno_ora)
+    velocita = fatti / giorno_ora if giorno_ora > 0 else 0.0
+    previsione = rimanenti if concluso else max(0.0, rimanenti - velocita * giorni_rimasti)
+    y_max = max([base, scope, 1.0] + [r[1] for r in righe]) * 1.12
+    px0, py0, pw, ph = 100, 220, 790, 280            # zona del grafico
+    X = lambda g: px0 + pw * g / giorni
+    Y = lambda v: py0 + ph * (1 - v / y_max)
     o = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" font-family="Arial">',
          f'<rect width="{W}" height="{H}" fill="#f3f4f6"/>']
 
-    def text(x, y, s, size=12, anchor="middle", color="#0f172a", weight="normal"):
-        o.append(f'<text x="{x:.1f}" y="{y:.1f}" font-size="{size}" text-anchor="{anchor}" fill="{color}" '
-                 f'font-weight="{weight}">{html.escape(str(s))}</text>')
+    def testo(x, y, s, dim=12, ancora="middle", colore="#0f172a", peso="normal"):
+        o.append(f'<text x="{x:.1f}" y="{y:.1f}" font-size="{dim}" text-anchor="{ancora}" fill="{colore}" '
+                 f'font-weight="{peso}">{html.escape(str(s))}</text>')
 
-    def line(x1, y1, x2, y2, color, w=1.5, dash=""):
-        d = f' stroke-dasharray="{dash}"' if dash else ""
-        o.append(f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}" stroke="{color}" stroke-width="{w}"{d}/>')
+    def linea(x1, y1, x2, y2, colore, sp=1.5, tratto=""):
+        d = f' stroke-dasharray="{tratto}"' if tratto else ""
+        o.append(f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}" stroke="{colore}" stroke-width="{sp}"{d}/>')
 
-    def rect(x, y, w, h, fill, rx=8, stroke="none", sw=1, op=1.0):
-        o.append(f'<rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{h:.1f}" rx="{rx}" fill="{fill}" '
-                 f'fill-opacity="{op}" stroke="{stroke}" stroke-width="{sw}"/>')
+    def rettangolo(x, y, w, h, riempimento, rx=8, bordo="none", sp=1, op=1.0):
+        o.append(f'<rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{h:.1f}" rx="{rx}" fill="{riempimento}" '
+                 f'fill-opacity="{op}" stroke="{bordo}" stroke-width="{sp}"/>')
 
-    def poly(pts, fill="none", op=1.0, stroke="none", w=1.5, dash="", closed=True):
-        tag, f = ("polygon", fill) if closed else ("polyline", "none")
-        d = f' stroke-dasharray="{dash}"' if dash else ""
-        o.append(f'<{tag} points="' + " ".join(f"{x:.1f},{y:.1f}" for x, y in pts) +
-                 f'" fill="{f}" fill-opacity="{op}" stroke="{stroke}" stroke-width="{w}" stroke-linejoin="round"{d}/>')
+    def poligono(punti, riempimento="none", op=1.0, bordo="none", sp=1.5, tratto="", chiuso=True):
+        tag, f = ("polygon", riempimento) if chiuso else ("polyline", "none")
+        d = f' stroke-dasharray="{tratto}"' if tratto else ""
+        o.append(f'<{tag} points="' + " ".join(f"{x:.1f},{y:.1f}" for x, y in punti) +
+                 f'" fill="{f}" fill-opacity="{op}" stroke="{bordo}" stroke-width="{sp}" stroke-linejoin="round"{d}/>')
 
     # intestazione
-    text(40, 42, f"Burndown · {title}", 22, "start", "#111827", "bold")
-    text(40, 62, f"{start:%d/%m/%Y} → {start + timedelta(days=days):%d/%m/%Y} · aggiornato al "
-                 f"{now:%d/%m %H:%M} UTC", 12, "start", "#6b7280")
+    testo(40, 42, f"Burndown · {titolo}", 22, "start", "#111827", "bold")
+    testo(40, 62, f"{inizio:%d/%m/%Y} → {inizio + timedelta(days=giorni):%d/%m/%Y} · aggiornato al "
+                  f"{adesso:%d/%m %H:%M} UTC", 12, "start", "#6b7280")
     # riquadri
-    if finished:
-        stato = ("Concluso", "tutto completato" if rem <= 0 else f"{rem:g} punti non completati",
-                 "#047857" if rem <= 0 else "#b91c1c")
-    elif behind > 0.5:
-        stato = ("In ritardo", f"{behind:.1f} punti sopra la linea ideale", "#b91c1c")
-    elif behind < -0.5:
-        stato = ("In anticipo", f"{-behind:.1f} punti sotto la linea ideale", "#1d4ed8")
+    if concluso:
+        stato = ("Concluso", "tutto completato" if rimanenti <= 0 else f"{rimanenti:g} punti non completati",
+                 "#047857" if rimanenti <= 0 else "#b91c1c")
+    elif scarto > 0.5:
+        stato = ("In ritardo", f"{scarto:.1f} punti sopra la linea ideale", "#b91c1c")
+    elif scarto < -0.5:
+        stato = ("In anticipo", f"{-scarto:.1f} punti sotto la linea ideale", "#1d4ed8")
     else:
         stato = ("In linea", "sulla linea ideale", "#047857")
-    pct = f"{done / scope:.0%} del lavoro" if scope else "nessun task"
-    cards = [("RIMANENTI", f"{rem:g}", "punti", "#1d4ed8"),
-             ("COMPLETATI", f"{done:g} / {scope:g}", pct, "#047857"),
-             ("GIORNI RIMASTI", f"{left:.1f}", f"su {days}", "#6d28d9"),
-             ("STATO", stato[0], stato[1], stato[2])]
-    for k, (t, v, sub, col) in enumerate(cards):
+    perc = f"{fatti / scope:.0%} del lavoro" if scope else "nessun task"
+    riquadri = [("RIMANENTI", f"{rimanenti:g}", "punti", "#1d4ed8"),
+                ("COMPLETATI", f"{fatti:g} / {scope:g}", perc, "#047857"),
+                ("GIORNI RIMASTI", f"{giorni_rimasti:.1f}", f"su {giorni}", "#6d28d9"),
+                ("STATO", stato[0], stato[1], stato[2])]
+    for k, (etichetta, valore, sotto, colore) in enumerate(riquadri):
         x = 40 + k * 224
-        rect(x, 82, 208, 92, "#ffffff", 12, "#e5e7eb")
-        rect(x, 82, 6, 92, col, 3)
-        text(x + 20, 106, t, 11, "start", "#6b7280", "bold")
-        text(x + 20, 142, v, 28 if len(str(v)) < 9 else 22, "start", col, "bold")
-        text(x + 20, 162, sub, 11, "start", "#6b7280")
-    rect(40, 192, 880, 394, "#ffffff", 12, "#e5e7eb")
+        rettangolo(x, 82, 208, 92, "#ffffff", 12, "#e5e7eb")
+        rettangolo(x, 82, 6, 92, colore, 3)
+        testo(x + 20, 106, etichetta, 11, "start", "#6b7280", "bold")
+        testo(x + 20, 142, valore, 28 if len(str(valore)) < 9 else 22, "start", colore, "bold")
+        testo(x + 20, 162, sotto, 11, "start", "#6b7280")
+    rettangolo(40, 192, 880, 394, "#ffffff", 12, "#e5e7eb")
     # griglia
-    st = _nice_step(ymax)
-    for v in range(0, int(ymax) + 1, st):
-        line(px0, Y(v), px0 + pw, Y(v), "#f1f5f9", 1)
-        text(px0 - 8, Y(v) + 4, v, 11, "end", "#6b7280")
-    every = max(1, round(days / 7))
-    for d in range(0, days + 1, every):
-        line(X(d), py0, X(d), py0 + ph, "#f8fafc", 1)
-        text(X(d), py0 + ph + 16, f"{start + timedelta(days=d):%d/%m}", 10, "middle", "#6b7280")
+    passo = _passo_griglia(y_max)
+    for v in range(0, int(y_max) + 1, passo):
+        linea(px0, Y(v), px0 + pw, Y(v), "#f1f5f9", 1)
+        testo(px0 - 8, Y(v) + 4, v, 11, "end", "#6b7280")
+    ogni = max(1, round(giorni / 7))
+    for g in range(0, giorni + 1, ogni):
+        linea(X(g), py0, X(g), py0 + ph, "#f8fafc", 1)
+        testo(X(g), py0 + ph + 16, f"{inizio + timedelta(days=g):%d/%m}", 10, "middle", "#6b7280")
     # area colorata tra reale e ideale (rosa = in ritardo, azzurra = in anticipo)
-    xs, acts = [r[0] for r in rows], [r[3] for r in rows]
+    xs, reali = [r[0] for r in righe], [r[3] for r in righe]
     for i in range(len(xs) - 1):
-        x0, x1, a0, a1 = xs[i], xs[i + 1], acts[i], acts[i + 1]
-        d0, d1 = a0 - ideal(x0), a1 - ideal(x1)
+        x0, x1, a0, a1 = xs[i], xs[i + 1], reali[i], reali[i + 1]
+        d0, d1 = a0 - ideale(x0), a1 - ideale(x1)
         if d0 * d1 >= 0:
-            col = "#f9a8d4" if (d0 + d1) > 0 else "#93c5fd"
-            poly([(X(x0), Y(a0)), (X(x1), Y(a1)), (X(x1), Y(ideal(x1))), (X(x0), Y(ideal(x0)))], col, 0.5)
+            colore = "#f9a8d4" if (d0 + d1) > 0 else "#93c5fd"
+            poligono([(X(x0), Y(a0)), (X(x1), Y(a1)), (X(x1), Y(ideale(x1))), (X(x0), Y(ideale(x0)))], colore, 0.5)
         else:
-            t = d0 / (d0 - d1)
-            xc = x0 + t * (x1 - x0)
-            yc = ideal(xc)
-            poly([(X(x0), Y(a0)), (X(xc), Y(yc)), (X(x0), Y(ideal(x0)))], "#f9a8d4" if d0 > 0 else "#93c5fd", 0.5)
-            poly([(X(xc), Y(yc)), (X(x1), Y(a1)), (X(x1), Y(ideal(x1)))], "#f9a8d4" if d1 > 0 else "#93c5fd", 0.5)
-    poly([(X(0), Y(base)), (X(days), Y(0))], stroke="#6b7280", w=2, dash="7 5", closed=False)
-    if not finished and velocity > 0:
-        poly([(X(x_now), Y(rem)), (X(days), Y(forecast_end))], stroke="#ea580c", w=2.2, dash="3 4", closed=False)
-    if rows:
-        poly([(X(x), Y(a)) for x, a in zip(xs, acts)], stroke="#2563eb", w=3, closed=False)
-        for x, a in zip(xs, acts):
+            # le linee si incrociano: due triangoli divisi nel punto d'incrocio
+            quota = d0 / (d0 - d1)
+            xc = x0 + quota * (x1 - x0)
+            yc = ideale(xc)
+            poligono([(X(x0), Y(a0)), (X(xc), Y(yc)), (X(x0), Y(ideale(x0)))], "#f9a8d4" if d0 > 0 else "#93c5fd", 0.5)
+            poligono([(X(xc), Y(yc)), (X(x1), Y(a1)), (X(x1), Y(ideale(x1)))], "#f9a8d4" if d1 > 0 else "#93c5fd", 0.5)
+    poligono([(X(0), Y(base)), (X(giorni), Y(0))], bordo="#6b7280", sp=2, tratto="7 5", chiuso=False)
+    if not concluso and velocita > 0:
+        poligono([(X(giorno_ora), Y(rimanenti)), (X(giorni), Y(previsione))], bordo="#ea580c", sp=2.2, tratto="3 4", chiuso=False)
+    if righe:
+        poligono([(X(x), Y(a)) for x, a in zip(xs, reali)], bordo="#2563eb", sp=3, chiuso=False)
+        for x, a in zip(xs, reali):
             o.append(f'<circle cx="{X(x):.1f}" cy="{Y(a):.1f}" r="3.2" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>')
-    if not finished:
-        line(X(x_now), py0, X(x_now), py0 + ph, "#ef4444", 1.3, "4 3")
-        rect(X(x_now) - 24, py0 - 4, 48, 18, "#ef4444", 9)
-        text(X(x_now), py0 + 9, "OGGI", 10, "middle", "#ffffff", "bold")
-        if velocity > 0:
-            ok = forecast_end < 0.5
-            msg = ("Previsione: sprint completato in tempo" if ok
-                   else f"Previsione: {forecast_end:.0f} punti non completati a fine sprint")
-            bx, by = X(days), py0 + 32
-            o.append(f'<circle cx="{bx:.1f}" cy="{Y(forecast_end):.1f}" r="5" fill="#ea580c"/>')
-            line(bx, by + 26, bx, Y(forecast_end) - 6, "#ea580c", 1.2, "3 3")
-            rect(bx - 290, by, 290, 26, "#f0fdf4" if ok else "#fff7ed", 13, "#16a34a" if ok else "#ea580c", 1.2)
-            text(bx - 145, by + 17, msg, 11, "middle", "#15803d" if ok else "#c2410c", "bold")
+    if not concluso:
+        linea(X(giorno_ora), py0, X(giorno_ora), py0 + ph, "#ef4444", 1.3, "4 3")
+        rettangolo(X(giorno_ora) - 24, py0 - 4, 48, 18, "#ef4444", 9)
+        testo(X(giorno_ora), py0 + 9, "OGGI", 10, "middle", "#ffffff", "bold")
+        if velocita > 0:
+            in_tempo = previsione < 0.5
+            msg = ("Previsione: sprint completato in tempo" if in_tempo
+                   else f"Previsione: {previsione:.0f} punti non completati a fine sprint")
+            bx, by = X(giorni), py0 + 32
+            o.append(f'<circle cx="{bx:.1f}" cy="{Y(previsione):.1f}" r="5" fill="#ea580c"/>')
+            linea(bx, by + 26, bx, Y(previsione) - 6, "#ea580c", 1.2, "3 3")
+            rettangolo(bx - 290, by, 290, 26, "#f0fdf4" if in_tempo else "#fff7ed", 13, "#16a34a" if in_tempo else "#ea580c", 1.2)
+            testo(bx - 145, by + 17, msg, 11, "middle", "#15803d" if in_tempo else "#c2410c", "bold")
     # legenda
-    items = [(100, 534, "#2563eb", "", "punti rimanenti"), (260, 534, "#6b7280", "7 5", "ideale")]
-    if not finished and velocity > 0:
-        items.append((340, 534, "#ea580c", "3 4", f"previsione al ritmo attuale ({velocity:.1f} punti/giorno)"))
-    for x, y, col, dash, txt in items:
-        line(x, y, x + 30, y, col, 3, dash)
-        text(x + 38, y + 4, txt, 12, "start", "#374151")
-    rect(100, 551, 22, 14, "#f9a8d4", 3, op=0.7)
-    text(128, 562, "area rosa: in ritardo rispetto all'ideale", 12, "start", "#374151")
-    rect(430, 551, 22, 14, "#93c5fd", 3, op=0.7)
-    text(458, 562, "area azzurra: in anticipo rispetto all'ideale", 12, "start", "#374151")
+    voci = [(100, 534, "#2563eb", "", "punti rimanenti"), (260, 534, "#6b7280", "7 5", "ideale")]
+    if not concluso and velocita > 0:
+        voci.append((340, 534, "#ea580c", "3 4", f"previsione al ritmo attuale ({velocita:.1f} punti/giorno)"))
+    for x, y, colore, tratto, descrizione in voci:
+        linea(x, y, x + 30, y, colore, 3, tratto)
+        testo(x + 38, y + 4, descrizione, 12, "start", "#374151")
+    rettangolo(100, 551, 22, 14, "#f9a8d4", 3, op=0.7)
+    testo(128, 562, "area rosa: in ritardo rispetto all'ideale", 12, "start", "#374151")
+    rettangolo(430, 551, 22, 14, "#93c5fd", 3, op=0.7)
+    testo(458, 562, "area azzurra: in anticipo rispetto all'ideale", 12, "start", "#374151")
     o.append("</svg>")
     return "\n".join(o)
 
 
-def demo_items():
+def dati_demo():
     """Dati finti: sprint di 21 giorni, 10 task di taglie diverse, qualcuno aggiunto in corso."""
-    start = date(2026, 10, 15)
-    def it(title, pts, created_day, done_day):
-        t0 = datetime.combine(start, datetime.min.time(), UTC)
-        return {"title": title, "points": float(pts), "created": t0 + timedelta(days=created_day),
-                "done_at": t0 + timedelta(days=done_day, hours=12) if done_day is not None else None,
-                "iter": {"title": "S1 - Preparazione", "startDate": start.isoformat(), "duration": 21}}
-    return [it("S1-01", 3, -2, 5), it("S1-02", 5, -2, 8), it("S1-03", 5, -2, 12), it("S1-04", 3, -2, 9),
-            it("S1-05", 5, -2, 15), it("S1-06", 3, -2, None), it("S1-07", 5, -2, None), it("S1-08", 2, -2, None),
-            it("S1-09", 3, 4, None), it("S1-10", 2, 6, None)]
+    inizio = date(2026, 10, 15)
+
+    def task(titolo, punti, giorno_creato, giorno_fatto):
+        t0 = datetime.combine(inizio, datetime.min.time(), UTC)
+        return {"title": titolo, "points": float(punti), "created": t0 + timedelta(days=giorno_creato),
+                "done_at": t0 + timedelta(days=giorno_fatto, hours=12) if giorno_fatto is not None else None,
+                "iter": {"title": "S1 - Preparazione", "startDate": inizio.isoformat(), "duration": 21}}
+
+    return [task("S1-01", 3, -2, 5), task("S1-02", 5, -2, 8), task("S1-03", 5, -2, 12), task("S1-04", 3, -2, 9),
+            task("S1-05", 5, -2, 15), task("S1-06", 3, -2, None), task("S1-07", 5, -2, None), task("S1-08", 2, -2, None),
+            task("S1-09", 3, 4, None), task("S1-10", 2, 6, None)]
 
 
-def inspect(ptitle, nodes):
+def ispeziona(titolo_project, righe):
     """Diagnostica: mostra project, campi e valori trovati, per controllare i nomi in configurazione."""
-    seen = {}
-    for n in nodes:
-        for v in n["fieldValues"]["nodes"]:
-            name = (v.get("field") or {}).get("name")
-            if not name:
+    visti = {}
+    for riga in righe:
+        for valore in riga["fieldValues"]["nodes"]:
+            nome = (valore.get("field") or {}).get("name")
+            if not nome:
                 continue
-            val = v.get("name") or v.get("number") or (f"{v['title']} ({v['startDate']}, {v['duration']} gg)"
-                                                       if "startDate" in v else "?")
-            seen.setdefault((name, v["__typename"].replace("ProjectV2ItemField", "")), set()).add(str(val))
-    print(f"Project «{ptitle}»: {len(nodes)} item")
-    counted_nodes = [n for n in nodes if not exclusion_reason(n["content"])]
-    print(f"Item conteggiabili: {len(counted_nodes)}; esclusi: {len(nodes) - len(counted_nodes)}")
-    for n in nodes:
-        reason = exclusion_reason(n["content"])
-        if reason:
-            print(f"  escluso [{reason}]: {(n['content'] or {}).get('title', '?')}")
-    for (name, kind), vals in sorted(seen.items()):
-        print(f"  campo «{name}» [{kind}]: {sorted(vals)}")
-    iters = {}
-    for n in nodes:
-        for v in n["fieldValues"]["nodes"]:
-            if "startDate" in v:
-                iters[v["title"]] = (date.fromisoformat(v["startDate"]), int(v["duration"]))
+            testo = valore.get("name") or valore.get("number") or (
+                f"{valore['title']} ({valore['startDate']}, {valore['duration']} gg)" if "startDate" in valore else "?")
+            visti.setdefault((nome, valore["__typename"].replace("ProjectV2ItemField", "")), set()).add(str(testo))
+    print(f"Project «{titolo_project}»: {len(righe)} item")
+    contabili = [r for r in righe if not motivo_esclusione(r["content"])]
+    print(f"Item conteggiabili: {len(contabili)}; esclusi: {len(righe) - len(contabili)}")
+    for riga in righe:
+        motivo = motivo_esclusione(riga["content"])
+        if motivo:
+            print(f"  escluso [{motivo}]: {(riga['content'] or {}).get('title', '?')}")
+    for (nome, tipo), valori in sorted(visti.items()):
+        print(f"  campo «{nome}» [{tipo}]: {sorted(valori)}")
+    iterazioni = {}
+    for riga in righe:
+        for valore in riga["fieldValues"]["nodes"]:
+            if "startDate" in valore:
+                iterazioni[valore["title"]] = (date.fromisoformat(valore["startDate"]), int(valore["duration"]))
     print("Iterazioni trovate (con item) e confronto con il piano del progetto:")
-    for t, (st, d) in sorted(iters.items(), key=lambda kv: kv[1][0]):
-        esito = "ok" if PIANO.get(st) == d else (
-            f"ATTENZIONE: il piano prevede {PIANO[st]} giorni da quella data" if st in PIANO
+    for titolo, (inizio, durata) in sorted(iterazioni.items(), key=lambda kv: kv[1][0]):
+        esito = "ok" if PIANO_SPRINT.get(inizio) == durata else (
+            f"ATTENZIONE: il piano prevede {PIANO_SPRINT[inizio]} giorni da quella data" if inizio in PIANO_SPRINT
             else "ATTENZIONE: data di inizio non presente nel piano")
-        print(f"  «{t}»: {st:%d/%m/%Y}, {d} gg, fine {st + timedelta(days=d):%d/%m/%Y} -> {esito}")
-    pf, sf = os.environ.get("POINTS_FIELD", "Estimate"), os.environ.get("SIZE_FIELD", "Size")
-    print(f"Task per iterazione e stima (campo Number «{pf}», altrimenti taglia «{sf}», altrimenti 1 punto):")
-    for t in sorted(iters, key=lambda k: iters[k][0]):
-        tot = no = 0
-        for n in counted_nodes:
-            vals = n["fieldValues"]["nodes"]
-            if not any("startDate" in v and v["title"] == t for v in vals):
+        print(f"  «{titolo}»: {inizio:%d/%m/%Y}, {durata} gg, fine {inizio + timedelta(days=durata):%d/%m/%Y} -> {esito}")
+    campo_punti, campo_taglia = os.environ.get("POINTS_FIELD", "Estimate"), os.environ.get("SIZE_FIELD", "Size")
+    print(f"Task per iterazione e stima (campo Number «{campo_punti}», altrimenti taglia «{campo_taglia}», altrimenti 1 punto):")
+    for titolo in sorted(iterazioni, key=lambda k: iterazioni[k][0]):
+        totale = senza_stima = 0
+        for riga in contabili:
+            valori = riga["fieldValues"]["nodes"]
+            if not any("startDate" in v and v["title"] == titolo for v in valori):
                 continue
-            tot += 1
-            has_num = any(v["__typename"] == "ProjectV2ItemFieldNumberValue" and (v.get("field") or {}).get("name") == pf
-                          for v in vals)
-            has_size = any(v["__typename"] == "ProjectV2ItemFieldSingleSelectValue" and (v.get("field") or {}).get("name") == sf
-                           for v in vals)
-            no += not (has_num or has_size)
-        print(f"  «{t}»: {tot} task, {no} senza stima" + ("  <- contati come 1 punto" if no else ""))
-        stf = os.environ.get("STATUS_FIELD", "Status")
+            totale += 1
+            ha_numero = any(v["__typename"] == "ProjectV2ItemFieldNumberValue" and (v.get("field") or {}).get("name") == campo_punti
+                            for v in valori)
+            ha_taglia = any(v["__typename"] == "ProjectV2ItemFieldSingleSelectValue" and (v.get("field") or {}).get("name") == campo_taglia
+                            for v in valori)
+            senza_stima += not (ha_numero or ha_taglia)
+        print(f"  «{titolo}»: {totale} task, {senza_stima} senza stima" + ("  <- contati come 1 punto" if senza_stima else ""))
+        campo_stato = os.environ.get("STATUS_FIELD", "Status")
         somma = 0.0
-        for n in counted_nodes:
-            vals = n["fieldValues"]["nodes"]
-            if not any("startDate" in v and v["title"] == t for v in vals):
+        for riga in contabili:
+            valori = riga["fieldValues"]["nodes"]
+            if not any("startDate" in v and v["title"] == titolo for v in valori):
                 continue
-            num = next((v["number"] for v in vals if v["__typename"] == "ProjectV2ItemFieldNumberValue"
-                        and (v.get("field") or {}).get("name") == pf), None)
-            size = next((v["name"] for v in vals if v["__typename"] == "ProjectV2ItemFieldSingleSelectValue"
-                         and (v.get("field") or {}).get("name") == sf), None)
-            stato = next((v["name"] for v in vals if v["__typename"] == "ProjectV2ItemFieldSingleSelectValue"
-                          and (v.get("field") or {}).get("name") == stf), "?")
-            if num is not None:
-                punti, da = num, pf
-            elif size in SIZE_POINTS:
-                punti, da = SIZE_POINTS[size], f"{sf}={size}"
+            numero = next((v["number"] for v in valori if v["__typename"] == "ProjectV2ItemFieldNumberValue"
+                           and (v.get("field") or {}).get("name") == campo_punti), None)
+            taglia = next((v["name"] for v in valori if v["__typename"] == "ProjectV2ItemFieldSingleSelectValue"
+                           and (v.get("field") or {}).get("name") == campo_taglia), None)
+            stato = next((v["name"] for v in valori if v["__typename"] == "ProjectV2ItemFieldSingleSelectValue"
+                          and (v.get("field") or {}).get("name") == campo_stato), "?")
+            if numero is not None:
+                punti, da = numero, campo_punti
+            elif taglia in PUNTI_PER_TAGLIA:
+                punti, da = PUNTI_PER_TAGLIA[taglia], f"{campo_taglia}={taglia}"
             else:
                 punti, da = 1, "NESSUNA STIMA (default)"
             somma += punti
-            titolo = (n["content"] or {}).get("title", "?")
-            print(f"      {punti:>4g} pt  [{da}]  {stato:<12} {titolo[:60]}  (aggiunto al project: {n['createdAt'][:16]})")
+            nome_task = (riga["content"] or {}).get("title", "?")
+            print(f"      {punti:>4g} pt  [{da}]  {stato:<12} {nome_task[:60]}  (aggiunto al project: {riga['createdAt'][:16]})")
         print(f"      totale punti dell'iterazione: {somma:g}")
-    print("Item senza issue collegata (bozze):", sum(1 for n in nodes if (n['content'] or {}).get('__typename') == 'DraftIssue'))
+    print("Item senza issue collegata (bozze):", sum(1 for r in righe if (r['content'] or {}).get('__typename') == 'DraftIssue'))
 
 
 def main():
     if "--demo" in sys.argv:
-        items = demo_items()
-        now = datetime(2026, 10, 30, 12, tzinfo=UTC)
-        out = Path(os.environ.get("OUT_DIR", "."))
+        elementi = dati_demo()
+        adesso = datetime(2026, 10, 30, 12, tzinfo=UTC)
+        cartella = Path(os.environ.get("OUT_DIR", "."))
     else:
-        cfg = {"iter_field": os.environ.get("ITERATION_FIELD", "Iteration"),
-               "status_field": os.environ.get("STATUS_FIELD", "Status"),
-               "done_value": os.environ.get("DONE_VALUE", "Done"),
-               "points_field": os.environ.get("POINTS_FIELD", "Estimate"),
-               "size_field": os.environ.get("SIZE_FIELD", "Size")}
-        ptitle, nodes = graphql(os.environ["PROJECT_TOKEN"], os.environ.get("OWNER_TYPE", "user"),
-                                os.environ["PROJECT_OWNER"], int(os.environ["PROJECT_NUMBER"]))
+        config = {"iter_field": os.environ.get("ITERATION_FIELD", "Iteration"),
+                  "status_field": os.environ.get("STATUS_FIELD", "Status"),
+                  "done_value": os.environ.get("DONE_VALUE", "Done"),
+                  "points_field": os.environ.get("POINTS_FIELD", "Estimate"),
+                  "size_field": os.environ.get("SIZE_FIELD", "Size")}
+        titolo_project, righe = scarica_righe(os.environ["PROJECT_TOKEN"], os.environ.get("OWNER_TYPE", "user"),
+                                              os.environ["PROJECT_OWNER"], int(os.environ["PROJECT_NUMBER"]))
         if "--inspect" in sys.argv:
-            inspect(ptitle, nodes)
+            ispeziona(titolo_project, righe)
             return
-        items = normalize(nodes, cfg)
-        now = datetime.now(UTC)
-        out = Path(os.environ.get("OUT_DIR", "docs/burndown"))
-    title, start, days = pick_iteration(items, os.environ.get("ITERATION_TITLE", ""), now.date())
-    mine, base, rows = compute(items, title, start, days, now)
-    out.mkdir(parents=True, exist_ok=True)
-    slug = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
-    with open(out / f"burndown-{slug}.csv", "w", newline="", encoding="utf-8") as fh:
+        elementi = normalizza(righe, config)
+        adesso = datetime.now(UTC)
+        cartella = Path(os.environ.get("OUT_DIR", "docs/burndown"))
+    titolo, inizio, giorni = scegli_iterazione(elementi, os.environ.get("ITERATION_TITLE", ""), adesso.date())
+    miei, base, righe = calcola(elementi, titolo, inizio, giorni, adesso)
+    cartella.mkdir(parents=True, exist_ok=True)
+    slug = re.sub(r"[^a-z0-9]+", "-", titolo.lower()).strip("-")
+    with open(cartella / f"burndown-{slug}.csv", "w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh)
         w.writerow(["giorno", "scope", "completati", "rimanenti"])
-        w.writerows([(f"{r[0]:.2f}", r[1], r[2], r[3]) for r in rows])
-    svg = render_svg(title, start, days, base, rows, now)
-    (out / f"burndown-{slug}.svg").write_text(svg, encoding="utf-8")
+        w.writerows([(f"{r[0]:.2f}", r[1], r[2], r[3]) for r in righe])
+    svg = disegna_svg(titolo, inizio, giorni, base, righe, adesso)
+    (cartella / f"burndown-{slug}.svg").write_text(svg, encoding="utf-8")
     # copia con nome fisso: il README punta sempre a questo file, che mostra lo sprint in corso
-    (out / "burndown-latest.svg").write_text(svg, encoding="utf-8")
-    print(f"{title}: {len(mine)} item conteggiati, base {base:g} punti, rimanenti {rows[-1][3]:g}" if rows else "nessun dato")
+    (cartella / "burndown-latest.svg").write_text(svg, encoding="utf-8")
+    print(f"{titolo}: {len(miei)} item conteggiati, base {base:g} punti, rimanenti {righe[-1][3]:g}" if righe else "nessun dato")
 
 
 if __name__ == "__main__":
