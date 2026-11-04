@@ -73,16 +73,7 @@
 
         #stage.no-anim .slide { transition: none !important; }
 
-        /* Dissolvenza (predefinita): solo opacità */
-        #stage[data-fx="fade"] .slide { transform: none; }
-
-        /* Scorri: la slide entra dal lato verso cui si avanza */
-        #stage[data-fx="slide"] .slide[data-state="before"] { transform: translateX(-14%); }
-        #stage[data-fx="slide"] .slide[data-state="after"]  { transform: translateX(14%); }
-
-        /* Zoom: la slide uscente si ingrandisce, quella entrante arriva da lontano */
-        #stage[data-fx="zoom"] .slide[data-state="before"] { transform: scale(1.18); }
-        #stage[data-fx="zoom"] .slide[data-state="after"]  { transform: scale(.86); }
+        /* Transizione tra le slide: dissolvenza (solo opacità) */
 
         .bg-cream { --bg: var(--cream); --pn: var(--muted); }
         .bg-white { --bg: #fff;         --pn: var(--muted); }
@@ -324,7 +315,6 @@
         .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
         @media (max-width: 640px) {
-            .ui .label { display: none; }
             .ui-bar { bottom: 12px; }
         }
 
@@ -347,7 +337,7 @@
     <h1 class="sr-only">PICUS – Sprint Review del 5 novembre – Pinguini alla Fragola</h1>
     <noscript><p style="padding:2rem;font:18px Arial,sans-serif">Questa presentazione richiede JavaScript.</p></noscript>
 
-    <main id="stage" data-fx="fade" class="no-anim" aria-roledescription="presentazione">
+    <main id="stage" class="no-anim" aria-roledescription="presentazione">
 
         <!-- 1 ───────────────────────────── Obiettivo e contesto -->
         <section class="slide bg-cream" data-bg="#FFF8EC" aria-label="Slide 1 di 8: PICUS, obiettivo e contesto">
@@ -545,10 +535,6 @@
     <div class="progress" aria-hidden="true"></div>
 
     <div class="ui ui-bar" role="toolbar" aria-label="Comandi della presentazione">
-        <a href="../index.html" id="home" title="Torna alla home" aria-label="Torna alla home">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7"/><path d="M6 10v9h12v-9"/></svg>
-        </a>
-        <span class="sep" aria-hidden="true"></span>
         <button type="button" id="prev" title="Slide precedente (←)" aria-label="Slide precedente">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
         </button>
@@ -557,10 +543,6 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
         </button>
         <span class="sep" aria-hidden="true"></span>
-        <button type="button" id="fx" title="Cambia effetto di transizione (T)" aria-label="Cambia effetto di transizione">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>
-            <span class="label" id="fx-label">Dissolvenza</span>
-        </button>
         <button type="button" id="full" title="Schermo intero (F)" aria-label="Schermo intero">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
         </button>
@@ -577,24 +559,10 @@
             const count = document.getElementById('count');
             const prevBtn = document.getElementById('prev');
             const nextBtn = document.getElementById('next');
-            const fxBtn = document.getElementById('fx');
-            const fxLabel = document.getElementById('fx-label');
             const fullBtn = document.getElementById('full');
             const toast = document.getElementById('toast');
 
-            const effects = [
-                { id: 'fade', label: 'Dissolvenza' },
-                { id: 'slide', label: 'Scorri' },
-                { id: 'zoom', label: 'Zoom' }
-            ];
-
             let current = -1;
-            let fxIndex = 0;
-
-            try {
-                const saved = effects.findIndex(e => e.id === localStorage.getItem('picus-review-fx-v2'));
-                if (saved >= 0) fxIndex = saved;
-            } catch (e) { /* localStorage non disponibile: si usa l'effetto predefinito */ }
 
             /* ---- preparazione delle animazioni di costruzione ---- */
 
@@ -661,26 +629,13 @@
             const next = () => go(current + 1);
             const prev = () => go(current - 1);
 
-            /* ---- effetti ---- */
-            function applyEffect(announce) {
-                const fx = effects[fxIndex];
-                stage.dataset.fx = fx.id;
-                fxLabel.textContent = fx.label;
-                try { localStorage.setItem('picus-review-fx-v2', fx.id); } catch (e) { /* ignorato */ }
-                if (announce) showToast('Transizione: ' + fx.label);
-            }
-
+            /* ---- messaggio temporaneo ---- */
             let toastTimer;
             function showToast(text) {
                 toast.textContent = text;
                 toast.classList.add('show');
                 clearTimeout(toastTimer);
                 toastTimer = setTimeout(() => toast.classList.remove('show'), 1400);
-            }
-
-            function cycleEffect() {
-                fxIndex = (fxIndex + 1) % effects.length;
-                applyEffect(true);
             }
 
             function toggleFullscreen() {
@@ -694,7 +649,6 @@
             /* ---- comandi e tastiera ---- */
             prevBtn.addEventListener('click', prev);
             nextBtn.addEventListener('click', next);
-            fxBtn.addEventListener('click', cycleEffect);
             fullBtn.addEventListener('click', toggleFullscreen);
 
             document.addEventListener('keydown', (e) => {
@@ -710,7 +664,6 @@
                     case 'Home': e.preventDefault(); go(0); break;
                     case 'End': e.preventDefault(); go(total - 1); break;
                     case 'f': case 'F': toggleFullscreen(); break;
-                    case 't': case 'T': cycleEffect(); break;
                     default:
                         if (/^[1-9]$/.test(e.key)) go(Number(e.key) - 1);
                 }
@@ -743,11 +696,10 @@
 
             /* ---- avvio ---- */
             fit();
-            applyEffect(false);
             const start = parseInt(location.hash.slice(1), 10);
             go(Number.isNaN(start) ? 0 : start - 1);
             wake();
-            requestAnimationFrame(() => requestAnimationFrame(() => stage.classList.remove('no-anim')));
+            setTimeout(() => stage.classList.remove('no-anim'), 80);
 
             if (window.innerHeight > window.innerWidth && window.innerWidth < 700) {
                 showToast('Ruota lo schermo per leggere meglio le slide');
