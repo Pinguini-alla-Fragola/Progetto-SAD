@@ -10,7 +10,6 @@ decisioni ancora aperte sono distinte; implementazione e approvazioni non sono p
 - [Scenari di qualità](quality-scenarios/README.md)
 - [Registro dei chiarimenti](requirements/open-questions.md)
 - [Proposta di MVP](requirements/proposta-mvp.md)
-- [Scaletta della review del 5 novembre](reviews/2026-11-05-scaletta-review.md)
 - [Architettura](architecture/README.md)
 - [Registro delle decisioni](adr/README.md)
 - [Review delle iterazioni](reviews/README.md)

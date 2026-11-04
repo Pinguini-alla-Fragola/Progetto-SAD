@@ -12,8 +12,3 @@ Per ogni iterazione aggiungere un resoconto con:
 
 Durante la preparazione il risultato consiste negli artefatti di analisi;
 il completamento di una task non attesta l'implementazione della funzionalità.
-
-## Verifiche documentali
-
-- [Coerenza dopo il confronto con lo stakeholder del 21 ottobre 2026](2026-10-21-coerenza-stakeholder-context.md)
-
