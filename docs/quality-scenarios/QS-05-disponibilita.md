@@ -1,35 +1,17 @@
 # QS-05 Ripristino del servizio dopo un fermo
 
-**Area e priorità:** Disponibilità / P2
+**Attributo di qualità:** Disponibilità.
 
-## Sorgente
+**Priorità proposta:** P2.
 
-Un guasto del processo applicativo o dell’istanza che lo esegue.
+**Motivazione:** Dopo un'interruzione, OPT, Banco e operatori devono poter riprendere il lavoro ritrovando i dati già salvati. La tolleranza ai fermi descritta nelle fonti consente di proporre un ripristino nell'arco di alcune ore.
 
-## Stimolo
+## Scenario
 
-PICUS diventa temporaneamente indisponibile dopo che alcuni dati sono stati registrati dal sistema.
+| Source | Stimulus | Environment | Artifact | Response | Response measure |
+|---|---|---|---|---|---|
+| Un guasto del processo applicativo o dell'istanza che lo esegue. | PICUS diventa temporaneamente indisponibile dopo che alcuni dati sono stati salvati. | Fermo del servizio con database integro e dati salvati ancora disponibili. Perdita del database e disastro dell'intera infrastruttura richiedono una politica di backup e uno scenario separati. | Applicazione, collegamento al database e procedura di ripristino. | Il servizio viene ripristinato seguendo una procedura documentata. Gli utenti ritrovano i dati già salvati e gli invii non riusciti non vengono mostrati come completati. | Obiettivo proposto: ripristino entro 4 ore dal fermo, con il 100% dei dati già salvati ancora disponibile nel caso di database integro. Il tempo termina quando riescono tutte e tre le operazioni di prova: accesso, lettura e nuovo invio. |
 
-## Ambiente
+## Approccio di verifica
 
-Fermo del servizio con database integro e dati persistiti disponibili. Perdita del database e disastro dell’intera infrastruttura richiedono uno scenario e una politica di backup separati.
-
-## Artefatto
-
-Applicazione, connessione alla persistenza e procedura di ripristino.
-
-## Risposta
-
-Il servizio viene ripristinato mediante una procedura documentata; gli utenti ritrovano i dati già registrati e gli invii non riusciti non appaiono falsamente completati.
-
-## Misura della risposta
-
-Obiettivo proposto: ripristino entro 4 ore dal fermo, con 100% dei record già registrati ancora disponibili nel caso di database integro. Il tempo è misurato fino al completamento riuscito di accesso, lettura e nuovo invio di prova.
-
-## Stato delle soglie
-
-F02 tollera alcune ore e, eccezionalmente, un paio di giorni; non stabilisce un SLA. Le 4 ore sono una proposta da concordare in Q-07. Nessuna garanzia sulla perdita del database viene dedotta.
-
-## Metodo di verifica previsto
-
-In un ambiente di prova interrompere il solo servizio, eseguire il runbook e confrontare i record prima e dopo. Registrare tempi e limiti a fine costruzione, con la procedura di ripristino completa.
+In un ambiente di prova interrompere il solo servizio, seguire la procedura documentata di ripristino e confrontare i dati prima e dopo. Verificare accesso, lettura e nuovo invio, oltre all'assenza di false conferme per gli invii non riusciti. Registrare tempi, configurazione e limiti della procedura.

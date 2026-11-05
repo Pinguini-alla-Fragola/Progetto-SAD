@@ -1,75 +1,28 @@
 # Requisiti e modelli di analisi
 
-Questa cartella raccoglie stakeholder, contesto, processi as-is e to-be,
-User Story, criteri di accettazione, ipotesi e domande aperte.
-L'analisi già redatta è nel
-[documento di progetto Word](../Documentazione_SAD_2026.docx).
-Il processo as-is è ricostruito dalle fonti in due diagrammi Mermaid.
-Il to-be è prodotto in tre viste Mermaid e descritto nella
-[guida ai diagrammi](guida-diagramma-to-be.md), con IP-01/IP-02 da validare.
-Sono disponibili anche il [registro dei chiarimenti](open-questions.md) e la
-[proposta di MVP](proposta-mvp.md), allineati al Word v0.5.
+Analisi e modelli PICUS, allineati alla revisione del **04/11/2026** e al Word/PDF v0.7. Le [regole funzionali](regole-funzionali.md) distinguono scelte del gruppo, risposte acquisite e residui; il [registro](open-questions.md) conserva i quesiti realmente aperti.
 
-Il Product Backlog resta la fonte operativa per il lavoro pianificato;
-qui si conservano riepiloghi stabili e modelli di supporto. Distinguere sempre
-fonti, proposte, ipotesi e requisiti concordati con relativa evidenza.
+- [Revisione del backlog](revisione-backlog-2026-11-04.md)
+- [MVP proposto](proposta-mvp.md): sei Story dopo l’accorpamento #52/#53, con la porzione pertinente del vincolo #28
+- [Regole comuni account e credenziali](regole-accessi.md)
+- [Tracciati di monitoraggio in bozza](tracciati-monitoraggio.md)
+- [Guida dei diagrammi to-be](guida-diagramma-to-be.md)
+- Word di progetto nell’area OneDrive condivisa; [esportazione PDF](../Documentazione_SAD_2026.pdf).
 
-## Dominio e stakeholder
+## Soggetti e confini
 
-- Il Banco coordina richieste, erogatori, disponibilità e appuntamenti.
-- Le OPT possono richiedere e offrire misure e mantengono i contatti con gli assistiti.
-- Gli operatori PICUS e i professionisti esterni erogano misure, confermano
-  appuntamenti e presentano le proprie schede trimestrali.
-- La gestione interna del personale delle OPT resta in capo alle organizzazioni.
-- Gli assistiti sono stakeholder senza account o dati identificativi nel sistema.
+Banco di coordinamento distinto dagli operatori interni. Account unico OPT e personali dei tre tipi Operatore; gli esterni OPT non accedono alla rendicontazione. Volontari e personale proprio OPT non censiti individualmente. Nessun account o identificativo assistiti. La OPT mantiene il contatto con gli assistiti; il Banco conferma soltanto l’accordo e inserisce manualmente nel portale ministeriale.
 
-Il catalogo delle misure è aggiornabile dal Banco. Il monitoraggio trimestrale
-è distinto dalle singole richieste e può includere attività senza richiesta PICUS.
-I dati degli assistiti sono conteggi aggregati; le schede degli operatori
-contengono dati personali e richiedono protezione. Conservazione e cancellazione
-restano da chiarire con gli interlocutori competenti.
+## Diagrammi
 
-## Modelli disponibili
+- Contesto: [drawio](<diagrams/contesto/Context Diagram.drawio>), [PNG](<diagrams/contesto/Context Diagram.drawio.png>); sottotipologie e permessi definiti nelle regole funzionali.
+- Schema iniziale: [PNG](diagrams/contesto/DiagrammaIniziale_PICUS.png), bozza di contesto e non processo as-is.
+- ASIS-01A: [Mermaid](diagrams/ASIS-01-richieste.mmd), [SVG](diagrams/ASIS-01-richieste.svg), [PNG](diagrams/ASIS-01-richieste.png).
+- ASIS-01B: [Mermaid](diagrams/ASIS-01-rendicontazione.mmd), [SVG](diagrams/ASIS-01-rendicontazione.svg), [PNG](diagrams/ASIS-01-rendicontazione.png).
+- TOBE-01A v0.3: [Mermaid](diagrams/to-be/TOBE-01A-richieste-disponibilita.mmd), [SVG](diagrams/to-be/TOBE-01A-richieste-disponibilita.svg), [PNG](diagrams/to-be/TOBE-01A-richieste-disponibilita.png).
+- TOBE-01B v0.2: [Mermaid](diagrams/to-be/TOBE-01B-appuntamento-esito.mmd), [SVG](diagrams/to-be/TOBE-01B-appuntamento-esito.svg), [PNG](diagrams/to-be/TOBE-01B-appuntamento-esito.png).
+- TOBE-02 v0.3: [Mermaid](diagrams/to-be/TOBE-02-rendicontazione.mmd), [SVG](diagrams/to-be/TOBE-02-rendicontazione.svg), [PNG](diagrams/to-be/TOBE-02-rendicontazione.png).
 
-- [Context diagram modificabile](<diagrams/contesto/Context Diagram.drawio>)
-- [Esportazione del context diagram](<diagrams/contesto/Context Diagram.drawio.png>)
-- [Schema iniziale di contesto, non diagramma as-is](diagrams/contesto/DiagrammaIniziale_PICUS.png)
-- As-is delle richieste: [Mermaid](diagrams/ASIS-01-richieste.mmd),
-  [PNG](diagrams/ASIS-01-richieste.png), [SVG](diagrams/ASIS-01-richieste.svg)
-- As-is della rendicontazione: [Mermaid](diagrams/ASIS-01-rendicontazione.mmd),
-  [PNG](diagrams/ASIS-01-rendicontazione.png), [SVG](diagrams/ASIS-01-rendicontazione.svg)
-- To-be della richiesta: [Mermaid](diagrams/to-be/TOBE-01A-richieste-disponibilita.mmd), [PNG](diagrams/to-be/TOBE-01A-richieste-disponibilita.png), [SVG](diagrams/to-be/TOBE-01A-richieste-disponibilita.svg)
-- To-be dell'appuntamento: [Mermaid](diagrams/to-be/TOBE-01B-appuntamento-esito.mmd), [PNG](diagrams/to-be/TOBE-01B-appuntamento-esito.png), [SVG](diagrams/to-be/TOBE-01B-appuntamento-esito.svg)
-- To-be della rendicontazione: [Mermaid](diagrams/to-be/TOBE-02-rendicontazione.mmd), [PNG](diagrams/to-be/TOBE-02-rendicontazione.png), [SVG](diagrams/to-be/TOBE-02-rendicontazione.svg)
-- Sequence diagram delle storie dell'epica IAM (#18), versione 0.1 del 31/10/2026:
-  - #24 caricamento CSV delle OPT: [Mermaid](diagrams/iam/IAM-24-caricamento-csv-opt.mmd), [PNG](diagrams/iam/IAM-24-caricamento-csv-opt.png), [SVG](diagrams/iam/IAM-24-caricamento-csv-opt.svg)
-  - #25 accesso con email e password: [Mermaid](diagrams/iam/IAM-25-accesso.mmd), [PNG](diagrams/iam/IAM-25-accesso.png), [SVG](diagrams/iam/IAM-25-accesso.svg)
-  - #26 revoca di una OPT: [Mermaid](diagrams/iam/IAM-26-revoca-opt.mmd), [PNG](diagrams/iam/IAM-26-revoca-opt.png), [SVG](diagrams/iam/IAM-26-revoca-opt.svg)
-  - #27 creazione e attivazione di un Operatore: [Mermaid](diagrams/iam/IAM-27-creazione-operatore.mmd), [PNG](diagrams/iam/IAM-27-creazione-operatore.png), [SVG](diagrams/iam/IAM-27-creazione-operatore.svg)
-  - #28 accessi per ruolo e appartenenza: [Mermaid](diagrams/iam/IAM-28-accessi-per-ruolo.mmd), [PNG](diagrams/iam/IAM-28-accessi-per-ruolo.png), [SVG](diagrams/iam/IAM-28-accessi-per-ruolo.svg)
-  - #30 revoca di un Operatore: [Mermaid](diagrams/iam/IAM-30-revoca-operatore.mmd), [PNG](diagrams/iam/IAM-30-revoca-operatore.png), [SVG](diagrams/iam/IAM-30-revoca-operatore.svg)
-  - #33 recupero della password: [Mermaid](diagrams/iam/IAM-33-recupero-password.mmd), [PNG](diagrams/iam/IAM-33-recupero-password.png), [SVG](diagrams/iam/IAM-33-recupero-password.svg)
-- [Verifica dopo il confronto con lo stakeholder](../reviews/2026-10-21-coerenza-stakeholder-context.md)
+Sorgenti ed esportazioni IAM sono in [diagrams/iam](diagrams/iam/). I modelli IAM precedenti sono riferimenti di supporto: logout e revoca OPT in attesa sono precisati nelle storie aggiornate, anche se non rappresentati nei vecchi diagrammi. L’as-is conserva la ricostruzione storica; non viene adattato al nuovo to-be. Il contesto grafico precedente non sostituisce la matrice di permessi.
 
-CTX-01 è aggiornato alla **versione 0.4 del 04/11/2026**; il Word e il PDF
-incorporano ancora la versione 0.3 del 25/10/2026, da riallineare. La revisione
-del gruppo resta da registrare. Il diagramma distingue gli operatori pagati dal
-Banco da quelli esterni delle OPT, indica il CSV come opzionale, uniforma la
-conferma di ricezione e include la creazione/revoca degli account degli
-operatori, la conferma del Banco e l'annullamento.
-
-ASIS-01A/B sono alla **versione 0.1 del 25/10/2026**, con sorgenti Mermaid
-ed esportazioni incorporate nella versione 0.5 del Word. I canali puntuali
-di rendicontazione e di aggiornamento dell'esito non sono documentati dalle fonti:
-restano visibili come punti da precisare, insieme alla revisione del gruppo.
-
-Per ogni modello mantenere identificativo, versione, data, fonte modificabile
-e collegamenti alle issue pertinenti. Non registrare come completati o validati
-modelli e decisioni ancora in discussione.
-
-TOBE-01A/B e TOBE-02 sono alla **versione 0.2 del 03/11/2026**. Confermata
-(Accettata nelle fonti precedenti) chiude il coordinamento nella proposta IP-01,
-dopo la conferma del Banco; Annullata è prevista solo per eventi eccezionali.
-Completata resta da riconciliare con F07 nella #29.
-Il monitoraggio trimestrale è un processo indipendente. Non è attestata una
-validazione del committente o una revisione del gruppo già svolta.
+Il Product Backlog resta la fonte per pianificazione e avanzamento. Le bozze di revisione richiedono aggiornamento GitHub, nuova consultazione OPT e conservazione di #53 come assorbita. Le prove dei QS sono pianificate, non risultati dell’analisi.

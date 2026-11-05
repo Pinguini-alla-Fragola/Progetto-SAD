@@ -1,35 +1,17 @@
 # QS-02 Minimizzazione e riservatezza dei dati
 
-**Area e priorità:** Privacy / P1
+**Attributo di qualità:** Privacy.
 
-## Sorgente
+**Priorità proposta:** P1.
 
-Una OPT che compila una richiesta o un utente che consulta dati degli operatori.
+**Motivazione:** Il coordinamento usa richieste prive di identificativi degli assistiti e il monitoraggio usa conteggi aggregati. I dati amministrativi ed economici degli operatori richiedono una protezione distinta dai recapiti necessari a organizzare il servizio.
 
-## Stimolo
+## Scenario
 
-Invia campi identificativi degli assistiti non previsti dallo schema oppure tenta di consultare dati personali di un operatore senza permesso.
+| Source | Stimulus | Environment | Artifact | Response | Response measure |
+|---|---|---|---|---|---|
+| Una OPT che compila una richiesta o un utente che consulta dati degli operatori. | Invia campi identificativi degli assistiti non previsti dal modulo oppure tenta di consultare dati riservati di un operatore senza permesso. | Moduli con campi strutturati, senza testo libero o allegati relativi agli assistiti. Controlli estesi alle schede e ai dati quantitativi delle OPT. Tutti i dati di prova sono sintetici. | Modello dati, campi accettati dal server, controlli di validazione, log, viste ed eventuali esportazioni. | Il server rifiuta i campi non ammessi senza salvarne o riportarne il contenuto nei messaggi o nei log. L'anagrafica completa, i dati contrattuali e il costo orario dell'operatore sono riservati al Banco autorizzato e all'operatore titolare. La OPT richiedente può vedere nome e telefono del referente indicato per l'appuntamento in presenza: questi recapiti servono al coordinamento e non sono dati degli assistiti. | 0 campi identificativi degli assistiti nel modello dati e nei campi accettati dal server. Tutti i 20 invii di prova con campi non ammessi sono respinti senza salvarne o riportarne i valori nei messaggi o nei log. Nessun identificativo di assistito rilevato nei dati, log ed eventuali esportazioni campionati. Tutti gli accessi non autorizzati ai dati riservati degli operatori sono negati. |
 
-## Ambiente
+## Approccio di verifica
 
-Form con campi strutturati e senza testo libero o allegati relativi agli assistiti; controlli estesi a schede e dati quantitativi delle OPT. Dataset di prova interamente sintetici.
-
-## Artefatto
-
-Schema dei moduli e delle richieste, validazione sul server, registri applicativi, viste ed eventuali esportazioni.
-
-## Risposta
-
-PICUS non offre campi anagrafici degli assistiti; rifiuta i campi non ammessi senza riprodurne il contenuto nei log o nei messaggi. Dati personali ed economici dell’operatore (anagrafica, tipologia contrattuale, costo orario lordo) accessibili solo al Banco autorizzato e all’operatore titolare. Nome e telefono del referente dell’erogatore, mostrati nell’appuntamento in presenza, sono ammessi e non riguardano gli assistiti.
-
-## Misura della risposta
-
-0 campi identificativi degli assistiti nel modello e nei contratti. Tutti i payload di prova con campi non ammessi sono respinti senza persistenza o eco del valore. Nessun identificativo di assistito rilevato nei dati, log ed export campionati; 100% degli accessi non consentiti ai dati personali ed economici degli operatori negati.
-
-## Stato delle soglie
-
-Vincoli di minimizzazione dalle fonti. La verifica dello schema, i campi consentiti e il campione di 20 payload negativi sono proposte del team. Nessuna classificazione automatica universale del testo viene presunta.
-
-## Metodo di verifica previsto
-
-Ispezionare schema e contratti; inviare 20 payload negativi sintetici; verificare database, messaggi e log. Applicare la matrice QS-01 ai dati personali degli operatori. Conservazione e cancellazione restano in Q-05.
+Ispezionare modello dati e campi accettati dal server. Inviare 20 richieste di prova contenenti campi identificativi sintetici non ammessi e verificare database, messaggi, log ed eventuali esportazioni. Applicare la matrice di QS-01 ai dati riservati degli operatori e verificare separatamente la visibilità dei recapiti del referente nella richiesta che coinvolge la OPT. Conservazione e cancellazione restano da definire in Q-05.

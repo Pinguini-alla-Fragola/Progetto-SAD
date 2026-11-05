@@ -1,35 +1,17 @@
 # QS-03 Risposta durante i picchi trimestrali
 
-**Area e priorità:** Performance / P2
+**Attributo di qualità:** Performance.
 
-## Sorgente
+**Priorità proposta:** P2.
 
-OPT, Banco e Operatori che usano contemporaneamente le funzioni dell’applicazione.
+**Motivazione:** Vicino alla scadenza delle schede trimestrali, consultazioni e invii possono concentrarsi mentre il Banco continua a coordinare le richieste. L'applicazione deve mantenere tempi di risposta compatibili con queste attività.
 
-## Stimolo
+## Scenario
 
-Un aumento di consultazioni e invii vicino alla scadenza trimestrale mentre continua il coordinamento delle richieste.
+| Source | Stimulus | Environment | Artifact | Response | Response measure |
+|---|---|---|---|---|---|
+| OPT, Banco e Operatori che usano contemporaneamente l'applicazione. | Aumentano consultazioni e invii vicino alla scadenza trimestrale, mentre continua il coordinamento delle richieste. | Applicazione completa, con 50 sessioni concorrenti, 450 OPT, 2.000 richieste sintetiche, le schede di 100 operatori interni ed esterni pagati dal Banco e dati quantitativi per ciascuna OPT. Dopo l'avvio sono previsti due minuti di preparazione a carico nominale, esclusi dalle misure, e 15 minuti di carico. Configurazione, risorse e rete sono registrate prima della prova. | Consultazione delle richieste, invio delle richieste, schede personali degli operatori del Banco, dati quantitativi delle OPT e salvataggio dei dati. | Le operazioni rispettano i tempi previsti. Ogni invio per cui l'utente riceve una conferma di successo corrisponde a un solo inserimento salvato. I dinieghi di accesso attesi sono conteggiati separatamente dagli errori del servizio. | Soglie proposte: almeno il 95% delle consultazioni entro 2 secondi e il 95% degli invii entro 3 secondi, calcolati separatamente per ciascun tipo di operazione. Il tempo decorre dall'azione nell'interfaccia fino alla visualizzazione del risultato o della conferma di salvataggio. Errori di servizio non oltre l'1%; 0 invii confermati persi o duplicati. Mix di carico: 60% consultazioni, 20% invio richieste, 10% schede personali e 10% dati quantitativi OPT. |
 
-## Ambiente
+## Approccio di verifica
 
-Prova proposta sull’applicazione completa con 50 sessioni concorrenti, 450 OPT, 2.000 richieste sintetiche, le schede di 100 operatori interni ed esterni pagati dal Banco e un inserimento di dati quantitativi per ciascuna OPT. Il sistema parte a freddo: i primi due minuti, a funzionamento nominale, servono a riscaldare la cache; seguono 15 minuti di carico. Configurazione, risorse e rete sono registrate prima della prova.
-
-## Artefatto
-
-Consultazione delle richieste, invio dei moduli, compilazione delle schede degli operatori interni ed esterni pagati dal Banco, inserimento dei dati quantitativi delle OPT e persistenza.
-
-## Risposta
-
-Le operazioni restano utilizzabili e ogni invio registrato dal sistema produce un solo record persistito. I rifiuti autorizzativi attesi sono distinti dagli errori del servizio.
-
-## Misura della risposta
-
-Soglie proposte: 95° percentile entro 2 secondi per consultazioni ed entro 3 secondi per invii; errori di servizio non oltre l’1%; nessun invio registrato perso o duplicato. Mix di carico: 60% consultazioni, 20% richieste, 20% schede e dati quantitativi.
-
-## Stato delle soglie
-
-Carichi e soglie interamente proposti da validare in Q-07. Non sono dedotti dal numero di OPT o dai 230.000 utenti.
-
-## Metodo di verifica previsto
-
-Eseguire un test di carico riproducibile sull’applicazione completa, a fine costruzione, conservando tempi, errori, profilo e conteggi. Nessun test di carico è dichiarato eseguito in S1.
+Eseguire una prova di carico riproducibile attraverso l'interfaccia dell'applicazione completa. Registrare prima dell'esecuzione la sequenza delle operazioni, il ritmo degli invii e le attese simulate tra le azioni. Misurare i tempi fino alla visualizzazione del risultato, distinguendo le consultazioni dai diversi tipi di invio. Conservare tempi, errori e profilo di carico; confrontare le conferme di successo con i dati salvati per rilevare perdite o duplicati.
