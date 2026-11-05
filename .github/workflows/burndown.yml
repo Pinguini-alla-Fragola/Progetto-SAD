@@ -1,18 +1,12 @@
-# Calcola il burndown dello sprint in corso e lo pubblica sul branch burndown-data.
-#
-# Da impostare in Settings -> Secrets and variables -> Actions:
-#  - secret PROJECT_TOKEN: token personale classico (scope project e repo) per leggere il project.
-#    La scadenza va messa oltre il 17/12/2026, altrimenti il workflow si ferma
-#  - variabile PROJECT_NUMBER: numero del project, lo trovi nell'URL .../projects/<numero>
-#  - PROJECT_OWNER e OWNER_TYPE (facoltative): di default il project è di Pinguini-alla-Fragola
-#
-# Output su burndown-data: burndown-latest.svg (sprint in corso, lo legge il README)
-# e svg/csv di ogni sprint. Ogni esecuzione salva anche l'artefatto «burndown».
+# Impostati in Settings -> Secrets and variables -> Actions, lo script li legge come variabili d'ambiente:
+#  PROJECT_TOKEN (secret): token personale classico, scope project e repo
+#  PROJECT_NUMBER (variabile): numero del project (.../projects/<numero>)
+#  PROJECT_OWNER, OWNER_TYPE (variabili, facoltative): proprietario del project e tipo (organization o user)
 name: burndown
 
 on:
   schedule:
-    - cron: "50 23 * * *"       # 23:50 UTC, ma GitHub lo avvia con ore di ritardo
+    - cron: "50 23 * * *"       # 23:50 UTC, GitHub parte con ritardo
   workflow_dispatch:
     inputs:
       iteration_title:
@@ -32,37 +26,43 @@ jobs:
   burndown:
     runs-on: ubuntu-latest
     steps:
+      # scarica il codice della repo
       - uses: actions/checkout@v4
 
+      # installa Python
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
+      # lancia i test dello script
       - name: Verifica esclusione di Epic e Pull Request
         run: python -m unittest discover -s scripts -p 'test_burndown.py'
 
+      # legge il project e scrive csv e svg in OUT_DIR
       - name: Calcola il burndown
+        # variabili lette da scripts/burndown.py
         env:
           PROJECT_TOKEN: ${{ secrets.PROJECT_TOKEN }}
-          PROJECT_OWNER: ${{ vars.PROJECT_OWNER || 'Pinguini-alla-Fragola' }}   # chi possiede il project
+          PROJECT_OWNER: ${{ vars.PROJECT_OWNER || 'Pinguini-alla-Fragola' }}
           PROJECT_NUMBER: ${{ vars.PROJECT_NUMBER }}
-          OWNER_TYPE: ${{ vars.OWNER_TYPE || 'organization' }}                  # organization o user
-          ITERATION_TITLE: ${{ github.event.inputs.iteration_title }}
-          ITERATION_FIELD: Iteration
-          STATUS_FIELD: Status
-          DONE_VALUE: Done
-          POINTS_FIELD: Estimate   # campo Number; se manca si usa Size (XS1 S2 M3 L5 XL8), poi 1
-          SIZE_FIELD: Size
-          OUT_DIR: ${{ runner.temp }}/out
+          OWNER_TYPE: ${{ vars.OWNER_TYPE || 'organization' }}
+          ITERATION_TITLE: ${{ github.event.inputs.iteration_title }}   # sprint scelto a mano, vuoto = quello in corso
+          ITERATION_FIELD: Iteration   # campo del project con lo sprint
+          STATUS_FIELD: Status         # campo del project con lo stato
+          DONE_VALUE: Done             # valore di Status dei task chiusi
+          POINTS_FIELD: Estimate       # campo Number con i punti; se manca si usa Size, poi 1
+          SIZE_FIELD: Size             # taglia XS S M L XL = 1 2 3 5 8 punti
+          OUT_DIR: ${{ runner.temp }}/out   # cartella temporanea del runner
         run: python scripts/burndown.py
 
+      # salva OUT_DIR come zip scaricabile dall'esecuzione
       - name: Conserva come artefatto
         uses: actions/upload-artifact@v4
         with:
           name: burndown
           path: ${{ runner.temp }}/out
 
-      # main è protetto, quindi push su un branch a parte
+      # copia i file di OUT_DIR sul branch burndown-data e fa il push (main è protetto)
       - name: Pubblica sul branch burndown-data
         run: |
           git config user.name "github-actions"
