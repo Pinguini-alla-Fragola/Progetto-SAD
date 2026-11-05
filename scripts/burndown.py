@@ -1,48 +1,25 @@
 #!/usr/bin/env python3
-"""Burndown di uno sprint da un GitHub Project (v2), pesato con la taglia dei task.
+"""Burndown di uno sprint da un GitHub Project (v2): scrive un CSV e un grafico SVG.
 
-Legge gli item della iterazione scelta, calcola i punti rimanenti giorno per giorno
-(scope - completati) e scrive un CSV e un grafico SVG con la linea ideale.
-Esclude Pull Request, issue di tipo nativo Epic e contenuti non disponibili.
-L'appartenenza al Project e all'iterazione non viene modificata.
-Solo libreria standard: nessuna dipendenza da installare nella CI.
+Punti di un task: campo Number, altrimenti la taglia (PUNTI_PER_TAGLIA), altrimenti 1.
+Esclude Pull Request, Epic e contenuti non disponibili. Solo libreria standard.
 
-Variabili d'ambiente (le prime tre servono, le altre hanno un default):
-  PROJECT_TOKEN     token personale classico con scope `project` e `repo`
-  PROJECT_OWNER     login proprietario del project (es. Pinguini-alla-Fragola)
-  PROJECT_NUMBER    numero del project (dall'URL .../projects/<numero>)
-  OWNER_TYPE        user | organization                      (default: user)
-  ITERATION_TITLE   titolo dell'iterazione; vuoto = quella in corso oggi
-  ITERATION_FIELD   nome del campo iterazione                (default: Iteration)
-  STATUS_FIELD      nome del campo stato                     (default: Status)
-  DONE_VALUE        valore di stato che vale «fatto»         (default: Done)
-  POINTS_FIELD      campo Number con i punti                 (default: Estimate)
-  SIZE_FIELD        campo Size (selezione singola)           (default: Size)
-  OUT_DIR           cartella di output                       (default: docs/burndown)
-
-Il grafico ha riquadri di stato, previsione a fine sprint e area colorata (rosa = in ritardo,
-azzurra = in anticipo rispetto alla linea ideale).
-Scrive solo l'iterazione in corso (e la copia `burndown-latest.svg` per il README): i file degli
-sprint conclusi restano com'erano, così i task spostati nello sprint successivo non alterano la storia.
-
-I punti di un task: campo Number se presente, altrimenti mappatura della taglia
-(PUNTI_PER_TAGLIA qui sotto), altrimenti 1.  Prova senza API:  python burndown.py --demo
-Controlla i nomi dei campi sul project reale:  python burndown.py --inspect
+Variabili d'ambiente (le prime tre sono obbligatorie):
+  PROJECT_TOKEN, PROJECT_OWNER, PROJECT_NUMBER
+  OWNER_TYPE (user), ITERATION_TITLE (sprint in corso), OUT_DIR (docs/burndown)
+  ITERATION_FIELD (Iteration), STATUS_FIELD (Status), DONE_VALUE (Done),
+  POINTS_FIELD (Estimate), SIZE_FIELD (Size)
 """
 import csv
 import html
 import json
 import os
 import re
-import sys
 import urllib.request
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
-PUNTI_PER_TAGLIA = {"XS": 1, "S": 2, "M": 3, "L": 5, "XL": 8}   # mappatura da concordare nel team
-# Calendario del progetto PICUS (presentazione, slide 11-12): data di inizio -> durata in giorni.
-# La preparatoria dura 3 settimane (eccezione); le tre iterazioni di costruzione 2 settimane.
-PIANO_SPRINT = {date(2026, 10, 15): 21, date(2026, 11, 5): 14, date(2026, 11, 19): 14, date(2026, 12, 3): 14}
+PUNTI_PER_TAGLIA = {"XS": 1, "S": 2, "M": 3, "L": 5, "XL": 8}   # da concordare nel team
 UTC = timezone.utc
 
 # TIPO_PROPRIETARIO diventa "user" o "organization"
@@ -77,116 +54,88 @@ query($login:String!, $num:Int!, $after:String) {
 """
 
 
-def scarica_righe(token, tipo_proprietario, login, numero):
-    tipo = "organization" if tipo_proprietario == "organization" else "user"
+def scarica_dati(cfg):
+    """Legge il Project da GitHub e restituisce i task conteggiati, divisi per sprint:
+    {titolo: {"inizio": date, "giorni": int, "task": [{"titolo", "punti", "creato", "chiuso"}]}}"""
+    tipo = "organization" if cfg["tipo"] == "organization" else "user"
     query = QUERY.replace("TIPO_PROPRIETARIO", tipo)
     righe, cursore = [], None
     while True:
-        corpo = json.dumps({"query": query, "variables": {"login": login, "num": numero, "after": cursore}}).encode()
+        corpo = json.dumps({"query": query, "variables": {"login": cfg["proprietario"], "num": cfg["numero"],
+                                                          "after": cursore}}).encode()
         richiesta = urllib.request.Request("https://api.github.com/graphql", data=corpo, headers={
-            "Authorization": f"Bearer {token}", "Content-Type": "application/json"})
+            "Authorization": f"Bearer {cfg['token']}", "Content-Type": "application/json"})
         with urllib.request.urlopen(richiesta) as risposta:
-            dati = json.load(risposta)
-        if "errors" in dati:
-            raise SystemExit(f"Errore GraphQL: {dati['errors']}")
-        project = dati["data"][tipo]["projectV2"]
-        righe += project["items"]["nodes"]
-        if not project["items"]["pageInfo"]["hasNextPage"]:
-            return project["title"], righe
-        cursore = project["items"]["pageInfo"]["endCursor"]
+            risposta = json.load(risposta)
+        if "errors" in risposta:
+            raise SystemExit(f"Errore GraphQL: {risposta['errors']}")
+        pagina = risposta["data"][tipo]["projectV2"]["items"]
+        righe += pagina["nodes"]
+        if not pagina["pageInfo"]["hasNextPage"]:
+            break
+        cursore = pagina["pageInfo"]["endCursor"]
 
-
-def leggi_data(testo):
-    return datetime.fromisoformat(testo.replace("Z", "+00:00")) if testo else None
-
-
-def motivo_esclusione(contenuto):
-    """Classifica il contenuto con i tipi GitHub, senza dedurli dal titolo."""
-    if not contenuto:
-        return "Contenuto non disponibile"
-    if contenuto.get("__typename") == "PullRequest":
-        return "Pull Request"
-    tipo_issue = (contenuto.get("issueType") or {}).get("name", "")
-    if contenuto.get("__typename") == "Issue" and tipo_issue.strip().casefold() == "epic":
-        return "Epic"
-    return None
-
-
-def normalizza(righe, config):
-    """Normalizza gli item; mantiene i metadati degli esclusi per scegliere l'iterazione."""
-    elementi = []
+    data = lambda testo: datetime.fromisoformat(testo.replace("Z", "+00:00")) if testo else None
+    sprint = {}
     for riga in righe:
-        campi = {"iter": None, "stato": None, "punti": None, "taglia": None}
-        for valore in riga["fieldValues"]["nodes"]:
-            nome = (valore.get("field") or {}).get("name")
-            if valore["__typename"] == "ProjectV2ItemFieldIterationValue" and nome == config["iter_field"]:
-                campi["iter"] = valore
-            elif valore["__typename"] == "ProjectV2ItemFieldSingleSelectValue":
-                if nome == config["status_field"]:
-                    campi["stato"] = valore["name"]
-                elif nome == config["size_field"]:
-                    campi["taglia"] = valore["name"]
-            elif valore["__typename"] == "ProjectV2ItemFieldNumberValue" and nome == config["points_field"]:
-                campi["punti"] = valore["number"]
+        campi = {(v.get("field") or {}).get("name"): v for v in riga["fieldValues"]["nodes"]}   # nome campo -> valore
+        it = campi.get(cfg["campo_sprint"], {})
+        if "startDate" not in it:
+            continue
+        # lo sprint esiste anche se il task è escluso
+        s = sprint.setdefault(it["title"], {"task": []})
+        s["inizio"], s["giorni"] = date.fromisoformat(it["startDate"]), int(it["duration"])
         contenuto = riga["content"] or {}
-        punti = campi["punti"] if campi["punti"] is not None else PUNTI_PER_TAGLIA.get(campi["taglia"], 1)
-        fatto = campi["stato"] == config["done_value"]
-        # data di completamento: chiusura dell'issue se c'è, altrimenti ultimo aggiornamento
-        fatto_il = (leggi_data(contenuto.get("closedAt")) or leggi_data(riga["updatedAt"])) if fatto else None
-        elementi.append({"title": contenuto.get("title", "?"), "iter": campi["iter"], "points": float(punti),
-                         "created": leggi_data(riga["createdAt"]), "done_at": fatto_il,
-                         "excluded": motivo_esclusione(contenuto)})
-    return elementi
+        epic = (contenuto.get("issueType") or {}).get("name", "").strip().casefold() == "epic"
+        if not contenuto or contenuto.get("__typename") == "PullRequest" or (contenuto.get("__typename") == "Issue" and epic):
+            continue
+        punti = campi.get(cfg["campo_punti"], {}).get("number")
+        if punti is None:
+            punti = PUNTI_PER_TAGLIA.get(campi.get(cfg["campo_taglia"], {}).get("name"), 1)
+        fatto = campi.get(cfg["campo_stato"], {}).get("name") == cfg["valore_fatto"]
+        # completato: chiusura dell'issue se c'è, altrimenti ultimo aggiornamento
+        chiuso = (data(contenuto.get("closedAt")) or data(riga["updatedAt"])) if fatto else None
+        s["task"].append({"titolo": contenuto.get("title", "?"), "punti": float(punti),
+                          "creato": data(riga["createdAt"]), "chiuso": chiuso})
+    return sprint
 
 
-def scegli_iterazione(elementi, titolo, oggi):
-    iterazioni = {}
-    for el in elementi:
-        it = el["iter"]
-        if it:
-            iterazioni[it["title"]] = (date.fromisoformat(it["startDate"]), int(it["duration"]))
+def scegli_sprint(dati, titolo, oggi):
+    """Titolo dello sprint da disegnare: quello richiesto, altrimenti quello in corso, altrimenti l'ultimo."""
     if titolo:
-        if titolo not in iterazioni:
-            raise SystemExit(f"Iterazione «{titolo}» non trovata. Disponibili: {sorted(iterazioni)}")
-        return titolo, *iterazioni[titolo]
-    if not iterazioni:
+        if titolo not in dati:
+            raise SystemExit(f"Iterazione «{titolo}» non trovata. Disponibili: {sorted(dati)}")
+        return titolo
+    if not dati:
         raise SystemExit("Nessuna iterazione trovata negli item del Project.")
-    for t, (inizio, durata) in iterazioni.items():
-        if inizio <= oggi < inizio + timedelta(days=durata):
-            return t, inizio, durata
-    t = max(iterazioni, key=lambda k: iterazioni[k][0])      # nessuna in corso: l'ultima
-    return t, *iterazioni[t]
+    for nome, s in dati.items():
+        if s["inizio"] <= oggi < s["inizio"] + timedelta(days=s["giorni"]):
+            return nome
+    return max(dati, key=lambda nome: dati[nome]["inizio"])
 
 
-def calcola(elementi, titolo, inizio, giorni, adesso):
-    """Serie (giorni dall'inizio, scope, completati, rimanenti) a ogni mezzanotte e adesso."""
-    miei = [e for e in elementi if not e.get("excluded") and e["iter"] and e["iter"]["title"] == titolo]
-    t0 = datetime.combine(inizio, datetime.min.time(), UTC)
+def calcola_punti(sprint, adesso):
+    """Punti a ogni mezzanotte dello sprint fino a adesso, più adesso se lo sprint è in corso.
+    Restituisce (base, righe) con righe = [(giorni dall'inizio, scope, completati, rimanenti)]."""
+    task, giorni = sprint["task"], sprint["giorni"]
+    t0 = datetime.combine(sprint["inizio"], datetime.min.time(), UTC)
     istanti = [t0 + timedelta(days=k) for k in range(giorni + 1) if t0 + timedelta(days=k) <= adesso]
     if adesso < t0 + timedelta(days=giorni):
-        istanti.append(adesso)                      # punto «adesso» se lo sprint è in corso
-    # i task aggiunti al project nel primo giorno (planning) fanno parte dello scope iniziale:
-    # solo quelli aggiunti dopo sono «aumento di perimetro»
-    tolleranza = t0 + timedelta(days=1)
-    aggiunto = lambda e: t0 if e["created"] < tolleranza else e["created"]
+        istanti.append(adesso)
+    # i task creati nel primo giorno (planning) fanno parte dello scope iniziale
+    aggiunto = lambda t: t0 if t["creato"] < t0 + timedelta(days=1) else t["creato"]
     righe = []
-    for t in istanti:
-        scope = sum(e["points"] for e in miei if aggiunto(e) <= t)
-        fatti = sum(e["points"] for e in miei if e["done_at"] and e["done_at"] <= t)
-        righe.append(((t - t0).total_seconds() / 86400, scope, fatti, scope - fatti))
-    base = righe[0][1] if righe and righe[0][1] > 0 else sum(e["points"] for e in miei)
-    return miei, base, righe
+    for istante in istanti:
+        scope = sum(t["punti"] for t in task if aggiunto(t) <= istante)
+        fatti = sum(t["punti"] for t in task if t["chiuso"] and t["chiuso"] <= istante)
+        righe.append(((istante - t0).total_seconds() / 86400, scope, fatti, scope - fatti))
+    base = righe[0][1] if righe and righe[0][1] > 0 else sum(t["punti"] for t in task)
+    return base, righe
 
 
-def _passo_griglia(massimo):
-    for passo in (1, 2, 5, 10, 20, 50, 100):
-        if massimo / passo <= 8:
-            return passo
-    return 100
-
-
-def disegna_svg(titolo, inizio, giorni, base, righe, adesso):
-    """Grafico in stile dashboard (riquadri di stato, previsione) con l'area colorata tra reale e ideale."""
+def disegna_grafico(titolo, sprint, base, righe, adesso):
+    """Restituisce l'SVG: riquadri di stato, punti rimanenti, linea ideale, previsione."""
+    inizio, giorni = sprint["inizio"], sprint["giorni"]
     W, H = 960, 600
     giorno_ora = righe[-1][0] if righe else 0.0
     scope, fatti, rimanenti = (righe[-1][1], righe[-1][2], righe[-1][3]) if righe else (0.0, 0.0, 0.0)
@@ -249,7 +198,7 @@ def disegna_svg(titolo, inizio, giorni, base, righe, adesso):
         testo(x + 20, 162, sotto, 11, "start", "#6b7280")
     rettangolo(40, 192, 880, 394, "#ffffff", 12, "#e5e7eb")
     # griglia
-    passo = _passo_griglia(y_max)
+    passo = next((p for p in (1, 2, 5, 10, 20, 50, 100) if y_max / p <= 8), 100)
     for v in range(0, int(y_max) + 1, passo):
         linea(px0, Y(v), px0 + pw, Y(v), "#f1f5f9", 1)
         testo(px0 - 8, Y(v) + 4, v, 11, "end", "#6b7280")
@@ -307,124 +256,30 @@ def disegna_svg(titolo, inizio, giorni, base, righe, adesso):
     return "\n".join(o)
 
 
-def dati_demo():
-    """Dati finti: sprint di 21 giorni, 10 task di taglie diverse, qualcuno aggiunto in corso."""
-    inizio = date(2026, 10, 15)
-
-    def task(titolo, punti, giorno_creato, giorno_fatto):
-        t0 = datetime.combine(inizio, datetime.min.time(), UTC)
-        return {"title": titolo, "points": float(punti), "created": t0 + timedelta(days=giorno_creato),
-                "done_at": t0 + timedelta(days=giorno_fatto, hours=12) if giorno_fatto is not None else None,
-                "iter": {"title": "S1 - Preparazione", "startDate": inizio.isoformat(), "duration": 21}}
-
-    return [task("S1-01", 3, -2, 5), task("S1-02", 5, -2, 8), task("S1-03", 5, -2, 12), task("S1-04", 3, -2, 9),
-            task("S1-05", 5, -2, 15), task("S1-06", 3, -2, None), task("S1-07", 5, -2, None), task("S1-08", 2, -2, None),
-            task("S1-09", 3, 4, None), task("S1-10", 2, 6, None)]
-
-
-def ispeziona(titolo_project, righe):
-    """Diagnostica: mostra project, campi e valori trovati, per controllare i nomi in configurazione."""
-    visti = {}
-    for riga in righe:
-        for valore in riga["fieldValues"]["nodes"]:
-            nome = (valore.get("field") or {}).get("name")
-            if not nome:
-                continue
-            testo = valore.get("name") or valore.get("number") or (
-                f"{valore['title']} ({valore['startDate']}, {valore['duration']} gg)" if "startDate" in valore else "?")
-            visti.setdefault((nome, valore["__typename"].replace("ProjectV2ItemField", "")), set()).add(str(testo))
-    print(f"Project «{titolo_project}»: {len(righe)} item")
-    contabili = [r for r in righe if not motivo_esclusione(r["content"])]
-    print(f"Item conteggiabili: {len(contabili)}; esclusi: {len(righe) - len(contabili)}")
-    for riga in righe:
-        motivo = motivo_esclusione(riga["content"])
-        if motivo:
-            print(f"  escluso [{motivo}]: {(riga['content'] or {}).get('title', '?')}")
-    for (nome, tipo), valori in sorted(visti.items()):
-        print(f"  campo «{nome}» [{tipo}]: {sorted(valori)}")
-    iterazioni = {}
-    for riga in righe:
-        for valore in riga["fieldValues"]["nodes"]:
-            if "startDate" in valore:
-                iterazioni[valore["title"]] = (date.fromisoformat(valore["startDate"]), int(valore["duration"]))
-    print("Iterazioni trovate (con item) e confronto con il piano del progetto:")
-    for titolo, (inizio, durata) in sorted(iterazioni.items(), key=lambda kv: kv[1][0]):
-        esito = "ok" if PIANO_SPRINT.get(inizio) == durata else (
-            f"ATTENZIONE: il piano prevede {PIANO_SPRINT[inizio]} giorni da quella data" if inizio in PIANO_SPRINT
-            else "ATTENZIONE: data di inizio non presente nel piano")
-        print(f"  «{titolo}»: {inizio:%d/%m/%Y}, {durata} gg, fine {inizio + timedelta(days=durata):%d/%m/%Y} -> {esito}")
-    campo_punti, campo_taglia = os.environ.get("POINTS_FIELD", "Estimate"), os.environ.get("SIZE_FIELD", "Size")
-    print(f"Task per iterazione e stima (campo Number «{campo_punti}», altrimenti taglia «{campo_taglia}», altrimenti 1 punto):")
-    for titolo in sorted(iterazioni, key=lambda k: iterazioni[k][0]):
-        totale = senza_stima = 0
-        for riga in contabili:
-            valori = riga["fieldValues"]["nodes"]
-            if not any("startDate" in v and v["title"] == titolo for v in valori):
-                continue
-            totale += 1
-            ha_numero = any(v["__typename"] == "ProjectV2ItemFieldNumberValue" and (v.get("field") or {}).get("name") == campo_punti
-                            for v in valori)
-            ha_taglia = any(v["__typename"] == "ProjectV2ItemFieldSingleSelectValue" and (v.get("field") or {}).get("name") == campo_taglia
-                            for v in valori)
-            senza_stima += not (ha_numero or ha_taglia)
-        print(f"  «{titolo}»: {totale} task, {senza_stima} senza stima" + ("  <- contati come 1 punto" if senza_stima else ""))
-        campo_stato = os.environ.get("STATUS_FIELD", "Status")
-        somma = 0.0
-        for riga in contabili:
-            valori = riga["fieldValues"]["nodes"]
-            if not any("startDate" in v and v["title"] == titolo for v in valori):
-                continue
-            numero = next((v["number"] for v in valori if v["__typename"] == "ProjectV2ItemFieldNumberValue"
-                           and (v.get("field") or {}).get("name") == campo_punti), None)
-            taglia = next((v["name"] for v in valori if v["__typename"] == "ProjectV2ItemFieldSingleSelectValue"
-                           and (v.get("field") or {}).get("name") == campo_taglia), None)
-            stato = next((v["name"] for v in valori if v["__typename"] == "ProjectV2ItemFieldSingleSelectValue"
-                          and (v.get("field") or {}).get("name") == campo_stato), "?")
-            if numero is not None:
-                punti, da = numero, campo_punti
-            elif taglia in PUNTI_PER_TAGLIA:
-                punti, da = PUNTI_PER_TAGLIA[taglia], f"{campo_taglia}={taglia}"
-            else:
-                punti, da = 1, "NESSUNA STIMA (default)"
-            somma += punti
-            nome_task = (riga["content"] or {}).get("title", "?")
-            print(f"      {punti:>4g} pt  [{da}]  {stato:<12} {nome_task[:60]}  (aggiunto al project: {riga['createdAt'][:16]})")
-        print(f"      totale punti dell'iterazione: {somma:g}")
-    print("Item senza issue collegata (bozze):", sum(1 for r in righe if (r['content'] or {}).get('__typename') == 'DraftIssue'))
-
-
 def main():
-    if "--demo" in sys.argv:
-        elementi = dati_demo()
-        adesso = datetime(2026, 10, 30, 12, tzinfo=UTC)
-        cartella = Path(os.environ.get("OUT_DIR", "."))
-    else:
-        config = {"iter_field": os.environ.get("ITERATION_FIELD", "Iteration"),
-                  "status_field": os.environ.get("STATUS_FIELD", "Status"),
-                  "done_value": os.environ.get("DONE_VALUE", "Done"),
-                  "points_field": os.environ.get("POINTS_FIELD", "Estimate"),
-                  "size_field": os.environ.get("SIZE_FIELD", "Size")}
-        titolo_project, righe = scarica_righe(os.environ["PROJECT_TOKEN"], os.environ.get("OWNER_TYPE", "user"),
-                                              os.environ["PROJECT_OWNER"], int(os.environ["PROJECT_NUMBER"]))
-        if "--inspect" in sys.argv:
-            ispeziona(titolo_project, righe)
-            return
-        elementi = normalizza(righe, config)
-        adesso = datetime.now(UTC)
-        cartella = Path(os.environ.get("OUT_DIR", "docs/burndown"))
-    titolo, inizio, giorni = scegli_iterazione(elementi, os.environ.get("ITERATION_TITLE", ""), adesso.date())
-    miei, base, righe = calcola(elementi, titolo, inizio, giorni, adesso)
+    env = os.environ
+    cfg = {"token": env["PROJECT_TOKEN"], "tipo": env.get("OWNER_TYPE", "user"),
+           "proprietario": env["PROJECT_OWNER"], "numero": int(env["PROJECT_NUMBER"]),
+           "campo_sprint": env.get("ITERATION_FIELD", "Iteration"), "campo_stato": env.get("STATUS_FIELD", "Status"),
+           "valore_fatto": env.get("DONE_VALUE", "Done"), "campo_punti": env.get("POINTS_FIELD", "Estimate"),
+           "campo_taglia": env.get("SIZE_FIELD", "Size")}
+    dati = scarica_dati(cfg)
+    adesso = datetime.now(UTC)
+    titolo = scegli_sprint(dati, env.get("ITERATION_TITLE", ""), adesso.date())
+    base, righe = calcola_punti(dati[titolo], adesso)
+    svg = disegna_grafico(titolo, dati[titolo], base, righe, adesso)
+
+    cartella = Path(env.get("OUT_DIR", "docs/burndown"))
     cartella.mkdir(parents=True, exist_ok=True)
-    slug = re.sub(r"[^a-z0-9]+", "-", titolo.lower()).strip("-")
-    with open(cartella / f"burndown-{slug}.csv", "w", newline="", encoding="utf-8") as fh:
+    nome = re.sub(r"[^a-z0-9]+", "-", titolo.lower()).strip("-")
+    with open(cartella / f"burndown-{nome}.csv", "w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh)
         w.writerow(["giorno", "scope", "completati", "rimanenti"])
         w.writerows([(f"{r[0]:.2f}", r[1], r[2], r[3]) for r in righe])
-    svg = disegna_svg(titolo, inizio, giorni, base, righe, adesso)
-    (cartella / f"burndown-{slug}.svg").write_text(svg, encoding="utf-8")
-    # copia con nome fisso: il README punta sempre a questo file, che mostra lo sprint in corso
-    (cartella / "burndown-latest.svg").write_text(svg, encoding="utf-8")
-    print(f"{titolo}: {len(miei)} item conteggiati, base {base:g} punti, rimanenti {righe[-1][3]:g}" if righe else "nessun dato")
+    (cartella / f"burndown-{nome}.svg").write_text(svg, encoding="utf-8")
+    (cartella / "burndown-latest.svg").write_text(svg, encoding="utf-8")     # il README punta a questo
+    print(f"{titolo}: {len(dati[titolo]['task'])} item conteggiati, base {base:g} punti, rimanenti {righe[-1][3]:g}"
+          if righe else "nessun dato")
 
 
 if __name__ == "__main__":
