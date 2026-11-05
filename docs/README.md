@@ -2,8 +2,8 @@
 
 La repository contiene il [PDF](Documentazione_SAD_2026.pdf) della
 **versione 0.7 del 4 novembre 2026**.
-La proposta preparatoria comprende as-is, tre viste to-be in Mermaid, sei scenari
-di qualità, registro delle domande, MVP e piano di review. Fonti, ipotesi e
+La proposta preparatoria comprende as-is, tre viste to-be in Mermaid, un catalogo
+di scenari di qualità, registro delle domande, MVP e piano di review. Fonti, ipotesi e
 decisioni ancora aperte sono distinte; implementazione e approvazioni non sono presunte.
 
 - [Requisiti e modelli di analisi](requirements/README.md)
