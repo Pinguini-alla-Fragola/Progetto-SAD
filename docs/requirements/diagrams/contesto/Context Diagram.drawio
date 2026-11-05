@@ -1,66 +1,81 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <mxfile host="app.diagrams.net">
-  <diagram name="CTX-01 v0.3" id="P3Ejr7MKGwG83A0HrSvj">
-    <mxGraphModel grid="1" gridSize="10" page="1" pageScale="1" pageWidth="1600" pageHeight="1060">
+  <diagram name="CTX-01 v0.4" id="P3Ejr7MKGwG83A0HrSvj">
+    <mxGraphModel grid="1" gridSize="10" page="1" pageScale="1" pageWidth="1600" pageHeight="1432">
       <root>
         <mxCell id="0"/>
         <mxCell id="1" parent="0"/>
         <mxCell id="banco" value="&lt;b&gt;BANCO&lt;/b&gt;" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fontFamily=Segoe UI;fontSize=23;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="20" y="80" width="245" height="330" as="geometry"/>
+          <mxGeometry x="20" y="80" width="245" height="443" as="geometry"/>
         </mxCell>
         <mxCell id="opt" value="&lt;b&gt;OPT&lt;/b&gt;" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fontFamily=Segoe UI;fontSize=23;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="20" y="440" width="245" height="305" as="geometry"/>
+          <mxGeometry x="20" y="553" width="245" height="357" as="geometry"/>
         </mxCell>
-        <mxCell id="operatore" value="&lt;b&gt;Operatore interno&lt;br&gt;PICUS /&lt;br&gt;professionista&lt;br&gt;esterno&lt;/b&gt;" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fontFamily=Segoe UI;fontSize=23;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="20" y="775" width="245" height="190" as="geometry"/>
+        <mxCell id="operatore" value="&lt;b&gt;Operatore&lt;br&gt;pagato dal Banco&lt;br&gt;(interno o esterno)&lt;/b&gt;" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fontFamily=Segoe UI;fontSize=23;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="20" y="940" width="245" height="214" as="geometry"/>
+        </mxCell>
+        <mxCell id="operatore-opt" value="&lt;b&gt;Operatore esterno&lt;br&gt;di una OPT&lt;br&gt;(senza scheda)&lt;/b&gt;" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fontFamily=Segoe UI;fontSize=23;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="20" y="1184" width="245" height="128" as="geometry"/>
         </mxCell>
         <mxCell id="picus" value="&lt;b&gt;Sistema PICUS&lt;/b&gt;" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fontFamily=Segoe UI;fontSize=23;fillColor=#e1d5e7;strokeColor=#9673a6;rounded=1;" vertex="1" parent="1">
-          <mxGeometry x="1320" y="80" width="260" height="885" as="geometry"/>
+          <mxGeometry x="1320" y="80" width="260" height="1232" as="geometry"/>
         </mxCell>
-        <mxCell id="title" value="CTX-01  Context Diagram  |  v0.3  |  25/10/2026" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fontFamily=Segoe UI;fontSize=23;fillColor=none;strokeColor=none;fontSize=27;fontStyle=1;" vertex="1" parent="1">
+        <mxCell id="title" value="CTX-01  Context Diagram  |  v0.4  |  04/11/2026" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fontFamily=Segoe UI;fontSize=23;fillColor=none;strokeColor=none;fontSize=27;fontStyle=1;" vertex="1" parent="1">
           <mxGeometry x="20" y="10" width="1560" height="45" as="geometry"/>
         </mxCell>
-        <mxCell id="flow-0" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;exitX=1;exitY=0.5151515151515151;entryX=0;entryY=0.192090395480226;" edge="1" parent="1" source="banco" target="picus">
+        <mxCell id="flow-0" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;exitX=1;exitY=0.5130984643179766;entryX=0;entryY=0.18441558441558445;" edge="1" parent="1" source="banco" target="picus">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
-        <mxCell id="label-0" value="Creazione/revoca account OPT; caricamento CSV (opzionale)&lt;br&gt;Creazione/revoca account Operatori&lt;br&gt;Configurazione e aggiornamento del catalogo misure&lt;br&gt;Assegnazione erogatore, verifica disponibilità e coordinamento appuntamento&lt;br&gt;Invio comunicazioni con allegati a gruppi/sottogruppi di OPT" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fontFamily=Segoe UI;fontSize=23;fontSize=21;fillColor=none;strokeColor=none;" vertex="1" parent="1">
-          <mxGeometry x="280" y="100" width="1020" height="143" as="geometry"/>
+        <mxCell id="label-0" value="Creazione/revoca account OPT; caricamento CSV (opzionale)&lt;br&gt;Creazione/revoca account Operatori&lt;br&gt;Configurazione e aggiornamento del catalogo misure&lt;br&gt;Scelta dell'erogatore da interpellare, uno per volta&lt;br&gt;Registrazione dei dettagli concordati e conferma dell'accordo&lt;br&gt;Rifiuto della richiesta; annullamento eccezionale per i propri operatori&lt;br&gt;Invio comunicazioni con allegati a OPT e operatori, tutti o per gruppi" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fontFamily=Segoe UI;fontSize=23;fontSize=21;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="280" y="100" width="1020" height="200" as="geometry"/>
         </mxCell>
-        <mxCell id="flow-1" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;exitX=0;exitY=0.3559322033898305;entryX=1;entryY=0.9545454545454546;" edge="1" parent="1" source="picus" target="banco">
+        <mxCell id="flow-1" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;exitX=0;exitY=0.3472402597402598;entryX=1;entryY=0.9661246612466124;" edge="1" parent="1" source="picus" target="banco">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
-        <mxCell id="label-1" value="Vista complessiva richieste e stato degli scambi di servizio&lt;br&gt;Disponibilità, territorio e misure offerte da OPT e Operatori&lt;br&gt;Conferme di ricezione delle comunicazioni&lt;br&gt;Dati aggregati e schede trimestrali per la rendicontazione ministeriale" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fontFamily=Segoe UI;fontSize=23;fontSize=21;fillColor=none;strokeColor=none;" vertex="1" parent="1">
-          <mxGeometry x="280" y="270" width="1020" height="116" as="geometry"/>
+        <mxCell id="label-1" value="Vista complessiva richieste e stato degli scambi di servizio&lt;br&gt;Erogatori compatibili con ordine suggerito (comune, confinanti, appuntamenti)&lt;br&gt;Risposte degli erogatori alle richieste di disponibilità&lt;br&gt;Conferme di ricezione delle comunicazioni&lt;br&gt;Schede trimestrali degli operatori del Banco e dati quantitativi delle OPT&lt;br&gt;(viste trimestrale e cumulativa) per la rendicontazione ministeriale" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fontFamily=Segoe UI;fontSize=23;fontSize=21;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="280" y="327" width="1020" height="172" as="geometry"/>
         </mxCell>
-        <mxCell id="flow-2" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;exitX=1;exitY=0.4918032786885246;entryX=0;entryY=0.576271186440678;" edge="1" parent="1" source="opt" target="picus">
+        <mxCell id="flow-2" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;exitX=1;exitY=0.5563025210084034;entryX=0;entryY=0.5449675324675325;" edge="1" parent="1" source="opt" target="picus">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
-        <mxCell id="label-2" value="Misure svolte e disponibilità come erogatrice&lt;br&gt;Richiesta di misura senza dati identificativi degli assistiti&lt;br&gt;Risposta sulla disponibilità all'erogazione&lt;br&gt;Dati quantitativi aggregati dell'OPT (contenuti da chiarire)&lt;br&gt;Conferma di ricezione delle comunicazioni del Banco" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fontFamily=Segoe UI;fontSize=23;fontSize=21;fillColor=none;strokeColor=none;" vertex="1" parent="1">
-          <mxGeometry x="280" y="442" width="1020" height="143" as="geometry"/>
+        <mxCell id="label-2" value="Misure svolte e disponibilità come erogatrice&lt;br&gt;Richiesta di misura senza dati identificativi degli assistiti&lt;br&gt;Risposta sulla disponibilità all'erogazione&lt;br&gt;Dati quantitativi per misura e categoria, riferiti a un periodo&lt;br&gt;Conferma di ricezione delle comunicazioni del Banco&lt;br&gt;Evento eccezionale e motivo per l'annullamento dei propri erogatori" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fontFamily=Segoe UI;fontSize=23;fontSize=21;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="280" y="573" width="1020" height="172" as="geometry"/>
         </mxCell>
-        <mxCell id="flow-3" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;exitX=0;exitY=0.7344632768361582;entryX=1;entryY=0.9508196721311475;" edge="1" parent="1" source="picus" target="opt">
+        <mxCell id="flow-3" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;exitX=0;exitY=0.6613636363636364;entryX=1;entryY=0.957983193277311;" edge="1" parent="1" source="picus" target="opt">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
         <mxCell id="label-3" value="Catalogo delle misure richiedibili&lt;br&gt;Stato proprie richieste e dettagli appuntamento (data, ora, luogo/link, referente)&lt;br&gt;Richieste di disponibilità dal Banco&lt;br&gt;Comunicazioni, avvisi e allegati dal Banco" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fontFamily=Segoe UI;fontSize=23;fontSize=21;fillColor=none;strokeColor=none;" vertex="1" parent="1">
-          <mxGeometry x="280" y="605" width="1020" height="116" as="geometry"/>
+          <mxGeometry x="280" y="771" width="1020" height="114" as="geometry"/>
         </mxCell>
-        <mxCell id="flow-4" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;exitX=1;exitY=0.45789473684210524;entryX=0;entryY=0.8836158192090395;" edge="1" parent="1" source="operatore" target="picus">
+        <mxCell id="flow-4" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;exitX=1;exitY=0.5271028037383177;entryX=0;entryY=0.789448051948052;" edge="1" parent="1" source="operatore" target="picus">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
-        <mxCell id="label-4" value="Conferma disponibilità e appuntamenti assegnati; invio scheda trimestrale&lt;br&gt;Dati personali/contrattuali operatore e conteggi aggregati assistiti" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fontFamily=Segoe UI;fontSize=23;fontSize=21;fillColor=none;strokeColor=none;" vertex="1" parent="1">
-          <mxGeometry x="280" y="785" width="1020" height="62" as="geometry"/>
+        <mxCell id="label-4" value="Risposta (conferma o rifiuto) alla richiesta di disponibilità&lt;br&gt;Invio scheda trimestrale&lt;br&gt;Dati personali/contrattuali operatore e conteggi aggregati assistiti" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fontFamily=Segoe UI;fontSize=23;fontSize=21;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="280" y="960" width="1020" height="86" as="geometry"/>
         </mxCell>
-        <mxCell id="flow-5" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;exitX=0;exitY=0.9853107344632769;entryX=1;entryY=0.9315789473684211;" edge="1" parent="1" source="picus" target="operatore">
+        <mxCell id="flow-5" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;exitX=0;exitY=0.8594155844155845;entryX=1;entryY=0.9299065420560748;" edge="1" parent="1" source="picus" target="operatore">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
-        <mxCell id="label-5" value="Richieste di appuntamento da confermare&lt;br&gt;Riepilogo/storico proprie schede e appuntamenti (proposta)" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fontFamily=Segoe UI;fontSize=23;fontSize=21;fillColor=none;strokeColor=none;" vertex="1" parent="1">
-          <mxGeometry x="280" y="885" width="1020" height="62" as="geometry"/>
+        <mxCell id="label-5" value="Richieste di disponibilità; comunicazioni e promemoria di scadenza della scheda&lt;br&gt;Riepilogo/storico proprie schede e appuntamenti (proposta)" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fontFamily=Segoe UI;fontSize=23;fontSize=21;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="280" y="1073" width="1020" height="57" as="geometry"/>
+        </mxCell>
+        <mxCell id="flow-6" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;exitX=1;exitY=0.4336973478939157;entryX=0;entryY=0.9410714285714287;" edge="1" parent="1" source="operatore-opt" target="picus">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="label-6" value="Risposta (conferma o rifiuto) alla richiesta di disponibilità" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fontFamily=Segoe UI;fontSize=23;fontSize=21;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="280" y="1204" width="1020" height="29" as="geometry"/>
+        </mxCell>
+        <mxCell id="flow-7" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;exitX=0;exitY=0.9878246753246753;entryX=1;entryY=0.8829953198127923;" edge="1" parent="1" source="picus" target="operatore-opt">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="label-7" value="Richieste di disponibilità e comunicazioni del Banco" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fontFamily=Segoe UI;fontSize=23;fontSize=21;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="280" y="1259" width="1020" height="29" as="geometry"/>
         </mxCell>
         <mxCell id="note-0" value="Assistiti senza accesso né dati identificativi. Ministero: inserimento manuale del Banco, nessuna integrazione." style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fontFamily=Segoe UI;fontSize=23;fontSize=19;fillColor=none;strokeColor=none;" vertex="1" parent="1">
-          <mxGeometry x="20" y="982" width="1560" height="30" as="geometry"/>
+          <mxGeometry x="20" y="1329" width="1560" height="30" as="geometry"/>
         </mxCell>
-        <mxCell id="note-1" value="Il personale interno delle OPT non è censito. Competenze sul coordinamento appuntamento da chiarire con il committente." style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fontFamily=Segoe UI;fontSize=23;fontSize=19;fillColor=none;strokeColor=none;" vertex="1" parent="1">
-          <mxGeometry x="20" y="1014" width="1560" height="30" as="geometry"/>
+        <mxCell id="note-1" value="Volontari e personale delle OPT senza account. Il Banco concorda i dettagli con l'erogatore e conferma: nessuna approvazione dell'erogatore o dell'OPT nell'app." style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fontFamily=Segoe UI;fontSize=23;fontSize=19;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="20" y="1361" width="1560" height="30" as="geometry"/>
         </mxCell>
       </root>
     </mxGraphModel>
