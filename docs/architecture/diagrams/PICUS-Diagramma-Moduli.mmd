@@ -1,0 +1,73 @@
+---
+title: "PICUS a regime · Vista dei moduli e dei package Java"
+config:
+  theme: base
+  themeVariables:
+    fontFamily: "Arial"
+    fontSize: "16px"
+    lineColor: "#64748B"
+    edgeLabelBackground: "#FFFFFF"
+  flowchart:
+    curve: linear
+    nodeSpacing: 34
+    rankSpacing: 44
+---
+flowchart TB
+    accTitle: Vista dei moduli e dei package Java di PICUS
+    accDescr: La prima vista mostra responsabilità, dati gestiti e dipendenze dei cinque moduli. La seconda mostra i package web, api e i package di implementazione interni a ciascun modulo.
+
+    subgraph MODULI["A · Moduli del monolite · it.unina.picus"]
+        direction TB
+        M1["<b>M1 · Account, profili<br/>e autorizzazioni</b><br/><code>utenze</code><div style='text-align:left;margin-top:8px'><b>Responsabilità</b> · accessi, attivazione e revoca<br/><b>Dati</b> · account, profili e ruoli</div>"]
+        M2["<b>M2 · Catalogo misure<br/>e offerta territoriale</b><br/><code>catalogo</code><div style='text-align:left;margin-top:8px'><b>Responsabilità</b> · misure e copertura territoriale<br/><b>Dati</b> · misure, comuni e offerte</div>"]
+        M3["<b>M3 · Richieste e coordinamento<br/>appuntamenti</b><br/><code>richieste</code><div style='text-align:left;margin-top:8px'><b>Responsabilità</b> · coordina le richieste fino all’esito<br/><b>Dati</b> · richieste, contatti e accordi</div>"]
+        M4["<b>M4 · Comunicazioni<br/>e notifiche</b><br/><code>comunicazioni</code><div style='text-align:left;margin-top:8px'><b>Responsabilità</b> · invii del Banco e riscontri<br/><b>Dati</b> · comunicazioni, riscontri e metadati allegati</div>"]
+        M5["<b>M5 · Monitoraggio<br/>e schede trimestrali</b><br/><code>monitoraggio</code><div style='text-align:left;margin-top:8px'><b>Responsabilità</b> · produce riepiloghi dai dati trimestrali<br/><b>Dati</b> · conteggi OPT e schede personali</div>"]
+
+        M3 -.->|Notifiche operative da definire| M4
+        M3 -->|Identità e ruoli| M1
+        M3 -->|Misure e offerta compatibile| M2
+        M5 -->|Misure dei conteggi OPT| M2
+        M5 -->|Identità e profili| M1
+        M4 -->|Account dei destinatari| M1
+        M2 -->|Profili degli erogatori| M1
+    end
+
+    LEGENDA["<b>Come leggere le dipendenze</b><br/>La freccia punta al modulo di cui si usa il package <code>api</code><br/>Il tratteggio indica una collaborazione da definire"]
+
+    subgraph STRUTTURA["B · Struttura dei package di ciascun modulo"]
+        direction TB
+        WEB["<b><code>web</code> · Ingresso HTTP</b><br/>Controller MVC e validazione dell’input"]
+        API["<b><code>api</code> · Contratti pubblici</b><br/>Interfacce Java e DTO<br/>Accesso per controller e altri moduli"]
+
+        subgraph INTERNO["interno · Implementazione del modulo"]
+            direction TB
+            APP["<b><code>applicazione</code></b><br/>Coordina i casi d’uso"]
+            DOM["<b><code>dominio</code></b><br/>Entità, stati e regole"]
+            PERS["<b><code>persistenza</code></b><br/>Repository e mappatura JPA"]
+            INT["<b><code>integrazioni</code></b><br/>Adattatori dei moduli<br/>Posta per M1, file per M4"]
+
+            APP -->|Applica le regole| DOM
+            APP -->|Legge e salva| PERS
+            APP -->|Usa gli adattatori previsti| INT
+        end
+
+        WEB -->|Invoca i servizi| API
+        APP -->|Implementa i contratti| API
+    end
+
+    %% Collegamenti invisibili per disporre le due viste e la legenda in verticale.
+    MODULI ~~~ LEGENDA
+    LEGENDA ~~~ STRUTTURA
+
+    classDef modulo fill:#EAF2FC,stroke:#5A7FA8,color:#153859,stroke-width:1.5px
+    classDef contratto fill:#E2F1E8,stroke:#568573,color:#1A4A3C,stroke-width:1.5px
+    classDef implementazione fill:#FFFFFF,stroke:#91B6A5,color:#1A4A3C,stroke-width:1.3px
+    classDef supporto fill:#F1F5F9,stroke:#94A3B8,color:#334155,stroke-width:1.3px
+    class M1,M2,M3,M4,M5,WEB modulo
+    class API contratto
+    class APP,DOM implementazione
+    class PERS,INT,LEGENDA supporto
+    style MODULI fill:#F7FAFE,stroke:#7C9BB9,stroke-width:1.4px,color:#183957
+    style STRUTTURA fill:#F7FBF8,stroke:#91B6A5,stroke-width:1.4px,color:#1A4A3C
+    style INTERNO fill:#EFF7F2,stroke:#A5C2B5,stroke-width:1.2px,color:#1A4A3C

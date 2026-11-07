@@ -1,0 +1,85 @@
+---
+title: "ARCH-01 · Architettura MVC di PICUS a regime"
+config:
+  theme: base
+  themeVariables:
+    fontFamily: "Arial"
+    fontSize: "16px"
+    lineColor: "#64748B"
+    edgeLabelBackground: "#FFFFFF"
+  flowchart:
+    curve: linear
+    nodeSpacing: 22
+    rankSpacing: 34
+---
+flowchart TB
+    accTitle: ARCH-01, architettura MVC di PICUS a regime
+    accDescr: Il browser invia una richiesta. Spring Security verifica l’accesso e il DispatcherServlet individua il controller. Il controller chiama il servizio Java del modulo pertinente, riceve il risultato e consegna a Spring MVC nome della vista e dati. La vista genera la pagina HTML. I moduli accedono ai dati tramite repository e adattatori.
+
+    BROWSER["<b>Browser</b><br/>OPT · Banco · Operatori"]
+
+    subgraph PICUS["Applicazione web PICUS · Monolite modulare · Java 25 e Spring Boot"]
+        SEC["<b>Spring Security</b><br/>Riconosce la sessione dell’utente<br/>e verifica l’accesso alla funzione"]
+        DISPATCHER["<b>DispatcherServlet</b><br/>Abbina metodo HTTP e percorso<br/>al metodo del controller"]
+        CONTROLLER["<b>Controller MVC selezionato</b><br/>I controller sono organizzati per area<br/>Valida l’input e prepara i dati della pagina"]
+
+        SEC -->|2. Se l’accesso è consentito| DISPATCHER
+        DISPATCHER -->|3. Inoltra al metodo selezionato| CONTROLLER
+
+        subgraph MODELLO["MODELLO · Servizi applicativi e regole di dominio"]
+            subgraph MODULI["Moduli del monolite"]
+                direction LR
+                M1["<b>M1 · Account, profili<br/>e autorizzazioni</b><br/>Attivazione e revoca"]
+                M2["<b>M2 · Catalogo misure<br/>e offerta territoriale</b><br/>Misure, comuni e offerta"]
+                M3["<b>M3 · Richieste e<br/>coordinamento appuntamenti</b><br/>Stati e assegnazioni"]
+                M4["<b>M4 · Comunicazioni<br/>e notifiche</b><br/>Invii, allegati e riscontri"]
+                M5["<b>M5 · Monitoraggio<br/>e schede trimestrali</b><br/>Conteggi e riepiloghi"]
+            end
+
+            MAIL["<b>Adattatore email</b><br/>Interno a M1"]
+            DATI["<b>Repository dei moduli</b><br/>Spring Data JPA · Hibernate"]
+            ALLEGATI["<b>Adattatore allegati</b><br/>Interno a M4"]
+
+            M1 -->|Chiede di inviare i link| MAIL
+            MODULI -->|Ogni modulo usa i suoi repository| DATI
+            M4 -->|Salva e recupera file| ALLEGATI
+        end
+
+        subgraph VISTA["VISTA · Presentazione lato server"]
+            RISOLUZIONE["<b>ViewResolver</b><br/>Associa il nome alla vista"]
+            TEMPLATE["<b>Template HTML</b><br/>Genera la pagina con i dati<br/>forniti dal controller"]
+            RISOLUZIONE -->|Vista risolta| TEMPLATE
+        end
+
+        CONTROLLER -->|4. Invoca il servizio del modulo| MODELLO
+        MODELLO -->|5. Restituisce il risultato| CONTROLLER
+        CONTROLLER -->|"6. Restituisce a Spring MVC<br/>nome della vista e dati da mostrare"| VISTA
+    end
+
+    POSTA["<b>Servizio email</b><br/>Fornitore e protocollo da definire"]
+    PG[("<b>PostgreSQL</b><br/>Dati e metadati degli allegati")]
+    FILE[("<b>Archivio allegati</b><br/>Tecnologia da definire")]
+    RISPOSTA["<b>Pagina nel browser</b><br/>L’utente vede il risultato"]
+
+    BROWSER -->|"1. Invia una richiesta HTTPS<br/>Metodo HTTP e percorso"| PICUS
+    MAIL -.->|"Link di attivazione<br/>e recupero"| POSTA
+    DATI -->|Legge e scrive via pgJDBC| PG
+    ALLEGATI -->|File delle comunicazioni| FILE
+    TEMPLATE -->|7. Pagina HTML via HTTPS| RISPOSTA
+
+    classDef browser fill:#F1F5F9,stroke:#94A3B8,color:#142B46,stroke-width:1.4px
+    classDef web fill:#E9F2FC,stroke:#5480B0,color:#143C65,stroke-width:1.5px
+    classDef modello fill:#EDF5F0,stroke:#568573,color:#1A4A3C,stroke-width:1.5px
+    classDef vista fill:#F2EEFC,stroke:#8069AE,color:#423069,stroke-width:1.5px
+    classDef dati fill:#E9F7F5,stroke:#3D867D,color:#153D38,stroke-width:1.4px
+    classDef esterno fill:#FFF8EA,stroke:#946728,color:#563C17,stroke-width:1.4px,stroke-dasharray:5 4
+    class BROWSER,RISPOSTA browser
+    class SEC,DISPATCHER,CONTROLLER web
+    class M1,M2,M3,M4,M5,MAIL,DATI,ALLEGATI modello
+    class RISOLUZIONE,TEMPLATE vista
+    class PG,FILE dati
+    class POSTA esterno
+    style PICUS fill:#F7FAFE,stroke:#7C9BB9,stroke-width:1.4px,color:#183957
+    style MODELLO fill:#F3F9F5,stroke:#91B6A5,stroke-width:1.4px,color:#1A4A3C
+    style MODULI fill:#FFFFFF,stroke:#B7CEC3,stroke-width:1.1px,color:#1A4A3C
+    style VISTA fill:#FBF9FF,stroke:#BFB0D9,stroke-width:1.4px,color:#423069

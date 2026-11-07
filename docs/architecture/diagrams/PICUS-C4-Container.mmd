@@ -1,0 +1,46 @@
+---
+title: "PICUS a regime — Diagramma dei container C4"
+config:
+  theme: base
+  themeVariables:
+    fontFamily: "Arial"
+    fontSize: "16px"
+    lineColor: "#64748B"
+    edgeLabelBackground: "#FFFFFF"
+  flowchart:
+    curve: linear
+    nodeSpacing: 36
+    rankSpacing: 37
+---
+flowchart LR
+    accTitle: PICUS a regime, diagramma dei container
+    accDescr: OPT, Banco e Operatori accedono alla web app tramite HTTPS. La web app usa PostgreSQL per i dati e un archivio separato per i file allegati. La consegna delle email è prevista con un servizio da definire.
+
+    OPT["<b>Referente OPT</b><br/>Richiedente o erogatrice<br/>Attore · Unico account organizzativo"]
+    BANCO["<b>Banco di coordinamento</b><br/>Attore · Account di coordinamento"]
+    OPERATORE["<b>Operatore del Banco</b><br/>Interno o esterno pagato dal Banco<br/>Attore · Account personale"]
+
+    subgraph PICUS["Sistema PICUS"]
+        WEB["<b>Applicazione web PICUS</b><br/>Container applicativo · Java 25, Spring Boot MVC<br/>Monolite modulare<br/><br/>Accessi, catalogo e offerta<br/>Richieste e appuntamenti<br/>Comunicazioni, monitoraggio e rendicontazione"]
+        DB[("<b>Database PICUS</b><br/>Container dati · PostgreSQL<br/>Dati operativi, rendicontazione<br/>e metadati degli allegati")]
+        ALLEGATI[("<b>Archivio allegati</b><br/>Container dati · Tecnologia da definire<br/>File allegati alle comunicazioni")]
+        WEB -->|"Legge e scrive dati<br/>Protocollo PostgreSQL<br/>Driver pgJDBC"| DB
+        WEB -->|"Salva e recupera i file<br/>Protocollo da definire"| ALLEGATI
+    end
+
+    EMAIL["<b>Servizio email</b><br/>Sistema esterno previsto<br/>Fornitore e protocollo da definire"]
+
+    OPT -->|"Invia richieste, gestisce l’offerta<br/>e risponde sulla disponibilità<br/>HTTPS"| WEB
+    BANCO -->|"Amministra e coordina<br/>le richieste<br/>HTTPS"| WEB
+    OPERATORE -->|"Risponde alle richieste di disponibilità<br/>e invia schede<br/>HTTPS"| WEB
+    WEB -.->|"Richiede l’invio dei link<br/>di attivazione e recupero"| EMAIL
+
+    classDef attore fill:#F1F5F9,stroke:#94A3B8,color:#142B46,stroke-width:1.4px
+    classDef app fill:#164E80,stroke:#123B61,color:#FFFFFF,stroke-width:1.8px
+    classDef dati fill:#E9F7F5,stroke:#3D867D,color:#153D38,stroke-width:1.4px
+    classDef esterno fill:#FFF8EA,stroke:#946728,color:#563C17,stroke-width:1.4px,stroke-dasharray:5 4
+    class OPT,BANCO,OPERATORE attore
+    class WEB app
+    class DB,ALLEGATI dati
+    class EMAIL esterno
+    style PICUS fill:#F7FAFE,stroke:#7C9BB9,stroke-width:1.4px,color:#183957
