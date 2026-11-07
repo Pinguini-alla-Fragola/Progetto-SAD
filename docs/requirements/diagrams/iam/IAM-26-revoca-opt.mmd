@@ -4,14 +4,14 @@ sequenceDiagram
     autonumber
     participant B as Banco
     participant S as Sistema PICUS
-    participant O as OPT
+    participant O as Account OPT
 
     Note over B,O: Revoca dell'accesso
     B->>S: Revoca l'accesso della OPT
     S->>S: Imposta lo stato Revocato
-    S->>S: Chiude subito le sessioni aperte della OPT
+    S->>S: Invalida subito sessioni e link della OPT
     S-->>B: Conferma la revoca
-    Note over B,O: Richieste e storico non vengono cancellati
+    Note over B,O: Richieste e storico conservati<br/>Subentro nelle pratiche da definire in #67
     Note over B,O: Dopo la revoca: la OPT prova ad accedere
     O->>S: Tenta di accedere con le sue credenziali
     S-->>O: Nega l'accesso

@@ -1,4 +1,4 @@
-%% TOBE-01A v0.2 - 03/11/2026
+%% TOBE-01A v0.4 - 07/11/2026
 %% Proposta del team: Epic #20. Allineato alle risposte del cliente (seconda tornata) e alle scelte del gruppo registrate il 03/11/2026.
 %% Il Banco lavora le richieste in ordine di arrivo e interpella un erogatore per volta.
 %% Il sistema puo' suggerire l'ordine degli erogatori; la scelta resta al Banco.
@@ -7,7 +7,7 @@ sequenceDiagram
     participant R as OPT richiedente
     participant S as Sistema PICUS
     participant B as Banco
-    participant E as Erogatore OPT o Operatore
+    participant E as Account OPT o account<br/>personale del Banco
 
     R->>S: Invia misura, persona o nucleo e comune<br/>(nessun dato identificativo)
     S->>S: Valida i dati
@@ -15,12 +15,13 @@ sequenceDiagram
         S->>S: Registra ID, data e titolare<br/>e mette la richiesta<br/>nello stato<br/>In programmazione
         S-->>R: Mostra ID e stato della propria richiesta
         B->>S: Consulta le richieste<br/>in ordine di arrivo
-        S-->>B: Mostra tutti gli erogatori compatibili<br/>con l'ordine suggerito
-        Note over S,E: CRITERI SUGGERITI DAL SISTEMA (la scelta resta al Banco)<br/>• Solo erogatori della misura richiesta<br/>• Stesso comune, poi comuni confinanti<br/>• A parità di distanza: operatori del programma, poi OPT erogatrici<br/>• Poi chi ha meno appuntamenti assegnati<br/>• Senza nessuno in zona: Centro PICUS da remoto, se la misura lo consente
+        S-->>B: Mostra tutti gli erogatori compatibili<br/>con l'ordine suggerito<br/>OPT e operatori interni/esterni pagati dal Banco
+        Note over S,E: CRITERI SUGGERITI DAL SISTEMA (la scelta resta al Banco)<br/>• Solo erogatori della misura richiesta<br/>• Stesso comune, poi comuni confinanti<br/>• A parità di distanza: operatori del Banco, poi OPT erogatrici<br/>• Poi chi ha meno appuntamenti assegnati<br/>• Senza nessuno in zona: Centro PICUS da remoto, se la misura lo consente
         loop Un erogatore per volta, fino a<br/>disponibilità o erogatori esauriti
             B->>S: Sceglie l'erogatore da interpellare
+            Note over S,E: La OPT opera come organizzazione anche<br/>se eroga tramite un professionista<br/>I dati mostrati sono quelli necessari al contatto
             S->>E: Notifica la richiesta di disponibilità
-            E->>S: Conferma o rifiuta
+            E->>S: Conferma o rifiuta<br/>dal solo account interpellato
             S-->>B: Mostra la risposta
             alt Erogatore disponibile
                 Note over S,E: Prosegue nel diagramma TOBE-01B<br/>La richiesta resta In programmazione
@@ -28,7 +29,7 @@ sequenceDiagram
                 break Uscita dal loop
                     B->>S: Rifiuta la richiesta<br/>(nessuna soluzione praticabile)
                     S->>S: Registra Rifiutata
-                    S-->>R: Mostra Rifiutata
+                    S-->>R: Mostra Rifiutata e<br/>Nessun erogatore disponibile
                 end
             end
         end

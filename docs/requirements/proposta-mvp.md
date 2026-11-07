@@ -13,21 +13,21 @@ Versione 0.2 del **04/11/2026**. Proposta da selezionare e stimare con PO e Deve
 | #51 | Risposta alla disponibilità | Assenso non conferma l’accordo; rifiuto singolo non rifiuta la pratica |
 | #52 | Conferma Banco e dettagli visibili nello stesso esito, oppure rifiuto finale | Presenza/remoto; nessuna seconda approvazione finale nell’app; dati immutabili dopo conferma |
 
-Sono sei riferimenti dopo l’accorpamento proposto: #53 esiste ancora su GitHub finché non aggiornata e chiusa come assorbita. L’incremento usa soltanto la porzione pertinente di #28; non attesta che tutti i permessi del prodotto siano già realizzati.
+I sei riferimenti includono #52, che ha assorbito la #53, e la porzione pertinente del vincolo #28.
 
 ## Prerequisiti e funzioni successive
 
-Account sintetici per Banco, due OPT e operatori delle tre tipologie; catalogo iniziale e offerta, adiacenze e carico. Il progetto non mostra disponibilità preventive: Q-03 conserva il confronto necessario col PO sul dato temporale chiesto dal cliente.
+Preparare l’account Banco, due account organizzativi OPT e due account personali, uno interno e uno esterno pagato dal Banco. Predisporre catalogo, offerta, adiacenze e carico. Una OPT eroga tramite un professionista e risponde con il proprio account. Il calendario facoltativo per misura (#73) è un’estensione e il dato temporale minimo resta in Q-03.
 
-Gestione utenti, CSV opzionale, recupero, catalogo/offerta tramite interfaccia, conteggi e consultazione OPT, schede personali e comunicazioni sono incrementi successivi. #54 può seguire il primo percorso: la matrice è già scelta, non va inventata al momento dell’implementazione. Annullo solo da Confermata per evento eccezionale con motivo e senza riaprire la ricerca. La scelta di rinviarlo è di pianificazione, non un’eliminazione dal prodotto.
+Gestione utenti, CSV opzionale, recupero, catalogo/offerta tramite interfaccia, conteggi e consultazione OPT (#69), schede e comunicazioni sono incrementi successivi. #54 può seguire il primo percorso secondo la pianificazione. Il prodotto usa la [matrice di annullamento](regole-funzionali.md#matrice-di-annullamento).
 
 ## Dimostrazione prevista
 
 1. OPT A accede, invia e ritrova richiesta con ID, data e In programmazione.
 2. Banco vede erogatori ordinati e ne interpella uno; un rifiuto lascia la pratica aperta e consente un’alternativa.
-3. Il secondo dà disponibilità: la richiesta resta In programmazione finché manca l’accordo completo.
+3. Una OPT che eroga tramite un professionista risponde dal proprio account. La richiesta resta In programmazione fino all’accordo completo.
 4. Banco ed erogatore concordano; solo il Banco registra dettagli completi e conferma. In un solo esito si ottengono Confermata e dettagli alla OPT, che informa l’assistito fuori dall’app. Modifiche successive negate.
 5. Su altra pratica, esaurite alternative anche remote compatibili, il Banco registra Rifiutata e compare Nessun erogatore disponibile.
 6. Accesso estraneo negato; erogatore autorizzato vede soltanto la propria assegnazione. Campi identificativi non ammessi non persistiti né copiati nei log. Logout invalida la sessione.
 
-QS-01A, QS-01B, QS-02A, QS-02B, QS-04A, QS-04B e QS-04C verificano il percorso quando disponibile. QS-03 completo richiede i moduli di schede e conteggi. QS-05A e QS-05B richiedono procedure di ripristino e QS-05B richiede anche un backup. QS-06 richiede la gestione del catalogo. Q-19 riguarda un erogatore che non risponde; non introdurre un timeout implicito. La Review di preparazione presenta artefatti e scelte, non test applicativi mai eseguiti.
+QS-01A, QS-02A, QS-02B e QS-04A/B/C coprono il percorso quando disponibile. QS-01B riguarda l’incremento #54 e QS-01C richiede la revoca. QS-03 completo richiede schede e conteggi, QS-05A/B procedure di ripristino, QS-06 la gestione del catalogo. #66/Q-19 riguarda il contatto senza risposta. Le prove sono pianificate.

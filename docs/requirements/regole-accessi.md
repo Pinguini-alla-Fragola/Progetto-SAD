@@ -1,12 +1,12 @@
 # Regole comuni per account e credenziali
 
-Versione 0.1 del **04/11/2026**. Specifica di supporto alle storie #24/#25/#26/#27/#28/#30/#33/#44. I valori numerici sono proposte tecniche da validare nella #34/Q-16, non una verifica normativa o un’approvazione del cliente.
+Versione 0.2 del **07/11/2026**. Specifica di supporto a #24/#25/#26/#27/#28/#30/#33/#44. Le soglie tecniche restano da validare in #34/Q-16.
 
 ## Account e permessi
 
-Un account e una email per OPT; account personali degli operatori interni Banco, esterni pagati Banco ed esterni OPT. Appartenenza OPT obbligatoria per l’ultima categoria, distinta da volontari e personale proprio non censiti. Creazione manuale OPT #44 indipendente da CSV #24. Operatore interno e ruolo di coordinamento Banco distinti. [Matrice dei permessi](regole-funzionali.md).
+Ogni OPT usa un account organizzativo e una email, anche quando eroga tramite un professionista esterno. Gli account personali di ruolo Operatore spettano agli interni del Banco e agli esterni pagati dal Banco. La tipologia organizzativa è distinta dalla qualifica professionale e il server accetta soltanto queste due tipologie. La creazione manuale OPT #44 è indipendente da CSV #24. Il coordinamento Banco usa un account distinto. [Matrice dei permessi](regole-funzionali.md).
 
-Stati: In attesa di attivazione, Attivo, Revocato. La revoca invalida sessioni e link ancora validi e non cancella i dati. Cambi referente/email, riattivazione e subentro nelle pratiche sono temi distinti (Q-01/Q-15/Q-18); nessuna riattivazione o revoca a cascata automatica.
+Stati ammessi per l’utenza sono In attesa di attivazione, Attivo e Revocato. #26 revoca il solo account organizzativo OPT e #30 il singolo account personale del Banco, invalidando sessioni e link ancora validi e conservando i dati. Subentro nelle pratiche in #67/Q-18, conservazione in #42 e continuità/riattivazione in #65/Q-01/Q-15.
 
 ## Policy proposta e link
 
@@ -25,7 +25,7 @@ Account in attesa usano il reinvio attivazione, non il recupero. Link scaduti/us
 
 ## Dati e import CSV
 
-OPT, campi proposti: codice struttura, nome, comune, codice fiscale ed email. Operatore: nome/cognome, email, telefono, codice fiscale, tipologia organizzativa, misure e territorio; per esterno OPT, organizzazione esistente obbligatoria. Campi completi e obbligatorietà ancora da validare.
+Campi proposti per la OPT sono codice struttura, nome, comune, codice fiscale ed email. Per l’operatore sono nome/cognome, email, telefono, codice fiscale, tipologia (interno del Banco o esterno pagato dal Banco), misure e territorio. Elenco completo e obbligatorietà restano da validare.
 
 CSV proposto UTF-8, intestazioni `codice_struttura`, `nome_opt`, `comune`, `codice_fiscale`, `email`:
 

@@ -1,5 +1,5 @@
 %% IAM-28 v0.1 - 31/10/2026
-%% Storia #28: accessi per ruolo e appartenenza (RBAC).
+%% Storia #28: accessi per ruolo, titolarità e assegnazione. Matrice in regole-funzionali.md.
 %% Controllo trasversale, applicato a ogni richiesta al server.
 sequenceDiagram
     autonumber
@@ -12,8 +12,8 @@ sequenceDiagram
     alt Sessione assente, scaduta o non valida
         S-->>U: UNAUTHORIZED, senza dati né modifiche
     else Sessione valida
-        S->>S: Verifica ruolo, appartenenza e assegnazioni
-        Note over U,S: Banco: richieste, disponibilità e schede<br/>OPT: propri dati e richieste assegnate<br/>Operatore: propri appuntamenti e schede
+        S->>S: Verifica ruolo, organizzazione, titolarità<br/>e assegnazioni dai dati sul server
+        Note over U,S: Banco: richieste, disponibilità e schede<br/>OPT: propri dati e contatti pertinenti<br/>Operatore Banco: proprie assegnazioni e schede<br/>Annullamento secondo matrice #28 e #54
         alt La risorsa non è consentita a questo utente
             S-->>U: FORBIDDEN, senza dati né modifiche
         else La risorsa è consentita

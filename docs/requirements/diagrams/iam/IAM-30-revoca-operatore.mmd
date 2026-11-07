@@ -1,17 +1,17 @@
 %% IAM-30 v0.1 - 31/10/2026
-%% Storia #30: revoca dell'account di un Operatore accreditato.
+%% Storia #30: revoca dell'account personale di un interno o esterno pagato dal Banco.
 sequenceDiagram
     autonumber
     participant B as Banco
     participant S as Sistema PICUS
-    participant O as Operatore
+    participant O as Account personale<br/>del Banco
 
     Note over B,O: Revoca dell'account
     B->>S: Conferma la revoca dell'account Operatore
     S->>S: Imposta lo stato Revocato
     S->>S: Invalida sessioni e link di attivazione o recupero ancora validi
     S-->>B: Conferma la revoca
-    Note over B,O: Appuntamenti e richieste pendenti non vengono chiusi né riassegnati
+    Note over B,O: Pratiche e accordi conservati<br/>Subentro da definire in #67
     Note over B,O: Dopo la revoca: l'Operatore prova a rientrare
     O->>S: Tenta di accedere o di riusare una sessione precedente
     S-->>O: Nega l'accesso

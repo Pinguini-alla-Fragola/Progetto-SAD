@@ -6,7 +6,7 @@ Bozza **v0.1 del 04/11/2026**. Identifica il contenuto iniziale dei due moduli; 
 
 | Informazione | Regola corrente | Da precisare |
 | --- | --- | --- |
-| OPT | Ricavata dall’account; non manipolabile per scrivere dati altrui | Cambio referente/appartenenza e storico |
+| OPT | Ricavata dall’account; non manipolabile per scrivere dati altrui | Cambio referente/email e storico (#65) |
 | Anno e trimestre | Riferimento dei dati per le due viste scelte | Scadenze, trimestri ammessi e correzioni |
 | Misura | Misura effettivamente svolta nel periodo | Misura disattivata o offerta ritirata dopo l’attività (Q-20) |
 | Voce/categoria | Conteggi aggregati secondo le categorie del modello fornito | Elenco completo e definizione di ogni voce |
@@ -15,9 +15,9 @@ Bozza **v0.1 del 04/11/2026**. Identifica il contenuto iniziale dei due moduli; 
 
 La seconda tornata richiede i conteggi delle persone per misura nelle categorie del modello già fornito; l’appendice B delle richieste iniziali cita nuclei e destinatari finali con ripartizioni per genere, età e categorie di interesse. Non sono specificati qui intervalli di età o un elenco inventato di categorie. Serve conferma del modulo esatto da applicare alle OPT.
 
-Le attività di volontari e personale proprio sono nei dati organizzativi. Attribuzione delle attività di esterni OPT che servono altre organizzazioni da definire; non si introduce una loro scheda personale.
+Le attività di volontari e personale proprio sono nei dati organizzativi. In #41/Q-13 resta da chiarire se includere le attività svolte tramite professionisti esterni e come attribuirle se coinvolgono più OPT.
 
-Registrazione #43 e nuova consultazione sotto #19 distinte. Vista cumulativa: somma della stessa voce sugli anni/trimestri inclusi nel periodo selezionato, ricavata dai dati trimestrali. Nessuna somma tra categorie sovrapposte come insiemi disgiunti; nessuna deduplicazione di persone fra trimestri o OPT. La ritrasmissione dello stesso invio non raddoppia il dato. Una correzione con valori diversi richiede la regola concordata su sostituzione/versione valida; il cumulativo dovrà usare una sola versione del valore.
+La registrazione #43 alimenta la consultazione #69, entrambe sotto #19. Vista cumulativa: somma della stessa voce sugli anni/trimestri inclusi nel periodo selezionato, ricavata dai dati trimestrali. Nessuna somma tra categorie sovrapposte come insiemi disgiunti; nessuna deduplicazione di persone fra trimestri o OPT. La ritrasmissione dello stesso invio non raddoppia il dato. Una correzione con valori diversi richiede la regola concordata su sostituzione/versione valida; il cumulativo dovrà usare una sola versione del valore.
 
 ## TM-OP-01 Scheda personale degli operatori
 

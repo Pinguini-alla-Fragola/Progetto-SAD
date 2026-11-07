@@ -9,11 +9,11 @@ sequenceDiagram
     participant O as Operatore
 
     Note over B,O: Creazione dell'account
-    B->>S: Inserisce i dati dell'Operatore, le misure e il territorio
-    alt Dati non validi o email già associata a un account non revocato
+    B->>S: Inserisce dati, misure e territorio<br/>Interno del Banco o esterno pagato dal Banco
+    alt Dati non validi, tipo non ammesso o email già in uso
         S-->>B: Non crea l'account e indica cosa correggere
     else Dati validi
-        S->>S: Crea l'account In attesa di attivazione
+        S->>S: Crea l’account personale Operatore<br/>In attesa di attivazione
         S->>M: Richiede il link di attivazione
         M-->>O: Invia il link monouso, valido 72 ore
         S-->>B: Mostra l'account con misure, territorio e stato

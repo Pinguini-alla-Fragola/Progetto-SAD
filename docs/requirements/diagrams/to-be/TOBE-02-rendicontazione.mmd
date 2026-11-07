@@ -3,15 +3,15 @@ config:
   sequence:
     noteAlign: left
 ---
-%% TOBE-02 v0.2 - 03/11/2026
+%% TOBE-02 v0.4 - 07/11/2026
 %% F02 §5.5 e appendice B, F06, F07; risposte del cliente (seconda tornata) e scelte del gruppo registrate il 03/11/2026.
 %% Compilano la scheda solo gli operatori interni del Banco e gli esterni pagati dal Banco, ciascuno con account personale.
 %% Volontari, personale e operatori esterni messi a disposizione dalle OPT non la compilano.
 %% La OPT inserisce i dati quantitativi dell'organizzazione; l'attivita' degli esterni delle OPT in quei dati e' da definire.
 sequenceDiagram
     autonumber
-    participant R as OPT
-    participant O as Operatore pagato<br/>dal Banco
+    participant R as Account OPT
+    participant O as Account personale del Banco<br/>(interno o esterno pagato)
     participant S as Sistema PICUS
     participant B as Banco
     participant M as Portale ministeriale
@@ -33,7 +33,10 @@ sequenceDiagram
         B->>M: Inserisce manualmente<br/>i dati nel portale
         Note over B,M: Nessuna integrazione applicativa<br/>con il portale
     end
-    Note over R,S: DATI QUANTITATIVI DELL'ORGANIZZAZIONE (distinti dalla scheda dell'operatore)<br/>Comprendono l'attività di volontari e personale della OPT
-    R->>S: Inserisce le persone raggiunte<br/>per misura e categoria del periodo
-    S->>S: Registra i dati del periodo
-    S-->>B: Rende disponibili le viste<br/>trimestrale e cumulativa
+    Note over R,S: DATI QUANTITATIVI DELL'ORGANIZZAZIONE (distinti dalla scheda dell'operatore)<br/>Comprendono l’attività di volontari e personale della OPT<br/>Inclusione e attribuzione delle attività dei professionisti in #41
+    R->>S: Seleziona anno e trimestre<br/>e inserisce conteggi per misura e categoria
+    S->>S: Valida e registra i dati<br/>della OPT per il trimestre
+    S-->>R: Conferma e mostra i propri dati salvati
+    B->>S: Seleziona un trimestre<br/>oppure un periodo di trimestri
+    S-->>B: Mostra il trimestre o il cumulativo (#69)<br/>derivato dagli stessi dati
+    Note over S,B: Conteggi dichiarati, non persone uniche fra trimestri<br/>Categorie sovrapposte distinte e dati mancanti diversi da zero<br/>Correzioni e versione valida da concordare nella domanda 41
