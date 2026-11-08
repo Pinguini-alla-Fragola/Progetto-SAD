@@ -19,7 +19,7 @@ Il walking skeleton registra la richiesta e la presenta alla OPT titolare e al B
 
 ## Decision
 
-Proponiamo di registrare i quattro stati in `request` e di associare i dettagli dell’accordo alla pratica. La disponibilità, il rifiuto di un singolo candidato e le controproposte appartengono ai contatti. La pratica resta `In programmazione` mentre il Banco interpella un erogatore alla volta e concorda i dettagli.
+Proponiamo di registrare i quattro stati in `richieste` e di associare i dettagli dell’accordo alla pratica. La disponibilità, il rifiuto di un singolo candidato e le controproposte appartengono ai contatti. La pratica resta `In programmazione` mentre il Banco interpella un erogatore alla volta e concorda i dettagli.
 
 | Stato di partenza | Comando e condizioni | Esito |
 | --- | --- | --- |
@@ -35,6 +35,6 @@ Il server consente soltanto le transizioni della tabella e verifica stato, autor
 ## Consequences
 
 - Gli utenti vedono un solo stato coerente con l’accordo. I contatti e le risposte restano registrati separatamente dallo stato della pratica.
-- Il modulo `request` deve coordinare contatti e transizioni. Le prove verificano il contatto sequenziale, la disponibilità che lascia aperta la pratica, il rifiuto definitivo, la conferma con dati completi e la conservazione dello stato se due comandi concorrenti risultano incompatibili.
+- Il modulo `richieste` deve coordinare contatti e transizioni. Le prove verificano il contatto sequenziale, la disponibilità che lascia aperta la pratica, il rifiuto definitivo, la conferma con dati completi e la conservazione dello stato se due comandi concorrenti risultano incompatibili.
 - Un eventuale requisito futuro di riprogrammazione o tracciamento della prestazione richiederebbe di rivalutare un ciclo separato per l’appuntamento.
 - Le prove di annullamento seguono la #54 e QS-01B. La visibilità del motivo e gli avvisi restano in Q-04. Negoziazione e gestione del contatto senza risposta restano in Q-09 e Q-19. [Registro dei chiarimenti](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/blob/2bb87e6c7c5b454d40af4a2b1b9635f07e8dfb2c/docs/requirements/open-questions.md)

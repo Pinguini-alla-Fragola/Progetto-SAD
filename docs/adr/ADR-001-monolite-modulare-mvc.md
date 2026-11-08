@@ -9,7 +9,7 @@
 
 PICUS parte da un unico progetto Spring Boot con Java 25 e Maven Wrapper. Il walking skeleton dello Sprint 2 copre accesso, invio e consultazione delle richieste e coda del Banco. Il percorso dell’MVP prosegue con ricerca dell’erogatore, risposta alla disponibilità e conferma dell’accordo o rifiuto definitivo. [Proposta di MVP](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/blob/2bb87e6c7c5b454d40af4a2b1b9635f07e8dfb2c/docs/requirements/proposta-mvp.md)
 
-La struttura deve permettere di evolvere i flussi di coordinamento, comunicazione e monitoraggio con responsabilità distinte. Per il primo percorso servono controlli di accesso server per ogni richiesta, validazione dei campi ammessi e un’interfaccia utilizzabile da smartphone. La #77 prevede un ambiente riproducibile con un’applicazione e un database MySQL. [QS-01A](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/blob/2bb87e6c7c5b454d40af4a2b1b9635f07e8dfb2c/docs/quality-scenarios/QS-01A-consultazione-richieste.md) · [QS-02A](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/blob/2bb87e6c7c5b454d40af4a2b1b9635f07e8dfb2c/docs/quality-scenarios/QS-02A-identificativi-assistiti.md) · [QS-04A](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/blob/2bb87e6c7c5b454d40af4a2b1b9635f07e8dfb2c/docs/quality-scenarios/QS-04A-invio-richiesta-smartphone.md)
+La struttura deve permettere di evolvere i flussi di coordinamento, comunicazione e monitoraggio con responsabilità distinte. Per il primo percorso servono controlli di accesso server per ogni richiesta, validazione dei campi ammessi e un’interfaccia utilizzabile da smartphone. La #77 prevede un ambiente riproducibile con un’applicazione e un database PostgreSQL. [QS-01A](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/blob/2bb87e6c7c5b454d40af4a2b1b9635f07e8dfb2c/docs/quality-scenarios/QS-01A-consultazione-richieste.md) · [QS-02A](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/blob/2bb87e6c7c5b454d40af4a2b1b9635f07e8dfb2c/docs/quality-scenarios/QS-02A-identificativi-assistiti.md) · [QS-04A](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/blob/2bb87e6c7c5b454d40af4a2b1b9635f07e8dfb2c/docs/quality-scenarios/QS-04A-invio-richiesta-smartphone.md)
 
 ## Considered options
 
@@ -19,19 +19,19 @@ La struttura deve permettere di evolvere i flussi di coordinamento, comunicazion
 
 ## Decision
 
-Proponiamo il monolite modulare MVC. L’applicazione usa Spring Boot e Thymeleaf per le viste web e MySQL per la persistenza. Il deployment della #77 comprende `picus-webapp` e `picus-db` in Docker Compose.
+Proponiamo il monolite modulare MVC con Spring Boot. Il team ha confermato Thymeleaf per le viste web e PostgreSQL come database condiviso, accessibile tramite pgJDBC. Il deployment della #77 comprende `picus-webapp` e `picus-db` in Docker Compose.
 
 | Modulo | Responsabilità |
 | --- | --- |
-| `account` | Account, sessioni, ruoli e profili OPT e Operatore del Banco. |
-| `catalog` | Misure, offerta delle OPT, comuni e relazioni di adiacenza. |
-| `request` | Richieste, coda del Banco, contatti con gli erogatori, assegnazione ed esito. |
-| `communication` | Comunicazioni generali e conferme di ricezione. |
-| `reporting` | Conteggi trimestrali delle OPT, schede degli operatori e consultazione per il monitoraggio. |
+| `utenze` | Account, sessioni, ruoli e profili OPT e Operatore del Banco. |
+| `catalogo` | Misure, offerta delle OPT, comuni e relazioni di adiacenza. |
+| `richieste` | Richieste, coda del Banco, contatti con gli erogatori, assegnazione ed esito. |
+| `comunicazioni` | Comunicazioni generali e conferme di ricezione. |
+| `monitoraggio` | Conteggi trimestrali delle OPT, schede degli operatori e consultazione per il monitoraggio. |
 
-Ogni modulo espone in `api` le interfacce e i DTO che gli altri moduli possono usare. `internal` contiene la logica applicativa, le entità JPA e i repository del modulo. `web` traduce richieste HTTP e moduli HTML in chiamate applicative e costruisce le viste con DTO dedicati. `shared` raccoglie soltanto componenti tecnici comuni.
+Ogni modulo espone in `api` le interfacce e i DTO che gli altri moduli possono usare. `interno` contiene `applicazione` per i casi d’uso, `dominio` per entità e regole, `persistenza` per repository e mappature JPA e `integrazioni` per gli adattatori richiesti. `web` traduce richieste HTTP e moduli HTML in chiamate applicative e costruisce le viste con DTO dedicati. `shared` raccoglie soltanto componenti tecnici comuni.
 
-Nel primo flusso `request` usa le API di `account` e `catalog` per ottenere le informazioni necessarie. Le regole di titolarità e assegnazione della singola pratica appartengono a `request`. Ogni modulo accede alle proprie entità e tabelle. Gli altri moduli passano dalla sua API. Le dipendenze tra moduli restano acicliche.
+Nel primo flusso `richieste` usa le API di `utenze` e `catalogo` per ottenere le informazioni necessarie. Le regole di titolarità e assegnazione della singola pratica appartengono a `richieste`. Ogni modulo accede alle proprie entità e tabelle. Gli altri moduli passano dalla sua API. Le dipendenze tra moduli restano acicliche.
 
 ## Consequences
 
