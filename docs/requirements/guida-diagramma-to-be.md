@@ -6,7 +6,7 @@ Guida v0.5 del **07/11/2026**, allineata al contesto del 5 novembre. Le [regole 
 
 | ID | Contenuto | Sorgenti ed esportazioni |
 | --- | --- | --- |
-| TOBE-01A v0.4 | Invio, ricerca sequenziale, disponibilità e rifiuto con Nessun erogatore disponibile | [Mermaid](diagrams/to-be/TOBE-01A-richieste-disponibilita.mmd), [SVG](diagrams/to-be/TOBE-01A-richieste-disponibilita.svg), [PNG](diagrams/to-be/TOBE-01A-richieste-disponibilita.png) |
+| TOBE-01A v0.5 | Invio, ricerca sequenziale, disponibilità e rifiuto con Nessun erogatore disponibile | [Mermaid](diagrams/to-be/TOBE-01A-richieste-disponibilita.mmd), [SVG](diagrams/to-be/TOBE-01A-richieste-disponibilita.svg), [PNG](diagrams/to-be/TOBE-01A-richieste-disponibilita.png) |
 | TOBE-01B v0.3 | Accordo, conferma del solo Banco e annullamento eccezionale | [Mermaid](diagrams/to-be/TOBE-01B-appuntamento-esito.mmd), [SVG](diagrams/to-be/TOBE-01B-appuntamento-esito.svg), [PNG](diagrams/to-be/TOBE-01B-appuntamento-esito.png) |
 | TOBE-02 v0.4 | Schede personali e registrazione/consultazione separata dei dati OPT per trimestre e periodo | [Mermaid](diagrams/to-be/TOBE-02-rendicontazione.mmd), [SVG](diagrams/to-be/TOBE-02-rendicontazione.svg), [PNG](diagrams/to-be/TOBE-02-rendicontazione.png) |
 
@@ -16,7 +16,7 @@ TOBE-01A/B sono due viste dello stesso percorso, #48/#49/#51 e #52/#54. #52 asso
 
 Quattro stati da #29: In programmazione, Confermata, Rifiutata e Annullata. Confermata attesta l’accordo, non la prestazione. Un assenso del candidato e un singolo rifiuto non producono da soli gli esiti finali. #36 richiede l’indicazione Nessun erogatore disponibile nel rifiuto finale, senza testo libero obbligatorio.
 
-Modulo minimo con misura, persona/nucleo e comune. Il sistema gestisce ID, arrivo e titolare. Sono compatibili le OPT e gli interni/esterni pagati dal Banco che offrono la misura. Una OPT compare come organizzazione anche se eroga tramite un professionista. Stesso comune, poi limitrofi. A pari prossimità precedono gli operatori del Banco. Il Banco sceglie e contatta un erogatore per volta sul relativo account. #66/Q-19 riguarda il contatto senza risposta.
+Modulo con misura, persona/nucleo e comune obbligatori e `description` facoltativa senza identificativi degli assistiti. Il sistema gestisce ID, arrivo e titolare. Sono compatibili le OPT e gli interni/esterni pagati dal Banco che offrono la misura. Una OPT compare come organizzazione anche se eroga tramite un professionista. Stesso comune, poi limitrofi. A pari prossimità precedono gli operatori del Banco. Il Banco sceglie e contatta un erogatore per volta sul relativo account. #66/Q-19 riguarda il contatto senza risposta.
 
 La disponibilità concreta si verifica per richiesta. Il calendario facoltativo per misura è un’estensione (#73). Q-03 conserva la decisione sul dato temporale minimo richiesto nella seconda tornata.
 

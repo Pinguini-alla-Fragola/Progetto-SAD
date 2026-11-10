@@ -1,6 +1,6 @@
 # Quality scenarios
 
-Catalogo di lavoro degli scenari di qualità. La sezione A5 del PDF pubblicato nella repository raccoglie gli scenari della versione **v0.7** del documento. Ogni scheda segue il template con Source, Stimulus, Environment, Artifact, Response e Response measure, accompagnato da attributo di qualità, priorità, motivazione e approccio di verifica.
+Catalogo di lavoro degli scenari di qualità. La sezione A5 del PDF pubblicato nella repository raccoglie gli scenari della versione **v0.9** del documento. Ogni scheda segue il template con Source, Stimulus, Environment, Artifact, Response e Response measure, accompagnato da attributo di qualità, priorità, motivazione e approccio di verifica.
 
 **Stato:** proposte da validare. Le soglie introdotte dal team non sono SLA concordati o risultati di prove software già eseguite.
 

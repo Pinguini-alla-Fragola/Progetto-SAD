@@ -12,7 +12,7 @@ Q-03 distingue la richiesta del dato temporale minimo dal calendario facoltativo
 
 **Stato corrente:** Solo il Banco conferma. Il ciclo #29 comprende In programmazione, Confermata, Rifiutata e Annullata. Dettagli immutabili dopo conferma e [matrice di annullamento](regole-funzionali.md#matrice-di-annullamento) comune.
 
-**Residuo:** Esempi di evento eccezionale, forma e visibilità del motivo, avvisi alle parti.
+**Residuo:** Esempi di evento eccezionale, forma e visibilità del motivo, avvisi alle parti. Da valutare la proposta `Creata` per le richieste in coda e il passaggio a `In programmazione` alla presa in carico esplicita del Banco. Il ciclo di riferimento è quello della #29.
 
 **Impatto e collegamenti:** #20/#28/#52/#54, QS-01B.
 
@@ -82,7 +82,7 @@ Q-03 distingue la richiesta del dato temporale minimo dal calendario facoltativo
 
 ## Q-02 Modulo minimo della richiesta
 
-**Stato corrente:** Scelti misura, persona/nucleo e comune; sistema gestisce ID/data/titolare/stato. Nessun testo libero, allegato o identificativo assistito nel modulo minimo.
+**Stato corrente:** Misura, persona/nucleo e comune sono obbligatori. `description` è facoltativa, in testo semplice e senza identificativi degli assistiti. Il sistema gestisce ID, data, titolare e stato. Il modulo esclude gli allegati.
 
 **Residuo:** Validazioni di dettaglio in progettazione; eventuali preferenze prima dell’accordo nella #38. #41 riguarda ora i tracciati del monitoraggio.
 
@@ -174,7 +174,7 @@ Q-03 distingue la richiesta del dato temporale minimo dal calendario facoltativo
 | --- | --- | --- |
 | IP-01 | Quattro stati; accordo confermato, non prestazione svolta | #29 e baseline del gruppo; Accettata/Completata restano storici |
 | IP-02 | Solo il Banco registra/conferma i dettagli concordati; immutabili dopo conferma | Scelta del gruppo; #38 limitata alla negoziazione precedente |
-| IP-03 | Modulo misura, persona/nucleo e comune, più metadati del sistema | Scelta del gruppo; nessun identificativo assistito |
+| IP-03 | Modulo con misura, persona/nucleo, comune e `description` facoltativa, più metadati del sistema | Scelta del gruppo; nessun identificativo assistito |
 | IP-04 | Account, catalogo e offerta sintetici della demo | Prerequisito tecnico, non gestione completa implementata |
 | IP-05 | 230.000 utenti non dimensiona account/concorrenza | Significato storico da precisare; QS con profili proposti |
 | IP-06 | Ordine territoriale/tipo/carico e contatto sequenziale | Risposte seconda tornata; dati preventivi oggetto di Q-03 |

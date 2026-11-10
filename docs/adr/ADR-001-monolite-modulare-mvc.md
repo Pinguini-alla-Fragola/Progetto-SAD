@@ -19,7 +19,7 @@ La struttura deve permettere di evolvere i flussi di coordinamento, comunicazion
 
 ## Decision
 
-Proponiamo il monolite modulare MVC con Spring Boot. Il team ha confermato Thymeleaf per le viste web e PostgreSQL come database condiviso, accessibile tramite pgJDBC. Il deployment della #77 comprende `picus-webapp` e `picus-db` in Docker Compose.
+Il team conferma il monolite modulare con Spring Boot. I moduli che espongono interfacce web adottano MVC. Il team ha confermato Thymeleaf per le viste web e PostgreSQL come database condiviso, accessibile tramite pgJDBC. Il deployment della #77 comprende `picus-webapp` e `picus-db` in Docker Compose.
 
 | Modulo | Responsabilità |
 | --- | --- |

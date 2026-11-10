@@ -8,7 +8,7 @@ Versione 0.2 del **04/11/2026**. Proposta da selezionare e stimare con PO e Deve
 | --- | --- | --- |
 | #25 | Login e logout | Recupero distinto #33; account sintetici già attivi |
 | #28, porzione del percorso | Permessi per ruolo, titolare e assegnazione | Vincolo trasversale: verificarlo sui moduli integrati, non chiuderlo prima di tutto il prodotto |
-| #48 | Invio e consultazione delle proprie richieste | Misura, persona/nucleo e comune; metadati del sistema |
+| #48 | Invio e consultazione delle proprie richieste | Misura, persona/nucleo, comune e `description` facoltativa. Metadati del sistema. |
 | #49 | Elenco ordinato e contatto di un erogatore per volta | Comuni/adiacenze e carico sintetici; periodo/spareggi da dettagliare |
 | #51 | Risposta alla disponibilità | Assenso non conferma l’accordo; rifiuto singolo non rifiuta la pratica |
 | #52 | Conferma Banco e dettagli visibili nello stesso esito, oppure rifiuto finale | Presenza/remoto; nessuna seconda approvazione finale nell’app; dati immutabili dopo conferma |

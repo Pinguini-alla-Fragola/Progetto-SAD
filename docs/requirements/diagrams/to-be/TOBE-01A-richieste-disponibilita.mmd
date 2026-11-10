@@ -1,4 +1,4 @@
-%% TOBE-01A v0.4 - 07/11/2026
+%% TOBE-01A v0.5 - 10/11/2026
 %% Proposta del team: Epic #20. Allineato alle risposte del cliente (seconda tornata) e alle scelte del gruppo registrate il 03/11/2026.
 %% Il Banco lavora le richieste in ordine di arrivo e interpella un erogatore per volta.
 %% Il sistema puo' suggerire l'ordine degli erogatori; la scelta resta al Banco.
@@ -9,7 +9,7 @@ sequenceDiagram
     participant B as Banco
     participant E as Account OPT o account<br/>personale del Banco
 
-    R->>S: Invia misura, persona o nucleo e comune<br/>(nessun dato identificativo)
+    R->>S: Invia misura, persona o nucleo, comune<br/>e descrizione facoltativa non identificativa
     S->>S: Valida i dati
     alt Dati validi
         S->>S: Registra ID, data e titolare<br/>e mette la richiesta<br/>nello stato<br/>In programmazione
