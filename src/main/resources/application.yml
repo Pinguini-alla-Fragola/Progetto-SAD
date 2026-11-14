@@ -1,3 +1,13 @@
 spring:
   application:
     name: picus
+  datasource:
+    url: "${PICUS_DB_URL:jdbc:postgresql://localhost:5432/picus}"
+    username: "${PICUS_DB_USER:picus}"
+    password: "${PICUS_DB_PASSWORD:}"
+  flyway:
+    locations: classpath:db/migration,classpath:db/{vendor}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
