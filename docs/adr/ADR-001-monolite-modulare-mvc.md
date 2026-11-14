@@ -29,7 +29,7 @@ Il team conferma il monolite modulare con Spring Boot. I moduli che espongono in
 | `comunicazioni` | Comunicazioni generali e conferme di ricezione. |
 | `monitoraggio` | Conteggi trimestrali delle OPT, schede degli operatori e consultazione per il monitoraggio. |
 
-Ogni modulo espone in `api` le interfacce e i DTO che gli altri moduli possono usare. `interno` contiene `applicazione` per i casi d’uso, `dominio` per entità e regole, `persistenza` per repository e mappature JPA e `integrazioni` per gli adattatori richiesti. `web` traduce richieste HTTP e moduli HTML in chiamate applicative e costruisce le viste con DTO dedicati. `shared` raccoglie soltanto componenti tecnici comuni.
+Ogni modulo espone in `api` le interfacce e i DTO che gli altri moduli possono usare. `interno` contiene `applicazione` per i casi d’uso, `dominio` per entità, regole e interfacce dei repository, `persistenza` per gli adattatori JPA che implementano tali interfacce e `integrazioni` per gli altri adattatori. I servizi ricevono le dipendenze per costruttore e Spring collega le implementazioni ai contratti. `web` traduce richieste HTTP e moduli HTML in chiamate ai casi d’uso del proprio modulo e costruisce le viste con DTO dedicati. `shared` raccoglie soltanto componenti tecnici comuni.
 
 Nel primo flusso `richieste` usa le API di `utenze` e `catalogo` per ottenere le informazioni necessarie. Le regole di titolarità e assegnazione della singola pratica appartengono a `richieste`. Ogni modulo accede alle proprie entità e tabelle. Gli altri moduli passano dalla sua API. Le dipendenze tra moduli restano acicliche.
 

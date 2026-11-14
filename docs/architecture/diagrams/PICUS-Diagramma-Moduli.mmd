@@ -38,21 +38,21 @@ flowchart TB
     subgraph STRUTTURA["B · Struttura dei package di ciascun modulo"]
         direction TB
         WEB["<b><code>web</code> · Ingresso HTTP</b><br/>Controller MVC e validazione dell’input"]
-        API["<b><code>api</code> · Contratti pubblici</b><br/>Interfacce Java e DTO<br/>Accesso per controller e altri moduli"]
+        API["<b><code>api</code> · Contratti pubblici</b><br/>Interfacce Java e DTO<br/>Accesso per gli altri moduli"]
 
         subgraph INTERNO["interno · Implementazione del modulo"]
             direction TB
             APP["<b><code>applicazione</code></b><br/>Coordina i casi d’uso"]
-            DOM["<b><code>dominio</code></b><br/>Entità, stati e regole"]
-            PERS["<b><code>persistenza</code></b><br/>Repository e mappatura JPA"]
+            DOM["<b><code>dominio</code></b><br/>Entità, stati, regole<br/>e interfacce dei repository"]
+            PERS["<b><code>persistenza</code></b><br/>Adattatori e mappatura JPA"]
             INT["<b><code>integrazioni</code></b><br/>Adattatori dei moduli<br/>Posta per M1, file per M4"]
 
-            APP -->|Applica le regole| DOM
-            APP -->|Legge e salva| PERS
-            APP -->|Usa gli adattatori previsti| INT
+            APP -->|Usa le regole e i contratti| DOM
+            PERS -->|Implementa i contratti repository| DOM
+            INT -->|Implementa i contratti di integrazione| APP
         end
 
-        WEB -->|Invoca i servizi| API
+        WEB -->|Invoca i casi d’uso| APP
         APP -->|Implementa i contratti| API
     end
 
