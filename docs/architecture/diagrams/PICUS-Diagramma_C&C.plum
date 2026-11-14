@@ -1,0 +1,261 @@
+@startuml PICUS-CC-View-Runtime-v3
+top to bottom direction
+title <size:22><b>PICUS · C&C View (Runtime)</b></size>\n<size:13>Client-server con applicazione layered · monolite modulare MVC · un solo processo JVM</size>\n<size:11><color:#64748B>Allineata alla Documentazione SAD v0.11 del 14/11/2026 · A8 Architettura e decisioni tecniche</color></size>
+
+' =====================================================================
+'  Scelte di impaginazione
+'  - Ogni tier ha un badge colorato a sinistra (card «t…»): il nome non sta
+'    nel titolo del riquadro, così nessuna freccia passa sopra un testo.
+'  - Nessun elemento spaziatore: l'ordine è deciso solo da collegamenti
+'    nascosti tra elementi veri.
+'  - Ingresso nei moduli: ogni modulo ESPONE la propria interfaccia api
+'    (lollipop). Il controller chiama il package api (passo 4); il Security
+'    Filter Chain chiama direttamente UtenzeApi (passo 2a).
+'  - Uscita verso i dati: un Persistence Adapter (repository) per modulo,
+'    mai condiviso tra moduli.
+' =====================================================================
+
+skinparam componentStyle uml2
+skinparam packageStyle rectangle
+skinparam nodesep 50
+skinparam ranksep 80
+skinparam legendFontSize 11
+skinparam ArrowMessageAlignment center
+
+<style>
+root {
+  FontName Arial
+  FontSize 13
+  Shadowing 0
+  RoundCorner 8
+  Padding 4
+}
+
+package {
+  LineColor #64748B
+  LineThickness 1.5
+}
+
+component {
+  FontSize 12
+  Padding 4
+  LineThickness 1.2
+
+  .client     { BackGroundColor #F1F5F9
+                LineColor #475569 }
+  .filter     { BackGroundColor #DBEAFE
+                LineColor #1D4ED8 }
+  .controller { BackGroundColor #DBEAFE
+                LineColor #1D4ED8 }
+  .view       { BackGroundColor #EDE9FE
+                LineColor #6D28D9 }
+  .module     { BackGroundColor #DCFCE7
+                LineColor #15803D }
+  .shared     { BackGroundColor #BBF7D0
+                LineColor #15803D
+                LineThickness 2.4 }
+  .adapter    { BackGroundColor #FFFFFF
+                LineColor #334155 }
+  .external   { BackGroundColor #FEF3C7
+                LineColor #B45309 }
+}
+
+card {
+  FontSize 11
+  LineThickness 1
+  Padding 4
+
+  .tcli  { BackGroundColor #475569
+           LineColor #475569
+           FontColor #FFFFFF }
+  .tweb  { BackGroundColor #1D4ED8
+           LineColor #1D4ED8
+           FontColor #FFFFFF }
+  .tapp  { BackGroundColor #15803D
+           LineColor #15803D
+           FontColor #FFFFFF }
+  .tint  { BackGroundColor #334155
+           LineColor #334155
+           FontColor #FFFFFF }
+  .tdat  { BackGroundColor #0F766E
+           LineColor #0F766E
+           FontColor #FFFFFF }
+  .apiif { BackGroundColor #FFFFFF
+           LineColor #15803D
+           LineThickness 1.4
+           FontColor #14532D }
+}
+
+database {
+  FontSize 12
+  Padding 4
+  BackGroundColor #CCFBF1
+  LineColor #0F766E
+}
+
+arrow {
+  LineColor #475569
+  LineThickness 1.4
+  FontSize 11
+  FontColor #334155
+}
+
+legend {
+  Padding 4
+  BackGroundColor #FFFFFF
+  LineColor #94A3B8
+  FontSize 10
+}
+</style>
+
+hide <<tcli>> stereotype
+hide <<tweb>> stereotype
+hide <<tapp>> stereotype
+hide <<tint>> stereotype
+hide <<tdat>> stereotype
+hide <<apiif>> stereotype
+
+' ======================= CLIENT TIER =======================
+package " " as CLI #F8FAFC;line:475569 {
+  card "<b>CLIENT TIER</b>\n<size:10>presentazione</size>\n<size:10>sul dispositivo dell'utente</size>" as LBLC <<tcli>>
+  component "<b>Web Browser</b>\nOPT · Banco · Operatori\n<size:11>HTML5 · CSS3 · JavaScript vanilla</size>" as BR <<client>>
+}
+
+' ================= PICUS WEB APPLICATION (un solo processo) =================
+package "<b>PICUS Web Application</b>\n<size:11>«execution environment»</size>\n<size:11>JVM · Java 25 · Spring Boot</size>\n<size:11>un solo processo</size>" as APP #FFFFFF {
+
+  ' ---------------- WEB TIER ----------------
+  package " " as WEB #EFF6FF;line:1D4ED8 {
+    card "<b>WEB TIER</b>\n<size:10>Spring Web MVC</size>\n<size:10>riceve la richiesta, la autorizza,</size>\n<size:10>la smista e produce la pagina</size>" as LBLW <<tweb>>
+    component "<b>Security Filter Chain</b>\nautenticazione di sessione\nautorizzazione per ruolo,\ntitolarità e assegnazione" as SEC <<filter>>
+    component "<b>Front Controller</b>\nrouting metodo HTTP + percorso\n<size:11>(DispatcherServlet)</size>" as FC <<controller>>
+    component "<b>Web Controllers</b>\nvalidazione input (Bean Validation)\nmapping DTO, scelta vista\n<size:11>nessuna regola di business</size>" as WC <<controller>>
+    component "<b>View Renderer</b>\nrisoluzione vista\ntemplate Thymeleaf lato server" as VR <<view>>
+  }
+
+  ' ---------------- APPLICATION TIER ----------------
+  package " " as MOD #F0FDF4;line:15803D {
+
+    ' Strato api: unico punto di ingresso nei moduli
+    package "<b>package api</b> <size:10>· unico punto di ingresso · solo DTO immutabili</size>" as API #FFFFFF;line:15803D;line.dashed {
+      card "<size:10>«interface»</size>\n<b>UtenzeApi</b>" as I1 <<apiif>>
+      card "<size:10>«interface»</size>\n<b>MonitoraggioApi</b>" as I5 <<apiif>>
+      card "<size:10>«interface»</size>\n<b>CatalogoApi</b>" as I2 <<apiif>>
+      card "<size:10>«interface»</size>\n<b>RichiesteApi</b>" as I3 <<apiif>>
+      card "<size:10>«interface»</size>\n<b>ComunicazioniApi</b>" as I4 <<apiif>>
+    }
+
+    card "<b>APPLICATION TIER</b>\n<size:10>moduli di dominio</size>\n<size:10>confini da confermare</size>\n<size:10>(round ADD)</size>" as LBLA <<tapp>>
+    component "<b>M1 · Utenze e accessi</b>\naccount OPT e operatori,\nattivazione, recupero password,\nrevoca, ruoli\n<size:11><i>servizio trasversale: usato da</i></size>\n<size:11><i>tutti i moduli e dal Security Filter</i></size>" as M1 <<shared>>
+    component "<b>M5 · Monitoraggio e schede</b>\nconteggi OPT per trimestre\ne misura; schede trimestrali,\nriepilogo" as M5 <<module>>
+    component "<b>M2 · Catalogo e offerta</b>\nmisure, offerta OPT,\ncomuni e adiacenze" as M2 <<module>>
+    component "<b>M3 · Richieste</b>\nrichieste a sei stati, presa in carico\ne ricerca erogatore, disponibilità,\nconferma dell'accordo, annullamento" as M3 <<module>>
+    component "<b>M4 · Comunicazioni</b>\ninvii a tutti o a gruppi,\nallegati, conferma di ricezione" as M4 <<module>>
+  }
+
+  ' ---------------- INTEGRATION TIER ----------------
+  package " " as INT #F8FAFC;line:334155 {
+    card "<b>INTEGRATION TIER</b>\n<size:10>adattatori: isolano il dominio</size>\n<size:10>da database, storage e posta</size>" as LBLI <<tint>>
+    component "<b>Mail Adapter</b>\n<size:11>interno a M1</size>\n<i>MailSender</i>" as MAIL <<adapter>>
+    component "<b>Persistence Adapters</b>\nSpring Data JPA · Hibernate\n<size:11>un repository per modulo, mai condiviso</size>" as REPO <<adapter>>
+    component "<b>Attachment Adapter</b>\n<size:11>interno a M4 · salva nel database</size>\n<i>AttachmentStore</i>" as ATT <<adapter>>
+  }
+}
+
+' ======================= DATA & EXTERNAL TIER =======================
+package " " as DAT #F0FDFA;line:0F766E {
+  card "<b>DATA & EXTERNAL</b>\n<size:10>risorse fuori dal processo</size>\n<size:10>dell'applicazione</size>" as LBLD <<tdat>>
+  component "<b>E-mail Service</b>\nlink di attivazione e recupero\n<size:11>fornitore da definire</size>" as SMTP <<external>>
+  database "<b>PostgreSQL</b>\n<size:11>unico database: dati applicativi,</size>\n<size:11>file e metadati degli allegati</size>\n<size:11>schema con migrazioni Flyway</size>" as DB
+}
+
+' ================= Ordine degli elementi (solo layout, non visibile) =================
+' Colonne coerenti dall'alto in basso: Security/M1/Mail a sinistra, M4/Attachment a destra,
+' così le frecce verso interfacce, adattatori e database non si incrociano.
+LBLC   -[hidden]right-> BR
+LBLW   -[hidden]right-> SEC
+LBLA   -[hidden]right-> M1
+M1     -[hidden]right-> M5
+M5     -[hidden]right-> M2
+M2     -[hidden]right-> M3
+M3     -[hidden]right-> M4
+I1     -[hidden]right-> I5
+I5     -[hidden]right-> I2
+I2     -[hidden]right-> I3
+I3     -[hidden]right-> I4
+LBLI   -[hidden]right-> MAIL
+MAIL   -[hidden]right-> REPO
+REPO   -[hidden]right-> ATT
+LBLD   -[hidden]right-> SMTP
+SMTP   -[hidden]right-> DB
+
+' ================= Sequenza di una richiesta (1-6) =================
+BR  -[#1D4ED8,bold]down->  SEC : <back:#1D4ED8><color:#FFFFFF><b> 1 </b></color></back> richiesta\n«HTTPS»
+SEC -[#1D4ED8,bold]right-> FC  : <back:#1D4ED8><color:#FFFFFF><b> 2 </b></color></back> autenticata\ne autorizzata
+FC  -[#1D4ED8,bold]right-> WC  : <back:#1D4ED8><color:#FFFFFF><b> 3 </b></color></back> instradata\nal controller
+WC  -[#15803D,bold]down->  API : <back:#15803D><color:#FFFFFF><b> 4 </b></color></back> valida e chiama l'interfaccia\napi del modulo (DTO)
+WC  -[#6D28D9,bold]right-> VR  : <back:#6D28D9><color:#FFFFFF><b> 5 </b></color></back> nome vista\n+ modello
+VR  -[#6D28D9,bold]up->    BR  : <back:#6D28D9><color:#FFFFFF><b> 6 </b></color></back> pagina HTML\n«HTTPS»
+
+' ================= Controllo accessi (2a) =================
+SEC -[#B91C1C,dashed,thickness=3]down-> I1 : <back:#B91C1C><color:#FFFFFF><b> 2a </b></color></back> stato account e permessi\n(account revocato → 401)
+
+' ================= Esposizione delle interfacce api =================
+M1 -[#15803D,dashed]up-|> I1
+M5 -[#15803D,dashed]up-|> I5
+M2 -[#15803D,dashed]up-|> I2
+M3 -[#15803D,dashed]up-|> I3
+M4 -[#15803D,dashed]up-|> I4
+
+' ================= Dipendenze tra moduli (solo tramite api) =================
+M5 -[#BE185D,thickness=2]up->  I2
+M3 -[#BE185D,thickness=2]up->  I2
+M3 -[#BE185D,dashed,thickness=2]up->  I4 : ComunicazioniApi\n<size:10>(da definire)</size>
+
+' ================= Accesso a dati e risorse (durante il passo 4) =================
+M1 -[#0F766E]down-> REPO : <back:#0F766E><color:#FFFFFF><b> 4a </b></color></back>
+M5 -[#0F766E]down-> REPO : <back:#0F766E><color:#FFFFFF><b> 4a </b></color></back>
+M2 -[#0F766E]down-> REPO : <back:#0F766E><color:#FFFFFF><b> 4a </b></color></back>
+M3 -[#0F766E]down-> REPO : <back:#0F766E><color:#FFFFFF><b> 4a </b></color></back>
+M4 -[#0F766E]down-> REPO : <back:#0F766E><color:#FFFFFF><b> 4a </b></color></back>
+M4 -[#0F766E]down-> ATT : <back:#0F766E><color:#FFFFFF><b> 4b </b></color></back> allegati
+M1 -[#B45309]down-> MAIL : <back:#B45309><color:#FFFFFF><b> 4c </b></color></back> link e-mail
+
+' ================= Connettori verso l'esterno =================
+REPO -down-> DB : «JDBC»\nSQL su TCP
+' Tratteggio: protocollo ancora da definire
+ATT  -down-> DB   : «JDBC»
+MAIL .down.> SMTP : «e-mail»
+
+' ================= Legenda =================
+legend bottom
+  <b><size:12>Sequenza di una richiesta</size></b>
+  |=<#E2E8F0> Passo |=<#E2E8F0> Azione |
+  |<#DBEAFE> <b>1</b> | Browser → Security Filter Chain: richiesta via HTTPS |
+  |<#DBEAFE> <b>2</b> | verifica sessione e autorizza per ruolo, titolarità e assegnazione |
+  |<#FEE2E2> <b>2a</b> | legge stato account e permessi da UtenzeApi (M1); account revocato → 401 |
+  |<#DBEAFE> <b>3</b> | Front Controller sceglie il controller da metodo HTTP e percorso |
+  |<#DCFCE7> <b>4</b> | il controller valida l'input, lo converte in DTO e chiama l'interfaccia api del modulo |
+  |<#CCFBF1> <b>4a</b> | il modulo accede ai propri dati |
+  |<#CCFBF1> <b>4b</b> | M4 salva gli allegati nel database |
+  |<#FEF3C7> <b>4c</b> | M1 invia le e-mail |
+  |<#EDE9FE> <b>5</b> | il controller sceglie vista e modello |
+  |<#EDE9FE> <b>6</b> | il View Renderer restituisce la pagina HTML via HTTPS |
+  <b><size:12>Notazione</size></b>
+  |=<#E2E8F0> Segno |=<#E2E8F0> Significato |
+  | <color:#475569><b>────▶</b></color> | «call-return»: chiamata Java in-process su interfaccia, con DTO · A → B significa «A usa B» |
+  | <color:#BE185D><b>────▶</b></color> | dipendenza tra moduli: A usa l'interfaccia api di B |
+  | <color:#BE185D><b>- - - ▶</b></color> | dipendenza tra moduli ancora da definire |
+  | <color:#15803D><b>- - - ▷</b></color> | il modulo realizza (espone) la propria interfaccia api |
+  | <color:#B91C1C><b>- - - ▶</b></color> | controllo di sicurezza (passo 2a) |
+  | <color:#64748B><b>- - - ▶</b></color> | collaborazione con protocollo da definire |
+  <b><size:12>Connettori</size></b>
+  |=<#E2E8F0> Stereotipo |=<#E2E8F0> Significato |
+  | «HTTPS» | request/response |
+  | «JDBC» | query SQL su TCP (Persistence Adapters e Attachment Adapter) |
+  | «e-mail» | protocollo da definire |
+  <b><size:12>Vincoli</size></b>
+  |<#F1F5F9> un solo processo JVM · tra moduli solo interfacce api e DTO immutabili · le entità JPA non escono dal modulo · nessun file sul filesystem: allegati nel database |
+  |<#F1F5F9> M1 è trasversale: tutti i moduli e il Security Filter Chain usano UtenzeApi (dipendenze non disegnate) |
+endlegend
+@enduml
