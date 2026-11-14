@@ -3,6 +3,7 @@ package it.unina.picus.richieste.interno.persistenza;
 import java.time.Instant;
 import java.util.UUID;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -21,7 +22,10 @@ public class RichiestaJpa {
     private String tipoDestinatario;
     private String description;
     private Instant inviataIl;
-    private String stato;
+    private String stato = "CREATA";
+
+    @Column(name = "erogatore_id")
+    private UUID erogatoreId;
 
     protected RichiestaJpa() {
     }
