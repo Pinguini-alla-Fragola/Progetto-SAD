@@ -59,15 +59,32 @@ In PowerShell:
 .\mvnw.cmd verify
 ```
 
-## Avvio locale
+## Avvio locale con Docker Compose
+
+Da un clone pulito, copia `.env.example` in `.env` e imposta le due password
+locali di prova. Esegui dalla radice del progetto:
 
 ```bash
-mvn spring-boot:run
+docker compose up --build
 ```
 
-Lo scheletro contiene la classe di avvio Spring Boot e il test di caricamento
-del contesto del template. La configurazione iniziale contiene soltanto
-`spring.application.name: picus`; le funzionalità di dominio sono da realizzare.
+`picus-webapp` risponde su `http://localhost:8080` e usa PostgreSQL nel
+servizio `picus-db`. Flyway crea lo schema e carica le 12 misure
+dell’Appendice A, i comuni e le adiacenze di esempio. Il profilo `demo`
+inserisce quattro account sintetici attivi:
+
+- `banco@picus.test`
+- `opt-a@picus.test`
+- `opt-b@picus.test`
+- `operatore@picus.test`
+
+`PICUS_DEMO_PASSWORD` è la password iniziale degli account demo, salvata
+come hash. Il login PICUS sarà realizzato nella #25. Il volume `picus-dati`
+conserva le tabelle e i dati fra gli avvii.
+
+Per verificare la predisposizione, esegui `./mvnw clean package`
+(`./mvnw.cmd clean package` in PowerShell) e controlla l’avvio dei servizi
+con `docker compose ps`.
 
 ## 🏭 Project management
 
