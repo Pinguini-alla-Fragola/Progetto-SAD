@@ -6,7 +6,7 @@ Le proposte dello Sprint 2 sono collegate alla [task di architettura #76](https:
 | ADR | Decisione | Stato |
 | --- | --- | --- |
 | [ADR-001](ADR-001-monolite-modulare-mvc.md) | Monolite modulare MVC e confini dei moduli | Proposed |
-| [ADR-002](ADR-002-ciclo-di-vita-richiesta.md) | Ciclo della richiesta a quattro stati | Proposed |
+| [ADR-002](ADR-002-ciclo-di-vita-richiesta.md) | Ciclo della richiesta e assegnazione dell’erogatore | Proposed |
 | [ADR-003](ADR-003-isolamento-e-validazione-richieste.md) | Isolamento delle richieste e validazione dei campi ammessi | Proposed |
 
 ## Aggiungere un ADR

@@ -38,11 +38,8 @@ flowchart TB
 
             MAIL["<b>Adattatore email</b><br/>Interno a M1"]
             DATI["<b>Repository dei moduli</b><br/>Spring Data JPA · Hibernate"]
-            ALLEGATI["<b>Adattatore allegati</b><br/>Interno a M4"]
-
             M1 -->|Chiede di inviare i link| MAIL
             MODULI -->|Ogni modulo usa i suoi repository| DATI
-            M4 -->|Salva e recupera file| ALLEGATI
         end
 
         subgraph VISTA["VISTA · Presentazione lato server"]
@@ -57,14 +54,12 @@ flowchart TB
     end
 
     POSTA["<b>Servizio email</b><br/>Fornitore e protocollo da definire"]
-    PG[("<b>PostgreSQL</b><br/>Dati e metadati degli allegati")]
-    FILE[("<b>Archivio allegati</b><br/>Tecnologia da definire")]
+    PG[("<b>PostgreSQL</b><br/>Unico database per tutti i moduli<br/>File e metadati degli allegati")]
     RISPOSTA["<b>Pagina nel browser</b><br/>L’utente vede il risultato"]
 
     BROWSER -->|"1. Invia una richiesta HTTPS<br/>Metodo HTTP e percorso"| PICUS
     MAIL -.->|"Link di attivazione<br/>e recupero"| POSTA
     DATI -->|Legge e scrive via pgJDBC| PG
-    ALLEGATI -->|File delle comunicazioni| FILE
     TEMPLATE -->|7. Pagina HTML via HTTPS| RISPOSTA
 
     classDef browser fill:#F1F5F9,stroke:#94A3B8,color:#142B46,stroke-width:1.4px
@@ -75,9 +70,9 @@ flowchart TB
     classDef esterno fill:#FFF8EA,stroke:#946728,color:#563C17,stroke-width:1.4px,stroke-dasharray:5 4
     class BROWSER,RISPOSTA browser
     class SEC,DISPATCHER,CONTROLLER web
-    class M1,M2,M3,M4,M5,MAIL,DATI,ALLEGATI modello
+    class M1,M2,M3,M4,M5,MAIL,DATI modello
     class RISOLUZIONE,TEMPLATE vista
-    class PG,FILE dati
+    class PG dati
     class POSTA esterno
     style PICUS fill:#F7FAFE,stroke:#7C9BB9,stroke-width:1.4px,color:#183957
     style MODELLO fill:#F3F9F5,stroke:#91B6A5,stroke-width:1.4px,color:#1A4A3C

@@ -1,6 +1,6 @@
 # Registro dei chiarimenti e delle ipotesi
 
-Versione 0.6 del **14/11/2026**. Il registro conserva gli identificativi Q-01–Q-20, ora in ordine crescente, aggiunge Q-21 per la nuova domanda #84 e recepisce i chiarimenti del contesto del 5 novembre e lo stato della bacheca [Domande al committente](https://github.com/orgs/Pinguini-alla-Fragola/projects/2/views/3).
+Versione 0.7 del **14/11/2026**. Il registro recepisce il ciclo a sei stati e le regole di annullamento del 14 novembre, conserva Q-21 per #84 e riporta lo stato della bacheca [Domande al committente](https://github.com/orgs/Pinguini-alla-Fragola/projects/2/views/3).
 
 ## Riferimenti e stato
 
@@ -55,13 +55,13 @@ Q-02, Q-07, Q-10 e Q-20 non hanno una domanda aperta in bacheca: si chiudono con
 
 **Impatto e collegamenti:** #19/#47/#49/#73; TOBE-01B.
 
-## Q-04 Confine e annullamento eccezionale
+## Q-04 Confine e annullamento
 
-**Stato corrente:** Solo il Banco conferma. Il ciclo #29 comprende In programmazione, Confermata, Rifiutata e Annullata, con motivo obbligatorio sull’annullamento dopo la conferma. #37 chiude il confine: il Banco non registra l’avvenuta erogazione. Dettagli immutabili dopo conferma e [matrice di annullamento](regole-funzionali.md#matrice-di-annullamento) comune.
+**Stato corrente:** Il 14 novembre il team ha distinto Creata, Presa in carico e In programmazione. Il Banco prende in carico la richiesta in modo esplicito e la passa in programmazione quando assegna un erogatore disponibile. Solo il Banco conferma l’accordo e i dettagli diventano immutabili. La [matrice di annullamento](regole-funzionali.md#matrice-di-annullamento) vale in qualsiasi stato, con motivo facoltativo solo in Creata. PICUS avvisa Banco, OPT richiedente ed erogatore se assegnato. Il confine del percorso ordinario resta quello chiarito nella #37.
 
-**Residuo:** Esempi di evento eccezionale, forma e visibilità del motivo, avvisi alle parti. Da valutare la proposta `Creata` per le richieste in coda e il passaggio a `In programmazione` alla presa in carico esplicita del Banco. Il ciclo di riferimento è quello della #29.
+**Residuo:** Forma e visibilità del motivo.
 
-**Impatto e collegamenti:** #20/#28/#37/#52/#54, QS-01B.
+**Impatto e collegamenti:** #20/#28/#37/#48/#49/#52/#54, QS-01B.
 
 ## Q-05 Storico dopo revoca
 
@@ -203,7 +203,7 @@ Q-02, Q-07, Q-10 e Q-20 non hanno una domanda aperta in bacheca: si chiudono con
 
 | ID | Riferimento corrente | Stato |
 | --- | --- | --- |
-| IP-01 | Quattro stati; accordo confermato, non prestazione svolta | #29 e #37 chiuse; baseline del gruppo; Accettata/Completata restano storici |
+| IP-01 | Sei stati. Creata all’invio, Presa in carico durante la ricerca, In programmazione con erogatore assegnato, Confermata, Rifiutata e Annullata | #29 e #37 chiuse. Decisione del PO del 14/11/2026 |
 | IP-02 | Solo il Banco registra/conferma i dettagli concordati; immutabili dopo conferma | Scelta del gruppo; #38 limitata alla negoziazione precedente |
 | IP-03 | Modulo con misura, persona/nucleo, comune e `description` facoltativa, più metadati del sistema | Scelta del gruppo; nessun identificativo assistito |
 | IP-04 | Account, catalogo e offerta sintetici della demo | Prerequisito tecnico, non gestione completa implementata |

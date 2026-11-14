@@ -21,7 +21,7 @@ flowchart TB
         M1["<b>M1 · Account, profili<br/>e autorizzazioni</b><br/><code>utenze</code><div style='text-align:left;margin-top:8px'><b>Responsabilità</b> · accessi, attivazione e revoca<br/><b>Dati</b> · account, profili e ruoli</div>"]
         M2["<b>M2 · Catalogo misure<br/>e offerta territoriale</b><br/><code>catalogo</code><div style='text-align:left;margin-top:8px'><b>Responsabilità</b> · misure e copertura territoriale<br/><b>Dati</b> · misure, comuni e offerte</div>"]
         M3["<b>M3 · Richieste e coordinamento<br/>appuntamenti</b><br/><code>richieste</code><div style='text-align:left;margin-top:8px'><b>Responsabilità</b> · coordina le richieste fino all’esito<br/><b>Dati</b> · richieste, contatti e accordi</div>"]
-        M4["<b>M4 · Comunicazioni<br/>e notifiche</b><br/><code>comunicazioni</code><div style='text-align:left;margin-top:8px'><b>Responsabilità</b> · invii del Banco e riscontri<br/><b>Dati</b> · comunicazioni, riscontri e metadati allegati</div>"]
+        M4["<b>M4 · Comunicazioni<br/>e notifiche</b><br/><code>comunicazioni</code><div style='text-align:left;margin-top:8px'><b>Responsabilità</b> · invii del Banco e riscontri<br/><b>Dati</b> · comunicazioni, riscontri e allegati</div>"]
         M5["<b>M5 · Monitoraggio<br/>e schede trimestrali</b><br/><code>monitoraggio</code><div style='text-align:left;margin-top:8px'><b>Responsabilità</b> · produce riepiloghi dai dati trimestrali<br/><b>Dati</b> · conteggi OPT e schede personali</div>"]
 
         M3 -.->|Notifiche operative da definire| M4
@@ -45,7 +45,7 @@ flowchart TB
             APP["<b><code>applicazione</code></b><br/>Coordina i casi d’uso"]
             DOM["<b><code>dominio</code></b><br/>Entità, stati, regole<br/>e interfacce dei repository"]
             PERS["<b><code>persistenza</code></b><br/>Adattatori e mappatura JPA"]
-            INT["<b><code>integrazioni</code></b><br/>Adattatori dei moduli<br/>Posta per M1, file per M4"]
+            INT["<b><code>integrazioni</code></b><br/>Adattatori dei moduli<br/>Servizio email per M1"]
 
             APP -->|Usa le regole e i contratti| DOM
             PERS -->|Implementa i contratti repository| DOM
