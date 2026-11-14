@@ -1,10 +1,10 @@
 <mxfile host="app.diagrams.net">
-  <diagram name="CTX-01 v0.6" id="P3Ejr7MKGwG83A0HrSvj">
+  <diagram name="CTX-01 v0.7" id="P3Ejr7MKGwG83A0HrSvj">
     <mxGraphModel background="#ffffff" dx="2943" dy="1609" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2460" pageHeight="2320" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="title" parent="1" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fontFamily=Segoe UI;fillColor=none;strokeColor=none;fontSize=27;fontStyle=1;" value="CTX-01  Context Diagram  |  v0.7&amp;nbsp; |  14/11/2026" vertex="1">
+        <mxCell id="title" parent="1" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fontFamily=Segoe UI;fillColor=none;strokeColor=none;fontSize=27;fontStyle=1;" value="CTX-01  Context Diagram  |  v0.7  |  14/11/2026" vertex="1">
           <mxGeometry height="45" width="2420" x="20" y="10" as="geometry" />
         </mxCell>
         <mxCell id="confine" parent="1" style="whiteSpace=wrap;html=1;align=center;verticalAlign=top;fontFamily=Segoe UI;fontSize=21;fillColor=none;strokeColor=#9673a6;fontColor=#9673a6;dashed=1;dashPattern=8 8;rounded=1;" value="Confine del sistema" vertex="1">
