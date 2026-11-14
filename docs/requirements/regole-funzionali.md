@@ -1,24 +1,27 @@
 # Regole funzionali di riferimento
 
-Versione 0.2 del **07/11/2026**, allineata al contesto del 5 novembre. Il [registro](open-questions.md) distingue le decisioni dai quesiti residui.
+Versione 0.4 del **14/11/2026**, aggiornata con il ciclo a sei stati e le regole di annullamento. Il [registro](open-questions.md) distingue le decisioni dai quesiti residui.
 
 ## Richiesta e accordo
 
 - Il modulo richiede misura del catalogo, persona/nucleo e comune. Accetta anche `description`, testo semplice facoltativo per descrivere il bisogno senza identificativi degli assistiti. Il dettaglio con la descrizione è riservato alla OPT titolare e al Banco autorizzato. Il sistema gestisce ID, data di invio, OPT titolare e stato. Il modulo esclude gli allegati.
+- L’invio valido crea la richiesta in stato Creata, in coda e senza assegnatario. La presa in carico esplicita del Banco la porta a Presa in carico. La semplice consultazione lascia la richiesta in coda.
 - Coda in ordine di arrivo. L’elenco include le OPT compatibili, anche se erogano tramite professionisti, e gli operatori interni o esterni pagati dal Banco. Prima stesso comune, poi limitrofi. A parità di prossimità precedono gli operatori del Banco, poi si considera il minor carico. In assenza di una soluzione locale si valuta il remoto PICUS compatibile e infine il rifiuto. Periodo/stati del carico e spareggi restano da definire.
-- Il Banco sceglie chi interpellare e contatta un erogatore per volta. La notifica e la risposta competono all’account organizzativo della OPT o all’account personale dell’operatore del Banco interpellato. Un assenso lascia la pratica In programmazione e un singolo rifiuto consente di cercare un’alternativa. Ritiro, avviso e risposte tardive in #66/Q-19.
-- Banco ed erogatore concordano i dettagli tramite il modulo di contatto. Solo il Banco di coordinamento registra e conferma, assegnando la pratica alla OPT o all’operatore del Banco. In presenza registra data, ora, luogo, nome/cognome e telefono del referente. A distanza registra data, ora e link. Scambio di proposte, dati e vincoli in #38/Q-09.
+- Il Banco sceglie chi interpellare e contatta un erogatore per volta. La notifica e la risposta competono all’account organizzativo della OPT o all’account personale dell’operatore del Banco interpellato. Il rifiuto di un candidato mantiene la richiesta Presa in carico e consente di cercare un’alternativa. Individuato un erogatore disponibile, il Banco lo assegna e la richiesta passa a In programmazione. Ritiro, avviso e risposte tardive in #66/Q-19.
+- Banco ed erogatore concordano i dettagli tramite il modulo di contatto. Solo il Banco di coordinamento registra i dettagli e conferma l’accordo. In presenza registra data, ora, luogo, nome/cognome e telefono del referente. A distanza registra data, ora e link. Scambio di proposte, dati e vincoli in #38/Q-09.
 - Conferma, stato e visibilità costituiscono un solo esito: l’accordo completo diventa Confermata e la OPT consulta i dettagli; li comunica all’assistito fuori dall’app. Nessuna verifica della prestazione svolta.
-- Dettagli non modificabili dopo Confermata. Annullamento eccezionale con motivo e senza riapertura automatica. Esatta visibilità del motivo e avvisi da dettagliare in Q-04.
+- Dopo la conferma i dettagli sono immutabili. L’annullamento conserva i dettagli e lascia chiusa la ricerca.
 
 | Stato iniziale | Azione | Stato risultante |
 | --- | --- | --- |
-| Nessuna richiesta | Invio valido della OPT | In programmazione |
+| Nessuna richiesta | Invio valido della OPT | Creata |
+| Creata | Il Banco prende esplicitamente in carico la richiesta | Presa in carico |
+| Presa in carico | Il Banco assegna un erogatore disponibile | In programmazione |
 | In programmazione | Banco conferma accordo completo | Confermata |
-| In programmazione | Banco conclude che manca una soluzione | Rifiutata, con Nessun erogatore disponibile |
-| Confermata | Account della matrice annulla per evento eccezionale con motivo | Annullata |
+| Presa in carico o In programmazione | Il Banco conclude che manca una soluzione | Rifiutata, con Nessun erogatore disponibile |
+| Qualsiasi stato | Un account della matrice annulla la richiesta | Annullata |
 
-Non sono definite altre transizioni. In programmazione/Rifiutata non passano ad Annullata; ripetere l’annullamento non riapre la pratica. Il rifiuto non richiede un motivo libero obbligatorio (#36).
+La rinuncia dell’erogatore già assegnato porta ad Annullata. Il rifiuto finale spetta al Banco e il motivo libero è facoltativo (#36).
 
 ## Permessi per ruolo e relazione con la risorsa
 
@@ -26,8 +29,8 @@ Non sono definite altre transizioni. In programmazione/Rifiutata non passano ad 
 | --- | --- | --- |
 | Dati e richieste di una OPT | Account titolare e Banco autorizzato | L’erogatore interpellato vede i dati minimi della singola richiesta. L’assegnatario vede i dettagli della propria assegnazione. |
 | Risposta alla disponibilità | Account OPT o account personale del Banco interpellato | Soltanto per il contatto ricevuto |
-| Conferma accordo e rifiuto finale | Banco di coordinamento | L’account Operatore interno non equivale al ruolo Banco |
-| Annullamento | Account della matrice di annullamento | Solo da Confermata, evento eccezionale e motivo obbligatorio |
+| Presa in carico, conferma accordo e rifiuto finale | Banco di coordinamento | L’account Operatore interno non equivale al ruolo Banco |
+| Annullamento | Account della matrice di annullamento | Qualsiasi stato. Motivo facoltativo in Creata, obbligatorio negli altri stati. |
 | Scheda personale | Interno o esterno pagato dal Banco titolare della scheda e Banco autorizzato | Invio del solo titolare. Accesso negato all’account OPT e agli altri operatori. |
 | Conteggi OPT | OPT titolare e Banco autorizzato | Viste aggregate del monitoraggio al Banco; estensione ad altre OPT non definita |
 | Comunicazione e riscontro | Destinatario e Banco autorizzato | Ogni destinatario conferma soltanto per sé |
@@ -38,13 +41,14 @@ Il vincolo #28 si verifica per incremento con casi consentiti e negati. Il [cata
 
 ### Matrice di annullamento
 
-| Erogatore assegnato | Account autorizzato ad annullare da Confermata |
+| Account | Richieste che può annullare |
 | --- | --- |
-| OPT erogatrice, anche se la misura è svolta tramite un professionista esterno | Account della stessa OPT |
-| Operatore interno del Banco / Centro PICUS | Account personale dell’operatore assegnato oppure Banco di coordinamento |
-| Operatore esterno pagato dal Banco | Account personale dell’operatore assegnato oppure Banco di coordinamento |
+| Banco di coordinamento | Tutte |
+| OPT richiedente | Quelle inviate dal proprio account |
+| OPT erogatrice | Quelle assegnate al proprio account, anche se eroga tramite un professionista |
+| Operatore interno o esterno pagato dal Banco | Quelle assegnate al proprio account personale |
 
-L’annullamento è eccezionale e richiede un motivo. L’esito è Annullata. I dettagli si conservano e la ricerca rimane chiusa. Il server nega l’operazione a OPT soltanto richiedenti o interpellate, colleghi e Banco di coordinamento su assegnazioni OPT. Verificare anche sessione assente o scaduta, motivo mancante e stato iniziale diverso da Confermata. In caso di diniego stato e dati restano invariati. Esempi di evento, visibilità del motivo e avvisi restano in [Q-04](open-questions.md#q-04-confine-e-annullamento-eccezionale).
+Il motivo è facoltativo da Creata e obbligatorio negli altri stati. PICUS avvisa Banco, OPT richiedente ed erogatore se assegnato, anche durante la programmazione. Il server nega l’operazione a chi è soltanto interpellato o a un collega dell’assegnatario. Una richiesta già Annullata resta tale. In caso di diniego stato e dati restano invariati. Forma e visibilità del motivo restano in [Q-04](open-questions.md#q-04-confine-e-annullamento).
 
 ## Offerta e disponibilità
 

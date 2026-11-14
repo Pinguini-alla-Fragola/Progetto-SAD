@@ -1,6 +1,6 @@
 # Proposta di MVP per il coordinamento
 
-Versione 0.2 del **04/11/2026**. Proposta da selezionare e stimare con PO e Developers; nessuna demo software o approvazione del committente presunta. Il percorso termina con l’accordo Confermato o con Rifiutata e Nessun erogatore disponibile. [Regole funzionali](regole-funzionali.md).
+Versione 0.4 del **14/11/2026**. Proposta da selezionare e stimare con PO e Developers; nessuna demo software o approvazione del committente presunta. Il percorso termina con l’accordo Confermato o con Rifiutata e Nessun erogatore disponibile. [Regole funzionali](regole-funzionali.md).
 
 ## Sei storie del primo percorso
 
@@ -23,9 +23,9 @@ Gestione utenti, CSV opzionale, recupero, catalogo/offerta tramite interfaccia, 
 
 ## Dimostrazione prevista
 
-1. OPT A accede, invia e ritrova richiesta con ID, data e In programmazione.
-2. Banco vede erogatori ordinati e ne interpella uno; un rifiuto lascia la pratica aperta e consente un’alternativa.
-3. Una OPT che eroga tramite un professionista risponde dal proprio account. La richiesta resta In programmazione fino all’accordo completo.
+1. OPT A accede, invia e ritrova la richiesta con ID, data e stato Creata. Il Banco la vede in coda.
+2. Il Banco prende in carico la richiesta, che passa a Presa in carico. Consulta gli erogatori ordinati e ne interpella uno. Un rifiuto consente di cercare un’alternativa.
+3. Una OPT che eroga tramite un professionista risponde dal proprio account. Il Banco le assegna la richiesta e avvia In programmazione.
 4. Banco ed erogatore concordano; solo il Banco registra dettagli completi e conferma. In un solo esito si ottengono Confermata e dettagli alla OPT, che informa l’assistito fuori dall’app. Modifiche successive negate.
 5. Su altra pratica, esaurite alternative anche remote compatibili, il Banco registra Rifiutata e compare Nessun erogatore disponibile.
 6. Accesso estraneo negato; erogatore autorizzato vede soltanto la propria assegnazione. Campi identificativi non ammessi non persistiti né copiati nei log. Logout invalida la sessione.

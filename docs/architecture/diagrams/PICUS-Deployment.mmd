@@ -1,0 +1,63 @@
+---
+title: "PICUS · Sprint 2 — Vista di deployment (Docker Compose)"
+config:
+  layout: elk
+  theme: base
+  themeVariables:
+    fontFamily: "Arial"
+    fontSize: "16px"
+    lineColor: "#64748B"
+    edgeLabelBackground: "#FFFFFF"
+  flowchart:
+    curve: linear
+    nodeSpacing: 34
+    rankSpacing: 50
+    wrappingWidth: 320
+    subGraphTitleMargin:
+      top: 6
+      bottom: 26
+---
+flowchart LR
+    accTitle: PICUS, vista di deployment dello Sprint 2
+    accDescr: Il browser dell'utente raggiunge via HTTP l'applicazione sulla macchina host. Docker Compose esegue due container. In picus-webapp la JVM Java 25 esegue picus.jar, che si collega con JDBC al database picus gestito da PostgreSQL 17 nel container picus-db. PostgreSQL salva i dati nel volume picus-dati. Una nota indica che picus-webapp parte solo quando picus-db è pronto.
+
+    subgraph DEVICE["«device»<br/>Dispositivo dell'utente"]
+        BROWSER["<b>Browser web</b><br/>OPT · Banco · Operatori<br/>Pagine HTML generate dal server"]
+    end
+
+    NOTA["<b>Vincolo di avvio</b><br/>picus-webapp parte solo<br/>quando picus-db è pronto."]
+
+    subgraph HOST["«device»<br/>Macchina host · Docker Compose"]
+        subgraph WEBAPP["«execution environment»<br/>Container picus-webapp"]
+            subgraph JVM["«execution environment»<br/>JVM Java 25"]
+                JAR["<b>«artifact» picus.jar</b><br/>Spring Boot 4.1.2 · Tomcat sulla porta 8080<br/><br/>Moduli utenze, catalogo, richieste,<br/>comunicazioni e monitoraggio"]
+            end
+        end
+
+        subgraph DB["«execution environment»<br/>Container picus-db"]
+            subgraph DBMS["«execution environment»<br/>PostgreSQL 17"]
+                SCHEMA["<b>Database picus</b><br/>Porta 5432 raggiungibile<br/>solo sulla rete Compose"]
+            end
+        end
+
+        VOL[("<b>Volume picus-dati</b><br/>/var/lib/postgresql/data<br/>Conserva i dati fra gli avvii")]
+    end
+
+    BROWSER -->|HTTP| JAR
+    JAR -->|"JDBC · driver pgJDBC"| SCHEMA
+    SCHEMA --> VOL
+
+    classDef nodo fill:#F1F5F9,stroke:#94A3B8,color:#142B46,stroke-width:1.4px
+    classDef artifact fill:#164E80,stroke:#123B61,color:#FFFFFF,stroke-width:1.8px
+    classDef dati fill:#E9F7F5,stroke:#3D867D,color:#153D38,stroke-width:1.4px
+    classDef nota fill:#FFF8EA,stroke:#946728,color:#563C17,stroke-width:1.3px,stroke-dasharray:5 4
+    class BROWSER nodo
+    class JAR artifact
+    class SCHEMA,VOL dati
+    class NOTA nota
+    style DEVICE fill:#F8FAFC,stroke:#94A3B8,stroke-width:1.4px,color:#142B46
+    style HOST fill:#F7FAFE,stroke:#7C9BB9,stroke-width:1.4px,color:#183957
+    style WEBAPP fill:#F3F8FD,stroke:#5480B0,stroke-width:1.4px,color:#143C65
+    style JVM fill:#E9F2FC,stroke:#5480B0,stroke-width:1.2px,color:#143C65
+    style DB fill:#F1F9F7,stroke:#3D867D,stroke-width:1.4px,color:#153D38
+    style DBMS fill:#E3F3EF,stroke:#3D867D,stroke-width:1.2px,color:#153D38
