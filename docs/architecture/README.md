@@ -5,6 +5,7 @@
 - [PICUS - Flusso dell'architettura MVC](diagrams/PICUS-Architettura-MVC.mmd) · [Anteprima PNG](diagrams/PICUS-Architettura-MVC.png)
 - [PICUS - Module&Package View](diagrams/PICUS-Module-Package-View.mmd) · [Anteprima PNG](diagrams/PICUS-Module-Package-View.png)
 - [PICUS - Deployment & Container View](diagrams/PICUS-Deployment-Container-View.mmd) · [Anteprima PNG](diagrams/PICUS-Deployment-Container-View.png)
+- [PICUS - Schema ER PostgreSQL](diagrams/PICUS-Schema-ER.puml) · [Anteprima PNG](diagrams/PICUS-Schema-ER.png)
 
 La vista dei moduli riprende i package di `src/main/java` presenti in `main` al commit `f3c4e95`. Le dipendenze `«import»` corrispondono agli import Java delle API; le dipendenze `«use»` rappresentano le collaborazioni previste con `ComunicazioniApi` e `CatalogoApi`. I contratti pubblici sono presenti, mentre le relative implementazioni sono ancora da completare.
 
@@ -28,6 +29,8 @@ I contratti previsti coprono accesso, invio, elenco della OPT titolare e coda de
 Il server ricava la titolarità dalla sessione e dai dati persistiti. Controller e viste ricevono DTO, mentre le entità JPA restano nel modulo che le gestisce. [ADR-003](../adr/ADR-003-isolamento-e-validazione-richieste.md)
 
 ## Persistenza iniziale
+
+Lo schema ER rappresenta le sette tabelle di `catalogo`, `utenze` e `richieste` definite dalle migrazioni Flyway di `main` al commit `e7a39aa`. `PK` indica la chiave primaria, `FK` la chiave esterna e `UK` un vincolo di unicità sulla singola colonna. In `catalogo_adiacenze` la coppia `(comune_a, comune_b)` è unica e rispetta il vincolo `comune_a < comune_b`. I campi facoltativi sono indicati nel diagramma. [Migrazioni Flyway](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/tree/e7a39aa0ceee9bdaea63a56d74099c1ba2c7fb8c/src/main/resources/db/migration)
 
 La #77 ha introdotto in `main` lo schema PostgreSQL, le mappature JPA e i dati demo. Flyway applica le migrazioni all’avvio. `RichiestaJpa` inizializza lo stato a `CREATA`. La colonna `erogatore_id` è facoltativa e riferisce l’account assegnato. Il flusso previsto la valorizza al passaggio a In programmazione, quando il Banco individua l’erogatore disponibile. [ADR-002](../adr/ADR-002-ciclo-di-vita-richiesta.md) · [PR #83](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/pull/83)
 
@@ -58,6 +61,6 @@ La #77 ha introdotto in `main` lo schema PostgreSQL, le mappature JPA e i dati d
 ## Rischi e debito tecnico
 
 - Il database e il rilascio sono condivisi. Le migrazioni vanno coordinate tra i moduli e il ripristino da backup resta da provare.
-- Lo schema risultante dalle migrazioni di `main` ammette cinque stati. Il passaggio a `Presa in carico` richiede l’allineamento della persistenza con l’[ADR-002](../adr/ADR-002-ciclo-di-vita-richiesta.md).
+- Lo schema rappresentato ammette quattro stati. Per persistere `CREATA` e `PRESA_IN_CARICO` serve allineare il vincolo SQL all’[ADR-002](../adr/ADR-002-ciclo-di-vita-richiesta.md).
 - Il campo `description` può contenere identificativi inseriti come testo libero. La gestione di questo caso resta da definire. [ADR-003](../adr/ADR-003-isolamento-e-validazione-richieste.md)
 - L’eventuale estrazione di un sottosistema via gRPC richiede di definire contratti, proprietà dei dati, transazioni e gestione dei guasti di rete. [ADR-001](../adr/ADR-001-monolite-modulare-mvc.md)
