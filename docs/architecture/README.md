@@ -5,6 +5,7 @@
 - [PICUS - Flusso dell'architettura MVC](diagrams/PICUS-Architettura-MVC.mmd) · [Anteprima PNG](diagrams/PICUS-Architettura-MVC.png)
 - [PICUS - Module&Package View](diagrams/PICUS-Module-Package-View.mmd) · [Anteprima PNG](diagrams/PICUS-Module-Package-View.png)
 - [PICUS - Deployment & Container View](diagrams/PICUS-Deployment-Container-View.mmd) · [Anteprima PNG](diagrams/PICUS-Deployment-Container-View.png)
+- [PICUS - Sequenza del walking skeleton](diagrams/PICUS-Walking-Skeleton.puml) · [Anteprima PNG](diagrams/PICUS-Walking-Skeleton.png)
 - [PICUS - Schema ER PostgreSQL](diagrams/PICUS-Schema-ER.puml) · [Anteprima PNG](diagrams/PICUS-Schema-ER.png)
 
 La vista dei moduli riprende i package di `src/main/java` presenti in `main` al commit `f3c4e95`. Le dipendenze `«import»` corrispondono agli import Java delle API; le dipendenze `«use»` rappresentano le collaborazioni previste con `ComunicazioniApi` e `CatalogoApi`. I contratti pubblici sono presenti, mentre le relative implementazioni sono ancora da completare.
@@ -17,11 +18,11 @@ PICUS usa un unico database PostgreSQL per tutti i moduli, inclusi file e metada
 
 ## Contratti del walking skeleton
 
-I contratti previsti coprono accesso, invio, elenco della OPT titolare e coda del Banco.
+La sequenza descrive il flusso previsto per lo Sprint 2 usando i contratti Java di `main` al commit `e7a39aa`. Mostra l’accesso e la chiusura della sessione, l’invio in stato `CREATA`, l’elenco della OPT titolare, la coda del Banco e la consultazione del dettaglio con il diniego a una OPT estranea. I casi negativi di accesso e validazione sono ripresi nelle verifiche della [#78](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/78).
 
 | Confine | Dati scambiati |
 | --- | --- |
-| `richieste` → `utenze.api` | Identificativo dell’account autenticato e ruolo ricavati dalla sessione. |
+| Spring Security → `utenze.api` | Verifica delle credenziali e, per le richieste protette, verifica dell’account ricavato dalla sessione. Il controller riceve l’identità verificata e la passa al caso d’uso. |
 | `richieste` → `catalogo.api` | Identificativo della misura e codice del comune. Il catalogo restituisce i riferimenti validi e lo stato della misura. |
 | Form → `richieste.web` | DTO di invio con misura, tipo di destinatario (persona o nucleo), comune e `description` facoltativa. |
 | `richieste` → viste Thymeleaf | DTO di elenco e dettaglio con identificativo, data, misura e stato. Il dettaglio include la descrizione per la OPT titolare e il Banco autorizzato. La coda del Banco è in ordine di arrivo. |
