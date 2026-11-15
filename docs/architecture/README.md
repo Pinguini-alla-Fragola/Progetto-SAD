@@ -32,11 +32,12 @@ tracciato definitivo delle schede si dettagliano nelle relative storie.
 
 ## Generare il Javadoc
 
-Dalla radice del clone, con il comando `javadoc` del JDK 25 disponibile nel
-`PATH`, eseguire:
+Dalla radice del clone, usare questi comandi in PowerShell con il JDK 25 nel
+`PATH`.
 
-```text
+```powershell
 javadoc -d target/apidocs '@scripts/javadoc.args'
+Copy-Item -LiteralPath docs/architecture/picus-logo.svg -Destination target/apidocs/resource-files/picus-logo.svg
 ```
 
 Aprire `target/apidocs/index.html`. Aggiornare nei sorgenti il Javadoc dei
@@ -49,6 +50,7 @@ nelle anteprime locali e nei file pubblicati su GitHub Pages. Il pulsante
 nell'intestazione alterna i temi chiaro e scuro. Il browser salva la scelta
 per le visite successive quando lo storage locale è disponibile.
 
-Il workflow usa lo stesso file di argomenti. Quando una PR viene integrata in
-`main`, rigenera la documentazione e la pubblica su GitHub Pages. Le istruzioni
+Il workflow usa lo stesso file di argomenti e include il logo SVG che
+collega alla landing page. Quando una PR viene integrata in `main`, rigenera
+la documentazione e la pubblica su GitHub Pages. Le istruzioni
 di attivazione sono nella [configurazione GitHub](../../.github/SETUP.md#pubblicazione-del-javadoc).

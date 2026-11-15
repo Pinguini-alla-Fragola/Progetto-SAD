@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">Pinguino e fragola</title>
+  <desc id="desc">Logo vettoriale: un pinguino seduto abbraccia una fragola grande quasi quanto lui. Sfondo trasparente, contorni blu notte, zampe arancioni e foglie verdi.</desc>
+  <g stroke="#182C39" stroke-width="17" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Piedi aperti, in posizione seduta. -->
+    <g fill="#F9AD49">
+      <path d="M350 780C315 776 270 791 233 813C207 829 179 857 195 877C209 894 250 887 277 889C316 893 366 881 396 853Z"/>
+      <path d="M674 780C709 776 754 791 791 813C817 829 845 857 829 877C815 894 774 887 747 889C708 893 658 881 628 853Z"/>
+    </g>
+    <!-- Sagoma compatta del pinguino. -->
+    <path fill="#253F4D" d="M512 137C374 122 278 210 265 341C258 414 224 468 219 577C213 704 270 801 371 840C437 865 587 865 653 840C754 801 811 704 805 577C800 468 766 414 759 341C746 210 650 122 512 137Z"/>
+    <path fill="#253F4D" d="M478 143C475 113 492 91 523 81C513 101 515 120 530 137"/>
+    <!-- Maschera a cuore e petto. -->
+    <path fill="#FFF9EF" stroke="none" d="M512 266C470 206 386 208 347 266C311 319 321 380 344 433C357 463 340 498 326 544C294 649 327 750 402 799C455 833 569 833 622 799C697 750 730 649 698 544C684 498 667 463 680 433C703 380 713 319 677 266C638 208 554 206 512 266Z"/>
+    <!-- Visage. -->
+    <g fill="#182C39" stroke="none">
+      <ellipse cx="423" cy="324" rx="15" ry="23"/>
+      <ellipse cx="601" cy="324" rx="15" ry="23"/>
+    </g>
+    <g fill="#F4AEA8" stroke="none">
+      <ellipse cx="370" cy="372" rx="28" ry="15"/>
+      <ellipse cx="654" cy="372" rx="28" ry="15"/>
+    </g>
+    <path fill="#F9AD49" stroke-width="12" d="M480 367Q512 352 544 367Q537 391 512 401Q487 391 480 367Z"/>
+    <!-- Une fraise généreuse, à l'échelle du corps. -->
+    <path fill="#F04F59" d="M512 456C462 425 393 428 342 453C285 481 266 536 283 607C306 705 387 819 473 877C499 895 525 895 551 877C637 819 718 705 741 607C758 536 739 481 682 453C631 428 562 425 512 456Z"/>
+    <!-- Un seul aplat latéral pour garder une lecture de logo. -->
+    <path fill="#D9364B" stroke="none" d="M682 453C739 481 758 536 741 607C718 705 637 819 551 877C537 887 524 891 512 891C573 823 627 742 659 657C694 566 702 505 682 453Z"/>
+    <!-- Calice, cinq feuilles en éventail. -->
+    <path fill="#4A9963" stroke-width="14" d="M512 449C482 410 449 397 414 405C426 428 439 444 457 456C413 447 377 454 350 477C384 495 423 497 461 481C466 508 485 530 512 545C539 530 558 508 563 481C601 497 640 495 674 477C647 454 611 447 567 456C585 444 598 428 610 405C575 397 542 410 512 449Z"/>
+    <path fill="none" stroke="#182C39" stroke-width="15" d="M512 449C510 426 517 408 534 395"/>
+    <!-- Graines larges, lisibles à petite échelle. -->
+    <g fill="#FFE8AF" stroke="none">
+      <ellipse cx="396" cy="552" rx="9" ry="16" transform="rotate(-22 396 552)"/>
+      <ellipse cx="512" cy="590" rx="9" ry="16"/>
+      <ellipse cx="628" cy="552" rx="9" ry="16" transform="rotate(22 628 552)"/>
+      <ellipse cx="367" cy="644" rx="9" ry="16" transform="rotate(-25 367 644)"/>
+      <ellipse cx="447" cy="684" rx="9" ry="16" transform="rotate(-12 447 684)"/>
+      <ellipse cx="577" cy="684" rx="9" ry="16" transform="rotate(12 577 684)"/>
+      <ellipse cx="657" cy="644" rx="9" ry="16" transform="rotate(25 657 644)"/>
+      <ellipse cx="435" cy="774" rx="8" ry="14" transform="rotate(-22 435 774)"/>
+      <ellipse cx="589" cy="774" rx="8" ry="14" transform="rotate(22 589 774)"/>
+      <ellipse cx="512" cy="818" rx="8" ry="14"/>
+    </g>
+    <!-- Ali appoggiate davanti al frutto: la presa è visibile. -->
+    <path fill="#253F4D" d="M265 459C241 471 226 509 234 552C246 608 286 655 332 674C352 682 373 674 372 654C371 633 344 611 330 584C314 552 311 521 308 500"/>
+    <path fill="#253F4D" d="M759 459C783 471 798 509 790 552C778 608 738 655 692 674C672 682 651 674 652 654C653 633 680 611 694 584C710 552 713 521 716 500"/>
+  </g>
+</svg>

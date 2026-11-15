@@ -91,6 +91,22 @@
         letter-spacing: -0.02em;
     }
 
+    .about-language a.picus-brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        color: var(--picus-text);
+        text-decoration: none;
+    }
+
+    .about-language a.picus-brand:hover {
+        color: var(--picus-accent);
+    }
+
+    .picus-brand img {
+        display: block;
+    }
+
     .picus-theme-toggle {
         min-height: 2.125rem;
         padding: 0.35rem 0.7rem;
