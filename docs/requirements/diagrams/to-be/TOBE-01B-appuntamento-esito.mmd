@@ -25,7 +25,7 @@ sequenceDiagram
 
     opt Annullamento da qualsiasi stato, anche durante TOBE-01A
         Note over R,E: Il Banco, la OPT richiedente o l'erogatore assegnato invia l'annullamento<br/>Il motivo è facoltativo solo in Creata
-        S->>S: Verifica account, relazione e motivo<br/>Registra Annullata e conserva i dettagli
+        S->>S: Verifica account e presenza del motivo,<br/>poi registra Annullata e conserva i dettagli
         S-->>B: Avvisa il Banco
         S-->>R: Avvisa la OPT richiedente
         opt Erogatore già assegnato
