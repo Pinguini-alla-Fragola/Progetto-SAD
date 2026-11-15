@@ -1,0 +1,15 @@
+-encoding UTF-8
+-Xdoclint:all
+-Werror
+-notimestamp
+-sourcepath src/main/java
+-windowtitle "PICUS API"
+-doctitle "API Java di PICUS"
+-header "<a class='picus-brand' href='https://strawberrypenguin.it/' aria-label='PICUS, pagina iniziale del progetto'><img src='{@docRoot}/resource-files/picus-logo.svg' width='38' height='38' alt=''>PICUS</a><button type='button' class='picus-theme-toggle' hidden>Tema chiaro</button>"
+--add-stylesheet docs/architecture/picus-javadoc.css
+--add-script docs/architecture/picus-javadoc-theme.js
+it.unina.picus.utenze.api
+it.unina.picus.catalogo.api
+it.unina.picus.richieste.api
+it.unina.picus.comunicazioni.api
+it.unina.picus.monitoraggio.api

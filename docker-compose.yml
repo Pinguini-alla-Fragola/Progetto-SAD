@@ -1,0 +1,30 @@
+services:
+  picus-db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: picus
+      POSTGRES_USER: picus
+      POSTGRES_PASSWORD: "${PICUS_DB_PASSWORD:?Imposta PICUS_DB_PASSWORD nel file .env}"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "picus", "-d", "picus"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - picus-dati:/var/lib/postgresql/data
+
+  picus-webapp:
+    build: .
+    depends_on:
+      picus-db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: demo
+      PICUS_DB_URL: jdbc:postgresql://picus-db:5432/picus
+      PICUS_DB_PASSWORD: "${PICUS_DB_PASSWORD:?Imposta PICUS_DB_PASSWORD nel file .env}"
+      PICUS_DEMO_PASSWORD: "${PICUS_DEMO_PASSWORD:?Imposta PICUS_DEMO_PASSWORD nel file .env}"
+
+volumes:
+  picus-dati:

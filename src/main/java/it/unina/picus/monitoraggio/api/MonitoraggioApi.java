@@ -1,0 +1,199 @@
+package it.unina.picus.monitoraggio.api;
+
+import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.UUID;
+
+/**
+ * Raccoglie i conteggi trimestrali delle OPT e le schede personali degli operatori del Banco.
+ * I dati descrivono attività dichiarate e sono indipendenti dal ciclo della singola richiesta.
+ */
+public interface MonitoraggioApi {
+
+    /**
+     * Registra i conteggi della OPT autenticata per il trimestre. Lo stesso valore ritrasmesso
+     * per OPT, trimestre, misura e voce compare una sola volta nei riepiloghi. Un valore diverso
+     * può sostituirlo secondo le regole vigenti per le correzioni.
+     *
+     * @param attore identità verificata della OPT titolare
+     * @param trimestre trimestre a cui si riferiscono le attività
+     * @param conteggi voci dichiarate per le misure svolte
+     * @throws SecurityException se l'attore non è una OPT autorizzata
+     * @throws IllegalArgumentException se le voci o i riferimenti alle misure sono invalidi
+     * @throws IllegalStateException se il periodo o il dato esistente non consentono l'aggiornamento
+     */
+    void registraConteggiOpt(IdentitaAutenticata attore, Trimestre trimestre, List<VoceMisura> conteggi);
+
+    /**
+     * Consulta i conteggi dichiarati, per un singolo trimestre o cumulati sui trimestri inclusi.
+     * Il cumulativo somma la stessa voce per OPT e misura. Una voce mai dichiarata nel periodo è
+     * assente, mentre uno zero dichiarato è un valore. Le categorie sovrapponibili restano distinte.
+     *
+     * @param attore identità verificata della OPT titolare o del Banco autorizzato
+     * @param optId account della OPT da consultare oppure {@code null} per tutte le OPT, riservato al Banco
+     * @param da primo trimestre incluso nel periodo
+     * @param a ultimo trimestre incluso, uguale a {@code da} per la vista trimestrale
+     * @return voci con un valore dichiarato nel periodo, eventualmente nessuna
+     * @throws SecurityException se l'attore non è autorizzato alla vista richiesta
+     * @throws IllegalArgumentException se il periodo è invertito
+     * @throws NoSuchElementException se l'account OPT richiesto non esiste
+     */
+    List<ConteggioOpt> consultaConteggiOpt(IdentitaAutenticata attore, UUID optId, Trimestre da, Trimestre a);
+
+    /**
+     * Invia la scheda personale trimestrale dell'operatore autenticato. Il modulo ricava il
+     * titolare dall'identità verificata. Il tracciato e le regole di firma e correzione seguono
+     * il raffinamento della storia di compilazione.
+     *
+     * @param attore identità verificata dell'operatore interno o esterno pagato dal Banco
+     * @param trimestre periodo di rendicontazione
+     * @param dati dati dichiarati nella scheda personale
+     * @return identificativo della scheda ricevuta
+     * @throws SecurityException se l'attore non è un operatore autorizzato
+     * @throws IllegalArgumentException se i dati non rispettano il tracciato applicabile
+     * @throws IllegalStateException se il periodo o la scheda esistente non consentono un nuovo invio
+     */
+    UUID inviaSchedaOperatore(IdentitaAutenticata attore, Trimestre trimestre, DatiSchedaOperatore dati);
+
+    /**
+     * Elenca le schede personali inviate dall'operatore autenticato.
+     *
+     * @param attore identità verificata dell'operatore titolare
+     * @return riferimenti alle proprie schede
+     * @throws SecurityException se l'attore non è un operatore autorizzato
+     */
+    List<SchedaSintesi> elencoSchedeOperatore(IdentitaAutenticata attore);
+
+    /**
+     * Consulta la scheda personale. Il Banco può leggerla per la rendicontazione e
+     * l'operatore titolare può consultare la propria.
+     *
+     * @param attore identità verificata del Banco autorizzato o dell'operatore titolare
+     * @param schedaId identificativo della scheda
+     * @return scheda personale visibile all'attore
+     * @throws SecurityException se l'attore non può consultare la scheda
+     * @throws NoSuchElementException se la scheda non esiste
+     */
+    SchedaOperatore consultaSchedaOperatore(IdentitaAutenticata attore, UUID schedaId);
+
+    /**
+     * Riepiloga per il Banco le schede ricevute nel trimestre selezionato. Le voci aggregate
+     * rappresentano conteggi dichiarati e conservano distinte le categorie sovrapponibili.
+     *
+     * @param attore identità verificata del Banco autorizzato alla rendicontazione
+     * @param trimestre singolo trimestre da riepilogare
+     * @return riferimenti alle schede ricevute e totali per voce, anche in assenza di invii
+     * @throws SecurityException se l'attore non è autorizzato al riepilogo
+     */
+    RiepilogoTrimestre riepilogaSchede(IdentitaAutenticata attore, Trimestre trimestre);
+
+    /**
+     * Identificativo di un trimestre di rendicontazione.
+     *
+     * @param anno anno di riferimento
+     * @param numero numero del trimestre, da 1 a 4
+     */
+    record Trimestre(int anno, int numero) {
+        /**
+         * Crea un riferimento a un trimestre.
+         *
+         * @param anno anno di riferimento
+         * @param numero numero del trimestre, da 1 a 4
+         * @throws IllegalArgumentException se l'anno non è positivo o il trimestre è fuori intervallo
+         */
+        public Trimestre {
+            if (anno < 1 || numero < 1 || numero > 4) {
+                throw new IllegalArgumentException("Anno o trimestre non valido");
+            }
+        }
+    }
+
+    /**
+     * Valore dichiarato o cumulato per una voce di conteggio e una misura.
+     *
+     * @param misuraId identificativo stabile della misura
+     * @param voce codice della voce nel tracciato applicabile
+     * @param valore conteggio per la voce, incluso zero se dichiarato
+     */
+    record VoceMisura(long misuraId, String voce, long valore) {}
+
+    /**
+     * Conteggio di un'organizzazione nel periodo consultato.
+     *
+     * @param optId account dell'organizzazione
+     * @param conteggio valore per una voce e una misura
+     */
+    record ConteggioOpt(UUID optId, VoceMisura conteggio) {}
+
+    /**
+     * Dati iniziali della scheda personale. Obbligatorietà, firma e versione del tracciato
+     * restano da definire con il raffinamento dei requisiti di monitoraggio.
+     *
+     * @param nome nome dell'operatore
+     * @param cognome cognome dell'operatore
+     * @param luogoNascita luogo di nascita
+     * @param dataNascita data di nascita
+     * @param codiceFiscale codice fiscale dell'operatore
+     * @param qualifica qualifica professionale
+     * @param tipologiaContratto tipologia di rapporto
+     * @param areaLivello area o livello contrattuale
+     * @param ore ore dichiarate nel trimestre
+     * @param costoOrarioLordo costo orario lordo
+     * @param conteggi conteggi aggregati per voce del tracciato
+     */
+    record DatiSchedaOperatore(
+            String nome,
+            String cognome,
+            String luogoNascita,
+            LocalDate dataNascita,
+            String codiceFiscale,
+            String qualifica,
+            String tipologiaContratto,
+            String areaLivello,
+            BigDecimal ore,
+            BigDecimal costoOrarioLordo,
+            Map<String, Long> conteggi) {
+        /** Crea una copia immutabile dei conteggi dichiarati. */
+        public DatiSchedaOperatore {
+            conteggi = Map.copyOf(conteggi);
+        }
+    }
+
+    /**
+     * Riferimento a una scheda in un elenco o riepilogo.
+     *
+     * @param id identificativo della scheda
+     * @param operatoreId account personale del titolare
+     * @param trimestre trimestre dichiarato
+     * @param inviataIl istante di invio della scheda ricevuta
+     */
+    record SchedaSintesi(UUID id, UUID operatoreId, Trimestre trimestre, Instant inviataIl) {}
+
+    /**
+     * Scheda personale consultabile nei casi d'uso autorizzati.
+     *
+     * @param sintesi riferimento e periodo della scheda
+     * @param dati dati personali, professionali e aggregati dichiarati
+     */
+    record SchedaOperatore(SchedaSintesi sintesi, DatiSchedaOperatore dati) {}
+
+    /**
+     * Dati usati dal Banco per la rendicontazione trimestrale.
+     *
+     * @param schede riferimenti alle schede ricevute usate per il riepilogo
+     * @param conteggi totali dichiarati per voce, senza stima di persone uniche
+     */
+    record RiepilogoTrimestre(List<SchedaSintesi> schede, Map<String, Long> conteggi) {
+        /** Crea copie immutabili dell'elenco delle schede e dei totali. */
+        public RiepilogoTrimestre {
+            schede = List.copyOf(schede);
+            conteggi = Map.copyOf(conteggi);
+        }
+    }
+}
