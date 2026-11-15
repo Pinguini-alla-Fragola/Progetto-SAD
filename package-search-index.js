@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html","k":"18"},{"l":"it.unina.picus.catalogo.api"},{"l":"it.unina.picus.comunicazioni.api"},{"l":"it.unina.picus.monitoraggio.api"},{"l":"it.unina.picus.richieste.api"},{"l":"it.unina.picus.utenze.api"}];updateSearchResults();
