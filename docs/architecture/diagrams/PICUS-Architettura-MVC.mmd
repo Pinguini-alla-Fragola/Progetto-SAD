@@ -1,5 +1,5 @@
 ---
-title: "ARCH-01 · Architettura MVC di PICUS a regime"
+title: "PICUS - Flusso dell'architettura MVC"
 config:
   theme: base
   themeVariables:
@@ -13,7 +13,7 @@ config:
     rankSpacing: 34
 ---
 flowchart TB
-    accTitle: ARCH-01, architettura MVC di PICUS a regime
+    accTitle: PICUS - Flusso dell'architettura MVC
     accDescr: Il browser invia una richiesta. Spring Security verifica l’accesso e il DispatcherServlet individua il controller. Il controller chiama il servizio Java del modulo pertinente, riceve il risultato e consegna a Spring MVC nome della vista e dati. La vista genera la pagina HTML. I moduli accedono ai dati tramite repository e adattatori.
 
     BROWSER["<b>Browser</b><br/>OPT · Banco · Operatori"]

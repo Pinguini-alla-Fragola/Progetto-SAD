@@ -1,5 +1,5 @@
 ---
-title: "PICUS · Deployment and Container View · Sprint 2 (Docker Compose)"
+title: "PICUS - Deployment & Container View"
 config:
   layout: elk
   theme: base
@@ -18,7 +18,7 @@ config:
       bottom: 26
 ---
 flowchart LR
-    accTitle: PICUS, Deployment and Container View dello Sprint 2
+    accTitle: PICUS - Deployment & Container View
     accDescr: Gli utenti usano PICUS dal browser via HTTP. Docker Compose esegue sulla macchina host due container. Il container applicativo picus-webapp esegue picus.jar sulla JVM Java 25 e contiene tutti i moduli. Il container dati picus-db esegue PostgreSQL 17, che gestisce l'unico database picus e salva i dati nel volume picus-dati. L'applicazione legge e scrive i dati via JDBC. Una nota indica che picus-webapp parte solo quando picus-db è pronto.
 
     subgraph DEVICE["«device»<br/>Dispositivo dell'utente"]
