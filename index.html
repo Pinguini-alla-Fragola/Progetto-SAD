@@ -1,18 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coming Soon</title>
+    <title>PICUS</title>
     <link rel="icon" type="image/svg+xml" href="logo.svg">
-    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&amp;display=swap" rel="stylesheet">
     <style>
         :root {
+            color-scheme: dark;
             --bg-color: #0d1117;
+            --surface-color: #161b22;
+            --border-color: #30363d;
             --text-primary: #f0f6fc;
             --text-secondary: #8b949e;
             --accent-color: #58a6ff;
@@ -20,174 +21,210 @@
 
         * {
             box-sizing: border-box;
-            margin: 0;
-            padding: 0;
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: clamp(1rem, 4vw, 3rem);
             background-color: var(--bg-color);
             color: var(--text-primary);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 3rem;
-            overflow-x: hidden;
+            font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
-        /* Layout Desktop */
         .container {
             display: flex;
-            flex-direction: row;
             align-items: center;
             justify-content: center;
-            gap: clamp(3rem, 5vw, 6.5rem);
-            width: min(88vw, 1700px);
+            gap: clamp(2rem, 5vw, 6.5rem);
+            width: min(100%, 1360px);
         }
 
         .logo-wrapper {
             flex: 0 1 auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
 
         .logo-wrapper img {
-            width: clamp(340px, 25vw, 560px);
-            max-height: 60vh;
+            display: block;
+            width: clamp(270px, 29vw, 480px);
             height: auto;
+            max-height: 68vh;
+            object-fit: contain;
         }
 
         .content {
-            flex: 1;
-            max-width: 1050px;
-            display: flex;
-            flex-direction: column;
-            gap: clamp(1.5rem, 2vw, 2.2rem);
+            display: grid;
+            flex: 1 1 0;
+            min-width: 0;
+            max-width: 790px;
+            gap: clamp(1.35rem, 2.6vw, 2.25rem);
         }
 
         h1 {
-            font-size: clamp(2.4rem, 3.6vw, 4.2rem);
+            margin: 0;
+            font-size: clamp(2.35rem, 4vw, 4.2rem);
             font-weight: 800;
-            line-height: 1.15;
-            letter-spacing: -0.02em;
-        }
-
-        p {
-            font-size: clamp(1.25rem, 1.8vw, 2rem);
-            color: var(--text-secondary);
-            line-height: 1.5;
+            line-height: 1.12;
+            letter-spacing: -0.035em;
         }
 
         a {
-            color: var(--text-primary);
-            text-decoration: none;
-            border-bottom: 3px solid var(--accent-color);
-            padding-bottom: 3px;
-            font-weight: 600;
-            white-space: nowrap;
-            transition: color 0.2s ease, border-color 0.2s ease;
-        }
-
-        a:hover {
             color: var(--accent-color);
+            text-decoration: none;
         }
 
-        .mobile-break {
-            display: none;
+        a:focus-visible {
+            outline: 2px solid var(--accent-color);
+            outline-offset: 4px;
         }
 
-        /* Link alla presentazione della Sprint Review */
+        .resources {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.75rem 1.25rem;
+        }
+
         .cta {
-            align-self: flex-start;
             display: inline-flex;
             align-items: center;
-            gap: 0.6em;
-            margin-top: 0.4rem;
-            padding: 0.7em 1.3em;
+            gap: 0.75rem;
+            padding: 0.7rem 1.1rem;
             border: 2px solid var(--accent-color);
             border-radius: 999px;
-            color: var(--accent-color);
-            font-size: clamp(1.1rem, 1.5vw, 1.6rem);
-            transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+            font-weight: 600;
         }
 
         .cta:hover {
-            background-color: var(--accent-color);
             color: var(--bg-color);
-            transform: translateY(-2px);
+            background-color: var(--accent-color);
         }
 
-        .cta-arrow {
-            transition: transform 0.2s ease;
+        .repository-link {
+            padding: 0.55rem 0.15rem;
+            color: var(--text-primary);
+            font-weight: 600;
         }
 
-        .cta:hover .cta-arrow {
-            transform: translateX(4px);
+        .repository-link:hover {
+            color: var(--accent-color);
+            text-decoration: underline;
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-14px); }
+        .reviews h2 {
+            margin: 0 0 0.75rem;
+            font-size: 1.17rem;
+            font-weight: 600;
         }
 
-        /* Layout Mobile */
+        .review-list {
+            display: grid;
+            gap: 0.55rem;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .review {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 0.35rem 1rem;
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            background-color: var(--surface-color);
+            line-height: 1.45;
+        }
+
+        .review--available:hover {
+            border-color: var(--accent-color);
+        }
+
+        .review--pending {
+            color: var(--text-secondary);
+        }
+
+        .review-title {
+            font-weight: 600;
+        }
+
+        .review-status {
+            font-size: 0.875rem;
+        }
+
         @media (max-width: 768px) {
-            body {
-                padding: 2rem;
-            }
             .container {
                 flex-direction: column;
-                text-align: center;
-                gap: 2.5rem;
-                width: 100%;
+                gap: 1.75rem;
+                padding-block: 0.5rem;
             }
+
             .logo-wrapper img {
-                width: 100%;
-                max-width: 250px;
+                width: clamp(160px, 42vw, 250px);
                 max-height: none;
             }
+
             .content {
-                gap: 1.2rem;
+                width: min(100%, 560px);
             }
+
             h1 {
-                font-size: clamp(2rem, 4vw, 3.5rem);
-                line-height: 1.15;
-            }
-            p {
-                font-size: clamp(1rem, 2vw, 1.25rem);
-            }
-            a {
-                border-bottom-width: 2px;
-                padding-bottom: 2px;
-            }
-            .mobile-break {
-                display: inline;
-            }
-            .cta {
-                align-self: center;
-                font-size: 1rem;
-                white-space: normal;
+                font-size: clamp(2rem, 6vw, 3.5rem);
                 text-align: center;
+            }
+
+            .resources {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 440px) {
+            .review {
+                flex-direction: column;
+                align-items: flex-start;
             }
         }
     </style>
 </head>
 <body>
-
     <main class="container">
         <div class="logo-wrapper">
-            <img src="pinguino-costruzione.webp" alt="Project Logo">
+            <img src="pinguino-costruzione.webp" alt="Il pinguino di PICUS al lavoro">
         </div>
         <div class="content">
-            <h1>Hold on, we're almost ready to shine.</h1>
-            <p>
-                While you wait, take a look at our <br class="mobile-break"><a href="https://github.com/CapHello/Progetto-SAD" target="_blank" rel="noopener noreferrer">GitHub Page</a>.
-            </p>
-            <a class="cta" href="review/index.html">Sprint Review del 5 novembre <span class="cta-arrow" aria-hidden="true">→</span></a>
+            <h1 lang="en">Hold on, we're almost ready to shine.</h1>
+
+            <nav class="resources" aria-label="Risorse PICUS">
+                <a class="cta" href="https://javadocs.strawberrypenguin.it/">
+                    Javadoc PICUS <span aria-hidden="true">→</span>
+                </a>
+                <a class="repository-link" href="https://github.com/Pinguini-alla-Fragola/Progetto-SAD" target="_blank" rel="noopener noreferrer">
+                    GitHub <span aria-hidden="true">↗</span>
+                </a>
+            </nav>
+
+            <section class="reviews" aria-labelledby="reviews-title">
+                <h2 id="reviews-title">Sprint Review</h2>
+                <ul class="review-list">
+                    <li>
+                        <a class="review review--available" href="review/index.html">
+                            <time class="review-title" datetime="2026-11-05">5 novembre 2026</time>
+                            <span class="review-status">Presentazione disponibile <span aria-hidden="true">→</span></span>
+                        </a>
+                    </li>
+                    <li>
+                        <div class="review review--pending">
+                            <span class="review-title">Prossima Sprint Review</span>
+                            <span class="review-status">Presentazione in preparazione</span>
+                        </div>
+                    </li>
+                </ul>
+            </section>
         </div>
     </main>
-
 </body>
 </html>
