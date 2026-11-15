@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title th:text="'Area ' + ${ruolo} + ' · PICUS'">Area · PICUS</title>
+    <link rel="stylesheet" th:href="@{/css/picus.css}">
+</head>
+<body>
+<header class="topbar">
+    <span class="logo">
+        <img class="logo-icon" th:src="@{/img/logo-picus.png}" alt="" width="38" height="38">
+        PICUS
+    </span>
+    <div class="topbar-end">
+        <span class="badge" th:text="${ruolo}">Ruolo</span>
+        <!-- il logout è solo POST e protetto da CSRF (th:action aggiunge il token) -->
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="btn btn-ghost">Esci</button>
+        </form>
+    </div>
+</header>
+<main class="page">
+    <section class="hero">
+        <div class="brand-bg" aria-hidden="true">
+            <span class="blob blob-1"></span>
+        </div>
+        <div>
+            <p class="eyebrow">Area riservata</p>
+            <h1 th:text="'Area ' + ${ruolo}">Area</h1>
+            <p th:text="${descrizione}">Descrizione</p>
+        </div>
+        <img class="hero-penguins" th:src="@{/img/pinguini-team.png}" alt="" aria-hidden="true">
+    </section>
+    <p class="note">Le funzioni del tuo ruolo compariranno qui.</p>
+</main>
+</body>
+</html>
