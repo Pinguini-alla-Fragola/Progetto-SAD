@@ -15,8 +15,8 @@ Il Banco di coordinamento conferma gli accordi e inserisce manualmente i dati ne
 
 ## Diagrammi
 
-- Contesto CTX-01 v0.7: [drawio](../architecture/diagrams/contesto/Context%20Diagram.drawio), [PNG](../architecture/diagrams/contesto/Context%20Diagram.png). I permessi per l’annullamento sono nelle [regole funzionali](regole-funzionali.md#matrice-di-annullamento).
-- Bozza iniziale del contesto: [PNG](../architecture/diagrams/contesto/DiagrammaIniziale_PICUS.png).
+- Contesto CTX-01 v0.7: [drawio](diagrams/context/Context%20Diagram.drawio), [PNG](diagrams/context/Context%20Diagram.png). I permessi per l’annullamento sono nelle [regole funzionali](regole-funzionali.md#matrice-di-annullamento).
+- Bozza iniziale del contesto: [PNG](diagrams/context/DiagrammaIniziale_PICUS.png).
 - ASIS-01A: [Mermaid](diagrams/ASIS-01-richieste.mmd), [SVG](diagrams/ASIS-01-richieste.svg), [PNG](diagrams/ASIS-01-richieste.png).
 - ASIS-01B: [Mermaid](diagrams/ASIS-01-rendicontazione.mmd), [SVG](diagrams/ASIS-01-rendicontazione.svg), [PNG](diagrams/ASIS-01-rendicontazione.png).
 - TOBE-01A v0.7: [Mermaid](diagrams/to-be/TOBE-01A-richieste-disponibilita.mmd), [SVG](diagrams/to-be/TOBE-01A-richieste-disponibilita.svg), [PNG](diagrams/to-be/TOBE-01A-richieste-disponibilita.png).

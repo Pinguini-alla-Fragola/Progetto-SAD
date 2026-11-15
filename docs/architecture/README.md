@@ -1,6 +1,6 @@
 # Architettura
 
-- [CTX-01 v0.7 · Diagramma di contesto](diagrams/contesto/Context%20Diagram.drawio) · [Anteprima PNG](diagrams/contesto/Context%20Diagram.png)
+- [CTX-01 v0.7 · Diagramma di contesto](../requirements/diagrams/context/Context%20Diagram.drawio) · [Anteprima PNG](../requirements/diagrams/context/Context%20Diagram.png)
 - [PICUS - System Context](diagrams/PICUS-System-Context.mmd) · [Anteprima PNG](diagrams/PICUS-System-Context.png)
 - [PICUS - Flusso dell'architettura MVC](diagrams/PICUS-Architettura-MVC.mmd) · [Anteprima PNG](diagrams/PICUS-Architettura-MVC.png)
 - [PICUS - Module&Package View](diagrams/PICUS-Module-Package-View.mmd) · [Anteprima PNG](diagrams/PICUS-Module-Package-View.png)

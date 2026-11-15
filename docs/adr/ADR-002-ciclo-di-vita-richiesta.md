@@ -19,7 +19,7 @@ Il walking skeleton registra la richiesta e la presenta alla OPT titolare e al B
 
 ## Decision
 
-La ricerca si svolge in `Presa in carico`. Il diniego di un candidato mantiene questo stato. Dopo l’assegnazione, le controproposte mantengono la richiesta `In programmazione`. L’appuntamento usa lo stato della richiesta.
+La ricerca si svolge in `Presa in carico`. Il rifiuto di un candidato mantiene questo stato. Dopo l’assegnazione, le controproposte mantengono la richiesta `In programmazione`. L’appuntamento usa lo stato della richiesta.
 
 | Stato di partenza | Comando e condizioni | Esito |
 | --- | --- | --- |
