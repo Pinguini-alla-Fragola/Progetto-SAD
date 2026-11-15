@@ -285,16 +285,41 @@
 }
 
 @media screen and (max-width: 600px) {
-    .package-index-page .sub-nav-list:empty {
+    :is(.package-index-page, .tree-page, .index-page) .sub-nav-list:empty {
         display: none;
     }
 
-    .package-index-page .nav-list-search {
+    :is(.package-index-page, .tree-page, .index-page) .nav-list-search {
         margin-inline-start: 0;
     }
 
-    .package-index-page input#search-input {
+    :is(.package-index-page, .tree-page, .index-page) input#search-input {
         width: 100%;
+    }
+
+    :is(.tree-page, .index-page) .main-grid main {
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    .tree-page .hierarchy ul {
+        padding-inline-start: 1rem;
+    }
+
+    .tree-page .hierarchy li {
+        margin-block: 0.35rem;
+    }
+
+    .index-page main > a[href^="#I:"] {
+        display: inline-block;
+        min-inline-size: 1.5rem;
+        padding-block: 0.35rem;
+        text-align: center;
+    }
+
+    .index-page dl.index dd {
+        margin-inline-start: 0.75rem;
+        margin-block-end: 0.75rem;
     }
 
     .package-index-page .two-column-summary > .table-header {
