@@ -1,10 +1,10 @@
 # Architettura
 
 - [CTX-01 v0.7 · Diagramma di contesto](diagrams/contesto/Context%20Diagram.drawio) · [Anteprima PNG](diagrams/contesto/Context%20Diagram.png)
-- [Diagramma dei container C4 di PICUS a regime](diagrams/PICUS-C4-Container.mmd) · [Anteprima PNG](diagrams/PICUS-C4-Container.png)
+- [System Context di PICUS a regime](diagrams/PICUS-System-Context.mmd) · [Anteprima PNG](diagrams/PICUS-System-Context.png)
 - [ARCH-01 · Architettura MVC di PICUS a regime](diagrams/PICUS-Architettura-MVC.mmd) · [Anteprima PNG](diagrams/PICUS-Architettura-MVC.png)
 - [Diagramma dei moduli e dei package Java](diagrams/PICUS-Diagramma-Moduli.mmd) · [Anteprima PNG](diagrams/PICUS-Diagramma-Moduli.png)
-- [Vista di deployment dello Sprint 2 con Docker Compose](diagrams/PICUS-Deployment.mmd) · [Anteprima PNG](diagrams/PICUS-Deployment.png)
+- [Deployment and Container View dello Sprint 2 con Docker Compose](diagrams/PICUS-Deployment-Container-View.mmd) · [Anteprima PNG](diagrams/PICUS-Deployment-Container-View.png)
 
 Nel diagramma dei moduli, ogni freccia parte dal modulo chiamante e punta al modulo di cui usa il package `api`. M1 fornisce identità, ruoli e profili. Ogni modulo applica i controlli di titolarità, assegnazione o ricezione sulle risorse che gestisce. Il tratteggio indica la collaborazione per le notifiche operative, da dettagliare.
 
@@ -38,8 +38,9 @@ La #77 ha introdotto in `main` lo schema PostgreSQL, le mappature JPA e i dati d
 - **Validazione.** Jakarta Bean Validation verifica i vincoli dichiarati sul DTO di ingresso, per esempio la presenza del comune. Il modulo applicativo verifica le regole che richiedono i dati del sistema, come lo stato della misura e la titolarità di una richiesta. [Validazione in Spring MVC](https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-validation.html)
 - **Servizio email.** M1 usa un adattatore per inviare i link di attivazione e recupero. La configurazione del servizio esterno resta da definire.
 
-## Come leggere la vista di deployment
+## Come leggere la Deployment and Container View
 
+- **Ruolo della vista.** Mostra i container eseguibili di PICUS, cioè l’applicazione web e il database, e dove vengono eseguiti. Gli attori e il servizio email esterno sono nel System Context.
 - **Notazione.** La vista segue la notazione UML dei diagrammi di deployment. I `«device»` sono le macchine fisiche, gli `«execution environment»` sono gli ambienti di esecuzione annidati e l’`«artifact»` è il file eseguito. Il sorgente usa il layout ELK di Mermaid.
 - **Nodi e container.** Docker Compose esegue sulla macchina host due container. In `picus-webapp` la JVM Java 25 esegue `picus.jar`. In `picus-db` PostgreSQL 17 gestisce il database `picus` e conserva i dati nel volume `picus-dati`. La nota indica che `picus-webapp` parte solo quando `picus-db` è pronto. [docker-compose.yml](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/blob/main/docker-compose.yml)
 - **Collegamenti.** Il browser raggiunge l’applicazione via HTTP su `127.0.0.1:8080`. L’applicazione usa JDBC verso `picus-db:5432`, raggiungibile solo sulla rete Compose.

@@ -1,5 +1,5 @@
 ---
-title: "PICUS · Sprint 2 — Vista di deployment (Docker Compose)"
+title: "PICUS · Deployment and Container View · Sprint 2 (Docker Compose)"
 config:
   layout: elk
   theme: base
@@ -18,8 +18,8 @@ config:
       bottom: 26
 ---
 flowchart LR
-    accTitle: PICUS, vista di deployment dello Sprint 2
-    accDescr: Il browser dell'utente raggiunge via HTTP l'applicazione sulla macchina host. Docker Compose esegue due container. In picus-webapp la JVM Java 25 esegue picus.jar, che si collega con JDBC al database picus gestito da PostgreSQL 17 nel container picus-db. PostgreSQL salva i dati nel volume picus-dati. Una nota indica che picus-webapp parte solo quando picus-db è pronto.
+    accTitle: PICUS, Deployment and Container View dello Sprint 2
+    accDescr: Gli utenti usano PICUS dal browser via HTTP. Docker Compose esegue sulla macchina host due container. Il container applicativo picus-webapp esegue picus.jar sulla JVM Java 25 e contiene tutti i moduli. Il container dati picus-db esegue PostgreSQL 17, che gestisce l'unico database picus e salva i dati nel volume picus-dati. L'applicazione legge e scrive i dati via JDBC. Una nota indica che picus-webapp parte solo quando picus-db è pronto.
 
     subgraph DEVICE["«device»<br/>Dispositivo dell'utente"]
         BROWSER["<b>Browser web</b><br/>OPT · Banco · Operatori<br/>Pagine HTML generate dal server"]
@@ -30,21 +30,21 @@ flowchart LR
     subgraph HOST["«device»<br/>Macchina host · Docker Compose"]
         subgraph WEBAPP["«execution environment»<br/>Container picus-webapp"]
             subgraph JVM["«execution environment»<br/>JVM Java 25"]
-                JAR["<b>«artifact» picus.jar</b><br/>Spring Boot 4.1.2 · Tomcat sulla porta 8080<br/><br/>Moduli utenze, catalogo, richieste,<br/>comunicazioni e monitoraggio"]
+                JAR["<b>«artifact» picus.jar</b><br/>Applicazione web · monolite modulare<br/>Spring Boot 4.1.2 · Tomcat sulla porta 8080<br/><br/>Moduli utenze, catalogo, richieste,<br/>comunicazioni e monitoraggio"]
             end
         end
 
         subgraph DB["«execution environment»<br/>Container picus-db"]
             subgraph DBMS["«execution environment»<br/>PostgreSQL 17"]
-                SCHEMA["<b>Database picus</b><br/>Porta 5432 raggiungibile<br/>solo sulla rete Compose"]
+                SCHEMA["<b>Database picus</b><br/>Unico database: dati di tutti i moduli,<br/>file e metadati degli allegati<br/>Porta 5432 solo sulla rete Compose"]
             end
         end
 
         VOL[("<b>Volume picus-dati</b><br/>/var/lib/postgresql/data<br/>Conserva i dati fra gli avvii")]
     end
 
-    BROWSER -->|HTTP| JAR
-    JAR -->|"JDBC · driver pgJDBC"| SCHEMA
+    BROWSER -->|"Usa l'applicazione<br/>HTTP"| JAR
+    JAR -->|"Legge e scrive i dati<br/>JDBC · driver pgJDBC"| SCHEMA
     SCHEMA --> VOL
 
     classDef nodo fill:#F1F5F9,stroke:#94A3B8,color:#142B46,stroke-width:1.4px
