@@ -8,12 +8,14 @@
         --picus-background: #0d1117;
         --picus-surface: #161b22;
         --picus-raised: #1b2330;
+        --picus-alternate: #121821;
         --picus-border: #30363d;
         --picus-text: #f0f6fc;
         --picus-muted: #8b949e;
         --picus-accent: #58a6ff;
         --picus-accent-hover: #a5d2ff;
         --picus-accent-surface: #16273c;
+        --picus-icon-filter: brightness(0) invert(0.8);
         --picus-gutter: clamp(1rem, 3vw, 2.5rem);
 
         /* Variabili dello standard doclet del JDK 25. */
@@ -35,7 +37,7 @@
         --selected-link-color: var(--picus-background);
         --table-header-color: var(--picus-raised);
         --even-row-color: var(--picus-surface);
-        --odd-row-color: #121821;
+        --odd-row-color: var(--picus-alternate);
         --title-color: var(--picus-text);
         --link-color: var(--picus-accent);
         --link-color-active: var(--picus-accent-hover);
@@ -57,17 +59,53 @@
         --tab-border-radius: 999px;
     }
 
+    :root[data-picus-theme="light"] {
+        color-scheme: light;
+
+        --picus-background: #ffffff;
+        --picus-surface: #f6f8fa;
+        --picus-raised: #edf2f8;
+        --picus-alternate: #ffffff;
+        --picus-border: #d0d7de;
+        --picus-text: #172332;
+        --picus-muted: #4e5d6d;
+        --picus-accent: #0962c9;
+        --picus-accent-hover: #064b9c;
+        --picus-accent-surface: #e1eeff;
+        --picus-icon-filter: brightness(0) invert(0.26);
+    }
+
     .nav-content {
         box-sizing: border-box;
         padding-inline: var(--picus-gutter);
     }
 
     .about-language {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
         padding-inline-end: 0;
         color: var(--picus-text);
         font-size: 1rem;
         font-weight: 800;
         letter-spacing: -0.02em;
+    }
+
+    .picus-theme-toggle {
+        min-height: 2.125rem;
+        padding: 0.35rem 0.7rem;
+        border: 1px solid var(--picus-border);
+        border-radius: 999px;
+        background: var(--picus-surface);
+        color: var(--picus-accent);
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .picus-theme-toggle:hover {
+        border-color: var(--picus-accent);
+        background: var(--picus-accent-surface);
     }
 
     div.sub-nav {
@@ -166,7 +204,7 @@
     a.anchor-link > img,
     button.copy > img,
     input[type="reset"] {
-        filter: brightness(0) invert(0.8);
+        filter: var(--picus-icon-filter);
     }
 
     .caption,
@@ -249,5 +287,11 @@
 
     .package-index-page .two-column-summary > .col-first:not(.table-header) {
         padding-bottom: 0;
+    }
+}
+
+@media print {
+    .picus-theme-toggle {
+        display: none;
     }
 }

@@ -45,7 +45,9 @@ verifica la documentazione e rigenera le pagine HTML in `target`.
 
 Il [foglio di stile del Javadoc](picus-javadoc.css) riprende la palette e la
 tipografia della landing. Il generatore lo include con `--add-stylesheet`
-nelle anteprime locali e nei file pubblicati su GitHub Pages.
+nelle anteprime locali e nei file pubblicati su GitHub Pages. Il pulsante
+nell'intestazione alterna i temi chiaro e scuro. Il browser salva la scelta
+per le visite successive quando lo storage locale è disponibile.
 
 Il workflow usa lo stesso file di argomenti. Quando una PR viene integrata in
 `main`, rigenera la documentazione e la pubblica su GitHub Pages. Le istruzioni
