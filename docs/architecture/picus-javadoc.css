@@ -1,0 +1,253 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400..800&display=swap");
+
+@media screen {
+    :root {
+        color-scheme: dark;
+
+        /* Palette e tipografia di strawberrypenguin.it. */
+        --picus-background: #0d1117;
+        --picus-surface: #161b22;
+        --picus-raised: #1b2330;
+        --picus-border: #30363d;
+        --picus-text: #f0f6fc;
+        --picus-muted: #8b949e;
+        --picus-accent: #58a6ff;
+        --picus-accent-hover: #a5d2ff;
+        --picus-accent-surface: #16273c;
+        --picus-gutter: clamp(1rem, 3vw, 2.5rem);
+
+        /* Variabili dello standard doclet del JDK 25. */
+        --body-font-family: Inter, system-ui, sans-serif;
+        --block-font-family: var(--body-font-family);
+        --body-text-color: var(--picus-text);
+        --block-text-color: var(--picus-text);
+        --body-background-color: var(--picus-background);
+        --detail-background-color: var(--picus-surface);
+        --detail-block-color: var(--picus-raised);
+        --code-background-color: var(--picus-raised);
+        --mark-background-color: var(--picus-accent-surface);
+        --navbar-background-color: var(--picus-background);
+        --navbar-text-color: var(--picus-text);
+        --subnav-background-color: var(--picus-surface);
+        --subnav-link-color: var(--picus-accent);
+        --selected-background-color: var(--picus-accent);
+        --selected-text-color: var(--picus-background);
+        --selected-link-color: var(--picus-background);
+        --table-header-color: var(--picus-raised);
+        --even-row-color: var(--picus-surface);
+        --odd-row-color: #121821;
+        --title-color: var(--picus-text);
+        --link-color: var(--picus-accent);
+        --link-color-active: var(--picus-accent-hover);
+        --toc-background-color: var(--picus-surface);
+        --toc-highlight-color: var(--picus-accent-surface);
+        --toc-hover-color: var(--picus-raised);
+        --snippet-background-color: var(--picus-raised);
+        --snippet-highlight-color: var(--picus-accent-surface);
+        --border-color: var(--picus-border);
+        --table-border-color: var(--picus-border);
+        --search-input-background-color: var(--picus-background);
+        --search-input-text-color: var(--picus-text);
+        --search-input-placeholder-color: var(--picus-muted);
+        --search-tag-highlight-color: var(--picus-accent-surface);
+        --button-border-color: var(--picus-border);
+        --top-nav-height: 54px;
+        --sub-nav-height: 48px;
+        --max-content-width: 1360px;
+        --tab-border-radius: 999px;
+    }
+
+    .nav-content {
+        box-sizing: border-box;
+        padding-inline: var(--picus-gutter);
+    }
+
+    .about-language {
+        padding-inline-end: 0;
+        color: var(--picus-text);
+        font-size: 1rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+    }
+
+    div.sub-nav {
+        box-shadow: inset 0 -1px var(--picus-border);
+    }
+
+    .top-nav .nav-list li,
+    .top-nav .nav-list a:link,
+    .top-nav .nav-list a:visited {
+        text-transform: none;
+    }
+
+    .top-nav .nav-list li {
+        height: auto;
+        padding: 0.45rem 0.75rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .nav-bar-cell1-rev {
+        border-radius: 999px;
+        background-color: var(--picus-accent-surface);
+        color: var(--picus-accent);
+    }
+
+    main {
+        padding: clamp(1.5rem, 4vw, 3rem) var(--picus-gutter);
+    }
+
+    .title {
+        font-size: clamp(1.6rem, 3vw, 2.5rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+        overflow-wrap: anywhere;
+    }
+
+    .package-index-page .title {
+        margin: 0 0 1.65rem;
+        font-size: clamp(2rem, 5vw, 3.5rem);
+    }
+
+    .package-index-page .title::after {
+        display: block;
+        width: 2.75rem;
+        height: 3px;
+        margin-top: 1rem;
+        background: var(--picus-accent);
+        content: "";
+    }
+
+    .sub-title,
+    .ui-autocomplete .search-result-desc,
+    #result-container div.result-table > a.search-result-link .search-result-desc {
+        color: var(--picus-muted);
+    }
+
+    body.class-declaration-page .summary h2,
+    body.class-declaration-page .details h2 {
+        font-style: normal;
+    }
+
+    body.class-declaration-page .details h3,
+    .member-signature,
+    pre {
+        border-radius: 8px;
+    }
+
+    .member-signature {
+        padding: 0.85rem;
+        border: 1px solid var(--picus-border);
+        background: var(--picus-raised);
+    }
+
+    .summary-table,
+    .details-table {
+        border-top: 1px solid var(--picus-border);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .summary-table > div,
+    .details-table > div {
+        height: auto;
+        padding: 0.65rem 0.85rem;
+        overflow-wrap: anywhere;
+    }
+
+    .summary-table > div.table-header,
+    .details-table > div.table-header {
+        height: auto;
+    }
+
+    .table-header[onclick]::after,
+    .main-grid nav.toc button > img,
+    a.anchor-link > img,
+    button.copy > img,
+    input[type="reset"] {
+        filter: brightness(0) invert(0.8);
+    }
+
+    .caption,
+    div.table-tabs {
+        padding-bottom: 0.55rem;
+    }
+
+    .caption span,
+    div.table-tabs > button.table-tab {
+        height: auto;
+        border: 1px solid var(--picus-border);
+        background: var(--picus-surface);
+        color: var(--picus-text);
+    }
+
+    .sub-nav .nav-list-search {
+        margin: 0 0 0 0.5rem;
+    }
+
+    input[type="text"] {
+        box-sizing: border-box;
+        height: 2.15rem;
+        padding-inline: 1.85rem;
+        border: 1px solid var(--picus-border);
+        border-radius: 999px;
+        background-position: 0.65rem center;
+        font-family: var(--body-font-family);
+    }
+
+    input#search-input {
+        width: clamp(9.5rem, 28vw, 20rem);
+    }
+
+    input#reset-search {
+        top: calc((2.15rem - 12px) / 2);
+        right: 0.65rem;
+    }
+
+    .ui-autocomplete.ui-widget-content {
+        border: 1px solid var(--picus-border);
+        border-radius: 8px;
+        color: var(--picus-text);
+    }
+
+    .ui-menu .ui-state-active .search-result-desc {
+        color: var(--picus-background);
+    }
+
+    .main-grid nav.toc button {
+        color: var(--picus-muted);
+    }
+
+    hr {
+        border: 0;
+        border-top: 1px solid var(--picus-border);
+    }
+
+    :where(a, button, input, summary):focus-visible {
+        outline: 2px solid var(--picus-accent);
+        outline-offset: 2px;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .package-index-page .sub-nav-list:empty {
+        display: none;
+    }
+
+    .package-index-page .nav-list-search {
+        margin-inline-start: 0;
+    }
+
+    .package-index-page input#search-input {
+        width: 100%;
+    }
+
+    .package-index-page .two-column-summary > .table-header {
+        display: none;
+    }
+
+    .package-index-page .two-column-summary > .col-first:not(.table-header) {
+        padding-bottom: 0;
+    }
+}

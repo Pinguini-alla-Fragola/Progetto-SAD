@@ -3,6 +3,10 @@
 -Werror
 -notimestamp
 -sourcepath src/main/java
+-windowtitle "PICUS API"
+-doctitle "API Java di PICUS"
+-header "PICUS"
+--add-stylesheet docs/architecture/picus-javadoc.css
 it.unina.picus.utenze.api
 it.unina.picus.catalogo.api
 it.unina.picus.richieste.api

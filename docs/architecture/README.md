@@ -43,6 +43,10 @@ Aprire `target/apidocs/index.html`. Aggiornare nei sorgenti il Javadoc dei
 contratti quando cambiano dati, permessi, precondizioni o esiti. Il comando
 verifica la documentazione e rigenera le pagine HTML in `target`.
 
+Il [foglio di stile del Javadoc](picus-javadoc.css) riprende la palette e la
+tipografia della landing. Il generatore lo include con `--add-stylesheet`
+nelle anteprime locali e nei file pubblicati su GitHub Pages.
+
 Il workflow usa lo stesso file di argomenti. Quando una PR viene integrata in
 `main`, rigenera la documentazione e la pubblica su GitHub Pages. Le istruzioni
 di attivazione sono nella [configurazione GitHub](../../.github/SETUP.md#pubblicazione-del-javadoc).
