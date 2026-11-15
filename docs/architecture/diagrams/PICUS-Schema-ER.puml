@@ -1,5 +1,5 @@
 @startuml
-' Schema PostgreSQL di main (e7a39aa), migrazioni Flyway V1-V3.
+' Schema PostgreSQL risultante dalle migrazioni Flyway V1-V5.
 skinparam linetype ortho
 skinparam roundCorner 0
 skinparam nodesep 90
@@ -105,5 +105,7 @@ utenze_profili_operatore -[hidden]down- utenze_profili_opt
 legend bottom
   <b>PK</b> Chiave primaria   <b>FK</b> Chiave esterna   <b>UK</b> Colonna univoca
   <b>Adiacenze</b> Coppia univoca (comune_a, comune_b), con comune_a < comune_b
+  <b>Stati della richiesta</b> CREATA, PRESA_IN_CARICO, IN_PROGRAMMAZIONE,
+  CONFERMATA, RIFIUTATA, ANNULLATA   <b>Default</b> CREATA
 endlegend
 @enduml

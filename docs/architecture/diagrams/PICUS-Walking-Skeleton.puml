@@ -101,11 +101,6 @@ else Chiavi ammesse e campi obbligatori presenti
     Web --> Browser: Conferma Thymeleaf con ID e stato
   end
 end
-note over Richieste, Db
-  L’inserimento in CREATA richiede
-  l’allineamento del vincolo SQL all’ADR-002.
-end note
-
 == Consultazione della richiesta ==
 
 group Elenco OPT titolare

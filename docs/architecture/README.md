@@ -16,6 +16,33 @@ A regime, i controller di `web` invocano i casi d’uso del proprio modulo. In `
 
 PICUS usa un unico database PostgreSQL per tutti i moduli, inclusi file e metadati degli allegati. Ciascun modulo accede ai propri dati tramite i suoi repository. [ADR-001](../adr/ADR-001-monolite-modulare-mvc.md) · [Task di predisposizione dell’ambiente](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/77)
 
+## API Java dei moduli
+
+I package `api` espongono le interfacce e i DTO usati nelle collaborazioni
+interne di PICUS. I moduli possiedono le proprie regole e i propri dati. Il
+modulo che riceve un comando verifica il ruolo e il rapporto dell'account con
+la risorsa. Le identità usate nei comandi provengono dal server dopo la
+verifica della sessione.
+
+| Interfaccia | Contratti |
+| --- | --- |
+| [UtenzeApi](../../src/main/java/it/unina/picus/utenze/api/UtenzeApi.java) | Identità, account e profili usati dagli altri moduli. |
+| [CatalogoApi](../../src/main/java/it/unina/picus/catalogo/api/CatalogoApi.java) | Misure, comuni e opzioni di erogazione compatibili. |
+| [RichiesteApi](../../src/main/java/it/unina/picus/richieste/api/RichiesteApi.java) | Invio, coda, contatti, assegnazione e transizioni della richiesta. |
+| [ComunicazioniApi](../../src/main/java/it/unina/picus/comunicazioni/api/ComunicazioniApi.java) | Comunicazioni del Banco, riscontri e avvisi operativi per conto di Richieste. |
+| [MonitoraggioApi](../../src/main/java/it/unina/picus/monitoraggio/api/MonitoraggioApi.java) | Conteggi delle OPT, schede degli operatori e riepiloghi trimestrali. |
+
+Il walking skeleton usa Utenze e Catalogo per l'identità della OPT e i
+riferimenti a misura e comune. Per la ricerca, Catalogo consulta Utenze e
+combina i profili degli operatori con le offerte delle OPT. Richieste ordina
+le opzioni usando anche il carico di appuntamenti e determina a chi far
+recapitare gli avvisi. Monitoraggio usa Utenze e Catalogo per risolvere i
+riferimenti dei dati trimestrali. [Vista dei moduli](diagrams/PICUS-Module-Package-View.mmd)
+
+Le interfacce descrivono gli esiti attesi per le successive implementazioni.
+Negoziazione, ritiro dei contatti e tracciato definitivo delle schede si
+dettagliano nelle relative storie. [ADR-002](../adr/ADR-002-ciclo-di-vita-richiesta.md) · [Registro dei chiarimenti](../requirements/open-questions.md)
+
 ## Contratti del walking skeleton
 
 La sequenza descrive il flusso previsto per lo Sprint 2 usando i contratti Java di `main` al commit `e7a39aa`. Mostra l’accesso e la chiusura della sessione, l’invio in stato `CREATA`, l’elenco della OPT titolare, la coda del Banco e la consultazione del dettaglio con il diniego a una OPT estranea. I casi negativi di accesso e validazione sono ripresi nelle verifiche della [#78](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/78).
@@ -31,9 +58,11 @@ Il server ricava la titolarità dalla sessione e dai dati persistiti. Controller
 
 ## Persistenza iniziale
 
-Lo schema ER rappresenta le sette tabelle di `catalogo`, `utenze` e `richieste` definite dalle migrazioni Flyway di `main` al commit `e7a39aa`. `PK` indica la chiave primaria, `FK` la chiave esterna e `UK` un vincolo di unicità sulla singola colonna. In `catalogo_adiacenze` la coppia `(comune_a, comune_b)` è unica e rispetta il vincolo `comune_a < comune_b`. I campi facoltativi sono indicati nel diagramma. [Migrazioni Flyway](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/tree/e7a39aa0ceee9bdaea63a56d74099c1ba2c7fb8c/src/main/resources/db/migration)
+Lo schema ER rappresenta le sette tabelle di `catalogo`, `utenze` e `richieste` definite dalle migrazioni Flyway per PostgreSQL. `PK` indica la chiave primaria, `FK` la chiave esterna e `UK` un vincolo di unicità sulla singola colonna. In `catalogo_adiacenze` la coppia `(comune_a, comune_b)` è unica e rispetta il vincolo `comune_a < comune_b`. I campi facoltativi sono indicati nel diagramma. [Migrazioni comuni](../../src/main/resources/db/migration/) · [Migrazioni PostgreSQL](../../src/main/resources/db/postgresql/)
 
 La #77 ha introdotto in `main` lo schema PostgreSQL, le mappature JPA e i dati demo. Flyway applica le migrazioni all’avvio. `RichiestaJpa` inizializza lo stato a `CREATA`. La colonna `erogatore_id` è facoltativa e riferisce l’account assegnato. Il flusso previsto la valorizza al passaggio a In programmazione, quando il Banco individua l’erogatore disponibile. [ADR-002](../adr/ADR-002-ciclo-di-vita-richiesta.md) · [PR #83](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/pull/83)
+
+Le migrazioni PostgreSQL V4 e V5 allineano il vincolo sullo stato ai sei valori dell’ADR-002. V4 abilita `CREATA` e lo imposta come default. V5 aggiunge `PRESA_IN_CARICO`. [V4](../../src/main/resources/db/postgresql/V4__aggiungi_stato_creata.sql) · [V5](../../src/main/resources/db/postgresql/V5__allinea_stati_richiesta.sql)
 
 ## Flusso dell'architettura MVC
 
@@ -62,6 +91,30 @@ La #77 ha introdotto in `main` lo schema PostgreSQL, le mappature JPA e i dati d
 ## Rischi e debito tecnico
 
 - Il database e il rilascio sono condivisi. Le migrazioni vanno coordinate tra i moduli e il ripristino da backup resta da provare.
-- Lo schema rappresentato ammette quattro stati. Per persistere `CREATA` e `PRESA_IN_CARICO` serve allineare il vincolo SQL all’[ADR-002](../adr/ADR-002-ciclo-di-vita-richiesta.md).
 - Il campo `description` può contenere identificativi inseriti come testo libero. La gestione di questo caso resta da definire. [ADR-003](../adr/ADR-003-isolamento-e-validazione-richieste.md)
-- L’eventuale estrazione di un sottosistema via gRPC richiede di definire contratti, proprietà dei dati, transazioni e gestione dei guasti di rete. [ADR-001](../adr/ADR-001-monolite-modulare-mvc.md)
+- Per la futura estrazione via gRPC di `monitoraggio` (M5), il modulo dei report trimestrali confermato dalla docente, restano da definire contratti, proprietà dei dati, transazioni, autorizzazioni e gestione dei guasti di rete. [ADR-001](../adr/ADR-001-monolite-modulare-mvc.md)
+
+## Generare il Javadoc
+
+Dalla radice del clone, usare questi comandi in PowerShell con il JDK 25 nel
+`PATH`.
+
+```powershell
+javadoc -d target/apidocs '@scripts/javadoc.args'
+Copy-Item -LiteralPath docs/architecture/picus-logo.svg -Destination target/apidocs/resource-files/picus-logo.svg
+```
+
+Aprire `target/apidocs/index.html`. Aggiornare nei sorgenti il Javadoc dei
+contratti quando cambiano dati, permessi, precondizioni o esiti. Il comando
+verifica la documentazione e rigenera le pagine HTML in `target`.
+
+Il [foglio di stile del Javadoc](picus-javadoc.css) riprende la palette e la
+tipografia della landing. Il generatore lo include con `--add-stylesheet`
+nelle anteprime locali e nei file pubblicati su GitHub Pages. Il pulsante
+nell'intestazione alterna i temi chiaro e scuro. Il browser salva la scelta
+per le visite successive quando lo storage locale è disponibile.
+
+Il workflow usa lo stesso file di argomenti e include il logo SVG che
+collega alla landing page. Quando una PR viene integrata in `main`, rigenera
+la documentazione e la pubblica su GitHub Pages. Le istruzioni
+di attivazione sono nella [configurazione GitHub](../../.github/SETUP.md#pubblicazione-del-javadoc).

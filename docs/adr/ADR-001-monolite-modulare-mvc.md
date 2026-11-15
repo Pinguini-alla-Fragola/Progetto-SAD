@@ -27,15 +27,17 @@ Il team conferma il monolite modulare con Spring Boot e Thymeleaf per le viste M
 | `catalogo` | Misure, offerta delle OPT, comuni e relazioni di adiacenza. |
 | `richieste` | Richieste, coda del Banco, contatti con gli erogatori, assegnazione ed esito. |
 | `comunicazioni` | Comunicazioni generali e conferme di ricezione. |
-| `monitoraggio` | Conteggi trimestrali delle OPT, schede degli operatori e consultazione per il monitoraggio. |
+| `monitoraggio` | Conteggi trimestrali delle OPT, schede degli operatori e report trimestrali. |
 
 Ogni modulo espone in `api` le interfacce e i DTO che gli altri moduli possono usare. `interno` contiene `applicazione` per i casi d’uso, `dominio` per entità, regole e interfacce dei repository, `persistenza` per gli adattatori JPA che implementano tali interfacce e `integrazioni` per gli altri adattatori. I servizi ricevono le dipendenze per costruttore e Spring collega le implementazioni ai contratti. `web` traduce richieste HTTP e moduli HTML in chiamate ai casi d’uso del proprio modulo e costruisce le viste con DTO dedicati. `shared` raccoglie soltanto componenti tecnici comuni.
 
 Nel primo flusso `richieste` usa le API di `utenze` e `catalogo` per ottenere le informazioni necessarie. Le regole di titolarità e assegnazione della singola pratica appartengono a `richieste`. Ogni modulo accede alle proprie entità e tabelle. Gli altri moduli passano dalla sua API. Le dipendenze tra moduli restano acicliche.
+
+La docente ha confermato `monitoraggio` (M5), il modulo dei report trimestrali, come servizio da estrarre dal monolite in un’evoluzione successiva via gRPC. Il deployment dello Sprint 2 comprende il modulo nel monolite. Il perimetro del servizio, il contratto Protocol Buffers e la proprietà dei dati verranno definiti con la progettazione dell’estrazione. [MonitoraggioApi](../../src/main/java/it/unina/picus/monitoraggio/api/MonitoraggioApi.java)
 
 ## Consequences
 
 - Il team può sviluppare e verificare i flussi in un solo ambiente. Le operazioni sulle richieste possono usare transazioni locali.
 - I moduli condividono processo, database e ciclo di rilascio. Un guasto dell’applicazione può interessare più funzionalità e le modifiche di schema vanno coordinate.
 - In review si controlla che i moduli accedano solo alle API pubbliche, che le dipendenze siano acicliche e che le firme pubbliche e le viste usino DTO. La vista dei moduli e la sequenza del walking skeleton in `docs/architecture/` documentano questi confini.
-- Le API tra moduli preparano un punto di separazione. Se emerge l’esigenza di un rilascio autonomo, il team può valutare gRPC e dovrà definire i contratti e rivedere proprietà dei dati, confini transazionali, autorizzazioni e gestione dei guasti di rete.
+- L’API Java di `monitoraggio` individua il confine da cui partire per l’estrazione. La progettazione gRPC dovrà coprire le autorizzazioni per ruolo e titolarità, i confini transazionali e il comportamento in caso di indisponibilità del servizio.
