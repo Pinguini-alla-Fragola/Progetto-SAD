@@ -81,6 +81,13 @@
             outline-offset: 4px;
         }
 
+        .resources-intro {
+            margin: 0 0 0.35rem;
+            color: var(--text-secondary);
+            font-size: clamp(1rem, 1.8vw, 1.35rem);
+            line-height: 1.5;
+        }
+
         .resources {
             display: flex;
             align-items: center;
@@ -88,28 +95,13 @@
             gap: 0.75rem 1.25rem;
         }
 
-        .cta {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.7rem 1.1rem;
-            border: 2px solid var(--accent-color);
-            border-radius: 999px;
-            font-weight: 600;
-        }
-
-        .cta:hover {
-            color: var(--bg-color);
-            background-color: var(--accent-color);
-        }
-
-        .repository-link {
+        .resource-link {
             padding: 0.55rem 0.15rem;
             color: var(--text-primary);
             font-weight: 600;
         }
 
-        .repository-link:hover {
+        .resource-link:hover {
             color: var(--accent-color);
             text-decoration: underline;
         }
@@ -130,7 +122,7 @@
 
         .review {
             display: flex;
-            align-items: baseline;
+            align-items: center;
             justify-content: space-between;
             gap: 0.35rem 1rem;
             padding: 0.8rem 1rem;
@@ -150,10 +142,6 @@
 
         .review-title {
             font-weight: 600;
-        }
-
-        .review-status {
-            font-size: 0.875rem;
         }
 
         @media (max-width: 768px) {
@@ -177,15 +165,12 @@
                 text-align: center;
             }
 
+            .resources-intro {
+                text-align: center;
+            }
+
             .resources {
                 justify-content: center;
-            }
-        }
-
-        @media (max-width: 440px) {
-            .review {
-                flex-direction: column;
-                align-items: flex-start;
             }
         }
     </style>
@@ -198,14 +183,17 @@
         <div class="content">
             <h1 lang="en">Hold on, we're almost ready to shine.</h1>
 
-            <nav class="resources" aria-label="Risorse PICUS">
-                <a class="cta" href="https://javadocs.strawberrypenguin.it/">
-                    Javadoc PICUS <span aria-hidden="true">→</span>
-                </a>
-                <a class="repository-link" href="https://github.com/Pinguini-alla-Fragola/Progetto-SAD" target="_blank" rel="noopener noreferrer">
-                    GitHub <span aria-hidden="true">↗</span>
-                </a>
-            </nav>
+            <div>
+                <p class="resources-intro" lang="en">While you wait, take a look at our</p>
+                <nav class="resources" aria-label="Risorse PICUS">
+                    <a class="resource-link" href="https://javadocs.strawberrypenguin.it/">
+                        Javadoc PICUS <span aria-hidden="true">↗</span>
+                    </a>
+                    <a class="resource-link" href="https://github.com/Pinguini-alla-Fragola/Progetto-SAD" target="_blank" rel="noopener noreferrer">
+                        GitHub <span aria-hidden="true">↗</span>
+                    </a>
+                </nav>
+            </div>
 
             <section class="reviews" aria-labelledby="reviews-title">
                 <h2 id="reviews-title">Sprint Review</h2>
@@ -213,13 +201,22 @@
                     <li>
                         <a class="review review--available" href="review/index.html">
                             <time class="review-title" datetime="2026-11-05">5 novembre 2026</time>
-                            <span class="review-status">Presentazione disponibile <span aria-hidden="true">→</span></span>
+                            <span aria-hidden="true">→</span>
                         </a>
                     </li>
                     <li>
                         <div class="review review--pending">
-                            <span class="review-title">Prossima Sprint Review</span>
-                            <span class="review-status">Presentazione in preparazione</span>
+                            <time class="review-title" datetime="2026-11-19">19 novembre 2026</time>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="review review--pending">
+                            <time class="review-title" datetime="2026-12-03">3 dicembre 2026</time>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="review review--pending">
+                            <time class="review-title" datetime="2026-12-17">17 dicembre 2026</time>
                         </div>
                     </li>
                 </ul>
