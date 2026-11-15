@@ -83,6 +83,28 @@ Aggiungere l'ecosistema Maven soltanto quando esiste il relativo POM.
 Riferimenti: [sicurezza delle Action](https://docs.github.com/en/actions/reference/security/secure-use)
 e [opzioni Dependabot](https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference).
 
+## Pubblicazione del Javadoc
+
+Il workflow [Pubblica Javadoc](workflows/javadoc.yml) si avvia a ogni push su
+`main`, compresi i merge delle PR. Genera l'HTML dei package pubblici con Java
+25, aggiorna il branch `javadoc` quando i file cambiano e invia lo stesso HTML
+a GitHub Pages. Il branch viene creato alla prima esecuzione e contiene
+l'output generato.
+
+Un maintainer abilita la pubblicazione in
+[Settings → Pages](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/settings/pages)
+selezionando **GitHub Actions** in **Build and deployment → Source**.
+Se l'ambiente `github-pages` ha regole di deploy, queste devono consentire
+`main`. GitHub Pages riceve l'artefatto del workflow perché i push eseguiti
+con `GITHUB_TOKEN` sul branch di output non avviano una build Pages.
+[Configurazione della sorgente](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)
+
+Dopo l'integrazione del workflow, la prima esecuzione può essere avviata
+anche da **Actions → Pubblica Javadoc → Run workflow**, selezionando `main`.
+L'URL effettivo compare nell'ambiente `github-pages` dopo il deploy. Con il
+dominio predefinito del progetto è
+[il sito Javadoc di Progetto-SAD](https://pinguini-alla-fragola.github.io/Progetto-SAD/).
+
 ## Sicurezza e accesso
 
 ### CFG-05: secret scanning e segnalazioni private

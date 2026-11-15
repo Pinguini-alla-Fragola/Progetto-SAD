@@ -1,0 +1,10 @@
+-encoding UTF-8
+-Xdoclint:all
+-Werror
+-notimestamp
+-sourcepath src/main/java
+it.unina.picus.utenze.api
+it.unina.picus.catalogo.api
+it.unina.picus.richieste.api
+it.unina.picus.comunicazioni.api
+it.unina.picus.monitoraggio.api

@@ -36,9 +36,13 @@ Dalla radice del clone, con il comando `javadoc` del JDK 25 disponibile nel
 `PATH`, eseguire:
 
 ```text
-javadoc -encoding UTF-8 -Xdoclint:all -Werror -sourcepath src/main/java -d target/apidocs it.unina.picus.utenze.api it.unina.picus.catalogo.api it.unina.picus.richieste.api it.unina.picus.comunicazioni.api it.unina.picus.monitoraggio.api
+javadoc -d target/apidocs '@scripts/javadoc.args'
 ```
 
 Aprire `target/apidocs/index.html`. Aggiornare nei sorgenti il Javadoc dei
 contratti quando cambiano dati, permessi, precondizioni o esiti. Il comando
 verifica la documentazione e rigenera le pagine HTML in `target`.
+
+Il workflow usa lo stesso file di argomenti. Quando una PR viene integrata in
+`main`, rigenera la documentazione e la pubblica su GitHub Pages. Le istruzioni
+di attivazione sono nella [configurazione GitHub](../../.github/SETUP.md#pubblicazione-del-javadoc).
