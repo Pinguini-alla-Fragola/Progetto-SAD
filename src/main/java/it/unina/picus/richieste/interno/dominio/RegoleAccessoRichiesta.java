@@ -9,6 +9,10 @@ import it.unina.picus.richieste.api.RichiesteApi;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
 
+import static it.unina.picus.shared.ControlloAccesso.identitaCompleta;
+import static it.unina.picus.shared.ControlloAccesso.richiedi;
+import static it.unina.picus.shared.ControlloAccesso.richiediRuolo;
+
 /**
  * Regole di accesso alle richieste (#28), usate dall'implementazione di {@link RichiesteApi}.
  *
@@ -20,7 +24,6 @@ import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
  *
  * <p>Ciò che non è espressamente consentito è negato.
  */
-
 
 final public class RegoleAccessoRichiesta {
     /**
@@ -47,7 +50,6 @@ final public class RegoleAccessoRichiesta {
     private static final Set<RuoloUtente> SOLO_BANCO = Set.of(RuoloUtente.BANCO);
     private static final Set<RuoloUtente> SOLO_OPT = Set.of(RuoloUtente.OPT);
     private static final Set<RuoloUtente> EROGATORI = Set.of(RuoloUtente.OPT, RuoloUtente.OPERATORE);
-
 
     // -- Pattern specification
     // Relazioni con la richiesta: una per riga della tabella della #28.
@@ -82,7 +84,6 @@ final public class RegoleAccessoRichiesta {
 
     private RegoleAccessoRichiesta() {
     }
-
 
     /**
      * Operazioni riservate al Banco di coordinamento: coda e archivio, presa in carico, ricerca e
@@ -133,7 +134,6 @@ final public class RegoleAccessoRichiesta {
         richiedi(consente(PUO_CONSULTARE, attore, soggetti), "Accesso negato alla richiesta");
     }
 
-
     // Attenzione: essere un erogatore candidato non significa avere la possibilità di accedere alle funzionalità dell'erogatore
     // Solo dopo l'assegnazione alla richiesta dà la possibilità di annullarla (con motivazione obbligatoria).
     /**
@@ -163,30 +163,13 @@ final public class RegoleAccessoRichiesta {
         return consente(VEDE_DATI_DEL_TITOLARE, attore, soggetti);
     }
 
-
-
-    // richiediRuolo esiste per scrivere una sola volta il controllo "il ruolo è tra quelli ammessi?"
-    private static void richiediRuolo(IdentitaAutenticata attore, Set<RuoloUtente> ammessi, String messaggio) {
-        richiedi(attore != null && attore.ruolo() != null && ammessi.contains(attore.ruolo()), messaggio);
-    }
-
     /** Valuta una politica solo su un'identità completa: un attore incompleto non ha mai accesso. */
     private static boolean consente(Predicate<Contesto> politica, IdentitaAutenticata attore, Soggetti soggetti) {
         Objects.requireNonNull(soggetti, "soggetti");
-        if (attore == null || attore.accountId() == null || attore.ruolo() == null) {
+        if (!identitaCompleta(attore)) {
             return false;
         }
         return politica.test(new Contesto(attore, soggetti));
     }
-
-    /** Unico punto in cui un rifiuto diventa eccezione. */
-    private static void richiedi(boolean consentito, String messaggio) {
-        if (!consentito) {
-            throw new SecurityException(messaggio);
-        }
-    }
-
-
-
 
 }

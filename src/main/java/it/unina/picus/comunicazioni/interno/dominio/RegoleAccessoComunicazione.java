@@ -9,6 +9,10 @@ import it.unina.picus.comunicazioni.api.ComunicazioniApi;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
 
+import static it.unina.picus.shared.ControlloAccesso.identitaCompleta;
+import static it.unina.picus.shared.ControlloAccesso.richiedi;
+import static it.unina.picus.shared.ControlloAccesso.richiediRuolo;
+
 /**
  * Regole di accesso alle comunicazioni del Banco (#28, criterio 7).
  *
@@ -26,6 +30,8 @@ import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
  * @see ComunicazioniApi
  */
 public final class RegoleAccessoComunicazione {
+
+    private static final Set<RuoloUtente> SOLO_BANCO = Set.of(RuoloUtente.BANCO);
 
     // Ruoli che possono essere destinatari: le OPT e gli operatori, non il Banco.
     private static final Set<RuoloUtente> RUOLI_DESTINATARI = Set.of(RuoloUtente.OPT, RuoloUtente.OPERATORE);
@@ -58,7 +64,7 @@ public final class RegoleAccessoComunicazione {
      * @see ComunicazioniApi#elencoRiscontri
      */
     public static void verificaBanco(IdentitaAutenticata attore) {
-        richiedi(attore != null && attore.ruolo() == RuoloUtente.BANCO, "Operazione riservata al Banco");
+        richiediRuolo(attore, SOLO_BANCO, "Operazione riservata al Banco");
     }
 
     /**
@@ -92,16 +98,10 @@ public final class RegoleAccessoComunicazione {
     private static boolean consente(BiPredicate<IdentitaAutenticata, Set<UUID>> politica,
                                     IdentitaAutenticata attore, Set<UUID> destinatari) {
         Objects.requireNonNull(destinatari, "destinatari");
-        if (attore == null || attore.accountId() == null || attore.ruolo() == null) {
+        if (!identitaCompleta(attore)) {
             return false;
         }
         return politica.test(attore, destinatari);
     }
 
-    /** Unico punto in cui un diniego diventa eccezione. */
-    private static void richiedi(boolean consentito, String messaggio) {
-        if (!consentito) {
-            throw new SecurityException(messaggio);
-        }
-    }
 }

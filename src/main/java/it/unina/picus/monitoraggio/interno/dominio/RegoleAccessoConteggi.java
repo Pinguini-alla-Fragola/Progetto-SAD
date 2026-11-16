@@ -8,6 +8,10 @@ import it.unina.picus.monitoraggio.api.MonitoraggioApi;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
 
+import static it.unina.picus.shared.ControlloAccesso.identitaCompleta;
+import static it.unina.picus.shared.ControlloAccesso.richiedi;
+import static it.unina.picus.shared.ControlloAccesso.richiediRuolo;
+
 /**
  * Regole di accesso ai conteggi trimestrali delle OPT (#28, criterio 5).
  *
@@ -45,8 +49,7 @@ public final class RegoleAccessoConteggi {
      * @see MonitoraggioApi#registraConteggiOpt
      */
     public static void verificaRegistrazione(IdentitaAutenticata attore) {
-        richiedi(attore != null && attore.ruolo() != null && SOLO_OPT.contains(attore.ruolo()),
-                "Operazione riservata alle OPT");
+        richiediRuolo(attore, SOLO_OPT, "Operazione riservata alle OPT");
     }
 
     /**
@@ -59,14 +62,7 @@ public final class RegoleAccessoConteggi {
      * @see MonitoraggioApi#consultaConteggiOpt
      */
     public static void verificaConsultazione(IdentitaAutenticata attore, UUID optId) {
-        boolean identitaCompleta = attore != null && attore.accountId() != null && attore.ruolo() != null;
-        richiedi(identitaCompleta && PUO_CONSULTARE.test(attore, optId), "Accesso negato ai conteggi");
+        richiedi(identitaCompleta(attore) && PUO_CONSULTARE.test(attore, optId), "Accesso negato ai conteggi");
     }
 
-    /** Unico punto in cui un diniego diventa eccezione. */
-    private static void richiedi(boolean consentito, String messaggio) {
-        if (!consentito) {
-            throw new SecurityException(messaggio);
-        }
-    }
 }

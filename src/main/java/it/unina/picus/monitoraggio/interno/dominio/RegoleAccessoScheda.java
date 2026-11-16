@@ -9,6 +9,10 @@ import it.unina.picus.monitoraggio.api.MonitoraggioApi;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
 
+import static it.unina.picus.shared.ControlloAccesso.identitaCompleta;
+import static it.unina.picus.shared.ControlloAccesso.richiedi;
+import static it.unina.picus.shared.ControlloAccesso.richiediRuolo;
+
 /**
  * Regole di accesso alle schede personali degli operatori (#28, criteri 4 e 5).
  *
@@ -77,24 +81,14 @@ public final class RegoleAccessoScheda {
         richiediRuolo(attore, SOLO_BANCO, "Operazione riservata al Banco");
     }
 
-    private static void richiediRuolo(IdentitaAutenticata attore, Set<RuoloUtente> ammessi, String messaggio) {
-        richiedi(attore != null && attore.ruolo() != null && ammessi.contains(attore.ruolo()), messaggio);
-    }
-
     /** Valuta una politica solo su un'identità completa: un attore incompleto non ha mai accesso. */
     private static boolean consente(BiPredicate<IdentitaAutenticata, UUID> politica,
                                     IdentitaAutenticata attore, UUID operatoreId) {
         Objects.requireNonNull(operatoreId, "operatoreId");
-        if (attore == null || attore.accountId() == null || attore.ruolo() == null) {
+        if (!identitaCompleta(attore)) {
             return false;
         }
         return politica.test(attore, operatoreId);
     }
 
-    /** Unico punto in cui un rifiuto diventa eccezione. */
-    private static void richiedi(boolean consentito, String messaggio) {
-        if (!consentito) {
-            throw new SecurityException(messaggio);
-        }
-    }
 }
