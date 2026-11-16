@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <title>Pagina non trovata · PICUS</title>
+    <link rel="icon" type="image/svg+xml" href="/logo.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&amp;display=swap" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg-color: #0d1117;
+            --surface-color: #161b22;
+            --border-color: #30363d;
+            --text-primary: #f0f6fc;
+            --text-secondary: #8b949e;
+            --accent-color: #58a6ff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            display: grid;
+            min-height: 100vh;
+            min-height: 100svh;
+            margin: 0;
+            padding: clamp(1rem, 4vw, 3rem);
+            place-items: center;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .error-card {
+            display: grid;
+            justify-items: center;
+            gap: clamp(0.75rem, 2.5vw, 1.25rem);
+            width: min(100%, 38rem);
+            padding: clamp(1rem, 5vw, 3rem);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            background-color: var(--surface-color);
+            text-align: center;
+        }
+
+        .error-penguin {
+            display: block;
+            width: min(68%, 12rem);
+            height: auto;
+        }
+
+        .code {
+            color: var(--accent-color);
+            font-size: clamp(2.5rem, 10vw, 4.5rem);
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        h1,
+        p {
+            margin: 0;
+        }
+
+        h1 {
+            font-size: clamp(1.65rem, 5.5vw, 2.65rem);
+            line-height: 1.15;
+            overflow-wrap: anywhere;
+        }
+
+        .description {
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .back-link {
+            display: inline-grid;
+            min-height: 44px;
+            max-width: 100%;
+            padding: 0.45rem 0.2rem 0.2rem;
+            place-items: center;
+            border-bottom: 3px solid var(--accent-color);
+            color: var(--text-primary);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            color: var(--accent-color);
+        }
+
+        .back-link:focus-visible {
+            outline: 2px solid var(--accent-color);
+            outline-offset: 4px;
+        }
+    </style>
+</head>
+<body>
+    <main class="error-card" aria-labelledby="error-title">
+        <img class="error-penguin" src="/pinguino-errore.png" width="1080" height="602" alt="">
+        <p class="code" aria-hidden="true">404</p>
+        <h1 id="error-title">Pagina non trovata</h1>
+        <p class="description">La pagina che cercavi si è persa tra i ghiacci.</p>
+        <a class="back-link" href="/">Torna alla home</a>
+    </main>
+</body>
+</html>
