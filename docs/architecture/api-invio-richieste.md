@@ -21,7 +21,8 @@ per costruttore e l'orologio è un `Clock` iniettato.
 La verifica dell'account passa da `UtenzeApi.verificaAccountSessione`, tramite
 l'implementazione di Utenze già presente. Si riutilizzano l'accesso JSON
 `POST /api/auth/login` e le sessioni Spring Security del progetto. Il principal
-ha come nome l'UUID dell'account; è supportato anche un principal
+ha come nome l'UUID dell'account. Il filtro di Utenze verifica l'account e aggiorna
+le autorità prima dei matcher; `IdentitaResolver` fornisce ai controller
 `IdentitaAutenticata`. Ruolo e stato attivo vengono riletti sul server prima
 di accedere alle risorse. Non sono introdotti nuovi endpoint di login o pagine.
 
@@ -38,7 +39,6 @@ in produzione il cookie rimane sicuro come previsto dalla configurazione.
 | --- | --- |
 | `GET /api/catalogo/misure` | Misure attive selezionabili. |
 | `GET /api/catalogo/comuni` | Codici e nomi dei comuni censiti. |
-| `GET /api/richieste/csrf` | `headerName`, `parameterName` e `token` per la sessione corrente. |
 | `POST /api/richieste` | Invio della OPT autenticata; `201`, sintesi e header `Location`. |
 | `GET /api/richieste/mie` | Sintesi delle richieste della sola OPT autenticata. |
 | `GET /api/richieste/coda` | Coda del solo Banco: Creata, Presa in carico e In programmazione. |
@@ -65,7 +65,7 @@ la vista deve renderlo come testo, con escaping, senza interpretarlo come HTML.
 Il controllo dei campi non identifica automaticamente dati personali scritti
 nella descrizione; tale valutazione resta aperta nell'ADR-003.
 
-Non sono ammessi altri campi, inclusi titolare, stato e identificativi
+Non sono ammessi nomi di proprietà JSON duplicati né altri campi, inclusi titolare, stato e identificativi
 dell'assistito. Il server rifiuta l'intero invio prima di scrivere. Gli errori
 contengono solo messaggi controllati e indicazioni sui campi ammessi; non
 riportano i valori ricevuti né il contenuto della descrizione. Il controller
@@ -113,3 +113,10 @@ I dettagli di un accordo registrato sono consultabili anche dopo annullamento.
 I test della funzionalità sono affidati al gruppo di test; questo incremento
 non aggiunge né modifica classi di test. Build e test già presenti restano
 parte delle verifiche del progetto.
+
+I matcher verificano il ruolo prima del binding HTTP: un account non abilitato
+al comando riceve `403` anche con corpo malformato. Soltanto gli errori
+applicativi specifici sono tradotti in `400/403/404/409`; eccezioni inattese
+restano errori interni `500`, senza messaggi o stack trace nella risposta.
+Il controllo dei dinieghi usa il contratto condiviso `AccessoNegatoException`
+e la relativa gestione, coerenti con #28/PR #106. `shared` non dipende da Utenze.
