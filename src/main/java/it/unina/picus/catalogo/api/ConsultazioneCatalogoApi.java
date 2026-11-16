@@ -8,15 +8,33 @@ import java.util.Optional;
 
 /** Riferimenti di catalogo necessari all'invio e alla consultazione delle richieste. */
 public interface ConsultazioneCatalogoApi {
-    /** @see CatalogoApi#elencoMisureAttive() */
+    /**
+     * Elenca le misure selezionabili per un nuovo invio.
+     * @return misure attive ordinate per codice
+     * @see CatalogoApi#elencoMisureAttive()
+     */
     List<Misura> elencoMisureAttive();
 
-    /** @see CatalogoApi#cercaMisura(long) */
+    /**
+     * Risolve una misura anche quando non è più attiva.
+     * @param misuraId identificativo stabile della misura
+     * @return misura trovata, oppure vuoto
+     * @see CatalogoApi#cercaMisura(long)
+     */
     Optional<Misura> cercaMisura(long misuraId);
 
-    /** @see CatalogoApi#elencoComuni() */
+    /**
+     * Elenca i comuni utilizzabili nell'invio.
+     * @return comuni censiti ordinati per nome
+     * @see CatalogoApi#elencoComuni()
+     */
     List<Comune> elencoComuni();
 
-    /** @see CatalogoApi#cercaComune(String) */
+    /**
+     * Risolve il codice di un comune.
+     * @param codice codice presente in catalogo
+     * @return comune trovato, oppure vuoto
+     * @see CatalogoApi#cercaComune(String)
+     */
     Optional<Comune> cercaComune(String codice);
 }

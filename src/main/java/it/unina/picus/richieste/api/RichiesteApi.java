@@ -20,7 +20,7 @@ import java.util.UUID;
  *
  * @see StatoRichiesta
  */
-public interface RichiesteApi {
+public interface RichiesteApi extends InvioRichiesteApi {
 
     /**
      * Registra una richiesta della OPT autenticata. Il modulo attribuisce ID, data, titolare
