@@ -1,0 +1,116 @@
+---
+title: "PICUS - Module&Package View"
+config:
+  layout: elk
+  look: classic
+  theme: base
+  themeVariables:
+    fontFamily: "Arial"
+    fontSize: "15px"
+    lineColor: "#64748B"
+    edgeLabelBackground: "#FFFFFF"
+  elk:
+    mergeEdges: false
+    nodePlacementStrategy: BRANDES_KOEPF
+    nodePlacementAlignment: BALANCED
+  flowchart:
+    curve: linear
+    nodeSpacing: 22
+    rankSpacing: 62
+    padding: 12
+    wrappingWidth: 240
+    subGraphTitleMargin:
+      top: 8
+      bottom: 18
+---
+flowchart TB
+    accTitle: PICUS - Module&Package View
+    accDescr: I cinque moduli sono package annidati sotto it.unina.picus. Ciascuno contiene web, api e interno. La struttura riprende src/main/java di main. Le dipendenze import sono presenti nei sorgenti Java; use indica le collaborazioni architetturali previste. Tutte passano per api. shared contiene componenti tecnici condivisi.
+
+    %% Il contenimento indica la gerarchia Java, non una dipendenza.
+    %% I nodi folder richiedono Mermaid 11.17 o successivo.
+    subgraph PICUS["«package» <b>it.unina.picus</b>"]
+        direction TB
+
+        subgraph M3["<b>richieste</b> · M3<br/>Richieste e appuntamenti"]
+            direction LR
+            R_WEB@{ shape: folder, label: "<b>web</b><br/>Controller MVC" }
+            R_API@{ shape: folder, label: "<b>api</b><br/>RichiesteApi · DTO" }
+            subgraph R_INT["«package» <b>interno</b>"]
+                direction LR
+                R_APP@{ shape: folder, label: "<b>applicazione</b><br/>Casi d’uso" }
+                R_DOM@{ shape: folder, label: "<b>dominio</b><br/>Regole e stati" }
+                R_PERS@{ shape: folder, label: "<b>persistenza</b><br/>Mappature JPA" }
+                R_APP ~~~ R_DOM ~~~ R_PERS
+            end
+            R_WEB ~~~ R_API ~~~ R_INT
+        end
+
+        subgraph M5["<b>monitoraggio</b> · M5<br/>Conteggi e schede trimestrali"]
+            direction LR
+            T_WEB@{ shape: folder, label: "<b>web</b><br/>Controller MVC" }
+            T_API@{ shape: folder, label: "<b>api</b><br/>MonitoraggioApi · DTO" }
+            T_INT@{ shape: folder, label: "<b>interno</b><br/>Implementazione" }
+            T_WEB ~~~ T_API ~~~ T_INT
+        end
+
+        subgraph M4["<b>comunicazioni</b> · M4<br/>Comunicazioni e notifiche"]
+            direction LR
+            C_WEB@{ shape: folder, label: "<b>web</b><br/>Controller MVC" }
+            C_API@{ shape: folder, label: "<b>api</b><br/>ComunicazioniApi · DTO" }
+            C_INT@{ shape: folder, label: "<b>interno</b><br/>Implementazione" }
+            C_WEB ~~~ C_API ~~~ C_INT
+        end
+
+        subgraph M2["<b>catalogo</b> · M2<br/>Misure e offerta territoriale"]
+            direction LR
+            K_WEB@{ shape: folder, label: "<b>web</b><br/>Controller MVC" }
+            K_API@{ shape: folder, label: "<b>api</b><br/>CatalogoApi · DTO" }
+            subgraph K_INT["«package» <b>interno</b>"]
+                K_PERS@{ shape: folder, label: "<b>persistenza</b><br/>Mappature JPA" }
+            end
+            K_WEB ~~~ K_API ~~~ K_INT
+        end
+
+        subgraph M1["<b>utenze</b> · M1<br/>Account, profili e autorizzazioni"]
+            direction LR
+            U_WEB@{ shape: folder, label: "<b>web</b><br/>Controller MVC" }
+            U_API@{ shape: folder, label: "<b>api</b><br/>UtenzeApi · DTO" }
+            subgraph U_INT["«package» <b>interno</b>"]
+                U_PERS@{ shape: folder, label: "<b>persistenza</b><br/>Mappature JPA" }
+            end
+            U_WEB ~~~ U_API ~~~ U_INT
+        end
+
+        SHARED@{ shape: folder, label: "<b>shared</b><br/>Componenti tecnici condivisi" }
+
+        %% Dipendenze della vista a regime: A usa B.api.
+        %% Nessuna freccia attraversa i package interni dei moduli.
+        M3 -. "«use»<br/>ComunicazioniApi" .-> M4
+        M3 -. "«import»<br/>CatalogoApi" .-> M2
+        M5 -. "«use»<br/>CatalogoApi" .-> M2
+        M4 -. "«import»<br/>UtenzeApi" .-> M1
+        M2 -. "«import»<br/>UtenzeApi" .-> M1
+        M3 -. "«import»<br/>UtenzeApi" .-> M1
+        M5 -. "«import»<br/>UtenzeApi" .-> M1
+
+        %% Solo layout: shared affianca utenze, senza dipendenze applicative.
+        M2 ~~~ SHARED
+    end
+
+    classDef web fill:#E9F2FC,stroke:#5480B0,color:#143C65,stroke-width:1.4px
+    classDef api fill:#E2F1E8,stroke:#568573,color:#1A4A3C,stroke-width:1.6px
+    classDef interno fill:#F1F5F9,stroke:#94A3B8,color:#334155,stroke-width:1.3px
+    class R_WEB,T_WEB,C_WEB,K_WEB,U_WEB web
+    class R_API,T_API,C_API,K_API,U_API api
+    class R_APP,R_DOM,R_PERS,T_INT,C_INT,K_PERS,U_PERS,SHARED interno
+
+    style PICUS fill:#F7FAFE,stroke:#7C9BB9,stroke-width:1.5px,color:#183957
+    style M1 fill:#F3F9F5,stroke:#568573,stroke-width:1.5px,color:#1A4A3C
+    style M2 fill:#F3F9F5,stroke:#568573,stroke-width:1.5px,color:#1A4A3C
+    style M3 fill:#F3F9F5,stroke:#568573,stroke-width:1.5px,color:#1A4A3C
+    style M4 fill:#F3F9F5,stroke:#568573,stroke-width:1.5px,color:#1A4A3C
+    style M5 fill:#F3F9F5,stroke:#568573,stroke-width:1.5px,color:#1A4A3C
+    style R_INT fill:#FFFFFF,stroke:#94A3B8,stroke-width:1px,color:#334155
+    style K_INT fill:#FFFFFF,stroke:#94A3B8,stroke-width:1px,color:#334155
+    style U_INT fill:#FFFFFF,stroke:#94A3B8,stroke-width:1px,color:#334155
