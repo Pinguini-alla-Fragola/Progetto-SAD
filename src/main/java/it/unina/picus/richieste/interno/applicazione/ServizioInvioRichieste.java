@@ -19,7 +19,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
+import it.unina.picus.richieste.api.ConflittoRichiestaException;
+import it.unina.picus.richieste.api.RisorsaRichiesteNonTrovataException;
+import it.unina.picus.shared.ControlloAccesso;
 import java.util.UUID;
 
 /** Casi d'uso della #48, senza comandi di transizione appartenenti al coordinamento. */
@@ -63,7 +65,7 @@ public class ServizioInvioRichieste implements InvioRichiesteApi {
 
     private RichiestaSintesi confermaInvio(RichiestaDiMisura richiesta, DatiInvio dati) {
         if (!richiesta.stessoInvio(dati)) {
-            throw new IllegalStateException("Il riferimento di invio è già associato a dati diversi");
+            throw new ConflittoRichiestaException("Il riferimento di invio è già associato a dati diversi");
         }
         return sintesi(richiesta, new HashMap<>());
     }
@@ -84,18 +86,16 @@ public class ServizioInvioRichieste implements InvioRichiesteApi {
     public RichiestaDettaglio consultaRichiesta(IdentitaAutenticata attore, UUID richiestaId) {
         richiediIdentita(attore);
         if (richiestaId == null) {
-            throw new IllegalArgumentException("Identificativo della richiesta obbligatorio");
+            throw new DatiRichiestaNonValidiException(Map.of("richiestaId", "Identificativo obbligatorio"));
         }
         var richiesta = repository.cercaPerId(richiestaId)
-                .orElseThrow(() -> new NoSuchElementException("Richiesta non trovata"));
+                .orElseThrow(() -> new RisorsaRichiesteNonTrovataException());
         boolean banco = attore.ruolo() == RuoloUtente.BANCO;
         boolean titolare = attore.ruolo() == RuoloUtente.OPT
                 && attore.accountId().equals(richiesta.titolareId());
         boolean assegnato = (attore.ruolo() == RuoloUtente.OPT || attore.ruolo() == RuoloUtente.OPERATORE)
                 && attore.accountId().equals(richiesta.erogatoreId());
-        if (!banco && !titolare && !assegnato) {
-            throw new SecurityException("Accesso alla richiesta non consentito");
-        }
+        ControlloAccesso.richiedi(banco || titolare || assegnato, "Accesso alla richiesta non consentito");
         return new RichiestaDettaglio(sintesi(richiesta, new HashMap<>()),
                 banco || titolare ? richiesta.titolareId() : null,
                 richiesta.tipoDestinatario(), richiesta.comuneCodice(),
@@ -143,14 +143,11 @@ public class ServizioInvioRichieste implements InvioRichiesteApi {
 
     private static void richiediRuolo(IdentitaAutenticata attore, RuoloUtente ruolo) {
         richiediIdentita(attore);
-        if (attore.ruolo() != ruolo) {
-            throw new SecurityException("Ruolo non autorizzato per questa operazione");
-        }
+        ControlloAccesso.richiedi(attore.ruolo() == ruolo, "Ruolo non autorizzato per questa operazione");
     }
 
     private static void richiediIdentita(IdentitaAutenticata attore) {
-        if (attore == null || attore.accountId() == null || attore.ruolo() == null) {
-            throw new SecurityException("Identità verificata obbligatoria");
-        }
+        ControlloAccesso.richiedi(attore != null && attore.accountId() != null && attore.ruolo() != null,
+                "Identità verificata obbligatoria");
     }
 }
