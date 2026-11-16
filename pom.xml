@@ -66,12 +66,14 @@
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- Test di integrazione sugli endpoint: MockMvc e utente autenticato simulato -->
+        <!-- Auto-configurazione di MockMvc nei test (@AutoConfigureMockMvc, @WebMvcTest).
+             La classe MockMvc arriva già da spring-boot-starter-test tramite spring-test. -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webmvc-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Utente autenticato simulato e token CSRF nelle chiamate MockMvc -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security-test</artifactId>
