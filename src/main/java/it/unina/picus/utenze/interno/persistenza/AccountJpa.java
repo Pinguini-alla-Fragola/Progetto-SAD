@@ -22,4 +22,11 @@ public class AccountJpa {
 
     protected AccountJpa() {
     }
+
+    public UUID getId() { return id; }
+    public String getEmail() { return email; }
+    public String getPasswordHash() { return passwordHash; }
+    public String getNome() { return nome; }
+    public String getRuolo() { return ruolo; }
+    public String getStato() { return stato; }
 }
