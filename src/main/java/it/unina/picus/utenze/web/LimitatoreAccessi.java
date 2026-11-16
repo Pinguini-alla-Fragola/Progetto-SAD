@@ -27,8 +27,8 @@ import org.springframework.stereotype.Component;
  * un'ondata di indirizzi inventati non svuota il contatore di un account già sotto tentativo.</p>
  *
  * <p>Conteggio, pulizia e rimozione avvengono sotto un unico lock: una pulizia non può togliere la
- * coda di una chiave mentre un tentativo sta per registrarvisi. Il costo è trascurabile, perché le
- * code hanno al massimo {@value #MAX_FALLIMENTI} elementi e la verifica BCrypt avviene fuori dal lock.</p>
+ * coda di una chiave mentre un tentativo sta per registrarvisi. La verifica BCrypt avviene
+ * fuori dal lock.</p>
  */
 @Component
 class LimitatoreAccessi {

@@ -1,18 +1,17 @@
 package it.unina.picus.utenze.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
+import java.lang.management.ManagementFactory;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Map;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
 class LimitatoreAccessiTest {
 
@@ -119,44 +118,36 @@ class LimitatoreAccessiTest {
     }
 
     @Test
-    void tentativiParalleliConPuliziaInCorsoNonSuperanoIlLimite() throws Exception {
-        for (int i = 0; i < LimitatoreAccessi.MAX_CHIAVI; i++) {
-            limitatore.ammetti("vecchia" + i + "@picus.test");
+    void ilTentativoSullaCodaScadutaContaAncheDuranteLaPulizia() throws Exception {
+        String bersaglio = "bersaglio@picus.test";
+        tentativi(bersaglio, 1);
+        for (int i = 1; i < LimitatoreAccessi.MAX_CHIAVI; i++) {
+            tentativi("vecchia" + i + "@picus.test", 1);
         }
-        orologio.avanza(Duration.ofMinutes(6)); // tutte scadute: la pulizia ha molto da rimuovere
+        orologio.avanza(LimitatoreAccessi.FINESTRA.plusSeconds(1));
 
-        int thread = 32;
-        int perThread = 10;
-        AtomicInteger ammessiBersaglio = new AtomicInteger();
-        CountDownLatch via = new CountDownLatch(1);
-        ExecutorService pool = Executors.newFixedThreadPool(thread);
-        try {
-            List<Future<?>> attivita = new ArrayList<>();
-            for (int t = 0; t < thread; t++) {
-                int numero = t;
-                attivita.add(pool.submit(() -> {
-                    via.await();
-                    for (int i = 0; i < perThread; i++) {
-                        // email nuove: tengono la mappa al limite e fanno scattare la pulizia
-                        limitatore.ammetti("nuova" + numero + "-" + i + "@picus.test");
-                        if (limitatore.ammetti("bersaglio@picus.test")) {
-                            ammessiBersaglio.incrementAndGet();
-                        }
-                    }
-                    return null;
-                }));
-            }
-            via.countDown();
-            for (Future<?> f : attivita) {
-                f.get();
-            }
-        } finally {
-            pool.shutdownNow();
+        var code = (Map<?, ?>) ReflectionTestUtils.getField(limitatore, "tentativi");
+        Object codaScaduta = code.get(bersaglio);
+        assertThat(codaScaduta).isNotNull();
+
+        var primoTentativo = new FutureTask<>(() -> limitatore.ammetti(bersaglio));
+        var thread = Thread.ofPlatform().daemon().unstarted(primoTentativo);
+        var threadMxBean = ManagementFactory.getThreadMXBean();
+        long titolareMonitor = Thread.currentThread().threadId();
+        // Con il precedente lock per coda, il tentativo resta sospeso dopo aver trovato la coda.
+        // La pulizia può rimuoverla proprio prima che il tentativo vi scriva.
+        synchronized (codaScaduta) {
+            thread.start();
+            await().atMost(Duration.ofSeconds(5)).until(() -> {
+                var info = threadMxBean.getThreadInfo(thread.threadId());
+                return primoTentativo.isDone() || (info != null && info.getLockOwnerId() == titolareMonitor);
+            });
+            assertThat(limitatore.ammetti("nuova@picus.test")).isTrue();
         }
 
-        // 320 tentativi sulla stessa email con orologio fermo: ne passano esattamente 5
-        assertThat(ammessiBersaglio.get()).isEqualTo(LimitatoreAccessi.MAX_FALLIMENTI);
-        assertThat(limitatore.numeroChiavi()).isLessThanOrEqualTo(LimitatoreAccessi.MAX_CHIAVI);
+        assertThat(primoTentativo.get(5, TimeUnit.SECONDS)).isTrue();
+        tentativi(bersaglio, MAX_RESIDUI);
+        assertThat(limitatore.ammetti(bersaglio)).isFalse();
     }
 
     @Test

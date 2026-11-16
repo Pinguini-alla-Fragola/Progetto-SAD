@@ -87,6 +87,22 @@ Per verificare la predisposizione, esegui `./mvnw clean package`
 (`./mvnw.cmd clean package` in PowerShell) e controlla l’avvio dei servizi
 con `docker compose ps`.
 
+### Aggiornare una demo avviata con la V5 del login
+
+Se il database locale ha già applicato `V5__blocco_accessi.sql`, ferma la
+demo dal progetto Compose usato in precedenza e avvia la versione aggiornata
+con un nuovo nome di progetto.
+
+```bash
+docker compose down
+docker compose -p picus-demo-v2 up --build
+```
+
+Il nuovo progetto usa il volume separato `picus-demo-v2_picus-dati`.
+Usa `-p picus-demo-v2` anche con i successivi comandi `ps`, `logs` e `down`.
+Se la demo precedente usava un nome personalizzato, passalo con `-p` al
+primo comando.
+
 ### Configurazione `.env`
 
 Il file `.env` sta nella radice del progetto, accanto a `docker-compose.yml`, e
