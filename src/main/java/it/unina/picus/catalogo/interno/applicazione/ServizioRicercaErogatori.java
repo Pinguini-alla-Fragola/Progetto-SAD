@@ -9,10 +9,12 @@ import it.unina.picus.utenze.api.UtenzeApi;
 import it.unina.picus.utenze.api.UtenzeApi.ProfiloErogatore;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.UUID;
 
 /** Combina offerta OPT e profili personali attraverso i confini pubblici dei moduli. */
 @Service
@@ -38,10 +40,8 @@ public class ServizioRicercaErogatori implements RicercaErogatoriApi {
         }
         Set<String> limitrofi = Set.copyOf(offerta.comuniLimitrofi(comuneCodice));
         List<ErogatoreCompatibile> risultato = new ArrayList<>();
-        for (var optId : offerta.optAttivePerMisura(misuraId)) {
-            utenze.cercaProfiloErogatoreAttivo(optId)
-                    .filter(p -> p.tipo() == UtenzeApi.TipoErogatore.OPT)
-                    .ifPresent(p -> aggiungiLocale(risultato, p, comuneCodice, limitrofi));
+        for (var opt : utenze.elencoOptAttive(Set.copyOf(offerta.optAttivePerMisura(misuraId)))) {
+            aggiungiLocale(risultato, opt, comuneCodice, limitrofi);
         }
         for (var operatore : utenze.elencoOperatoriAttiviPerMisura(misuraId)) {
             aggiungiLocale(risultato, operatore, comuneCodice, limitrofi);
@@ -50,6 +50,28 @@ public class ServizioRicercaErogatori implements RicercaErogatoriApi {
             }
         }
         return List.copyOf(risultato);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.MANDATORY)
+    public boolean bloccaCompatibilita(long misuraId, String comune, UUID accountId, AmbitoErogazione ambito) {
+        var misura = offerta.bloccaMisura(misuraId);
+        if (misura.isEmpty() || !misura.get().attiva()) {
+            return false;
+        }
+        var profilo = utenze.bloccaProfiloPerMisura(accountId, misuraId);
+        if (profilo.isEmpty()) {
+            return false;
+        }
+        var p = profilo.get();
+        if (p.tipo() == UtenzeApi.TipoErogatore.OPT && !offerta.bloccaOfferta(accountId, misuraId)) {
+            return false;
+        }
+        return switch (ambito) {
+            case STESSO_COMUNE -> comune.equals(p.comuneCodice());
+            case COMUNE_LIMITROFO -> offerta.bloccaAdiacenza(comune, p.comuneCodice());
+            case CENTRO_PICUS_A_DISTANZA -> p.centroPicus() && misura.get().dati().erogabileADistanza();
+        };
     }
 
     private static void aggiungiLocale(List<ErogatoreCompatibile> risultato, ProfiloErogatore profilo,

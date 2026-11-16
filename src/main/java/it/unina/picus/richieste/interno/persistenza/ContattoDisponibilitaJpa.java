@@ -56,7 +56,7 @@ public class ContattoDisponibilitaJpa {
     /** Costruisce il contatto mentre il chiamante mantiene il lock della richiesta. */
     public static ContattoDisponibilitaJpa crea(RichiestaJpa richiesta, UUID erogatoreId,
             AmbitoErogazione ambito, String nomeMisura, Instant istante) {
-        richiesta.verificaPresaInCarico();
+        richiesta.aDominio().verificaPresaInCarico();
         var contatto = new ContattoDisponibilitaJpa();
         contatto.id = UUID.randomUUID();
         contatto.richiesta = richiesta;

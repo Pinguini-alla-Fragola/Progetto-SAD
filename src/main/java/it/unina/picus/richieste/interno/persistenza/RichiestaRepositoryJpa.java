@@ -4,11 +4,15 @@ import it.unina.picus.richieste.api.RichiesteApi.StatoRichiesta;
 import it.unina.picus.richieste.interno.dominio.RichiestaDiMisura;
 import it.unina.picus.richieste.interno.dominio.RichiestaRepository;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.time.Instant;
+import java.util.Map;
+import java.util.HashMap;
 
 /** Adattatore PostgreSQL/JPA; il vincolo univoco coordina anche processi applicativi diversi. */
 @Repository
@@ -49,6 +53,38 @@ public class RichiestaRepositoryJpa implements RichiestaRepository {
     @Override
     public Optional<RichiestaDiMisura> cercaPerId(UUID id) {
         return Optional.ofNullable(entityManager.find(RichiestaJpa.class, id)).map(RichiestaJpa::aDominio);
+    }
+
+    @Override
+    public Optional<RichiestaDiMisura> cercaPerAggiornamento(UUID id) {
+        var entita = entityManager.find(RichiestaJpa.class, id, LockModeType.PESSIMISTIC_WRITE);
+        if (entita == null) {
+            return Optional.empty();
+        }
+        entityManager.refresh(entita, LockModeType.PESSIMISTIC_WRITE);
+        return Optional.of(entita.aDominio());
+    }
+
+    @Override
+    public void aggiorna(RichiestaDiMisura richiesta) {
+        var entita = entityManager.find(RichiestaJpa.class, richiesta.id());
+        if (entita == null || !entityManager.getLockMode(entita).equals(LockModeType.PESSIMISTIC_WRITE)) {
+            throw new IllegalStateException("Aggiornamento senza lock della richiesta");
+        }
+        entita.aggiorna(richiesta);
+    }
+
+    @Override
+    public Map<UUID, Integer> carichiConfermati(Instant da) {
+        var righe = entityManager.createQuery("""
+                select r.erogatoreId, count(r) from RichiestaJpa r
+                where r.stato = :stato and r.accordo.dataOra >= :da and r.erogatoreId is not null
+                group by r.erogatoreId
+                """, Object[].class)
+                .setParameter("stato", StatoRichiesta.CONFERMATA).setParameter("da", da).getResultList();
+        Map<UUID, Integer> risultato = new HashMap<>();
+        righe.forEach(r -> risultato.put((UUID) r[0], Math.toIntExact((Long) r[1])));
+        return Map.copyOf(risultato);
     }
 
     @Override

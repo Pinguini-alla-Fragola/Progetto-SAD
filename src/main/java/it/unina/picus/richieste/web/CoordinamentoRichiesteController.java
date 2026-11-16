@@ -6,10 +6,9 @@ import it.unina.picus.richieste.api.DatiRichiestaNonValidiException;
 import it.unina.picus.richieste.api.RichiesteApi.Candidato;
 import it.unina.picus.richieste.api.RichiesteApi.ContattoDisponibilita;
 import it.unina.picus.richieste.api.RichiesteApi.RichiestaSintesi;
-import it.unina.picus.shared.AutenticazioneCorrente;
+import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,30 +26,26 @@ import java.util.UUID;
 @RequestMapping(value = "/api", produces = MediaType.APPLICATION_JSON_VALUE)
 public class CoordinamentoRichiesteController {
     private final CoordinamentoRichiesteApi coordinamento;
-    private final AutenticazioneCorrente autenticazione;
-
-    public CoordinamentoRichiesteController(CoordinamentoRichiesteApi coordinamento, AutenticazioneCorrente autenticazione) {
+    public CoordinamentoRichiesteController(CoordinamentoRichiesteApi coordinamento) {
         this.coordinamento = coordinamento;
-        this.autenticazione = autenticazione;
     }
 
     @PostMapping("/richieste/{id}/presa-in-carico")
-    public RichiestaSintesi prendiInCarico(Authentication authentication, @PathVariable UUID id,
-            @RequestBody(required = false) Map<String, Object> corpo) {
-        var attore = autenticazione.richiedi(authentication);
+    public RichiestaSintesi prendiInCarico(IdentitaAutenticata attore, @PathVariable UUID id,
+            @RequestBody(required = false) CorpoJson corpo) {
         verificaCorpoVuoto(corpo);
         return coordinamento.prendiInCarico(attore, id);
     }
 
     @GetMapping("/richieste/{id}/candidati")
-    public List<Candidato> candidati(Authentication authentication, @PathVariable UUID id) {
-        return coordinamento.cercaErogatoriOrdinati(autenticazione.richiedi(authentication), id);
+    public List<Candidato> candidati(IdentitaAutenticata attore, @PathVariable UUID id) {
+        return coordinamento.cercaErogatoriOrdinati(attore, id);
     }
 
     @PostMapping(value = "/richieste/{id}/contatti", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ContattoDisponibilita> interpella(Authentication authentication, @PathVariable UUID id,
-            @RequestBody Map<String, Object> corpo) {
-        var attore = autenticazione.richiedi(authentication);
+    public ResponseEntity<ContattoDisponibilita> interpella(IdentitaAutenticata attore, @PathVariable UUID id,
+            @RequestBody CorpoJson ingresso) {
+        var corpo = ingresso.campi();
         if (corpo == null || !corpo.keySet().equals(Set.of("erogatoreId", "ambito"))) {
             throw nonValido("contatto", "Indica soltanto erogatoreId e ambito");
         }
@@ -76,19 +71,24 @@ public class CoordinamentoRichiesteController {
             throw nonValido("ambito", "Seleziona un ambito di erogazione valido");
         }
         var contatto = coordinamento.interpellaErogatore(attore, id, erogatoreId, ambito);
-        return ResponseEntity.created(URI.create("/api/contatti-disponibilita/" + contatto.id())).body(contatto);
+        return ResponseEntity.created(URI.create("/api/richieste/" + id + "/contatti/" + contatto.id())).body(contatto);
+    }
+
+    @GetMapping("/richieste/{id}/contatti/{contattoId}")
+    public ContattoDisponibilita consultaContatto(IdentitaAutenticata attore, @PathVariable UUID id,
+            @PathVariable UUID contattoId) {
+        return coordinamento.consultaContattoBanco(attore, id, contattoId);
     }
 
     @PostMapping("/contatti-disponibilita/{id}/assegnazione")
-    public RichiestaSintesi assegna(Authentication authentication, @PathVariable UUID id,
-            @RequestBody(required = false) Map<String, Object> corpo) {
-        var attore = autenticazione.richiedi(authentication);
+    public RichiestaSintesi assegna(IdentitaAutenticata attore, @PathVariable UUID id,
+            @RequestBody(required = false) CorpoJson corpo) {
         verificaCorpoVuoto(corpo);
         return coordinamento.assegnaErogatore(attore, id);
     }
 
-    private static void verificaCorpoVuoto(Map<String, Object> corpo) {
-        if (corpo != null && !corpo.isEmpty()) {
+    private static void verificaCorpoVuoto(CorpoJson corpo) {
+        if (corpo != null && corpo.campi() != null && !corpo.campi().isEmpty()) {
             throw nonValido("comando", "Questo comando non prevede campi aggiuntivi");
         }
     }

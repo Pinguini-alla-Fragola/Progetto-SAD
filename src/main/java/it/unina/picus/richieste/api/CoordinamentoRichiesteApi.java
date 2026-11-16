@@ -11,6 +11,14 @@ import java.util.UUID;
 /** Capacità del Banco per ricerca, contatto e assegnazione; contratti di {@link RichiesteApi}. */
 public interface CoordinamentoRichiesteApi {
     /**
+     * Consulta il contatto della pratica dal perimetro autorizzato del Banco.
+     * @param attore identità corrente del Banco
+     * @param richiestaId pratica a cui deve appartenere il contatto
+     * @param contattoId contatto da leggere
+     * @return contatto e relativo esito
+     */
+    ContattoDisponibilita consultaContattoBanco(IdentitaAutenticata attore, UUID richiestaId, UUID contattoId);
+    /**
      * Prende esplicitamente in carico una richiesta Creata.
      * @param attore identità verificata del Banco
      * @param richiestaId pratica in coda

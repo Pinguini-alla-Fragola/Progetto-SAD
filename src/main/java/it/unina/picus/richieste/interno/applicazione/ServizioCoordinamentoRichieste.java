@@ -4,18 +4,20 @@ import it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione;
 import it.unina.picus.catalogo.api.CatalogoApi.ErogatoreCompatibile;
 import it.unina.picus.catalogo.api.RicercaErogatoriApi;
 import it.unina.picus.comunicazioni.api.AvvisiOperativiApi;
+import it.unina.picus.richieste.api.ConflittoRichiestaException;
 import it.unina.picus.richieste.api.CoordinamentoRichiesteApi;
+import it.unina.picus.richieste.api.DatiRichiestaNonValidiException;
 import it.unina.picus.richieste.api.InvioRichiesteApi;
+import it.unina.picus.richieste.api.RisorsaRichiesteNonTrovataException;
 import it.unina.picus.richieste.api.RichiesteApi.Candidato;
 import it.unina.picus.richieste.api.RichiesteApi.ContattoDisponibilita;
 import it.unina.picus.richieste.api.RichiesteApi.EsitoContatto;
 import it.unina.picus.richieste.api.RichiesteApi.RichiestaSintesi;
-import it.unina.picus.richieste.api.RichiesteApi.StatoRichiesta;
+import it.unina.picus.richieste.interno.dominio.ContattiRepository;
 import it.unina.picus.richieste.interno.dominio.OrdinamentoErogatori;
-import it.unina.picus.richieste.interno.persistenza.ContattoDisponibilitaJpa;
-import it.unina.picus.richieste.interno.persistenza.ContattoDisponibilitaRepository;
-import it.unina.picus.richieste.interno.persistenza.RichiestaJpa;
-import it.unina.picus.richieste.interno.persistenza.RichiestaRepository;
+import it.unina.picus.richieste.interno.dominio.RichiestaDiMisura;
+import it.unina.picus.richieste.interno.dominio.RichiestaRepository;
+import it.unina.picus.shared.ControlloAccesso;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
 import org.springframework.stereotype.Service;
@@ -24,7 +26,6 @@ import java.time.Clock;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 /** Service Layer: i comandi condividono il lock della pratica con le risposte degli erogatori. */
@@ -32,13 +33,13 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class ServizioCoordinamentoRichieste implements CoordinamentoRichiesteApi {
     private final RichiestaRepository richieste;
-    private final ContattoDisponibilitaRepository contatti;
+    private final ContattiRepository contatti;
     private final RicercaErogatoriApi catalogo;
     private final InvioRichiesteApi consultazione;
     private final AvvisiOperativiApi avvisi;
     private final Clock clock;
 
-    public ServizioCoordinamentoRichieste(RichiestaRepository richieste, ContattoDisponibilitaRepository contatti,
+    public ServizioCoordinamentoRichieste(RichiestaRepository richieste, ContattiRepository contatti,
             RicercaErogatoriApi catalogo, InvioRichiesteApi consultazione, AvvisiOperativiApi avvisi, Clock clock) {
         this.richieste = richieste;
         this.contatti = contatti;
@@ -49,23 +50,26 @@ public class ServizioCoordinamentoRichieste implements CoordinamentoRichiesteApi
     }
 
     @Override
+    public ContattoDisponibilita consultaContattoBanco(IdentitaAutenticata attore, UUID richiestaId, UUID contattoId) {
+        verificaBanco(attore);
+        return contatti.cerca(contattoId).filter(c -> c.richiestaId().equals(richiestaId))
+                .orElseThrow(RisorsaRichiesteNonTrovataException::new);
+    }
+
+    @Override
     @Transactional
     public RichiestaSintesi prendiInCarico(IdentitaAutenticata attore, UUID richiestaId) {
         verificaBanco(attore);
-        var richiesta = blocca(richiestaId);
-        richiesta.prendiInCarico();
+        richieste.aggiorna(blocca(richiestaId).prendiInCarico());
         return consultazione.consultaRichiesta(attore, richiestaId).richiesta();
     }
 
     @Override
     public List<Candidato> cercaErogatoriOrdinati(IdentitaAutenticata attore, UUID richiestaId) {
         verificaBanco(attore);
-        var richiesta = richieste.findById(richiestaId).orElseThrow(() -> new NoSuchElementException("Richiesta non trovata"));
+        var richiesta = richieste.cercaPerId(richiestaId).orElseThrow(RisorsaRichiesteNonTrovataException::new);
         richiesta.verificaPresaInCarico();
-        Map<UUID, Integer> carichi = new HashMap<>();
-        richieste.carichi(StatoRichiesta.CONFERMATA, clock.instant())
-                .forEach(c -> carichi.put(c.getErogatoreId(), Math.toIntExact(c.getNumero())));
-        return OrdinamentoErogatori.ordina(compatibili(richiesta), carichi);
+        return OrdinamentoErogatori.ordina(compatibili(richiesta), richieste.carichiConfermati(clock.instant()));
     }
 
     @Override
@@ -74,53 +78,50 @@ public class ServizioCoordinamentoRichieste implements CoordinamentoRichiesteApi
             UUID erogatoreId, AmbitoErogazione ambito) {
         verificaBanco(attore);
         if (erogatoreId == null || ambito == null) {
-            throw new IllegalArgumentException("Erogatore e ambito obbligatori");
+            throw new DatiRichiestaNonValidiException(Map.of("contatto", "Erogatore e ambito obbligatori"));
         }
         var richiesta = blocca(richiestaId);
         richiesta.verificaPresaInCarico();
         verificaAssenzaContattiInAttesa(richiestaId);
         var opzioni = compatibili(richiesta);
         if (opzioni.stream().noneMatch(o -> o.accountId().equals(erogatoreId) && o.ambito() == ambito)) {
-            throw new IllegalArgumentException("Erogatore non compatibile con la richiesta");
+            throw new DatiRichiestaNonValidiException(Map.of("contatto", "Erogatore non compatibile con la richiesta"));
         }
         if (ambito == AmbitoErogazione.CENTRO_PICUS_A_DISTANZA) {
             verificaEsaurimentoLocale(richiestaId, opzioni);
         }
         String nomeMisura = consultazione.consultaRichiesta(attore, richiestaId).richiesta().nomeMisura();
-        var contatto = contatti.saveAndFlush(ContattoDisponibilitaJpa.crea(
-                richiesta, erogatoreId, ambito, nomeMisura, clock.instant()));
-        avvisi.avvisaDisponibilita(richiestaId, contatto.getId(), erogatoreId);
-        return aDto(contatto);
+        var contatto = contatti.registra(richiestaId, erogatoreId, ambito, nomeMisura, clock.instant());
+        avvisi.avvisaDisponibilita(richiestaId, contatto.id(), erogatoreId);
+        return contatto;
     }
 
     @Override
     @Transactional
     public RichiestaSintesi assegnaErogatore(IdentitaAutenticata attore, UUID contattoId) {
         verificaBanco(attore);
-        var riferimento = contatti.cercaRiferimento(contattoId)
-                .orElseThrow(() -> new NoSuchElementException("Contatto non trovato"));
-        var richiesta = blocca(riferimento.getRichiestaId());
+        var richiestaId = contatti.richiestaDelContatto(contattoId).orElseThrow(RisorsaRichiesteNonTrovataException::new);
+        var richiesta = blocca(richiestaId);
         richiesta.verificaPresaInCarico();
-        var contatto = contatti.findById(contattoId).orElseThrow(() -> new NoSuchElementException("Contatto non trovato"));
-        if (contatto.getEsito() != EsitoContatto.DISPONIBILE) {
-            throw new IllegalStateException("Il contatto non attesta disponibilità");
+        var contatto = contatti.cerca(contattoId).orElseThrow(RisorsaRichiesteNonTrovataException::new);
+        if (contatto.esito() != EsitoContatto.DISPONIBILE) {
+            throw new ConflittoRichiestaException("Il contatto non attesta disponibilità");
         }
-        var ultimo = ultimiContatti(richiesta.getId())
-                .get(new Opzione(contatto.getErogatoreId(), contatto.getAmbito()));
-        if (ultimo == null || !ultimo.getId().equals(contattoId)) {
-            throw new IllegalStateException("La risposta è stata superata da un contatto successivo");
+        var ultimo = ultimiContatti(richiestaId).get(new Opzione(contatto.erogatoreId(), contatto.ambito()));
+        if (ultimo == null || !ultimo.id().equals(contattoId)) {
+            throw new ConflittoRichiestaException("La risposta è stata superata da un contatto successivo");
         }
-        verificaAssenzaContattiInAttesa(richiesta.getId());
-        if (compatibili(richiesta).stream().noneMatch(o -> o.accountId().equals(contatto.getErogatoreId())
-                && o.ambito() == contatto.getAmbito())) {
-            throw new IllegalStateException("L'erogatore non è più abilitato per questa opzione");
+        verificaAssenzaContattiInAttesa(richiestaId);
+        if (!catalogo.bloccaCompatibilita(richiesta.misuraId(), richiesta.comuneCodice(),
+                contatto.erogatoreId(), contatto.ambito())) {
+            throw new ConflittoRichiestaException("L'erogatore non è più abilitato per questa opzione");
         }
-        richiesta.assegna(contatto.getErogatoreId(), contatto.getAmbito());
-        return consultazione.consultaRichiesta(attore, richiesta.getId()).richiesta();
+        richieste.aggiorna(richiesta.assegna(contatto.erogatoreId(), contatto.ambito()));
+        return consultazione.consultaRichiesta(attore, richiestaId).richiesta();
     }
 
-    private List<ErogatoreCompatibile> compatibili(RichiestaJpa richiesta) {
-        return catalogo.cercaErogatoriCompatibili(richiesta.getMisuraId(), richiesta.getComuneCodice());
+    private List<ErogatoreCompatibile> compatibili(RichiestaDiMisura richiesta) {
+        return catalogo.cercaErogatoriCompatibili(richiesta.misuraId(), richiesta.comuneCodice());
     }
 
     private void verificaEsaurimentoLocale(UUID richiestaId, List<ErogatoreCompatibile> opzioni) {
@@ -129,40 +130,32 @@ public class ServizioCoordinamentoRichieste implements CoordinamentoRichiesteApi
                 .filter(o -> o.ambito() != AmbitoErogazione.CENTRO_PICUS_A_DISTANZA)
                 .anyMatch(o -> {
                     var ultimo = ultimi.get(new Opzione(o.accountId(), o.ambito()));
-                    return ultimo == null || ultimo.getEsito() != EsitoContatto.NON_DISPONIBILE;
+                    return ultimo == null || ultimo.esito() != EsitoContatto.NON_DISPONIBILE;
                 });
         if (localeNonDeclinato) {
-            throw new IllegalStateException("Valutare prima la disponibilità degli erogatori locali");
+            throw new ConflittoRichiestaException("Valutare prima la disponibilità degli erogatori locali");
         }
     }
 
-    private Map<Opzione, ContattoDisponibilitaJpa> ultimiContatti(UUID richiestaId) {
-        Map<Opzione, ContattoDisponibilitaJpa> ultimi = new HashMap<>();
-        contatti.findAllByRichiesta_IdOrderByOrdineInvioAsc(richiestaId)
-                .forEach(c -> ultimi.put(new Opzione(c.getErogatoreId(), c.getAmbito()), c));
+    private Map<Opzione, ContattoDisponibilita> ultimiContatti(UUID richiestaId) {
+        Map<Opzione, ContattoDisponibilita> ultimi = new HashMap<>();
+        contatti.storico(richiestaId).forEach(c -> ultimi.put(new Opzione(c.erogatoreId(), c.ambito()), c));
         return ultimi;
     }
 
     private void verificaAssenzaContattiInAttesa(UUID richiestaId) {
-        if (contatti.existsByRichiesta_IdAndEsito(richiestaId, EsitoContatto.IN_ATTESA.name())) {
-            throw new IllegalStateException("Un contatto è ancora in attesa di risposta");
+        if (contatti.inAttesa(richiestaId)) {
+            throw new ConflittoRichiestaException("Un contatto è ancora in attesa di risposta");
         }
     }
 
-    private RichiestaJpa blocca(UUID richiestaId) {
-        return richieste.cercaPerAggiornamento(richiestaId)
-                .orElseThrow(() -> new NoSuchElementException("Richiesta non trovata"));
+    private RichiestaDiMisura blocca(UUID richiestaId) {
+        return richieste.cercaPerAggiornamento(richiestaId).orElseThrow(RisorsaRichiesteNonTrovataException::new);
     }
 
     private static void verificaBanco(IdentitaAutenticata attore) {
-        if (attore == null || attore.accountId() == null || attore.ruolo() != RuoloUtente.BANCO) {
-            throw new SecurityException("Operazione riservata al Banco");
-        }
-    }
-
-    private static ContattoDisponibilita aDto(ContattoDisponibilitaJpa c) {
-        return new ContattoDisponibilita(c.getId(), c.getRichiesta().getId(),
-                c.getErogatoreId(), c.getAmbito(), c.getEsito());
+        ControlloAccesso.richiedi(attore != null && attore.accountId() != null && attore.ruolo() == RuoloUtente.BANCO,
+                "Operazione riservata al Banco");
     }
 
     private record Opzione(UUID accountId, AmbitoErogazione ambito) {}

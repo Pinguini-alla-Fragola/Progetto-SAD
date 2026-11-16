@@ -3,6 +3,8 @@ package it.unina.picus.richieste.interno.dominio;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.time.Instant;
+import java.util.Map;
 
 /** Porta di persistenza del modulo Richieste. */
 public interface RichiestaRepository {
@@ -11,6 +13,15 @@ public interface RichiestaRepository {
 
     /** Cerca una pratica senza modificarla. */
     Optional<RichiestaDiMisura> cercaPerId(UUID id);
+
+    /** Rilegge e blocca la pratica fino alla fine della transazione chiamante. */
+    Optional<RichiestaDiMisura> cercaPerAggiornamento(UUID id);
+
+    /** Salva la transizione della pratica già bloccata nella stessa transazione. */
+    void aggiorna(RichiestaDiMisura richiesta);
+
+    /** Conta gli appuntamenti confermati futuri per erogatore con una query aggregata. */
+    Map<UUID, Integer> carichiConfermati(Instant da);
 
     /** Cerca un invio nel solo perimetro della OPT titolare. */
     Optional<RichiestaDiMisura> cercaPerInvio(UUID titolareId, UUID riferimentoInvio);

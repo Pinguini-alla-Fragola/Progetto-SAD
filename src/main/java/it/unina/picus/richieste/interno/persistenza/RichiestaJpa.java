@@ -60,7 +60,7 @@ public class RichiestaJpa {
     RichiestaDiMisura aDominio() {
         return new RichiestaDiMisura(id, titolareId, misuraId, tipoDestinatario,
                 comuneCodice, description, inviataIl, stato, erogatoreId,
-                accordo == null ? null : accordo.aDto(), riferimentoInvio);
+                accordo == null ? null : accordo.aDto(), riferimentoInvio, erogatoreAmbito);
     }
 
     /** {@return identificativo della richiesta} */
@@ -88,29 +88,9 @@ public class RichiestaJpa {
         return stato;
     }
 
-    /** Il chiamante mantiene il lock sulla riga fino al commit. */
-    public void prendiInCarico() {
-        if (stato != StatoRichiesta.CREATA) {
-            throw new IllegalStateException("La richiesta non è Creata");
-        }
-        stato = StatoRichiesta.PRESA_IN_CARICO;
-    }
-
-    /** Verifica lo stato richiesto dai comandi di ricerca e disponibilità. */
-    public void verificaPresaInCarico() {
-        if (stato != StatoRichiesta.PRESA_IN_CARICO) {
-            throw new IllegalStateException("La richiesta non è Presa in carico");
-        }
-    }
-
-    /** Registra assegnatario, ambito e stato insieme dopo la verifica della risposta positiva. */
-    public void assegna(UUID accountId, AmbitoErogazione ambito) {
-        verificaPresaInCarico();
-        if (accountId == null || ambito == null) {
-            throw new IllegalArgumentException("Assegnatario e ambito obbligatori");
-        }
-        erogatoreId = accountId;
-        erogatoreAmbito = ambito;
-        stato = StatoRichiesta.IN_PROGRAMMAZIONE;
+    void aggiorna(RichiestaDiMisura richiesta) {
+        stato = richiesta.stato();
+        erogatoreId = richiesta.erogatoreId();
+        erogatoreAmbito = richiesta.erogatoreAmbito();
     }
 }

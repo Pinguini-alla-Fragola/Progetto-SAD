@@ -18,6 +18,8 @@ public class OffertaOptJpa {
 
     protected OffertaOptJpa() {}
 
+    boolean attiva() { return attiva; }
+
     /** Chiave della dichiarazione per OPT e misura. */
     @Embeddable
     public record Chiave(UUID optId, long misuraId) implements Serializable {}
