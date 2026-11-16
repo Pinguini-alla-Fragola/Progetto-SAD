@@ -33,6 +33,44 @@ Il gruppo sta definendo i processi as-is e to-be nell'iterazione preparatoria.
 - [Regole di contribuzione](.github/CONTRIBUTING.md)
 
 
+## Interfaccia web MVP
+
+Con il database e il profilo `demo` avviati come descritto sotto, aprire
+`http://localhost:8080/login`. L'interfaccia usa le sessioni e la protezione
+CSRF di Spring Security.
+
+- La OPT può inviare una richiesta selezionando misura e comune dal catalogo,
+  ritrovare le proprie richieste e consultarne il dettaglio.
+- Il Banco vede la coda in ordine di arrivo, prende esplicitamente in carico
+  una richiesta, consulta gli erogatori compatibili e interpella un account
+  per volta. Dopo una risposta positiva può assegnare l'erogatore e passare
+  la pratica a **In programmazione**.
+- La OPT o l'operatore interpellato trova il contatto nella propria area e
+  comunica disponibilità o indisponibilità. Dal contatto può aprire la pratica
+  dopo l'assegnazione. Il solo candidato vede i dati minimi, mentre la
+  descrizione del bisogno resta riservata alla OPT titolare e al Banco.
+- Il Banco consulta anche lo storico dei contatti, gli account attivi e il
+  catalogo delle misure attive. I pulsanti **Aggiorna** ricaricano gli elenchi.
+
+La disponibilità del candidato e l'assegnazione sono passaggi distinti.
+L'apertura del dettaglio conserva lo stato. Se la risposta all'invio viene
+persa, **Riprova lo stesso invio** riusa dati e `Idempotency-Key`, senza creare
+una seconda pratica.
+
+I controlli senza endpoint restano disattivati: conferma dell'accordo e
+rifiuto definitivo (#52), annullamento, archivio degli esiti, gestione delle
+utenze e del catalogo, offerta, comunicazioni generali e monitoraggio.
+Le regole di autorizzazione di #28 non equivalgono all'implementazione di
+tutte queste operazioni. Per una demo della ricerca degli erogatori usare
+la [fixture sintetica e la procedura di coordinamento](docs/architecture/api-coordinamento-richieste.md).
+
+I test delle viste e dei permessi sono in `RichiesteVisteTest`; i test del
+client HTTP si eseguono con Node.js 22 o successivo:
+
+```bash
+node --test src/test/js/area-client.test.mjs
+```
+
 ## Prerequisiti
 
 - Java **25 LTS**.
