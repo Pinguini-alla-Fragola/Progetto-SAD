@@ -14,8 +14,9 @@ import it.unina.picus.richieste.api.RichiesteApi.StatoRichiesta;
  * autorizzato non si rivela nulla sulle regole di stato. L'annullamento è ammesso in qualsiasi stato.
  *
  * <p>Una ripetizione su una richiesta già Annullata è idempotente anche senza motivo, come
- * promette il contratto di {@code RichiesteApi} e come prevede la #54: si riconosce prima di
- * validare il motivo.
+ * promette il contratto di {@code RichiesteApi} e come prevede la #54. Per questo Annullata è tra
+ * gli stati con motivo facoltativo, e {@link #motivoObbligatorio} e {@link #valuta} danno la
+ * stessa risposta.
  *
  * @see RichiesteApi#annullaRichiesta
  */
@@ -29,8 +30,9 @@ public final class RegoleAnnullamento {
         GIA_ANNULLATA
     }
 
-    // Stati da cui il motivo è facoltativo.
-    private static final Set<StatoRichiesta> MOTIVO_FACOLTATIVO = Set.of(StatoRichiesta.CREATA);
+    // Stati con motivo facoltativo: Creata e Annullata (la ripetizione è idempotente).
+    private static final Set<StatoRichiesta> MOTIVO_FACOLTATIVO =
+            Set.of(StatoRichiesta.CREATA, StatoRichiesta.ANNULLATA);
 
     private RegoleAnnullamento() {
     }
@@ -39,7 +41,7 @@ public final class RegoleAnnullamento {
      * Dice se per annullare partendo da questo stato serve un motivo.
      *
      * @param stato stato corrente della richiesta
-     * @return {@code false} solo partendo da Creata
+     * @return {@code false} partendo da Creata e da Annullata, {@code true} negli altri stati
      */
     public static boolean motivoObbligatorio(StatoRichiesta stato) {
         return !MOTIVO_FACOLTATIVO.contains(Objects.requireNonNull(stato, "stato"));
@@ -51,19 +53,17 @@ public final class RegoleAnnullamento {
      * come U+00A0 e U+202F.
      *
      * @param stato stato corrente della richiesta
-     * @param motivo motivo indicato da chi annulla, facoltativo solo partendo da Creata
+     * @param motivo motivo indicato da chi annulla, facoltativo partendo da Creata e da Annullata
      * @return {@link Decisione#GIA_ANNULLATA} se la richiesta è già Annullata, con o senza motivo,
      *         altrimenti {@link Decisione#ANNULLA}
-     * @throws IllegalArgumentException se la richiesta non è Annullata e manca il motivo richiesto
+     * @throws IllegalArgumentException se manca il motivo negli stati in cui è obbligatorio, cioè
+     *         tutti tranne Creata e Annullata
      */
     public static Decisione valuta(StatoRichiesta stato, String motivo) {
-        if (stato == StatoRichiesta.ANNULLATA) {
-            return Decisione.GIA_ANNULLATA;
-        }
         if (motivoObbligatorio(stato) && eVuoto(motivo)) {
             throw new IllegalArgumentException("Motivo obbligatorio");
         }
-        return Decisione.ANNULLA;
+        return stato == StatoRichiesta.ANNULLATA ? Decisione.GIA_ANNULLATA : Decisione.ANNULLA;
     }
 
     // isBlank() non considera spazi i caratteri non separabili: isSpaceChar li include.
