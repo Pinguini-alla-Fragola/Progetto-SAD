@@ -16,4 +16,8 @@ public class ProfiloOperatoreJpa {
 
     protected ProfiloOperatoreJpa() {
     }
+
+    public UUID getAccountId() { return accountId; }
+    public String getTipologia() { return tipologia; }
+    public String getComuneCodice() { return comuneCodice; }
 }
