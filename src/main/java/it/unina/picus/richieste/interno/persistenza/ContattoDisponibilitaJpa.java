@@ -27,6 +27,9 @@ public class ContattoDisponibilitaJpa {
     @Id
     private UUID id;
 
+    @Column(insertable = false, updatable = false)
+    private Long ordineInvio;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "richiesta_id", nullable = false, updatable = false)
     private RichiestaJpa richiesta;
@@ -48,6 +51,21 @@ public class ContattoDisponibilitaJpa {
 
     /** Costruttore riservato a JPA. */
     protected ContattoDisponibilitaJpa() {
+    }
+
+    /** Costruisce il contatto mentre il chiamante mantiene il lock della richiesta. */
+    public static ContattoDisponibilitaJpa crea(RichiestaJpa richiesta, UUID erogatoreId,
+            AmbitoErogazione ambito, String nomeMisura, Instant istante) {
+        richiesta.aDominio().verificaPresaInCarico();
+        var contatto = new ContattoDisponibilitaJpa();
+        contatto.id = UUID.randomUUID();
+        contatto.richiesta = richiesta;
+        contatto.erogatoreId = erogatoreId;
+        contatto.ambito = ambito.name();
+        contatto.nomeMisura = nomeMisura;
+        contatto.inviatoIl = istante;
+        contatto.esito = EsitoContatto.IN_ATTESA.name();
+        return contatto;
     }
 
     /** {@return identificativo del contatto} */

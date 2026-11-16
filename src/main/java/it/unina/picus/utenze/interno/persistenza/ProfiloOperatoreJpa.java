@@ -13,6 +13,7 @@ public class ProfiloOperatoreJpa {
     private UUID accountId;
     private String tipologia;
     private String comuneCodice;
+    private boolean centroPicus;
 
     protected ProfiloOperatoreJpa() {
     }
@@ -20,4 +21,5 @@ public class ProfiloOperatoreJpa {
     public UUID getAccountId() { return accountId; }
     public String getTipologia() { return tipologia; }
     public String getComuneCodice() { return comuneCodice; }
+    public boolean isCentroPicus() { return centroPicus; }
 }

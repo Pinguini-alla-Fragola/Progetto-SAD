@@ -6,6 +6,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
@@ -104,6 +105,19 @@ public class StubUtenzeApi implements UtenzeApi {
         return perEmail.values().stream()
                 .filter(a -> a.ruolo() == RuoloUtente.OPERATORE && a.stato() == StatoUtenza.ATTIVO)
                 .flatMap(a -> profilo(a).stream()).toList();
+    }
+
+    @Override
+    public List<ProfiloErogatore> elencoOptAttive(Set<UUID> ids) {
+        return perEmail.values().stream()
+                .filter(a -> ids.contains(a.id()) && a.ruolo() == RuoloUtente.OPT && a.stato() == StatoUtenza.ATTIVO)
+                .flatMap(a -> profilo(a).stream()).toList();
+    }
+
+    @Override
+    public Optional<ProfiloErogatore> bloccaProfiloPerMisura(UUID accountId, long misuraId) {
+        // Lo skeleton offre solo consultazione in memoria; non esegue assegnazioni persistite.
+        return cercaProfiloErogatoreAttivo(accountId);
     }
 
     private Optional<Account> trova(UUID id) {

@@ -2,6 +2,9 @@ package it.unina.picus.richieste.interno.persistenza;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.List;
+import java.time.Instant;
+import it.unina.picus.richieste.api.RichiesteApi.StatoRichiesta;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -28,4 +31,20 @@ public interface RichiestaRepository extends JpaRepository<RichiestaJpa, UUID> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select r from RichiestaJpa r where r.id = :id")
     Optional<RichiestaJpa> cercaPerAggiornamento(@Param("id") UUID id);
+
+    /** Conteggia in un'unica query gli appuntamenti confermati non ancora trascorsi. */
+    @Query("""
+            select r.erogatoreId as erogatoreId, count(r) as numero
+            from RichiestaJpa r where r.erogatoreId is not null and r.stato = :stato
+            and r.accordo.dataOra >= :istante group by r.erogatoreId
+            """)
+    List<CaricoAppuntamenti> carichi(@Param("stato") StatoRichiesta stato, @Param("istante") Instant istante);
+
+    /** Proiezione aggregata senza caricare le pratiche degli altri candidati. */
+    interface CaricoAppuntamenti {
+        /** {@return account dell'erogatore} */
+        UUID getErogatoreId();
+        /** {@return numero di appuntamenti nel criterio di carico} */
+        long getNumero();
+    }
 }
