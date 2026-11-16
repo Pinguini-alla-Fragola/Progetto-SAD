@@ -502,14 +502,3 @@ body[data-area] .picus-footer { background: var(--color-white); }
     .count-row .btn { grid-column: 1 / -1; justify-self: start; }
     .picus-dialog .picus-fields { grid-template-columns: minmax(0, 1fr); }
 }
-
-/* Dati di disponibilità e riepiloghi consultabili. */
-.account-list, .contatto-storico { margin: 0; padding: 0; list-style: none; }
-.contatto-dati { margin: 0 0 1rem; }
-.contatto-dati dd { margin: 0 0 .75rem; overflow-wrap: anywhere; }
-.contatto-dati dd:last-child { margin-bottom: 0; }
-.contatto-azioni { display: grid; gap: .75rem; margin-block: 1rem; }
-.contatto-riga { display: grid; gap: .375rem; min-width: 0; }
-.contatto-erogatore { min-width: 0; overflow-wrap: anywhere; }
-.badge-stato[data-esito="DISPONIBILE"] { background: var(--color-success-bg); color: var(--color-success); }
-.badge-stato[data-esito="NON_DISPONIBILE"] { background: var(--color-danger-bg); color: var(--color-danger); }

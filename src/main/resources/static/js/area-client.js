@@ -1,26 +1,39 @@
 export class ErroreHttp extends Error {
-    constructor(stato) {
-        super('Richiesta non riuscita');
+    constructor(stato, dati) {
+        super(dati?.message || dati?.errore || 'Operazione non riuscita');
         this.stato = stato;
     }
 }
 
-export async function api(percorso, { method = 'GET', body } = {}) {
+export async function api(url, { method = 'GET', body, contentType = 'application/json' } = {}) {
     const headers = { Accept: 'application/json' };
-    if (method === 'POST') {
+    if (!['GET', 'HEAD', 'OPTIONS', 'TRACE'].includes(method)) {
         const csrf = await api('/api/auth/csrf');
         headers[csrf.headerName] = csrf.token;
     }
     if (body !== undefined) {
-        headers['Content-Type'] = 'application/json';
+        headers['Content-Type'] = contentType;
     }
-    const risposta = await fetch(percorso, {
-        method,
-        headers,
-        body: body === undefined ? undefined : JSON.stringify(body)
+    const res = await fetch(url, {
+        method, headers,
+        body: body !== undefined && contentType === 'application/json' ? JSON.stringify(body) : body
     });
-    if (!risposta.ok) {
-        throw new ErroreHttp(risposta.status);
+    const dati = res.status === 204 ? null : await res.json().catch(() => null);
+    if (!res.ok) {
+        throw new ErroreHttp(res.status, dati);
     }
-    return risposta.status === 204 ? null : risposta.json();
+    return dati;
+}
+
+export function pagina(url) {
+    return url;
+}
+
+export async function esci() {
+    try {
+        await api('/api/auth/logout', { method: 'POST' });
+    } catch (err) {
+        if (err.stato !== 401) throw err;
+    }
+    location.assign('/login?logout');
 }

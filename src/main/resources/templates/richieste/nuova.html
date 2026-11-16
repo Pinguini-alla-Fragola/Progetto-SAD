@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuova Richiesta di Misura &mdash; PICUS</title>
+    <link rel="icon" href="/img/picus.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/css/picus.css">
+    <script src="/js/nuova-richiesta.js" type="module"></script>
+    <link rel="stylesheet" href="/css/integrazione-ui.css">
+</head>
+<body class="flow-page">
+    <a th:replace="~{fragments/layout :: skip}" href="#contenuto">Vai al contenuto</a>
+    <header class="picus-navbar">
+        <div class="nav-inner">
+            <a th:replace="~{fragments/layout :: brand}" href="/">PICUS</a>
+            <a href="/opt/dashboard" class="nav-link"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#back"></use></svg> Area OPT</a>
+        </div>
+    </header>
+
+    <main id="contenuto" class="mobile-wrapper" tabindex="-1">
+        <header class="mobile-header">
+            <div>
+                <h1>Nuova richiesta di misura</h1>
+            </div>
+        </header>
+
+        <div class="mobile-body">
+            <div class="alert alert-info">
+                <div>
+                    <strong>Tutela dei dati degli assistiti.</strong> Non inserire mai nome, cognome, codice fiscale, recapiti o altri riferimenti identificativi della persona o del nucleo assistito.
+                </div>
+            </div>
+
+            <form id="richiestaForm" data-form-anteprima><fieldset class="campi-inattivi" disabled>
+                <div class="form-group">
+                    <label class="form-label" for="misuraId">Misura di accompagnamento *</label>
+                    <select id="misuraId" name="misuraId" class="form-control" required>
+                        <option value="">Seleziona una misura</option>
+                        <option th:each="m : ${misure}" th:value="${m.id}" th:text="${m.dati.nome}"></option>
+                    </select>
+                </div>
+
+                <fieldset class="form-group">
+                    <legend class="form-label">Tipologia di destinatario *</legend>
+                    <div class="radio-pill-group">
+                        <label class="radio-pill">
+                            <input type="radio" name="tipoDestinatario" value="PERSONA" checked>
+                            <span>Persona</span>
+                        </label>
+                        <label class="radio-pill">
+                            <input type="radio" name="tipoDestinatario" value="NUCLEO">
+                            <span>Nucleo familiare</span>
+                        </label>
+                    </div>
+                </fieldset>
+
+                <div class="form-group">
+                    <label class="form-label" for="comune">Comune di intervento *</label>
+                    <input type="text" id="comune" name="comuneCodice" class="form-control" th:value="${comuneDefault}" placeholder="Es. Napoli" maxlength="150" required aria-describedby="comune-help">
+                    <div class="form-text" id="comune-help">Utilizzato dal Banco per individuare gli erogatori nello stesso comune o nei comuni limitrofi.</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="description">Descrizione del bisogno (facoltativa)</label>
+                    <textarea id="description" name="description" class="form-control" rows="3" maxlength="1000" placeholder="Indica eventuali esigenze logistiche o linguistiche in forma strettamente impersonale..."></textarea>
+                </div>
+
+                <span class="azione-inattiva" data-funzione-inattiva><button type="submit" class="btn btn-primary btn-block nuova-richiesta-stile-1" id="btnInvia">
+                    Invia la richiesta al Banco
+                </button></span>
+            </fieldset></form>
+
+            <p id="errore-invio" class="picus-esito picus-errore" role="alert"></p>
+            <div id="conferma" role="status" class="alert alert-success nuova-richiesta-stile-2" hidden>
+                <div class="nuova-richiesta-stile-3">Richiesta registrata con successo</div>
+                <div class="nuova-richiesta-stile-4">Identificativo della pratica: <code id="confId"></code></div>
+                <div class="nuova-richiesta-stile-5">Stato assegnato: <span class="badge-stato ">Creata</span></div>
+                <div class="nuova-richiesta-stile-6">
+                    <a id="linkDettaglio" href="#" class="btn btn-secondary btn-block btn-sm">Apri Scheda Pratica &rarr;</a>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

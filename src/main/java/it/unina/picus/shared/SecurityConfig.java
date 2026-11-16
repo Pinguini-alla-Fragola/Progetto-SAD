@@ -99,7 +99,7 @@ class SecurityConfig {
                 .sessionManagement(Customizer.withDefaults())
                 .with(new LoginJsonConfigurer(json), Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/api/auth/csrf").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/auth/csrf", "/recupera", "/attiva").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers("/login", "/error", "/css/**", "/js/**", "/img/**", "/fonts/**", "/favicon.ico").permitAll()
                         // ogni ruolo vede solo la propria area

@@ -11,10 +11,10 @@ const etichetteAmbito = {
     CENTRO_PICUS_A_DISTANZA: 'Centro PICUS a distanza'
 };
 const etichetteDestinatario = { PERSONA: 'Persona', NUCLEO: 'Nucleo familiare' };
-
-const pagina = document.getElementById('contenuto');
-const caricamento = document.getElementById('caricamento');
-const errore = document.getElementById('errore-contatto');
+const perId = id => document.getElementById(id);
+const pagina = perId('contenuto');
+const caricamento = perId('caricamento');
+const errore = perId('errore-contatto');
 
 function mostraErrore(causa, assente) {
     const messaggi = {
@@ -35,23 +35,22 @@ function mostraEsito(elemento, esito) {
 
 async function collegaRisposta(contattoId) {
     const percorso = '/api/contatti-disponibilita/' + encodeURIComponent(contattoId);
-    const azioni = document.getElementById('azioni');
+    const azioni = perId('sezione-azioni');
     const pulsanti = [...azioni.querySelectorAll('button')];
-    const esito = document.getElementById('esito-contatto');
-    const conferma = document.getElementById('risposta-registrata');
-    const assente = 'Il contatto non è disponibile.';
+    const esito = perId('esito-contatto');
     try {
         const dettaglio = await api(percorso);
-        document.getElementById('misura').textContent = dettaglio.nomeMisura;
-        document.getElementById('comune').textContent = dettaglio.comuneCodice;
-        document.getElementById('destinatario').textContent = etichetteDestinatario[dettaglio.tipoDestinatario];
-        document.getElementById('ambito').textContent = etichetteAmbito[dettaglio.contatto.ambito];
-        document.getElementById('richiesta-id').textContent = dettaglio.contatto.richiestaId;
-        document.getElementById('dati-contatto').hidden = false;
+        perId('misura-titolo').textContent = dettaglio.nomeMisura;
+        perId('comune-intervento').textContent = dettaglio.comuneCodice;
+        perId('tipo-destinatario').textContent = etichetteDestinatario[dettaglio.tipoDestinatario];
+        perId('richiesta-id').textContent = dettaglio.contatto.richiestaId;
+        perId('contatto-remoto').hidden = dettaglio.contatto.ambito !== 'CENTRO_PICUS_A_DISTANZA';
+        perId('dati-contatto').hidden = false;
         mostraEsito(esito, dettaglio.contatto.esito);
         azioni.hidden = dettaglio.contatto.esito !== 'IN_ATTESA';
+        perId('risposta-presente').hidden = !azioni.hidden;
     } catch (causa) {
-        mostraErrore(causa, assente);
+        mostraErrore(causa, 'Il contatto non è disponibile.');
         return;
     } finally {
         caricamento.hidden = true;
@@ -62,18 +61,19 @@ async function collegaRisposta(contattoId) {
             pulsanti.forEach(azione => { azione.disabled = true; });
             errore.hidden = true;
             try {
+                const disponibile = pulsante.dataset.disponibile === 'true';
                 const contatto = await api(percorso + '/risposta', {
-                    method: 'POST', body: { disponibile: pulsante.dataset.disponibile === 'true' }
+                    method: 'POST', body: { disponibile }
                 });
                 mostraEsito(esito, contatto.esito);
-                conferma.textContent = 'Risposta registrata.';
-                conferma.hidden = false;
+                perId('testo-esito').textContent = disponibile
+                    ? 'Hai comunicato la tua disponibilità al Banco. La richiesta resta in presa in carico fino all’assegnazione.'
+                    : 'Hai comunicato la tua indisponibilità. Il Banco può interpellare un altro erogatore.';
+                perId('messaggio-conferma').hidden = false;
                 azioni.hidden = true;
             } catch (causa) {
-                mostraErrore(causa, assente);
-                if ([401, 403, 404, 409].includes(causa.stato)) {
-                    azioni.hidden = true;
-                }
+                mostraErrore(causa, 'Il contatto non è disponibile.');
+                if ([401, 403, 404, 409].includes(causa.stato)) azioni.hidden = true;
             } finally {
                 pulsanti.forEach(azione => { azione.disabled = false; });
             }
@@ -82,8 +82,8 @@ async function collegaRisposta(contattoId) {
 }
 
 async function caricaStorico(richiestaId) {
-    const elenco = document.getElementById('storico-contatti');
-    const modello = document.getElementById('modello-contatto');
+    const elenco = perId('storico-contatti');
+    const modello = perId('modello-contatto');
     try {
         const contatti = await api('/api/richieste/' + encodeURIComponent(richiestaId) + '/contatti');
         for (const contatto of contatti) {
@@ -93,7 +93,7 @@ async function caricaStorico(richiestaId) {
             mostraEsito(riga.querySelector('[data-campo=esito]'), contatto.esito);
             elenco.append(riga);
         }
-        document.getElementById('nessun-contatto').hidden = contatti.length !== 0;
+        perId('nessun-contatto').hidden = contatti.length !== 0;
     } catch (causa) {
         mostraErrore(causa, 'Lo storico dei contatti non è disponibile.');
     } finally {
@@ -101,8 +101,10 @@ async function caricaStorico(richiestaId) {
     }
 }
 
-if (pagina.dataset.contattoId) {
-    await collegaRisposta(pagina.dataset.contattoId);
-} else {
-    await caricaStorico(pagina.dataset.richiestaId);
+if (pagina.dataset.contattiDisponibili === 'true') {
+    if (pagina.dataset.contattoId) {
+        await collegaRisposta(pagina.dataset.contattoId);
+    } else {
+        await caricaStorico(pagina.dataset.richiestaId);
+    }
 }

@@ -8,27 +8,6 @@
     <span>PICUS</span>
 </a>
 
-<header th:fragment="workspaceHeader(ruolo)" class="picus-navbar workspace-navbar">
-    <div class="nav-inner">
-        <div class="workspace-identity">
-            <button type="button" class="sidebar-toggle" id="sidebar-toggle" aria-controls="workspace-sidebar"
-                    aria-expanded="true" aria-label="Chiudi menu di navigazione">
-                <svg class="icon" aria-hidden="true"><use href="/img/icons.svg#menu"></use></svg>
-            </button>
-            <a th:replace="~{fragments/layout :: brand}" href="/">PICUS</a>
-            <span class="workspace-role" th:text="${ruolo}"></span>
-        </div>
-        <div class="workspace-account">
-            <span class="workspace-user" th:text="${nomeAccount}"></span>
-            <form th:action="@{/logout}" method="post">
-                <button class="btn btn-secondary btn-sm" type="submit">
-                    <svg class="icon" aria-hidden="true"><use href="/img/icons.svg#logout"></use></svg><span>Esci</span>
-                </button>
-            </form>
-        </div>
-    </div>
-</header>
-
 <footer th:fragment="footer" class="picus-footer">
     <div class="footer-inner">
         <p><strong>PICUS</strong></p>
