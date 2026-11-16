@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="/css/integrazione-ui.css">
     <script src="/js/dettaglio-richiesta.js" type="module"></script>
 </head>
-<body class="flow-page">
+<body class="flow-page request-page">
 <a th:replace="~{fragments/layout :: skip}" href="#contenuto">Vai al contenuto</a>
 <header class="picus-navbar">
     <div class="nav-inner">
@@ -17,68 +17,80 @@
         <a th:href="${dashboard}" class="nav-link"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#back"></use></svg> Area di lavoro</a>
     </div>
 </header>
-<main id="contenuto" class="mobile-wrapper" tabindex="-1"
-      th:attr="data-richiesta-id=${richiestaId},data-stato=${richiesta.stato.name()},data-banco=${banco}">
-    <header class="mobile-header">
-        <h1>Dettaglio della richiesta</h1>
+<main id="contenuto" class="request-detail" tabindex="-1"
+      th:attr="data-richiesta-id=${richiestaId},data-stato=${richiesta.stato.name()},data-banco=${banco},data-misura=${richiesta.nomeMisura},data-opt=${nomeOptRichiedente}">
+    <header class="request-heading">
+        <div><h1 th:text="${richiesta.nomeMisura}">Dettaglio della richiesta</h1><p>Richiesta di misura di accompagnamento</p></div>
         <span class="badge-stato" th:classappend="${'badge-' + #strings.toLowerCase(richiesta.stato.name())}"
               th:text="${#strings.capitalize(#strings.toLowerCase(#strings.replace(richiesta.stato.name(), '_', ' ')))}">Creata</span>
     </header>
-    <div class="mobile-body">
-        <dl class="flow-facts request-facts">
-            <dt class="detail-label">Identificativo della pratica</dt>
-            <dd class="detail-value"><code th:text="${richiesta.id}"></code></dd>
-            <dt class="detail-label">Misura di accompagnamento</dt>
-            <dd class="detail-value" th:text="${richiesta.nomeMisura}"></dd>
-            <dt class="detail-label">Data di invio</dt>
-            <dd class="detail-value"><time th:datetime="${richiesta.inviataIl}" th:text="${dataInvio}"></time></dd>
-            <dt class="detail-label">Comune di intervento</dt>
-            <dd class="detail-value" th:text="${comune}"></dd>
-            <dt class="detail-label">Tipologia di destinatario</dt>
-            <dd class="detail-value" th:text="${dettaglio.tipoDestinatario.name() == 'NUCLEO' ? 'Nucleo familiare' : 'Persona'}"></dd>
-            <th:block th:if="${dettaglio.description != null}">
-                <dt class="detail-label">Descrizione del bisogno</dt>
-                <dd class="detail-value request-description" th:text="${dettaglio.description}"></dd>
-            </th:block>
-            <th:block th:if="${dettaglio.erogatoreAssegnatoId != null}">
-                <dt class="detail-label">Account erogatore assegnato</dt>
-                <dd class="detail-value"><code th:text="${dettaglio.erogatoreAssegnatoId}"></code></dd>
-            </th:block>
-        </dl>
 
-        <section th:if="${accordoPresenza != null || accordoRemoto != null}" class="flow-facts" aria-labelledby="titolo-appuntamento">
-            <h2 id="titolo-appuntamento">Appuntamento confermato</h2>
-            <p th:text="${dataAccordo}"></p>
-            <th:block th:if="${accordoPresenza != null}">
-                <p>In presenza</p>
-                <p th:text="${accordoPresenza.luogo}"></p>
-                <p th:text="${accordoPresenza.nomeReferente + ' ' + accordoPresenza.cognomeReferente}"></p>
-                <p>Telefono del referente: <span th:text="${accordoPresenza.telefonoReferente}"></span></p>
-            </th:block>
-            <th:block th:if="${accordoRemoto != null}">
-                <p>A distanza</p>
-                <a th:href="${accordoRemoto.link}" th:text="${accordoRemoto.link}" target="_blank" rel="noopener noreferrer"></a>
-            </th:block>
-        </section>
-        <p th:if="${richiesta.stato.name() == 'RIFIUTATA'}" class="alert alert-danger">Nessun erogatore disponibile</p>
-        <p th:if="${richiesta.stato.name() == 'ANNULLATA'}" class="alert alert-info">La richiesta è annullata.</p>
+    <div class="request-state-message" th:switch="${richiesta.stato.name()}">
+        <p th:case="'CREATA'">La richiesta è stata inviata. Il prossimo passaggio è la presa in carico da parte del Banco.</p>
+        <p th:case="'PRESA_IN_CARICO'">Il Banco sta cercando un erogatore disponibile. La richiesta è in lavorazione.</p>
+        <p th:case="'IN_PROGRAMMAZIONE'">L’erogatore è stato assegnato. Sono da concordare i dettagli dell’accordo.</p>
+        <p th:case="'CONFERMATA'">L’accordo è confermato. Di seguito trovi i dettagli dell’appuntamento.</p>
+        <p th:case="'RIFIUTATA'">Nessun erogatore disponibile. La ricerca si è conclusa senza una soluzione disponibile.</p>
+        <p th:case="'ANNULLATA'">La richiesta è annullata. I dati già registrati sono conservati nella pratica.</p>
+    </div>
 
-        <section th:if="${banco}" aria-labelledby="titolo-coordinamento">
-            <h2 id="titolo-coordinamento">Coordinamento</h2>
+    <div class="request-layout">
+        <div class="request-information">
+            <section aria-labelledby="titolo-riepilogo">
+                <h2 id="titolo-riepilogo">Riepilogo della richiesta</h2>
+                <dl class="request-facts-grid">
+                    <div th:if="${nomeOptRichiedente != null}"><dt>OPT richiedente</dt><dd th:text="${nomeOptRichiedente}"></dd></div>
+                    <div><dt>Data e ora di invio</dt><dd><time th:datetime="${richiesta.inviataIl}" th:text="${dataInvio}"></time></dd></div>
+                    <div><dt>Comune di intervento</dt><dd th:text="${comune}"></dd></div>
+                    <div><dt>Destinatario della misura</dt><dd th:text="${dettaglio.tipoDestinatario.name() == 'NUCLEO' ? 'Nucleo familiare' : 'Persona'}"></dd></div>
+                    <div th:if="${nomeErogatore != null}"><dt>Erogatore assegnato</dt><dd th:text="${nomeErogatore}"></dd></div>
+                </dl>
+            </section>
+            <section class="request-section" th:if="${dettaglio.titolareId != null}" aria-labelledby="titolo-bisogno">
+                <h2 id="titolo-bisogno">Bisogno e contesto</h2>
+                <p class="request-description" th:if="${dettaglio.description != null}" th:text="${dettaglio.description}"></p>
+                <p class="picus-meta" th:unless="${dettaglio.description != null}">Non è stata aggiunta una descrizione.</p>
+            </section>
+            <section class="request-section" th:if="${accordoPresenza != null || accordoRemoto != null}" aria-labelledby="titolo-appuntamento">
+                <h2 id="titolo-appuntamento">Appuntamento confermato</h2>
+                <p class="appointment-date" th:text="${dataAccordo}"></p>
+                <th:block th:if="${accordoPresenza != null}">
+                    <p>In presenza · <span th:text="${accordoPresenza.luogo}"></span></p>
+                    <p th:text="${accordoPresenza.nomeReferente + ' ' + accordoPresenza.cognomeReferente}"></p>
+                    <p>Telefono del referente: <span th:text="${accordoPresenza.telefonoReferente}"></span></p>
+                </th:block>
+                <th:block th:if="${accordoRemoto != null}">
+                    <p>A distanza</p>
+                    <a th:href="${accordoRemoto.link}" th:text="${accordoRemoto.link}" target="_blank" rel="noopener noreferrer"></a>
+                </th:block>
+            </section>
+        </div>
+
+        <aside class="request-coordination" th:if="${banco}" aria-labelledby="titolo-coordinamento">
+            <h2 id="titolo-coordinamento">Coordinamento del Banco</h2>
             <p id="coordinamento-esito" class="picus-esito" role="status"></p>
             <div id="coordinamento-azioni" class="picus-actions"></div>
+            <h3 id="titolo-candidati" hidden>Erogatori compatibili</h3>
             <div id="candidati" class="picus-list"></div>
             <a class="btn btn-secondary btn-sm" th:href="@{/banco/richieste/{id}/contatti(id=${richiestaId})}">Storico dei contatti</a>
-            <div class="picus-actions future-actions">
-                <span class="azione-inattiva" data-funzione-inattiva><button type="button" class="btn btn-secondary btn-sm" disabled>Conferma accordo</button></span>
-                <span class="azione-inattiva" data-funzione-inattiva><button type="button" class="btn btn-danger btn-sm" disabled>Rifiuta richiesta</button></span>
-            </div>
+        </aside>
+
+        <section class="request-reference" aria-labelledby="titolo-riferimenti">
+            <h2 id="titolo-riferimenti">Riferimenti della pratica</h2>
+            <p><span>Identificativo</span><code id="dettaglio-id" th:text="${richiesta.id}"></code></p>
+            <details class="request-future">
+                <summary>Altre operazioni</summary>
+                <div class="picus-actions future-actions">
+                    <th:block th:if="${banco}">
+                        <span class="azione-inattiva" data-funzione-inattiva><button type="button" class="btn btn-secondary btn-sm" disabled>Conferma accordo</button></span>
+                        <span class="azione-inattiva" data-funzione-inattiva><button type="button" class="btn btn-danger btn-sm" disabled>Rifiuta richiesta</button></span>
+                    </th:block>
+                    <span class="azione-inattiva" data-funzione-inattiva><button type="button" class="btn btn-secondary btn-sm" disabled>Annulla la richiesta</button></span>
+                </div>
+            </details>
         </section>
-        <div class="future-actions">
-            <span class="azione-inattiva" data-funzione-inattiva><button type="button" class="btn btn-secondary btn-block" disabled>Annulla la richiesta</button></span>
-        </div>
-        <a th:href="${dashboard}" class="btn btn-secondary btn-block">Torna all’area di lavoro</a>
     </div>
+    <a th:href="${dashboard}" class="btn btn-secondary request-back">Torna all’area di lavoro</a>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>

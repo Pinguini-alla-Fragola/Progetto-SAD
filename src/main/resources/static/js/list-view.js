@@ -35,6 +35,12 @@ class ListView {
         this.search.id = this.id + '-search';
         searchLabel.append(this.searchText, this.search);
         this.filterBox = el('div', null, 'list-filters');
+        this.sortLabel = el('label', null, 'campo list-sort');
+        this.sortText = el('span', 'Ordina per');
+        this.sort = el('select', null, 'form-control');
+        this.sort.id = this.id + '-sort';
+        this.sortLabel.append(this.sortText, this.sort);
+        this.sort.addEventListener('change', () => { this.page = 1; this.render(); });
         this.tools.append(searchLabel, this.filterBox);
         this.search.addEventListener('input', () => { this.page = 1; this.render(); });
         this.search.addEventListener('keydown', event => {
@@ -97,7 +103,7 @@ class ListView {
 
     update(rows, options) {
         this.options = options;
-        this.entries = rows.map(row => ({ row, text: row.listText ?? row.textContent,
+        this.entries = rows.map(row => ({ row, text: row.listText ?? row.textContent, data: row.listData,
             filters: row.listFilters || { ...row.dataset } }));
         rows.forEach(row => row.setAttribute('role', 'listitem'));
         this.items.replaceChildren(...rows);
@@ -132,7 +138,15 @@ class ListView {
         for (const [key, control] of this.filterControls) {
             if (!activeKeys.has(key)) { control.parentElement.remove(); this.filterControls.delete(key); }
         }
+        const selectedOrder = this.sort.value;
+        this.sort.replaceChildren(...(options.sort?.options || []).map(option => new Option(option.label, option.value)));
+        if (options.sort) {
+            this.sort.value = options.sort.options.some(option => option.value === selectedOrder) ? selectedOrder : options.sort.initial;
+        }
+        this.sortLabel.hidden = !options.sort;
+        this.filterBox.append(this.sortLabel);
         this.filterBox.hidden = [...this.filterControls.values()].every(control => control.parentElement.hidden);
+        if (options.sort) this.filterBox.hidden = false;
         this.render();
         return this;
     }
@@ -141,6 +155,7 @@ class ListView {
 
     matching() {
         const entries = filterItems(this.entries, this.search.value, this.filters);
+        if (this.options.sort) entries.sort((a, b) => this.options.sort.compare(a.data, b.data, this.sort.value));
         return this.options.selectable && this.onlySelected.checked
             ? entries.filter(entry => this.checkbox(entry.row).checked) : entries;
     }
@@ -157,6 +172,7 @@ class ListView {
     render(focusSummary = false) {
         if (!this.entries) return;
         const matching = this.matching();
+        if (this.options.sort) this.items.append(...matching.map(entry => entry.row));
         const slice = paginate(matching, this.page, this.pageSize);
         const focusedRow = this.entries.find(entry => entry.row.contains(document.activeElement));
         this.page = slice.page;

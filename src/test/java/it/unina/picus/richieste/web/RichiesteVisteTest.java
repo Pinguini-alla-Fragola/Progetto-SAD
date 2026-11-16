@@ -18,6 +18,8 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import org.springframework.http.MediaType;
 
 /** Verifica le viste renderizzate con dati e permessi reali del backend. */
 @SpringBootTest(properties = "spring.datasource.url=jdbc:h2:mem:viste")
@@ -72,6 +74,32 @@ class RichiesteVisteTest {
     }
 
     @Test
+    void codaBancoEsponeNomeOptEComuneSenzaModificareIlContrattoApplicativo() throws Exception {
+        jdbc.update("update utenze_account set ruolo = 'BANCO' where id = ?", estraneo);
+        mvc.perform(get("/banco/richieste/coda").accept(MediaType.APPLICATION_JSON)
+                .with(user(estraneo.toString()).roles("BANCO")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].richiesta.id").value(richiesta.toString()))
+                .andExpect(jsonPath("$[0].optRichiedente").value("OPT di prova"))
+                .andExpect(jsonPath("$[0].comune").value("Napoli"));
+        mvc.perform(get("/banco/richieste/coda").accept(MediaType.APPLICATION_JSON)
+                .with(user(titolare.toString()).roles("OPT"))).andExpect(status().isForbidden());
+        mvc.perform(get("/banco/richieste/coda").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void dettaglioBancoIdentificaLaOptEDistingueRiepilogoBisognoECoordinamento() throws Exception {
+        jdbc.update("update utenze_account set ruolo = 'BANCO' where id = ?", estraneo);
+        mvc.perform(get("/richieste/{id}", richiesta).with(user(estraneo.toString()).roles("BANCO")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("OPT richiedente")))
+                .andExpect(content().string(containsString("OPT di prova")))
+                .andExpect(content().string(containsString("Bisogno e contesto")))
+                .andExpect(content().string(containsString("Riferimenti della pratica")));
+    }
+
+    @Test
     void accordoRemotoMostraIlLinkSenzaCampiDelReferenteInPresenza() throws Exception {
         jdbc.update("update richieste set stato = 'CONFERMATA', accordo_modalita = 'A_DISTANZA', accordo_data_ora = now(), accordo_link = 'https://example.test/incontro' where id = ?", richiesta);
         mvc.perform(get("/richieste/{id}", richiesta).with(user(titolare.toString()).roles("OPT")))
@@ -86,6 +114,28 @@ class RichiesteVisteTest {
         jdbc.update("update utenze_account set ruolo = 'BANCO' where id = ?", estraneo);
         mvc.perform(get("/richieste/nuova").with(user(estraneo.toString()).roles("BANCO")))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void praticaInesistenteHaUnaPagina404MaLeApiConservanoLErroreJson() throws Exception {
+        UUID assente = UUID.randomUUID();
+        mvc.perform(get("/richieste/{id}", assente).accept(MediaType.TEXT_HTML)
+                .with(user(titolare.toString()).roles("OPT")))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
+                .andExpect(content().string(containsString("Pagina non trovata")));
+        mvc.perform(get("/api/richieste/{id}", assente).accept(MediaType.APPLICATION_JSON)
+                .with(user(titolare.toString()).roles("OPT")))
+                .andExpect(status().isNotFound()).andExpect(jsonPath("$.codice").value("NOT_FOUND"));
+    }
+
+    @Test
+    void pagina404GestisceAncheGliErroriDiPercorso() throws Exception {
+        mvc.perform(get("/error").accept(MediaType.TEXT_HTML)
+                .requestAttr(jakarta.servlet.RequestDispatcher.ERROR_STATUS_CODE, 404)
+                .with(user(titolare.toString()).roles("OPT")))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string(containsString("Pagina non trovata")));
     }
 
     private UUID account() {

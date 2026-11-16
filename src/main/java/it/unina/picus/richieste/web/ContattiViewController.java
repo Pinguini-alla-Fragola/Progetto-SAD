@@ -12,12 +12,17 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
 import it.unina.picus.catalogo.api.ConsultazioneCatalogoApi;
+import it.unina.picus.utenze.api.UtenzeApi;
 import it.unina.picus.richieste.api.InvioRichiesteApi;
+import it.unina.picus.richieste.api.RisorsaRichiesteNonTrovataException;
 import it.unina.picus.richieste.api.RichiesteApi.AccordoADistanza;
 import it.unina.picus.richieste.api.RichiesteApi.AccordoInPresenza;
 
@@ -31,15 +36,17 @@ class ContattiViewController {
     private final ObjectProvider<RequestMappingHandlerMapping> rotte;
     private final InvioRichiesteApi richieste;
     private final ConsultazioneCatalogoApi catalogo;
+    private final UtenzeApi utenze;
     private static final DateTimeFormatter DATA = DateTimeFormatter.ofPattern("d MMMM uuuu, HH:mm", Locale.ITALIAN)
             .withZone(ZoneId.of("Europe/Rome"));
 
     ContattiViewController(@Qualifier("requestMappingHandlerMapping")
             ObjectProvider<RequestMappingHandlerMapping> rotte, InvioRichiesteApi richieste,
-            ConsultazioneCatalogoApi catalogo) {
+            ConsultazioneCatalogoApi catalogo, UtenzeApi utenze) {
         this.rotte = rotte;
         this.richieste = richieste;
         this.catalogo = catalogo;
+        this.utenze = utenze;
     }
 
     /** Carica i valori di catalogo ammessi per l'invio della OPT. */
@@ -65,6 +72,13 @@ class ContattiViewController {
                 .map(c -> c.nome()).orElse(dettaglio.comuneCodice()));
         modello.addAttribute("dataInvio", DATA.format(dettaglio.richiesta().inviataIl()));
         modello.addAttribute("banco", identita.ruolo() == RuoloUtente.BANCO);
+        if (dettaglio.titolareId() != null) {
+            modello.addAttribute("nomeOptRichiedente", utenze.cercaAccount(dettaglio.titolareId())
+                    .map(UtenzeApi.AccountSintetico::nomeVisualizzato).orElse("OPT non disponibile"));
+        }
+        modello.addAttribute("nomeErogatore", dettaglio.erogatoreAssegnatoId() == null ? null
+                : utenze.cercaAccount(dettaglio.erogatoreAssegnatoId())
+                    .map(UtenzeApi.AccountSintetico::nomeVisualizzato).orElse("Erogatore assegnato"));
         if (dettaglio.accordo() instanceof AccordoInPresenza accordo) {
             modello.addAttribute("accordoPresenza", accordo);
             modello.addAttribute("dataAccordo", DATA.format(accordo.dataOra()));
@@ -91,6 +105,13 @@ class ContattiViewController {
         modello.addAttribute("richiestaId", richiestaId);
         modello.addAttribute("contattiDisponibili", endpointRegistrato("/api/richieste/{richiestaId}/contatti"));
         return "richieste/contatti";
+    }
+
+    /** Le pagine mostrano un errore HTML; gli endpoint API conservano il proprio contratto JSON. */
+    @ExceptionHandler(RisorsaRichiesteNonTrovataException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    String richiestaNonTrovata() {
+        return "error/404";
     }
 
     private boolean endpointRegistrato(String percorso) {

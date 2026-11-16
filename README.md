@@ -41,10 +41,13 @@ CSRF di Spring Security.
 
 - La OPT può inviare una richiesta selezionando misura e comune dal catalogo,
   ritrovare le proprie richieste e consultarne il dettaglio.
-- Il Banco vede la coda in ordine di arrivo, prende esplicitamente in carico
+- Il Banco vede la coda dalla richiesta più recente e può scegliere l'ordine
+  cronologico di arrivo nei filtri. Ogni riga mostra OPT richiedente, stato,
+  data e ora; l'identificativo compare soltanto nel dettaglio. Prende esplicitamente in carico
   una richiesta, consulta gli erogatori compatibili e interpella un account
   per volta. Dopo una risposta positiva può assegnare l'erogatore e passare
   la pratica a **In programmazione**.
+  La presa in carico richiede una conferma: Annulla ed Escape conservano lo stato.
 - La OPT o l'operatore interpellato trova il contatto nella propria area e
   comunica disponibilità o indisponibilità. Dal contatto può aprire la pratica
   dopo l'assegnazione. Il solo candidato vede i dati minimi, mentre la
@@ -70,6 +73,11 @@ client HTTP si eseguono con Node.js 22 o successivo:
 ```bash
 node --test src/test/js/area-client.test.mjs
 ```
+
+Il login presenta il logo accanto al modulo su desktop e sopra al modulo su
+mobile. Il dettaglio separa riepilogo, bisogno, coordinamento e riferimenti;
+una pagina 404 dedicata gestisce percorsi e pratiche inesistenti nelle viste,
+mentre gli endpoint API conservano gli errori JSON.
 
 ## Prerequisiti
 

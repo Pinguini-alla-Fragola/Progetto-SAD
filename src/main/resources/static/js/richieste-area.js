@@ -1,5 +1,6 @@
 import { api } from './area-client.js';
 import { renderList, listRow } from './list-view.js';
+import { confermaPresaInCarico } from './conferma.js';
 
 const etichette = {
     CREATA: 'Creata', PRESA_IN_CARICO: 'Presa in carico', IN_PROGRAMMAZIONE: 'In programmazione',
@@ -22,20 +23,23 @@ export function link(testo, href) {
     nodo.href = href;
     return nodo;
 }
-export function pulsante(testo, azione, esito) {
+export function pulsante(testo, azione, esito, conferma) {
     const nodo = elemento('button', testo, 'btn btn-primary btn-sm');
     nodo.type = 'button';
     nodo.addEventListener('click', async () => {
         nodo.disabled = true;
-        esito.textContent = 'Operazione in corso…';
-        esito.classList.remove('picus-errore');
+        let annullata = false;
         try {
+            if (conferma && !await conferma()) { annullata = true; return; }
+            esito.textContent = 'Operazione in corso…';
+            esito.classList.remove('picus-errore');
             await azione();
         } catch (causa) {
             esito.textContent = causa.stato ? causa.message : 'Connessione interrotta. Aggiorna la vista per verificare l’esito.';
             esito.classList.add('picus-errore');
         } finally {
             nodo.disabled = false;
+            if (annullata) nodo.focus();
         }
     });
     return nodo;
@@ -49,7 +53,7 @@ export function riga(titolo, dettagli, azioni, filtri = {}) {
     nodo.append(testo, controlli);
     return listRow(nodo, { filters: filtri });
 }
-async function caricaLista(id, carica, vuoto, filtri = []) {
+async function caricaLista(id, carica, vuoto, filtri = [], opzioni = {}) {
     const box = document.getElementById(id);
     if (!box) return;
     box.setAttribute('aria-busy', 'true');
@@ -59,14 +63,14 @@ async function caricaLista(id, carica, vuoto, filtri = []) {
     try {
         renderList(box, await carica(), {
             empty: vuoto, searchLabel: 'Cerca nell’elenco',
-            filters: filtri.map(key => ({ key, label: key === 'stato' ? 'Stato' : 'Ambito', labels: etichette }))
+            filters: filtri.map(key => ({ key, label: key === 'stato' ? 'Stato' : 'Ambito', labels: etichette })), ...opzioni
         });
     } catch (causa) {
         const messaggio = elemento('p', causa.stato ? causa.message : 'Connessione interrotta. Riprova a caricare l’elenco.', 'picus-errore');
         messaggio.setAttribute('role', 'alert');
         const retry = elemento('button', 'Riprova', 'btn btn-secondary btn-sm');
         retry.type = 'button';
-        retry.addEventListener('click', () => caricaLista(id, carica, vuoto, filtri));
+        retry.addEventListener('click', () => caricaLista(id, carica, vuoto, filtri, opzioni));
         box.replaceChildren(messaggio, retry);
         if (causa.stato === 401) box.append(link('Accedi di nuovo', '/login'));
     } finally {
@@ -77,7 +81,8 @@ async function caricaLista(id, carica, vuoto, filtri = []) {
 export async function caricaRichieste(area) {
     const id = area === 'banco' ? 'coda' : 'richieste-mie';
     return caricaLista(id, async () => {
-        const richieste = await api(area === 'banco' ? '/api/richieste/coda' : '/api/richieste/mie');
+        const dati = await api(area === 'banco' ? '/banco/richieste/coda' : '/api/richieste/mie');
+        const richieste = area === 'banco' ? dati.map(r => ({ ...r.richiesta, optRichiedente: r.optRichiedente, comune: r.comune })) : dati;
         return richieste.map(r => {
             const azioni = [link('Dettaglio', '/richieste/' + r.id)];
             if (area === 'banco') {
@@ -85,14 +90,46 @@ export async function caricaRichieste(area) {
                     await api('/api/richieste/' + r.id + '/presa-in-carico', { method: 'POST' });
                     await caricaRichieste(area);
                     document.getElementById('area-esito').textContent = 'Richiesta presa in carico.';
-                }, document.getElementById('area-esito')));
-                if (r.stato === 'PRESA_IN_CARICO') azioni.push(link('Coordina', '/richieste/' + r.id));
-                if (r.stato !== 'CREATA') azioni.push(link('Storico contatti', '/banco/richieste/' + r.id + '/contatti'));
+                }, document.getElementById('area-esito'), () => confermaPresaInCarico(r.nomeMisura, r.optRichiedente)));
             }
-            return riga(r.nomeMisura, [etichetta(r.stato), data(r.inviataIl), r.id].join(' · '), azioni, { stato: r.stato });
+            return rigaRichiesta(r, azioni, area === 'banco');
         });
-    }, area === 'banco' ? 'La coda è vuota. Le nuove richieste delle OPT compariranno qui in ordine di arrivo.'
-        : 'Non hai ancora inviato richieste. Seleziona «Nuova richiesta» per iniziare.', ['stato']);
+    }, area === 'banco' ? 'La coda è vuota. Le nuove richieste delle OPT compariranno qui.'
+        : 'Non hai ancora inviato richieste. Seleziona «Nuova richiesta» per iniziare.', ['stato'], {
+            searchLabel: area === 'banco' ? 'Cerca misura o OPT' : 'Cerca una richiesta',
+            placeholder: area === 'banco' ? 'Misura, organizzazione o comune' : 'Misura o stato',
+            columns: area === 'banco' ? ['Misura', 'OPT richiedente', 'Stato', 'Invio', 'Azioni'] : [],
+            sort: {
+                initial: 'recenti', options: [{ value: 'recenti', label: 'Più recenti' }, { value: 'meno-recenti', label: 'Meno recenti' }],
+                compare: (a, b, ordine) => (new Date(a.inviataIl) - new Date(b.inviataIl)) * (ordine === 'recenti' ? -1 : 1)
+            }
+        });
+}
+
+function rigaRichiesta(r, azioni, banco) {
+    const nodo = elemento('article', null, 'request-row' + (banco ? '' : ' request-row-own'));
+    nodo.dataset.richiestaId = r.id;
+    const campo = (label, valore, classe) => {
+        const box = elemento('div', null, classe);
+        box.append(elemento('span', label, 'request-field-label'), valore);
+        return box;
+    };
+    const misura = elemento('div');
+    misura.append(elemento('strong', r.nomeMisura));
+    if (r.comune) misura.append(elemento('span', r.comune, 'picus-meta'));
+    nodo.append(campo('Misura', misura, 'request-measure'));
+    if (banco) nodo.append(campo('OPT richiedente', elemento('strong', r.optRichiedente), 'request-organization'));
+    const stato = elemento('span', etichetta(r.stato), 'badge-stato badge-' + r.stato.toLowerCase());
+    nodo.append(campo('Stato', stato, 'request-status'));
+    const orario = elemento('time');
+    orario.dateTime = r.inviataIl;
+    orario.append(elemento('span', new Date(r.inviataIl).toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Europe/Rome' })),
+        elemento('span', 'ore ' + new Date(r.inviataIl).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Rome' }), 'picus-meta'));
+    nodo.append(campo('Data e ora', orario, 'request-date'));
+    const controlli = elemento('div', null, 'picus-actions request-actions');
+    controlli.append(...azioni);
+    nodo.append(controlli);
+    return listRow(nodo, { filters: { stato: r.stato }, data: r });
 }
 export async function caricaAvvisi() {
     return caricaLista('assegnazioni', async () => {
@@ -129,7 +166,7 @@ export async function avviaCoordinamento(pagina) {
         azioni.append(pulsante('Prendi in carico', async () => {
             await api('/api/richieste/' + id + '/presa-in-carico', { method: 'POST' });
             location.reload();
-        }, esito));
+        }, esito, () => confermaPresaInCarico(pagina.dataset.misura, pagina.dataset.opt)));
         return;
     }
     if (stato === 'IN_PROGRAMMAZIONE') {
@@ -143,9 +180,10 @@ export async function avviaCoordinamento(pagina) {
         const ultimi = new Map(contatti.map(c => [c.erogatoreId + '|' + c.ambito, c]));
         const attesa = contatti.find(c => c.esito === 'IN_ATTESA');
         if (attesa) {
-            esito.textContent = 'In attesa di risposta dall’account ' + attesa.erogatoreId + '. Puoi interpellare un altro candidato dopo la risposta.';
+            esito.textContent = 'Richiesta di disponibilità inviata. Attendi il riscontro dell’erogatore prima di contattarne un altro.';
         } else {
             esito.textContent = 'Scegli un erogatore compatibile oppure assegna uno dei candidati disponibili.';
+            document.getElementById('titolo-candidati').hidden = false;
             await caricaLista('candidati', async () => {
                 const candidati = await api('/api/richieste/' + id + '/candidati');
                 const localiDaValutare = candidati.some(({ erogatore: e }) => e.ambito !== 'CENTRO_PICUS_A_DISTANZA'
