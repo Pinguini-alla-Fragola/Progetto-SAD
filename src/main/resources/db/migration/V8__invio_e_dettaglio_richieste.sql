@@ -1,3 +1,4 @@
+-- Invio e consultazione, successivi allo schema dei contatti di disponibilità.
 alter table richieste add column riferimento_invio uuid;
 alter table richieste add column accordo_modalita varchar(20);
 alter table richieste add column accordo_data_ora timestamp with time zone;

@@ -1,6 +1,6 @@
 package it.unina.picus.shared;
 
-import it.unina.picus.utenze.api.SessioniApi;
+import it.unina.picus.utenze.api.UtenzeApi;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -11,10 +11,10 @@ import java.util.UUID;
 /** Traduce il principal verificato da Spring Security nell'identità corrente di PICUS. */
 @Component
 public class AutenticazioneCorrente {
-    private final SessioniApi sessioni;
+    private final UtenzeApi utenze;
 
-    public AutenticazioneCorrente(SessioniApi sessioni) {
-        this.sessioni = sessioni;
+    public AutenticazioneCorrente(UtenzeApi utenze) {
+        this.utenze = utenze;
     }
 
     public IdentitaAutenticata richiedi(Authentication authentication) {
@@ -33,6 +33,6 @@ public class AutenticazioneCorrente {
             }
         }
         // Il ruolo arriva dal database, anche quando il principal della sessione è precedente.
-        return sessioni.verificaAccountSessione(accountId).orElseThrow(SessioneNonValidaException::new);
+        return utenze.verificaAccountSessione(accountId).orElseThrow(SessioneNonValidaException::new);
     }
 }

@@ -8,7 +8,7 @@ import java.util.UUID;
  * Fornisce identità verificate e le informazioni minime degli account necessarie ai moduli PICUS.
  * Il chiamante applica i controlli di titolarità, assegnazione o ricezione sulla propria risorsa.
  */
-public interface UtenzeApi extends SessioniApi {
+public interface UtenzeApi {
 
     /**
      * Verifica le credenziali per l'apertura di una sessione di un account attivo.

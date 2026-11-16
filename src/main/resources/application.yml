@@ -11,3 +11,12 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: validate
+server:
+  servlet:
+    session:
+      timeout: 30m
+      cookie:
+        http-only: true
+        # false solo per sviluppo locale in http (PICUS_COOKIE_SECURE=false)
+        secure: "${PICUS_COOKIE_SECURE:true}"
+        same-site: lax

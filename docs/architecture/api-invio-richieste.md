@@ -8,8 +8,8 @@ appartengono agli incrementi successivi.
 ## Contratti e responsabilità
 
 `RichiesteApi`, `CatalogoApi` e `UtenzeApi` conservano nomi, firme e DTO.
-Estendono rispettivamente `InvioRichiesteApi`, `ConsultazioneCatalogoApi` e
-`SessioniApi`: queste capacità permettono di utilizzare l'incremento senza
+Le prime due estendono `InvioRichiesteApi` e `ConsultazioneCatalogoApi`:
+queste capacità permettono di utilizzare l'incremento senza
 dipendere dai comandi di coordinamento non ancora implementati.
 
 `ServizioInvioRichieste` implementa i casi d'uso; `RichiestaDiMisura` rappresenta
@@ -18,21 +18,21 @@ di Richieste accede solo alle proprie tabelle. I riferimenti di catalogo e le
 identità passano dalle API dei rispettivi moduli. Le dipendenze sono ricevute
 per costruttore e l'orologio è un `Clock` iniettato.
 
-La verifica dell'account passa da `SessioniApi.verificaAccountSessione`.
-`AccountUserDetailsService` collega gli account persistenti all'autenticazione
-Spring Security già presente, anche per richieste HTTP Basic durante
-l'integrazione locale. Il principal ha come nome l'UUID dell'account; è
-supportato anche un principal `IdentitaAutenticata`. Ruolo e stato attivo
-vengono riletti sul server prima di accedere alle risorse. Non sono introdotti
-nuovi endpoint di login o pagine. L'interfaccia di accesso e i controlli
-specifici della #25 rimangono nel relativo incremento.
+La verifica dell'account passa da `UtenzeApi.verificaAccountSessione`, tramite
+l'implementazione di Utenze già presente. Si riutilizzano l'accesso JSON
+`POST /api/auth/login` e le sessioni Spring Security del progetto. Il principal
+ha come nome l'UUID dell'account; è supportato anche un principal
+`IdentitaAutenticata`. Ruolo e stato attivo vengono riletti sul server prima
+di accedere alle risorse. Non sono introdotti nuovi endpoint di login o pagine.
 
 ## Endpoint JSON
 
 Tutti gli endpoint richiedono un account PICUS attivo. Per i client HTTP usare
 `Accept: application/json`. I comandi conservano la protezione CSRF di Spring
 Security; il client deve mantenere il cookie di sessione e inviare il token
-nell'header restituito da `GET /api/richieste/csrf`.
+nell'header restituito da `GET /api/auth/csrf`. Dopo il login il token va
+ricaricato per la nuova sessione. Per HTTP locale usare `PICUS_COOKIE_SECURE=false`;
+in produzione il cookie rimane sicuro come previsto dalla configurazione.
 
 | Metodo e percorso | Risultato e autorizzazione |
 | --- | --- |
@@ -89,7 +89,7 @@ diversi. La transazione usa `READ COMMITTED`, rilegge l'invio vincente e ne
 confronta i dati senza sovrascriverli. Un ritento già registrato resta
 riconoscibile anche se nel frattempo la misura è stata disattivata.
 
-Le migrazioni additive V6 e V7 introducono il flag di erogabilità a distanza
+Le migrazioni additive V7 e V8 introducono il flag di erogabilità a distanza
 del catalogo, il riferimento di invio, gli indici e i campi di lettura
 dell'accordo. Il flag delle misure esistenti parte da `false`: la loro
 abilitazione a distanza resta una scelta del catalogo. Non sono eseguiti
