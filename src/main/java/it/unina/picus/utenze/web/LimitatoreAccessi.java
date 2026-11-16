@@ -5,9 +5,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +25,10 @@ import org.springframework.stereotype.Component;
  * <p>Le email distinte memorizzate non superano mai {@value #MAX_CHIAVI}: a mappa piena si eliminano
  * prima le chiavi scadute; se non basta, l'email nuova è rifiutata finché non si libera spazio, così
  * un'ondata di indirizzi inventati non svuota il contatore di un account già sotto tentativo.</p>
+ *
+ * <p>Conteggio, pulizia e rimozione avvengono sotto un unico lock: una pulizia non può togliere la
+ * coda di una chiave mentre un tentativo sta per registrarvisi. Il costo è trascurabile, perché le
+ * code hanno al massimo {@value #MAX_FALLIMENTI} elementi e la verifica BCrypt avviene fuori dal lock.</p>
  */
 @Component
 class LimitatoreAccessi {
@@ -36,7 +40,7 @@ class LimitatoreAccessi {
     private static final int LUNGHEZZA_MAX_CHIAVE = 254;
 
     private final Clock clock;
-    private final Map<String, Deque<Instant>> tentativi = new ConcurrentHashMap<>();
+    private final Map<String, Deque<Instant>> tentativi = new HashMap<>(); // protetta da this
 
     @Autowired
     LimitatoreAccessi(ObjectProvider<Clock> clock) {
@@ -53,64 +57,43 @@ class LimitatoreAccessi {
     }
 
     /** @return false se il tentativo va rifiutato; altrimenti lo registra e lo ammette. */
-    boolean ammetti(String chiave) {
+    synchronized boolean ammetti(String chiave) {
         Instant ora = clock.instant();
-        Deque<Instant> d = coda(chiave, ora);
+        Instant limite = ora.minus(FINESTRA);
+        Deque<Instant> d = tentativi.get(chiave);
         if (d == null) {
-            return false;
-        }
-        synchronized (d) {
-            while (!d.isEmpty() && d.peekFirst().isBefore(ora.minus(FINESTRA))) {
-                d.removeFirst();
-            }
-            if (d.size() >= MAX_FALLIMENTI && ora.isBefore(d.peekLast().plus(ATTESA))) {
-                return false;
-            }
-            d.addLast(ora);
-            return true;
-        }
-    }
-
-    /** @return la coda della chiave, creata se serve; null se la mappa è piena di chiavi ancora attive. */
-    private Deque<Instant> coda(String chiave, Instant ora) {
-        Deque<Instant> esistente = tentativi.get(chiave);
-        if (esistente != null) {
-            return esistente;
-        }
-        synchronized (tentativi) { // la creazione è seriale: il limite non viene superato in parallelo
-            esistente = tentativi.get(chiave);
-            if (esistente != null) {
-                return esistente;
-            }
             if (tentativi.size() >= MAX_CHIAVI) {
-                Instant limite = ora.minus(FINESTRA);
-                tentativi.values().removeIf(q -> {
-                    synchronized (q) {
-                        return q.peekLast() != null && q.peekLast().isBefore(limite);
-                    }
-                });
+                // ogni coda memorizzata contiene almeno un tentativo
+                tentativi.values().removeIf(q -> q.peekLast().isBefore(limite));
                 if (tentativi.size() >= MAX_CHIAVI) {
-                    return null;
+                    return false;
                 }
             }
-            Deque<Instant> nuova = new ArrayDeque<>();
-            tentativi.put(chiave, nuova);
-            return nuova;
+            d = new ArrayDeque<>();
+            tentativi.put(chiave, d);
         }
+        while (!d.isEmpty() && d.peekFirst().isBefore(limite)) {
+            d.removeFirst();
+        }
+        if (d.size() >= MAX_FALLIMENTI && ora.isBefore(d.peekLast().plus(ATTESA))) {
+            return false;
+        }
+        d.addLast(ora);
+        return true;
     }
 
     /** Accesso riuscito: i tentativi precedenti non contano più. */
-    void azzera(String chiave) {
+    synchronized void azzera(String chiave) {
         tentativi.remove(chiave);
     }
 
     /** Solo per i test. */
-    int numeroChiavi() {
+    synchronized int numeroChiavi() {
         return tentativi.size();
     }
 
     /** Solo per i test. */
-    void azzeraTutto() {
+    synchronized void azzeraTutto() {
         tentativi.clear();
     }
 }

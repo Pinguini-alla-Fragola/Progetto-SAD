@@ -7,6 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import it.unina.picus.shared.ControlloSessione;
 import it.unina.picus.shared.RichiestaApi;
 import it.unina.picus.utenze.api.UtenzeApi;
 
@@ -19,11 +20,12 @@ import jakarta.servlet.http.HttpSession;
 /**
  * A ogni richiesta conferma che l'account della sessione esista ancora e sia attivo: una revoca
  * chiude la sessione alla richiesta successiva (302 al login per le pagine HTML, 401 per le API,
- * come in {@link RichiestaApi}). Viene eseguito dopo la catena di Spring Security,
- * quindi l'autenticazione della sessione è già stata caricata.
+ * come in {@link RichiestaApi}). Fa parte della catena di Spring Security, subito dopo il caricamento
+ * della sessione e prima di CSRF e dei permessi di ruolo: una sessione revocata riceve lo stesso esito
+ * qualunque area o metodo la prima richiesta usi.
  */
 @Component
-class VerificaSessioneFilter extends OncePerRequestFilter {
+class VerificaSessioneFilter extends OncePerRequestFilter implements ControlloSessione {
 
     private final UtenzeApi utenze;
 

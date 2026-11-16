@@ -3,6 +3,13 @@ package it.unina.picus.utenze.web;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -109,6 +116,47 @@ class LimitatoreAccessiTest {
 
         assertThat(limitatore.ammetti("nuovo@picus.test")).isTrue();
         assertThat(limitatore.numeroChiavi()).isEqualTo(1);
+    }
+
+    @Test
+    void tentativiParalleliConPuliziaInCorsoNonSuperanoIlLimite() throws Exception {
+        for (int i = 0; i < LimitatoreAccessi.MAX_CHIAVI; i++) {
+            limitatore.ammetti("vecchia" + i + "@picus.test");
+        }
+        orologio.avanza(Duration.ofMinutes(6)); // tutte scadute: la pulizia ha molto da rimuovere
+
+        int thread = 32;
+        int perThread = 10;
+        AtomicInteger ammessiBersaglio = new AtomicInteger();
+        CountDownLatch via = new CountDownLatch(1);
+        ExecutorService pool = Executors.newFixedThreadPool(thread);
+        try {
+            List<Future<?>> attivita = new ArrayList<>();
+            for (int t = 0; t < thread; t++) {
+                int numero = t;
+                attivita.add(pool.submit(() -> {
+                    via.await();
+                    for (int i = 0; i < perThread; i++) {
+                        // email nuove: tengono la mappa al limite e fanno scattare la pulizia
+                        limitatore.ammetti("nuova" + numero + "-" + i + "@picus.test");
+                        if (limitatore.ammetti("bersaglio@picus.test")) {
+                            ammessiBersaglio.incrementAndGet();
+                        }
+                    }
+                    return null;
+                }));
+            }
+            via.countDown();
+            for (Future<?> f : attivita) {
+                f.get();
+            }
+        } finally {
+            pool.shutdownNow();
+        }
+
+        // 320 tentativi sulla stessa email con orologio fermo: ne passano esattamente 5
+        assertThat(ammessiBersaglio.get()).isEqualTo(LimitatoreAccessi.MAX_FALLIMENTI);
+        assertThat(limitatore.numeroChiavi()).isLessThanOrEqualTo(LimitatoreAccessi.MAX_CHIAVI);
     }
 
     @Test

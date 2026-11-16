@@ -132,10 +132,23 @@ La Content-Security-Policy imposta `default-src 'self'`: CSS, script, font e
 immagini vanno serviti da `web/static/`, non da host esterni. Per questo
 l’interfaccia usa i font di sistema.
 
-Accesso senza autenticazione valida: le pagine HTML rispondono `302` verso
-`/login`; le API (percorsi sotto `/api/`, richieste XHR o con `Accept` JSON)
-rispondono `401` senza redirect. Con autenticazione valida ma ruolo non
-abilitato la risposta è `403`.
+### Risposte di accesso negato
+
+Una richiesta è di **API** se il percorso è sotto `/api/`, se è XHR
+(`X-Requested-With: XMLHttpRequest`) o se `Accept` preferisce JSON
+(`application/json` o un tipo `+json` con qualità maggiore di zero e maggiore
+di quella di HTML). Tutto il resto è una **pagina HTML**.
+
+| Caso | Pagina HTML | API |
+|------|-------------|-----|
+| Senza sessione | `302` verso `/login` | `401`, senza redirect |
+| `POST` senza sessione e senza token CSRF | `403` | `401` |
+| Sessione revocata (qualunque area o metodo alla prima richiesta) | `302` verso `/login?error`, sessione chiusa | `401`, sessione chiusa |
+| Sessione valida, ruolo non abilitato | `403` | `403` |
+| Sessione valida, `POST` senza token CSRF | `403` | `403` |
+
+Il controllo della sessione avviene prima di CSRF e dei permessi di ruolo.
+Le responsabilità sono in `shared/SecurityConfig` e `shared/RichiestaApi`.
 
 ## 🏭 Project management
 

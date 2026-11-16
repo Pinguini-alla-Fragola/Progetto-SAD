@@ -34,7 +34,12 @@
         </div>
 
         <div class="mascot-scene" aria-hidden="true">
-            <img class="mascot-img" th:src="@{/img/pinguini-team.png}" alt="">
+            <!-- il PNG si scarica solo dove la scena è visibile (oltre 860 px, come nel CSS); altrove resta il segnaposto trasparente -->
+            <picture>
+                <source media="(min-width: 860.02px)" th:srcset="@{/img/pinguini-team.png}">
+                <img class="mascot-img" alt=""
+                     src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">
+            </picture>
         </div>
     </aside>
 

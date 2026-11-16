@@ -58,7 +58,6 @@ class AccessoSkeletonTest {
 
     @Autowired WebApplicationContext contesto;
     @Autowired @Qualifier("springSecurityFilterChain") Filter catenaSicurezza;
-    @Autowired VerificaSessioneFilter verificaSessione;
     @Autowired LimitatoreAccessi limitatore;
     @Autowired OrologioModificabile orologio;
     @Autowired StubUtenzeApi stub;
@@ -69,7 +68,7 @@ class AccessoSkeletonTest {
 
     @BeforeEach
     void setUp() {
-        mvc = MockMvcBuilders.webAppContextSetup(contesto).addFilters(catenaSicurezza, verificaSessione).build();
+        mvc = MockMvcBuilders.webAppContextSetup(contesto).addFilters(catenaSicurezza).build();
         limitatore.azzeraTutto();
     }
 
@@ -139,6 +138,45 @@ class AccessoSkeletonTest {
     void unaApiProtettaSenzaSessioneRispondeConUnauthorizedSenzaRedirect() throws Exception {
         mvc.perform(get("/api/richieste"))
                 .andExpect(status().isUnauthorized()).andExpect(header().doesNotExist("Location"));
+    }
+
+    // Senza sessione una API riceve 401 anche con POST senza token CSRF (senza sessione il token non esiste).
+    @Test
+    void unaPostApiSenzaSessioneESenzaTokenCsrfRispondeConUnauthorized() throws Exception {
+        mvc.perform(post("/api/richieste"))
+                .andExpect(status().isUnauthorized()).andExpect(header().doesNotExist("Location"));
+    }
+
+    // Con sessione valida, token CSRF mancante o ruolo non abilitato → 403, per API e per pagine HTML.
+    @Test
+    void unaPostApiConSessioneMaSenzaTokenCsrfRispondeConForbidden() throws Exception {
+        Sessione s = apriLogin();
+        accedi(s, StubUtenzeApi.OPT, PASSWORD).andExpect(status().is3xxRedirection());
+
+        mvc.perform(post("/api/richieste").session(s.http()).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void unaPostDiUnaPaginaHtmlSenzaSessioneESenzaTokenCsrfRispondeConForbidden() throws Exception {
+        mvc.perform(post("/opt")).andExpect(status().isForbidden());
+    }
+
+    @Test
+    void unApiConRuoloNonAbilitatoRispondeConForbidden() throws Exception {
+        Sessione s = apriLogin();
+        accedi(s, StubUtenzeApi.OPERATORE, PASSWORD).andExpect(status().is3xxRedirection());
+
+        mvc.perform(get("/banco").session(s.http()).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void unAcceptSiInterpretaPerTipiEQualitaNonPerRicercaDiTesto() throws Exception {
+        mvc.perform(get("/opt").accept("application/problem+json"))
+                .andExpect(status().isUnauthorized()).andExpect(header().doesNotExist("Location"));
+        mvc.perform(get("/opt").header("Accept", "text/html, application/json;q=0"))
+                .andExpect(redirectedUrl("/login"));
     }
 
     @Test
@@ -221,6 +259,8 @@ class AccessoSkeletonTest {
 
         Sessione api = apriLogin();
         accedi(api, StubUtenzeApi.REVOCABILE, PASSWORD).andExpect(status().is3xxRedirection());
+        Sessione altraArea = apriLogin();
+        accedi(altraArea, StubUtenzeApi.REVOCABILE, PASSWORD).andExpect(status().is3xxRedirection());
 
         stub.revoca(StubUtenzeApi.REVOCABILE);
 
@@ -230,5 +270,9 @@ class AccessoSkeletonTest {
         mvc.perform(get("/operatore").session(api.http()).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized()).andExpect(header().doesNotExist("Location"));
         assertThat(api.http().isInvalid()).isTrue();
+        // la prima richiesta dopo la revoca è rivolta a un'altra area (/banco): 401 e non 403, sessione chiusa
+        mvc.perform(get("/banco").session(altraArea.http()).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized());
+        assertThat(altraArea.http().isInvalid()).isTrue();
     }
 }
