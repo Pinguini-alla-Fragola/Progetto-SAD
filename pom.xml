@@ -66,6 +66,35 @@
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Auto-configurazione di MockMvc nei test (@AutoConfigureMockMvc, @WebMvcTest).
+             La classe MockMvc arriva già da spring-boot-starter-test tramite spring-test. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Utente autenticato simulato e token CSRF nelle chiamate MockMvc -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Test di integrazione su PostgreSQL reale avviato in Docker (Testcontainers) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
