@@ -108,10 +108,11 @@ Copy-Item -LiteralPath docs/architecture/picus-logo.svg -Destination target/apid
 ```
 
 Aprire `target/apidocs/index.html`. Il sito include i package di
-`src/main/java`, compresi i componenti con visibilità di package. La
-generazione verifica la sintassi e i riferimenti dei commenti in tutto il
-codice applicativo. Il workflow controlla anche la completezza del Javadoc
-dei contratti pubblici con `scripts/javadoc-api.args`.
+`src/main/java`, compresi i componenti con visibilità di package. La panoramica
+offre collegamenti ai moduli e alla ricerca. Le schede dell'elenco dei package
+filtrano per modulo. La generazione verifica la sintassi e i riferimenti dei
+commenti in tutto il codice applicativo. Il workflow controlla anche la
+completezza del Javadoc dei contratti pubblici con `scripts/javadoc-api.args`.
 
 Il [foglio di stile del Javadoc](picus-javadoc.css) riprende la palette e la
 tipografia della landing. Il generatore lo include con `--add-stylesheet`

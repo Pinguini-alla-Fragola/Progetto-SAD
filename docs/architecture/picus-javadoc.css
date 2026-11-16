@@ -160,17 +160,102 @@
     }
 
     .package-index-page .title {
-        margin: 0 0 1.65rem;
-        font-size: clamp(2rem, 5vw, 3.5rem);
+        margin: 0 0 0.75rem;
+        font-size: clamp(2rem, 4vw, 3rem);
     }
 
-    .package-index-page .title::after {
-        display: block;
-        width: 2.75rem;
-        height: 3px;
-        margin-top: 1rem;
-        background: var(--picus-accent);
-        content: "";
+    .package-index-page main > .block {
+        margin-inline-end: 0;
+    }
+
+    .picus-overview {
+        margin-block: 0.75rem 2.5rem;
+    }
+
+    .picus-overview-intro {
+        margin-block: 0 1rem;
+        color: var(--picus-muted);
+        font-size: 1rem;
+        line-height: 1.5;
+    }
+
+    .picus-overview-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .picus-overview-links a {
+        padding: 0.55rem 0.85rem;
+        border: 1px solid var(--picus-border);
+        border-radius: 8px;
+        background: var(--picus-surface);
+        font-weight: 600;
+    }
+
+    .picus-overview-links a:hover,
+    .picus-overview-links a.picus-overview-search {
+        border-color: var(--picus-accent);
+        background: var(--picus-accent-surface);
+    }
+
+    .picus-modules {
+        margin-block-start: 1.75rem;
+    }
+
+    .picus-modules h2 {
+        margin-block: 0 0.75rem;
+        font-size: 1.375rem;
+    }
+
+    .picus-module-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.75rem;
+    }
+
+    .picus-module {
+        display: flex;
+        flex-direction: column;
+        padding: 0.9rem 1rem;
+        border: 1px solid var(--picus-border);
+        border-radius: 10px;
+        background: var(--picus-surface);
+    }
+
+    .picus-module h3 {
+        margin: 0;
+        font-size: 1.1rem;
+    }
+
+    .picus-module p {
+        flex: 1;
+        margin-block: 0.35rem 0.65rem;
+        color: var(--picus-muted);
+        line-height: 1.45;
+    }
+
+    .picus-module ul {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem 1rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .package-index-page #all-packages-table {
+        scroll-margin-block-start: 0.75rem;
+    }
+
+    .package-index-page #all-packages-table .table-tabs {
+        gap: 0.35rem;
+    }
+
+    .package-index-page #all-packages-table .active-table-tab {
+        border: 1px solid var(--picus-accent);
     }
 
     .sub-title,
@@ -284,7 +369,17 @@
     }
 }
 
+@media screen and (max-width: 900px) {
+    .picus-module-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
 @media screen and (max-width: 600px) {
+    .picus-module-grid {
+        grid-template-columns: 1fr;
+    }
+
     :is(.package-index-page, .tree-page, .index-page) .sub-nav-list:empty {
         display: none;
     }
