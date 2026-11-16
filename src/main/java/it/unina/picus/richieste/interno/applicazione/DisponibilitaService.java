@@ -117,7 +117,7 @@ public class DisponibilitaService {
         if (!richieste.existsById(richiestaId)) {
             throw new NoSuchElementException("Richiesta inesistente");
         }
-        return contatti.findAllByRichiesta_IdOrderByInviatoIlAscIdAsc(richiestaId).stream()
+        return contatti.findAllByRichiesta_IdOrderByOrdineInvioAsc(richiestaId).stream()
                 .map(DisponibilitaService::aDto)
                 .toList();
     }
