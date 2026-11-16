@@ -80,7 +80,7 @@ inserisce quattro account sintetici attivi:
 - `operatore@picus.test`
 
 `PICUS_DEMO_PASSWORD` è la password iniziale degli account demo, salvata
-come hash. Il login PICUS (#25) è disponibile su `http://localhost:8080/login`.
+come hash. Il [backend del login](#contratto-http-del-login) risponde su `http://localhost:8080`.
 Il volume `picus-dati` conserva le tabelle e i dati fra gli avvii.
 
 Per verificare la predisposizione, esegui `./mvnw clean package`
@@ -117,7 +117,7 @@ non va versionato. `.env.example` ne elenca le variabili, entrambe obbligatorie:
 ## Avvio dello skeleton senza database
 
 Lo *skeleton* avvia l’applicazione con le utenze in memoria: login, area per
-ruolo e logout funzionano senza PostgreSQL e senza Docker. Dalla radice del
+ruolo e logout sono verificabili senza PostgreSQL e senza Docker. Dalla radice del
 progetto:
 
 ```bash
@@ -127,26 +127,29 @@ mvn spring-boot:run -Dspring-boot.run.profiles=skeleton
 Con il Maven Wrapper: `bash ./mvnw spring-boot:run -Dspring-boot.run.profiles=skeleton`
 (`.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=skeleton"` in PowerShell).
 
-L’app risponde su `http://localhost:8080/login`. Gli account attivi sono
+L’app risponde su `http://localhost:8080`. Gli account attivi sono
 `banco@picus.test`, `opt@picus.test` e `operatore@picus.test`; la password è
 `picus-demo`, modificabile con la proprietà `picus.skeleton.password`. Il
 cookie di sessione non è `Secure`, per l’uso locale in http. Il profilo è solo
 per sviluppo e test.
 
-## Convenzione per viste e risorse web
+## Contratto HTTP del login
 
-I percorsi sono globali e valgono per tutti i moduli:
+Il client usa la sessione Spring Security tramite cookie. Prima di un POST
+recupera il token da `GET /api/auth/csrf` nella stessa sessione e invia
+`token` nell’header indicato da `headerName`.
 
-- `src/main/resources/web/dynamic/` contiene i template Thymeleaf. Ogni modulo
-  usa la propria sottocartella, ad esempio `web/dynamic/utenze/login.html`,
-  che il controller restituisce come vista `utenze/login`.
-- `src/main/resources/web/static/` contiene le risorse statiche, servite dalla
-  radice: `web/static/css/picus.css` risponde su `/css/picus.css`; analoghi
-  `/js/` e `/img/`.
-
-La Content-Security-Policy imposta `default-src 'self'`: CSS, script, font e
-immagini vanno serviti da `web/static/`, non da host esterni. Per questo
-l’interfaccia usa i font di sistema.
+- `POST /api/auth/login` riceve un JSON con `email` e `password`. Risponde
+  `204` su successo, `401` con `errore` per credenziali errate o account
+  non attivo e `429` con `errore` per il blocco temporaneo.
+- Dopo il login, `GET /` reindirizza a `/banco/dashboard`, `/opt/dashboard`
+  o `/operatore/dashboard` in base al ruolo. Le viste d’area fanno parte
+  dell’integrazione dell’interfaccia.
+- `POST /api/auth/logout` termina la sessione e risponde `204`. Recupera un
+  nuovo token CSRF dopo il login, prima di eseguire il logout o altri POST.
+- Spring Security gestisce anche i form su `POST /login` e `POST /logout`.
+  Gli script dell’interfaccia sono serviti come risorse dello stesso sito
+  secondo la Content-Security-Policy.
 
 ### Risposte di accesso negato
 

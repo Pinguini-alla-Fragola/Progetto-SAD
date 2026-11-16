@@ -3,9 +3,11 @@ package it.unina.picus.shared;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.LockedException;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.Authentication;
@@ -21,6 +23,10 @@ import org.springframework.security.web.access.AccessDeniedHandlerImpl;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Configurazione tecnica della sicurezza web. Non importa nulla dai moduli applicativi:
@@ -37,6 +43,11 @@ class SecurityConfig {
             "base-uri 'self'",
             "form-action 'self'",
             "frame-ancestors 'none'");
+
+    private static final PathPatternRequestMatcher USCITA_API =
+            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/auth/logout");
+    private static final PathPatternRequestMatcher USCITA_FORM =
+            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/logout");
 
     /** Messaggio generico di attesa solo per il blocco temporaneo, messaggio generico di errore per il resto. */
     private static final AuthenticationFailureHandler ESITO_NEGATIVO = (request, response, eccezione) ->
@@ -80,11 +91,16 @@ class SecurityConfig {
     }
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http, ControlloSessione controlloSessione) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, ControlloSessione controlloSessione,
+            JsonMapper json) throws Exception {
         http
                 // subito dopo il caricamento della sessione: prima di CSRF e dei permessi di ruolo
                 .addFilterAfter(controlloSessione, SecurityContextHolderFilter.class)
+                .sessionManagement(Customizer.withDefaults())
+                .with(new LoginJsonConfigurer(json), Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.GET, "/api/auth/csrf").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers("/login", "/error", "/css/**", "/js/**", "/img/**", "/favicon.ico").permitAll()
                         // ogni ruolo vede solo la propria area
                         .requestMatchers("/banco/**").hasRole("BANCO")
@@ -101,8 +117,14 @@ class SecurityConfig {
                         .defaultSuccessUrl("/", false)
                         .permitAll())
                 .logout(logout -> logout
-                        .logoutUrl("/logout") // solo POST, protetto da CSRF
-                        .logoutSuccessUrl("/login?logout")
+                        .logoutRequestMatcher(new OrRequestMatcher(USCITA_API, USCITA_FORM))
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            if (USCITA_API.matches(request)) {
+                                response.setStatus(HttpStatus.NO_CONTENT.value());
+                            } else {
+                                response.sendRedirect(request.getContextPath() + "/login?logout");
+                            }
+                        })
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID"))
                 .headers(headers -> headers

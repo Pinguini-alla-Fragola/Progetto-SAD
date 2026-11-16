@@ -11,11 +11,6 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: validate
-  thymeleaf:
-    prefix: classpath:/web/dynamic/
-  web:
-    resources:
-      static-locations: classpath:/web/static/
 server:
   servlet:
     session:
