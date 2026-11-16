@@ -1,13 +1,14 @@
 package it.unina.picus.shared;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.function.Executable;
+import org.opentest4j.TestAbortedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
@@ -95,16 +96,28 @@ public abstract class AccessiBlackBoxTest {
      */
     protected void assertNegatoSenzaModifiche(UUID richiestaId, Executable operazione) {
         RichiestaDettaglio prima = scenario.istantanea(richiestaId);
-        assertThrows(SecurityException.class, operazione, "atteso FORBIDDEN (SecurityException)");
+        assertNegato(operazione);
         assertEquals(prima, scenario.istantanea(richiestaId), "la pratica deve restare invariata dopo il diniego");
     }
 
     /**
      * Verifica un diniego {@code FORBIDDEN} su un'operazione di sola lettura.
      *
+     * <p>Se l'operazione usa un modulo non ancora integrato, la sospensione del test
+     * ({@link TestAbortedException}) viene propagata e non scambiata per un esito errato.</p>
+     *
      * @param operazione operazione che deve essere negata
      */
     protected static void assertNegato(Executable operazione) {
-        assertThrows(SecurityException.class, operazione, "atteso FORBIDDEN (SecurityException)");
+        try {
+            operazione.execute();
+        } catch (TestAbortedException sospeso) {
+            throw sospeso;
+        } catch (SecurityException atteso) {
+            return;
+        } catch (Throwable altro) {
+            fail("atteso FORBIDDEN (SecurityException), ricevuto " + altro, altro);
+        }
+        fail("atteso FORBIDDEN (SecurityException), l'operazione è stata eseguita");
     }
 }

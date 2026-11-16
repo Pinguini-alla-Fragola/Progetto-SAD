@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -42,10 +43,12 @@ import jakarta.servlet.Filter;
  * #28 — CA-08 (richiesta protetta senza autenticazione valida o con sessione scaduta: {@code 401},
  * senza dati né modifiche) e CA-09 lato HTTP (parametri alterati non concedono accessi).
  *
- * <p>Il server è chiamato direttamente, come nell'approccio di verifica di QS-01A. Le API seguono la
- * convenzione già adottata da MVP-Login: percorsi sotto {@code /api/}, {@code 401} senza redirect.
- * I percorsi delle singole risorse sono quelli proposti in {@link #CONSULTA_RICHIESTA}: allinearli ai
- * controller quando saranno integrati.</p>
+ * <p>Il server è chiamato direttamente, come nell'approccio di verifica di QS-01A, con le regole di
+ * {@code SecurityConfig}: API sotto {@code /api/}, {@code 401} senza redirect, accesso pubblico con
+ * email e password in JSON su {@link #LOGIN} e token CSRF letto da {@link #TOKEN_CSRF}. I contatti di
+ * disponibilità usano i percorsi di {@code ContattiDisponibilitaController}; i percorsi delle richieste
+ * ({@link #CONSULTA_RICHIESTA}, {@link #ANNULLA_RICHIESTA}) sono ancora proposti e vanno allineati al
+ * controller di Richieste quando sarà integrato.</p>
  *
  * <p>Tecniche: test negativi di sicurezza su sessione assente, scaduta e revocata, e su parametri e
  * header alterati, con un controllo positivo prima di ogni scadenza o revoca.</p>
@@ -55,6 +58,8 @@ import jakarta.servlet.Filter;
  *   <li>i test dei parametri alterati si sospendono se il percorso risponde {@code 404};</li>
  *   <li>le POST senza autenticazione portano il token CSRF di una sessione anonima, così il {@code 401}
  *       dipende dall'autenticazione e non da un diniego CSRF;</li>
+ *   <li>la sessione scaduta e la revoca si verificano anche su {@link #CONSULTA_CONTATTO}, già esposto,
+ *       senza attendere il controller di Richieste;</li>
  *   <li>la scadenza si simula invalidando la sessione autenticata, come fa il server al timeout.</li>
  * </ul>
  */
@@ -65,8 +70,17 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
     static final String CONSULTA_RICHIESTA = "/api/richieste/{id}";
     /** Percorso proposto per l'annullamento; da allineare al controller di Richieste. */
     static final String ANNULLA_RICHIESTA = "/api/richieste/{id}/annullamento";
+    /** Consultazione di un contatto di disponibilità, esposta da {@code ContattiDisponibilitaController}. */
+    static final String CONSULTA_CONTATTO = "/api/contatti-disponibilita/{id}";
+    /** Risposta a un contatto di disponibilità, esposta da {@code ContattiDisponibilitaController}. */
+    static final String RISPONDI_CONTATTO = "/api/contatti-disponibilita/{id}/risposta";
+    /** Token CSRF della sessione, pubblico ({@code SecurityConfig}). */
+    static final String TOKEN_CSRF = "/api/auth/csrf";
+    /** Accesso con email e password in JSON, pubblico ({@code LoginJsonConfigurer}). */
+    static final String LOGIN = "/api/auth/login";
 
-    private static final Pattern CSRF = Pattern.compile("name=\"_csrf\"[^>]*value=\"([^\"]+)\"");
+    private static final Pattern CAMPO_HEADER = Pattern.compile("\"headerName\"\\s*:\\s*\"([^\"]+)\"");
+    private static final Pattern CAMPO_TOKEN = Pattern.compile("\"token\"\\s*:\\s*\"([^\"]+)\"");
 
     @Autowired
     private WebApplicationContext web;
@@ -99,15 +113,36 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
         return ("POST".equals(metodo) ? post(percorso) : get(percorso)).accept(MediaType.APPLICATION_JSON);
     }
 
-    /** Sessione anonima con il token CSRF della pagina di accesso: nessuna identità autenticata. */
-    private record SessioneAnonima(MockHttpSession sessione, String csrf) {}
+    /** Token CSRF restituito da {@link #TOKEN_CSRF}, con l'header in cui inviarlo. */
+    private record Csrf(String header, String token) {}
+
+    /** Sessione anonima con il proprio token CSRF: nessuna identità autenticata. */
+    private record SessioneAnonima(MockHttpSession sessione, Csrf csrf) {}
+
+    /** Legge il token CSRF della sessione indicata, oppure di una sessione nuova se {@code null}. */
+    private MvcResult leggiCsrf(MockHttpSession sessione) throws Exception {
+        MockHttpServletRequestBuilder builder = get(TOKEN_CSRF).accept(MediaType.APPLICATION_JSON);
+        if (sessione != null) {
+            builder.session(sessione);
+        }
+        return mvc.perform(builder).andReturn();
+    }
+
+    private static Csrf estraiCsrf(MvcResult esito) throws Exception {
+        String corpo = esito.getResponse().getContentAsString();
+        Matcher header = CAMPO_HEADER.matcher(corpo);
+        Matcher token = CAMPO_TOKEN.matcher(corpo);
+        assertEquals(200, esito.getResponse().getStatus(), TOKEN_CSRF + " deve essere pubblico");
+        assertTrue(header.find() && token.find(), "risposta di " + TOKEN_CSRF + " senza headerName o token");
+        return new Csrf(header.group(1), token.group(1));
+    }
 
     private SessioneAnonima sessioneAnonima() throws Exception {
-        MvcResult pagina = mvc.perform(get("/login")).andReturn();
-        MockHttpSession sessione = (MockHttpSession) pagina.getRequest().getSession(false);
-        Matcher csrf = CSRF.matcher(pagina.getResponse().getContentAsString());
-        assumeTrue(sessione != null && csrf.find(), "pagina di accesso con token CSRF non disponibile");
-        return new SessioneAnonima(sessione, csrf.group(1));
+        MvcResult esito = leggiCsrf(null);
+        Csrf csrf = estraiCsrf(esito);
+        MockHttpSession sessione = (MockHttpSession) esito.getRequest().getSession(false);
+        assertNotNull(sessione, "il token CSRF deve essere legato a una sessione");
+        return new SessioneAnonima(sessione, csrf);
     }
 
     /**
@@ -118,7 +153,7 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
         MockHttpServletRequestBuilder builder = richiesta(metodo, percorso);
         if ("POST".equals(metodo)) {
             SessioneAnonima anonima = sessioneAnonima();
-            builder.session(anonima.sessione()).param("_csrf", anonima.csrf());
+            builder.session(anonima.sessione()).header(anonima.csrf().header(), anonima.csrf().token());
         }
         return builder;
     }
@@ -137,9 +172,62 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
     }
 
     @Test
-    @DisplayName("CA-08 · l'accesso resta un'operazione pubblica")
+    @DisplayName("CA-08 · l'accesso resta un'operazione pubblica e segue le proprie regole")
     void loginPubblico() throws Exception {
-        assertEquals(200, mvc.perform(get("/login")).andReturn().getResponse().getStatus());
+        Account opt = scenario.optRichiedente();
+
+        // credenziali errate: 401 con messaggio generico, senza redirect
+        SessioneAnonima anonima = sessioneAnonima();
+        MockHttpServletResponse errata = mvc.perform(login(anonima, opt.email(), "Password-errata-28!"))
+                .andReturn().getResponse();
+        assertEquals(401, errata.getStatus());
+        assertNull(errata.getHeader("Location"), "il login JSON non rimanda ad altre pagine");
+
+        // credenziali corrette senza sessione autenticata: accesso consentito
+        MockHttpSession sessione = accedi(opt);
+        assertNotEquals(401, mvc.perform(get(CONSULTA_CONTATTO, UUID.randomUUID()).session(sessione)
+                .accept(MediaType.APPLICATION_JSON)).andReturn().getResponse().getStatus(),
+                "dopo l'accesso la sessione è autenticata");
+    }
+
+    @Test
+    @DisplayName("CA-08 · su un'API esposta una sessione autenticata e poi scaduta riceve 401 senza redirect")
+    void sessioneScadutaSuApiEsposta() throws Exception {
+        MockHttpSession sessione = accedi(scenario.optRichiedente());
+        UUID contatto = UUID.randomUUID();
+        assertNotEquals(401, mvc.perform(get(CONSULTA_CONTATTO, contatto).session(sessione)
+                .accept(MediaType.APPLICATION_JSON)).andReturn().getResponse().getStatus(),
+                "prima della scadenza la sessione è valida");
+
+        sessione.invalidate();
+        MockHttpServletResponse risposta = mvc.perform(get(CONSULTA_CONTATTO, contatto).session(sessione)
+                .accept(MediaType.APPLICATION_JSON)).andReturn().getResponse();
+
+        assertEquals(401, risposta.getStatus());
+        assertNull(risposta.getHeader("Location"), "una API non deve rimandare al login");
+    }
+
+    @Test
+    @DisplayName("CA-08 · su un'API esposta la sessione di un account revocato riceve 401 in lettura e in scrittura")
+    void sessioneRevocataSuApiEsposta() throws Exception {
+        Account opt = scenario.optRichiedente();
+        MockHttpSession sessione = accedi(opt);
+        Csrf csrf = estraiCsrf(leggiCsrf(sessione));
+        UUID contatto = UUID.randomUUID();
+        assertNotEquals(401, mvc.perform(get(CONSULTA_CONTATTO, contatto).session(sessione)
+                .accept(MediaType.APPLICATION_JSON)).andReturn().getResponse().getStatus(),
+                "prima della revoca la sessione è valida");
+
+        scenario.revoca(opt);
+        MockHttpServletResponse scrittura = mvc.perform(post(RISPONDI_CONTATTO, contatto).session(sessione)
+                .header(csrf.header(), csrf.token()).contentType(MediaType.APPLICATION_JSON)
+                .content("{\"disponibile\":true}").accept(MediaType.APPLICATION_JSON)).andReturn().getResponse();
+        MockHttpServletResponse lettura = mvc.perform(get(CONSULTA_CONTATTO, contatto).session(sessione)
+                .accept(MediaType.APPLICATION_JSON)).andReturn().getResponse();
+
+        assertEquals(401, scrittura.getStatus(), "la revoca chiude la sessione alla richiesta successiva");
+        assertNull(scrittura.getHeader("Location"), "una API non deve rimandare al login");
+        assertEquals(401, lettura.getStatus(), "la sessione revocata non torna valida");
     }
 
     @Test
@@ -172,7 +260,7 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
         SessioneAnonima anonima = sessioneAnonima();
 
         MockHttpServletResponse risposta = mvc.perform(post(ANNULLA_RICHIESTA, id).session(anonima.sessione())
-                .param("_csrf", anonima.csrf()).param("motivo", "Tentativo senza sessione")
+                .header(anonima.csrf().header(), anonima.csrf().token()).param("motivo", "Tentativo senza sessione")
                 .accept(MediaType.APPLICATION_JSON)).andReturn().getResponse();
 
         assertEquals(401, risposta.getStatus());
@@ -263,27 +351,30 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
     }
 
     /**
-     * Token CSRF valido per la sessione autenticata, letto da una pagina della stessa sessione.
-     * Si usa la pagina di accesso perché è l'unica pagina con form garantita in questa fase.
+     * Parametro {@code _csrf} valido per la sessione autenticata. Il token viene riletto dopo l'accesso,
+     * perché Spring Security lo rinnova quando la sessione si autentica.
      */
     private String csrfDellaSessione(MockHttpSession sessione) throws Exception {
-        String pagina = mvc.perform(get("/login").session(sessione)).andReturn().getResponse().getContentAsString();
-        Matcher csrf = CSRF.matcher(pagina);
-        assumeTrue(csrf.find(), "token CSRF della sessione autenticata non disponibile");
-        return csrf.group(1);
+        return estraiCsrf(leggiCsrf(sessione)).token();
     }
 
-    /** Apre una sessione con il form di accesso, come l'utente. */
+    /** Richiesta di accesso JSON con il token CSRF della sessione anonima. */
+    private static MockHttpServletRequestBuilder login(SessioneAnonima anonima, String email, String password) {
+        return post(LOGIN).session(anonima.sessione())
+                .header(anonima.csrf().header(), anonima.csrf().token())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"email\":\"" + email + "\",\"password\":\"" + password + "\"}")
+                .accept(MediaType.APPLICATION_JSON);
+    }
+
+    /** Apre una sessione con l'accesso JSON di {@code /api/auth/login}, come il client. */
     private MockHttpSession accedi(Account account) throws Exception {
         SessioneAnonima anonima = sessioneAnonima();
-        MockHttpSession sessione = anonima.sessione();
 
-        MvcResult esito = mvc.perform(post("/login").session(sessione)
-                .param("username", account.email())
-                .param("password", ScenarioAccessi.PASSWORD)
-                .param("_csrf", anonima.csrf())).andReturn();
-        assertNotNull(esito.getResponse().getRedirectedUrl(), "accesso riuscito con redirect");
-        assertFalse(esito.getResponse().getRedirectedUrl().contains("error"), "credenziali di prova rifiutate");
-        return sessione; // MockHttpSession conserva l'oggetto anche dopo il cambio di identificativo
+        MockHttpServletResponse esito = mvc.perform(login(anonima, account.email(), ScenarioAccessi.PASSWORD))
+                .andReturn().getResponse();
+
+        assertEquals(204, esito.getStatus(), "credenziali di prova rifiutate");
+        return anonima.sessione(); // MockHttpSession conserva l'oggetto anche dopo il cambio di identificativo
     }
 }
