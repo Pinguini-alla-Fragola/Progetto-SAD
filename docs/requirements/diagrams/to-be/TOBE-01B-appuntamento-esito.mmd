@@ -1,35 +1,35 @@
-%% TOBE-01B v0.3 - 07/11/2026
-%% Allineato alle scelte del gruppo registrate il 03/11/2026: Banco ed erogatore concordano i dettagli, solo il Banco li registra e conferma.
-%% Stato finale positivo Confermata: attesta l'accordo, non l'erogazione. Dopo la conferma i dettagli non cambiano.
-%% Annullata: solo per evento eccezionale, con motivo obbligatorio, secondo la matrice di #28 e #54.
+%% TOBE-01B v0.4 - 14/11/2026
+%% Accordo e annullamento. Si modella lo stato della sola richiesta.
 sequenceDiagram
     autonumber
     participant R as OPT richiedente
     participant S as Sistema PICUS
     participant B as Banco
-    participant E as Account OPT o account<br/>personale del Banco
+    participant E as OPT o operatore<br/>del Banco assegnato
 
-    Note over B,E: Un erogatore ha dato la disponibilità (TOBE-01A)<br/>Le controproposte di data e ora<br/>lasciano la richiesta In programmazione
-    Note over B,E: Flusso base tramite modulo di contatto (#38)<br/>Calendario OPT facoltativo per misura (#73)
-    B->>E: Concorda data, ora e luogo oppure link,<br/>rappresentando le esigenze dell'assistito
-    E-->>B: Accetta, contropropone<br/>o non trova l'accordo
+    Note over B,E: Richiesta In programmazione con erogatore assegnato
+    loop Definizione dei dettagli
+        B->>E: Propone data, ora e luogo o link<br/>tramite il modulo di contatto
+        E-->>B: Accetta o propone altri dettagli
+    end
     alt Accordo raggiunto
-        B->>S: Registra i dettagli concordati<br/>e conferma l'accordo
-        S->>S: Verifica i dati, assegna la pratica<br/>alla OPT o all’operatore del Banco<br/>e registra Confermata<br/>(dettagli non modificabili)
-        S-->>R: Mostra appuntamento,<br/>riferimento ed esito
-        R->>R: Informa la persona<br/>fuori da PICUS
-        opt Evento eccezionale dopo la conferma
-            alt OPT assegnata
-                E->>S: L'account della OPT segnala<br/>l'evento e il motivo
-            else Operatore del Banco assegnato
-                alt Annulla l’operatore assegnato
-                    E->>S: Segnala evento e motivo
-                else Annulla il Banco di coordinamento
-                    B->>S: Segnala evento e motivo
-                end
-            end
-            S->>S: Verifica account, assegnazione,<br/>stato e motivo. Porta la richiesta<br/>ad Annullata<br/>senza riaprire la ricerca
+        B->>S: Registra i dettagli e conferma l'accordo
+        S->>S: Verifica i dati e registra Confermata<br/>I dettagli restano immutabili
+        S-->>R: Mostra i dettagli dell'appuntamento
+        R->>R: Informa l'assistito fuori da PICUS
+    else Il Banco conclude che manca una soluzione
+        B->>S: Rifiuta la richiesta
+        S->>S: Registra Rifiutata
+        S-->>R: Mostra Nessun erogatore disponibile
+    end
+
+    opt Annullamento da qualsiasi stato, anche durante TOBE-01A
+        Note over R,E: Il Banco, la OPT richiedente o l'erogatore assegnato invia l'annullamento<br/>Il motivo è facoltativo solo in Creata
+        S->>S: Verifica account e presenza del motivo,<br/>poi registra Annullata e conserva i dettagli
+        S-->>B: Avvisa il Banco
+        S-->>R: Avvisa la OPT richiedente
+        opt Erogatore già assegnato
+            S-->>E: Avvisa l'erogatore
         end
-    else Mancato accordo con l'erogatore
-        Note over B,E: Il Banco cerca l'erogatore successivo<br/>(si riparte da TOBE-01A)
+        Note over S,B: La ricerca resta chiusa
     end

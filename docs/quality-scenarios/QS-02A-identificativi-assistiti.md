@@ -4,7 +4,7 @@
 
 **Priorità proposta** · P1
 
-**Motivazione.** Per chiedere una misura al Banco bastano la misura selezionata dal catalogo, l’indicazione *persona o nucleo* e il comune. Il coordinamento può iniziare senza raccogliere l’identità dell’assistito.
+**Motivazione.** Per chiedere una misura al Banco bastano la misura selezionata dal catalogo, l’indicazione *persona o nucleo* e il comune. La descrizione facoltativa `description` riguarda il bisogno in termini generali. Il modulo chiede di omettere gli identificativi degli assistiti.
 
 ## Scenario
 
@@ -19,5 +19,6 @@ Inviare le richieste direttamente al server con dati sintetici. Esaminare il mod
 | Caso | Esito atteso |
 | --- | --- |
 | La OPT invia misura, comune e indicazione *persona o nucleo*. | Il server crea la richiesta. |
+| La OPT invia gli stessi campi con una `description` sintetica non identificativa. | Il server crea la richiesta. Il dettaglio riservato alla OPT titolare e al Banco autorizzato riporta la descrizione. |
 | La OPT aggiunge `codiceFiscale` come campo extra a un invio altrimenti valido. | Il server respinge l’intero invio e crea **zero richieste**. Il valore sintetico è assente dalla risposta di errore, dai dati salvati, dai log e dalle eventuali esportazioni. |
 | La OPT ripete la prova aggiungendo `nomeAssistito` come campo extra. | Il server respinge l’intero invio e crea **zero richieste**. Il valore sintetico è assente dalla risposta di errore, dai dati salvati, dai log e dalle eventuali esportazioni. |

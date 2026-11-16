@@ -1,7 +1,5 @@
-%% TOBE-01A v0.4 - 07/11/2026
-%% Proposta del team: Epic #20. Allineato alle risposte del cliente (seconda tornata) e alle scelte del gruppo registrate il 03/11/2026.
-%% Il Banco lavora le richieste in ordine di arrivo e interpella un erogatore per volta.
-%% Il sistema puo' suggerire l'ordine degli erogatori; la scelta resta al Banco.
+%% TOBE-01A v0.7 - 14/11/2026
+%% Invio e ricerca. I soggetti coinvolti possono annullare secondo la regola in TOBE-01B.
 sequenceDiagram
     autonumber
     participant R as OPT richiedente
@@ -9,30 +7,33 @@ sequenceDiagram
     participant B as Banco
     participant E as Account OPT o account<br/>personale del Banco
 
-    R->>S: Invia misura, persona o nucleo e comune<br/>(nessun dato identificativo)
+    R->>S: Invia misura, persona o nucleo, comune<br/>e descrizione facoltativa non identificativa
     S->>S: Valida i dati
     alt Dati validi
-        S->>S: Registra ID, data e titolare<br/>e mette la richiesta<br/>nello stato<br/>In programmazione
+        S->>S: Registra ID, data e titolare<br/>e mette in coda la richiesta Creata
         S-->>R: Mostra ID e stato della propria richiesta
-        B->>S: Consulta le richieste<br/>in ordine di arrivo
-        S-->>B: Mostra tutti gli erogatori compatibili<br/>con l'ordine suggerito<br/>OPT e operatori interni/esterni pagati dal Banco
-        Note over S,E: CRITERI SUGGERITI DAL SISTEMA (la scelta resta al Banco)<br/>• Solo erogatori della misura richiesta<br/>• Stesso comune, poi comuni confinanti<br/>• A parità di distanza: operatori del Banco, poi OPT erogatrici<br/>• Poi chi ha meno appuntamenti assegnati<br/>• Senza nessuno in zona: Centro PICUS da remoto, se la misura lo consente
-        loop Un erogatore per volta, fino a<br/>disponibilità o erogatori esauriti
-            B->>S: Sceglie l'erogatore da interpellare
-            Note over S,E: La OPT opera come organizzazione anche<br/>se eroga tramite un professionista<br/>I dati mostrati sono quelli necessari al contatto
-            S->>E: Notifica la richiesta di disponibilità
-            E->>S: Conferma o rifiuta<br/>dal solo account interpellato
+        B->>S: Consulta la coda in ordine di arrivo
+        S-->>B: Mostra le richieste in coda
+        B->>S: Prende in carico la richiesta
+        S->>S: Registra Presa in carico
+        S-->>B: Mostra tutti gli erogatori compatibili<br/>con l'ordine suggerito
+        Note over S,E: Stesso comune, poi comuni confinanti<br/>A pari distanza, prima operatori del Banco, poi OPT<br/>A parità di priorità, meno appuntamenti assegnati<br/>Se nessuno in zona, Centro PICUS da remoto se compatibile
+        loop Un erogatore per volta fino a disponibilità o esaurimento
+            B->>S: Sceglie il candidato da contattare
+            S->>E: Chiede disponibilità per la singola richiesta
+            E->>S: Risponde dall'account interpellato
             S-->>B: Mostra la risposta
-            alt Erogatore disponibile
-                Note over S,E: Prosegue nel diagramma TOBE-01B<br/>La richiesta resta In programmazione
-            else Erogatori esauriti
-                break Uscita dal loop
-                    B->>S: Rifiuta la richiesta<br/>(nessuna soluzione praticabile)
-                    S->>S: Registra Rifiutata
-                    S-->>R: Mostra Rifiutata e<br/>Nessun erogatore disponibile
-                end
-            end
+            Note over B,E: Un rifiuto mantiene Presa in carico<br/>La OPT usa il proprio account<br/>anche se eroga con un professionista
+        end
+        alt Erogatore disponibile
+            B->>S: Assegna la richiesta all'erogatore disponibile
+            S->>S: Registra l'assegnazione e In programmazione
+            Note over B,E: Prosegue in TOBE-01B
+        else Nessuna soluzione praticabile
+            B->>S: Rifiuta la richiesta
+            S->>S: Registra Rifiutata
+            S-->>R: Mostra Nessun erogatore disponibile
         end
     else Dati non validi
-        S-->>R: Mostra gli errori<br/>e riporta al modulo<br/>senza creare la richiesta
+        S-->>R: Mostra gli errori e riapre il modulo
     end
