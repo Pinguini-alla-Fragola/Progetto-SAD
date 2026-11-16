@@ -31,11 +31,20 @@ jobs:
         with:
           distribution: temurin
           java-version: '25'
+          cache: maven
+
+      - name: Risolvi il classpath Java
+        shell: bash
+        run: |
+          bash ./mvnw --batch-mode --no-transfer-progress dependency:build-classpath \
+            -DincludeScope=compile -Dmdep.outputFile="$RUNNER_TEMP/javadoc-classpath.txt"
 
       - name: Genera Javadoc
         shell: bash
         run: |
-          javadoc -d "$RUNNER_TEMP/javadoc-site" '@scripts/javadoc.args'
+          classpath="$(cat "$RUNNER_TEMP/javadoc-classpath.txt")"
+          javadoc -quiet -classpath "$classpath" -d "$RUNNER_TEMP/javadoc-api-check" '@scripts/javadoc-api.args'
+          javadoc -classpath "$classpath" -d "$RUNNER_TEMP/javadoc-site" '@scripts/javadoc.args'
           test -s "$RUNNER_TEMP/javadoc-site/index.html"
           cp docs/architecture/picus-logo.svg "$RUNNER_TEMP/javadoc-site/resource-files/picus-logo.svg"
 
@@ -69,7 +78,7 @@ jobs:
           source_commit="$(git -C "$GITHUB_WORKSPACE" rev-parse --short HEAD)"
           git -c user.name='github-actions[bot]' \
               -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
-              commit -m "docs(javadoc): aggiorna API da $source_commit"
+              commit -m "docs(javadoc): aggiorna la documentazione Java da $source_commit"
           git_auth push origin HEAD:refs/heads/javadoc
 
       - name: Carica l'artefatto per GitHub Pages

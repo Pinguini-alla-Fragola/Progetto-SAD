@@ -59,6 +59,17 @@ In PowerShell:
 .\mvnw.cmd verify
 ```
 
+`verify` esegue tutti i test, compresi quelli di integrazione su PostgreSQL.
+Questi test avviano da soli un container `postgres:17` tramite Testcontainers,
+quindi richiedono **Docker in esecuzione** sulla macchina (Docker Desktop su
+Windows e macOS). Non serve avviare `docker compose` né configurare un
+database: il container viene creato all'inizio dei test e rimosso alla fine.
+
+Senza Docker i test di integrazione falliscono con un errore esplicito di
+Testcontainers e la build risulta fallita: non vengono saltati in silenzio.
+La CI usa lo stesso comando su un runner che mette a disposizione Docker,
+quindi li esegue a ogni pull request.
+
 ## Avvio locale con Docker Compose
 
 Da un clone pulito, copia `.env.example` in `.env` e imposta le due password
