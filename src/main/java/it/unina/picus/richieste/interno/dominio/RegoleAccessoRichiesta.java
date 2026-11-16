@@ -9,9 +9,7 @@ import it.unina.picus.richieste.api.RichiesteApi;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
 
-import static it.unina.picus.shared.ControlloAccesso.identitaCompleta;
 import static it.unina.picus.shared.ControlloAccesso.richiedi;
-import static it.unina.picus.shared.ControlloAccesso.richiediRuolo;
 
 /**
  * Regole di accesso alle richieste (#28), usate dall'implementazione di {@link RichiesteApi}.
@@ -22,24 +20,24 @@ import static it.unina.picus.shared.ControlloAccesso.richiediRuolo;
  * Quando l'accesso non è consentito lanciano {@link SecurityException}, come dichiarato nel
  * contratto. Il livello web la traduce in {@code 403} senza restituire dati.
  *
- * <p>Ciò che non è espressamente consentito è negato.
+ * <p>Ciò che non è espressamente consentito è negato. Un'identità incompleta non ha mai accesso.
+ * Finché l'erogatore non è assegnato, la relazione «erogatore» non concede nulla a nessuno: il
+ * Banco e la OPT titolare mantengono il proprio accesso.
  */
+public final class RegoleAccessoRichiesta {
 
-final public class RegoleAccessoRichiesta {
     /**
      * Soggetti legati a una richiesta. Vanno letti dai dati salvati, mai dai parametri del client.
      *
      * @param titolareId account della OPT che ha inviato la richiesta
      * @param erogatoreId account dell'erogatore assegnato, {@code null} prima dell'assegnazione
      */
-    public record Soggetti(UUID titolareId, UUID erogatoreId){
+    public record Soggetti(UUID titolareId, UUID erogatoreId) {
         /** Una richiesta ha sempre un titolare. */
         public Soggetti {
             Objects.requireNonNull(titolareId, "titolareId");
         }
     }
-
-    // Questi sono dei parameter objects
 
     /** Attore e soggetti della richiesta su cui si decide. */
     private record Contesto(IdentitaAutenticata attore, Soggetti soggetti) {
@@ -51,7 +49,6 @@ final public class RegoleAccessoRichiesta {
     private static final Set<RuoloUtente> SOLO_OPT = Set.of(RuoloUtente.OPT);
     private static final Set<RuoloUtente> EROGATORI = Set.of(RuoloUtente.OPT, RuoloUtente.OPERATORE);
 
-    // -- Pattern specification
     // Relazioni con la richiesta: una per riga della tabella della #28.
     // sono tre domande sull'attore che possono essere riusate in tutto il codice
     // la E iniziale sta per "è": "è il Banco?", "è il titolare?", "è l'erogatore assegnato?"
@@ -90,7 +87,7 @@ final public class RegoleAccessoRichiesta {
      * contatto degli erogatori, assegnazione, conferma dell'accordo e rifiuto definitivo.
      *
      * @param attore identità verificata della sessione
-     * @throws SecurityException se l'attore non è il Banco
+     * @throws SecurityException se l'identità è incompleta o l'attore non è il Banco
      * @see RichiesteApi#prendiInCarico
      * @see RichiesteApi#confermaAccordo
      * @see RichiesteApi#rifiutaRichiesta
@@ -103,7 +100,7 @@ final public class RegoleAccessoRichiesta {
      * Operazioni della OPT richiedente: invio ed elenco delle proprie richieste.
      *
      * @param attore identità verificata della sessione
-     * @throws SecurityException se l'attore non è una OPT
+     * @throws SecurityException se l'identità è incompleta o l'attore non è una OPT
      * @see RichiesteApi#invia
      * @see RichiesteApi#elencoRichiesteOpt
      */
@@ -115,7 +112,7 @@ final public class RegoleAccessoRichiesta {
      * Elenco delle pratiche assegnate, riservato a chi può erogare: OPT e operatori.
      *
      * @param attore identità verificata della sessione
-     * @throws SecurityException se l'attore non ha un ruolo da erogatore
+     * @throws SecurityException se l'identità è incompleta o l'attore non ha un ruolo da erogatore
      * @see RichiesteApi#elencoAssegnazioni
      */
     public static void verificaErogatore(IdentitaAutenticata attore) {
@@ -127,7 +124,8 @@ final public class RegoleAccessoRichiesta {
      *
      * @param attore identità verificata della sessione
      * @param soggetti titolare ed erogatore letti dalla richiesta salvata
-     * @throws SecurityException se l'attore non ha relazione con la richiesta
+     * @throws SecurityException se l'identità è incompleta o l'attore non ha relazione con la richiesta
+     * @throws NullPointerException se i soggetti mancano per un attore con identità completa
      * @see RichiesteApi#consultaRichiesta
      */
     public static void verificaConsultazione(IdentitaAutenticata attore, Soggetti soggetti) {
@@ -139,11 +137,12 @@ final public class RegoleAccessoRichiesta {
     /**
      * Annullamento: il Banco, la OPT titolare o l'erogatore assegnato. Il solo contatto come
      * candidato non basta, perché l'erogatore viene registrato solo con l'assegnazione. Le regole
-     * su motivo e stato restano nel caso d'uso dell'annullamento (#54).
+     * su motivo e stato sono in {@link RegoleAnnullamento}.
      *
      * @param attore identità verificata della sessione
      * @param soggetti titolare ed erogatore letti dalla richiesta salvata
-     * @throws SecurityException se l'attore non ha relazione con la richiesta
+     * @throws SecurityException se l'identità è incompleta o l'attore non ha relazione con la richiesta
+     * @throws NullPointerException se i soggetti mancano per un attore con identità completa
      * @see RichiesteApi#annullaRichiesta
      */
     public static void verificaAnnullamento(IdentitaAutenticata attore, Soggetti soggetti) {
@@ -158,18 +157,31 @@ final public class RegoleAccessoRichiesta {
      * @param attore identità verificata della sessione
      * @param soggetti titolare ed erogatore letti dalla richiesta salvata
      * @return {@code true} per il Banco e per la OPT titolare
+     * @throws NullPointerException se i soggetti mancano per un attore con identità completa
      */
     public static boolean vedeDatiDelTitolare(IdentitaAutenticata attore, Soggetti soggetti) {
         return consente(VEDE_DATI_DEL_TITOLARE, attore, soggetti);
     }
 
-    /** Valuta una politica solo su un'identità completa: un attore incompleto non ha mai accesso. */
+    // richiediRuolo esiste per scrivere una sola volta il controllo "il ruolo è tra quelli ammessi?"
+    private static void richiediRuolo(IdentitaAutenticata attore, Set<RuoloUtente> ammessi, String messaggio) {
+        richiedi(identitaCompleta(attore) && ammessi.contains(attore.ruolo()), messaggio);
+    }
+
+    /** Un'identità incompleta, senza account o senza ruolo, non ha mai accesso. */
+    private static boolean identitaCompleta(IdentitaAutenticata attore) {
+        return attore != null && attore.accountId() != null && attore.ruolo() != null;
+    }
+
+    /**
+     * Valuta una politica solo su un'identità completa: un attore incompleto non ha mai accesso.
+     * I soggetti sono una precondizione per un attore completo.
+     */
     private static boolean consente(Predicate<Contesto> politica, IdentitaAutenticata attore, Soggetti soggetti) {
-        Objects.requireNonNull(soggetti, "soggetti");
         if (!identitaCompleta(attore)) {
             return false;
         }
+        Objects.requireNonNull(soggetti, "soggetti");
         return politica.test(new Contesto(attore, soggetti));
     }
-
 }

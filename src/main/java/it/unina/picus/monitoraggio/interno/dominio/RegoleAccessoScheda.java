@@ -9,9 +9,7 @@ import it.unina.picus.monitoraggio.api.MonitoraggioApi;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
 
-import static it.unina.picus.shared.ControlloAccesso.identitaCompleta;
 import static it.unina.picus.shared.ControlloAccesso.richiedi;
-import static it.unina.picus.shared.ControlloAccesso.richiediRuolo;
 
 /**
  * Regole di accesso alle schede personali degli operatori (#28, criteri 4 e 5).
@@ -22,7 +20,12 @@ import static it.unina.picus.shared.ControlloAccesso.richiediRuolo;
  * del client. Un accesso non consentito lancia {@link SecurityException}, che il livello web
  * traduce in {@code 403} senza restituire dati.
  *
- * <p>Ciò che non è espressamente consentito è negato.
+ * <p>Ciò che non è espressamente consentito è negato. Un'identità incompleta non ha mai accesso.
+ *
+ * <p>Oggi il permesso «Banco autorizzato alla rendicontazione» (#57, {@code MonitoraggioApi#riepilogaSchede})
+ * coincide con il ruolo Banco, perché il modello ha solo ruoli: ogni identità Banco completa lo
+ * possiede. Se il team distinguerà i due livelli, la decisione dovrà ricevere il permesso
+ * verificato dal server.
  *
  * @see MonitoraggioApi
  */
@@ -50,7 +53,7 @@ public final class RegoleAccessoScheda {
      * dal Banco. La scheda inviata appartiene all'operatore autenticato.
      *
      * @param attore identità verificata della sessione
-     * @throws SecurityException se l'attore non è un operatore
+     * @throws SecurityException se l'identità è incompleta o l'attore non è un operatore
      * @see MonitoraggioApi#inviaSchedaOperatore
      * @see MonitoraggioApi#elencoSchedeOperatore
      */
@@ -63,7 +66,8 @@ public final class RegoleAccessoScheda {
      *
      * @param attore identità verificata della sessione
      * @param operatoreId account dell'operatore titolare, letto dalla scheda salvata
-     * @throws SecurityException se l'attore è una OPT, un altro operatore o un account incompleto
+     * @throws SecurityException se l'identità è incompleta o l'attore è una OPT o un altro operatore
+     * @throws NullPointerException se {@code operatoreId} manca per un attore con identità completa
      * @see MonitoraggioApi#consultaSchedaOperatore
      */
     public static void verificaConsultazione(IdentitaAutenticata attore, UUID operatoreId) {
@@ -74,21 +78,32 @@ public final class RegoleAccessoScheda {
      * Riepilogo delle schede ricevute nel trimestre, per la rendicontazione: riservato al Banco.
      *
      * @param attore identità verificata della sessione
-     * @throws SecurityException se l'attore non è il Banco
+     * @throws SecurityException se l'identità è incompleta o l'attore non è il Banco
      * @see MonitoraggioApi#riepilogaSchede
      */
     public static void verificaRiepilogo(IdentitaAutenticata attore) {
         richiediRuolo(attore, SOLO_BANCO, "Operazione riservata al Banco");
     }
 
-    /** Valuta una politica solo su un'identità completa: un attore incompleto non ha mai accesso. */
+    private static void richiediRuolo(IdentitaAutenticata attore, Set<RuoloUtente> ammessi, String messaggio) {
+        richiedi(identitaCompleta(attore) && ammessi.contains(attore.ruolo()), messaggio);
+    }
+
+    /** Un'identità incompleta, senza account o senza ruolo, non ha mai accesso. */
+    private static boolean identitaCompleta(IdentitaAutenticata attore) {
+        return attore != null && attore.accountId() != null && attore.ruolo() != null;
+    }
+
+    /**
+     * Valuta una politica solo su un'identità completa: un attore incompleto non ha mai accesso.
+     * Il titolare della scheda è una precondizione per un attore completo.
+     */
     private static boolean consente(BiPredicate<IdentitaAutenticata, UUID> politica,
                                     IdentitaAutenticata attore, UUID operatoreId) {
-        Objects.requireNonNull(operatoreId, "operatoreId");
         if (!identitaCompleta(attore)) {
             return false;
         }
+        Objects.requireNonNull(operatoreId, "operatoreId");
         return politica.test(attore, operatoreId);
     }
-
 }

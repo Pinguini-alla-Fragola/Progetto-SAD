@@ -1,36 +1,42 @@
 package it.unina.picus.shared;
 
-import java.io.IOException;
-import java.util.NoSuchElementException;
+import java.util.Date;
+import java.util.Map;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.ModelAndView;
 
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
- * Traduce le eccezioni dichiarate dai contratti dei moduli nelle risposte HTTP (#28).
+ * Traduce in {@code 403} il diniego deciso dalle regole dei moduli (#28).
  *
- * <p>{@link SecurityException} diventa {@code 403} e {@link NoSuchElementException} diventa
- * {@code 404}. La risposta non riporta il messaggio dell'eccezione né dati della richiesta:
- * la pagina o il JSON di errore li compone Spring Boot sul percorso {@code /error}.
- * Un {@code @ExceptionHandler} scritto dentro un controller ha la precedenza su questo.
+ * <p>Gestisce soltanto {@link AccessoNegatoException}, cioè un esito applicativo esplicito: gli
+ * altri guasti restano sul percorso {@code 500} e la risorsa inesistente spetta al controller
+ * interessato. La risposta è costruita qui e non passa da {@code /error}, quindi non dipende dalla
+ * configurazione di Spring: non contiene mai il messaggio dell'eccezione né dati della risorsa.
+ *
+ * <p>Le richieste di API, riconosciute da {@link RichiestaApi} come dalla sicurezza, ricevono il
+ * solo codice di stato, come nei gestori locali dei controller. Le pagine ricevono la vista
+ * {@code error} con soli {@code timestamp}, {@code status} ed {@code error}, cioè i campi standard
+ * di Spring senza il messaggio. Un {@code @ExceptionHandler} scritto dentro un controller ha la
+ * precedenza su questo.
  */
-
-
-
 @ControllerAdvice
 class GestioneRifiuti {
 
     /** Accesso non consentito dal ruolo o dalla relazione con la risorsa. */
-    @ExceptionHandler(SecurityException.class)
-    void accessoNegato(HttpServletResponse risposta) throws IOException {
-        risposta.sendError(HttpServletResponse.SC_FORBIDDEN);
-    }
-
-    /** Risorsa inesistente. */
-    @ExceptionHandler(NoSuchElementException.class)
-    void nonTrovata(HttpServletResponse risposta) throws IOException {
-        risposta.sendError(HttpServletResponse.SC_NOT_FOUND);
+    @ExceptionHandler(AccessoNegatoException.class)
+    Object accessoNegato(HttpServletRequest richiesta) {
+        if (RichiestaApi.e(richiesta)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        return new ModelAndView("error", Map.of(
+                "timestamp", new Date(),
+                "status", HttpStatus.FORBIDDEN.value(),
+                "error", HttpStatus.FORBIDDEN.getReasonPhrase()), HttpStatus.FORBIDDEN);
     }
 }

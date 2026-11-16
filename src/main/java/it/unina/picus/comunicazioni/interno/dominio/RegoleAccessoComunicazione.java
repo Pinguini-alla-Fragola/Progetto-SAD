@@ -9,9 +9,7 @@ import it.unina.picus.comunicazioni.api.ComunicazioniApi;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
 
-import static it.unina.picus.shared.ControlloAccesso.identitaCompleta;
 import static it.unina.picus.shared.ControlloAccesso.richiedi;
-import static it.unina.picus.shared.ControlloAccesso.richiediRuolo;
 
 /**
  * Regole di accesso alle comunicazioni del Banco (#28, criterio 7).
@@ -22,10 +20,12 @@ import static it.unina.picus.shared.ControlloAccesso.richiediRuolo;
  * proprio account: il riscontro va registrato per l'account della sessione, mai per uno indicato
  * dal client. L'identità arriva dalla sessione e i destinatari dai dati salvati. Un accesso non
  * consentito lancia {@link SecurityException}, che il livello web traduce in {@code 403} senza
- * restituire dati.
+ * restituire dati. Un'identità incompleta non ha mai accesso.
  *
- * <p>Gli elenchi delle comunicazioni ricevute e degli avvisi operativi non richiedono una regola:
- * restituiscono soltanto ciò che appartiene all'account della sessione.
+ * <p>Gli elenchi delle comunicazioni ricevute e degli avvisi operativi non richiedono una regola
+ * sul singolo oggetto, ma ogni query deve usare l'{@code accountId} dell'identità verificata come
+ * filtro obbligatorio. Una query senza destinatario non è valida: le implementazioni delle storie
+ * #55 e #56 non devono restituire elenchi non filtrati per account.
  *
  * @see ComunicazioniApi
  */
@@ -44,10 +44,10 @@ public final class RegoleAccessoComunicazione {
             (attore, destinatari) -> RUOLI_DESTINATARI.contains(attore.ruolo())
                     && destinatari.contains(attore.accountId());
 
-    // Oggi la conferma è dei soli destinatari
     private static final BiPredicate<IdentitaAutenticata, Set<UUID>> PUO_CONSULTARE =
             E_BANCO.or(E_DESTINATARIO);
 
+    // Oggi la conferma è dei soli destinatari: il Banco legge, ma non conferma al posto di nessuno.
     private static final BiPredicate<IdentitaAutenticata, Set<UUID>> PUO_CONFERMARE =
             E_DESTINATARIO;
 
@@ -58,7 +58,7 @@ public final class RegoleAccessoComunicazione {
      * Invio delle comunicazioni, elenco delle inviate e dei riscontri: riservati al Banco.
      *
      * @param attore identità verificata della sessione
-     * @throws SecurityException se l'attore non è il Banco
+     * @throws SecurityException se l'identità è incompleta o l'attore non è il Banco
      * @see ComunicazioniApi#inviaComunicazione
      * @see ComunicazioniApi#elencoInviate
      * @see ComunicazioniApi#elencoRiscontri
@@ -73,7 +73,8 @@ public final class RegoleAccessoComunicazione {
      *
      * @param attore identità verificata della sessione
      * @param destinatari account destinatari registrati all'invio, letti dai dati salvati
-     * @throws SecurityException se l'attore non è il Banco né un destinatario
+     * @throws SecurityException se l'identità è incompleta o l'attore non è il Banco né un destinatario
+     * @throws NullPointerException se i destinatari mancano per un attore con identità completa
      * @see ComunicazioniApi#consultaComunicazione
      * @see ComunicazioniApi#scaricaAllegato
      */
@@ -87,21 +88,33 @@ public final class RegoleAccessoComunicazione {
      *
      * @param attore identità verificata della sessione
      * @param destinatari account destinatari registrati all'invio, letti dai dati salvati
-     * @throws SecurityException se l'attore non è un destinatario
+     * @throws SecurityException se l'identità è incompleta o l'attore non è un destinatario
+     * @throws NullPointerException se i destinatari mancano per un attore con identità completa
      * @see ComunicazioniApi#confermaRicezione
      */
     public static void verificaConfermaRicezione(IdentitaAutenticata attore, Set<UUID> destinatari) {
         richiedi(consente(PUO_CONFERMARE, attore, destinatari), "Conferma riservata ai destinatari");
     }
 
-    /** Valuta una politica solo su un'identità completa: un attore incompleto non ha mai accesso. */
+    private static void richiediRuolo(IdentitaAutenticata attore, Set<RuoloUtente> ammessi, String messaggio) {
+        richiedi(identitaCompleta(attore) && ammessi.contains(attore.ruolo()), messaggio);
+    }
+
+    /** Un'identità incompleta, senza account o senza ruolo, non ha mai accesso. */
+    private static boolean identitaCompleta(IdentitaAutenticata attore) {
+        return attore != null && attore.accountId() != null && attore.ruolo() != null;
+    }
+
+    /**
+     * Valuta una politica solo su un'identità completa: un attore incompleto non ha mai accesso.
+     * I destinatari sono una precondizione per un attore completo.
+     */
     private static boolean consente(BiPredicate<IdentitaAutenticata, Set<UUID>> politica,
                                     IdentitaAutenticata attore, Set<UUID> destinatari) {
-        Objects.requireNonNull(destinatari, "destinatari");
         if (!identitaCompleta(attore)) {
             return false;
         }
+        Objects.requireNonNull(destinatari, "destinatari");
         return politica.test(attore, destinatari);
     }
-
 }

@@ -8,9 +8,7 @@ import it.unina.picus.monitoraggio.api.MonitoraggioApi;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
 
-import static it.unina.picus.shared.ControlloAccesso.identitaCompleta;
 import static it.unina.picus.shared.ControlloAccesso.richiedi;
-import static it.unina.picus.shared.ControlloAccesso.richiediRuolo;
 
 /**
  * Regole di accesso ai conteggi trimestrali delle OPT (#28, criterio 5).
@@ -18,7 +16,7 @@ import static it.unina.picus.shared.ControlloAccesso.richiediRuolo;
  * <p>La OPT registra e consulta i propri conteggi. Il Banco consulta quelli di qualsiasi OPT e
  * quelli di tutte insieme. Gli operatori non hanno accesso. L'identità arriva dalla sessione,
  * mai da parametri del client. Un accesso non consentito lancia {@link SecurityException}, che il
- * livello web traduce in {@code 403} senza restituire dati.
+ * livello web traduce in {@code 403} senza restituire dati. Un'identità incompleta non ha mai accesso.
  *
  * @see MonitoraggioApi
  */
@@ -45,7 +43,7 @@ public final class RegoleAccessoConteggi {
      * Registrazione dei conteggi: riservata alla OPT, che dichiara i propri.
      *
      * @param attore identità verificata della sessione
-     * @throws SecurityException se l'attore non è una OPT
+     * @throws SecurityException se l'identità è incompleta o l'attore non è una OPT
      * @see MonitoraggioApi#registraConteggiOpt
      */
     public static void verificaRegistrazione(IdentitaAutenticata attore) {
@@ -58,11 +56,19 @@ public final class RegoleAccessoConteggi {
      *
      * @param attore identità verificata della sessione
      * @param optId account della OPT richiesta, oppure {@code null} per tutte le OPT
-     * @throws SecurityException se l'attore non è autorizzato alla vista richiesta
+     * @throws SecurityException se l'identità è incompleta o l'attore non è autorizzato alla vista richiesta
      * @see MonitoraggioApi#consultaConteggiOpt
      */
     public static void verificaConsultazione(IdentitaAutenticata attore, UUID optId) {
         richiedi(identitaCompleta(attore) && PUO_CONSULTARE.test(attore, optId), "Accesso negato ai conteggi");
     }
 
+    private static void richiediRuolo(IdentitaAutenticata attore, Set<RuoloUtente> ammessi, String messaggio) {
+        richiedi(identitaCompleta(attore) && ammessi.contains(attore.ruolo()), messaggio);
+    }
+
+    /** Un'identità incompleta, senza account o senza ruolo, non ha mai accesso. */
+    private static boolean identitaCompleta(IdentitaAutenticata attore) {
+        return attore != null && attore.accountId() != null && attore.ruolo() != null;
+    }
 }
