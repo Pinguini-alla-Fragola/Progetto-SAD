@@ -86,9 +86,14 @@ loadScripts(document, 'script');</script>
 <h1 title="Interface RichiesteApi" class="title">Interface RichiesteApi</h1>
 </div>
 <section class="class-description" id="class-description">
+<dl class="notes">
+<dt>All Superinterfaces:</dt>
+<dd><code><a href="CoordinamentoRichiesteApi.html" title="interface in it.unina.picus.richieste.api">CoordinamentoRichiesteApi</a>, <a href="InvioRichiesteApi.html" title="interface in it.unina.picus.richieste.api">InvioRichiesteApi</a></code></dd>
+</dl>
 <hr>
 <div class="horizontal-scroll">
-<div class="type-signature"><span class="modifiers">public interface </span><span class="element-name type-name-label">RichiesteApi</span></div>
+<div class="type-signature"><span class="modifiers">public interface </span><span class="element-name type-name-label">RichiesteApi</span><span class="extends-implements">
+extends <a href="InvioRichiesteApi.html" title="interface in it.unina.picus.richieste.api">InvioRichiesteApi</a>, <a href="CoordinamentoRichiesteApi.html" title="interface in it.unina.picus.richieste.api">CoordinamentoRichiesteApi</a></span></div>
 <div class="block">Governa il ciclo delle richieste, i contatti di disponibilità e gli accordi.
 
 <p>Ogni operazione riceve l'identità verificata dal server e controlla il ruolo e il legame
@@ -293,6 +298,9 @@ assegnato.</div>
 </div>
 </div>
 </div>
+<div class="inherited-list">
+<h3 id="methods-inherited-from-class-it.unina.picus.richieste.api.CoordinamentoRichiesteApi">Methods inherited from interface&nbsp;<a href="CoordinamentoRichiesteApi.html#method-summary" title="interface in it.unina.picus.richieste.api">CoordinamentoRichiesteApi</a></h3>
+<code><a href="CoordinamentoRichiesteApi.html#consultaContattoBanco(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,java.util.UUID)" title="consultaContattoBanco(UtenzeApi.IdentitaAutenticata, UUID, UUID)">consultaContattoBanco</a></code></div>
 </section>
 </li>
 </ul>
@@ -315,6 +323,8 @@ assegnato.</div>
 e stato iniziale <a href="RichiesteApi.StatoRichiesta.html#CREATA"><code>RichiesteApi.StatoRichiesta.CREATA</code></a>. Un ritento dello stesso invio della stessa OPT
 con uguale riferimento e dati restituisce la richiesta già registrata.</div>
 <dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="InvioRichiesteApi.html#invia(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.richieste.api.RichiesteApi.DatiInvio,java.util.UUID)">invia</a></code>&nbsp;in interface&nbsp;<code><a href="InvioRichiesteApi.html" title="interface in it.unina.picus.richieste.api">InvioRichiesteApi</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>attore</code> - identità verificata della OPT richiedente</dd>
 <dd><code>dati</code> - misura, persona o nucleo, comune ed eventuale descrizione</dd>
@@ -327,6 +337,12 @@ con uguale riferimento e dati restituisce la richiesta già registrata.</div>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - se i dati sono incompleti, la misura non è richiedibile
                                  o il comune è sconosciuto</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - se il riferimento di invio della OPT è già associato a dati diversi</dd>
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list-long">
+<li><a href="#invia(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.richieste.api.RichiesteApi.DatiInvio,java.util.UUID)"><code>invia(IdentitaAutenticata, DatiInvio, UUID)</code></a></li>
+</ul>
+</dd>
 </dl>
 </div>
 </section>
@@ -338,12 +354,20 @@ con uguale riferimento e dati restituisce la richiesta già registrata.</div>
 <div class="member-signature"><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="RichiesteApi.RichiestaSintesi.html" title="class in it.unina.picus.richieste.api">RichiesteApi.RichiestaSintesi</a>&gt;</span>&nbsp;<span class="element-name">elencoRichiesteOpt</span><wbr><span class="parameters">(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore)</span></div>
 <div class="block">Elenca le richieste inviate dalla OPT autenticata.</div>
 <dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="InvioRichiesteApi.html#elencoRichiesteOpt(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)">elencoRichiesteOpt</a></code>&nbsp;in interface&nbsp;<code><a href="InvioRichiesteApi.html" title="interface in it.unina.picus.richieste.api">InvioRichiesteApi</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>attore</code> - identità verificata della OPT titolare</dd>
 <dt>Returns:</dt>
 <dd>richieste proprie, eventualmente nessuna</dd>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/SecurityException.html" title="class or interface in java.lang" class="external-link">SecurityException</a></code> - se l'attore non è una OPT autorizzata</dd>
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list-long">
+<li><a href="#elencoRichiesteOpt(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)"><code>elencoRichiesteOpt(IdentitaAutenticata)</code></a></li>
+</ul>
+</dd>
 </dl>
 </div>
 </section>
@@ -355,12 +379,20 @@ con uguale riferimento e dati restituisce la richiesta già registrata.</div>
 <div class="member-signature"><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="RichiesteApi.RichiestaSintesi.html" title="class in it.unina.picus.richieste.api">RichiesteApi.RichiestaSintesi</a>&gt;</span>&nbsp;<span class="element-name">codaBanco</span><wbr><span class="parameters">(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore)</span></div>
 <div class="block">Elenca le richieste aperte in ordine cronologico di invio.</div>
 <dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="InvioRichiesteApi.html#codaBanco(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)">codaBanco</a></code>&nbsp;in interface&nbsp;<code><a href="InvioRichiesteApi.html" title="interface in it.unina.picus.richieste.api">InvioRichiesteApi</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>attore</code> - identità verificata del Banco di coordinamento</dd>
 <dt>Returns:</dt>
 <dd>coda con richieste Creata, Presa in carico e In programmazione</dd>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/SecurityException.html" title="class or interface in java.lang" class="external-link">SecurityException</a></code> - se l'attore non è il Banco</dd>
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="#codaBanco(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)"><code>codaBanco(IdentitaAutenticata)</code></a></li>
+</ul>
+</dd>
 </dl>
 </div>
 </section>
@@ -408,6 +440,8 @@ con uguale riferimento e dati restituisce la richiesta già registrata.</div>
 <div class="block">Consulta la pratica con i soli dati visibili al Banco, alla OPT titolare o all'erogatore
 assegnato. Una consultazione conserva lo stato corrente.</div>
 <dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="InvioRichiesteApi.html#consultaRichiesta(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)">consultaRichiesta</a></code>&nbsp;in interface&nbsp;<code><a href="InvioRichiesteApi.html" title="interface in it.unina.picus.richieste.api">InvioRichiesteApi</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>attore</code> - identità verificata del richiedente</dd>
 <dd><code>richiestaId</code> - identificativo della pratica</dd>
@@ -416,6 +450,12 @@ assegnato. Una consultazione conserva lo stato corrente.</div>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/SecurityException.html" title="class or interface in java.lang" class="external-link">SecurityException</a></code> - se l'attore non ha accesso alla pratica</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/NoSuchElementException.html" title="class or interface in java.util" class="external-link">NoSuchElementException</a></code> - se la pratica non esiste</dd>
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list-long">
+<li><a href="#consultaRichiesta(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)"><code>consultaRichiesta(IdentitaAutenticata, UUID)</code></a></li>
+</ul>
+</dd>
 </dl>
 </div>
 </section>
@@ -428,6 +468,8 @@ assegnato. Una consultazione conserva lo stato corrente.</div>
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;richiestaId)</span></div>
 <div class="block">Registra la presa in carico esplicita del Banco per una richiesta Creata.</div>
 <dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="CoordinamentoRichiesteApi.html#prendiInCarico(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)">prendiInCarico</a></code>&nbsp;in interface&nbsp;<code><a href="CoordinamentoRichiesteApi.html" title="interface in it.unina.picus.richieste.api">CoordinamentoRichiesteApi</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>attore</code> - identità verificata del Banco di coordinamento</dd>
 <dd><code>richiestaId</code> - identificativo della richiesta in coda</dd>
@@ -437,6 +479,12 @@ assegnato. Una consultazione conserva lo stato corrente.</div>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/SecurityException.html" title="class or interface in java.lang" class="external-link">SecurityException</a></code> - se l'attore non è il Banco</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/NoSuchElementException.html" title="class or interface in java.util" class="external-link">NoSuchElementException</a></code> - se la pratica non esiste</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - se la richiesta non è Creata</dd>
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list-long">
+<li><a href="#prendiInCarico(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)"><code>prendiInCarico(IdentitaAutenticata, UUID)</code></a></li>
+</ul>
+</dd>
 </dl>
 </div>
 </section>
@@ -452,6 +500,8 @@ prossimità, poi a pari prossimità per precedenza degli operatori del Banco sul
 infine per minor carico. Il Centro PICUS a distanza è l'alternativa alle opzioni locali
 quando la misura lo consente.</div>
 <dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="CoordinamentoRichiesteApi.html#cercaErogatoriOrdinati(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)">cercaErogatoriOrdinati</a></code>&nbsp;in interface&nbsp;<code><a href="CoordinamentoRichiesteApi.html" title="interface in it.unina.picus.richieste.api">CoordinamentoRichiesteApi</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>attore</code> - identità verificata del Banco di coordinamento</dd>
 <dd><code>richiestaId</code> - identificativo della pratica in lavorazione</dd>
@@ -461,6 +511,12 @@ quando la misura lo consente.</div>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/SecurityException.html" title="class or interface in java.lang" class="external-link">SecurityException</a></code> - se l'attore non è il Banco</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/NoSuchElementException.html" title="class or interface in java.util" class="external-link">NoSuchElementException</a></code> - se la pratica non esiste</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - se lo stato non consente la ricerca</dd>
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list-long">
+<li><a href="#cercaErogatoriOrdinati(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)"><code>cercaErogatoriOrdinati(IdentitaAutenticata, UUID)</code></a></li>
+</ul>
+</dd>
 </dl>
 </div>
 </section>
@@ -476,6 +532,8 @@ quando la misura lo consente.</div>
 <div class="block">Registra un contatto di disponibilità e fa avvisare il solo account interpellato.
 La richiesta resta Presa in carico e può avere al più un contatto in attesa di risposta.</div>
 <dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="CoordinamentoRichiesteApi.html#interpellaErogatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,java.util.UUID,it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione)">interpellaErogatore</a></code>&nbsp;in interface&nbsp;<code><a href="CoordinamentoRichiesteApi.html" title="interface in it.unina.picus.richieste.api">CoordinamentoRichiesteApi</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>attore</code> - identità verificata del Banco di coordinamento</dd>
 <dd><code>richiestaId</code> - identificativo della pratica</dd>
@@ -488,6 +546,12 @@ La richiesta resta Presa in carico e può avere al più un contatto in attesa di
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/NoSuchElementException.html" title="class or interface in java.util" class="external-link">NoSuchElementException</a></code> - se la pratica non esiste</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - se l'opzione scelta non è compatibile</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - se la richiesta non è Presa in carico o un contatto è già in attesa</dd>
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list-long">
+<li><a href="#interpellaErogatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,java.util.UUID,it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione)"><code>interpellaErogatore(IdentitaAutenticata, UUID, UUID, AmbitoErogazione)</code></a></li>
+</ul>
+</dd>
 </dl>
 </div>
 </section>
@@ -565,6 +629,8 @@ La richiesta resta Presa in carico e può avere al più un contatto in attesa di
 <div class="block">Assegna la richiesta Presa in carico all'erogatore che ha risposto positivamente
 al contatto. Il passaggio a In programmazione registra l'assegnazione nello stesso esito.</div>
 <dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="CoordinamentoRichiesteApi.html#assegnaErogatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)">assegnaErogatore</a></code>&nbsp;in interface&nbsp;<code><a href="CoordinamentoRichiesteApi.html" title="interface in it.unina.picus.richieste.api">CoordinamentoRichiesteApi</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>attore</code> - identità verificata del Banco di coordinamento</dd>
 <dd><code>contattoId</code> - identificativo del contatto con l'erogatore disponibile</dd>
@@ -575,6 +641,12 @@ al contatto. Il passaggio a In programmazione registra l'assegnazione nello stes
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/NoSuchElementException.html" title="class or interface in java.util" class="external-link">NoSuchElementException</a></code> - se il contatto non esiste</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - se la richiesta non è Presa in carico,
                               il contatto non attesta disponibilità o l'erogatore non è più abilitato</dd>
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list-long">
+<li><a href="#assegnaErogatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)"><code>assegnaErogatore(IdentitaAutenticata, UUID)</code></a></li>
+</ul>
+</dd>
 </dl>
 </div>
 </section>

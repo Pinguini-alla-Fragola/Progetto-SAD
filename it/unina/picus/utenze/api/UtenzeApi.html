@@ -65,6 +65,8 @@ loadScripts(document, 'script');</script>
 <li><a href="#cercaAccount(java.util.UUID)" tabindex="0">cercaAccount(UUID)</a></li>
 <li><a href="#elencoAccountAttivi(it.unina.picus.utenze.api.UtenzeApi.RuoloUtente)" tabindex="0">elencoAccountAttivi(UtenzeApi.RuoloUtente)</a></li>
 <li><a href="#cercaProfiloErogatoreAttivo(java.util.UUID)" tabindex="0">cercaProfiloErogatoreAttivo(UUID)</a></li>
+<li><a href="#elencoOptAttive(java.util.Set)" tabindex="0">elencoOptAttive(Set)</a></li>
+<li><a href="#bloccaProfiloPerMisura(java.util.UUID,long)" tabindex="0">bloccaProfiloPerMisura(UUID, long)</a></li>
 <li><a href="#elencoOperatoriAttiviPerMisura(long)" tabindex="0">elencoOperatoriAttiviPerMisura(long)</a></li>
 </ol>
 </li>
@@ -138,25 +140,36 @@ Il chiamante applica i controlli di titolarità, assegnazione o ricezione sulla 
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="UtenzeApi.AccountSintetico.html" title="class in it.unina.picus.utenze.api">UtenzeApi.AccountSintetico</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#cercaAccount(java.util.UUID)" class="member-name-link">cercaAccount</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;accountId)</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="UtenzeApi.ProfiloErogatore.html" title="class in it.unina.picus.utenze.api">UtenzeApi.ProfiloErogatore</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#bloccaProfiloPerMisura(java.util.UUID,long)" class="member-name-link">bloccaProfiloPerMisura</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;accountId,
+ long&nbsp;misuraId)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Rilegge il profilo attivo e la competenza personale, bloccandoli fino al commit chiamante.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="UtenzeApi.AccountSintetico.html" title="class in it.unina.picus.utenze.api">UtenzeApi.AccountSintetico</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#cercaAccount(java.util.UUID)" class="member-name-link">cercaAccount</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;accountId)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Cerca i dati minimi di un account anche per visualizzare un riferimento storico.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="UtenzeApi.ProfiloErogatore.html" title="class in it.unina.picus.utenze.api">UtenzeApi.ProfiloErogatore</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#cercaProfiloErogatoreAttivo(java.util.UUID)" class="member-name-link">cercaProfiloErogatoreAttivo</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;accountId)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="UtenzeApi.ProfiloErogatore.html" title="class in it.unina.picus.utenze.api">UtenzeApi.ProfiloErogatore</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#cercaProfiloErogatoreAttivo(java.util.UUID)" class="member-name-link">cercaProfiloErogatoreAttivo</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;accountId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Cerca il profilo di un soggetto abilitato a erogare, per esempio di una OPT con un'offerta.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="UtenzeApi.AccountSintetico.html" title="class in it.unina.picus.utenze.api">UtenzeApi.AccountSintetico</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#elencoAccountAttivi(it.unina.picus.utenze.api.UtenzeApi.RuoloUtente)" class="member-name-link">elencoAccountAttivi</a><wbr>(<a href="UtenzeApi.RuoloUtente.html" title="enum class in it.unina.picus.utenze.api">UtenzeApi.RuoloUtente</a>&nbsp;ruolo)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="UtenzeApi.AccountSintetico.html" title="class in it.unina.picus.utenze.api">UtenzeApi.AccountSintetico</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#elencoAccountAttivi(it.unina.picus.utenze.api.UtenzeApi.RuoloUtente)" class="member-name-link">elencoAccountAttivi</a><wbr>(<a href="UtenzeApi.RuoloUtente.html" title="enum class in it.unina.picus.utenze.api">UtenzeApi.RuoloUtente</a>&nbsp;ruolo)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Elenca gli account attivi di un ruolo per risolvere una selezione di destinatari.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="UtenzeApi.ProfiloErogatore.html" title="class in it.unina.picus.utenze.api">UtenzeApi.ProfiloErogatore</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#elencoOperatoriAttiviPerMisura(long)" class="member-name-link">elencoOperatoriAttiviPerMisura</a><wbr>(long&nbsp;misuraId)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="UtenzeApi.ProfiloErogatore.html" title="class in it.unina.picus.utenze.api">UtenzeApi.ProfiloErogatore</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#elencoOperatoriAttiviPerMisura(long)" class="member-name-link">elencoOperatoriAttiviPerMisura</a><wbr>(long&nbsp;misuraId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Elenca gli operatori attivi del Banco il cui profilo comprende la misura indicata.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="UtenzeApi.ProfiloErogatore.html" title="class in it.unina.picus.utenze.api">UtenzeApi.ProfiloErogatore</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#elencoOptAttive(java.util.Set)" class="member-name-link">elencoOptAttive</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html" title="class or interface in java.util" class="external-link">Set</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&gt;&nbsp;accountIds)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Legge in blocco i profili delle OPT attive appartenenti alla selezione.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&gt;</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#verificaAccountSessione(java.util.UUID)" class="member-name-link">verificaAccountSessione</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;accountId)</code></div>
@@ -256,6 +269,41 @@ Il chiamante applica i controlli di titolarità, assegnazione o ricezione sulla 
 <dd><code>accountId</code> - identificativo dell'account organizzativo o personale</dd>
 <dt>Returns:</dt>
 <dd>profilo minimo, oppure vuoto se l'account manca, non è attivo o non è un erogatore</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="elencoOptAttive(java.util.Set)">
+<h3>elencoOptAttive</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="UtenzeApi.ProfiloErogatore.html" title="class in it.unina.picus.utenze.api">UtenzeApi.ProfiloErogatore</a>&gt;</span>&nbsp;<span class="element-name">elencoOptAttive</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html" title="class or interface in java.util" class="external-link">Set</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&gt;&nbsp;accountIds)</span></div>
+<div class="block">Legge in blocco i profili delle OPT attive appartenenti alla selezione.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>accountIds</code> - selezione di account organizzativi</dd>
+<dt>Returns:</dt>
+<dd>soli profili OPT attivi trovati, eventualmente nessuno</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="bloccaProfiloPerMisura(java.util.UUID,long)">
+<h3>bloccaProfiloPerMisura</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="UtenzeApi.ProfiloErogatore.html" title="class in it.unina.picus.utenze.api">UtenzeApi.ProfiloErogatore</a>&gt;</span>&nbsp;<span class="element-name">bloccaProfiloPerMisura</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;accountId,
+ long&nbsp;misuraId)</span></div>
+<div class="block">Rilegge il profilo attivo e la competenza personale, bloccandoli fino al commit chiamante.
+Richiede una transazione di scrittura già aperta. L'ordine è account, profilo, competenza;
+la revoca o la modifica concorrente non può superare questa verifica prima del commit.
+Per le OPT la dichiarazione di offerta è verificata dal Catalogo.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>accountId</code> - account scelto dal Banco</dd>
+<dd><code>misuraId</code> - competenza richiesta agli operatori</dd>
+<dt>Returns:</dt>
+<dd>profilo corrente o vuoto se non abilitato</dd>
 </dl>
 </div>
 </section>

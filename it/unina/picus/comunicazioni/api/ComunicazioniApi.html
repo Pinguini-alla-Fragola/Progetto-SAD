@@ -80,9 +80,14 @@ loadScripts(document, 'script');</script>
 <h1 title="Interface ComunicazioniApi" class="title">Interface ComunicazioniApi</h1>
 </div>
 <section class="class-description" id="class-description">
+<dl class="notes">
+<dt>All Superinterfaces:</dt>
+<dd><code><a href="AvvisiOperativiApi.html" title="interface in it.unina.picus.comunicazioni.api">AvvisiOperativiApi</a></code></dd>
+</dl>
 <hr>
 <div class="horizontal-scroll">
-<div class="type-signature"><span class="modifiers">public interface </span><span class="element-name type-name-label">ComunicazioniApi</span></div>
+<div class="type-signature"><span class="modifiers">public interface </span><span class="element-name type-name-label">ComunicazioniApi</span><span class="extends-implements">
+extends <a href="AvvisiOperativiApi.html" title="interface in it.unina.picus.comunicazioni.api">AvvisiOperativiApi</a></span></div>
 <div class="block">Gestisce le comunicazioni del Banco, i riscontri dei destinatari e la consegna degli avvisi
 operativi. Richieste rimane responsabile della pratica e delle azioni a cui puntano gli avvisi.</div>
 </div>
@@ -369,10 +374,18 @@ account per la stessa comunicazione restituisce la data e l'ora del primo riscon
 <div class="block">Registra l'avviso per un contatto di disponibilità acquisito da Richieste. Più chiamate
 per lo stesso contatto e destinatario producono un solo avviso visibile nell'app.</div>
 <dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="AvvisiOperativiApi.html#avvisaDisponibilita(java.util.UUID,java.util.UUID,java.util.UUID)">avvisaDisponibilita</a></code>&nbsp;in interface&nbsp;<code><a href="AvvisiOperativiApi.html" title="interface in it.unina.picus.comunicazioni.api">AvvisiOperativiApi</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>richiestaId</code> - riferimento alla pratica</dd>
 <dd><code>contattoId</code> - riferimento al contatto da aprire per rispondere</dd>
 <dd><code>destinatarioId</code> - unico account interpellato, determinato da Richieste</dd>
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list-long">
+<li><a href="#avvisaDisponibilita(java.util.UUID,java.util.UUID,java.util.UUID)"><code>avvisaDisponibilita(UUID, UUID, UUID)</code></a></li>
+</ul>
+</dd>
 </dl>
 </div>
 </section>
@@ -400,10 +413,18 @@ richiesta producono un solo avviso di annullamento per account destinatario.</di
 <div class="member-signature"><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="ComunicazioniApi.AvvisoOperativo.html" title="class in it.unina.picus.comunicazioni.api">ComunicazioniApi.AvvisoOperativo</a>&gt;</span>&nbsp;<span class="element-name">elencoAvvisiOperativi</span><wbr><span class="parameters">(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore)</span></div>
 <div class="block">Elenca gli avvisi operativi destinati all'account, senza esporre i dati della pratica.</div>
 <dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="AvvisiOperativiApi.html#elencoAvvisiOperativi(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)">elencoAvvisiOperativi</a></code>&nbsp;in interface&nbsp;<code><a href="AvvisiOperativiApi.html" title="interface in it.unina.picus.comunicazioni.api">AvvisiOperativiApi</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>attore</code> - identità verificata dell'account destinatario</dd>
 <dt>Returns:</dt>
 <dd>avvisi visibili al destinatario, eventualmente nessuno</dd>
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list-long">
+<li><a href="#elencoAvvisiOperativi(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)"><code>elencoAvvisiOperativi(IdentitaAutenticata)</code></a></li>
+</ul>
+</dd>
 </dl>
 </div>
 </section>

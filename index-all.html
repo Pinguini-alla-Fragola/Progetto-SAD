@@ -52,7 +52,7 @@ loadScripts(document, 'script');</script>
 <div class="header">
 <h1>Index</h1>
 </div>
-<a href="#I:A">A</a>&nbsp;<a href="#I:B">B</a>&nbsp;<a href="#I:C">C</a>&nbsp;<a href="#I:D">D</a>&nbsp;<a href="#I:E">E</a>&nbsp;<a href="#I:F">F</a>&nbsp;<a href="#I:G">G</a>&nbsp;<a href="#I:H">H</a>&nbsp;<a href="#I:I">I</a>&nbsp;<a href="#I:L">L</a>&nbsp;<a href="#I:M">M</a>&nbsp;<a href="#I:N">N</a>&nbsp;<a href="#I:O">O</a>&nbsp;<a href="#I:P">P</a>&nbsp;<a href="#I:Q">Q</a>&nbsp;<a href="#I:R">R</a>&nbsp;<a href="#I:S">S</a>&nbsp;<a href="#I:T">T</a>&nbsp;<a href="#I:U">U</a>&nbsp;<a href="#I:V">V</a>&nbsp;<br><a href="allclasses-index.html">All&nbsp;Classes&nbsp;and&nbsp;Interfaces</a><span class="vertical-separator">|</span><a href="allpackages-index.html">All&nbsp;Packages</a>
+<a href="#I:A">A</a>&nbsp;<a href="#I:B">B</a>&nbsp;<a href="#I:C">C</a>&nbsp;<a href="#I:D">D</a>&nbsp;<a href="#I:E">E</a>&nbsp;<a href="#I:F">F</a>&nbsp;<a href="#I:G">G</a>&nbsp;<a href="#I:H">H</a>&nbsp;<a href="#I:I">I</a>&nbsp;<a href="#I:L">L</a>&nbsp;<a href="#I:M">M</a>&nbsp;<a href="#I:N">N</a>&nbsp;<a href="#I:O">O</a>&nbsp;<a href="#I:P">P</a>&nbsp;<a href="#I:Q">Q</a>&nbsp;<a href="#I:R">R</a>&nbsp;<a href="#I:S">S</a>&nbsp;<a href="#I:T">T</a>&nbsp;<a href="#I:U">U</a>&nbsp;<a href="#I:V">V</a>&nbsp;<br><a href="allclasses-index.html">All&nbsp;Classes&nbsp;and&nbsp;Interfaces</a><span class="vertical-separator">|</span><a href="allpackages-index.html">All&nbsp;Packages</a><span class="vertical-separator">|</span><a href="serialized-form.html">Serialized&nbsp;Form</a>
 <h2 class="title" id="I:A">A</h2>
 <dl class="index">
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.RichiestaDettaglio.html#accordo()" class="member-name-link">accordo()</a> - Method in record class it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.RichiestaDettaglio.html" title="class in it.unina.picus.richieste.api">RichiesteApi.RichiestaDettaglio</a></dt>
@@ -127,6 +127,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/monitoraggio/api/MonitoraggioApi.DatiSchedaOperatore.html#param-areaLivello"><code>areaLivello</code></a> record component.</div>
 </dd>
+<dt><a href="it/unina/picus/richieste/api/CoordinamentoRichiesteApi.html#assegnaErogatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">assegnaErogatore(UtenzeApi.IdentitaAutenticata, UUID)</a> - Method in interface it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/CoordinamentoRichiesteApi.html" title="interface in it.unina.picus.richieste.api">CoordinamentoRichiesteApi</a></dt>
+<dd>
+<div class="block">Assegna l'erogatore ancora abilitato che ha risposto positivamente.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.html#assegnaErogatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">assegnaErogatore(UtenzeApi.IdentitaAutenticata, UUID)</a> - Method in interface it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.html" title="interface in it.unina.picus.richieste.api">RichiesteApi</a></dt>
 <dd>
 <div class="block">Assegna la richiesta Presa in carico all'erogatore che ha risposto positivamente
@@ -144,9 +148,17 @@ al contatto.</div>
 <dd>
 <div class="block">Registra gli avvisi per un annullamento acquisito da Richieste.</div>
 </dd>
+<dt><a href="it/unina/picus/comunicazioni/api/AvvisiOperativiApi.html#avvisaDisponibilita(java.util.UUID,java.util.UUID,java.util.UUID)" class="member-name-link">avvisaDisponibilita(UUID, UUID, UUID)</a> - Method in interface it.unina.picus.comunicazioni.api.<a href="it/unina/picus/comunicazioni/api/AvvisiOperativiApi.html" title="interface in it.unina.picus.comunicazioni.api">AvvisiOperativiApi</a></dt>
+<dd>
+<div class="block">Registra un avviso idempotente nella transazione che crea il contatto.</div>
+</dd>
 <dt><a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.html#avvisaDisponibilita(java.util.UUID,java.util.UUID,java.util.UUID)" class="member-name-link">avvisaDisponibilita(UUID, UUID, UUID)</a> - Method in interface it.unina.picus.comunicazioni.api.<a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.html" title="interface in it.unina.picus.comunicazioni.api">ComunicazioniApi</a></dt>
 <dd>
 <div class="block">Registra l'avviso per un contatto di disponibilità acquisito da Richieste.</div>
+</dd>
+<dt><a href="it/unina/picus/comunicazioni/api/AvvisiOperativiApi.html" class="type-name-link" title="interface in it.unina.picus.comunicazioni.api">AvvisiOperativiApi</a> - Interface in <a href="it/unina/picus/comunicazioni/api/package-summary.html">it.unina.picus.comunicazioni.api</a></dt>
+<dd>
+<div class="block">Avvisi di disponibilità in-app, indipendenti dalle comunicazioni generali del Banco.</div>
 </dd>
 <dt><a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.AvvisoOperativo.html#%3Cinit%3E(java.util.UUID,it.unina.picus.comunicazioni.api.ComunicazioniApi.TipoAvviso,java.util.UUID,java.util.UUID,java.time.Instant)" class="member-name-link">AvvisoOperativo(UUID, ComunicazioniApi.TipoAvviso, UUID, UUID, Instant)</a> - Constructor for record class it.unina.picus.comunicazioni.api.<a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.AvvisoOperativo.html" title="class in it.unina.picus.comunicazioni.api">ComunicazioniApi.AvvisoOperativo</a></dt>
 <dd>
@@ -159,9 +171,21 @@ al contatto.</div>
 <dd>
 <div class="block">Account di coordinamento del Banco.</div>
 </dd>
+<dt><a href="it/unina/picus/catalogo/api/RicercaErogatoriApi.html#bloccaCompatibilita(long,java.lang.String,java.util.UUID,it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione)" class="member-name-link">bloccaCompatibilita(long, String, UUID, CatalogoApi.AmbitoErogazione)</a> - Method in interface it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/RicercaErogatoriApi.html" title="interface in it.unina.picus.catalogo.api">RicercaErogatoriApi</a></dt>
+<dd>
+<div class="block">Verifica l'opzione corrente mantenendo le abilitazioni bloccate fino al commit chiamante.</div>
+</dd>
+<dt><a href="it/unina/picus/utenze/api/UtenzeApi.html#bloccaProfiloPerMisura(java.util.UUID,long)" class="member-name-link">bloccaProfiloPerMisura(UUID, long)</a> - Method in interface it.unina.picus.utenze.api.<a href="it/unina/picus/utenze/api/UtenzeApi.html" title="interface in it.unina.picus.utenze.api">UtenzeApi</a></dt>
+<dd>
+<div class="block">Rilegge il profilo attivo e la competenza personale, bloccandoli fino al commit chiamante.</div>
+</dd>
 </dl>
 <h2 class="title" id="I:C">C</h2>
 <dl class="index">
+<dt><a href="it/unina/picus/richieste/api/DatiRichiestaNonValidiException.html#campi()" class="member-name-link">campi()</a> - Method in exception class it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/DatiRichiestaNonValidiException.html" title="class in it.unina.picus.richieste.api">DatiRichiestaNonValidiException</a></dt>
+<dd>
+<div class="block">Restituisce indicazioni immutabili per la correzione del modulo.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.Candidato.html#%3Cinit%3E(it.unina.picus.catalogo.api.CatalogoApi.ErogatoreCompatibile,int)" class="member-name-link">Candidato(CatalogoApi.ErogatoreCompatibile, int)</a> - Constructor for record class it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.Candidato.html" title="class in it.unina.picus.richieste.api">RichiesteApi.Candidato</a></dt>
 <dd>
 <div class="block">Creates an instance of a <code>Candidato</code> record class.</div>
@@ -214,9 +238,21 @@ al contatto.</div>
 <dd>
 <div class="block">Verifica e risolve un codice comune.</div>
 </dd>
+<dt><a href="it/unina/picus/catalogo/api/ConsultazioneCatalogoApi.html#cercaComune(java.lang.String)" class="member-name-link">cercaComune(String)</a> - Method in interface it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/ConsultazioneCatalogoApi.html" title="interface in it.unina.picus.catalogo.api">ConsultazioneCatalogoApi</a></dt>
+<dd>
+<div class="block">Risolve il codice di un comune.</div>
+</dd>
 <dt><a href="it/unina/picus/catalogo/api/CatalogoApi.html#cercaErogatoriCompatibili(long,java.lang.String)" class="member-name-link">cercaErogatoriCompatibili(long, String)</a> - Method in interface it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/CatalogoApi.html" title="interface in it.unina.picus.catalogo.api">CatalogoApi</a></dt>
 <dd>
 <div class="block">Combina le offerte delle OPT con i profili degli operatori attivi che erogano la misura.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/api/RicercaErogatoriApi.html#cercaErogatoriCompatibili(long,java.lang.String)" class="member-name-link">cercaErogatoriCompatibili(long, String)</a> - Method in interface it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/RicercaErogatoriApi.html" title="interface in it.unina.picus.catalogo.api">RicercaErogatoriApi</a></dt>
+<dd>
+<div class="block">Cerca tutte le opzioni compatibili per misura e territorio.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/api/CoordinamentoRichiesteApi.html#cercaErogatoriOrdinati(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">cercaErogatoriOrdinati(UtenzeApi.IdentitaAutenticata, UUID)</a> - Method in interface it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/CoordinamentoRichiesteApi.html" title="interface in it.unina.picus.richieste.api">CoordinamentoRichiesteApi</a></dt>
+<dd>
+<div class="block">Ordina tutte le opzioni compatibili senza cambiare lo stato della pratica.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.html#cercaErogatoriOrdinati(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">cercaErogatoriOrdinati(UtenzeApi.IdentitaAutenticata, UUID)</a> - Method in interface it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.html" title="interface in it.unina.picus.richieste.api">RichiesteApi</a></dt>
 <dd>
@@ -226,9 +262,17 @@ al contatto.</div>
 <dd>
 <div class="block">Risolve il riferimento a una misura anche quando è stata disattivata.</div>
 </dd>
+<dt><a href="it/unina/picus/catalogo/api/ConsultazioneCatalogoApi.html#cercaMisura(long)" class="member-name-link">cercaMisura(long)</a> - Method in interface it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/ConsultazioneCatalogoApi.html" title="interface in it.unina.picus.catalogo.api">ConsultazioneCatalogoApi</a></dt>
+<dd>
+<div class="block">Risolve una misura anche quando non è più attiva.</div>
+</dd>
 <dt><a href="it/unina/picus/utenze/api/UtenzeApi.html#cercaProfiloErogatoreAttivo(java.util.UUID)" class="member-name-link">cercaProfiloErogatoreAttivo(UUID)</a> - Method in interface it.unina.picus.utenze.api.<a href="it/unina/picus/utenze/api/UtenzeApi.html" title="interface in it.unina.picus.utenze.api">UtenzeApi</a></dt>
 <dd>
 <div class="block">Cerca il profilo di un soggetto abilitato a erogare, per esempio di una OPT con un'offerta.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/api/InvioRichiesteApi.html#codaBanco(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">codaBanco(UtenzeApi.IdentitaAutenticata)</a> - Method in interface it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/InvioRichiesteApi.html" title="interface in it.unina.picus.richieste.api">InvioRichiesteApi</a></dt>
+<dd>
+<div class="block">Elenca le richieste aperte in ordine cronologico di arrivo.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.html#codaBanco(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">codaBanco(UtenzeApi.IdentitaAutenticata)</a> - Method in interface it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.html" title="interface in it.unina.picus.richieste.api">RichiesteApi</a></dt>
 <dd>
@@ -343,6 +387,14 @@ operativi.</div>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/comunicazioni/api/ComunicazioniApi.Riscontro.html#param-confermataIl"><code>confermataIl</code></a> record component.</div>
 </dd>
+<dt><a href="it/unina/picus/richieste/api/ConflittoRichiestaException.html" class="type-name-link" title="class in it.unina.picus.richieste.api">ConflittoRichiestaException</a> - Exception Class in <a href="it/unina/picus/richieste/api/package-summary.html">it.unina.picus.richieste.api</a></dt>
+<dd>
+<div class="block">Comando applicativo incompatibile con lo stato o con un invio già registrato.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/api/ConflittoRichiestaException.html#%3Cinit%3E(java.lang.String)" class="member-name-link">ConflittoRichiestaException(String)</a> - Constructor for exception class it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/ConflittoRichiestaException.html" title="class in it.unina.picus.richieste.api">ConflittoRichiestaException</a></dt>
+<dd>
+<div class="block">Crea il conflitto con un messaggio controllato.</div>
+</dd>
 <dt><a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.html#consultaComunicazione(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">consultaComunicazione(UtenzeApi.IdentitaAutenticata, UUID)</a> - Method in interface it.unina.picus.comunicazioni.api.<a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.html" title="interface in it.unina.picus.comunicazioni.api">ComunicazioniApi</a></dt>
 <dd>
 <div class="block">Consulta il testo e i metadati degli allegati.</div>
@@ -351,9 +403,17 @@ operativi.</div>
 <dd>
 <div class="block">Fornisce al solo account interpellato i dati minimi per valutare la disponibilità.</div>
 </dd>
+<dt><a href="it/unina/picus/richieste/api/CoordinamentoRichiesteApi.html#consultaContattoBanco(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,java.util.UUID)" class="member-name-link">consultaContattoBanco(UtenzeApi.IdentitaAutenticata, UUID, UUID)</a> - Method in interface it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/CoordinamentoRichiesteApi.html" title="interface in it.unina.picus.richieste.api">CoordinamentoRichiesteApi</a></dt>
+<dd>
+<div class="block">Consulta il contatto della pratica dal perimetro autorizzato del Banco.</div>
+</dd>
 <dt><a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.html#consultaConteggiOpt(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre)" class="member-name-link">consultaConteggiOpt(UtenzeApi.IdentitaAutenticata, UUID, MonitoraggioApi.Trimestre, MonitoraggioApi.Trimestre)</a> - Method in interface it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.html" title="interface in it.unina.picus.monitoraggio.api">MonitoraggioApi</a></dt>
 <dd>
 <div class="block">Consulta i conteggi dichiarati, per un singolo trimestre o cumulati sui trimestri inclusi.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/api/InvioRichiesteApi.html#consultaRichiesta(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">consultaRichiesta(UtenzeApi.IdentitaAutenticata, UUID)</a> - Method in interface it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/InvioRichiesteApi.html" title="interface in it.unina.picus.richieste.api">InvioRichiesteApi</a></dt>
+<dd>
+<div class="block">Consulta la pratica senza transizioni, filtrando i dati per il richiedente.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.html#consultaRichiesta(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">consultaRichiesta(UtenzeApi.IdentitaAutenticata, UUID)</a> - Method in interface it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.html" title="interface in it.unina.picus.richieste.api">RichiesteApi</a></dt>
 <dd>
@@ -363,6 +423,10 @@ assegnato.</div>
 <dt><a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.html#consultaSchedaOperatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">consultaSchedaOperatore(UtenzeApi.IdentitaAutenticata, UUID)</a> - Method in interface it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.html" title="interface in it.unina.picus.monitoraggio.api">MonitoraggioApi</a></dt>
 <dd>
 <div class="block">Consulta la scheda personale.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/api/ConsultazioneCatalogoApi.html" class="type-name-link" title="interface in it.unina.picus.catalogo.api">ConsultazioneCatalogoApi</a> - Interface in <a href="it/unina/picus/catalogo/api/package-summary.html">it.unina.picus.catalogo.api</a></dt>
+<dd>
+<div class="block">Riferimenti di catalogo necessari all'invio e alla consultazione delle richieste.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.DettaglioContatto.html#contatto()" class="member-name-link">contatto()</a> - Method in record class it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.DettaglioContatto.html" title="class in it.unina.picus.richieste.api">RichiesteApi.DettaglioContatto</a></dt>
 <dd>
@@ -395,6 +459,14 @@ assegnato.</div>
 <dt><a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.FileAllegato.html#contenuto()" class="member-name-link">contenuto()</a> - Method in record class it.unina.picus.comunicazioni.api.<a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.FileAllegato.html" title="class in it.unina.picus.comunicazioni.api">ComunicazioniApi.FileAllegato</a></dt>
 <dd>
 <div class="block">Restituisce una copia dei byte del file.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/api/CoordinamentoRichiesteApi.html" class="type-name-link" title="interface in it.unina.picus.richieste.api">CoordinamentoRichiesteApi</a> - Interface in <a href="it/unina/picus/richieste/api/package-summary.html">it.unina.picus.richieste.api</a></dt>
+<dd>
+<div class="block">Capacità del Banco per ricerca, contatto e assegnazione; contratti di <a href="it/unina/picus/richieste/api/RichiesteApi.html" title="interface in it.unina.picus.richieste.api"><code>RichiesteApi</code></a>.</div>
+</dd>
+<dt><a href="it/unina/picus/comunicazioni/api/DestinatariAvvisi.html#corrisponde(java.util.UUID,java.util.UUID,java.util.UUID)" class="member-name-link">corrisponde(UUID, UUID, UUID)</a> - Method in interface it.unina.picus.comunicazioni.api.<a href="it/unina/picus/comunicazioni/api/DestinatariAvvisi.html" title="interface in it.unina.picus.comunicazioni.api">DestinatariAvvisi</a></dt>
+<dd>
+<div class="block">Verifica che pratica e destinatario coincidano con quelli immutabili del contatto.</div>
 </dd>
 <dt><a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.DatiSchedaOperatore.html#costoOrarioLordo()" class="member-name-link">costoOrarioLordo()</a> - Method in record class it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.DatiSchedaOperatore.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.DatiSchedaOperatore</a></dt>
 <dd>
@@ -443,6 +515,14 @@ assegnato.</div>
 <dd>
 <div class="block">Creates an instance of a <code>DatiMisura</code> record class.</div>
 </dd>
+<dt><a href="it/unina/picus/richieste/api/DatiRichiestaNonValidiException.html" class="type-name-link" title="class in it.unina.picus.richieste.api">DatiRichiestaNonValidiException</a> - Exception Class in <a href="it/unina/picus/richieste/api/package-summary.html">it.unina.picus.richieste.api</a></dt>
+<dd>
+<div class="block">Errori riferiti esclusivamente ai campi ammessi, senza i valori ricevuti.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/api/DatiRichiestaNonValidiException.html#%3Cinit%3E(java.util.Map)" class="member-name-link">DatiRichiestaNonValidiException(Map)</a> - Constructor for exception class it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/DatiRichiestaNonValidiException.html" title="class in it.unina.picus.richieste.api">DatiRichiestaNonValidiException</a></dt>
+<dd>
+<div class="block">Costruisce l'errore dai messaggi controllati di validazione.</div>
+</dd>
 <dt><a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.DatiSchedaOperatore.html#%3Cinit%3E(java.lang.String,java.lang.String,java.lang.String,java.time.LocalDate,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.math.BigDecimal,java.math.BigDecimal,java.util.Map)" class="member-name-link">DatiSchedaOperatore(String, String, String, LocalDate, String, String, String, String, BigDecimal, BigDecimal, Map)</a> - Constructor for record class it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.DatiSchedaOperatore.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.DatiSchedaOperatore</a></dt>
 <dd>
 <div class="block">Crea una copia immutabile dei conteggi dichiarati.</div>
@@ -458,6 +538,10 @@ assegnato.</div>
 <dt><a href="it/unina/picus/catalogo/api/CatalogoApi.DatiMisura.html#descrizione()" class="member-name-link">descrizione()</a> - Method in record class it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/CatalogoApi.DatiMisura.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.DatiMisura</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/catalogo/api/CatalogoApi.DatiMisura.html#param-descrizione"><code>descrizione</code></a> record component.</div>
+</dd>
+<dt><a href="it/unina/picus/comunicazioni/api/DestinatariAvvisi.html" class="type-name-link" title="interface in it.unina.picus.comunicazioni.api">DestinatariAvvisi</a> - Interface in <a href="it/unina/picus/comunicazioni/api/package-summary.html">it.unina.picus.comunicazioni.api</a></dt>
+<dd>
+<div class="block">Porta di verifica dei riferimenti, fornita dal modulo proprietario del contatto.</div>
 </dd>
 <dt><a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.Riscontro.html#destinatarioId()" class="member-name-link">destinatarioId()</a> - Method in record class it.unina.picus.comunicazioni.api.<a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.Riscontro.html" title="class in it.unina.picus.comunicazioni.api">ComunicazioniApi.Riscontro</a></dt>
 <dd>
@@ -486,6 +570,10 @@ assegnato.</div>
 <dd>
 <div class="block">Elenca le pratiche assegnate all'account autenticato.</div>
 </dd>
+<dt><a href="it/unina/picus/comunicazioni/api/AvvisiOperativiApi.html#elencoAvvisiOperativi(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">elencoAvvisiOperativi(UtenzeApi.IdentitaAutenticata)</a> - Method in interface it.unina.picus.comunicazioni.api.<a href="it/unina/picus/comunicazioni/api/AvvisiOperativiApi.html" title="interface in it.unina.picus.comunicazioni.api">AvvisiOperativiApi</a></dt>
+<dd>
+<div class="block">Elenca gli avvisi del solo account autenticato.</div>
+</dd>
 <dt><a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.html#elencoAvvisiOperativi(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">elencoAvvisiOperativi(UtenzeApi.IdentitaAutenticata)</a> - Method in interface it.unina.picus.comunicazioni.api.<a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.html" title="interface in it.unina.picus.comunicazioni.api">ComunicazioniApi</a></dt>
 <dd>
 <div class="block">Elenca gli avvisi operativi destinati all'account, senza esporre i dati della pratica.</div>
@@ -493,6 +581,10 @@ assegnato.</div>
 <dt><a href="it/unina/picus/catalogo/api/CatalogoApi.html#elencoComuni()" class="member-name-link">elencoComuni()</a> - Method in interface it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/CatalogoApi.html" title="interface in it.unina.picus.catalogo.api">CatalogoApi</a></dt>
 <dd>
 <div class="block">Elenca i comuni utilizzabili nei moduli di PICUS.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/api/ConsultazioneCatalogoApi.html#elencoComuni()" class="member-name-link">elencoComuni()</a> - Method in interface it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/ConsultazioneCatalogoApi.html" title="interface in it.unina.picus.catalogo.api">ConsultazioneCatalogoApi</a></dt>
+<dd>
+<div class="block">Elenca i comuni utilizzabili nell'invio.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.html#elencoContatti(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">elencoContatti(UtenzeApi.IdentitaAutenticata, UUID)</a> - Method in interface it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.html" title="interface in it.unina.picus.richieste.api">RichiesteApi</a></dt>
 <dd>
@@ -510,6 +602,10 @@ assegnato.</div>
 <dd>
 <div class="block">Elenca le misure selezionabili per una nuova richiesta o dichiarazione di offerta.</div>
 </dd>
+<dt><a href="it/unina/picus/catalogo/api/ConsultazioneCatalogoApi.html#elencoMisureAttive()" class="member-name-link">elencoMisureAttive()</a> - Method in interface it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/ConsultazioneCatalogoApi.html" title="interface in it.unina.picus.catalogo.api">ConsultazioneCatalogoApi</a></dt>
+<dd>
+<div class="block">Elenca le misure selezionabili per un nuovo invio.</div>
+</dd>
 <dt><a href="it/unina/picus/catalogo/api/CatalogoApi.html#elencoOffertaOpt(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">elencoOffertaOpt(UtenzeApi.IdentitaAutenticata, UUID)</a> - Method in interface it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/CatalogoApi.html" title="interface in it.unina.picus.catalogo.api">CatalogoApi</a></dt>
 <dd>
 <div class="block">Consulta l'offerta corrente di una OPT come titolare o Banco.</div>
@@ -518,9 +614,17 @@ assegnato.</div>
 <dd>
 <div class="block">Elenca gli operatori attivi del Banco il cui profilo comprende la misura indicata.</div>
 </dd>
+<dt><a href="it/unina/picus/utenze/api/UtenzeApi.html#elencoOptAttive(java.util.Set)" class="member-name-link">elencoOptAttive(Set)</a> - Method in interface it.unina.picus.utenze.api.<a href="it/unina/picus/utenze/api/UtenzeApi.html" title="interface in it.unina.picus.utenze.api">UtenzeApi</a></dt>
+<dd>
+<div class="block">Legge in blocco i profili delle OPT attive appartenenti alla selezione.</div>
+</dd>
 <dt><a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.html#elencoRicevute(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">elencoRicevute(UtenzeApi.IdentitaAutenticata)</a> - Method in interface it.unina.picus.comunicazioni.api.<a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.html" title="interface in it.unina.picus.comunicazioni.api">ComunicazioniApi</a></dt>
 <dd>
 <div class="block">Elenca le comunicazioni ricevute dall'account autenticato.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/api/InvioRichiesteApi.html#elencoRichiesteOpt(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">elencoRichiesteOpt(UtenzeApi.IdentitaAutenticata)</a> - Method in interface it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/InvioRichiesteApi.html" title="interface in it.unina.picus.richieste.api">InvioRichiesteApi</a></dt>
+<dd>
+<div class="block">Elenca le sole richieste della OPT titolare.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.html#elencoRichiesteOpt(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">elencoRichiesteOpt(UtenzeApi.IdentitaAutenticata)</a> - Method in interface it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.html" title="interface in it.unina.picus.richieste.api">RichiesteApi</a></dt>
 <dd>
@@ -874,9 +978,17 @@ assegnato.</div>
 <dd>
 <div class="block">Operatore interno del Banco.</div>
 </dd>
+<dt><a href="it/unina/picus/richieste/api/CoordinamentoRichiesteApi.html#interpellaErogatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,java.util.UUID,it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione)" class="member-name-link">interpellaErogatore(UtenzeApi.IdentitaAutenticata, UUID, UUID, CatalogoApi.AmbitoErogazione)</a> - Method in interface it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/CoordinamentoRichiesteApi.html" title="interface in it.unina.picus.richieste.api">CoordinamentoRichiesteApi</a></dt>
+<dd>
+<div class="block">Registra un solo contatto in attesa e il suo avviso al destinatario.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.html#interpellaErogatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,java.util.UUID,it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione)" class="member-name-link">interpellaErogatore(UtenzeApi.IdentitaAutenticata, UUID, UUID, CatalogoApi.AmbitoErogazione)</a> - Method in interface it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.html" title="interface in it.unina.picus.richieste.api">RichiesteApi</a></dt>
 <dd>
 <div class="block">Registra un contatto di disponibilità e fa avvisare il solo account interpellato.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/api/InvioRichiesteApi.html#invia(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.richieste.api.RichiesteApi.DatiInvio,java.util.UUID)" class="member-name-link">invia(UtenzeApi.IdentitaAutenticata, RichiesteApi.DatiInvio, UUID)</a> - Method in interface it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/InvioRichiesteApi.html" title="interface in it.unina.picus.richieste.api">InvioRichiesteApi</a></dt>
+<dd>
+<div class="block">Registra l'invio valido in Creata o riconosce un ritento della stessa OPT.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.html#invia(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.richieste.api.RichiesteApi.DatiInvio,java.util.UUID)" class="member-name-link">invia(UtenzeApi.IdentitaAutenticata, RichiesteApi.DatiInvio, UUID)</a> - Method in interface it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.html" title="interface in it.unina.picus.richieste.api">RichiesteApi</a></dt>
 <dd>
@@ -901,6 +1013,10 @@ assegnato.</div>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.RichiestaSintesi.html#inviataIl()" class="member-name-link">inviataIl()</a> - Method in record class it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.RichiestaSintesi.html" title="class in it.unina.picus.richieste.api">RichiesteApi.RichiestaSintesi</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/richieste/api/RichiesteApi.RichiestaSintesi.html#param-inviataIl"><code>inviataIl</code></a> record component.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/api/InvioRichiesteApi.html" class="type-name-link" title="interface in it.unina.picus.richieste.api">InvioRichiesteApi</a> - Interface in <a href="it/unina/picus/richieste/api/package-summary.html">it.unina.picus.richieste.api</a></dt>
+<dd>
+<div class="block">Capacità di invio e consultazione della richiesta, indipendente dai comandi di coordinamento.</div>
 </dd>
 <dt><a href="it/unina/picus/catalogo/api/package-summary.html">it.unina.picus.catalogo.api</a> - package it.unina.picus.catalogo.api</dt>
 <dd>
@@ -1098,6 +1214,10 @@ operativi di Richieste.</div>
 <dd>
 <div class="block">Singola persona.</div>
 </dd>
+<dt><a href="it/unina/picus/richieste/api/CoordinamentoRichiesteApi.html#prendiInCarico(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">prendiInCarico(UtenzeApi.IdentitaAutenticata, UUID)</a> - Method in interface it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/CoordinamentoRichiesteApi.html" title="interface in it.unina.picus.richieste.api">CoordinamentoRichiesteApi</a></dt>
+<dd>
+<div class="block">Prende esplicitamente in carico una richiesta Creata.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.html#prendiInCarico(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">prendiInCarico(UtenzeApi.IdentitaAutenticata, UUID)</a> - Method in interface it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.html" title="interface in it.unina.picus.richieste.api">RichiesteApi</a></dt>
 <dd>
 <div class="block">Registra la presa in carico esplicita del Banco per una richiesta Creata.</div>
@@ -1135,6 +1255,10 @@ operativi di Richieste.</div>
 <dt><a href="it/unina/picus/utenze/api/UtenzeApi.StatoUtenza.html#REVOCATO" class="member-name-link">REVOCATO</a> - Enum constant in enum class it.unina.picus.utenze.api.<a href="it/unina/picus/utenze/api/UtenzeApi.StatoUtenza.html" title="enum class in it.unina.picus.utenze.api">UtenzeApi.StatoUtenza</a></dt>
 <dd>
 <div class="block">Utenza il cui accesso è stato revocato.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/api/RicercaErogatoriApi.html" class="type-name-link" title="interface in it.unina.picus.catalogo.api">RicercaErogatoriApi</a> - Interface in <a href="it/unina/picus/catalogo/api/package-summary.html">it.unina.picus.catalogo.api</a></dt>
+<dd>
+<div class="block">Capacità di ricerca dell'offerta, separata dai comandi di amministrazione del catalogo.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.RichiestaDettaglio.html#richiesta()" class="member-name-link">richiesta()</a> - Method in record class it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.RichiestaDettaglio.html" title="class in it.unina.picus.richieste.api">RichiesteApi.RichiestaDettaglio</a></dt>
 <dd>
@@ -1235,6 +1359,14 @@ operativi di Richieste.</div>
 <dt><a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.Riscontro.html#%3Cinit%3E(java.util.UUID,java.lang.String,java.time.Instant)" class="member-name-link">Riscontro(UUID, String, Instant)</a> - Constructor for record class it.unina.picus.comunicazioni.api.<a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.Riscontro.html" title="class in it.unina.picus.comunicazioni.api">ComunicazioniApi.Riscontro</a></dt>
 <dd>
 <div class="block">Creates an instance of a <code>Riscontro</code> record class.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/api/RisorsaRichiesteNonTrovataException.html" class="type-name-link" title="class in it.unina.picus.richieste.api">RisorsaRichiesteNonTrovataException</a> - Exception Class in <a href="it/unina/picus/richieste/api/package-summary.html">it.unina.picus.richieste.api</a></dt>
+<dd>
+<div class="block">Assenza applicativa di una pratica o di un contatto richiesto esplicitamente.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/api/RisorsaRichiesteNonTrovataException.html#%3Cinit%3E()" class="member-name-link">RisorsaRichiesteNonTrovataException()</a> - Constructor for exception class it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RisorsaRichiesteNonTrovataException.html" title="class in it.unina.picus.richieste.api">RisorsaRichiesteNonTrovataException</a></dt>
+<dd>
+<div class="block">Crea un esito senza identificativi o dati della risorsa.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.html#rispondiDisponibilita(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,boolean)" class="member-name-link">rispondiDisponibilita(UtenzeApi.IdentitaAutenticata, UUID, boolean)</a> - Method in interface it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.html" title="interface in it.unina.picus.richieste.api">RichiesteApi</a></dt>
 <dd>
@@ -1626,7 +1758,7 @@ the order they are declared.</div>
 <div class="block">Creates an instance of a <code>VoceMisura</code> record class.</div>
 </dd>
 </dl>
-<a href="#I:A">A</a>&nbsp;<a href="#I:B">B</a>&nbsp;<a href="#I:C">C</a>&nbsp;<a href="#I:D">D</a>&nbsp;<a href="#I:E">E</a>&nbsp;<a href="#I:F">F</a>&nbsp;<a href="#I:G">G</a>&nbsp;<a href="#I:H">H</a>&nbsp;<a href="#I:I">I</a>&nbsp;<a href="#I:L">L</a>&nbsp;<a href="#I:M">M</a>&nbsp;<a href="#I:N">N</a>&nbsp;<a href="#I:O">O</a>&nbsp;<a href="#I:P">P</a>&nbsp;<a href="#I:Q">Q</a>&nbsp;<a href="#I:R">R</a>&nbsp;<a href="#I:S">S</a>&nbsp;<a href="#I:T">T</a>&nbsp;<a href="#I:U">U</a>&nbsp;<a href="#I:V">V</a>&nbsp;<br><a href="allclasses-index.html">All&nbsp;Classes&nbsp;and&nbsp;Interfaces</a><span class="vertical-separator">|</span><a href="allpackages-index.html">All&nbsp;Packages</a></main>
+<a href="#I:A">A</a>&nbsp;<a href="#I:B">B</a>&nbsp;<a href="#I:C">C</a>&nbsp;<a href="#I:D">D</a>&nbsp;<a href="#I:E">E</a>&nbsp;<a href="#I:F">F</a>&nbsp;<a href="#I:G">G</a>&nbsp;<a href="#I:H">H</a>&nbsp;<a href="#I:I">I</a>&nbsp;<a href="#I:L">L</a>&nbsp;<a href="#I:M">M</a>&nbsp;<a href="#I:N">N</a>&nbsp;<a href="#I:O">O</a>&nbsp;<a href="#I:P">P</a>&nbsp;<a href="#I:Q">Q</a>&nbsp;<a href="#I:R">R</a>&nbsp;<a href="#I:S">S</a>&nbsp;<a href="#I:T">T</a>&nbsp;<a href="#I:U">U</a>&nbsp;<a href="#I:V">V</a>&nbsp;<br><a href="allclasses-index.html">All&nbsp;Classes&nbsp;and&nbsp;Interfaces</a><span class="vertical-separator">|</span><a href="allpackages-index.html">All&nbsp;Packages</a><span class="vertical-separator">|</span><a href="serialized-form.html">Serialized&nbsp;Form</a></main>
 </div>
 </body>
 </html>
