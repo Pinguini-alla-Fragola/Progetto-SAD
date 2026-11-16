@@ -12,7 +12,7 @@ import java.util.UUID;
  * Fornisce i riferimenti alle misure, ai comuni e all'offerta territoriale.
  * I comandi di modifica devono verificare sul server il ruolo e, per l'offerta, la titolarità.
  */
-public interface CatalogoApi {
+public interface CatalogoApi extends ConsultazioneCatalogoApi {
 
     /**
      * Elenca le misure selezionabili per una nuova richiesta o dichiarazione di offerta.
