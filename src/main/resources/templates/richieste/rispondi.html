@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Richiesta di disponibilità · PICUS</title>
+    <link rel="icon" href="/img/picus.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/css/picus.css">
+    <script src="/js/disponibilita.js" type="module"></script>
+</head>
+<body class="flow-page">
+<a th:replace="~{fragments/layout :: skip}" href="#contenuto">Vai al contenuto</a>
+<header class="picus-navbar">
+    <div class="nav-inner">
+        <a th:replace="~{fragments/layout :: brand}" href="/">PICUS</a>
+        <a href="/dashboard" class="nav-link"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#back"></use></svg>Area di lavoro</a>
+    </div>
+</header>
+
+<main id="contenuto" class="mobile-wrapper" tabindex="-1" th:attr="data-contatto-id=${contattoId}">
+    <header class="mobile-header">
+        <h1>Richiesta di disponibilità</h1>
+        <span id="esito-contatto" class="badge-stato" hidden></span>
+    </header>
+    <div class="mobile-body">
+        <p id="caricamento" class="picus-meta" role="status">Caricamento del contatto…</p>
+        <p id="errore-contatto" class="alert alert-danger" role="alert" hidden></p>
+        <dl id="dati-contatto" class="flow-facts contatto-dati" hidden>
+            <dt class="detail-label">Misura richiesta</dt>
+            <dd class="detail-value" id="misura"></dd>
+            <dt class="detail-label">Codice del comune di intervento</dt>
+            <dd class="detail-value" id="comune"></dd>
+            <dt class="detail-label">Tipologia di destinatario</dt>
+            <dd class="detail-value" id="destinatario"></dd>
+            <dt class="detail-label">Ambito di erogazione</dt>
+            <dd class="detail-value" id="ambito"></dd>
+            <dt class="detail-label">Identificativo della richiesta</dt>
+            <dd class="detail-value"><code id="richiesta-id"></code></dd>
+        </dl>
+        <div id="azioni" class="contatto-azioni" hidden>
+            <button type="button" class="btn btn-success btn-block" data-disponibile="true">Conferma la disponibilità</button>
+            <button type="button" class="btn btn-danger btn-block" data-disponibile="false">Comunica indisponibilità</button>
+        </div>
+        <p id="risposta-registrata" role="status" class="alert alert-success" hidden></p>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

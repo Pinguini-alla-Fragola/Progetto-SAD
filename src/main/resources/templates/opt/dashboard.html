@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Organizzazione partner · PICUS</title>
+    <link rel="icon" href="/img/picus.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/css/picus.css">
+    <script src="/js/workspace.js" type="module"></script>
+</head>
+<body data-area="opt">
+<a th:replace="~{fragments/layout :: skip}" href="#contenuto">Vai al contenuto</a>
+<header th:replace="~{fragments/layout :: workspaceHeader('Organizzazione partner')}"></header>
+<button class="sidebar-backdrop" type="button" aria-label="Chiudi menu di navigazione" tabindex="-1" hidden></button>
+<nav class="area-nav" id="workspace-sidebar" aria-label="Area di lavoro">
+        <a href="#richieste" aria-current="location"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#requests"></use></svg><span>Richieste</span></a>
+        <a href="#offerta"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#book"></use></svg><span>Offerta</span></a>
+        <a href="#comunicazioni"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#mail"></use></svg><span>Comunicazioni</span></a>
+        <a href="#monitoraggio"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#chart"></use></svg><span>Monitoraggio</span></a>
+</nav>
+
+<main id="contenuto" class="area" tabindex="-1">
+    <header class="area-intro"><h1 id="workspace-title">Organizzazione partner</h1></header>
+    <div class="area-content">
+        <section class="area-panel" id="richieste" aria-labelledby="titolo-richieste" tabindex="-1">
+            <h2 class="picus-card-title" id="titolo-richieste">Richieste</h2>
+            <p class="picus-meta">L’invio e la consultazione delle richieste sono in attesa del servizio Richieste.</p>
+        </section>
+        <section class="area-panel" id="offerta" aria-labelledby="titolo-offerta" tabindex="-1">
+            <h2 class="picus-card-title" id="titolo-offerta">Offerta</h2>
+            <p class="picus-meta">La dichiarazione dell’offerta sarà disponibile con il modulo Catalogo.</p>
+        </section>
+        <section class="area-panel" id="comunicazioni" aria-labelledby="titolo-comunicazioni" tabindex="-1">
+            <h2 class="picus-card-title" id="titolo-comunicazioni">Comunicazioni</h2>
+            <p class="picus-meta">Le comunicazioni saranno consultabili quando il modulo sarà disponibile.</p>
+        </section>
+        <section class="area-panel" id="monitoraggio" aria-labelledby="titolo-monitoraggio" tabindex="-1">
+            <h2 class="picus-card-title" id="titolo-monitoraggio">Monitoraggio</h2>
+            <p class="picus-meta">I conteggi trimestrali saranno disponibili con il modulo Monitoraggio.</p>
+        </section>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Accedi · PICUS</title>
+    <link rel="icon" href="/img/picus.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/css/picus.css">
+</head>
+<body class="auth-page">
+<a th:replace="~{fragments/layout :: skip}" href="#contenuto">Vai al contenuto</a>
+<header class="picus-navbar">
+    <div class="nav-inner">
+        <span class="picus-logo"><img src="/img/picus.svg" width="36" height="36" alt=""> PICUS</span>
+    </div>
+</header>
+
+<main id="contenuto" class="picus-container auth-shell" tabindex="-1">
+    <div class="auth-content">
+        <h1>Accedi a PICUS</h1>
+        <p th:if="${param.logout != null}" class="alert alert-success" role="status">Disconnessione completata.</p>
+        <p th:if="${param.error != null}" class="alert alert-danger" role="alert">Credenziali non valide.</p>
+        <p th:if="${param.attesa != null}" class="alert alert-danger" role="alert">Accesso temporaneamente bloccato. Riprova tra poco.</p>
+
+        <form id="formLogin" th:action="@{/login}" method="post">
+            <div class="form-group">
+                <label class="form-label" for="email">Email</label>
+                <input type="email" id="email" name="username" class="form-control" required
+                       maxlength="254" autocomplete="username" placeholder="nome@organizzazione.it">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-control" required
+                       autocomplete="current-password">
+            </div>
+            <button type="submit" class="btn btn-primary btn-block" id="btnLogin">Accedi</button>
+        </form>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
