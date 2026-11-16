@@ -14,6 +14,7 @@ form.addEventListener('submit', async event => {
     occupato = true;
     invio ??= {
         chiave: crypto.randomUUID(),
+        incerto: false,
         dati: {
             misuraId: Number(form.elements.misuraId.value),
             tipoDestinatario: form.elements.tipoDestinatario.value,
@@ -39,11 +40,12 @@ form.addEventListener('submit', async event => {
         conferma.focus();
     } catch (causa) {
         errore.textContent = causa.stato ? causa.message : 'Connessione interrotta. Riprova per verificare l’invio senza creare duplicati.';
-        if ([400, 403, 429].includes(causa.stato)) {
+        if (!invio.incerto && [400, 403, 429].includes(causa.stato)) {
             invio = undefined;
             campi.disabled = false;
             incerto.hidden = true;
         } else {
+            invio.incerto = true;
             incerto.hidden = false;
         }
         for (const [nome, testo] of Object.entries(causa.campi || {})) {
@@ -58,4 +60,3 @@ form.addEventListener('submit', async event => {
         button.disabled = false;
     }
 });
-
