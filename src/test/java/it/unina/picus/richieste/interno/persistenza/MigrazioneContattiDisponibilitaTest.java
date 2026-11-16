@@ -13,6 +13,7 @@ import java.util.UUID;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -25,12 +26,13 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
  * Criterio C1 della #92: su PostgreSQL, Flyway applica V6 a un database già migrato a V5 e
  * crea i vincoli attesi, senza toccare le tabelle precedenti.
  *
- * <p>Ogni test parte da uno schema dedicato migrato fino a V5 e già popolato con una
+ * Ogni test parte da uno schema dedicato migrato fino a V5 e già popolato con una
  * richiesta, poi applica V6. Lo schema è separato da quello dell'applicazione, quindi la
- * prova non interferisce con gli altri test che usano lo stesso container.</p>
+ * prova non interferisce con gli altri test che usano lo stesso container.
  */
 @TestIntegrazionePostgres
 @DisplayName("#92 C1 - Migrazione V6 dei contatti di disponibilità su PostgreSQL")
+@Tag("issue-51")
 class MigrazioneContattiDisponibilitaTest {
 
     private static final String SCHEMA = "verifica_v6";

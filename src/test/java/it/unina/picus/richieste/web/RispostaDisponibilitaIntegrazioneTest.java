@@ -26,9 +26,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -44,14 +42,15 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
  * completamento della #92 che verificano (C2, C3, C4). Il criterio C1 sulla migrazione è in
  * {@code MigrazioneContattiDisponibilitaTest}; C5 richiede login, notifiche e UI integrati.
  *
- * <p>Richiesta e contatto sono dati di prova inseriti nel database, perché l'apertura del
+ * Richiesta e contatto sono dati di prova inseriti nel database, perché l'apertura del
  * contatto appartiene alla #49. Gli utenti simulati hanno come nome l'UUID di un account di
  * prova e ogni POST porta un token CSRF valido: un {@code 403} dipende quindi soltanto dal
  * controllo dell'applicazione. L'utente simulato non è un {@code PrincipalePicus}, perciò
- * login e revoca della sessione non sono oggetto di questi test.</p>
+ * login e revoca della sessione non sono oggetto di questi test.
  */
 @TestIntegrazionePostgres
 @DisplayName("#92 Risposta di disponibilità: integrazione su HTTP e PostgreSQL")
+@Tag("issue-51")
 class RispostaDisponibilitaIntegrazioneTest {
 
     private static final String DESCRIZIONE_RISERVATA = "Descrizione riservata a titolare e Banco";

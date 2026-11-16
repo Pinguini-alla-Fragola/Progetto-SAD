@@ -7,9 +7,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 /**
  * Dati sintetici inseriti direttamente nel database per i test di integrazione.
  *
- * <p>Servono finché invio, presa in carico e contatto del candidato (#48, #49) non sono
+ * Servono finché invio, presa in carico e contatto del candidato (#48, #49) non sono
  * disponibili come operazioni dell'applicazione. Ogni metodo genera identificativi nuovi,
- * quindi i test non dipendono l'uno dall'altro né dall'ordine di esecuzione.</p>
+ * quindi i test non dipendono l'uno dall'altro né dall'ordine di esecuzione.
  */
 public final class DatiDiProva {
 

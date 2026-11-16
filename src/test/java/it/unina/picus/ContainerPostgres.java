@@ -9,8 +9,8 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
  * PostgreSQL usato dai test di integrazione: un container {@code postgres:17} avviato da
  * Testcontainers e collegato al datasource di Spring. Richiede Docker in esecuzione.
  *
- * <p>Il container è un bean: le classi annotate con {@link TestIntegrazionePostgres}
- * condividono lo stesso contesto Spring e quindi lo stesso database, avviato una sola volta.</p>
+ * Il container è un bean: le classi annotate con {@link TestIntegrazionePostgres}
+ * condividono lo stesso contesto Spring e quindi lo stesso database, avviato una sola volta.
  */
 @TestConfiguration(proxyBeanMethods = false)
 public class ContainerPostgres {
