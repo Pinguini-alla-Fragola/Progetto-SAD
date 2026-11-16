@@ -18,7 +18,12 @@ import it.unina.picus.richieste.interno.persistenza.RichiestaRepository;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
 
-/** Casi d'uso di consultazione e risposta per un contatto di disponibilità già aperto. */
+/**
+ * Coordina la consultazione e la risposta per un contatto di disponibilità già aperto.
+ *
+ * <p>Applica il pattern <em>Service Layer</em>. Concentra i controlli di accesso e i
+ * confini delle transazioni dei casi d'uso e usa i repository per accedere ai dati.
+ */
 @Service
 @Transactional(readOnly = true)
 public class DisponibilitaService {
@@ -26,12 +31,27 @@ public class DisponibilitaService {
     private final RichiestaRepository richieste;
     private final ContattoDisponibilitaRepository contatti;
 
+    /**
+     * Costruisce il servizio con i repository usati dai casi d'uso di disponibilità.
+     *
+     * @param richieste repository delle richieste di misura
+     * @param contatti repository dei contatti di disponibilità
+     */
     public DisponibilitaService(RichiestaRepository richieste, ContattoDisponibilitaRepository contatti) {
         this.richieste = richieste;
         this.contatti = contatti;
     }
 
-    /** @see RichiesteApi#consultaContatto(IdentitaAutenticata, UUID) */
+    /**
+     * Fornisce all'erogatore destinatario solo le informazioni necessarie per valutare il contatto.
+     *
+     * @param attore identità verificata della OPT o dell'operatore destinatario
+     * @param contattoId identificativo del contatto da consultare
+     * @return contatto e dati essenziali della richiesta
+     * @throws SecurityException se l'attore non è un erogatore o non è il destinatario
+     * @throws NoSuchElementException se il contatto non esiste
+     * @see RichiesteApi#consultaContatto(IdentitaAutenticata, UUID)
+     */
     public DettaglioContatto consultaContatto(IdentitaAutenticata attore, UUID contattoId) {
         verificaRuoloErogatore(attore);
         var contatto = contatti.findOneById(contattoId)
@@ -44,8 +64,20 @@ public class DisponibilitaService {
     }
 
     /**
-     * Blocca la pratica prima di leggere l'esito, così una sola transazione può rispondere.
+     * Registra la risposta del destinatario mantenendo la richiesta in presa in carico.
      *
+     * <p>Dopo aver verificato il destinatario, acquisisce un lock pessimistico sulla richiesta.
+     * Legge l'esito del contatto sotto lock, così soltanto un invio concorrente può registrare
+     * la risposta.
+     *
+     * @param attore identità verificata della OPT o dell'operatore destinatario
+     * @param contattoId identificativo del contatto a cui si risponde
+     * @param disponibile {@code true} per confermare, {@code false} per rifiutare
+     * @return contatto con l'esito registrato
+     * @throws SecurityException se l'attore non è un erogatore o non è il destinatario
+     * @throws NoSuchElementException se il contatto o la richiesta non esistono
+     * @throws StatoContattoIncompatibileException se il contatto non è in attesa o la richiesta
+     *         non è in presa in carico
      * @see RichiesteApi#rispondiDisponibilita(IdentitaAutenticata, UUID, boolean)
      */
     @Transactional
@@ -68,7 +100,16 @@ public class DisponibilitaService {
         return aDto(contatto);
     }
 
-    /** @see RichiesteApi#elencoContatti(IdentitaAutenticata, UUID) */
+    /**
+     * Elenca per il Banco i contatti della richiesta e i rispettivi esiti.
+     *
+     * @param attore identità verificata del Banco
+     * @param richiestaId identificativo della richiesta
+     * @return contatti in ordine di invio, eventualmente nessuno
+     * @throws SecurityException se l'attore non è il Banco
+     * @throws NoSuchElementException se la richiesta non esiste
+     * @see RichiesteApi#elencoContatti(IdentitaAutenticata, UUID)
+     */
     public List<ContattoDisponibilita> elencoContatti(IdentitaAutenticata attore, UUID richiestaId) {
         if (attore == null || attore.accountId() == null || attore.ruolo() != RuoloUtente.BANCO) {
             throw new SecurityException("Lo storico dei contatti è riservato al Banco");
