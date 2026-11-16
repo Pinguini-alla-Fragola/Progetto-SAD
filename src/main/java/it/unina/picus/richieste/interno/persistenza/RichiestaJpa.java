@@ -8,10 +8,15 @@ import it.unina.picus.richieste.api.RichiesteApi.TipoDestinatario;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import it.unina.picus.richieste.interno.dominio.RichiestaDiMisura;
+import it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione;
 
 /**
  * Entità JPA che conserva i dati e lo stato della richiesta di misura.
@@ -29,16 +34,33 @@ public class RichiestaJpa {
     private UUID titolareId;
     private Long misuraId;
     private String comuneCodice;
-    private String tipoDestinatario;
+    @Enumerated(EnumType.STRING)
+    private TipoDestinatario tipoDestinatario;
+    @Column(columnDefinition = "text")
     private String description;
     private Instant inviataIl;
-    private String stato = "CREATA";
+    @Enumerated(EnumType.STRING)
+    private StatoRichiesta stato = StatoRichiesta.CREATA;
+    private UUID riferimentoInvio;
+
+    @Embedded
+    private AccordoJpa accordo;
 
     @Column(name = "erogatore_id")
     private UUID erogatoreId;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 30)
+    private AmbitoErogazione erogatoreAmbito;
+
     /** Costruttore riservato a JPA. */
     protected RichiestaJpa() {
+    }
+
+    RichiestaDiMisura aDominio() {
+        return new RichiestaDiMisura(id, titolareId, misuraId, tipoDestinatario,
+                comuneCodice, description, inviataIl, stato, erogatoreId,
+                accordo == null ? null : accordo.aDto(), riferimentoInvio, erogatoreAmbito);
     }
 
     /** {@return identificativo della richiesta} */
@@ -58,11 +80,17 @@ public class RichiestaJpa {
 
     /** {@return tipo di destinatario della misura} */
     public TipoDestinatario getTipoDestinatario() {
-        return TipoDestinatario.valueOf(tipoDestinatario);
+        return tipoDestinatario;
     }
 
     /** {@return stato corrente della richiesta} */
     public StatoRichiesta getStato() {
-        return StatoRichiesta.valueOf(stato);
+        return stato;
+    }
+
+    void aggiorna(RichiestaDiMisura richiesta) {
+        stato = richiesta.stato();
+        erogatoreId = richiesta.erogatoreId();
+        erogatoreAmbito = richiesta.erogatoreAmbito();
     }
 }

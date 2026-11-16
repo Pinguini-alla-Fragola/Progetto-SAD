@@ -12,7 +12,7 @@ import java.util.UUID;
  * Gestisce le comunicazioni del Banco, i riscontri dei destinatari e la consegna degli avvisi
  * operativi. Richieste rimane responsabile della pratica e delle azioni a cui puntano gli avvisi.
  */
-public interface ComunicazioniApi {
+public interface ComunicazioniApi extends AvvisiOperativiApi {
 
     /**
      * Invia una comunicazione del Banco. Il modulo risolve e registra gli account destinatari

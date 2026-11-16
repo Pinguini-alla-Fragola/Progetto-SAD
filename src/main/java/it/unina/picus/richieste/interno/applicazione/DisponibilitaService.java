@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import it.unina.picus.richieste.api.RichiesteApi;
+import it.unina.picus.richieste.api.RisorsaRichiesteNonTrovataException;
+import it.unina.picus.shared.ControlloAccesso;
 import it.unina.picus.richieste.api.RichiesteApi.ContattoDisponibilita;
 import it.unina.picus.richieste.api.RichiesteApi.DettaglioContatto;
 import it.unina.picus.richieste.api.RichiesteApi.StatoRichiesta;
@@ -55,7 +57,7 @@ public class DisponibilitaService {
     public DettaglioContatto consultaContatto(IdentitaAutenticata attore, UUID contattoId) {
         verificaRuoloErogatore(attore);
         var contatto = contatti.findOneById(contattoId)
-                .orElseThrow(() -> new NoSuchElementException("Contatto inesistente"));
+                .orElseThrow(RisorsaRichiesteNonTrovataException::new);
         verificaDestinatario(attore, contatto.getErogatoreId());
 
         var richiesta = contatto.getRichiesta();
@@ -85,17 +87,17 @@ public class DisponibilitaService {
             boolean disponibile) {
         verificaRuoloErogatore(attore);
         var riferimento = contatti.cercaRiferimento(contattoId)
-                .orElseThrow(() -> new NoSuchElementException("Contatto inesistente"));
+                .orElseThrow(RisorsaRichiesteNonTrovataException::new);
         verificaDestinatario(attore, riferimento.getErogatoreId());
 
         var richiesta = richieste.cercaPerAggiornamento(riferimento.getRichiestaId())
-                .orElseThrow(() -> new NoSuchElementException("Richiesta inesistente"));
+                .orElseThrow(RisorsaRichiesteNonTrovataException::new);
         if (richiesta.getStato() != StatoRichiesta.PRESA_IN_CARICO) {
             throw new StatoContattoIncompatibileException("La richiesta non è in presa in carico");
         }
 
         var contatto = contatti.findById(contattoId)
-                .orElseThrow(() -> new NoSuchElementException("Contatto inesistente"));
+                .orElseThrow(RisorsaRichiesteNonTrovataException::new);
         contatto.registraRisposta(disponibile);
         return aDto(contatto);
     }
@@ -111,28 +113,24 @@ public class DisponibilitaService {
      * @see RichiesteApi#elencoContatti(IdentitaAutenticata, UUID)
      */
     public List<ContattoDisponibilita> elencoContatti(IdentitaAutenticata attore, UUID richiestaId) {
-        if (attore == null || attore.accountId() == null || attore.ruolo() != RuoloUtente.BANCO) {
-            throw new SecurityException("Lo storico dei contatti è riservato al Banco");
-        }
+        ControlloAccesso.richiedi(attore != null && attore.accountId() != null && attore.ruolo() == RuoloUtente.BANCO,
+                "Lo storico dei contatti è riservato al Banco");
         if (!richieste.existsById(richiestaId)) {
-            throw new NoSuchElementException("Richiesta inesistente");
+            throw new RisorsaRichiesteNonTrovataException();
         }
-        return contatti.findAllByRichiesta_IdOrderByInviatoIlAscIdAsc(richiestaId).stream()
+        return contatti.findAllByRichiesta_IdOrderByOrdineInvioAsc(richiestaId).stream()
                 .map(DisponibilitaService::aDto)
                 .toList();
     }
 
     private static void verificaRuoloErogatore(IdentitaAutenticata attore) {
-        if (attore == null || attore.accountId() == null
-                || (attore.ruolo() != RuoloUtente.OPT && attore.ruolo() != RuoloUtente.OPERATORE)) {
-            throw new SecurityException("Operazione riservata agli erogatori");
-        }
+        ControlloAccesso.richiedi(attore != null && attore.accountId() != null
+                && (attore.ruolo() == RuoloUtente.OPT || attore.ruolo() == RuoloUtente.OPERATORE),
+                "Operazione riservata agli erogatori");
     }
 
     private static void verificaDestinatario(IdentitaAutenticata attore, UUID erogatoreId) {
-        if (!attore.accountId().equals(erogatoreId)) {
-            throw new SecurityException("Contatto indirizzato a un altro account");
-        }
+        ControlloAccesso.richiedi(attore.accountId().equals(erogatoreId), "Contatto indirizzato a un altro account");
     }
 
     private static ContattoDisponibilita aDto(ContattoDisponibilitaJpa contatto) {

@@ -75,8 +75,8 @@ class SecurityConfig {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean senzaSessione = auth == null || auth instanceof AnonymousAuthenticationToken
                 || !auth.isAuthenticated();
-        if (senzaSessione && RichiestaApi.e(request)) {
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        if (RichiestaApi.e(request)) {
+            response.setStatus((senzaSessione ? HttpStatus.UNAUTHORIZED : HttpStatus.FORBIDDEN).value());
         } else {
             new AccessDeniedHandlerImpl().handle(request, response, eccezione);
         }
@@ -102,6 +102,15 @@ class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/auth/csrf", "/recupera", "/attiva").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers("/login", "/error", "/css/**", "/js/**", "/img/**", "/fonts/**", "/favicon.ico").permitAll()
+                        // Autorizzazione prima del binding MVC, anche con corpo o UUID malformati.
+                        .requestMatchers(HttpMethod.POST, "/api/richieste").hasRole("OPT")
+                        .requestMatchers(HttpMethod.GET, "/api/richieste/mie").hasRole("OPT")
+                        .requestMatchers(HttpMethod.GET, "/api/contatti-disponibilita/*").hasAnyRole("OPT", "OPERATORE")
+                        .requestMatchers(HttpMethod.POST, "/api/contatti-disponibilita/*/risposta").hasAnyRole("OPT", "OPERATORE")
+                        .requestMatchers(HttpMethod.POST, "/api/richieste/*/presa-in-carico",
+                                "/api/richieste/*/contatti", "/api/contatti-disponibilita/*/assegnazione").hasRole("BANCO")
+                        .requestMatchers(HttpMethod.GET, "/api/richieste/coda", "/api/richieste/*/candidati",
+                                "/api/richieste/*/contatti", "/api/richieste/*/contatti/*").hasRole("BANCO")
                         // ogni ruolo vede solo la propria area
                         .requestMatchers("/banco/**").hasRole("BANCO")
                         .requestMatchers("/opt/**").hasRole("OPT")
