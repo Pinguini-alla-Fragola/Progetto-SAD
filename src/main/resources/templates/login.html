@@ -17,8 +17,14 @@
 </header>
 
 <main id="contenuto" class="picus-container auth-shell" tabindex="-1">
+    <div class="auth-brand-panel">
+        <div class="auth-brand-mark"><img src="/img/picus.svg" width="112" height="112" alt=""><p>PICUS</p></div>
+        <p class="auth-brand-description">Coordinare le risorse.<br> Accompagnare le persone.</p>
+        <p class="auth-brand-note">Lo spazio di lavoro del Banco, delle organizzazioni partner e degli operatori.</p>
+    </div>
     <div class="auth-content">
         <h1>Accedi a PICUS</h1>
+        <p class="auth-intro">Entra nella tua area di lavoro.</p>
 
         <div id="messaggio-errore" role="alert" class="alert alert-danger" th:if="${param.error != null or param.attesa != null}">
             <span id="testo-errore" th:text="${param.attesa != null} ? 'Accesso temporaneamente bloccato. Riprova tra poco.' : 'Credenziali non valide.'"></span>
