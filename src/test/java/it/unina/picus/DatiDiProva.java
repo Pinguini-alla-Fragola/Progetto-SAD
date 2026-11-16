@@ -7,11 +7,16 @@ import org.springframework.jdbc.core.JdbcTemplate;
 /**
  * Dati sintetici inseriti direttamente nel database per i test di integrazione.
  *
- * Servono finché invio, presa in carico e contatto del candidato (#48, #49) non sono
- * disponibili come operazioni dell'applicazione. Ogni metodo genera identificativi nuovi,
- * quindi i test non dipendono l'uno dall'altro né dall'ordine di esecuzione.
+ * Coprono ciò che l'applicazione non permette ancora di creare dalle sue operazioni:
+ * account, profili, offerte e misure. Richieste e contatti nascono invece dal flusso reale
+ * (invio, presa in carico, contatto); i metodi che li inseriscono direttamente servono solo
+ * alla prova della migrazione. Ogni metodo genera identificativi nuovi, quindi i test non
+ * dipendono l'uno dall'altro né dall'ordine di esecuzione.
  */
 public final class DatiDiProva {
+
+    /** Nome delle misure create da {@link #creaMisura()}. */
+    public static final String NOME_MISURA_DI_PROVA = "Misura di prova";
 
     private final JdbcTemplate jdbc;
     private final String schema;
@@ -36,7 +41,7 @@ public final class DatiDiProva {
         jdbc.update(
                 "insert into " + schema + "utenze_account (id, email, password_hash, nome, ruolo, stato)"
                         + " values (?, ?, 'accesso-non-previsto-nei-test', ?, ?, 'ATTIVO')",
-                id, id + "@picus.test", nome, ruolo);
+                id, emailDi(id), nome, ruolo);
         return id;
     }
 
@@ -48,6 +53,52 @@ public final class DatiDiProva {
                         + " values (?, ?, 'napoli')",
                 id, "T-" + id.toString().substring(0, 8));
         return id;
+    }
+
+    /** Indirizzo con cui l'account di prova accede: deriva dall'identificativo. */
+    public static String emailDi(UUID account) {
+        return account + "@picus.test";
+    }
+
+    /** Misura attiva nuova: i candidati della richiesta sono solo quelli creati dal test. */
+    public long creaMisura() {
+        String codice = "T" + UUID.randomUUID().toString().replace("-", "").substring(0, 9).toUpperCase();
+        return jdbc.queryForObject(
+                "insert into " + schema + "catalogo_misure (codice, nome, descrizione)"
+                        + " values (?, '" + NOME_MISURA_DI_PROVA + "', 'Misura sintetica per i test') returning id",
+                Long.class, codice);
+    }
+
+    /** OPT di Napoli che dichiara di erogare la misura: compare fra i candidati dello stesso comune. */
+    public UUID creaOptErogatrice(String nome, long misuraId) {
+        UUID id = creaOptConProfilo(nome);
+        jdbc.update(
+                "insert into " + schema + "catalogo_offerte_opt (opt_id, misura_id) values (?, ?)", id, misuraId);
+        return id;
+    }
+
+    /** Operatore interno del Banco con territorio Napoli, senza misure nel profilo. */
+    public UUID creaOperatore(String nome) {
+        UUID id = creaAccount("OPERATORE", nome);
+        jdbc.update(
+                "insert into " + schema + "utenze_profili_operatore (account_id, tipologia, comune_codice)"
+                        + " values (?, 'INTERNO_BANCO', 'napoli')",
+                id);
+        return id;
+    }
+
+    /** Operatore interno del Banco abilitato alla misura: compare fra i candidati dello stesso comune. */
+    public UUID creaOperatoreErogatore(String nome, long misuraId) {
+        UUID id = creaOperatore(nome);
+        jdbc.update(
+                "insert into " + schema + "utenze_operatori_misure (account_id, misura_id) values (?, ?)",
+                id, misuraId);
+        return id;
+    }
+
+    /** Revoca l'accesso dell'account, come farebbe il Banco. */
+    public void revoca(UUID account) {
+        jdbc.update("update " + schema + "utenze_account set stato = 'REVOCATO' where id = ?", account);
     }
 
     /** Richiesta per una persona a Napoli sulla misura M01, nello stato indicato. */
