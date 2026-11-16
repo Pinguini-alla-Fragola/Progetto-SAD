@@ -13,7 +13,8 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 /** Risposte con messaggi controllati: mai valori del corpo, descrizioni o messaggi del parser. */
-@RestControllerAdvice(basePackages = {"it.unina.picus.richieste.web", "it.unina.picus.catalogo.web"})
+@RestControllerAdvice(basePackages = {"it.unina.picus.richieste.web", "it.unina.picus.catalogo.web",
+        "it.unina.picus.comunicazioni.web"})
 public class ErroriRichieste {
     public record Errore(String codice, String messaggio, Map<String, String> campi) {}
 

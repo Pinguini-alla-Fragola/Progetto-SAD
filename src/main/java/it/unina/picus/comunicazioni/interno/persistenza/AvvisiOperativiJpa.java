@@ -5,7 +5,6 @@ import it.unina.picus.comunicazioni.api.ComunicazioniApi.AvvisoOperativo;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.Clock;
 import java.util.List;
@@ -24,7 +23,7 @@ public class AvvisiOperativiJpa implements AvvisiOperativiApi {
     }
 
     @Override
-    @Transactional(propagation = Propagation.MANDATORY)
+    @Transactional
     public void avvisaDisponibilita(UUID richiestaId, UUID contattoId, UUID destinatarioId) {
         if (richiestaId == null || contattoId == null || destinatarioId == null) {
             throw new IllegalArgumentException("Riferimenti dell'avviso obbligatori");

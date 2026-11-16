@@ -16,6 +16,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import it.unina.picus.richieste.interno.dominio.RichiestaDiMisura;
+import it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione;
 
 /**
  * Entità JPA che conserva i dati e lo stato della richiesta di misura.
@@ -47,6 +48,10 @@ public class RichiestaJpa {
 
     @Column(name = "erogatore_id")
     private UUID erogatoreId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 30)
+    private AmbitoErogazione erogatoreAmbito;
 
     /** Costruttore riservato a JPA. */
     protected RichiestaJpa() {
@@ -81,5 +86,31 @@ public class RichiestaJpa {
     /** {@return stato corrente della richiesta} */
     public StatoRichiesta getStato() {
         return stato;
+    }
+
+    /** Il chiamante mantiene il lock sulla riga fino al commit. */
+    public void prendiInCarico() {
+        if (stato != StatoRichiesta.CREATA) {
+            throw new IllegalStateException("La richiesta non è Creata");
+        }
+        stato = StatoRichiesta.PRESA_IN_CARICO;
+    }
+
+    /** Verifica lo stato richiesto dai comandi di ricerca e disponibilità. */
+    public void verificaPresaInCarico() {
+        if (stato != StatoRichiesta.PRESA_IN_CARICO) {
+            throw new IllegalStateException("La richiesta non è Presa in carico");
+        }
+    }
+
+    /** Registra assegnatario, ambito e stato insieme dopo la verifica della risposta positiva. */
+    public void assegna(UUID accountId, AmbitoErogazione ambito) {
+        verificaPresaInCarico();
+        if (accountId == null || ambito == null) {
+            throw new IllegalArgumentException("Assegnatario e ambito obbligatori");
+        }
+        erogatoreId = accountId;
+        erogatoreAmbito = ambito;
+        stato = StatoRichiesta.IN_PROGRAMMAZIONE;
     }
 }
