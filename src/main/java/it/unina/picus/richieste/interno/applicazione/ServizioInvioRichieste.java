@@ -125,7 +125,8 @@ public class ServizioInvioRichieste implements InvioRichiesteApi {
             errori.put("tipoDestinatario", "Seleziona PERSONA o NUCLEO");
         }
         String comune = dati == null || dati.comuneCodice() == null ? "" : dati.comuneCodice().strip();
-        if (comune.isEmpty() || comune.length() > 50) {
+        if (comune.isEmpty() || comune.length() > 50
+                || comune.codePoints().anyMatch(Character::isISOControl)) {
             errori.put("comuneCodice", "Seleziona un comune del catalogo");
         }
         String descrizione = dati == null || dati.description() == null ? null : dati.description().strip();
