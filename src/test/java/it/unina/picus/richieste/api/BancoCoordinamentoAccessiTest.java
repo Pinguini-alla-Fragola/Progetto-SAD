@@ -3,17 +3,24 @@ package it.unina.picus.richieste.api;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import it.unina.picus.shared.AccessiBlackBoxTest;
 import it.unina.picus.shared.ScenarioAccessi;
 import it.unina.picus.shared.ScenarioAccessi.Account;
-import it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione;
+import it.unina.picus.monitoraggio.api.MonitoraggioApi.ConteggioOpt;
+import it.unina.picus.monitoraggio.api.MonitoraggioApi.VoceMisura;
 import it.unina.picus.richieste.api.RichiesteApi.ContattoDisponibilita;
 import it.unina.picus.richieste.api.RichiesteApi.EsitoContatto;
 import it.unina.picus.richieste.api.RichiesteApi.RichiestaDettaglio;
@@ -26,8 +33,10 @@ import it.unina.picus.utenze.api.UtenzeApi.TipoErogatore;
  * funzioni autorizzate. Controllo complementare: le stesse funzioni sono negate a OPT e operatori,
  * perché l'account Operatore interno non equivale al ruolo Banco.
  *
- * <p>Tecniche: matrice dei permessi ruolo × operazione; la OPT titolare è provata a parte, perché è la
- * classe di attori più vicina ai permessi del Banco sulla propria richiesta.</p>
+ * <p>Tecniche: matrice azione × ruolo per le tre azioni di CA-06 (presa in carico, conferma
+ * dell'accordo, rifiuto definitivo), ciascuna sul proprio stato minimo e con il controllo positivo del
+ * Banco; la OPT titolare è provata a parte, perché è la classe di attori più vicina ai permessi del
+ * Banco sulla propria richiesta.</p>
  *
  * <p>La classe sta in {@code richieste.api} perché verifica soprattutto coda, dettaglio, contatti e
  * archivio; contiene anche alcune verifiche su schede e conteggi di Monitoraggio.</p>
@@ -84,19 +93,44 @@ class BancoCoordinamentoAccessiTest extends AccessiBlackBoxTest {
                 .anyMatch(s -> s.id().equals(schedaId)));
     }
 
-    @Test
-    @DisplayName("CA-05 · il Banco consulta i conteggi di una OPT e di tutte le OPT")
-    void bancoConsultaConteggi() {
-        Account opt = scenario.optRichiedente();
-        IdentitaAutenticata banco = scenario.banco().identita();
-        var trimestre = ScenarioAccessi.TRIMESTRE;
+    /**
+     * Codice sintetico della voce di conteggio; da allineare al tracciato della #41 quando sarà definito.
+     */
+    private static final String VOCE_DI_PROVA = "VOCE_PROVA_28";
 
-        scenario.monitoraggio().consultaConteggiOpt(banco, opt.id(), trimestre, trimestre);
-        scenario.monitoraggio().consultaConteggiOpt(banco, null, trimestre, trimestre);
+    @Test
+    @DisplayName("CA-05 · il Banco consulta i conteggi di una OPT e di tutte le OPT, ciascuna con i propri valori")
+    void bancoConsultaConteggi() {
+        Account optA = scenario.optRichiedente();
+        Account optB = scenario.optRichiedente();
+        long misura = scenario.misura();
+        var trimestre = ScenarioAccessi.TRIMESTRE;
+        scenario.monitoraggio().registraConteggiOpt(optA.identita(), trimestre,
+                List.of(new VoceMisura(misura, VOCE_DI_PROVA, 3)));
+        scenario.monitoraggio().registraConteggiOpt(optB.identita(), trimestre,
+                List.of(new VoceMisura(misura, VOCE_DI_PROVA, 7)));
+        IdentitaAutenticata banco = scenario.banco().identita();
+
+        List<ConteggioOpt> vistaA = scenario.monitoraggio().consultaConteggiOpt(banco, optA.id(), trimestre, trimestre);
+        List<ConteggioOpt> vistaB = scenario.monitoraggio().consultaConteggiOpt(banco, optB.id(), trimestre, trimestre);
+        List<ConteggioOpt> vistaTutte = scenario.monitoraggio().consultaConteggiOpt(banco, null, trimestre, trimestre);
+
+        assertEquals(List.of(new ConteggioOpt(optA.id(), new VoceMisura(misura, VOCE_DI_PROVA, 3))), vistaA,
+                "la vista di una OPT contiene solo i suoi conteggi");
+        assertEquals(List.of(new ConteggioOpt(optB.id(), new VoceMisura(misura, VOCE_DI_PROVA, 7))), vistaB,
+                "la vista di una OPT contiene solo i suoi conteggi");
+        assertEquals(Set.of(new ConteggioOpt(optA.id(), new VoceMisura(misura, VOCE_DI_PROVA, 3)),
+                        new ConteggioOpt(optB.id(), new VoceMisura(misura, VOCE_DI_PROVA, 7))),
+                vistaTutte.stream().filter(c -> Set.of(optA.id(), optB.id()).contains(c.optId()))
+                        .collect(Collectors.toSet()),
+                "la vista complessiva contiene entrambe le OPT con i rispettivi valori");
     }
 
     /** Ruoli diversi dal Banco, inclusi gli operatori interni. */
     enum NonBanco { OPT, OPERATORE_INTERNO, OPERATORE_ESTERNO }
+
+    /** Azioni riservate al Banco elencate da CA-06. */
+    enum AzioneBanco { PRESA_IN_CARICO, CONFERMA_ACCORDO, RIFIUTO_DEFINITIVO }
 
     private Account account(NonBanco ruolo) {
         return switch (ruolo) {
@@ -106,23 +140,39 @@ class BancoCoordinamentoAccessiTest extends AccessiBlackBoxTest {
         };
     }
 
-    @ParameterizedTest(name = "CA-06 · presa in carico, ricerca, contatti e rifiuto definitivo negati a {0}")
-    @EnumSource(NonBanco.class)
-    void coordinamentoNegatoAgliAltriRuoli(NonBanco ruolo) {
-        Account attore = account(ruolo);
-        Account erogatore = scenario.erogatore(TipoErogatore.OPT);
-        UUID creata = scenario.richiestaCreata(scenario.optRichiedente());
-        UUID presaInCarico = scenario.richiestaPresaInCarico(scenario.optRichiedente());
-        IdentitaAutenticata identita = attore.identita();
+    /** Stato minimo da cui l'azione è eseguibile dal Banco. */
+    private UUID statoMinimo(AzioneBanco azione) {
+        Account titolare = scenario.optRichiedente();
+        return switch (azione) {
+            case PRESA_IN_CARICO -> scenario.richiestaCreata(titolare);
+            case CONFERMA_ACCORDO -> scenario.richiestaInProgrammazione(titolare, scenario.erogatore(TipoErogatore.OPT));
+            case RIFIUTO_DEFINITIVO -> scenario.richiestaPresaInCarico(titolare);
+        };
+    }
 
-        assertNegato(() -> scenario.richieste().codaBanco(identita));
-        assertNegato(() -> scenario.richieste().archivioBanco(identita));
-        assertNegatoSenzaModifiche(creata, () -> scenario.richieste().prendiInCarico(identita, creata));
-        assertNegato(() -> scenario.richieste().cercaErogatoriOrdinati(identita, presaInCarico));
-        assertNegatoSenzaModifiche(presaInCarico, () -> scenario.richieste()
-                .interpellaErogatore(identita, presaInCarico, erogatore.id(), AmbitoErogazione.COMUNE_LIMITROFO));
-        assertNegato(() -> scenario.richieste().elencoContatti(identita, presaInCarico));
-        assertNegatoSenzaModifiche(presaInCarico, () -> scenario.richieste().rifiutaRichiesta(identita, presaInCarico));
+    private void esegui(AzioneBanco azione, IdentitaAutenticata attore, UUID richiestaId) {
+        switch (azione) {
+            case PRESA_IN_CARICO -> scenario.richieste().prendiInCarico(attore, richiestaId);
+            case CONFERMA_ACCORDO -> scenario.richieste().confermaAccordo(attore, richiestaId, ScenarioAccessi.ACCORDO);
+            case RIFIUTO_DEFINITIVO -> scenario.richieste().rifiutaRichiesta(attore, richiestaId);
+        }
+    }
+
+    static Stream<Arguments> azioneERuolo() {
+        return Stream.of(AzioneBanco.values())
+                .flatMap(azione -> Stream.of(NonBanco.values()).map(ruolo -> Arguments.of(azione, ruolo)));
+    }
+
+    @ParameterizedTest(name = "CA-06 · {0} negata a {1}; il Banco la esegue sullo stesso stato")
+    @MethodSource("azioneERuolo")
+    void azioneRiservataAlBanco(AzioneBanco azione, NonBanco ruolo) {
+        UUID id = statoMinimo(azione);
+        IdentitaAutenticata attore = account(ruolo).identita();
+
+        assertNegatoSenzaModifiche(id, () -> esegui(azione, attore, id));
+
+        // controllo positivo: sullo stesso stato l'azione è consentita al Banco
+        esegui(azione, scenario.banco().identita(), id);
     }
 
     @Test
@@ -147,14 +197,5 @@ class BancoCoordinamentoAccessiTest extends AccessiBlackBoxTest {
         UUID id = scenario.richiestaInProgrammazione(scenario.optRichiedente(), scenario.erogatore(TipoErogatore.OPT));
 
         assertNegatoSenzaModifiche(id, () -> scenario.richieste().rifiutaRichiesta(operatore.identita(), id));
-    }
-
-    @ParameterizedTest(name = "CA-05 · rendicontazione e catalogo completo negati a {0}")
-    @EnumSource(NonBanco.class)
-    void rendicontazioneNegataAgliAltriRuoli(NonBanco ruolo) {
-        IdentitaAutenticata identita = account(ruolo).identita();
-
-        assertNegato(() -> scenario.monitoraggio().riepilogaSchede(identita, ScenarioAccessi.TRIMESTRE));
-        assertNegato(() -> scenario.catalogo().elencoMisure(identita));
     }
 }

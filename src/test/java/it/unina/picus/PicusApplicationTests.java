@@ -2,10 +2,8 @@ package it.unina.picus;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 
-@SpringBootTest
-@Import(TestcontainersConfiguration.class)
+@SpringBootTest(properties = "spring.datasource.url=jdbc:h2:mem:picus")
 class PicusApplicationTests {
 
     @Test

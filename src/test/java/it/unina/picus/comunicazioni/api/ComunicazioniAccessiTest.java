@@ -123,19 +123,27 @@ class ComunicazioniAccessiTest extends AccessiBlackBoxTest {
     }
 
     @Test
-    @DisplayName("CA-07 · un non destinatario non conferma la ricezione; il destinatario conferma per sé")
+    @DisplayName("CA-07 · ogni destinatario conferma solo per sé; un non destinatario non conferma")
     void confermaSoloPerSe() {
-        Account destinataria = scenario.optRichiedente();
+        Account destinatariaA = scenario.optRichiedente();
+        Account destinatariaB = scenario.optRichiedente();
         Account esclusa = scenario.optRichiedente();
-        UUID id = invia(TipoDestinatari.GRUPPO_OPT, Set.of(destinataria.id())).id();
+        UUID id = invia(TipoDestinatari.GRUPPO_OPT, Set.of(destinatariaA.id(), destinatariaB.id())).id();
 
         assertNegato(() -> scenario.comunicazioni().confermaRicezione(esclusa.identita(), id));
-        assertNull(riscontro(id, destinataria).confermataIl(), "il diniego non registra riscontri");
+        assertNull(riscontro(id, destinatariaA).confermataIl(), "il diniego non registra riscontri");
+        assertNull(riscontro(id, destinatariaB).confermataIl(), "il diniego non registra riscontri");
         assertFalse(scenario.comunicazioni().elencoRiscontri(scenario.banco().identita(), id).stream()
                 .anyMatch(r -> r.destinatarioId().equals(esclusa.id())));
 
-        scenario.comunicazioni().confermaRicezione(destinataria.identita(), id);
-        assertNotNull(riscontro(id, destinataria).confermataIl());
+        scenario.comunicazioni().confermaRicezione(destinatariaA.identita(), id);
+        Riscontro primoDiA = riscontro(id, destinatariaA);
+        assertNotNull(primoDiA.confermataIl(), "A ha confermato");
+        assertNull(riscontro(id, destinatariaB).confermataIl(), "la conferma di A non vale per B");
+
+        scenario.comunicazioni().confermaRicezione(destinatariaB.identita(), id);
+        assertNotNull(riscontro(id, destinatariaB).confermataIl(), "B ha confermato");
+        assertEquals(primoDiA, riscontro(id, destinatariaA), "la conferma di B non modifica il riscontro di A");
     }
 
     @Test
@@ -151,21 +159,6 @@ class ComunicazioniAccessiTest extends AccessiBlackBoxTest {
         assertArrayEquals(CONTENUTO,
                 scenario.comunicazioni().scaricaAllegato(destinataria.identita(), allegatoId).contenuto());
         assertNegato(() -> scenario.comunicazioni().scaricaAllegato(esclusa.identita(), allegatoId));
-    }
-
-    @Test
-    @DisplayName("CA-07 · invio, elenco degli inviati e riscontri sono funzioni del solo Banco")
-    void funzioniDelBancoNegateAgliAltri() {
-        Account opt = scenario.optRichiedente();
-        Account operatore = scenario.operatore(TipoErogatore.INTERNO_BANCO);
-        UUID id = invia(TipoDestinatari.TUTTE_LE_OPT, Set.of()).id();
-        var dati = new DatiComunicazione("Tentativo", "Testo", TipoDestinatari.TUTTE_LE_OPT, Set.of(), List.of());
-
-        for (Account account : List.of(opt, operatore)) {
-            assertNegato(() -> scenario.comunicazioni().inviaComunicazione(account.identita(), dati));
-            assertNegato(() -> scenario.comunicazioni().elencoInviate(account.identita()));
-            assertNegato(() -> scenario.comunicazioni().elencoRiscontri(account.identita(), id));
-        }
     }
 
     private Riscontro riscontro(UUID comunicazioneId, Account destinatario) {

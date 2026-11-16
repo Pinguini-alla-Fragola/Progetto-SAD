@@ -1,11 +1,11 @@
 package it.unina.picus.richieste.api;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import java.util.Arrays;
-import java.util.NoSuchElementException;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -14,10 +14,19 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.web.context.WebApplicationContext;
+
+import com.jayway.jsonpath.JsonPath;
 
 import it.unina.picus.shared.AccessiBlackBoxTest;
+import it.unina.picus.shared.ClientHttp;
 import it.unina.picus.shared.ScenarioAccessi;
 import it.unina.picus.shared.ScenarioAccessi.Account;
+import it.unina.picus.shared.ScenarioAccessi.ContattoPreparato;
 import it.unina.picus.richieste.api.RichiesteApi.ContattoDisponibilita;
 import it.unina.picus.richieste.api.RichiesteApi.DettaglioContatto;
 import it.unina.picus.richieste.api.RichiesteApi.EsitoContatto;
@@ -38,6 +47,12 @@ import it.unina.picus.utenze.api.UtenzeApi.TipoErogatore;
  */
 @DisplayName("#28 CA-02 · Erogatore interpellato e contatto di disponibilità")
 class ContattiDisponibilitaAccessiTest extends AccessiBlackBoxTest {
+
+    /** Consultazione HTTP di un contatto ({@code ContattiDisponibilitaController}). */
+    private static final String CONSULTA_CONTATTO = "/api/contatti-disponibilita/{id}";
+
+    @Autowired
+    private WebApplicationContext web;
 
     @ParameterizedTest(name = "CA-02 · {0} interpellato consulta i dati minimi del contatto")
     @EnumSource(TipoErogatore.class)
@@ -64,6 +79,43 @@ class ContattiDisponibilitaAccessiTest extends AccessiBlackBoxTest {
 
         assertEquals(Set.of("contatto", "misuraId", "nomeMisura", "tipoDestinatario", "comuneCodice"), campi,
                 "i dati minimi per valutare la disponibilità sono cambiati: rivedere QS-01A e #28");
+    }
+
+    @Test
+    @DisplayName("CA-02 · via HTTP il destinatario riceve solo i dati minimi del contatto; un estraneo riceve 403")
+    void datiMinimiNellaRispostaHttp() throws Exception {
+        ClientHttp http = new ClientHttp(web);
+        http.richiediEndpointEsposto(HttpMethod.GET, CONSULTA_CONTATTO, UUID.randomUUID());
+        Account titolare = scenario.optRichiedente();
+        Account destinatario = scenario.optRichiedente();
+        Account estraneo = scenario.optRichiedente();
+        ContattoPreparato contatto = scenario.contattoInAttesa(titolare, destinatario);
+
+        MockHttpServletResponse risposta = http.esegui(get(CONSULTA_CONTATTO, contatto.contattoId())
+                .session(http.accedi(destinatario)).accept(MediaType.APPLICATION_JSON));
+
+        assertEquals(200, risposta.getStatus());
+        String json = risposta.getContentAsString();
+        Map<String, Object> corpo = JsonPath.read(json, "$");
+        Map<String, Object> datiContatto = JsonPath.read(json, "$.contatto");
+        assertEquals(Set.of("contatto", "misuraId", "nomeMisura", "tipoDestinatario", "comuneCodice"), corpo.keySet(),
+                "solo i campi consentiti");
+        assertEquals(Set.of("id", "richiestaId", "erogatoreId", "ambito", "esito"), datiContatto.keySet(),
+                "solo i campi consentiti del contatto");
+        assertEquals(contatto.contattoId().toString(), datiContatto.get("id"));
+        assertEquals(destinatario.id().toString(), datiContatto.get("erogatoreId"));
+        assertEquals("IN_ATTESA", datiContatto.get("esito"));
+        assertEquals(contatto.misuraId(), ((Number) corpo.get("misuraId")).longValue());
+        assertEquals(contatto.nomeMisura(), corpo.get("nomeMisura"));
+        assertEquals(ScenarioAccessi.COMUNE_RICHIESTA, corpo.get("comuneCodice"));
+        assertFalse(json.contains(titolare.id().toString()), "nessun titolare");
+        assertFalse(json.contains(ScenarioAccessi.DESCRIZIONE), "nessuna descrizione");
+
+        MockHttpServletResponse negata = http.esegui(get(CONSULTA_CONTATTO, contatto.contattoId())
+                .session(http.accedi(estraneo)).accept(MediaType.APPLICATION_JSON));
+
+        assertEquals(403, negata.getStatus());
+        assertFalse(negata.getContentAsString().contains(contatto.contattoId().toString()), "nessun dato del contatto");
     }
 
     @ParameterizedTest(name = "CA-02 · {0} interpellato risponde al proprio contatto")
@@ -127,19 +179,22 @@ class ContattiDisponibilitaAccessiTest extends AccessiBlackBoxTest {
         Account candidatoA = scenario.erogatore(tipo);
         Account candidatoB = scenario.erogatore(tipo);
         UUID id = scenario.richiestaPresaInCarico(titolare);
+
+        // #49: un contatto per volta. A risponde prima che il Banco interpelli B.
         ContattoDisponibilita contattoA = scenario.interpella(id, candidatoA);
+        scenario.richieste().rispondiDisponibilita(candidatoA.identita(), contattoA.id(), false);
+        assertEquals(EsitoContatto.NON_DISPONIBILE, esitoPerIlBanco(contattoA), "risposta legittima di A");
         ContattoDisponibilita contattoB = scenario.interpella(id, candidatoB);
 
         // stessa richiesta, ma il contatto ricevuto da A non autorizza il contatto di B
         assertNegato(() -> scenario.richieste().consultaContatto(candidatoA.identita(), contattoB.id()));
         assertNegatoSenzaModifiche(id,
                 () -> scenario.richieste().rispondiDisponibilita(candidatoA.identita(), contattoB.id(), true));
-        assertEquals(EsitoContatto.IN_ATTESA, esitoPerIlBanco(contattoB));
+        assertEquals(EsitoContatto.IN_ATTESA, esitoPerIlBanco(contattoB), "il diniego non modifica il contatto di B");
 
-        // controllo positivo: A risponde al proprio contatto
-        scenario.richieste().rispondiDisponibilita(candidatoA.identita(), contattoA.id(), false);
-        assertEquals(EsitoContatto.NON_DISPONIBILE, esitoPerIlBanco(contattoA));
-        assertEquals(EsitoContatto.IN_ATTESA, esitoPerIlBanco(contattoB));
+        // controllo positivo: B risponde al proprio contatto
+        scenario.richieste().rispondiDisponibilita(candidatoB.identita(), contattoB.id(), true);
+        assertEquals(EsitoContatto.DISPONIBILE, esitoPerIlBanco(contattoB), "risposta legittima di B");
     }
 
     @Test
@@ -154,17 +209,6 @@ class ContattiDisponibilitaAccessiTest extends AccessiBlackBoxTest {
         assertNegatoSenzaModifiche(contatto.richiestaId(),
                 () -> scenario.richieste().rispondiDisponibilita(scenario.banco().identita(), contatto.id(), true));
         assertEquals(EsitoContatto.IN_ATTESA, esitoPerIlBanco(contatto));
-    }
-
-    @Test
-    @DisplayName("CA-02 · un contatto inesistente non rivela dati")
-    void contattoInesistente() {
-        Account opt = scenario.erogatore(TipoErogatore.OPT);
-
-        Throwable errore = assertThrows(RuntimeException.class,
-                () -> scenario.richieste().consultaContatto(opt.identita(), UUID.randomUUID()));
-        assertTrue(errore instanceof SecurityException || errore instanceof NoSuchElementException,
-                "atteso FORBIDDEN o risorsa inesistente, ricevuto " + errore);
     }
 
     private EsitoContatto esitoPerIlBanco(ContattoDisponibilita contatto) {

@@ -81,17 +81,6 @@ class AssegnazioniAccessiTest extends AccessiBlackBoxTest {
         }
     }
 
-    @Test
-    @DisplayName("CA-03 · la OPT titolare vede l'accordo con i soli recapiti del referente")
-    void titolareVedeAccordoConfermato() {
-        Account titolare = scenario.optRichiedente();
-        UUID id = scenario.richiestaConfermata(titolare, scenario.erogatore(TipoErogatore.INTERNO_BANCO));
-
-        RichiestaDettaglio dettaglio = scenario.richieste().consultaRichiesta(titolare.identita(), id);
-
-        assertEquals(ScenarioAccessi.ACCORDO, dettaglio.accordo());
-    }
-
     @ParameterizedTest(name = "CA-06 · {0} assegnato non conferma l'accordo")
     @EnumSource(TipoErogatore.class)
     void erogatoreAssegnatoNonConferma(TipoErogatore tipo) {

@@ -11,10 +11,9 @@ import org.junit.jupiter.api.function.Executable;
 import org.opentest4j.TestAbortedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Import;
-
-import it.unina.picus.TestcontainersConfiguration;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 
 import it.unina.picus.richieste.api.RichiesteApi.RichiestaDettaglio;
 
@@ -36,8 +35,9 @@ import it.unina.picus.richieste.api.RichiesteApi.RichiestaDettaglio;
  *       autenticazione, l'interfaccia HTTP. Le classi {@code interno} dei moduli non vengono usate.</li>
  *   <li>Le pratiche si portano negli stati richiesti con le stesse operazioni degli utenti (invio, presa
  *       in carico, ricerca, contatto, risposta, assegnazione, conferma). Il database si usa solo per
- *       creare gli account sintetici e simulare una revoca, perché Utenze non espone ancora un contratto
- *       di creazione; l'identità usata è sempre quella restituita dal server.</li>
+ *       preparare dati che nessun contratto consegnato permette ancora di creare: account sintetici,
+ *       revoca e, per i test HTTP, un contatto in attesa ({@link ScenarioAccessi#contattoInAttesa}).
+ *       L'identità usata è sempre quella restituita dal server.</li>
  *   <li>{@code FORBIDDEN} corrisponde a {@link SecurityException} sui contratti e a {@code 403} via HTTP;
  *       {@code UNAUTHORIZED} corrisponde a {@code 401}.</li>
  *   <li>«Senza dati né modifiche»: l'operazione negata non restituisce valori e la pratica, riletta dal
@@ -62,14 +62,26 @@ import it.unina.picus.richieste.api.RichiesteApi.RichiestaDettaglio;
  *
  * <h2>Esecuzione</h2>
  * <p>{@code ./mvnw test -Dtest='*AccessiTest'}; tag JUnit {@code blackbox} e {@code US-28}. Il database
- * di prova è un PostgreSQL 17 dedicato, avviato in Docker da {@link TestcontainersConfiguration}: serve
+ * di prova è il PostgreSQL 17 di {@link #POSTGRES}, dichiarato qui come nel test della #110: serve
  * Docker attivo e i dati di prova non toccano il database di sviluppo.</p>
  */
 @SpringBootTest
-@Import(TestcontainersConfiguration.class)
 @Tag("blackbox")
 @Tag("US-28")
 public abstract class AccessiBlackBoxTest {
+
+    /**
+     * PostgreSQL 17 usa e getta, condiviso da tutte le classi della suite. Viene avviato una sola volta
+     * (contenitore singleton) e non ad ogni classe, perché le classi condividono lo stesso contesto
+     * Spring; Testcontainers lo elimina a fine esecuzione. {@link ServiceConnection} imposta la
+     * datasource del contesto.
+     */
+    @ServiceConnection
+    protected static final PostgreSQLContainer POSTGRES = new PostgreSQLContainer("postgres:17");
+
+    static {
+        POSTGRES.start();
+    }
 
     /** Costruttore per le sottoclassi di test; il contesto Spring è iniettato da JUnit. */
     protected AccessiBlackBoxTest() {

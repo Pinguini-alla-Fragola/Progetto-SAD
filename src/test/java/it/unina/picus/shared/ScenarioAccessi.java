@@ -38,7 +38,8 @@ import it.unina.picus.utenze.api.UtenzeApi.TipoErogatore;
 
 /**
  * Fixture dei test #28. Crea account sintetici e porta le pratiche negli stati richiesti usando
- * soltanto le operazioni pubbliche dei moduli, come farebbero gli utenti.
+ * soltanto le operazioni pubbliche dei moduli, come farebbero gli utenti. L'unica eccezione è
+ * {@link #contattoInAttesa}, dichiarata come preparazione dati.
  *
  * <p>Se un modulo non è ancora presente nel contesto Spring il test viene <em>sospeso</em>
  * (assumption) e non fallito: la suite può stare su {@code main} prima dell'integrazione e
@@ -438,6 +439,49 @@ public final class ScenarioAccessi {
             default -> throw new IllegalArgumentException("Nessun erogatore assegnato nello stato " + stato);
         }
         return id;
+    }
+
+    /**
+     * Contatto di disponibilità preparato nel database.
+     *
+     * @param richiestaId richiesta Presa in carico a cui appartiene il contatto
+     * @param contattoId contatto in attesa intestato al destinatario
+     * @param misuraId misura della richiesta
+     * @param nomeMisura nome della misura registrato nel contatto
+     */
+    public record ContattoPreparato(UUID richiestaId, UUID contattoId, long misuraId, String nomeMisura) {}
+
+    /**
+     * <b>Preparazione dati, non verifica.</b> Inserisce una richiesta Presa in carico della OPT titolare e
+     * un contatto {@code IN_ATTESA} intestato al destinatario, con la stessa fixture SQL di
+     * {@code RispostaDisponibilitaPostgresqlTest} (#110).
+     *
+     * <p>Serve ai test HTTP sui contatti, già esposti, finché le capacità di invio e coordinamento
+     * (#107) non permettono di arrivare allo stesso stato con le operazioni degli utenti. Usa la misura
+     * {@code M01} e il comune {@link #COMUNE_RICHIESTA}; la descrizione è {@link #DESCRIZIONE}, così i
+     * test possono verificare che non arrivi a chi non deve vederla.</p>
+     *
+     * @param titolare OPT titolare della richiesta
+     * @param destinatario account interpellato
+     * @return identificativi e dati minimi del contatto preparato
+     */
+    public ContattoPreparato contattoInAttesa(Account titolare, Account destinatario) {
+        Map<String, Object> misura = jdbc().queryForMap("select id, nome from catalogo_misure where codice = 'M01'");
+        long misuraDelContatto = ((Number) misura.get("id")).longValue();
+        String nomeMisura = (String) misura.get("nome");
+        UUID richiestaId = UUID.randomUUID();
+        jdbc().update("""
+                insert into richieste (id, titolare_id, misura_id, comune_codice, tipo_destinatario, description,
+                                       inviata_il, stato)
+                values (?, ?, ?, ?, 'PERSONA', ?, now(), 'PRESA_IN_CARICO')
+                """, richiestaId, titolare.id(), misuraDelContatto, COMUNE_RICHIESTA, DESCRIZIONE);
+        UUID contattoId = UUID.randomUUID();
+        jdbc().update("""
+                insert into richieste_contatti_disponibilita (id, richiesta_id, erogatore_id, ambito, nome_misura,
+                                                              inviato_il)
+                values (?, ?, ?, 'STESSO_COMUNE', ?, now())
+                """, contattoId, richiestaId, destinatario.id(), nomeMisura);
+        return new ContattoPreparato(richiestaId, contattoId, misuraDelContatto, nomeMisura);
     }
 
     /**

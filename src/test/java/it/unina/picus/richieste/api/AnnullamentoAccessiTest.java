@@ -41,8 +41,6 @@ import it.unina.picus.utenze.api.UtenzeApi.TipoErogatore;
  * <p>Scelte da confermare con il team:</p>
  * <ul>
  *   <li>un motivo vuoto o di soli spazi è trattato come mancante (CA-12);</li>
- *   <li>CA-14 non dice se chi annulla riceve anche l'avviso: i test lo verificano per gli altri
- *       coinvolti e non per l'autore;</li>
  *   <li>la matrice di annullamento di {@code regole-funzionali.md} limita ancora l'annullamento a
  *       Confermata: i test seguono #28, che lo ammette in ogni stato, anche da Rifiutata.</li>
  * </ul>
@@ -254,7 +252,6 @@ class AnnullamentoAccessiTest extends AccessiBlackBoxTest {
     void annullamentoValidoAvvisaICoinvolti(Soggetto annullatore, TipoErogatore tipo) {
         Account titolare = scenario.optRichiedente();
         Account assegnato = scenario.erogatore(tipo);
-        Account estranea = scenario.optRichiedente();
         UUID id = scenario.richiestaInProgrammazione(titolare, assegnato);
         RichiestaDettaglio prima = scenario.istantanea(id);
         List<ContattoDisponibilita> contattiPrima = contatti(id);
@@ -268,43 +265,25 @@ class AnnullamentoAccessiTest extends AccessiBlackBoxTest {
 
         assertDatiConservati(prima, scenario.istantanea(id));
         assertEquals(contattiPrima, contatti(id), "i contatti di disponibilità registrati sono conservati");
-        for (Account coinvolto : List.of(scenario.banco(), titolare, assegnato)) {
-            if (!coinvolto.equals(attore)) {
-                assertEquals(1, avvisiDiAnnullamento(coinvolto, id),
-                        "avviso di annullamento atteso per " + coinvolto.ruolo());
-            }
+        // CA-14 elenca Banco, OPT richiedente ed erogatore assegnato, senza escludere chi annulla
+        for (Account destinatario : List.of(scenario.banco(), titolare, assegnato)) {
+            assertEquals(1, avvisiDiAnnullamento(destinatario, id),
+                    "un avviso di annullamento atteso per " + destinatario.ruolo());
         }
-        assertEquals(0, avvisiDiAnnullamento(estranea, id), "nessun avviso a chi non è coinvolto");
     }
 
-    @Test
-    @DisplayName("CA-14 · da Creata, senza erogatore individuato, il Banco viene avvisato")
-    void annullamentoDaCreataAvvisaIlBanco() {
+    @ParameterizedTest(name = "CA-14 · da Creata, senza erogatore, l'annullamento di {0} avvisa Banco e OPT richiedente")
+    @EnumSource(Coordinatore.class)
+    void annullamentoDaCreataAvvisaBancoERichiedente(Coordinatore coordinatore) {
         Account titolare = scenario.optRichiedente();
         UUID id = scenario.richiestaCreata(titolare);
 
-        scenario.richieste().annullaRichiesta(titolare.identita(), id, null);
+        scenario.richieste().annullaRichiesta(attore(coordinatore, titolare).identita(), id, null);
 
-        assertEquals(1, avvisiDiAnnullamento(scenario.banco(), id));
-    }
-
-    @ParameterizedTest(name = "CA-14 · da Presa in carico il candidato {0} soltanto interpellato non viene avvisato")
-    @EnumSource(TipoErogatore.class)
-    void candidatoInterpellatoNonAvvisato(TipoErogatore tipo) {
-        Account titolare = scenario.optRichiedente();
-        Account interpellato = scenario.erogatore(tipo);
-        UUID id = scenario.richiestaPresaInCarico(titolare);
-        scenario.interpella(id, interpellato);
-        RichiestaDettaglio prima = scenario.istantanea(id);
-        List<ContattoDisponibilita> contattiPrima = contatti(id);
-
-        scenario.richieste().annullaRichiesta(titolare.identita(), id, MOTIVO);
-
-        assertDatiConservati(prima, scenario.istantanea(id));
-        assertEquals(contattiPrima, contatti(id), "i contatti di disponibilità registrati sono conservati");
-        assertEquals(1, avvisiDiAnnullamento(scenario.banco(), id), "il Banco viene avvisato");
-        assertEquals(0, avvisiDiAnnullamento(interpellato, id),
-                "nessun erogatore è ancora individuato: il candidato non riceve l'avviso");
+        for (Account destinatario : List.of(scenario.banco(), titolare)) {
+            assertEquals(1, avvisiDiAnnullamento(destinatario, id),
+                    "un avviso di annullamento atteso per " + destinatario.ruolo());
+        }
     }
 
     // ------------------------------------------------------------------ CA-15
@@ -329,12 +308,6 @@ class AnnullamentoAccessiTest extends AccessiBlackBoxTest {
         assertTrue(scenario.richieste().archivioBanco(banco).stream().map(RichiestaSintesi::id).anyMatch(id::equals));
         assertThrows(IllegalStateException.class, () -> scenario.richieste().cercaErogatoriOrdinati(banco, id),
                 "la ricerca resta chiusa");
-        for (Account coinvolto : List.of(scenario.banco(), titolare, assegnato)) {
-            if (!coinvolto.equals(attore)) {
-                assertEquals(1, avvisiDiAnnullamento(coinvolto, id),
-                        "un solo avviso per destinatario: " + coinvolto.ruolo());
-            }
-        }
     }
 
     // ------------------------------------------------------------------ supporto

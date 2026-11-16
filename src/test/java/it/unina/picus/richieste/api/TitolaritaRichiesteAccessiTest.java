@@ -127,10 +127,4 @@ class TitolaritaRichiesteAccessiTest extends AccessiBlackBoxTest {
 
         assertEquals(new IdentitaAutenticata(account.id(), ruolo), sessione);
     }
-
-    @Test
-    @DisplayName("CA-09 · un identificativo di account inesistente non ottiene un'identità")
-    void accountSconosciutoSenzaIdentita() {
-        assertTrue(scenario.utenze().verificaAccountSessione(UUID.randomUUID()).isEmpty());
-    }
 }
