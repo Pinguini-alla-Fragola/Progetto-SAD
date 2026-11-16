@@ -1,44 +1,61 @@
 import { api } from './area-client.js';
 
 const form = document.getElementById('richiestaForm');
-// Mantiene il riferimento dell'invio quando si ritenta dopo un'interruzione.
-let riferimentoInvio;
+const campi = document.getElementById('campi-invio');
+const button = document.getElementById('btnInvia');
+const errore = document.getElementById('errore-invio');
+const incerto = document.getElementById('invio-incerto');
+let invio;
+let occupato = false;
 
 form.addEventListener('submit', async event => {
     event.preventDefault();
-    if (form.hasAttribute('data-form-anteprima')) return;
-
-    riferimentoInvio ??= crypto.randomUUID();
-    const button = document.getElementById('btnInvia');
-    const errore = document.getElementById('errore-invio');
+    if (occupato) return;
+    occupato = true;
+    invio ??= {
+        chiave: crypto.randomUUID(),
+        dati: {
+            misuraId: Number(form.elements.misuraId.value),
+            tipoDestinatario: form.elements.tipoDestinatario.value,
+            comuneCodice: form.elements.comuneCodice.value,
+            description: form.elements.description.value.trim() || null
+        }
+    };
     errore.textContent = '';
+    for (const nodo of form.querySelectorAll('[aria-invalid]')) nodo.removeAttribute('aria-invalid');
+    for (const nodo of form.querySelectorAll('.picus-errore')) nodo.textContent = '';
+    campi.disabled = true;
     button.disabled = true;
     button.textContent = 'Registrazione in corso…';
-
-    const payload = {
-        misuraId: Number(form.elements.misuraId.value),
-        tipoDestinatario: form.elements.tipoDestinatario.value,
-        comuneCodice: form.elements.comuneCodice.value.trim(),
-        description: form.elements.description.value.trim() || null,
-        riferimentoInvio
-    };
     try {
-        const richiesta = await api('/api/richieste', { method: 'POST', body: payload });
+        const richiesta = await api('/api/richieste', {
+            method: 'POST', body: invio.dati, headers: { 'Idempotency-Key': invio.chiave }
+        });
         form.hidden = true;
         document.getElementById('confId').textContent = richiesta.id;
         document.getElementById('linkDettaglio').href = '/richieste/' + encodeURIComponent(richiesta.id);
-        document.getElementById('conferma').hidden = false;
+        const conferma = document.getElementById('conferma');
+        conferma.hidden = false;
+        conferma.focus();
     } catch (causa) {
-        errore.textContent = causa.stato ? causa.message : 'Connessione interrotta. Riprova l’invio senza duplicare la pratica.';
+        errore.textContent = causa.stato ? causa.message : 'Connessione interrotta. Riprova per verificare l’invio senza creare duplicati.';
+        if ([400, 403, 429].includes(causa.stato)) {
+            invio = undefined;
+            campi.disabled = false;
+            incerto.hidden = true;
+        } else {
+            incerto.hidden = false;
+        }
+        for (const [nome, testo] of Object.entries(causa.campi || {})) {
+            const messaggio = document.getElementById('errore-' + nome);
+            if (messaggio) messaggio.textContent = testo;
+            form.querySelector('[name="' + CSS.escape(nome) + '"]')?.setAttribute('aria-invalid', 'true');
+        }
+        form.querySelector('[aria-invalid]')?.focus();
+        button.textContent = invio ? 'Riprova lo stesso invio' : 'Invia la richiesta al Banco';
+    } finally {
+        occupato = false;
         button.disabled = false;
-        button.textContent = 'Riprova l’invio';
     }
 });
 
-window.addEventListener('pageshow', () => {
-    if (!form.hasAttribute('data-form-anteprima')) {
-        const button = document.getElementById('btnInvia');
-        button.disabled = false;
-        button.textContent = 'Invia la richiesta al Banco';
-    }
-});

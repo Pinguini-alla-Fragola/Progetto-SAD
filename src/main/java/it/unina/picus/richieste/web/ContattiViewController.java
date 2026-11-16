@@ -1,6 +1,9 @@
 package it.unina.picus.richieste.web;
 
 import java.util.UUID;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -13,6 +16,10 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
+import it.unina.picus.catalogo.api.ConsultazioneCatalogoApi;
+import it.unina.picus.richieste.api.InvioRichiesteApi;
+import it.unina.picus.richieste.api.RichiesteApi.AccordoADistanza;
+import it.unina.picus.richieste.api.RichiesteApi.AccordoInPresenza;
 
 /**
  * Presenta le viste dei contatti di disponibilità. Gli endpoint di Richieste verificano
@@ -22,26 +29,49 @@ import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
 class ContattiViewController {
 
     private final ObjectProvider<RequestMappingHandlerMapping> rotte;
+    private final InvioRichiesteApi richieste;
+    private final ConsultazioneCatalogoApi catalogo;
+    private static final DateTimeFormatter DATA = DateTimeFormatter.ofPattern("d MMMM uuuu, HH:mm", Locale.ITALIAN)
+            .withZone(ZoneId.of("Europe/Rome"));
 
     ContattiViewController(@Qualifier("requestMappingHandlerMapping")
-            ObjectProvider<RequestMappingHandlerMapping> rotte) {
+            ObjectProvider<RequestMappingHandlerMapping> rotte, InvioRichiesteApi richieste,
+            ConsultazioneCatalogoApi catalogo) {
         this.rotte = rotte;
+        this.richieste = richieste;
+        this.catalogo = catalogo;
     }
 
-    /** Mostra alla OPT la vista di invio con i controlli disattivati. */
+    /** Carica i valori di catalogo ammessi per l'invio della OPT. */
     @GetMapping("/richieste/nuova")
-    String nuova(IdentitaAutenticata identita) {
+    String nuova(IdentitaAutenticata identita, Model modello) {
         if (identita.ruolo() != RuoloUtente.OPT) {
             throw new AccessDeniedException("Invio riservato alle OPT");
         }
+        modello.addAttribute("misure", catalogo.elencoMisureAttive());
+        modello.addAttribute("comuni", catalogo.elencoComuni());
         return "richieste/nuova";
     }
 
-    /** Mostra la struttura del dettaglio in attesa del servizio di consultazione. */
+    /** Consulta tramite il caso d'uso, che filtra i dati e controlla il legame con la pratica. */
     @GetMapping("/richieste/{richiestaId}")
-    String dettaglio(@PathVariable UUID richiestaId, Model modello) {
+    String dettaglio(@PathVariable UUID richiestaId, IdentitaAutenticata identita, Model modello) {
+        var dettaglio = richieste.consultaRichiesta(identita, richiestaId);
         modello.addAttribute("richiestaId", richiestaId);
         modello.addAttribute("dashboard", "/dashboard");
+        modello.addAttribute("dettaglio", dettaglio);
+        modello.addAttribute("richiesta", dettaglio.richiesta());
+        modello.addAttribute("comune", catalogo.cercaComune(dettaglio.comuneCodice())
+                .map(c -> c.nome()).orElse(dettaglio.comuneCodice()));
+        modello.addAttribute("dataInvio", DATA.format(dettaglio.richiesta().inviataIl()));
+        modello.addAttribute("banco", identita.ruolo() == RuoloUtente.BANCO);
+        if (dettaglio.accordo() instanceof AccordoInPresenza accordo) {
+            modello.addAttribute("accordoPresenza", accordo);
+            modello.addAttribute("dataAccordo", DATA.format(accordo.dataOra()));
+        } else if (dettaglio.accordo() instanceof AccordoADistanza accordo) {
+            modello.addAttribute("accordoRemoto", accordo);
+            modello.addAttribute("dataAccordo", DATA.format(accordo.dataOra()));
+        }
         return "richieste/dettaglio";
     }
 

@@ -2,142 +2,85 @@
 <html lang="it" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dettaglio Pratica &mdash; PICUS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dettaglio richiesta · PICUS</title>
     <link rel="icon" href="/img/picus.svg" type="image/svg+xml">
     <link rel="stylesheet" href="/css/picus.css">
-    <script src="/js/dettaglio-richiesta.js" type="module"></script>
     <link rel="stylesheet" href="/css/integrazione-ui.css">
+    <script src="/js/dettaglio-richiesta.js" type="module"></script>
 </head>
 <body class="flow-page">
-    <a th:replace="~{fragments/layout :: skip}" href="#contenuto">Vai al contenuto</a>
-    <header class="picus-navbar">
-        <div class="nav-inner">
-            <a th:replace="~{fragments/layout :: brand}" href="/">PICUS</a>
-            <a th:href="${dashboard}" class="nav-link"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#back"></use></svg> Area di lavoro</a>
-        </div>
+<a th:replace="~{fragments/layout :: skip}" href="#contenuto">Vai al contenuto</a>
+<header class="picus-navbar">
+    <div class="nav-inner">
+        <a th:replace="~{fragments/layout :: brand}" href="/">PICUS</a>
+        <a th:href="${dashboard}" class="nav-link"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#back"></use></svg> Area di lavoro</a>
+    </div>
+</header>
+<main id="contenuto" class="mobile-wrapper" tabindex="-1"
+      th:attr="data-richiesta-id=${richiestaId},data-stato=${richiesta.stato.name()},data-banco=${banco}">
+    <header class="mobile-header">
+        <h1>Dettaglio della richiesta</h1>
+        <span class="badge-stato" th:classappend="${'badge-' + #strings.toLowerCase(richiesta.stato.name())}"
+              th:text="${#strings.capitalize(#strings.toLowerCase(#strings.replace(richiesta.stato.name(), '_', ' ')))}">Creata</span>
     </header>
-
-    <main id="contenuto" class="mobile-wrapper" th:data-richiesta-id="${richiestaId}" tabindex="-1">
-        <header class="mobile-header">
-            <div>
-                <h1>Dettaglio della richiesta</h1>
-            </div>
-            <span th:if="${richiesta != null}" class="badge-stato"
-                  th:classappend="${richiesta.stato.name() == 'IN_PROGRAMMAZIONE' ? 'badge-in_programmazione' : (richiesta.stato.name() == 'CONFERMATA' ? 'badge-confermata' : (richiesta.stato.name() == 'RIFIUTATA' ? 'badge-rifiutata' : 'badge-annullata'))}"
-                  th:text="${#strings.capitalize(#strings.toLowerCase(#strings.replace(richiesta.stato.name(), '_', ' ')))}">In programmazione</span>
-        </header>
-
-        <div class="mobile-body">
-            <div class="flow-facts" th:if="${richiesta == null}">
-                <div class="detail-label">Identificativo della pratica</div>
-                <div class="detail-value"><code th:text="${richiestaId}"></code></div>
-                <div class="detail-label">Misura richiesta</div><div class="detail-value">—</div>
-                <div class="detail-label">Data di invio</div><div class="detail-value">—</div>
-                <div class="detail-label">Comune di intervento</div><div class="detail-value">—</div>
-                <div class="detail-label">Tipologia di destinatario</div><div class="detail-value">—</div>
-                <span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-secondary btn-block" type="button" disabled>Annulla la richiesta</button></span>
-            </div>
-            <th:block th:if="${richiesta != null}">
-            <!-- Dati Pratica Principali -->
-            <div class="flow-facts">
-                <div class="detail-label">Identificativo della pratica</div>
-                <div class="detail-value dettaglio-richiesta-stile-1" id="dettaglio-id" th:text="${richiesta.id}"></div>
-
-                <div class="detail-label">Misura di accompagnamento</div>
-                <div class="detail-value dettaglio-richiesta-stile-2" id="dettaglio-misura"
-                     th:text="${richiesta.titoloMisura != null && !richiesta.titoloMisura.isEmpty() ? richiesta.titoloMisura : richiesta.misuraId}"></div>
-
-                <div class="detail-label">Data di invio</div>
-                <time class="detail-value" th:datetime="${richiesta.inviataIl}" th:text="${dataInvio}"></time>
-
-                <div class="detail-label dettaglio-richiesta-stile-3">Comune di intervento</div>
-                <div class="detail-value dettaglio-richiesta-stile-4" id="dettaglio-comune" th:text="${richiesta.comune}"></div>
-
-                <div class="detail-label">Tipologia di destinatario</div>
-                <div class="detail-value dettaglio-richiesta-stile-5" th:text="${richiesta.tipoDestinatario.name() == 'NUCLEO' ? 'Nucleo familiare' : 'Persona'}"></div>
-
-                <div th:if="${richiesta.description != null && !richiesta.description.isEmpty()}">
-                    <div class="detail-label">Descrizione Sintetica del Bisogno</div>
-                    <div class="detail-value dettaglio-richiesta-stile-6" th:text="${richiesta.description}"></div>
-                </div>
-            </div>
-
-            <!-- Dettagli Accordo Appuntamento (Immutabili dopo conferma del Banco) -->
-            <div class="accordo-box" th:if="${richiesta.accordo != null}" id="sezione-accordo">
-                <div class="accordo-title">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                    <span>Dettagli Appuntamento Concordato</span>
-                </div>
-
-                <div class="dettaglio-richiesta-stile-7">
-                    <div class="detail-label">Data e Ora Fissate</div>
-                    <div class="detail-value" id="appuntamento-dataora" th:text="${dataAccordo}"></div>
-                </div>
-
-                <div class="dettaglio-richiesta-stile-8">
-                    <div class="detail-label">Modalit&agrave; di Erogazione</div>
-                    <div class="detail-value dettaglio-richiesta-stile-9" th:text="${richiesta.accordo.modalita}"></div>
-                </div>
-
-                <div th:if="${richiesta.accordo.modalita.name() == 'IN_PRESENZA'}" class="dettaglio-richiesta-stile-10">
-                    <div class="detail-label">Luogo dell'Incontro</div>
-                    <div class="detail-value dettaglio-richiesta-stile-11" id="appuntamento-luogo" th:text="${richiesta.accordo.luogo}"></div>
-                </div>
-
-                <div th:if="${richiesta.accordo.modalita.name() == 'A_DISTANZA'}" class="dettaglio-richiesta-stile-12">
-                    <div class="detail-label">Collegamento Videoconferenza</div>
-                    <div class="detail-value dettaglio-richiesta-stile-13" id="appuntamento-link">
-                        <a th:href="${richiesta.accordo.link}" target="_blank" rel="noopener noreferrer" th:text="${richiesta.accordo.link}"></a>
-                    </div>
-                </div>
-
-                <div th:if="${richiesta.accordo.nomeReferente != null}">
-                    <div class="detail-label">Referente Operativo per l'Incontro</div>
-                    <div class="detail-value dettaglio-richiesta-stile-14" id="appuntamento-referente"
-                         th:text="${richiesta.accordo.nomeReferente + ' ' + richiesta.accordo.cognomeReferente + ' — Tel: ' + richiesta.accordo.telefonoReferente}"></div>
-                </div>
-            </div>
-
-            <!-- Esito Rifiuto (Dicitura standard: Nessun erogatore disponibile) -->
-            <div class="alert alert-danger" th:if="${richiesta.stato.name() == 'RIFIUTATA' || richiesta.motivoRifiuto != null}">
-                <div>
-                    <strong>Esito Richiesta: Rifiutata</strong>
-                    <div th:text="${richiesta.motivoRifiuto != null ? richiesta.motivoRifiuto : 'Nessun erogatore disponibile'}" class="dettaglio-richiesta-stile-15">Nessun erogatore disponibile</div>
-                </div>
-            </div>
-
-            <!-- Alert Annullamento Eccezionale -->
-            <div class="alert dettaglio-richiesta-stile-16" th:if="${richiesta.motivoAnnullamento != null}">
-                <div>
-                    <strong>Accordo Annullato per Evento Eccezionale</strong>
-                    <div class="dettaglio-richiesta-stile-17">Motivazione registrata: <span th:text="${richiesta.motivoAnnullamento}"></span></div>
-                </div>
-            </div>
-
-            <!-- Annullamento Eccezionale (Ammesso ESCLUSIVAMENTE dallo stato CONFERMATA per gli account autorizzati dalla matrice) -->
-            <div th:if="${puoAnnullare}" class="dettaglio-richiesta-stile-18">
-                <button type="button" class="btn btn-secondary btn-block btn-sm dettaglio-richiesta-stile-19" id="toggle-annulla">
-                    Segnala Evento Eccezionale e Annulla Accordo...
-                </button>
-                <div id="boxAnnulla" hidden class="dettaglio-richiesta-stile-20">
-                    <p class="dettaglio-richiesta-stile-21">
-                        L'annullamento &egrave; riservato all'erogatore assegnato (o al Banco per i propri operatori) in caso di impedimento eccezionale sopravvenuto. I dettagli dell'accordo restano conservati a storico.
-                    </p>
-                    <div class="form-group dettaglio-richiesta-stile-22">
-                        <label class="form-label" for="motivoAnnulla">Motivo dell'annullamento *</label>
-                        <input type="text" id="motivoAnnulla" th:required="${richiesta.stato.name() != 'CREATA'}" class="form-control" placeholder="Specifica la causa eccezionale sopravvenuta...">
-                    </div>
-                    <button type="button" class="btn btn-danger btn-block btn-sm" id="conferma-annulla">Conferma Annullamento Definitivo</button>
-                </div>
-            </div>
-
+    <div class="mobile-body">
+        <dl class="flow-facts request-facts">
+            <dt class="detail-label">Identificativo della pratica</dt>
+            <dd class="detail-value"><code th:text="${richiesta.id}"></code></dd>
+            <dt class="detail-label">Misura di accompagnamento</dt>
+            <dd class="detail-value" th:text="${richiesta.nomeMisura}"></dd>
+            <dt class="detail-label">Data di invio</dt>
+            <dd class="detail-value"><time th:datetime="${richiesta.inviataIl}" th:text="${dataInvio}"></time></dd>
+            <dt class="detail-label">Comune di intervento</dt>
+            <dd class="detail-value" th:text="${comune}"></dd>
+            <dt class="detail-label">Tipologia di destinatario</dt>
+            <dd class="detail-value" th:text="${dettaglio.tipoDestinatario.name() == 'NUCLEO' ? 'Nucleo familiare' : 'Persona'}"></dd>
+            <th:block th:if="${dettaglio.description != null}">
+                <dt class="detail-label">Descrizione del bisogno</dt>
+                <dd class="detail-value request-description" th:text="${dettaglio.description}"></dd>
             </th:block>
-            <div class="dettaglio-richiesta-stile-23">
-                <a th:href="${dashboard}" class="btn btn-secondary btn-block">Torna all’area di lavoro</a>
+            <th:block th:if="${dettaglio.erogatoreAssegnatoId != null}">
+                <dt class="detail-label">Account erogatore assegnato</dt>
+                <dd class="detail-value"><code th:text="${dettaglio.erogatoreAssegnatoId}"></code></dd>
+            </th:block>
+        </dl>
+
+        <section th:if="${accordoPresenza != null || accordoRemoto != null}" class="flow-facts" aria-labelledby="titolo-appuntamento">
+            <h2 id="titolo-appuntamento">Appuntamento confermato</h2>
+            <p th:text="${dataAccordo}"></p>
+            <th:block th:if="${accordoPresenza != null}">
+                <p>In presenza</p>
+                <p th:text="${accordoPresenza.luogo}"></p>
+                <p th:text="${accordoPresenza.nomeReferente + ' ' + accordoPresenza.cognomeReferente}"></p>
+                <p>Telefono del referente: <span th:text="${accordoPresenza.telefonoReferente}"></span></p>
+            </th:block>
+            <th:block th:if="${accordoRemoto != null}">
+                <p>A distanza</p>
+                <a th:href="${accordoRemoto.link}" th:text="${accordoRemoto.link}" target="_blank" rel="noopener noreferrer"></a>
+            </th:block>
+        </section>
+        <p th:if="${richiesta.stato.name() == 'RIFIUTATA'}" class="alert alert-danger">Nessun erogatore disponibile</p>
+        <p th:if="${richiesta.stato.name() == 'ANNULLATA'}" class="alert alert-info">La richiesta è annullata.</p>
+
+        <section th:if="${banco}" aria-labelledby="titolo-coordinamento">
+            <h2 id="titolo-coordinamento">Coordinamento</h2>
+            <p id="coordinamento-esito" class="picus-esito" role="status"></p>
+            <div id="coordinamento-azioni" class="picus-actions"></div>
+            <div id="candidati" class="picus-list"></div>
+            <a class="btn btn-secondary btn-sm" th:href="@{/banco/richieste/{id}/contatti(id=${richiestaId})}">Storico dei contatti</a>
+            <div class="picus-actions future-actions">
+                <span class="azione-inattiva" data-funzione-inattiva><button type="button" class="btn btn-secondary btn-sm" disabled>Conferma accordo</button></span>
+                <span class="azione-inattiva" data-funzione-inattiva><button type="button" class="btn btn-danger btn-sm" disabled>Rifiuta richiesta</button></span>
             </div>
+        </section>
+        <div class="future-actions">
+            <span class="azione-inattiva" data-funzione-inattiva><button type="button" class="btn btn-secondary btn-block" disabled>Annulla la richiesta</button></span>
         </div>
-    </main>
-    <footer th:replace="~{fragments/layout :: footer}"></footer>
+        <a th:href="${dashboard}" class="btn btn-secondary btn-block">Torna all’area di lavoro</a>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>
 </html>
+

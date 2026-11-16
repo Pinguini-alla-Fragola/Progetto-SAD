@@ -32,13 +32,16 @@
                 </div>
             </div>
 
-            <form id="richiestaForm" data-form-anteprima><fieldset class="campi-inattivi" disabled>
+            <noscript><p class="alert alert-info">Per inviare la richiesta abilita JavaScript nel browser.</p></noscript>
+            <form id="richiestaForm"><fieldset id="campi-invio" class="campi-inattivi">
+                <legend class="sr-only">Dati della richiesta</legend>
                 <div class="form-group">
                     <label class="form-label" for="misuraId">Misura di accompagnamento *</label>
-                    <select id="misuraId" name="misuraId" class="form-control" required>
+                    <select id="misuraId" name="misuraId" class="form-control" required aria-describedby="errore-misuraId">
                         <option value="">Seleziona una misura</option>
                         <option th:each="m : ${misure}" th:value="${m.id}" th:text="${m.dati.nome}"></option>
                     </select>
+                    <p id="errore-misuraId" class="form-text picus-errore"></p>
                 </div>
 
                 <fieldset class="form-group">
@@ -57,22 +60,29 @@
 
                 <div class="form-group">
                     <label class="form-label" for="comune">Comune di intervento *</label>
-                    <input type="text" id="comune" name="comuneCodice" class="form-control" th:value="${comuneDefault}" placeholder="Es. Napoli" maxlength="150" required aria-describedby="comune-help">
+                    <select id="comune" name="comuneCodice" class="form-control" required aria-describedby="comune-help errore-comuneCodice">
+                        <option value="">Seleziona un comune</option>
+                        <option th:each="c : ${comuni}" th:value="${c.codice}" th:text="${c.nome}"></option>
+                    </select>
                     <div class="form-text" id="comune-help">Utilizzato dal Banco per individuare gli erogatori nello stesso comune o nei comuni limitrofi.</div>
+                    <p id="errore-comuneCodice" class="form-text picus-errore"></p>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label" for="description">Descrizione del bisogno (facoltativa)</label>
-                    <textarea id="description" name="description" class="form-control" rows="3" maxlength="1000" placeholder="Indica eventuali esigenze logistiche o linguistiche in forma strettamente impersonale..."></textarea>
+                    <textarea id="description" name="description" class="form-control" rows="3" maxlength="1000" aria-describedby="errore-description" placeholder="Indica eventuali esigenze logistiche o linguistiche in forma strettamente impersonale..."></textarea>
+                    <p id="errore-description" class="form-text picus-errore"></p>
                 </div>
 
-                <span class="azione-inattiva" data-funzione-inattiva><button type="submit" class="btn btn-primary btn-block nuova-richiesta-stile-1" id="btnInvia">
+            </fieldset>
+                <button type="submit" class="btn btn-primary btn-block nuova-richiesta-stile-1" id="btnInvia">
                     Invia la richiesta al Banco
-                </button></span>
-            </fieldset></form>
+                </button>
+                <p id="invio-incerto" class="form-text" hidden>I dati restano bloccati durante il ritento per evitare richieste duplicate. Riprova per verificare lo stesso invio.</p>
+            </form>
 
             <p id="errore-invio" class="picus-esito picus-errore" role="alert"></p>
-            <div id="conferma" role="status" class="alert alert-success nuova-richiesta-stile-2" hidden>
+            <div id="conferma" role="status" tabindex="-1" class="alert alert-success nuova-richiesta-stile-2" hidden>
                 <div class="nuova-richiesta-stile-3">Richiesta registrata con successo</div>
                 <div class="nuova-richiesta-stile-4">Identificativo della pratica: <code id="confId"></code></div>
                 <div class="nuova-richiesta-stile-5">Stato assegnato: <span class="badge-stato ">Creata</span></div>
