@@ -86,10 +86,11 @@ e [opzioni Dependabot](https://docs.github.com/en/code-security/reference/supply
 ## Pubblicazione del Javadoc
 
 Il workflow [Pubblica Javadoc](workflows/javadoc.yml) si avvia a ogni push su
-`main`, compresi i merge delle PR. Genera l'HTML dei package pubblici con Java
-25, aggiorna il branch `javadoc` quando i file cambiano e invia lo stesso HTML
-a GitHub Pages. Il branch viene creato alla prima esecuzione e contiene
-l'output generato.
+`main`, compresi i merge delle PR. Usa Java 25 e il classpath di compilazione
+risolto da Maven per generare l'HTML dei package in `src/main/java`. Verifica
+la completezza della documentazione delle API pubbliche, aggiorna il branch
+`javadoc` quando i file cambiano e invia lo stesso HTML a GitHub Pages. Il
+branch viene creato alla prima esecuzione e contiene l'output generato.
 
 Un maintainer abilita la pubblicazione in
 [Settings → Pages](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/settings/pages)

@@ -97,16 +97,21 @@ Le migrazioni PostgreSQL V4 e V5 allineano il vincolo sullo stato ai sei valori 
 ## Generare il Javadoc
 
 Dalla radice del clone, usare questi comandi in PowerShell con il JDK 25 nel
-`PATH`.
+`PATH`. Maven risolve il classpath di compilazione per includere anche le
+classi applicative che usano librerie esterne.
 
 ```powershell
-javadoc -d target/apidocs '@scripts/javadoc.args'
+.\mvnw.cmd dependency:build-classpath '-DincludeScope=compile' '-Dmdep.outputFile=target/javadoc-classpath.txt'
+$javadocClasspath = (Get-Content -Raw target/javadoc-classpath.txt).Trim()
+javadoc -classpath $javadocClasspath -d target/apidocs '@scripts/javadoc.args'
 Copy-Item -LiteralPath docs/architecture/picus-logo.svg -Destination target/apidocs/resource-files/picus-logo.svg
 ```
 
-Aprire `target/apidocs/index.html`. Aggiornare nei sorgenti il Javadoc dei
-contratti quando cambiano dati, permessi, precondizioni o esiti. Il comando
-verifica la documentazione e rigenera le pagine HTML in `target`.
+Aprire `target/apidocs/index.html`. Il sito include i package di
+`src/main/java`, compresi i componenti con visibilità di package. La
+generazione verifica la sintassi e i riferimenti dei commenti in tutto il
+codice applicativo. Il workflow controlla anche la completezza del Javadoc
+dei contratti pubblici con `scripts/javadoc-api.args`.
 
 Il [foglio di stile del Javadoc](picus-javadoc.css) riprende la palette e la
 tipografia della landing. Il generatore lo include con `--add-stylesheet`
