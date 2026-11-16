@@ -54,11 +54,19 @@
 .contatto-storico { margin: 0; padding: 0; list-style: none; }
 .contatto-riga { display: grid; gap: .375rem; min-width: 0; }
 .contatto-erogatore { min-width: 0; overflow-wrap: anywhere; }
+.badge-creata { background: var(--color-mist); color: var(--color-primary); }
+.badge-presa_in_carico { background: var(--color-warning-bg); color: var(--color-warning); }
+.request-facts dd { margin-inline-start: 0; }
+.request-description { white-space: pre-wrap; }
+.future-actions { margin-block: 1.5rem; }
+.detail-value, .picus-list-row > div { min-width: 0; overflow-wrap: anywhere; }
+#coordinamento-azioni { margin-block: 1rem; }
+.picus-actions { flex-wrap: wrap; }
 
 @media (hover: hover) and (pointer: fine) {
     [data-funzione-inattiva]:hover { z-index: 5; }
     [data-funzione-inattiva]:hover::after {
-        content: "Not yet available. Check back in a future release.";
+        content: "Funzione non ancora disponibile.";
         position: absolute;
         z-index: 5;
         inset: auto auto calc(100% + .375rem) 0;

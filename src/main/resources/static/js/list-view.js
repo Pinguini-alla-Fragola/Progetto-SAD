@@ -192,7 +192,7 @@ class ListView {
 
 export function renderList(container, rows, options = {}) {
     let view = views.get(container);
-    if (!view) { view = new ListView(container); views.set(container, view); }
+    if (!view || !container.contains(view.tools)) { view = new ListView(container); views.set(container, view); }
     return view.update(rows, options);
 }
 

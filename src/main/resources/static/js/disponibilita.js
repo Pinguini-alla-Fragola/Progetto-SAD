@@ -33,6 +33,23 @@ function mostraEsito(elemento, esito) {
     elemento.hidden = false;
 }
 
+async function mostraAssegnazione(contatto) {
+    if (contatto.esito !== 'DISPONIBILE') return;
+    perId('attesa-assegnazione').hidden = false;
+    try {
+        const dettaglio = await api('/api/richieste/' + encodeURIComponent(contatto.richiestaId));
+        if (dettaglio.erogatoreAssegnatoId !== contatto.erogatoreId) return;
+        perId('link-pratica-assegnata').href = '/richieste/' + encodeURIComponent(contatto.richiestaId);
+        perId('assegnazione-contatto').hidden = false;
+        perId('attesa-assegnazione').hidden = true;
+    } catch (causa) {
+        // Prima dell'assegnazione il candidato non ha accesso al dettaglio completo.
+        if (causa.stato !== 403) {
+            perId('attesa-assegnazione').firstChild.textContent = 'Non è stato possibile aggiornare l’assegnazione. ';
+        }
+    }
+}
+
 async function collegaRisposta(contattoId) {
     const percorso = '/api/contatti-disponibilita/' + encodeURIComponent(contattoId);
     const azioni = perId('sezione-azioni');
@@ -49,6 +66,7 @@ async function collegaRisposta(contattoId) {
         mostraEsito(esito, dettaglio.contatto.esito);
         azioni.hidden = dettaglio.contatto.esito !== 'IN_ATTESA';
         perId('risposta-presente').hidden = !azioni.hidden;
+        await mostraAssegnazione(dettaglio.contatto);
     } catch (causa) {
         mostraErrore(causa, 'Il contatto non è disponibile.');
         return;
@@ -71,6 +89,7 @@ async function collegaRisposta(contattoId) {
                     : 'Hai comunicato la tua indisponibilità. Il Banco può interpellare un altro erogatore.';
                 perId('messaggio-conferma').hidden = false;
                 azioni.hidden = true;
+                await mostraAssegnazione(contatto);
             } catch (causa) {
                 mostraErrore(causa, 'Il contatto non è disponibile.');
                 if ([401, 403, 404, 409].includes(causa.stato)) azioni.hidden = true;

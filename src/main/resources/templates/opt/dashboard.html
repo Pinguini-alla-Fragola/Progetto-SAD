@@ -9,7 +9,7 @@
     <script src="/js/area.js" type="module"></script>
     <link rel="stylesheet" href="/css/integrazione-ui.css">
 </head>
-<body data-anteprima-dashboard data-area="opt" th:attr="data-utente=${utente.id}">
+<body data-area="opt" th:attr="data-utente=${utente.id}">
 <a th:replace="~{fragments/layout :: skip}" href="#contenuto">Vai al contenuto</a>
 <header class="picus-navbar workspace-navbar">
     <div class="nav-inner">
@@ -35,13 +35,13 @@
 <section class="area-panel" id="richieste" tabindex="-1" aria-label="Richieste">
 <div class="workspace-tabs" data-tabs><div class="tab-list" role="tablist" aria-label="Richieste organizzazione">
 <button type="button" role="tab" id="richieste-tab-mie" aria-controls="richieste-view-mie" aria-selected="true" tabindex="0">Richieste inviate</button>
-<button type="button" role="tab" id="richieste-tab-assegnazioni" aria-controls="richieste-view-assegnazioni" aria-selected="false" tabindex="-1">Disponibilità e assegnazioni</button>
+<button type="button" role="tab" id="richieste-tab-assegnazioni" aria-controls="richieste-view-assegnazioni" aria-selected="false" tabindex="-1">Disponibilità ricevute</button>
 </div>
 <div role="tabpanel" id="richieste-view-mie" aria-labelledby="richieste-tab-mie" tabindex="0">
-<div class="panel-heading"><h2 class="picus-card-title">Richieste dell’organizzazione</h2><a class="btn btn-primary" href="/richieste/nuova">Nuova richiesta</a></div><div class="picus-list" id="richieste-mie" aria-live="polite" data-funzione-inattiva></div>
+<div class="panel-heading"><h2 class="picus-card-title">Richieste dell’organizzazione</h2><div class="picus-actions"><button class="btn btn-secondary btn-sm" type="button" data-aggiorna="richieste">Aggiorna elenco</button><a class="btn btn-primary" href="/richieste/nuova">Nuova richiesta</a></div></div><div class="picus-list" id="richieste-mie" aria-live="polite"></div>
 </div>
 <div role="tabpanel" id="richieste-view-assegnazioni" aria-labelledby="richieste-tab-assegnazioni" tabindex="0" hidden>
-<h2 class="picus-card-title">Disponibilità e assegnazioni</h2><div class="picus-list" id="assegnazioni" aria-live="polite" data-funzione-inattiva></div>
+<div class="panel-heading"><h2 class="picus-card-title">Contatti di disponibilità</h2><button class="btn btn-secondary btn-sm" type="button" data-aggiorna="avvisi">Aggiorna contatti</button></div><div class="picus-list" id="assegnazioni" aria-live="polite"></div>
 </div>
 </div>
 </section>

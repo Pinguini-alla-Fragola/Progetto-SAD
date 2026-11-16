@@ -45,6 +45,10 @@
             </div>
 
             <p class="picus-meta" id="risposta-presente" hidden>Hai già inviato una risposta.</p>
+            <div id="assegnazione-contatto" class="alert alert-success" hidden>
+                <div><p>Il Banco ti ha assegnato questa richiesta.</p><a id="link-pratica-assegnata" class="btn btn-secondary btn-sm">Apri la pratica assegnata</a></div>
+            </div>
+            <p id="attesa-assegnazione" class="picus-meta" hidden>La disponibilità è registrata. L’assegnazione spetta al Banco. <a href="">Aggiorna stato</a></p>
             <div id="sezione-azioni" th:hidden="${contattiDisponibili}">
                 <p class="risposta-contatto-stile-5">
                     Comunica al Banco la disponibilit&agrave; a prendere in carico questa misura di accompagnamento:
