@@ -126,14 +126,20 @@ medesimo contatto viene rifiutato. Nessun dato della pratica entra nell'avviso.
 ## Aggiornamento di un database esistente
 
 Prima dell'upgrade fare un backup e provare il ripristino su una copia. Eseguire
-il controllo in sola lettura [preflight-richieste.sql](../../scripts/db/preflight-richieste.sql)
-prima su quella copia e poi con le scritture applicative sospese:
+il controllo in sola lettura [preflight-richieste.sql](../../scripts/db/preflight-richieste.sql),
+utilizzabile da V6 in poi, prima su quella copia e poi con le scritture applicative
+sospese. Lo script contiene metacomandi del client `psql` e va eseguito così:
 
 ```powershell
 Get-Content -Raw scripts/db/preflight-richieste.sql | docker compose exec -T picus-db psql -U picus -d picus -v ON_ERROR_STOP=1
 ```
 
-Il risultato deve contenere zero righe in tutti e tre i report. Il callback
+Su V6–V9 viene eseguito il report dei contatti ancora aperti. La tabella degli
+avvisi non esiste prima di V10: lo script verifica la sua presenza e segnala
+esplicitamente che i due controlli sugli avvisi non sono applicabili, senza
+interrompersi con `ON_ERROR_STOP=1`. Da V10 esegue anche quei due report.
+
+Il risultato deve contenere zero righe in ogni report eseguito. Il callback
 Flyway ripete il controllo prima di V11 e V13 e ferma l'upgrade con un messaggio
 operativo se trova anomalie, prima di creare il relativo vincolo. Non modifica
 lo storico né il checksum delle migrazioni precedenti.
