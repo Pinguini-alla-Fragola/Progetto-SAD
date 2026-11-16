@@ -98,5 +98,5 @@ rifiuto definitivo o annullamento.
 Gli avvisi espongono solo riferimenti: il destinatario apre il contatto per
 leggere i dati minimi. La descrizione della pratica rimane riservata a
 OPT titolare e Banco anche dopo l'assegnazione. I codici HTTP seguono la
-#48: `400` per dati non validi, `401` per assenza di sessione, `403` per
+storia #48: `400` per dati non validi, `401` per assenza di sessione, `403` per
 accesso vietato, `404` per risorsa inesistente e `409` per stato incompatibile.
