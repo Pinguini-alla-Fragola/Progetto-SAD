@@ -3,6 +3,9 @@ package it.unina.picus.richieste.interno.persistenza;
 import java.time.Instant;
 import java.util.UUID;
 
+import it.unina.picus.richieste.api.RichiesteApi.StatoRichiesta;
+import it.unina.picus.richieste.api.RichiesteApi.TipoDestinatario;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -28,5 +31,25 @@ public class RichiestaJpa {
     private UUID erogatoreId;
 
     protected RichiestaJpa() {
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public long getMisuraId() {
+        return misuraId;
+    }
+
+    public String getComuneCodice() {
+        return comuneCodice;
+    }
+
+    public TipoDestinatario getTipoDestinatario() {
+        return TipoDestinatario.valueOf(tipoDestinatario);
+    }
+
+    public StatoRichiesta getStato() {
+        return StatoRichiesta.valueOf(stato);
     }
 }
