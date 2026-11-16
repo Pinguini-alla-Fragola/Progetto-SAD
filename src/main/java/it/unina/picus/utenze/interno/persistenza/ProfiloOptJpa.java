@@ -16,4 +16,8 @@ public class ProfiloOptJpa {
 
     protected ProfiloOptJpa() {
     }
+
+    public UUID getAccountId() { return accountId; }
+    public String getCodiceStruttura() { return codiceStruttura; }
+    public String getComuneCodice() { return comuneCodice; }
 }

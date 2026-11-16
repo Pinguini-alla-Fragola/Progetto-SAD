@@ -1,0 +1,111 @@
+@startuml
+' Schema PostgreSQL risultante dalle migrazioni Flyway V1-V5.
+skinparam linetype ortho
+skinparam roundCorner 0
+skinparam nodesep 90
+skinparam ranksep 62
+skinparam shadowing false
+skinparam dpi 160
+skinparam defaultFontName Arial
+skinparam defaultFontColor #172B3A
+skinparam classFontStyle bold
+skinparam classAttributeIconSize 0
+skinparam ArrowColor #465D71
+skinparam legend {
+  BackgroundColor #F4F7FA
+  BorderColor #BAC9D6
+}
+
+skinparam class {
+  BorderColor #60768A
+  BackgroundColor #F6FAFD
+  BackgroundColor<<Catalogo>> #EAF3FC
+  BorderColor<<Catalogo>> #5F85AB
+  BackgroundColor<<Utenze>> #EAF5F0
+  BorderColor<<Utenze>> #508873
+  BackgroundColor<<Richieste>> #FFF2E3
+  BorderColor<<Richieste>> #B07848
+}
+
+hide circle
+hide stereotype
+title <size:22><b>PICUS · Schema ER PostgreSQL</b></size>
+
+entity catalogo_comuni <<Catalogo>> {
+  codice : varchar(50) [PK]
+  --
+  nome : varchar(255)
+}
+
+entity catalogo_adiacenze <<Catalogo>> {
+  id : bigint [PK, identity]
+  --
+  comune_a : varchar(50) [FK]
+  comune_b : varchar(50) [FK]
+}
+
+entity catalogo_misure <<Catalogo>> {
+  id : bigint [PK, identity]
+  --
+  codice : varchar(10) [UK]
+  nome : varchar(255)
+  descrizione : varchar(255)
+  attiva : boolean [default true]
+}
+
+entity utenze_account <<Utenze>> {
+  id : uuid [PK]
+  --
+  email : varchar(254) [UK]
+  password_hash : varchar(255)
+  nome : varchar(255)
+  ruolo : varchar(20)
+  stato : varchar(30)
+}
+
+entity utenze_profili_opt <<Utenze>> {
+  account_id : uuid [PK, FK]
+  --
+  codice_struttura : varchar(30) [UK]
+  comune_codice : varchar(50) [FK]
+}
+
+entity utenze_profili_operatore <<Utenze>> {
+  account_id : uuid [PK, FK]
+  --
+  tipologia : varchar(30)
+  comune_codice : varchar(50) [FK]
+}
+
+entity richieste <<Richieste>> {
+  id : uuid [PK]
+  --
+  titolare_id : uuid [FK]
+  misura_id : bigint [FK]
+  comune_codice : varchar(50) [FK]
+  tipo_destinatario : varchar(10)
+  description : text [facoltativa]
+  inviata_il : timestamptz
+  stato : varchar(20)
+  erogatore_id : uuid [FK, facoltativo]
+}
+
+catalogo_comuni ||.left.o{ catalogo_adiacenze : comune_a
+catalogo_comuni ||.left.o{ catalogo_adiacenze : comune_b
+catalogo_comuni ||.down.o{ utenze_profili_opt
+catalogo_comuni ||.right.o{ utenze_profili_operatore
+catalogo_comuni ||.down.o{ richieste
+catalogo_misure ||.left.o{ richieste
+utenze_account ||-down-o| utenze_profili_opt
+utenze_account ||-left-o| utenze_profili_operatore
+utenze_account |o.down.o{ richieste : erogatore_id
+utenze_profili_opt ||.down.o{ richieste
+utenze_profili_operatore -[hidden]down- utenze_profili_opt
+
+legend bottom
+  <b>PK</b> Chiave primaria   <b>FK</b> Chiave esterna   <b>UK</b> Colonna univoca
+  <b>Adiacenze</b> Coppia univoca (comune_a, comune_b), con comune_a < comune_b
+  <b>Stati della richiesta</b> CREATA, PRESA_IN_CARICO, IN_PROGRAMMAZIONE,
+  CONFERMATA, RIFIUTATA, ANNULLATA   <b>Default</b> CREATA
+endlegend
+@enduml

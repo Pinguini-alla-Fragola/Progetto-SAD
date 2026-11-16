@@ -1,6 +1,6 @@
 # Quality scenarios
 
-Catalogo di lavoro degli scenari di qualità. La sezione A5 del PDF pubblicato nella repository raccoglie gli scenari della versione **v0.7** del documento. Ogni scheda segue il template con Source, Stimulus, Environment, Artifact, Response e Response measure, accompagnato da attributo di qualità, priorità, motivazione e approccio di verifica.
+Catalogo di lavoro degli scenari di qualità. La sezione A5 del PDF pubblicato nella repository raccoglie gli scenari della versione **v0.11** del documento. Ogni scheda segue il template con Source, Stimulus, Environment, Artifact, Response e Response measure, accompagnato da attributo di qualità, priorità, motivazione e approccio di verifica.
 
 **Stato:** proposte da validare. Le soglie introdotte dal team non sono SLA concordati o risultati di prove software già eseguite.
 
@@ -24,4 +24,4 @@ Gli scenari si verificano a fine costruzione, sull’applicazione completa. QS-0
 
 Q-07 raccoglie la validazione dei carichi e delle soglie. Il numero delle OPT (circa 450) dimensiona i dati di prova, non la concorrenza; i profili non sono dedotti dal dato 230.000 utenti. QS-06 valuta la modificabilità limitatamente agli aggiornamenti del catalogo tramite configurazione.
 
-[Documento PDF](../Documentazione_SAD_2026.pdf) · [Proposta di MVP](../requirements/proposta-mvp.md) · [Registro dei chiarimenti](../requirements/open-questions.md)
+[Documento PDF](../Documentazione_SAD_2026.pdf) · [Scenari e decisioni architetturali](../architecture/README.md#scenari-di-qualità-e-decisioni) · [Proposta di MVP](../requirements/proposta-mvp.md) · [Registro dei chiarimenti](../requirements/open-questions.md)

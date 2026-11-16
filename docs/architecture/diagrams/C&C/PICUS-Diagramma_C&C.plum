@@ -1,0 +1,137 @@
+@startuml PICUS_V1_Panoramica
+title PICUS · C&C Runtime · Vista 1 · Panoramica (Porte, Lollipop & Socket)
+skinparam componentStyle uml2
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam nodesep 50
+skinparam ranksep 65
+skinparam ArrowColor #475569
+skinparam ArrowThickness 1.6
+
+skinparam component {
+  BackgroundColor #EDF5F0
+  BorderColor #568573
+  FontColor #1A4A3C
+}
+skinparam component<<client>> {
+  BackgroundColor #F1F5F9
+  BorderColor #64748B
+  FontColor #142B46
+}
+skinparam component<<subsystem>> {
+  BackgroundColor #E9F2FC
+  BorderColor #5480B0
+  FontColor #143C65
+  MinimumWidth 720
+}
+skinparam component<<external>> {
+  BackgroundColor #FFF8EA
+  BorderColor #946728
+  FontColor #563C17
+}
+skinparam database {
+  BackgroundColor #E9F7F5
+  BorderColor #3D867D
+  FontColor #153D38
+}
+skinparam interface {
+  BackgroundColor #FFFFFF
+  BorderColor #1A4A3C
+  FontColor #1A4A3C
+}
+skinparam port {
+  BackgroundColor #FFFFFF
+  BorderColor #1E293B
+}
+
+' ───────────── LIVELLO 1: CLIENT ─────────────
+component "Web Browser\nOPT · Banco · Operatori" as BR <<client>> {
+  portout " " as pBrHttps
+}
+
+interface "IWebAccess [HTTPS / TLS 1.3]" as I_WEB
+
+' ───────────── LIVELLO 2-4: MONOLITE MODULARE ─────────────
+package "Applicazione Web PICUS · Monolite Modulare (Runtime JVM)" #F7FAFE {
+
+  component "Web Tier\nAutenticazione, Routing HTTP, Controller MVC & Rendering Viste" as WEB <<subsystem>> {
+    portin " " as pWebHttps
+    portout " " as pWebUtenze
+    portout " " as pWebCatalogo
+    portout " " as pWebRichieste
+    portout " " as pWebComun
+    portout " " as pWebMonit
+  }
+
+  interface "IUtenzeApi" as I_UTENZE
+  interface "ICatalogoApi" as I_CATALOGO
+  interface "IRichiesteApi" as I_RICHIESTE
+  interface "IComunicazioniApi" as I_COMUNICAZIONI
+  interface "IMonitoraggioApi" as I_MONITORAGGIO
+
+  component "Core Services\nLogica di Dominio (Moduli M1..M5) & Gestione Transazionale" as CORE <<subsystem>> {
+    portin " " as pCoreUtenze
+    portin " " as pCoreCatalogo
+    portin " " as pCoreRichieste
+    portin " " as pCoreComun
+    portin " " as pCoreMonit
+    portout " " as pCoreDb
+    portout " " as pCoreSmtp
+  }
+}
+
+' ───────────── LIVELLO 5-6: PERSISTENZA & SERVIZI ESTERNI ─────────────
+interface "IRelationalStore [SQL · TCP :5432]" as I_DB
+interface "ISmtpSubmission [SMTP · STARTTLS :587]" as I_SMTP
+
+database "PostgreSQL 17\nDB unico picus (dati + allegati)" as DB {
+  portin " " as pDbSql
+}
+
+component "Servizio Email Esterno\nRelay SMTP Transazionale" as SMTP <<external>> {
+  portin " " as pSmtpIn
+}
+
+' ───────────── ALLINEAMENTO ORIZZONTALE CORSIE ─────────────
+I_UTENZE -[hidden]right- I_CATALOGO
+I_CATALOGO -[hidden]right- I_RICHIESTE
+I_RICHIESTE -[hidden]right- I_COMUNICAZIONI
+I_COMUNICAZIONI -[hidden]right- I_MONITORAGGIO
+
+I_DB -[hidden]right- I_SMTP
+DB -[hidden]right- SMTP
+
+' ───────────── CONNESSIONE INGRESSO WEB ─────────────
+pBrHttps -down-( I_WEB : <<role>> client
+pWebHttps -up- I_WEB : <<role>> server
+
+' ───────────── 5 CORSIE PARALLELE IN-PROCESS (WEB -> API -> CORE) ─────────────
+pWebUtenze -down-( I_UTENZE
+pCoreUtenze -up- I_UTENZE
+
+pWebCatalogo -down-( I_CATALOGO
+pCoreCatalogo -up- I_CATALOGO
+
+pWebRichieste -down-( I_RICHIESTE
+pCoreRichieste -up- I_RICHIESTE
+
+pWebComun -down-( I_COMUNICAZIONI
+pCoreComun -up- I_COMUNICAZIONI
+
+pWebMonit -down-( I_MONITORAGGIO
+pCoreMonit -up- I_MONITORAGGIO
+
+' ───────────── CONNESSIONI IN USCITA (CORE -> DATASTORE / SMTP) ─────────────
+pCoreDb -down-( I_DB : <<role>> sql-client
+pDbSql -up- I_DB : <<role>> db-server
+
+pCoreSmtp -down-( I_SMTP : <<role>> sender
+pSmtpIn -up- I_SMTP : <<role>> receiver
+
+legend bottom
+  <b>Lollipop</b> —○ = interfaccia fornita (<i>Provided</i>) · <b>Socket</b> —◠ = interfaccia richiesta (<i>Required</i>) · <b>Quadratini sul bordo</b> = <i>Port</i>
+  <b>Connettori In-Proc</b> (<i>IUtenzeApi .. IMonitoraggioApi</i>): invocazioni sincrone in-memory su DTO (<i>Web Tier</i> = caller, <i>Core Services</i> = callee).
+  Dettaglio interno dei sottosistemi in <b>Vista 2</b> (Web Tier) e <b>Vista 3</b> (Core Services).
+end legend
+@enduml

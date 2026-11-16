@@ -10,7 +10,7 @@
 
 | Source | Stimulus | Environment | Artifact | Response | Response measure |
 | --- | --- | --- | --- | --- | --- |
-| Un operatore interno del Banco o un operatore esterno pagato dal Banco, autenticato con il proprio account *Operatore*. | Il Banco chiede all’operatore se è disponibile a erogare la misura. L’operatore apre la notifica e comunica da smartphone se è disponibile o indisponibile, secondo la situazione descritta nella prova. | PICUS è in normale operatività. La richiesta è *In programmazione* e la notifica di disponibilità è già presente nell’app. | La notifica e la schermata per rispondere alla richiesta di disponibilità. | PICUS mostra la richiesta, registra la risposta selezionata e conferma l’esito all’operatore. | Almeno **4 operatori su 5** inviano la risposta prevista, **senza aiuto ed entro 1 minuto** dall’apertura della notifica alla conferma. |
+| Un operatore interno del Banco o un operatore esterno pagato dal Banco, autenticato con il proprio account *Operatore*. | Il Banco chiede all’operatore se è disponibile a erogare la misura. L’operatore apre la notifica e comunica da smartphone se è disponibile o indisponibile, secondo la situazione descritta nella prova. | PICUS è in normale operatività. La richiesta è *Presa in carico* e la notifica di disponibilità è già presente nell’app. | La notifica e la schermata per rispondere alla richiesta di disponibilità. | PICUS mostra la richiesta, registra la risposta selezionata e conferma l’esito all’operatore. | Almeno **4 operatori su 5** inviano la risposta prevista, **senza aiuto ed entro 1 minuto** dall’apertura della notifica alla conferma. |
 
 ## Approccio di verifica
 
