@@ -115,17 +115,19 @@ class UtenzeService implements UtenzeApi {
                         a.getId(), a.getNome(), TipoErogatore.OPT, p.getComuneCodice(), false));
                 case OPERATORE -> profiliOperatore.findById(a.getId()).map(p -> new ProfiloErogatore(
                         a.getId(), a.getNome(), TipoErogatore.valueOf(p.getTipologia()),
-                        p.getComuneCodice(), false));
+                        p.getComuneCodice(), p.isCentroPicus()));
                 case BANCO -> Optional.empty();
             };
         });
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ProfiloErogatore> elencoOperatoriAttiviPerMisura(long misuraId) {
-        // Lo schema non contiene il legame operatore-misura né l'appartenenza al Centro PICUS.
-        throw new UnsupportedOperationException(
-                "Serve una migrazione che modelli le misure erogate da ciascun operatore");
+        return profiliOperatore.perMisura(misuraId).stream()
+                .map(p -> new ProfiloErogatore(p.getAccountId(), p.getNome(),
+                        TipoErogatore.valueOf(p.getTipologia()), p.getComuneCodice(), p.isCentroPicus()))
+                .toList();
     }
 
     private void confrontoFittizio() {
