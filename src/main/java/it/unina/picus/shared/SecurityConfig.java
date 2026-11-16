@@ -2,12 +2,16 @@ package it.unina.picus.shared;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
 
@@ -32,6 +36,18 @@ class SecurityConfig {
             response.sendRedirect(request.getContextPath()
                     + (eccezione instanceof LockedException ? "/login?attesa" : "/login?error"));
 
+    /**
+     * Senza autenticazione valida: le pagine HTML rimandano al login (302), le API ricevono 401
+     * senza redirect (vedi {@link RichiestaApi}).
+     */
+    private static final AuthenticationEntryPoint NON_AUTENTICATO = (request, response, eccezione) -> {
+        if (RichiestaApi.e(request)) {
+            new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED).commence(request, response, eccezione);
+        } else {
+            new LoginUrlAuthenticationEntryPoint("/login").commence(request, response, eccezione);
+        }
+    };
+
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -42,6 +58,7 @@ class SecurityConfig {
                         .requestMatchers("/opt/**").hasRole("OPT")
                         .requestMatchers("/operatore/**").hasRole("OPERATORE")
                         .anyRequest().authenticated())
+                .exceptionHandling(eccezioni -> eccezioni.authenticationEntryPoint(NON_AUTENTICATO))
                 .formLogin(form -> form
                         .loginPage("/login")
                         .failureHandler(ESITO_NEGATIVO)

@@ -32,12 +32,16 @@ class UtenzeServiceTest {
     }
 
     private AccountJpa nuovo(String stato) throws Exception {
+        return nuovo(stato, "segreta");
+    }
+
+    private AccountJpa nuovo(String stato, String password) throws Exception {
         var ctor = AccountJpa.class.getDeclaredConstructor();
         ctor.setAccessible(true);
         AccountJpa a = ctor.newInstance();
         ReflectionTestUtils.setField(a, "id", UUID.randomUUID());
         ReflectionTestUtils.setField(a, "email", "banco@picus.test");
-        ReflectionTestUtils.setField(a, "passwordHash", encoder.encode("segreta"));
+        ReflectionTestUtils.setField(a, "passwordHash", encoder.encode(password));
         ReflectionTestUtils.setField(a, "nome", "Banco");
         ReflectionTestUtils.setField(a, "ruolo", "BANCO");
         ReflectionTestUtils.setField(a, "stato", stato);
@@ -77,6 +81,34 @@ class UtenzeServiceTest {
         assertThat(service.verificaCredenziali("banco@picus.test", null)).isEmpty();
         assertThat(service.verificaCredenziali("banco@picus.test", "")).isEmpty();
         assertThat(service.verificaCredenziali("banco@picus.test", "a".repeat(500))).isEmpty();
+    }
+
+    @Test
+    void passwordDi72ByteAccettata() throws Exception {
+        String password = "a".repeat(UtenzeService.LUNGHEZZA_MAX_PASSWORD_BYTE);
+        when(accounts.findByEmailIgnoreCase("banco@picus.test")).thenReturn(Optional.of(nuovo("ATTIVO", password)));
+
+        assertThat(service.verificaCredenziali("banco@picus.test", password)).isPresent();
+    }
+
+    @Test
+    void passwordDi72ByteConSuffissoExtraRifiutata() throws Exception {
+        String valida = "a".repeat(UtenzeService.LUNGHEZZA_MAX_PASSWORD_BYTE);
+        when(accounts.findByEmailIgnoreCase("banco@picus.test")).thenReturn(Optional.of(nuovo("ATTIVO", valida)));
+
+        // BCrypt ignorerebbe il byte oltre il 72°: il limite deve respingerla prima del confronto
+        assertThat(service.verificaCredenziali("banco@picus.test", valida + "b")).isEmpty();
+    }
+
+    @Test
+    void ilLimiteSiMisuraInByteUtf8NonInCaratteri() throws Exception {
+        String multibyte = "è".repeat(36); // 36 caratteri, 72 byte
+        when(accounts.findByEmailIgnoreCase("banco@picus.test")).thenReturn(Optional.of(nuovo("ATTIVO", multibyte)));
+
+        assertThat(service.verificaCredenziali("banco@picus.test", multibyte)).isPresent();
+        assertThat(service.verificaCredenziali("banco@picus.test", multibyte + "x")).isEmpty();
+        // 37 caratteri (74 byte): sotto il vecchio limite di 128 caratteri, ma oltre i 72 byte
+        assertThat(service.verificaCredenziali("banco@picus.test", "è".repeat(37))).isEmpty();
     }
 
     @Test

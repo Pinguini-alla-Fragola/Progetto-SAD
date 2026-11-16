@@ -1,6 +1,5 @@
 package it.unina.picus.utenze.interno.persistenza;
 
-import java.time.Instant;
 import java.util.UUID;
 
 import jakarta.persistence.Entity;
@@ -20,8 +19,6 @@ public class AccountJpa {
     private String nome;
     private String ruolo;
     private String stato;
-    private int tentativiFalliti;
-    private Instant bloccatoFino;
 
     protected AccountJpa() {
     }
@@ -32,10 +29,4 @@ public class AccountJpa {
     public String getNome() { return nome; }
     public String getRuolo() { return ruolo; }
     public String getStato() { return stato; }
-    public int getTentativiFalliti() { return tentativiFalliti; }
-
-    /** Vero se l'accesso con credenziali è sospeso all'istante indicato. */
-    public boolean isBloccatoAl(Instant ora) {
-        return bloccatoFino != null && bloccatoFino.isAfter(ora);
-    }
 }

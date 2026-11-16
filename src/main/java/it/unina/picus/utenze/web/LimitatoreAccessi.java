@@ -21,6 +21,10 @@ import org.springframework.stereotype.Component;
  * scoprire quali account esistono. Ogni tentativo viene registrato <em>prima</em> della verifica
  * (e cancellato se riesce), così richieste parallele non aggirano il limite. Lo stato è in memoria
  * (MVP a istanza singola): per più istanze va spostato in uno store condiviso.</p>
+ *
+ * <p>Le email distinte memorizzate non superano mai {@value #MAX_CHIAVI}: a mappa piena si eliminano
+ * prima le chiavi scadute; se non basta, l'email nuova è rifiutata finché non si libera spazio, così
+ * un'ondata di indirizzi inventati non svuota il contatore di un account già sotto tentativo.</p>
  */
 @Component
 class LimitatoreAccessi {
@@ -28,7 +32,7 @@ class LimitatoreAccessi {
     static final int MAX_FALLIMENTI = 5;
     static final Duration FINESTRA = Duration.ofMinutes(5);
     static final Duration ATTESA = Duration.ofSeconds(60);
-    private static final int MAX_CHIAVI = 10_000;
+    static final int MAX_CHIAVI = 10_000;
     private static final int LUNGHEZZA_MAX_CHIAVE = 254;
 
     private final Clock clock;
@@ -51,10 +55,10 @@ class LimitatoreAccessi {
     /** @return false se il tentativo va rifiutato; altrimenti lo registra e lo ammette. */
     boolean ammetti(String chiave) {
         Instant ora = clock.instant();
-        if (tentativi.size() > MAX_CHIAVI) {
-            tentativi.values().removeIf(d -> d.isEmpty() || d.peekLast().isBefore(ora.minus(FINESTRA)));
+        Deque<Instant> d = coda(chiave, ora);
+        if (d == null) {
+            return false;
         }
-        Deque<Instant> d = tentativi.computeIfAbsent(chiave, k -> new ArrayDeque<>());
         synchronized (d) {
             while (!d.isEmpty() && d.peekFirst().isBefore(ora.minus(FINESTRA))) {
                 d.removeFirst();
@@ -67,9 +71,42 @@ class LimitatoreAccessi {
         }
     }
 
+    /** @return la coda della chiave, creata se serve; null se la mappa è piena di chiavi ancora attive. */
+    private Deque<Instant> coda(String chiave, Instant ora) {
+        Deque<Instant> esistente = tentativi.get(chiave);
+        if (esistente != null) {
+            return esistente;
+        }
+        synchronized (tentativi) { // la creazione è seriale: il limite non viene superato in parallelo
+            esistente = tentativi.get(chiave);
+            if (esistente != null) {
+                return esistente;
+            }
+            if (tentativi.size() >= MAX_CHIAVI) {
+                Instant limite = ora.minus(FINESTRA);
+                tentativi.values().removeIf(q -> {
+                    synchronized (q) {
+                        return q.peekLast() != null && q.peekLast().isBefore(limite);
+                    }
+                });
+                if (tentativi.size() >= MAX_CHIAVI) {
+                    return null;
+                }
+            }
+            Deque<Instant> nuova = new ArrayDeque<>();
+            tentativi.put(chiave, nuova);
+            return nuova;
+        }
+    }
+
     /** Accesso riuscito: i tentativi precedenti non contano più. */
     void azzera(String chiave) {
         tentativi.remove(chiave);
+    }
+
+    /** Solo per i test. */
+    int numeroChiavi() {
+        return tentativi.size();
     }
 
     /** Solo per i test. */

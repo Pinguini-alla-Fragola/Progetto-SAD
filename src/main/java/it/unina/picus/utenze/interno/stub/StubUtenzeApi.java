@@ -1,5 +1,6 @@
 package it.unina.picus.utenze.interno.stub;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -26,6 +27,9 @@ import it.unina.picus.utenze.api.UtenzeApi;
 public class StubUtenzeApi implements UtenzeApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(StubUtenzeApi.class);
+
+    /** Come in UtenzeService: BCrypt considera solo i primi 72 byte UTF-8. */
+    static final int LUNGHEZZA_MAX_PASSWORD_BYTE = 72;
 
     public static final String BANCO = "banco@picus.test";
     public static final String OPT = "opt@picus.test";
@@ -64,7 +68,7 @@ public class StubUtenzeApi implements UtenzeApi {
     public Optional<IdentitaAutenticata> verificaCredenziali(String email, String password) {
         Account account = email == null ? null : perEmail.get(email.strip().toLowerCase(Locale.ROOT));
         // confronto sempre eseguito: i tempi non rivelano se l'account esiste
-        boolean passwordOk = password != null && !password.isEmpty() && password.length() <= 128
+        boolean passwordOk = password != null && !password.isEmpty() && password.getBytes(StandardCharsets.UTF_8).length <= LUNGHEZZA_MAX_PASSWORD_BYTE
                 && encoder.matches(password, hash);
         if (account == null || !passwordOk || account.stato() != StatoUtenza.ATTIVO) {
             return Optional.empty();

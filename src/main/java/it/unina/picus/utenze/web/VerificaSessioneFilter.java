@@ -7,6 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import it.unina.picus.shared.RichiestaApi;
 import it.unina.picus.utenze.api.UtenzeApi;
 
 import jakarta.servlet.FilterChain;
@@ -17,7 +18,8 @@ import jakarta.servlet.http.HttpSession;
 
 /**
  * A ogni richiesta conferma che l'account della sessione esista ancora e sia attivo: una revoca
- * chiude la sessione alla richiesta successiva. Viene eseguito dopo la catena di Spring Security,
+ * chiude la sessione alla richiesta successiva (302 al login per le pagine HTML, 401 per le API,
+ * come in {@link RichiestaApi}). Viene eseguito dopo la catena di Spring Security,
  * quindi l'autenticazione della sessione è già stata caricata.
  */
 @Component
@@ -40,7 +42,11 @@ class VerificaSessioneFilter extends OncePerRequestFilter {
             if (sessione != null) {
                 sessione.invalidate();
             }
-            response.sendRedirect(request.getContextPath() + "/login?error");
+            if (RichiestaApi.e(request)) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // API: 401, nessun redirect
+            } else {
+                response.sendRedirect(request.getContextPath() + "/login?error");
+            }
             return;
         }
         chain.doFilter(request, response);

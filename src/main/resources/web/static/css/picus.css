@@ -1,5 +1,5 @@
 /* PICUS · design system cozy & organico (tema caldo arancione/crema) */
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,SOFT,wght@9..144,100,700;9..144,100,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+/* Font di sistema per scelta: la CSP (default-src 'self') blocca i font ospitati altrove. */
 
 :root {
   --bg: #F5EDE0;
@@ -23,8 +23,8 @@
   --ok: #29572C;
   --ok-bg: #E7F4E6;
 
-  --display: "Fraunces", Georgia, serif;
-  --sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --display: Georgia, "Times New Roman", serif;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   color-scheme: light;
 }
 

@@ -1,5 +1,6 @@
 package it.unina.picus.utenze.interno.applicazione;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -30,7 +31,8 @@ import it.unina.picus.utenze.interno.persistenza.ProfiloOptRepository;
 class UtenzeService implements UtenzeApi {
 
     static final int LUNGHEZZA_MAX_EMAIL = 254;
-    static final int LUNGHEZZA_MAX_PASSWORD = 128;
+    /** BCrypt considera solo i primi 72 byte: il limite è in byte UTF-8, non in caratteri. */
+    static final int LUNGHEZZA_MAX_PASSWORD_BYTE = 72;
 
     private final AccountRepository accounts;
     private final ProfiloOptRepository profiliOpt;
@@ -52,7 +54,7 @@ class UtenzeService implements UtenzeApi {
     public Optional<IdentitaAutenticata> verificaCredenziali(String email, String password) {
         String chiave = normalizzaEmail(email);
         if (chiave == null || password == null || password.isEmpty()
-                || password.length() > LUNGHEZZA_MAX_PASSWORD) {
+                || password.getBytes(StandardCharsets.UTF_8).length > LUNGHEZZA_MAX_PASSWORD_BYTE) {
             confrontoFittizio();
             return Optional.empty();
         }

@@ -62,7 +62,8 @@ In PowerShell:
 ## Avvio locale con Docker Compose
 
 Da un clone pulito, copia `.env.example` in `.env` e imposta le due password
-locali di prova. Esegui dalla radice del progetto:
+locali di prova (vedi [Configurazione `.env`](#configurazione-env)). Esegui
+dalla radice del progetto:
 
 ```bash
 docker compose up --build
@@ -79,12 +80,62 @@ inserisce quattro account sintetici attivi:
 - `operatore@picus.test`
 
 `PICUS_DEMO_PASSWORD` è la password iniziale degli account demo, salvata
-come hash. Il login PICUS sarà realizzato nella #25. Il volume `picus-dati`
-conserva le tabelle e i dati fra gli avvii.
+come hash. Il login PICUS (#25) è disponibile su `http://localhost:8080/login`.
+Il volume `picus-dati` conserva le tabelle e i dati fra gli avvii.
 
 Per verificare la predisposizione, esegui `./mvnw clean package`
 (`./mvnw.cmd clean package` in PowerShell) e controlla l’avvio dei servizi
 con `docker compose ps`.
+
+### Configurazione `.env`
+
+Il file `.env` sta nella radice del progetto, accanto a `docker-compose.yml`, e
+non va versionato. `.env.example` ne elenca le variabili, entrambe obbligatorie:
+`docker compose` si ferma con un errore se una è vuota.
+
+| Variabile | Uso |
+|-----------|-----|
+| `PICUS_DB_PASSWORD` | Password dell’utente `picus` di PostgreSQL, usata da `picus-db` e da `picus-webapp`. |
+| `PICUS_DEMO_PASSWORD` | Password iniziale dei quattro account demo, salvata come hash BCrypt. Vale al massimo 72 byte UTF-8. |
+
+## Avvio dello skeleton senza database
+
+Lo *skeleton* avvia l’applicazione con le utenze in memoria: login, area per
+ruolo e logout funzionano senza PostgreSQL e senza Docker. Dalla radice del
+progetto:
+
+```bash
+mvn spring-boot:run -Dspring-boot.run.profiles=skeleton
+```
+
+Con il Maven Wrapper: `bash ./mvnw spring-boot:run -Dspring-boot.run.profiles=skeleton`
+(`.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=skeleton"` in PowerShell).
+
+L’app risponde su `http://localhost:8080/login`. Gli account attivi sono
+`banco@picus.test`, `opt@picus.test` e `operatore@picus.test`; la password è
+`picus-demo`, modificabile con la proprietà `picus.skeleton.password`. Il
+cookie di sessione non è `Secure`, per l’uso locale in http. Il profilo è solo
+per sviluppo e test.
+
+## Convenzione per viste e risorse web
+
+I percorsi sono globali e valgono per tutti i moduli:
+
+- `src/main/resources/web/dynamic/` contiene i template Thymeleaf. Ogni modulo
+  usa la propria sottocartella, ad esempio `web/dynamic/utenze/login.html`,
+  che il controller restituisce come vista `utenze/login`.
+- `src/main/resources/web/static/` contiene le risorse statiche, servite dalla
+  radice: `web/static/css/picus.css` risponde su `/css/picus.css`; analoghi
+  `/js/` e `/img/`.
+
+La Content-Security-Policy imposta `default-src 'self'`: CSS, script, font e
+immagini vanno serviti da `web/static/`, non da host esterni. Per questo
+l’interfaccia usa i font di sistema.
+
+Accesso senza autenticazione valida: le pagine HTML rispondono `302` verso
+`/login`; le API (percorsi sotto `/api/`, richieste XHR o con `Accept` JSON)
+rispondono `401` senza redirect. Con autenticazione valida ma ruolo non
+abilitato la risposta è `403`.
 
 ## 🏭 Project management
 

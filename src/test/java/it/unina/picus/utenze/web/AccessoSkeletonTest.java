@@ -3,6 +3,7 @@ package it.unina.picus.utenze.web;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -22,6 +23,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -126,6 +128,27 @@ class AccessoSkeletonTest {
         mvc.perform(get("/banco")).andExpect(redirectedUrl("/login"));
     }
 
+    // Senza autenticazione valida: pagine HTML → 302 al login; API (/api/**, XHR, Accept JSON) → 401
+    // senza redirect; con autenticazione ma ruolo sbagliato → 403 (vedi unRuoloNonEntraNellAreaDiUnAltro).
+    @Test
+    void unaPaginaHtmlProtettaSenzaSessioneRimandaAlLoginAncheDalBrowser() throws Exception {
+        mvc.perform(get("/opt").accept(MediaType.TEXT_HTML)).andExpect(redirectedUrl("/login"));
+    }
+
+    @Test
+    void unaApiProtettaSenzaSessioneRispondeConUnauthorizedSenzaRedirect() throws Exception {
+        mvc.perform(get("/api/richieste"))
+                .andExpect(status().isUnauthorized()).andExpect(header().doesNotExist("Location"));
+    }
+
+    @Test
+    void unaRichiestaXhrOChePretendeJsonSenzaSessioneRiceveUnauthorized() throws Exception {
+        mvc.perform(get("/opt").header("X-Requested-With", "XMLHttpRequest"))
+                .andExpect(status().isUnauthorized()).andExpect(header().doesNotExist("Location"));
+        mvc.perform(get("/opt").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized()).andExpect(header().doesNotExist("Location"));
+    }
+
     // AC2 — credenziali errate o account revocato: stesso messaggio generico
     @ParameterizedTest
     @CsvSource({
@@ -196,8 +219,16 @@ class AccessoSkeletonTest {
         accedi(s, StubUtenzeApi.REVOCABILE, PASSWORD).andExpect(status().is3xxRedirection());
         mvc.perform(get("/operatore").session(s.http())).andExpect(status().isOk());
 
+        Sessione api = apriLogin();
+        accedi(api, StubUtenzeApi.REVOCABILE, PASSWORD).andExpect(status().is3xxRedirection());
+
         stub.revoca(StubUtenzeApi.REVOCABILE);
 
+        // pagina HTML: la sessione si chiude e si torna al login
         mvc.perform(get("/operatore").session(s.http())).andExpect(redirectedUrl("/login?error"));
+        // API: 401 senza redirect, nessun dato restituito
+        mvc.perform(get("/operatore").session(api.http()).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized()).andExpect(header().doesNotExist("Location"));
+        assertThat(api.http().isInvalid()).isTrue();
     }
 }
