@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -17,6 +18,7 @@ import it.unina.picus.DatiDiProva;
 import it.unina.picus.SessioneDiProva;
 import it.unina.picus.TestIntegrazionePostgres;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,19 +38,25 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 
 /**
  * Test di integrazione della user story #51 «Risposta alla richiesta di disponibilità»,
  * richiesti dalla #92: endpoint HTTP reali, login reale e PostgreSQL.
  *
- * Ogni test riporta nel nome l'Acceptance Criterion della #51 che verifica (AC1..AC4).
+ * Ogni test riporta nel nome l'Acceptance Criteria della #51 che verifica (AC1..AC4).
  * I test marcati «#92» coprono i criteri di completamento della task che la user story non
  * esprime: doppio invio, stato non consentito, sessione. La migrazione è in
  * {@code MigrazioneContattiDisponibilitaTest}.
+ *
+ * Ogni {@code 409} viene verificato anche nel corpo: dalla #124 il modulo Richieste risponde
+ * con l'errore JSON comune ({@code codice}, {@code messaggio}, {@code campi}) e senza dati
+ * della pratica.
  *
  * Lo scenario nasce dal flusso dell'applicazione: la OPT titolare invia la richiesta, il
  * Banco la prende in carico e interpella un candidato (#48, #49). Ogni attore accede con il
@@ -345,19 +353,19 @@ class RispostaDisponibilitaIntegrazioneTest {
     // ------------------------------------------------------------------ #92: doppio invio e stato
 
     @Test
-    @DisplayName("#92 - una seconda risposta riceve 409 e resta valido il primo esito")
+    @DisplayName("#92 - una seconda risposta riceve 409 con l'errore JSON e resta valido il primo esito")
     void doppioInvioInSequenza() throws Exception {
         rispondi(come(destinatario), contattoId, false).andExpect(status().isOk());
 
-        rispondi(come(destinatario), contattoId, true).andExpect(status().isConflict());
-        rispondi(come(destinatario), contattoId, false).andExpect(status().isConflict());
+        assertConflittoSenzaDatiDellaPratica(rispondi(come(destinatario), contattoId, true));
+        assertConflittoSenzaDatiDellaPratica(rispondi(come(destinatario), contattoId, false));
 
         assertEquals("NON_DISPONIBILE", esitoVistoDalBanco(contattoId));
         come(banco).get("/api/richieste/{id}/contatti", richiestaId).andExpect(jsonPath("$", hasSize(1)));
     }
 
     @Test
-    @DisplayName("#92 - risposte concorrenti: una sola riceve 200, le altre 409, un solo esito persistito")
+    @DisplayName("#92 - risposte concorrenti: una sola riceve 200, le altre 409 con l'errore JSON, un solo esito persistito")
     void doppioInvioConcorrente() throws Exception {
         int invii = 8;
         // una sessione per invio, come lo stesso account aperto su più dispositivi
@@ -368,14 +376,14 @@ class RispostaDisponibilitaIntegrazioneTest {
 
         ExecutorService esecutore = Executors.newFixedThreadPool(invii);
         CountDownLatch via = new CountDownLatch(1);
-        List<Future<Integer>> esiti = new ArrayList<>();
+        List<Future<MvcResult>> esiti = new ArrayList<>();
         try {
             for (int i = 0; i < invii; i++) {
                 SessioneDiProva sessione = sessioniDelDestinatario.get(i);
                 boolean disponibile = i % 2 == 0;
                 esiti.add(esecutore.submit(() -> {
                     via.await();
-                    return rispondi(sessione, contattoId, disponibile).andReturn().getResponse().getStatus();
+                    return rispondi(sessione, contattoId, disponibile).andReturn();
                 }));
             }
             via.countDown();
@@ -384,11 +392,14 @@ class RispostaDisponibilitaIntegrazioneTest {
             int inConflitto = 0;
             boolean disponibileAccettato = false;
             for (int i = 0; i < invii; i++) {
-                int stato = esiti.get(i).get(30, TimeUnit.SECONDS);
+                MvcResult esito = esiti.get(i).get(30, TimeUnit.SECONDS);
+                int stato = esito.getResponse().getStatus();
                 if (stato == 200) {
                     accettate++;
                     disponibileAccettato = i % 2 == 0;
                 } else if (stato == 409) {
+                    String corpo = esito.getResponse().getContentAsString(StandardCharsets.UTF_8);
+                    assertEquals("CONFLICT", JsonPath.read(corpo, "$.codice"), "corpo del 409 concorrente");
                     inConflitto++;
                 }
             }
@@ -413,7 +424,7 @@ class RispostaDisponibilitaIntegrazioneTest {
         come(banco).post("/api/contatti-disponibilita/{id}/assegnazione", null, contattoId)
                 .andExpect(status().isOk());
 
-        rispondi(come(destinatario), contattoId, false).andExpect(status().isConflict());
+        assertConflittoSenzaDatiDellaPratica(rispondi(come(destinatario), contattoId, false));
 
         assertEquals("DISPONIBILE", esitoVistoDalBanco(contattoId));
     }
@@ -425,7 +436,7 @@ class RispostaDisponibilitaIntegrazioneTest {
         // operazioni disponibili: lo stato viene forzato nel database per provare la difesa del server.
         dati.impostaStato(richiestaId, stato);
 
-        rispondi(come(destinatario), contattoId, true).andExpect(status().isConflict());
+        assertConflittoSenzaDatiDellaPratica(rispondi(come(destinatario), contattoId, true));
 
         assertAll(
                 () -> assertEquals("IN_ATTESA", dati.esitoContatto(contattoId)),
@@ -494,6 +505,26 @@ class RispostaDisponibilitaIntegrazioneTest {
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
         return JsonPath.read(corpo, "$.esito");
+    }
+
+    /**
+     * Verifica un conflitto nel formato comune del modulo Richieste (#124): stato {@code 409},
+     * corpo JSON con i soli {@code codice}, {@code messaggio} e {@code campi}, nessun dato
+     * della pratica (identificativi, partecipanti, descrizione).
+     */
+    private void assertConflittoSenzaDatiDellaPratica(ResultActions risposta) throws Exception {
+        risposta.andExpect(status().isConflict())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.*", hasSize(3)))
+                .andExpect(jsonPath("$.codice").value("CONFLICT"))
+                .andExpect(jsonPath("$.messaggio").isNotEmpty())
+                .andExpect(jsonPath("$.campi").isEmpty());
+
+        String corpo = risposta.andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
+        for (String datoDellaPratica : List.of(richiestaId.toString(), contattoId.toString(),
+                titolare.toString(), destinatario.toString(), DESCRIZIONE_RISERVATA)) {
+            assertFalse(corpo.contains(datoDellaPratica), "il 409 non deve contenere " + datoDellaPratica);
+        }
     }
 
     private void assertRichiestaPresaInCaricoSenzaErogatore() throws Exception {
