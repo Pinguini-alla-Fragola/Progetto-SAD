@@ -101,7 +101,8 @@ export async function caricaRichieste(area) {
             placeholder: area === 'banco' ? 'Misura, organizzazione o comune' : 'Misura o stato',
             columns: area === 'banco' ? ['Misura', 'OPT richiedente', 'Stato', 'Invio', 'Azioni'] : [],
             sort: {
-                initial: 'recenti', options: [{ value: 'recenti', label: 'Più recenti' }, { value: 'meno-recenti', label: 'Meno recenti' }],
+                initial: area === 'banco' ? 'meno-recenti' : 'recenti',
+                options: [{ value: 'meno-recenti', label: 'Ordine di arrivo' }, { value: 'recenti', label: 'Più recenti' }],
                 compare: (a, b, ordine) => (new Date(a.inviataIl) - new Date(b.inviataIl)) * (ordine === 'recenti' ? -1 : 1)
             }
         });
@@ -118,6 +119,11 @@ function rigaRichiesta(r, azioni, banco) {
     const misura = elemento('div');
     misura.append(elemento('strong', r.nomeMisura));
     if (r.comune) misura.append(elemento('span', r.comune, 'picus-meta'));
+    if (banco) {
+        const riferimento = elemento('details', null, 'picus-meta');
+        riferimento.append(elemento('summary', 'Identificativo'), elemento('span', r.id));
+        misura.append(riferimento);
+    }
     nodo.append(campo('Misura', misura, 'request-measure'));
     if (banco) nodo.append(campo('OPT richiedente', elemento('strong', r.optRichiedente), 'request-organization'));
     const stato = elemento('span', etichetta(r.stato), 'badge-stato badge-' + r.stato.toLowerCase());

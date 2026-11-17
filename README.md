@@ -42,9 +42,10 @@ CSRF di Spring Security.
 - La OPT può inviare una richiesta selezionando misura e comune dal catalogo,
   ritrovare le proprie richieste e consultarne il dettaglio. La conferma di invio
   riepiloga misura e comune e permette di aprire subito il dettaglio.
-- Il Banco vede la coda dalla richiesta più recente e può scegliere l'ordine
-  cronologico di arrivo nei filtri. Ogni riga mostra OPT richiedente, stato,
-  data e ora; l'identificativo compare soltanto nel dettaglio. Prende esplicitamente in carico
+- Il Banco vede la coda in ordine di arrivo e può scegliere l'ordine
+  inverso nei filtri. Ogni riga mostra OPT richiedente, stato,
+  data e ora; l'identificativo è consultabile nei riferimenti espandibili della riga,
+  anche su mobile. Prende esplicitamente in carico
   una richiesta, consulta gli erogatori compatibili e interpella un account
   per volta. Dopo una risposta positiva può assegnare l'erogatore e passare
   la pratica a **In programmazione**.
@@ -68,7 +69,17 @@ CSRF di Spring Security.
 La disponibilità del candidato e l'assegnazione sono passaggi distinti.
 L'apertura del dettaglio conserva lo stato. Se la risposta all'invio viene
 persa, **Riprova lo stesso invio** riusa dati e `Idempotency-Key`, senza creare
-una seconda pratica.
+una seconda pratica. Dopo un ricaricamento, nella stessa scheda, il modulo
+recupera il riferimento della OPT autenticata: reinserendo gli stessi dati si
+verifica l'invio originale. La memoria di sessione conserva solo chiave e
+impronta dei dati, senza descrizione; la conferma o un rifiuto certo rimuovono
+il riferimento. Con memoria non disponibile il modulo blocca l'invio.
+Il pulsante viene abilitato solo dopo l'inizializzazione dello script;
+il fallback nativo usa POST per tenere i dati fuori dall'URL.
+
+La disponibilità registrata resta visibile anche se il candidato non può
+consultare il dettaglio: un `403` non determina lo stato della pratica né
+segnala un'assegnazione ancora in attesa.
 
 I controlli senza endpoint restano disattivati: annullamento, archivio degli esiti, gestione delle
 utenze e del catalogo, offerta, comunicazioni generali e monitoraggio.
