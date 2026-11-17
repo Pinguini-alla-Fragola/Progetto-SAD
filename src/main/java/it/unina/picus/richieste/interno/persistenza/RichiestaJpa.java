@@ -24,7 +24,7 @@ import it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione;
  * <p>La relativa riga è usata per coordinare gli aggiornamenti concorrenti dei contatti.
  * L'aggiornamento persiste stato, assegnazione e accordo sulla stessa riga già bloccata.
  *
- * @see RichiestaRepository#cercaPerAggiornamento(UUID)
+ * @see RichiestaRepositoryJpa#cercaPerAggiornamento(UUID)
  */
 @Entity
 @Table(name = "richieste")
@@ -82,11 +82,6 @@ public class RichiestaJpa {
     /** {@return tipo di destinatario della misura} */
     public TipoDestinatario getTipoDestinatario() {
         return tipoDestinatario;
-    }
-
-    /** {@return stato corrente della richiesta} */
-    public StatoRichiesta getStato() {
-        return stato;
     }
 
     void aggiorna(RichiestaDiMisura richiesta) {
