@@ -70,10 +70,14 @@ La disponibilità del candidato e l'assegnazione sono passaggi distinti.
 L'apertura del dettaglio conserva lo stato. Se la risposta all'invio viene
 persa, **Riprova lo stesso invio** riusa dati e `Idempotency-Key`, senza creare
 una seconda pratica. Dopo un ricaricamento, nella stessa scheda, il modulo
-recupera il riferimento della OPT autenticata: reinserendo gli stessi dati si
-verifica l'invio originale. La memoria di sessione conserva solo chiave e
-impronta dei dati, senza descrizione; la conferma o un rifiuto certo rimuovono
-il riferimento. Con memoria non disponibile il modulo blocca l'invio.
+recupera il riferimento della OPT autenticata. Reinserendo gli stessi dati si
+verifica l'invio originale. Dopo averlo controllato in **Le mie richieste**,
+**Ho verificato, inizia una nuova richiesta** consente di inviare dati diversi
+e conserva il riferimento precedente per un ritento con gli stessi dati.
+La memoria di sessione conserva chiavi, impronte e stato dei riferimenti.
+La conferma o un rifiuto certo rimuovono il riferimento del singolo invio.
+Con memoria non disponibile il modulo blocca l'invio. Se la sessione cambia
+in un'altra scheda, occorre ricaricare il modulo prima di inviare.
 Il pulsante viene abilitato solo dopo l'inizializzazione dello script;
 il fallback nativo usa POST per tenere i dati fuori dall'URL.
 

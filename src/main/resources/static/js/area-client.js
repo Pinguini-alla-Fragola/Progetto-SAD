@@ -13,11 +13,11 @@ export class ErroreHttp extends Error {
     }
 }
 
-export async function api(url, { method = 'GET', body, contentType = 'application/json', headers: aggiuntive = {} } = {}) {
+export async function api(url, { method = 'GET', body, contentType = 'application/json', headers: aggiuntive = {}, csrf } = {}) {
     const headers = { ...aggiuntive, Accept: 'application/json' };
     if (!['GET', 'HEAD', 'OPTIONS', 'TRACE'].includes(method)) {
-        const csrf = await api('/api/auth/csrf');
-        headers[csrf.headerName] = csrf.token;
+        const { headerName, token } = csrf ?? await api('/api/auth/csrf');
+        headers[headerName] = token;
     }
     if (body !== undefined) {
         headers['Content-Type'] = contentType;

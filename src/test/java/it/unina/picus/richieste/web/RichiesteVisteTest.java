@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.mock.web.MockHttpSession;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +18,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -55,8 +58,40 @@ class RichiesteVisteTest {
                 .andExpect(content().string(containsString("value=\"napoli\"")))
                 .andExpect(content().string(matchesPattern("(?s).*<form[^>]*id=\"richiestaForm\"[^>]*method=\"post\"[^>]*>.*")))
                 .andExpect(content().string(containsString("data-utente=\"" + titolare + "\"")))
+                .andExpect(content().string(containsString("data-csrf-header=\"X-CSRF-TOKEN\"")))
+                .andExpect(content().string(containsString("data-csrf-parametro=\"_csrf\"")))
+                .andExpect(content().string(containsString("name=\"_csrf\"")))
                 .andExpect(content().string(matchesPattern("(?s).*<button[^>]*id=\"btnInvia\"[^>]*disabled[^>]*>.*")))
                 .andExpect(content().string(not(containsString("data-form-anteprima"))));
+    }
+
+    @Test
+    void tokenDelModuloRifiutatoDopoIlCambioDiSessione() throws Exception {
+        jdbc.update("insert into utenze_profili_opt (account_id, codice_struttura, comune_codice) values (?, ?, 'napoli')",
+                estraneo, "UI-" + estraneo.toString().substring(0, 8));
+        var paginaA = mvc.perform(get("/richieste/nuova").with(user(titolare.toString()).roles("OPT")))
+                .andExpect(status().isOk()).andReturn().getRequest();
+        var paginaB = mvc.perform(get("/richieste/nuova").with(user(estraneo.toString()).roles("OPT")))
+                .andExpect(status().isOk()).andReturn().getRequest();
+        var tokenA = (CsrfToken) paginaA.getAttribute(CsrfToken.class.getName());
+        var misura = jdbc.queryForObject("select id from catalogo_misure where codice = 'M01'", Long.class);
+        var dati = """
+                {"misuraId":%d,"tipoDestinatario":"NUCLEO","comuneCodice":"napoli","description":"Esigenza <sintetica>"}
+                """.formatted(misura);
+        var riferimento = UUID.randomUUID();
+        jdbc.update("update richieste set riferimento_invio = ? where id = ?", riferimento, richiesta);
+
+        mvc.perform(post("/api/richieste").session((MockHttpSession) paginaA.getSession(false))
+                .with(user(titolare.toString()).roles("OPT"))
+                .header(tokenA.getHeaderName(), tokenA.getToken()).header("Idempotency-Key", riferimento.toString())
+                .contentType(MediaType.APPLICATION_JSON).content(dati))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.id").value(richiesta.toString()));
+
+        mvc.perform(post("/api/richieste").session((MockHttpSession) paginaB.getSession(false))
+                .with(user(estraneo.toString()).roles("OPT"))
+                .header(tokenA.getHeaderName(), tokenA.getToken()).header("Idempotency-Key", riferimento.toString())
+                .contentType(MediaType.APPLICATION_JSON).content(dati)).andExpect(status().isForbidden());
+        assertEquals(0, jdbc.queryForObject("select count(*) from richieste where titolare_id = ?", Integer.class, estraneo));
     }
 
     @Test
