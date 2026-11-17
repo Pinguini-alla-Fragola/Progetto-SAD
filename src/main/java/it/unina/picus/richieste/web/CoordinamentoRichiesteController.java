@@ -1,13 +1,13 @@
 package it.unina.picus.richieste.web;
 
 import it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione;
-import it.unina.picus.richieste.api.CoordinamentoRichiesteApi;
 import it.unina.picus.richieste.api.DatiRichiestaNonValidiException;
-import it.unina.picus.richieste.api.EsitoRichiesteApi;
+import it.unina.picus.richieste.api.RichiesteApi;
 import it.unina.picus.richieste.api.RichiesteApi.Candidato;
 import it.unina.picus.richieste.api.RichiesteApi.ContattoDisponibilita;
 import it.unina.picus.richieste.api.RichiesteApi.RichiestaDettaglio;
 import it.unina.picus.richieste.api.RichiesteApi.RichiestaSintesi;
+import it.unina.picus.richieste.interno.applicazione.ServizioCoordinamentoRichieste;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,18 +27,15 @@ import java.util.UUID;
 @RestController
 @RequestMapping(value = "/api", produces = MediaType.APPLICATION_JSON_VALUE)
 public class CoordinamentoRichiesteController {
-    private final CoordinamentoRichiesteApi coordinamento;
-    private final EsitoRichiesteApi esiti;
+    private final ServizioCoordinamentoRichieste coordinamento;
 
     /**
      * Collega l’adattatore REST ai casi d’uso del Banco.
      *
-     * @param coordinamento ricerca, contatto e assegnazione
-     * @param esiti conferma dell’accordo e rifiuto definitivo
+     * @param coordinamento servizio di coordinamento e registrazione dell'esito
      */
-    public CoordinamentoRichiesteController(CoordinamentoRichiesteApi coordinamento, EsitoRichiesteApi esiti) {
+    public CoordinamentoRichiesteController(ServizioCoordinamentoRichieste coordinamento) {
         this.coordinamento = coordinamento;
-        this.esiti = esiti;
     }
 
     @PostMapping("/richieste/{id}/presa-in-carico")
@@ -105,11 +102,11 @@ public class CoordinamentoRichiesteController {
      * @param id identificativo della richiesta
      * @param corpo proprietà JSON specifiche della modalità
      * @return dettaglio della richiesta Confermata
-     * @see EsitoRichiesteApi#confermaAccordo
+     * @see RichiesteApi#confermaAccordo
      */
     @PostMapping(value = "/richieste/{id}/conferma", consumes = MediaType.APPLICATION_JSON_VALUE)
     public RichiestaDettaglio conferma(IdentitaAutenticata attore, @PathVariable UUID id, @RequestBody CorpoJson corpo) {
-        return esiti.confermaAccordo(attore, id, AccordoJson.leggi(corpo.campi()));
+        return coordinamento.confermaAccordo(attore, id, AccordoJson.leggi(corpo.campi()));
     }
 
     /**
@@ -119,13 +116,13 @@ public class CoordinamentoRichiesteController {
      * @param id identificativo della richiesta
      * @param corpo corpo assente o oggetto JSON vuoto
      * @return sintesi della richiesta Rifiutata
-     * @see EsitoRichiesteApi#rifiutaRichiesta
+     * @see RichiesteApi#rifiutaRichiesta
      */
     @PostMapping("/richieste/{id}/rifiuta")
     public RichiestaSintesi rifiuta(IdentitaAutenticata attore, @PathVariable UUID id,
             @RequestBody(required = false) CorpoJson corpo) {
         verificaCorpoVuoto(corpo);
-        return esiti.rifiutaRichiesta(attore, id);
+        return coordinamento.rifiutaRichiesta(attore, id);
     }
 
     private static void verificaCorpoVuoto(CorpoJson corpo) {

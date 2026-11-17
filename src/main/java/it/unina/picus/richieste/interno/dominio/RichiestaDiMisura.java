@@ -1,7 +1,7 @@
 package it.unina.picus.richieste.interno.dominio;
 
 import it.unina.picus.richieste.api.DatiRichiestaNonValidiException;
-import it.unina.picus.richieste.api.RichiesteApi.AccordoInPresenza;
+import it.unina.picus.richieste.api.RichiesteApi.AccordoADistanza;
 import it.unina.picus.richieste.api.RichiesteApi.DatiInvio;
 import it.unina.picus.richieste.api.RichiesteApi.DettagliAccordo;
 import it.unina.picus.richieste.api.RichiesteApi.StatoRichiesta;
@@ -72,10 +72,10 @@ public record RichiestaDiMisura(
             throw new ConflittoRichiestaException("Serve una richiesta In programmazione con erogatore assegnato");
         }
         var accordoValidato = ValidazioneAccordo.valida(dettagli);
-        if (erogatoreAmbito == AmbitoErogazione.CENTRO_PICUS_A_DISTANZA
-                && accordoValidato instanceof AccordoInPresenza) {
+        boolean assegnazioneADistanza = erogatoreAmbito == AmbitoErogazione.CENTRO_PICUS_A_DISTANZA;
+        if (assegnazioneADistanza != (accordoValidato instanceof AccordoADistanza)) {
             throw new DatiRichiestaNonValidiException(Map.of("modalita",
-                    "Il contatto con il Centro PICUS prevede un accordo a distanza"));
+                    "La modalità dell'accordo deve corrispondere all'ambito dell'assegnazione"));
         }
         return conEsito(StatoRichiesta.CONFERMATA, accordoValidato);
     }
