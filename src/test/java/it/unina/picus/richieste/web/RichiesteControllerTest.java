@@ -12,10 +12,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -42,6 +45,8 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import com.jayway.jsonpath.JsonPath;
 
+import tools.jackson.databind.json.JsonMapper;
+
 import it.unina.picus.shared.DatiSintetici;
 import it.unina.picus.shared.IntegrazionePostgresql;
 
@@ -64,6 +69,9 @@ class RichiesteControllerTest {
     private static final String BANCO = "BANCO";
     private static final String OPERATORE = "OPERATORE";
     private static final String DESCRIZIONE = "Accompagnamento ai servizi del territorio.";
+    private static final UUID PARI_MINORE = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    private static final UUID PARI_MAGGIORE = UUID.fromString("00000000-0000-0000-0000-000000000002");
+    private static final JsonMapper JSON = JsonMapper.builder().build();
 
     @Autowired
     private MockMvc mvc;
@@ -118,7 +126,11 @@ class RichiesteControllerTest {
             assertThat(riga.get("erogatore_id")).isNull();
             assertThat(riga.get("erogatore_ambito")).isNull();
             assertThat(riga.get("accordo_modalita")).isNull();
-            assertThat(((Timestamp) riga.get("inviata_il")).toInstant()).isBetween(prima, dopo);
+            Instant salvata = ((Timestamp) riga.get("inviata_il")).toInstant();
+            assertThat(salvata).isBetween(prima, dopo);
+            // La risposta all'invio usa l'istante del server, che PostgreSQL salva al microsecondo.
+            Instant esposta = istante(JsonPath.read(corpo, "$.inviataIl"));
+            assertThat(Duration.between(salvata, esposta).abs()).isLessThan(Duration.ofNanos(1_000));
             assertThat(conta("select count(*) from richieste")).isEqualTo(1);
         }
 
@@ -195,48 +207,56 @@ class RichiesteControllerTest {
     class ElenchiEDettaglio {
 
         @Test
-        @DisplayName("La richiesta inviata compare nell'elenco della titolare e nella coda del Banco, non altrove")
+        @DisplayName("Ogni OPT vede solo la propria richiesta su /mie e su /api/richieste; il Banco le vede entrambe")
         void elencoECoda() throws Exception {
-            UUID id = idCreato(invia(titolare, corpoInvio(m01, "PERSONA", "napoli", DESCRIZIONE)));
+            UUID propria = idCreato(invia(titolare, corpoInvio(m01, "PERSONA", "napoli", DESCRIZIONE)));
+            UUID altrui = idCreato(invia(estranea, corpoInvio(m01, "NUCLEO", "portici", null)));
 
-            mvc.perform(get("/api/richieste/mie").with(come(titolare, OPT)))
+            for (String percorso : List.of("/api/richieste/mie", "/api/richieste")) {
+                verificaElenco(get(percorso).with(come(titolare, OPT)), propria);
+                verificaElenco(get(percorso).with(come(estranea, OPT)), altrui);
+            }
+            for (String percorso : List.of("/api/richieste/coda", "/api/richieste")) {
+                verificaElenco(get(percorso).with(come(banco, BANCO)), propria, altrui);
+            }
+        }
+
+        /** Controlla ID esatti, nell'ordine, con stato Creata e istante uguale a quello salvato. */
+        private void verificaElenco(MockHttpServletRequestBuilder richiesta, UUID... attese) throws Exception {
+            String corpo = mvc.perform(richiesta)
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$[*].id", contains(id.toString())))
-                    .andExpect(jsonPath("$[0].stato").value("CREATA"));
-            mvc.perform(get("/api/richieste").with(come(titolare, OPT)))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$[*].id", contains(id.toString())));
-            mvc.perform(get("/api/richieste/mie").with(come(estranea, OPT)))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$", hasSize(0)));
-            mvc.perform(get("/api/richieste/coda").with(come(banco, BANCO)))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$[*].id", contains(id.toString())));
-            mvc.perform(get("/api/richieste").with(come(banco, BANCO)))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$[*].id", contains(id.toString())));
+                    .andReturn().getResponse().getContentAsString();
+
+            List<String> id = JsonPath.read(corpo, "$[*].id");
+            List<String> stati = JsonPath.read(corpo, "$[*].stato");
+            List<Object> date = JsonPath.read(corpo, "$[*].inviataIl");
+            assertThat(id).containsExactly(Stream.of(attese).map(UUID::toString).toArray(String[]::new));
+            assertThat(stati).containsOnly("CREATA");
+            for (int i = 0; i < attese.length; i++) {
+                assertThat(istante(date.get(i))).isEqualTo(inviataIlSalvata(attese[i]));
+            }
         }
 
         @Test
         @DisplayName("Coda del Banco ed elenco OPT in ordine cronologico, a parità di istante per UUID")
         void ordineCronologico() throws Exception {
             Instant base = Instant.parse("2026-11-10T09:00:00Z");
+            Instant pari = base.plus(1, ChronoUnit.HOURS);
+            // UUID fissi inseriti in ordine inverso: senza lo spareggio l'ordine fisico sarebbe sbagliato.
+            richiestaConId(PARI_MAGGIORE, titolare, "CREATA", pari);
+            richiestaConId(PARI_MINORE, titolare, "CREATA", pari);
             UUID terza = dati.richiesta(titolare, m01, "napoli", "CREATA", base.plus(2, ChronoUnit.HOURS));
             UUID prima = dati.richiesta(estranea, m01, "portici", "CREATA", base);
-            UUID pariA = dati.richiesta(titolare, m01, "napoli", "CREATA", base.plus(1, ChronoUnit.HOURS));
-            UUID pariB = dati.richiesta(titolare, m01, "napoli", "CREATA", base.plus(1, ChronoUnit.HOURS));
-            dati.richiesta(titolare, m01, "napoli", "RIFIUTATA", base.minus(1, ChronoUnit.HOURS));
-            List<String> pari = Stream.of(pariA, pariB).map(UUID::toString).sorted().toList();
+            UUID rifiutata = dati.richiesta(titolare, m01, "napoli", "RIFIUTATA", base.minus(1, ChronoUnit.HOURS));
 
             mvc.perform(get("/api/richieste/coda").with(come(banco, BANCO)))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$[*].id", contains(prima.toString(), pari.get(0), pari.get(1),
-                            terza.toString())));
+                    .andExpect(jsonPath("$[*].id", contains(prima.toString(), PARI_MINORE.toString(),
+                            PARI_MAGGIORE.toString(), terza.toString())));
             mvc.perform(get("/api/richieste/mie").with(come(titolare, OPT)))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$", hasSize(4)))
-                    .andExpect(jsonPath("$[1].id").value(pari.get(0)))
-                    .andExpect(jsonPath("$[3].id").value(terza.toString()));
+                    .andExpect(jsonPath("$[*].id", contains(rifiutata.toString(), PARI_MINORE.toString(),
+                            PARI_MAGGIORE.toString(), terza.toString())));
         }
 
         @Test
@@ -246,17 +266,18 @@ class RichiesteControllerTest {
             Map<String, Object> prima = riga(id);
 
             for (var lettore : List.of(come(titolare, OPT), come(banco, BANCO))) {
-                mvc.perform(get("/api/richieste/{id}", id).with(lettore))
+                String corpo = mvc.perform(get("/api/richieste/{id}", id).with(lettore))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$.richiesta.id").value(id.toString()))
-                        .andExpect(jsonPath("$.richiesta.inviataIl").exists())
                         .andExpect(jsonPath("$.richiesta.misuraId").value(m01))
                         .andExpect(jsonPath("$.richiesta.nomeMisura").value("Accoglienza e ascolto"))
                         .andExpect(jsonPath("$.richiesta.stato").value("CREATA"))
                         .andExpect(jsonPath("$.tipoDestinatario").value("PERSONA"))
                         .andExpect(jsonPath("$.comuneCodice").value("napoli"))
                         .andExpect(jsonPath("$.erogatoreAssegnatoId").doesNotExist())
-                        .andExpect(jsonPath("$.accordo").doesNotExist());
+                        .andExpect(jsonPath("$.accordo").doesNotExist())
+                        .andReturn().getResponse().getContentAsString();
+                assertThat(istante(JsonPath.read(corpo, "$.richiesta.inviataIl"))).isEqualTo(inviataIlSalvata(id));
             }
 
             assertThat(riga(id)).isEqualTo(prima);
@@ -370,56 +391,68 @@ class RichiesteControllerTest {
     @DisplayName("Criterio 4: campi identificativi aggiuntivi (QS-02A)")
     class CampiIdentificativi {
 
+        /**
+         * Valori dei campi extra come albero JSON. {@link Libero} riceve una sentinella univoca a ogni
+         * esecuzione; {@link Tipizzato} è un identificativo sintetico con formato valido (codici
+         * fiscali e IBAN con carattere di controllo corretto, UUID casuali non presenti nel database)
+         * e viene cercato così com'è. Ogni foglia, anche dentro array e oggetti, è verificata.
+         */
         static Stream<Arguments> campiIdentificativi() {
             return Stream.of(
-                    Arguments.of("codiceFiscale", "\"RSSMRA80A01F839X\""),
-                    Arguments.of("nomeAssistito", "\"Mario\""),
-                    Arguments.of("cognomeAssistito", "\"Rossi\""),
-                    Arguments.of("nome", "\"Maria\""),
-                    Arguments.of("cognome", "\"Bianchi\""),
-                    Arguments.of("dataNascita", "\"1980-01-01\""),
-                    Arguments.of("luogoNascita", "\"Napoli\""),
-                    Arguments.of("telefonoAssistito", "\"+39 333 0000000\""),
-                    Arguments.of("emailAssistito", "\"assistito@example.invalid\""),
-                    Arguments.of("indirizzo", "\"Via Sintetica 1\""),
-                    Arguments.of("numeroDocumento", "\"AA0000000\""),
-                    Arguments.of("tesseraSanitaria", "\"80380000000000000000\""),
-                    Arguments.of("iban", "\"IT00X0000000000000000000000\""),
-                    Arguments.of("cittadinanza", "\"Sintetica\""),
-                    Arguments.of("codiceAssistito", "\"ASS-0001\""),
-                    Arguments.of("componentiNucleo", "[\"Anna\",\"Luca\"]"),
-                    Arguments.of("assistito", "{\"nome\":\"Paolo\",\"codiceFiscale\":\"VRDPLA70B02F839Y\"}"),
-                    Arguments.of("titolareId", "\"{estranea}\""),
-                    Arguments.of("stato", "\"CONFERMATA\""),
-                    Arguments.of("id", "\"{id}\""),
-                    Arguments.of("erogatoreId", "\"{operatore}\""),
-                    Arguments.of("inviataIl", "\"2020-01-01T00:00:00Z\""),
-                    Arguments.of("CodiceFiscale", "\"BNCMRA85C41F839Z\""),
-                    Arguments.of("descrizione", "\"Testo con dati dell'assistito\""));
+                    Arguments.of("codiceFiscale", new Tipizzato("RSSMRA80A01F839W")),
+                    Arguments.of("nomeAssistito", new Libero("Mario")),
+                    Arguments.of("cognomeAssistito", new Libero("Rossi")),
+                    Arguments.of("nome", new Libero("Maria")),
+                    Arguments.of("cognome", new Libero("Bianchi")),
+                    Arguments.of("dataNascita", new Tipizzato("1931-07-19")),
+                    Arguments.of("luogoNascita", new Libero("Napoli")),
+                    Arguments.of("telefonoAssistito", new Tipizzato("+393331234567")),
+                    Arguments.of("emailAssistito", new Tipizzato("assistito.sintetico@example.invalid")),
+                    Arguments.of("indirizzo", new Libero("Via Sintetica 1")),
+                    Arguments.of("numeroDocumento", new Tipizzato("CA00000AA")),
+                    Arguments.of("tesseraSanitaria", new Tipizzato("80380001200000000001")),
+                    Arguments.of("iban", new Tipizzato("IT60X0542811101000000123456")),
+                    Arguments.of("cittadinanza", new Libero("Sintetica")),
+                    Arguments.of("codiceAssistito", new Libero("ASS")),
+                    Arguments.of("componentiNucleo", List.of(new Libero("Anna"), new Libero("Luca"),
+                            new Tipizzato("BNCMRA85C41F839P"))),
+                    Arguments.of("assistito", Map.of("nome", new Libero("Paolo"),
+                            "codiceFiscale", new Tipizzato("VRDPLA70B02F839T"),
+                            "recapiti", List.of(new Libero("Via Annidata 2")))),
+                    Arguments.of("titolareId", new Tipizzato(UUID.randomUUID().toString())),
+                    Arguments.of("stato", new Libero("CONFERMATA")),
+                    Arguments.of("id", new Tipizzato(UUID.randomUUID().toString())),
+                    Arguments.of("erogatoreId", new Tipizzato(UUID.randomUUID().toString())),
+                    Arguments.of("inviataIl", new Tipizzato("1999-12-31T23:59:58.123456Z")),
+                    Arguments.of("CodiceFiscale", new Tipizzato("BNCMRA85C41F839P")),
+                    Arguments.of("descrizione", new Libero("Testo con dati dell'assistito")));
         }
 
         @ParameterizedTest(name = "campo extra {0}")
         @MethodSource("campiIdentificativi")
-        @DisplayName("Il server respinge l'intero invio, crea zero richieste e non riporta il valore in risposta, database e log")
-        void campoExtraRespinto(String campo, String valore, CapturedOutput log) throws Exception {
-            String sentinella = "SINTETICO-" + UUID.randomUUID();
-            String valoreConSentinella = valore
-                    .replace("{estranea}", estranea.toString())
-                    .replace("{operatore}", operatore.toString())
-                    .replace("{id}", UUID.randomUUID().toString());
-            String corpo = "{\"misuraId\":" + m01 + ",\"tipoDestinatario\":\"PERSONA\",\"comuneCodice\":\"napoli\","
-                    + "\"description\":\"" + sentinella + "-descrizione\",\"" + campo + "\":"
-                    + valoreConSentinella.replaceFirst("\"", "\"" + sentinella + "-") + "}";
+        @DisplayName("Il server respinge l'intero invio, crea zero richieste e non riporta alcun valore in risposta, database e log")
+        void campoExtraRespinto(String campo, Object modello, CapturedOutput log) throws Exception {
+            List<String> daCercare = new ArrayList<>();
+            Map<String, Object> corpo = new LinkedHashMap<>();
+            corpo.put("misuraId", m01);
+            corpo.put("tipoDestinatario", "PERSONA");
+            corpo.put("comuneCodice", "napoli");
+            corpo.put("description", istanzia(new Libero("Descrizione"), daCercare));
+            corpo.put(campo, istanzia(modello, daCercare));
 
-            String risposta = invia(titolare, corpo)
+            String risposta = invia(titolare, JSON.writeValueAsString(corpo))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.campi.richiesta").exists())
                     .andReturn().getResponse().getContentAsString();
 
             assertThat(conta("select count(*) from richieste")).isZero();
-            assertThat(risposta).doesNotContain(sentinella);
-            assertThat(occorrenzeNelDatabase(sentinella)).isZero();
-            assertThat(log.getAll()).doesNotContain(sentinella);
+            assertThat(daCercare).as("description più almeno un valore del campo extra").hasSizeGreaterThanOrEqualTo(2);
+            String output = log.getAll();
+            for (String valore : daCercare) {
+                assertThat(risposta).as("risposta, valore %s", valore).doesNotContain(valore);
+                assertThat(occorrenzeNelDatabase(valore)).as("database, valore %s", valore).isZero();
+                assertThat(output).as("log, valore %s", valore).doesNotContain(valore);
+            }
         }
 
         @Test
@@ -625,6 +658,60 @@ class RichiesteControllerTest {
 
     private Map<String, Object> riga(UUID id) {
         return jdbc.queryForMap("select * from richieste where id = ?", id);
+    }
+
+    private Instant inviataIlSalvata(UUID id) {
+        return ((Timestamp) riga(id).get("inviata_il")).toInstant();
+    }
+
+    /** Richiesta Creata o di altro stato con identificativo scelto dal test. */
+    private void richiestaConId(UUID id, UUID titolareRichiesta, String stato, Instant inviataIl) {
+        jdbc.update("""
+                insert into richieste (id, titolare_id, misura_id, comune_codice, tipo_destinatario, inviata_il, stato)
+                values (?, ?, ?, 'napoli', 'PERSONA', ?, ?)
+                """, id, titolareRichiesta, m01, Timestamp.from(inviataIl), stato);
+    }
+
+    /** Istante esposto in JSON: stringa ISO-8601 oppure secondi decimali dall'epoca. */
+    private static Instant istante(Object valore) {
+        if (valore instanceof String testo) {
+            return Instant.parse(testo);
+        }
+        if (valore instanceof Number numero) {
+            BigDecimal secondi = new BigDecimal(numero.toString());
+            long interi = secondi.longValue();
+            int nano = secondi.subtract(BigDecimal.valueOf(interi)).movePointRight(9).intValue();
+            return Instant.ofEpochSecond(interi, nano);
+        }
+        throw new AssertionError("Valore non riconosciuto come istante: " + valore);
+    }
+
+    /** Testo libero di un campo extra: riceve una sentinella univoca a ogni esecuzione. */
+    private record Libero(String prefisso) {}
+
+    /** Identificativo sintetico con formato valido, cercato così com'è. */
+    private record Tipizzato(String valore) {}
+
+    /** Costruisce il valore JSON del modello e raccoglie ogni foglia da cercare. */
+    private static Object istanzia(Object modello, List<String> daCercare) {
+        return switch (modello) {
+            case Libero libero -> {
+                String valore = libero.prefisso() + "-SINTETICO-" + UUID.randomUUID();
+                daCercare.add(valore);
+                yield valore;
+            }
+            case Tipizzato tipizzato -> {
+                daCercare.add(tipizzato.valore());
+                yield tipizzato.valore();
+            }
+            case List<?> elementi -> elementi.stream().map(elemento -> istanzia(elemento, daCercare)).toList();
+            case Map<?, ?> proprieta -> {
+                Map<String, Object> oggetto = new LinkedHashMap<>();
+                proprieta.forEach((chiave, valore) -> oggetto.put((String) chiave, istanzia(valore, daCercare)));
+                yield oggetto;
+            }
+            default -> throw new IllegalArgumentException("Modello non previsto: " + modello);
+        };
     }
 
     private int conta(String sql) {

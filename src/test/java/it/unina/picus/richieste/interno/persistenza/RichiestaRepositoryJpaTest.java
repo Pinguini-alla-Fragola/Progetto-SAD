@@ -2,9 +2,12 @@ package it.unina.picus.richieste.interno.persistenza;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.sql.Timestamp;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CyclicBarrier;
@@ -40,6 +43,9 @@ import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
 @DisplayName("Repository delle richieste su PostgreSQL")
 class RichiestaRepositoryJpaTest {
 
+    private static final UUID PARI_MINORE = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    private static final UUID PARI_MAGGIORE = UUID.fromString("00000000-0000-0000-0000-000000000002");
+
     @Autowired
     private InvioRichiesteApi invio;
 
@@ -73,10 +79,17 @@ class RichiestaRepositoryJpaTest {
 
         var esiti = inParallelo(comandi);
 
-        assertThat(esiti).allSatisfy(esito -> assertThat(esito).isInstanceOf(RichiestaSintesi.class));
-        assertThat(esiti).extracting(esito -> ((RichiestaSintesi) esito).id()).containsOnly(
-                ((RichiestaSintesi) esiti.getFirst()).id());
         assertThat(jdbc.queryForObject("select count(*) from richieste", Integer.class)).isEqualTo(1);
+        Map<String, Object> salvata = rigaPerInvio(riferimento);
+        assertThat(esiti).allSatisfy(esito -> assertThat(esito)
+                .isInstanceOfSatisfying(RichiestaSintesi.class, sintesi -> {
+                    assertThat(sintesi.id()).isEqualTo(salvata.get("id"));
+                    // Il comando vincente risponde con l'istante in memoria, PostgreSQL lo salva al microsecondo.
+                    assertThat(Duration.between(((Timestamp) salvata.get("inviata_il")).toInstant(),
+                            sintesi.inviataIl()).abs()).isLessThan(Duration.ofNanos(1_000));
+                }));
+        assertThat(salvata.get("tipo_destinatario")).isEqualTo("PERSONA");
+        assertThat(salvata.get("description")).isEqualTo("Bisogno generico");
     }
 
     @RepeatedTest(3)
@@ -90,9 +103,17 @@ class RichiestaRepositoryJpaTest {
                 () -> invio.invia(titolare, persona, riferimento),
                 () -> invio.invia(titolare, nucleo, riferimento)));
 
-        assertThat(esiti).filteredOn(RichiestaSintesi.class::isInstance).hasSize(1);
-        assertThat(esiti).filteredOn(ConflittoRichiestaException.class::isInstance).hasSize(1);
+        // inParallelo conserva l'ordine: l'indice dell'esito riuscito indica i dati che devono essere salvati.
+        boolean vinceIlPrimo = esiti.get(0) instanceof RichiestaSintesi;
+        Object riuscito = esiti.get(vinceIlPrimo ? 0 : 1);
+        assertThat(riuscito).isInstanceOf(RichiestaSintesi.class);
+        assertThat(esiti.get(vinceIlPrimo ? 1 : 0)).isInstanceOf(ConflittoRichiestaException.class);
         assertThat(jdbc.queryForObject("select count(*) from richieste", Integer.class)).isEqualTo(1);
+
+        Map<String, Object> salvata = rigaPerInvio(riferimento);
+        assertThat(((RichiestaSintesi) riuscito).id()).isEqualTo(salvata.get("id"));
+        assertThat(salvata.get("tipo_destinatario")).isEqualTo(vinceIlPrimo ? "PERSONA" : "NUCLEO");
+        assertThat(salvata.get("titolare_id")).isEqualTo(titolare.accountId());
     }
 
     @Test
@@ -112,16 +133,31 @@ class RichiestaRepositoryJpaTest {
     void ordinamentoPersistito() {
         Instant base = Instant.parse("2026-11-10T09:00:00Z");
         UUID altraOpt = dati.opt("OPT altra", "portici");
+        // Due pratiche della stessa titolare con lo stesso istante e UUID fissi inseriti in ordine
+        // inverso: senza lo spareggio per UUID l'ordine fisico non coinciderebbe con quello atteso.
+        richiestaConId(PARI_MAGGIORE, titolare.accountId(), "PRESA_IN_CARICO", base);
+        richiestaConId(PARI_MINORE, titolare.accountId(), "CREATA", base);
         UUID tardiva = dati.richiesta(titolare.accountId(), m01, "napoli", "CREATA", base.plusSeconds(60));
-        UUID parA = dati.richiesta(titolare.accountId(), m01, "napoli", "PRESA_IN_CARICO", base);
-        UUID parB = dati.richiesta(altraOpt, m01, "portici", "IN_PROGRAMMAZIONE", base);
-        dati.richiesta(titolare.accountId(), m01, "napoli", "ANNULLATA", base.minusSeconds(60));
-        List<UUID> pari = List.of(parA, parB).stream().sorted((a, b) -> a.toString().compareTo(b.toString())).toList();
+        UUID annullata = dati.richiesta(titolare.accountId(), m01, "napoli", "ANNULLATA", base.minusSeconds(60));
+        UUID altrui = dati.richiesta(altraOpt, m01, "portici", "IN_PROGRAMMAZIONE", base.plusSeconds(30));
 
         assertThat(repository.codaBanco()).extracting(r -> r.id())
-                .containsExactly(pari.get(0), pari.get(1), tardiva);
+                .containsExactly(PARI_MINORE, PARI_MAGGIORE, altrui, tardiva);
         assertThat(repository.cercaPerTitolare(titolare.accountId())).extracting(r -> r.id())
-                .hasSize(3).doesNotContain(parB).endsWith(tardiva);
+                .containsExactly(annullata, PARI_MINORE, PARI_MAGGIORE, tardiva);
+        assertThat(repository.cercaPerTitolare(altraOpt)).extracting(r -> r.id()).containsExactly(altrui);
+    }
+
+    private Map<String, Object> rigaPerInvio(UUID riferimento) {
+        return jdbc.queryForMap("select * from richieste where titolare_id = ? and riferimento_invio = ?",
+                titolare.accountId(), riferimento);
+    }
+
+    private void richiestaConId(UUID id, UUID titolareRichiesta, String stato, Instant inviataIl) {
+        jdbc.update("""
+                insert into richieste (id, titolare_id, misura_id, comune_codice, tipo_destinatario, inviata_il, stato)
+                values (?, ?, ?, 'napoli', 'PERSONA', ?, ?)
+                """, id, titolareRichiesta, m01, Timestamp.from(inviataIl), stato);
     }
 
     private static List<Object> inParallelo(List<Callable<Object>> comandi) throws Exception {

@@ -24,7 +24,13 @@ public final class DatiSintetici {
         this.jdbc = jdbc;
     }
 
-    /** Riporta le tabelle dinamiche allo stato iniziale delle migrazioni, catalogo compreso. */
+    /**
+     * Riporta le tabelle dinamiche allo stato iniziale delle migrazioni, catalogo compreso.
+     *
+     * <p>Agisce sull'intero database condiviso: usarla solo da classi annotate con
+     * {@link IntegrazionePostgresql}, il cui lock JUnit impedisce che un'altra classe stia
+     * preparando o leggendo dati nello stesso momento.</p>
+     */
     public void svuota() {
         jdbc.update("delete from comunicazioni_avvisi_operativi");
         jdbc.update("delete from richieste_contatti_disponibilita");
