@@ -56,6 +56,12 @@ public class RichiestaRepositoryJpa implements RichiestaRepository {
     }
 
     @Override
+    public boolean esiste(UUID id) {
+        return !entityManager.createQuery("select r.id from RichiestaJpa r where r.id = :id", UUID.class)
+                .setParameter("id", id).getResultList().isEmpty();
+    }
+
+    @Override
     public Optional<RichiestaDiMisura> cercaPerAggiornamento(UUID id) {
         var entita = entityManager.find(RichiestaJpa.class, id, LockModeType.PESSIMISTIC_WRITE);
         if (entita == null) {

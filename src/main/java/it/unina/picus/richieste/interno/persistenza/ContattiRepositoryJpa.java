@@ -2,7 +2,9 @@ package it.unina.picus.richieste.interno.persistenza;
 
 import it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione;
 import it.unina.picus.richieste.api.RichiesteApi.ContattoDisponibilita;
+import it.unina.picus.richieste.api.RichiesteApi.DettaglioContatto;
 import it.unina.picus.richieste.api.RichiesteApi.EsitoContatto;
+import it.unina.picus.richieste.api.RisorsaRichiesteNonTrovataException;
 import it.unina.picus.richieste.interno.dominio.ContattiRepository;
 import jakarta.persistence.EntityManager;
 import java.time.Instant;
@@ -11,7 +13,7 @@ import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Repository;
 
-/** Adatta i contatti persistiti alla porta del coordinamento. */
+/** Applica il pattern <em>Data Mapper</em> per condividere le proiezioni dei contatti. */
 @Repository
 public class ContattiRepositoryJpa implements ContattiRepository {
     private final ContattoDisponibilitaRepository contatti;
@@ -23,8 +25,24 @@ public class ContattiRepositoryJpa implements ContattiRepository {
     }
 
     @Override
-    public Optional<UUID> richiestaDelContatto(UUID id) {
-        return contatti.cercaRiferimento(id).map(ContattoDisponibilitaRepository.RiferimentoContatto::getRichiestaId);
+    public Optional<Riferimento> cercaRiferimento(UUID id) {
+        return contatti.cercaRiferimento(id).map(r -> new Riferimento(r.getRichiestaId(), r.getErogatoreId()));
+    }
+
+    @Override
+    public Optional<DettaglioContatto> cercaDettaglio(UUID id) {
+        return contatti.findOneById(id).map(contatto -> {
+            var richiesta = contatto.getRichiesta();
+            return new DettaglioContatto(aDto(contatto), richiesta.getMisuraId(), contatto.getNomeMisura(),
+                    richiesta.getTipoDestinatario(), richiesta.getComuneCodice());
+        });
+    }
+
+    @Override
+    public ContattoDisponibilita rispondi(UUID id, boolean disponibile) {
+        var contatto = contatti.findById(id).orElseThrow(RisorsaRichiesteNonTrovataException::new);
+        contatto.registraRisposta(disponibile);
+        return aDto(contatto);
     }
 
     @Override
