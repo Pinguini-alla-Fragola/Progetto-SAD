@@ -135,7 +135,10 @@ class RichiesteVisteTest {
                 .requestAttr(jakarta.servlet.RequestDispatcher.ERROR_STATUS_CODE, 404)
                 .with(user(titolare.toString()).roles("OPT")))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string(containsString("Pagina non trovata")));
+                .andExpect(content().string(containsString("Pagina non trovata")))
+                .andExpect(content().string(containsString("action=\"/logout\"")))
+                .andExpect(content().string(containsString("method=\"post\"")))
+                .andExpect(content().string(containsString("name=\"_csrf\"")));
     }
 
     private UUID account() {

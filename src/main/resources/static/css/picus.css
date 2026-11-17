@@ -411,7 +411,10 @@ body[data-area] .picus-footer { background: var(--color-white); }
 .count-report-row, .record-details .list-columns { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) 6rem; gap: .75rem; }
 .count-report-row { align-items: baseline; padding-block: .875rem; border-bottom: 1px solid var(--color-line); font-size: .9375rem; overflow-wrap: anywhere; }
 .count-value { text-align: right; font-variant-numeric: tabular-nums; }
-#riepilogo-schede, #riepilogo-opt { display: flex; align-items: end; flex-wrap: wrap; gap: 1rem 1.5rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--color-line); }
+#riepilogo-schede { padding-bottom: 1.25rem; border-bottom: 1px solid var(--color-line); }
+#riepilogo-opt { display: flex; align-items: end; flex-wrap: wrap; gap: 1rem 1.5rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--color-line); }
+#riepilogo-schede > .campi-inattivi { display: flex; align-items: end; flex-wrap: wrap; gap: 1rem 1.5rem; width: 100%; }
+#riepilogo-schede > .campi-inattivi > .picus-fields { flex: 0 1 24rem; max-width: 100%; }
 #riepilogo-schede .form-submit, #riepilogo-opt .form-submit { margin: 0; padding: 0; border: 0; }
 #riepilogo-opt .form-section { flex: 1 1 22rem; padding: 0; border: 0; }
 #riepilogo-opt .form-section > legend { float: none; width: auto; margin-bottom: .5rem; padding: 0; color: var(--color-slate-600); font-size: .875rem; }
@@ -427,6 +430,9 @@ body[data-area] .picus-footer { background: var(--color-white); }
 }
 
 @media (max-width: 660px) {
+    #riepilogo-schede .form-submit { flex-basis: 100%; }
+    #riepilogo-schede .form-submit > .azione-inattiva { width: 100%; }
+    #riepilogo-schede .form-submit .btn { width: 100%; }
     .list-tools, .list-filters { align-items: stretch; gap: .75rem; }
     .list-search { flex-basis: 100%; }
     .list-filters { width: 100%; }
@@ -510,6 +516,8 @@ body[data-area] .picus-footer { background: var(--color-white); }
 .error-content h1 { margin-bottom: 1rem; font: 400 clamp(2rem, 4vw, 2.75rem)/1.12 var(--font-display); letter-spacing: -.025em; }
 .error-content > p { max-width: 48ch; margin-bottom: .75rem; color: var(--color-slate-600); line-height: 1.65; }
 .error-content .picus-actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.5rem; }
+.error-content .picus-actions > form { margin: 0; }
+.error-content .picus-actions > form .btn { width: 100%; }
 body[data-area] { background: var(--color-ground); }
 .workspace-navbar { background: var(--color-paper); }
 .area-nav { background: var(--color-primary); border-right: 0; }
