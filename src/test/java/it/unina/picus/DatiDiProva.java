@@ -1,5 +1,6 @@
 package it.unina.picus;
 
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -62,11 +63,34 @@ public final class DatiDiProva {
 
     /** Misura attiva nuova: i candidati della richiesta sono solo quelli creati dal test. */
     public long creaMisura() {
+        return creaMisura(false);
+    }
+
+    /** Misura attiva nuova erogabile anche a distanza: ammette l'opzione del Centro PICUS. */
+    public long creaMisuraADistanza() {
+        return creaMisura(true);
+    }
+
+    private long creaMisura(boolean erogabileADistanza) {
         String codice = "T" + UUID.randomUUID().toString().replace("-", "").substring(0, 9).toUpperCase();
         return jdbc.queryForObject(
-                "insert into " + schema + "catalogo_misure (codice, nome, descrizione)"
-                        + " values (?, '" + NOME_MISURA_DI_PROVA + "', 'Misura sintetica per i test') returning id",
-                Long.class, codice);
+                "insert into " + schema + "catalogo_misure (codice, nome, descrizione, erogabile_a_distanza)"
+                        + " values (?, '" + NOME_MISURA_DI_PROVA + "', 'Misura sintetica per i test', ?) returning id",
+                Long.class, codice, erogabileADistanza);
+    }
+
+    /** Cambia l'erogabilità a distanza di una misura, come farebbe il Banco aggiornando il catalogo. */
+    public void impostaErogabileADistanza(long misuraId, boolean erogabile) {
+        jdbc.update("update " + schema + "catalogo_misure set erogabile_a_distanza = ? where id = ?",
+                erogabile, misuraId);
+    }
+
+    /** Comune nuovo senza adiacenze: chi vi risiede non è un'opzione locale per le richieste di Napoli. */
+    public String creaComuneIsolato() {
+        String codice = "isolato-" + UUID.randomUUID().toString().substring(0, 8);
+        jdbc.update("insert into " + schema + "catalogo_comuni (codice, nome) values (?, 'Comune isolato di prova')",
+                codice);
+        return codice;
     }
 
     /** OPT di Napoli che dichiara di erogare la misura: compare fra i candidati dello stesso comune. */
@@ -90,6 +114,22 @@ public final class DatiDiProva {
     /** Operatore interno del Banco abilitato alla misura: compare fra i candidati dello stesso comune. */
     public UUID creaOperatoreErogatore(String nome, long misuraId) {
         UUID id = creaOperatore(nome);
+        jdbc.update(
+                "insert into " + schema + "utenze_operatori_misure (account_id, misura_id) values (?, ?)",
+                id, misuraId);
+        return id;
+    }
+
+    /**
+     * Operatore del Centro PICUS nel comune indicato, abilitato alla misura. Se il comune è isolato
+     * e la misura è erogabile a distanza, l'unica opzione che offre è {@code CENTRO_PICUS_A_DISTANZA}.
+     */
+    public UUID creaOperatoreCentroPicus(String nome, long misuraId, String comune) {
+        UUID id = creaAccount("OPERATORE", nome);
+        jdbc.update(
+                "insert into " + schema + "utenze_profili_operatore (account_id, tipologia, comune_codice, centro_picus)"
+                        + " values (?, 'INTERNO_BANCO', ?, true)",
+                id, comune);
         jdbc.update(
                 "insert into " + schema + "utenze_operatori_misure (account_id, misura_id) values (?, ?)",
                 id, misuraId);
@@ -125,8 +165,28 @@ public final class DatiDiProva {
         return id;
     }
 
+    /**
+     * Forza lo stato della richiesta, per provare la difesa del server su stati che il flusso non
+     * permette di raggiungere. Per {@code CONFERMATA} completa anche erogatore e accordo, che il
+     * vincolo della V14 rende obbligatori: come erogatore usa l'ultimo contattato.
+     */
     public void impostaStato(UUID richiestaId, String stato) {
-        jdbc.update("update " + schema + "richieste set stato = ? where id = ?", stato, richiestaId);
+        if (!"CONFERMATA".equals(stato)) {
+            jdbc.update("update " + schema + "richieste set stato = ? where id = ?", stato, richiestaId);
+            return;
+        }
+        jdbc.update(
+                "update " + schema + "richieste r set stato = 'CONFERMATA',"
+                        + " erogatore_id = coalesce(r.erogatore_id, (select c.erogatore_id from " + schema
+                        + "richieste_contatti_disponibilita c where c.richiesta_id = r.id"
+                        + " order by c.inviato_il desc limit 1)),"
+                        + " erogatore_ambito = coalesce(r.erogatore_ambito, 'STESSO_COMUNE'),"
+                        + " accordo_modalita = 'IN_PRESENZA', accordo_data_ora = now() + interval '30 days',"
+                        + " accordo_luogo = 'Sede di prova', accordo_nome_referente = 'Referente',"
+                        + " accordo_cognome_referente = 'Sintetico', accordo_telefono_referente = '0810000000',"
+                        + " accordo_link = null"
+                        + " where r.id = ?",
+                richiestaId);
     }
 
     public String esitoContatto(UUID contattoId) {
@@ -138,6 +198,18 @@ public final class DatiDiProva {
     public String statoRichiesta(UUID richiestaId) {
         return jdbc.queryForObject(
                 "select stato from " + schema + "richieste where id = ?", String.class, richiestaId);
+    }
+
+    /**
+     * Stato e colonne dell'accordo come sono salvati, per verificare che un comando respinto non
+     * abbia lasciato scritture parziali.
+     */
+    public Map<String, Object> accordoPersistito(UUID richiestaId) {
+        return jdbc.queryForMap(
+                "select stato, accordo_modalita, accordo_data_ora, accordo_luogo, accordo_nome_referente,"
+                        + " accordo_cognome_referente, accordo_telefono_referente, accordo_link"
+                        + " from " + schema + "richieste where id = ?",
+                richiestaId);
     }
 
     /** Erogatore assegnato alla richiesta, oppure {@code null} se non è stato assegnato nessuno. */
