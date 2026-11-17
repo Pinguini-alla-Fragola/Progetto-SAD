@@ -36,7 +36,7 @@ class TitolaritaRichiesteAccessiTest extends AccessiBlackBoxTest {
         Account titolare = scenario.optRichiedente();
         UUID id = scenario.richiestaCreata(titolare);
 
-        RichiestaDettaglio dettaglio = scenario.richieste().consultaRichiesta(titolare.identita(), id);
+        RichiestaDettaglio dettaglio = scenario.invio().consultaRichiesta(titolare.identita(), id);
 
         assertEquals(id, dettaglio.richiesta().id());
         assertEquals(titolare.id(), dettaglio.titolareId());
@@ -51,9 +51,9 @@ class TitolaritaRichiesteAccessiTest extends AccessiBlackBoxTest {
         Account estranea = scenario.optRichiedente();
         UUID id = scenario.richiestaCreata(titolare);
 
-        assertNegatoSenzaModifiche(id, () -> scenario.richieste().consultaRichiesta(estranea.identita(), id));
+        assertNegatoSenzaModifiche(id, () -> scenario.invio().consultaRichiesta(estranea.identita(), id));
         // stessa risorsa, account titolare: resta consultabile
-        assertEquals(id, scenario.richieste().consultaRichiesta(titolare.identita(), id).richiesta().id());
+        assertEquals(id, scenario.invio().consultaRichiesta(titolare.identita(), id).richiesta().id());
     }
 
     @Test
@@ -63,9 +63,9 @@ class TitolaritaRichiesteAccessiTest extends AccessiBlackBoxTest {
         Account estranea = scenario.optRichiedente();
         UUID id = scenario.richiestaCreata(titolare);
 
-        assertTrue(scenario.richieste().elencoRichiesteOpt(titolare.identita()).stream()
+        assertTrue(scenario.invio().elencoRichiesteOpt(titolare.identita()).stream()
                 .map(RichiestaSintesi::id).anyMatch(id::equals));
-        assertFalse(scenario.richieste().elencoRichiesteOpt(estranea.identita()).stream()
+        assertFalse(scenario.invio().elencoRichiesteOpt(estranea.identita()).stream()
                 .map(RichiestaSintesi::id).anyMatch(id::equals), "la OPT estranea non deve vedere la richiesta");
     }
 

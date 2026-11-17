@@ -49,9 +49,10 @@ import it.unina.picus.shared.ScenarioAccessi.ContattoPreparato;
  * </ul>
  *
  * <p>Su {@code main} sono esposti i contatti di disponibilità ({@link #CONSULTA_CONTATTO},
- * {@link #RISPONDI_CONTATTO}, {@link #CONTATTI_RICHIESTA}). I percorsi delle richieste
- * ({@link #CONSULTA_RICHIESTA}, {@link #ANNULLA_RICHIESTA}) sono ancora proposti e vanno allineati al
- * controller di Richieste quando sarà integrato.</p>
+ * {@link #RISPONDI_CONTATTO}, {@link #CONTATTI_RICHIESTA}) e il dettaglio della richiesta
+ * ({@link #CONSULTA_RICHIESTA}): se manca un loro handler il caso fallisce. L'annullamento
+ * ({@link #ANNULLA_RICHIESTA}) non è ancora esposto e i suoi casi si sospendono finché il controller non
+ * gestisce la stessa richiesta JSON usata dal test.</p>
  *
  * <p>Tecniche: test negativi di sicurezza su sessione assente, scaduta e revocata e su parametri
  * alterati, con un controllo positivo {@code 200} sulla stessa risorsa prima di ogni scadenza o revoca
@@ -73,13 +74,15 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
     static final String RISPONDI_CONTATTO = "/api/contatti-disponibilita/{id}/risposta";
     /** Storico dei contatti di una richiesta, riservato al Banco ({@code ContattiDisponibilitaController}). */
     static final String CONTATTI_RICHIESTA = "/api/richieste/{id}/contatti";
-    /** Percorso proposto per il dettaglio di una richiesta; da allineare al controller di Richieste. */
+    /** Dettaglio di una richiesta ({@code RichiesteController}). */
     static final String CONSULTA_RICHIESTA = "/api/richieste/{id}";
-    /** Percorso proposto per l'annullamento; da allineare al controller di Richieste. */
+    /** Annullamento, non ancora esposto: percorso e corpo JSON proposti, da allineare al controller. */
     static final String ANNULLA_RICHIESTA = "/api/richieste/{id}/annullamento";
     /** Percorso volutamente senza controller, per il solo test del filtro di sicurezza generale. */
     static final String NON_MAPPATO = "/api/percorso-non-mappato-28/{id}";
 
+    /** Motivo sintetico degli annullamenti tentati. */
+    private static final String MOTIVO = "Tentativo di annullamento #28";
     /** Corpo della risposta a un contatto. */
     private static final String DISPONIBILE = "{\"disponibile\":true}";
 
@@ -99,23 +102,26 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
     @DisplayName("CA-08 · filtro di sicurezza: qualunque /api/** anonimo → 401 senza redirect (percorso non mappato)")
     void filtroDiSicurezzaSuApiNonMappata() throws Exception {
         UUID id = UUID.randomUUID();
-        assertFalse(http.mappato(HttpMethod.GET, NON_MAPPATO, id), "il percorso deve restare senza controller");
-        assertFalse(http.mappato(HttpMethod.POST, NON_MAPPATO, id), "il percorso deve restare senza controller");
         SessioneAnonima anonima = http.sessioneAnonima();
+        MockHttpServletRequestBuilder lettura = get(NON_MAPPATO, id).accept(MediaType.APPLICATION_JSON);
+        MockHttpServletRequestBuilder scrittura = post(NON_MAPPATO, id).session(anonima.sessione())
+                .header(anonima.csrf().header(), anonima.csrf().token())
+                .contentType(MediaType.APPLICATION_JSON).content("{}").accept(MediaType.APPLICATION_JSON);
+        assertFalse(http.mappato(lettura), "il percorso deve restare senza controller");
+        assertFalse(http.mappato(scrittura), "il percorso deve restare senza controller");
 
-        MockHttpServletResponse lettura = http.esegui(get(NON_MAPPATO, id).accept(MediaType.APPLICATION_JSON));
-        MockHttpServletResponse scrittura = http.esegui(post(NON_MAPPATO, id).session(anonima.sessione())
-                .header(anonima.csrf().header(), anonima.csrf().token()).accept(MediaType.APPLICATION_JSON));
+        MockHttpServletResponse esitoLettura = http.esegui(lettura);
+        MockHttpServletResponse esitoScrittura = http.esegui(scrittura);
 
-        assertEquals(401, lettura.getStatus());
-        assertNull(lettura.getHeader("Location"), "una API non deve rimandare al login");
-        assertEquals(401, scrittura.getStatus());
-        assertNull(scrittura.getHeader("Location"), "una API non deve rimandare al login");
+        assertEquals(401, esitoLettura.getStatus());
+        assertNull(esitoLettura.getHeader("Location"), "una API non deve rimandare al login");
+        assertEquals(401, esitoScrittura.getStatus());
+        assertNull(esitoScrittura.getHeader("Location"), "una API non deve rimandare al login");
     }
 
     // ------------------------------------------------------------------ risorse reali senza sessione
 
-    /** Risorse protette su cui si verifica il {@code 401} anonimo, con un dato reale preparato. */
+    /** Risorse protette e già consegnate su cui si verifica il {@code 401} anonimo, con un dato reale preparato. */
     enum RisorsaProtetta {
         CONSULTA_CONTATTO(HttpMethod.GET, SessioneHttpAccessiTest.CONSULTA_CONTATTO, true),
         RISPONDI_CONTATTO(HttpMethod.POST, SessioneHttpAccessiTest.RISPONDI_CONTATTO, true),
@@ -136,11 +142,12 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
     @ParameterizedTest(name = "CA-08 · {0} senza sessione → 401 senza redirect, dati né modifiche")
     @EnumSource(RisorsaProtetta.class)
     void risorsaRealeSenzaSessioneRisponde401(RisorsaProtetta risorsa) throws Exception {
-        http.richiediEndpointEsposto(risorsa.metodo, risorsa.percorso, UUID.randomUUID());
         ContattoPreparato contatto = scenario.contattoInAttesa(scenario.optRichiedente(), scenario.optRichiedente());
         UUID id = risorsa.suContatto ? contatto.contattoId() : contatto.richiestaId();
+        MockHttpServletRequestBuilder richiesta = senzaIdentita(risorsa.metodo, risorsa.percorso, id);
+        http.richiediEndpointConsegnato(richiesta);
 
-        MockHttpServletResponse risposta = http.esegui(senzaIdentita(risorsa.metodo, risorsa.percorso, id));
+        MockHttpServletResponse risposta = http.esegui(richiesta);
 
         assertEquals(401, risposta.getStatus());
         assertNull(risposta.getHeader("Location"), "una API non deve rimandare al login");
@@ -151,11 +158,11 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
     @Test
     @DisplayName("CA-08 · l'accesso è raggiungibile senza sessione e apre una sessione valida")
     void loginPubblico() throws Exception {
-        http.richiediEndpointEsposto(HttpMethod.GET, CONSULTA_CONTATTO, UUID.randomUUID());
         Account destinatario = scenario.optRichiedente();
         ContattoPreparato contatto = scenario.contattoInAttesa(scenario.optRichiedente(), destinatario);
 
         MockHttpSession sessione = http.accedi(destinatario);
+        http.richiediEndpointConsegnato(leggiContatto(sessione, contatto));
 
         assertEquals(200, http.esegui(leggiContatto(sessione, contatto)).getStatus(),
                 "dopo l'accesso il destinatario consulta il proprio contatto");
@@ -190,12 +197,12 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
         verificaSessioneChiusa(sessione, csrf, contatto);
     }
 
-    // ------------------------------------------------------------------ richieste (percorsi proposti)
+    // ------------------------------------------------------------------ richieste
 
     @Test
     @DisplayName("CA-08 · una sessione autenticata e poi scaduta riceve 401 e la pratica resta invariata")
     void sessioneScadutaSullaRichiesta() throws Exception {
-        http.richiediEndpointEsposto(HttpMethod.GET, CONSULTA_RICHIESTA, UUID.randomUUID());
+        http.richiediEndpointConsegnato(leggiRichiesta(new MockHttpSession(), UUID.randomUUID()));
         Account titolare = scenario.optRichiedente();
         UUID id = scenario.richiestaCreata(titolare);
         MockHttpSession sessione = http.accedi(titolare);
@@ -214,7 +221,7 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
     @Test
     @DisplayName("CA-08 · dopo la revoca dell'account la sessione aperta riceve 401 sulla richiesta senza dati")
     void sessioneRevocataSullaRichiesta() throws Exception {
-        http.richiediEndpointEsposto(HttpMethod.GET, CONSULTA_RICHIESTA, UUID.randomUUID());
+        http.richiediEndpointConsegnato(leggiRichiesta(new MockHttpSession(), UUID.randomUUID()));
         Account titolare = scenario.optRichiedente();
         UUID id = scenario.richiestaCreata(titolare);
         MockHttpSession sessione = http.accedi(titolare);
@@ -232,12 +239,13 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
     @Test
     @DisplayName("CA-08 · un annullamento senza sessione su una pratica reale riceve 401 e nulla cambia")
     void annullamentoSenzaSessioneNonModifica() throws Exception {
-        http.richiediEndpointEsposto(HttpMethod.POST, ANNULLA_RICHIESTA, UUID.randomUUID());
+        http.richiediEndpointEsposto(annulla(UUID.randomUUID(), MOTIVO));
         UUID id = scenario.richiestaCreata(scenario.optRichiedente());
         var prima = scenario.istantanea(id);
 
-        MockHttpServletResponse risposta = http.esegui(senzaIdentita(HttpMethod.POST, ANNULLA_RICHIESTA, id)
-                .param("motivo", "Tentativo senza sessione"));
+        SessioneAnonima anonima = http.sessioneAnonima();
+        MockHttpServletResponse risposta = http.esegui(annulla(id, MOTIVO).session(anonima.sessione())
+                .header(anonima.csrf().header(), anonima.csrf().token()));
 
         assertEquals(401, risposta.getStatus());
         assertFalse(risposta.getContentAsString().contains(id.toString()), "nessun dato della richiesta");
@@ -247,7 +255,7 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
     @Test
     @DisplayName("CA-08 · dopo la revoca un annullamento con la sessione aperta riceve 401 e nulla cambia")
     void annullamentoDopoRevocaNonModifica() throws Exception {
-        http.richiediEndpointEsposto(HttpMethod.POST, ANNULLA_RICHIESTA, UUID.randomUUID());
+        http.richiediEndpointEsposto(annulla(UUID.randomUUID(), MOTIVO));
         Account titolare = scenario.optRichiedente();
         UUID id = scenario.richiestaCreata(titolare);
         MockHttpSession sessione = http.accedi(titolare);
@@ -255,8 +263,8 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
         var prima = scenario.istantanea(id);
 
         scenario.revoca(titolare);
-        MockHttpServletResponse risposta = http.esegui(post(ANNULLA_RICHIESTA, id).session(sessione)
-                .header(csrf.header(), csrf.token()).accept(MediaType.APPLICATION_JSON));
+        MockHttpServletResponse risposta = http.esegui(annulla(id, MOTIVO).session(sessione)
+                .header(csrf.header(), csrf.token()));
 
         assertEquals(401, risposta.getStatus());
         assertEquals(prima, scenario.istantanea(id), "stato e dati invariati");
@@ -265,7 +273,7 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
     @Test
     @DisplayName("CA-09 · ruolo, titolare, organizzazione e assegnazione alterati non aprono la pratica altrui")
     void parametriAlteratiNonConcedonoAccessi() throws Exception {
-        http.richiediEndpointEsposto(HttpMethod.GET, CONSULTA_RICHIESTA, UUID.randomUUID());
+        http.richiediEndpointConsegnato(leggiRichiesta(new MockHttpSession(), UUID.randomUUID()));
         Account titolare = scenario.optRichiedente();
         Account estranea = scenario.optRichiedente();
         UUID id = scenario.richiestaCreata(titolare);
@@ -287,7 +295,7 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
     @Test
     @DisplayName("CA-09 · organizzazione e assegnazione alterate non permettono di annullare la pratica altrui")
     void assegnazioneAlterataNonConcedeAnnullamento() throws Exception {
-        http.richiediEndpointEsposto(HttpMethod.POST, ANNULLA_RICHIESTA, UUID.randomUUID());
+        http.richiediEndpointEsposto(annulla(UUID.randomUUID(), MOTIVO));
         Account titolare = scenario.optRichiedente();
         Account estranea = scenario.optRichiedente();
         UUID id = scenario.richiestaCreata(titolare);
@@ -295,12 +303,11 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
         Csrf csrf = http.csrf(sessione);
         var prima = scenario.istantanea(id);
 
-        MockHttpServletResponse risposta = http.esegui(post(ANNULLA_RICHIESTA, id).session(sessione)
-                .header(csrf.header(), csrf.token()).param("motivo", "Tentativo con parametri alterati")
+        MockHttpServletResponse risposta = http.esegui(annulla(id, MOTIVO).session(sessione)
+                .header(csrf.header(), csrf.token())
                 .param("ruolo", "BANCO").param("optId", titolare.id().toString())
                 .param("organizzazioneId", titolare.id().toString()).param("titolareId", estranea.id().toString())
-                .param("erogatoreId", estranea.id().toString()).param("assegnatarioId", estranea.id().toString())
-                .accept(MediaType.APPLICATION_JSON));
+                .param("erogatoreId", estranea.id().toString()).param("assegnatarioId", estranea.id().toString()));
 
         assertEquals(403, risposta.getStatus(), "a rotta esposta ogni esito diverso da 403 è un errore");
         assertEquals(prima, scenario.istantanea(id), "stato e dati invariati");
@@ -309,12 +316,13 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
     // ------------------------------------------------------------------ supporto
 
     /** Contatto in attesa intestato al destinatario, dopo aver verificato che le rotte usate siano esposte. */
-    private ContattoPreparato preparaContattoAccessibile(Account destinatario) {
-        UUID qualunque = UUID.randomUUID();
-        http.richiediEndpointEsposto(HttpMethod.GET, CONSULTA_CONTATTO, qualunque);
-        http.richiediEndpointEsposto(HttpMethod.POST, RISPONDI_CONTATTO, qualunque);
-        http.richiediEndpointEsposto(HttpMethod.GET, CONTATTI_RICHIESTA, qualunque);
-        return scenario.contattoInAttesa(scenario.optRichiedente(), destinatario);
+    private ContattoPreparato preparaContattoAccessibile(Account destinatario) throws Exception {
+        ContattoPreparato contatto = scenario.contattoInAttesa(scenario.optRichiedente(), destinatario);
+        MockHttpSession qualunque = new MockHttpSession();
+        http.richiediEndpointConsegnato(leggiContatto(qualunque, contatto));
+        http.richiediEndpointConsegnato(rispondi(contatto));
+        http.richiediEndpointConsegnato(get(CONTATTI_RICHIESTA, contatto.richiestaId()).accept(MediaType.APPLICATION_JSON));
+        return contatto;
     }
 
     /** Controllo positivo: con la sessione valida il destinatario legge il contatto ({@code 200}, dati minimi). */
@@ -332,9 +340,8 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
     private void verificaSessioneChiusa(MockHttpSession sessione, Csrf csrf, ContattoPreparato contatto)
             throws Exception {
         MockHttpServletResponse lettura = http.esegui(leggiContatto(sessione, contatto));
-        MockHttpServletResponse risposta = http.esegui(post(RISPONDI_CONTATTO, contatto.contattoId())
-                .session(sessione).header(csrf.header(), csrf.token())
-                .contentType(MediaType.APPLICATION_JSON).content(DISPONIBILE).accept(MediaType.APPLICATION_JSON));
+        MockHttpServletResponse risposta = http.esegui(rispondi(contatto).session(sessione)
+                .header(csrf.header(), csrf.token()));
 
         for (MockHttpServletResponse esito : List.of(lettura, risposta)) {
             assertEquals(401, esito.getStatus());
@@ -374,5 +381,20 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
 
     private static MockHttpServletRequestBuilder leggiRichiesta(MockHttpSession sessione, UUID id) {
         return get(CONSULTA_RICHIESTA, id).session(sessione).accept(MediaType.APPLICATION_JSON);
+    }
+
+    /** Risposta positiva al contatto, nel formato JSON del controller. */
+    private static MockHttpServletRequestBuilder rispondi(ContattoPreparato contatto) {
+        return post(RISPONDI_CONTATTO, contatto.contattoId())
+                .contentType(MediaType.APPLICATION_JSON).content(DISPONIBILE).accept(MediaType.APPLICATION_JSON);
+    }
+
+    /**
+     * Annullamento con motivo nel corpo JSON, come gli altri comandi delle API. La verifica del mapping usa
+     * la stessa richiesta, così il caso si attiva quando il controller esporrà questo formato.
+     */
+    private static MockHttpServletRequestBuilder annulla(UUID id, String motivo) {
+        return post(ANNULLA_RICHIESTA, id).contentType(MediaType.APPLICATION_JSON)
+                .content("{\"motivo\":\"" + motivo + "\"}").accept(MediaType.APPLICATION_JSON);
     }
 }

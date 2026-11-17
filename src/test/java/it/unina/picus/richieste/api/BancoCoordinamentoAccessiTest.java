@@ -51,8 +51,8 @@ class BancoCoordinamentoAccessiTest extends AccessiBlackBoxTest {
         UUID id = scenario.richiestaCreata(titolare);
         IdentitaAutenticata banco = scenario.banco().identita();
 
-        assertTrue(scenario.richieste().codaBanco(banco).stream().map(RichiestaSintesi::id).anyMatch(id::equals));
-        RichiestaDettaglio dettaglio = scenario.richieste().consultaRichiesta(banco, id);
+        assertTrue(scenario.invio().codaBanco(banco).stream().map(RichiestaSintesi::id).anyMatch(id::equals));
+        RichiestaDettaglio dettaglio = scenario.invio().consultaRichiesta(banco, id);
         assertEquals(titolare.id(), dettaglio.titolareId());
         assertEquals(ScenarioAccessi.DESCRIZIONE, dettaglio.description());
     }
@@ -63,9 +63,9 @@ class BancoCoordinamentoAccessiTest extends AccessiBlackBoxTest {
         Account titolare = scenario.optRichiedente();
         Account interpellato = scenario.erogatore(TipoErogatore.OPT);
         ContattoDisponibilita contatto = scenario.richiestaConContatto(titolare, interpellato);
-        scenario.richieste().rispondiDisponibilita(interpellato.identita(), contatto.id(), false);
+        scenario.contatti().rispondiDisponibilita(interpellato, contatto.id(), false);
 
-        var contatti = scenario.richieste().elencoContatti(scenario.banco().identita(), contatto.richiestaId());
+        var contatti = scenario.contatti().elencoContatti(scenario.banco(), contatto.richiestaId());
 
         assertTrue(contatti.stream().anyMatch(c -> c.id().equals(contatto.id())
                 && c.erogatoreId().equals(interpellato.id()) && c.esito() == EsitoContatto.NON_DISPONIBILE));
@@ -152,9 +152,9 @@ class BancoCoordinamentoAccessiTest extends AccessiBlackBoxTest {
 
     private void esegui(AzioneBanco azione, IdentitaAutenticata attore, UUID richiestaId) {
         switch (azione) {
-            case PRESA_IN_CARICO -> scenario.richieste().prendiInCarico(attore, richiestaId);
-            case CONFERMA_ACCORDO -> scenario.richieste().confermaAccordo(attore, richiestaId, ScenarioAccessi.ACCORDO);
-            case RIFIUTO_DEFINITIVO -> scenario.richieste().rifiutaRichiesta(attore, richiestaId);
+            case PRESA_IN_CARICO -> scenario.coordinamento().prendiInCarico(attore, richiestaId);
+            case CONFERMA_ACCORDO -> scenario.coordinamento().confermaAccordo(attore, richiestaId, ScenarioAccessi.ACCORDO);
+            case RIFIUTO_DEFINITIVO -> scenario.coordinamento().rifiutaRichiesta(attore, richiestaId);
         }
     }
 
@@ -184,10 +184,10 @@ class BancoCoordinamentoAccessiTest extends AccessiBlackBoxTest {
         UUID inProgrammazione = scenario.richiestaInProgrammazione(titolare, scenario.erogatore(TipoErogatore.OPT));
         IdentitaAutenticata identita = titolare.identita();
 
-        assertNegatoSenzaModifiche(creata, () -> scenario.richieste().prendiInCarico(identita, creata));
-        assertNegatoSenzaModifiche(presaInCarico, () -> scenario.richieste().rifiutaRichiesta(identita, presaInCarico));
+        assertNegatoSenzaModifiche(creata, () -> scenario.coordinamento().prendiInCarico(identita, creata));
+        assertNegatoSenzaModifiche(presaInCarico, () -> scenario.coordinamento().rifiutaRichiesta(identita, presaInCarico));
         assertNegatoSenzaModifiche(inProgrammazione,
-                () -> scenario.richieste().rifiutaRichiesta(identita, inProgrammazione));
+                () -> scenario.coordinamento().rifiutaRichiesta(identita, inProgrammazione));
     }
 
     @ParameterizedTest(name = "CA-06 · operatore {0} non assegnato non rifiuta una richiesta In programmazione")
@@ -196,6 +196,6 @@ class BancoCoordinamentoAccessiTest extends AccessiBlackBoxTest {
         Account operatore = scenario.operatore(tipologia);
         UUID id = scenario.richiestaInProgrammazione(scenario.optRichiedente(), scenario.erogatore(TipoErogatore.OPT));
 
-        assertNegatoSenzaModifiche(id, () -> scenario.richieste().rifiutaRichiesta(operatore.identita(), id));
+        assertNegatoSenzaModifiche(id, () -> scenario.coordinamento().rifiutaRichiesta(operatore.identita(), id));
     }
 }

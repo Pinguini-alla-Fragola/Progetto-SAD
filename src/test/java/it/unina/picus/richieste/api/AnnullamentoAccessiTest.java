@@ -20,6 +20,7 @@ import it.unina.picus.shared.AccessiBlackBoxTest;
 import it.unina.picus.shared.ScenarioAccessi;
 import it.unina.picus.shared.ScenarioAccessi.Account;
 import it.unina.picus.comunicazioni.api.ComunicazioniApi.TipoAvviso;
+import it.unina.picus.richieste.api.RichiesteApi;
 import it.unina.picus.richieste.api.RichiesteApi.ContattoDisponibilita;
 import it.unina.picus.richieste.api.RichiesteApi.RichiestaDettaglio;
 import it.unina.picus.richieste.api.RichiesteApi.RichiestaSintesi;
@@ -156,8 +157,9 @@ class AnnullamentoAccessiTest extends AccessiBlackBoxTest {
         UUID id = scenario.richiestaInStato(stato, titolare);
         RichiestaDettaglio prima = scenario.istantanea(id);
 
-        assertThrows(IllegalArgumentException.class, () -> scenario.richieste()
-                .annullaRichiesta(attore(coordinatore, titolare).identita(), id, motivo));
+        RichiesteApi richieste = scenario.richieste(); // fuori dalla lambda: una sospensione non è un esito
+        assertThrows(IllegalArgumentException.class,
+                () -> richieste.annullaRichiesta(attore(coordinatore, titolare).identita(), id, motivo));
         assertEquals(prima, scenario.istantanea(id), "stato e dati devono restare invariati");
     }
 
@@ -168,8 +170,9 @@ class AnnullamentoAccessiTest extends AccessiBlackBoxTest {
         UUID id = scenario.richiestaAssegnataInStato(stato, scenario.optRichiedente(), assegnato);
         RichiestaDettaglio prima = scenario.istantanea(id);
 
+        RichiesteApi richieste = scenario.richieste(); // fuori dalla lambda: una sospensione non è un esito
         assertThrows(IllegalArgumentException.class,
-                () -> scenario.richieste().annullaRichiesta(assegnato.identita(), id, null));
+                () -> richieste.annullaRichiesta(assegnato.identita(), id, null));
         assertEquals(prima, scenario.istantanea(id));
     }
 
@@ -200,9 +203,9 @@ class AnnullamentoAccessiTest extends AccessiBlackBoxTest {
                 () -> scenario.richieste().annullaRichiesta(interpellato.identita(), id, MOTIVO));
 
         // dopo il rifiuto del candidato e l'assegnazione a un altro erogatore
-        scenario.richieste().rispondiDisponibilita(interpellato.identita(), contatto.id(), false);
+        scenario.contatti().rispondiDisponibilita(interpellato, contatto.id(), false);
         scenario.assegna(id, assegnato);
-        scenario.richieste().confermaAccordo(scenario.banco().identita(), id, ScenarioAccessi.ACCORDO);
+        scenario.coordinamento().confermaAccordo(scenario.banco().identita(), id, ScenarioAccessi.ACCORDO);
         assertNegatoSenzaModifiche(id,
                 () -> scenario.richieste().annullaRichiesta(interpellato.identita(), id, MOTIVO));
     }
@@ -233,8 +236,8 @@ class AnnullamentoAccessiTest extends AccessiBlackBoxTest {
                 () -> scenario.richieste().annullaRichiesta(erogatore.identita(), id, MOTIVO));
 
         // l'assegnazione è un'altra relazione autorizzante
-        scenario.richieste().rispondiDisponibilita(erogatore.identita(), contatto.id(), true);
-        scenario.richieste().assegnaErogatore(scenario.banco().identita(), contatto.id());
+        scenario.contatti().rispondiDisponibilita(erogatore, contatto.id(), true);
+        scenario.coordinamento().assegnaErogatore(scenario.banco().identita(), contatto.id());
         RichiestaSintesi esito = scenario.richieste().annullaRichiesta(erogatore.identita(), id, MOTIVO);
 
         assertEquals(StatoRichiesta.ANNULLATA, esito.stato());
@@ -303,10 +306,11 @@ class AnnullamentoAccessiTest extends AccessiBlackBoxTest {
         assertEquals(StatoRichiesta.ANNULLATA, ripetuto.stato());
         assertEquals(dopoIlPrimo, scenario.istantanea(id), "il secondo comando non cambia dati");
         var banco = scenario.banco().identita();
-        assertFalse(scenario.richieste().codaBanco(banco).stream().map(RichiestaSintesi::id).anyMatch(id::equals),
+        assertFalse(scenario.invio().codaBanco(banco).stream().map(RichiestaSintesi::id).anyMatch(id::equals),
                 "la richiesta non torna in coda");
         assertTrue(scenario.richieste().archivioBanco(banco).stream().map(RichiestaSintesi::id).anyMatch(id::equals));
-        assertThrows(IllegalStateException.class, () -> scenario.richieste().cercaErogatoriOrdinati(banco, id),
+        var coordinamento = scenario.coordinamento();
+        assertThrows(IllegalStateException.class, () -> coordinamento.cercaErogatoriOrdinati(banco, id),
                 "la ricerca resta chiusa");
     }
 
@@ -328,11 +332,11 @@ class AnnullamentoAccessiTest extends AccessiBlackBoxTest {
 
     /** Contatti di disponibilità della richiesta letti dal Banco. */
     private List<ContattoDisponibilita> contatti(UUID richiestaId) {
-        return scenario.richieste().elencoContatti(scenario.banco().identita(), richiestaId);
+        return scenario.contatti().elencoContatti(scenario.banco(), richiestaId);
     }
 
     private long avvisiDiAnnullamento(Account account, UUID richiestaId) {
-        return scenario.comunicazioni().elencoAvvisiOperativi(account.identita()).stream()
+        return scenario.avvisi().elencoAvvisiOperativi(account.identita()).stream()
                 .filter(a -> a.tipo() == TipoAvviso.RICHIESTA_ANNULLATA && a.richiestaId().equals(richiestaId))
                 .count();
     }

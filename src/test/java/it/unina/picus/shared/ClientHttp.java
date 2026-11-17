@@ -6,12 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -20,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.util.ServletRequestPathUtils;
@@ -34,9 +33,10 @@ import jakarta.servlet.Filter;
  * con {@code email} e {@code password}; il token CSRF si legge da {@link #TOKEN_CSRF} e si invia
  * nell'header indicato dal server.
  *
- * <p>Prima di attribuire un esito a una risorsa, i test verificano con {@link #richiediEndpointEsposto}
- * che metodo e percorso abbiano un handler reale: la sicurezza risponde {@code 401} anche a un URL senza
- * controller, quindi un {@code 401} da solo non dimostra che la risorsa sia protetta.</p>
+ * <p>Prima di attribuire un esito a una risorsa, i test verificano con {@link #richiediEndpointEsposto} o
+ * {@link #richiediEndpointConsegnato} che la stessa richiesta abbia un handler reale: la sicurezza risponde
+ * {@code 401} anche a un URL senza controller, quindi un {@code 401} da solo non dimostra che la risorsa sia
+ * protetta.</p>
  */
 public final class ClientHttp {
 
@@ -92,33 +92,52 @@ public final class ClientHttp {
     }
 
     /**
-     * Dice se metodo e percorso hanno un handler di un controller.
+     * Dice se un controller gestisce la richiesta, costruita esattamente come quella che il test esegue:
+     * stesso metodo, percorso, {@code Content-Type}, {@code Accept} e corpo. Una rotta che esiste solo per
+     * un altro metodo HTTP non è esposta per questo metodo. Ogni altra eccezione del mapping, per esempio un
+     * tipo di contenuto non accettato, emerge e fa fallire il test, perché indica una richiesta del test
+     * diversa da quella prevista dal controller.
      *
-     * @param metodo metodo HTTP
-     * @param percorso modello del percorso
-     * @param variabili valori delle variabili del percorso
+     * @param richiesta richiesta che il test esegue
      * @return {@code true} se un controller gestisce la richiesta
+     * @throws Exception errore imprevisto del mapping
      */
-    public boolean mappato(HttpMethod metodo, String percorso, Object... variabili) {
-        MockHttpServletRequest richiesta = request(metodo, percorso, variabili).buildRequest(web.getServletContext());
-        ServletRequestPathUtils.parseAndCache(richiesta);
+    public boolean mappato(MockHttpServletRequestBuilder richiesta) throws Exception {
+        MockHttpServletRequest costruita = richiesta.buildRequest(web.getServletContext());
+        ServletRequestPathUtils.parseAndCache(costruita);
         try {
-            return mapping.getHandler(richiesta) != null;
-        } catch (Exception metodoNonSupportato) {
+            return mapping.getHandler(costruita) != null;
+        } catch (HttpRequestMethodNotSupportedException soloAltriMetodi) {
             return false;
         }
     }
 
     /**
-     * Sospende il test se l'endpoint non è ancora esposto: il caso non viene contato come coperto.
+     * Sospende il test se l'endpoint di una capacità non ancora consegnata non è esposto: il caso non viene
+     * contato come coperto.
      *
-     * @param metodo metodo HTTP
-     * @param percorso modello del percorso
-     * @param variabili valori delle variabili del percorso
+     * @param richiesta richiesta che il test esegue
+     * @throws Exception errore imprevisto del mapping
      */
-    public void richiediEndpointEsposto(HttpMethod metodo, String percorso, Object... variabili) {
-        assumeTrue(mappato(metodo, percorso, variabili),
-                () -> "endpoint non ancora esposto: " + metodo + " " + percorso);
+    public void richiediEndpointEsposto(MockHttpServletRequestBuilder richiesta) throws Exception {
+        boolean esposto = mappato(richiesta);
+        assumeTrue(esposto, () -> "endpoint non ancora esposto: " + descrivi(richiesta));
+    }
+
+    /**
+     * Fa fallire il test se l'endpoint di una capacità già consegnata non ha un handler: è una regressione.
+     *
+     * @param richiesta richiesta che il test esegue
+     * @throws Exception errore imprevisto del mapping
+     */
+    public void richiediEndpointConsegnato(MockHttpServletRequestBuilder richiesta) throws Exception {
+        boolean esposto = mappato(richiesta);
+        assertTrue(esposto, () -> "endpoint consegnato ma senza handler (regressione): " + descrivi(richiesta));
+    }
+
+    private String descrivi(MockHttpServletRequestBuilder richiesta) {
+        MockHttpServletRequest costruita = richiesta.buildRequest(web.getServletContext());
+        return costruita.getMethod() + " " + costruita.getRequestURI();
     }
 
     /**

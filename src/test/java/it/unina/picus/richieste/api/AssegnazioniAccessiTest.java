@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
@@ -38,15 +39,13 @@ class AssegnazioniAccessiTest extends AccessiBlackBoxTest {
         Account assegnato = scenario.erogatore(tipo);
         UUID id = scenario.richiestaConfermata(titolare, assegnato);
 
-        RichiestaDettaglio dettaglio = scenario.richieste().consultaRichiesta(assegnato.identita(), id);
+        RichiestaDettaglio dettaglio = scenario.invio().consultaRichiesta(assegnato.identita(), id);
 
         assertEquals(StatoRichiesta.CONFERMATA, dettaglio.richiesta().stato());
         assertEquals(assegnato.id(), dettaglio.erogatoreAssegnatoId());
         assertEquals(ScenarioAccessi.ACCORDO, dettaglio.accordo(), "l'assegnatario vede i dettagli dell'accordo");
         assertNull(dettaglio.titolareId(), "il titolare è visibile solo a titolare e Banco");
         assertNull(dettaglio.description(), "la descrizione è riservata a titolare e Banco");
-        assertTrue(scenario.richieste().elencoAssegnazioni(assegnato.identita()).stream()
-                .map(RichiestaSintesi::id).anyMatch(id::equals));
     }
 
     @ParameterizedTest(name = "CA-03 · {0} assegnato non accede ad assegnazioni estranee")
@@ -59,10 +58,7 @@ class AssegnazioniAccessiTest extends AccessiBlackBoxTest {
         UUID estranea = scenario.richiestaConfermata(titolare, collega);
 
         assertNegatoSenzaModifiche(estranea,
-                () -> scenario.richieste().consultaRichiesta(assegnato.identita(), estranea));
-        assertFalse(scenario.richieste().elencoAssegnazioni(assegnato.identita()).stream()
-                .map(RichiestaSintesi::id).anyMatch(estranea::equals),
-                "l'assegnazione del collega non deve comparire tra le proprie");
+                () -> scenario.invio().consultaRichiesta(assegnato.identita(), estranea));
     }
 
     @ParameterizedTest(name = "CA-03 · {0} assegnato non accede alle altre pratiche della OPT richiedente")
@@ -75,10 +71,26 @@ class AssegnazioniAccessiTest extends AccessiBlackBoxTest {
         UUID altraPresaInCarico = scenario.richiestaPresaInCarico(titolare);
 
         for (UUID altra : new UUID[] {altraCreata, altraPresaInCarico}) {
-            assertNegatoSenzaModifiche(altra, () -> scenario.richieste().consultaRichiesta(assegnato.identita(), altra));
-            assertFalse(scenario.richieste().elencoAssegnazioni(assegnato.identita()).stream()
-                    .map(RichiestaSintesi::id).anyMatch(altra::equals));
+            assertNegatoSenzaModifiche(altra, () -> scenario.invio().consultaRichiesta(assegnato.identita(), altra));
         }
+    }
+
+    @ParameterizedTest(name = "CA-03 · l''elenco delle assegnazioni di {0} contiene solo le proprie")
+    @EnumSource(TipoErogatore.class)
+    void elencoAssegnazioniContieneSoloLeProprie(TipoErogatore tipo) {
+        Account titolare = scenario.optRichiedente();
+        Account assegnato = scenario.erogatore(tipo);
+        Account collega = scenario.erogatore(tipo);
+        UUID propria = scenario.richiestaConfermata(titolare, assegnato);
+        UUID delCollega = scenario.richiestaConfermata(titolare, collega);
+        UUID altraDellaRichiedente = scenario.richiestaPresaInCarico(titolare);
+
+        List<UUID> elenco = scenario.richieste().elencoAssegnazioni(assegnato.identita()).stream()
+                .map(RichiestaSintesi::id).toList();
+
+        assertTrue(elenco.contains(propria), "la propria assegnazione compare");
+        assertFalse(elenco.contains(delCollega), "l'assegnazione del collega non compare");
+        assertFalse(elenco.contains(altraDellaRichiedente), "le altre pratiche della richiedente non compaiono");
     }
 
     @ParameterizedTest(name = "CA-06 · {0} assegnato non conferma l'accordo")
@@ -88,7 +100,7 @@ class AssegnazioniAccessiTest extends AccessiBlackBoxTest {
         Account assegnato = scenario.erogatore(tipo);
         UUID id = scenario.richiestaInProgrammazione(titolare, assegnato);
 
-        assertNegatoSenzaModifiche(id, () -> scenario.richieste()
+        assertNegatoSenzaModifiche(id, () -> scenario.coordinamento()
                 .confermaAccordo(assegnato.identita(), id, ScenarioAccessi.ACCORDO));
         RichiestaDettaglio dopo = scenario.istantanea(id);
         assertEquals(StatoRichiesta.IN_PROGRAMMAZIONE, dopo.richiesta().stato());
@@ -102,9 +114,9 @@ class AssegnazioniAccessiTest extends AccessiBlackBoxTest {
         Account operatoreEstraneo = scenario.operatore(tipologia);
         UUID id = scenario.richiestaInProgrammazione(titolare, scenario.erogatore(TipoErogatore.OPT));
 
-        assertNegatoSenzaModifiche(id, () -> scenario.richieste()
+        assertNegatoSenzaModifiche(id, () -> scenario.coordinamento()
                 .confermaAccordo(titolare.identita(), id, ScenarioAccessi.ACCORDO));
-        assertNegatoSenzaModifiche(id, () -> scenario.richieste()
+        assertNegatoSenzaModifiche(id, () -> scenario.coordinamento()
                 .confermaAccordo(operatoreEstraneo.identita(), id, ScenarioAccessi.ACCORDO));
     }
 
@@ -115,7 +127,7 @@ class AssegnazioniAccessiTest extends AccessiBlackBoxTest {
         Account assegnato = scenario.erogatore(tipo);
         UUID id = scenario.richiestaInProgrammazione(titolare, assegnato);
 
-        assertNegatoSenzaModifiche(id, () -> scenario.richieste().rifiutaRichiesta(assegnato.identita(), id));
+        assertNegatoSenzaModifiche(id, () -> scenario.coordinamento().rifiutaRichiesta(assegnato.identita(), id));
     }
 
     @Test
@@ -124,7 +136,7 @@ class AssegnazioniAccessiTest extends AccessiBlackBoxTest {
         Account titolare = scenario.optRichiedente();
         UUID id = scenario.richiestaInProgrammazione(titolare, scenario.erogatore(TipoErogatore.OPT));
 
-        RichiestaDettaglio confermata = scenario.richieste()
+        RichiestaDettaglio confermata = scenario.coordinamento()
                 .confermaAccordo(scenario.banco().identita(), id, ScenarioAccessi.ACCORDO);
 
         assertEquals(StatoRichiesta.CONFERMATA, confermata.richiesta().stato());

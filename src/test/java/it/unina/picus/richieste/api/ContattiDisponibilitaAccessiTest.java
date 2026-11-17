@@ -15,9 +15,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.jayway.jsonpath.JsonPath;
@@ -61,7 +61,7 @@ class ContattiDisponibilitaAccessiTest extends AccessiBlackBoxTest {
         Account interpellato = scenario.erogatore(tipo);
         ContattoDisponibilita contatto = scenario.richiestaConContatto(titolare, interpellato);
 
-        DettaglioContatto dettaglio = scenario.richieste().consultaContatto(interpellato.identita(), contatto.id());
+        DettaglioContatto dettaglio = scenario.contatti().consultaContatto(interpellato, contatto.id());
 
         assertEquals(contatto.id(), dettaglio.contatto().id());
         assertEquals(interpellato.id(), dettaglio.contatto().erogatoreId());
@@ -85,14 +85,16 @@ class ContattiDisponibilitaAccessiTest extends AccessiBlackBoxTest {
     @DisplayName("CA-02 · via HTTP il destinatario riceve solo i dati minimi del contatto; un estraneo riceve 403")
     void datiMinimiNellaRispostaHttp() throws Exception {
         ClientHttp http = new ClientHttp(web);
-        http.richiediEndpointEsposto(HttpMethod.GET, CONSULTA_CONTATTO, UUID.randomUUID());
         Account titolare = scenario.optRichiedente();
         Account destinatario = scenario.optRichiedente();
         Account estraneo = scenario.optRichiedente();
         ContattoPreparato contatto = scenario.contattoInAttesa(titolare, destinatario);
 
-        MockHttpServletResponse risposta = http.esegui(get(CONSULTA_CONTATTO, contatto.contattoId())
-                .session(http.accedi(destinatario)).accept(MediaType.APPLICATION_JSON));
+        MockHttpServletRequestBuilder lettura = get(CONSULTA_CONTATTO, contatto.contattoId())
+                .accept(MediaType.APPLICATION_JSON);
+        http.richiediEndpointConsegnato(lettura);
+
+        MockHttpServletResponse risposta = http.esegui(lettura.session(http.accedi(destinatario)));
 
         assertEquals(200, risposta.getStatus());
         String json = risposta.getContentAsString();
@@ -126,7 +128,7 @@ class ContattiDisponibilitaAccessiTest extends AccessiBlackBoxTest {
         ContattoDisponibilita contatto = scenario.richiestaConContatto(titolare, interpellato);
 
         ContattoDisponibilita risposta =
-                scenario.richieste().rispondiDisponibilita(interpellato.identita(), contatto.id(), true);
+                scenario.contatti().rispondiDisponibilita(interpellato, contatto.id(), true);
 
         assertEquals(EsitoContatto.DISPONIBILE, risposta.esito());
         assertEquals(StatoRichiesta.PRESA_IN_CARICO, scenario.istantanea(contatto.richiestaId()).richiesta().stato());
@@ -140,7 +142,7 @@ class ContattiDisponibilitaAccessiTest extends AccessiBlackBoxTest {
         ContattoDisponibilita contatto = scenario.richiestaConContatto(titolare, interpellato);
 
         assertNegatoSenzaModifiche(contatto.richiestaId(),
-                () -> scenario.richieste().consultaRichiesta(interpellato.identita(), contatto.richiestaId()));
+                () -> scenario.invio().consultaRichiesta(interpellato.identita(), contatto.richiestaId()));
     }
 
     @ParameterizedTest(name = "CA-02 · le altre pratiche della richiedente restano riservate a {0}")
@@ -152,7 +154,17 @@ class ContattiDisponibilitaAccessiTest extends AccessiBlackBoxTest {
         UUID altra = scenario.richiestaCreata(titolare);
 
         assertNegatoSenzaModifiche(altra,
-                () -> scenario.richieste().consultaRichiesta(interpellato.identita(), altra));
+                () -> scenario.invio().consultaRichiesta(interpellato.identita(), altra));
+    }
+
+    @ParameterizedTest(name = "CA-02 · {0} interpellato non annulla un'altra pratica della richiedente")
+    @EnumSource(TipoErogatore.class)
+    void altrePraticheDellaRichiedenteNonAnnullabili(TipoErogatore tipo) {
+        Account titolare = scenario.optRichiedente();
+        Account interpellato = scenario.erogatore(tipo);
+        scenario.richiestaConContatto(titolare, interpellato);
+        UUID altra = scenario.richiestaCreata(titolare);
+
         assertNegatoSenzaModifiche(altra,
                 () -> scenario.richieste().annullaRichiesta(interpellato.identita(), altra, "Motivo di prova"));
     }
@@ -166,9 +178,9 @@ class ContattiDisponibilitaAccessiTest extends AccessiBlackBoxTest {
                 : scenario.operatore(tipo);
         ContattoDisponibilita contatto = scenario.richiestaConContatto(titolare, interpellato);
 
-        assertNegato(() -> scenario.richieste().consultaContatto(estraneo.identita(), contatto.id()));
+        assertNegato(() -> scenario.contatti().consultaContatto(estraneo, contatto.id()));
         assertNegatoSenzaModifiche(contatto.richiestaId(),
-                () -> scenario.richieste().rispondiDisponibilita(estraneo.identita(), contatto.id(), true));
+                () -> scenario.contatti().rispondiDisponibilita(estraneo, contatto.id(), true));
         assertEquals(EsitoContatto.IN_ATTESA, esitoPerIlBanco(contatto));
     }
 
@@ -182,18 +194,18 @@ class ContattiDisponibilitaAccessiTest extends AccessiBlackBoxTest {
 
         // #49: un contatto per volta. A risponde prima che il Banco interpelli B.
         ContattoDisponibilita contattoA = scenario.interpella(id, candidatoA);
-        scenario.richieste().rispondiDisponibilita(candidatoA.identita(), contattoA.id(), false);
+        scenario.contatti().rispondiDisponibilita(candidatoA, contattoA.id(), false);
         assertEquals(EsitoContatto.NON_DISPONIBILE, esitoPerIlBanco(contattoA), "risposta legittima di A");
         ContattoDisponibilita contattoB = scenario.interpella(id, candidatoB);
 
         // stessa richiesta, ma il contatto ricevuto da A non autorizza il contatto di B
-        assertNegato(() -> scenario.richieste().consultaContatto(candidatoA.identita(), contattoB.id()));
+        assertNegato(() -> scenario.contatti().consultaContatto(candidatoA, contattoB.id()));
         assertNegatoSenzaModifiche(id,
-                () -> scenario.richieste().rispondiDisponibilita(candidatoA.identita(), contattoB.id(), true));
+                () -> scenario.contatti().rispondiDisponibilita(candidatoA, contattoB.id(), true));
         assertEquals(EsitoContatto.IN_ATTESA, esitoPerIlBanco(contattoB), "il diniego non modifica il contatto di B");
 
         // controllo positivo: B risponde al proprio contatto
-        scenario.richieste().rispondiDisponibilita(candidatoB.identita(), contattoB.id(), true);
+        scenario.contatti().rispondiDisponibilita(candidatoB, contattoB.id(), true);
         assertEquals(EsitoContatto.DISPONIBILE, esitoPerIlBanco(contattoB), "risposta legittima di B");
     }
 
@@ -205,15 +217,13 @@ class ContattiDisponibilitaAccessiTest extends AccessiBlackBoxTest {
         ContattoDisponibilita contatto = scenario.richiestaConContatto(titolare, interpellato);
 
         assertNegatoSenzaModifiche(contatto.richiestaId(),
-                () -> scenario.richieste().rispondiDisponibilita(titolare.identita(), contatto.id(), true));
+                () -> scenario.contatti().rispondiDisponibilita(titolare, contatto.id(), true));
         assertNegatoSenzaModifiche(contatto.richiestaId(),
-                () -> scenario.richieste().rispondiDisponibilita(scenario.banco().identita(), contatto.id(), true));
+                () -> scenario.contatti().rispondiDisponibilita(scenario.banco(), contatto.id(), true));
         assertEquals(EsitoContatto.IN_ATTESA, esitoPerIlBanco(contatto));
     }
 
     private EsitoContatto esitoPerIlBanco(ContattoDisponibilita contatto) {
-        return scenario.richieste().elencoContatti(scenario.banco().identita(), contatto.richiestaId()).stream()
-                .filter(c -> c.id().equals(contatto.id()))
-                .findFirst().orElseThrow().esito();
+        return scenario.esitoPerIlBanco(contatto.richiestaId(), contatto.id());
     }
 }

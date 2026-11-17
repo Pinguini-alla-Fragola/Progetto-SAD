@@ -2,12 +2,15 @@ package it.unina.picus.shared;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -16,19 +19,27 @@ import java.util.UUID;
 import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.context.WebApplicationContext;
 
 import it.unina.picus.catalogo.api.CatalogoApi;
+import it.unina.picus.catalogo.api.ConsultazioneCatalogoApi;
+import it.unina.picus.catalogo.api.RicercaErogatoriApi;
+import it.unina.picus.comunicazioni.api.AvvisiOperativiApi;
 import it.unina.picus.comunicazioni.api.ComunicazioniApi;
 import it.unina.picus.monitoraggio.api.MonitoraggioApi;
 import it.unina.picus.monitoraggio.api.MonitoraggioApi.DatiSchedaOperatore;
 import it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre;
+import it.unina.picus.richieste.api.CoordinamentoRichiesteApi;
+import it.unina.picus.richieste.api.InvioRichiesteApi;
 import it.unina.picus.richieste.api.RichiesteApi;
 import it.unina.picus.richieste.api.RichiesteApi.AccordoInPresenza;
 import it.unina.picus.richieste.api.RichiesteApi.Candidato;
 import it.unina.picus.richieste.api.RichiesteApi.ContattoDisponibilita;
 import it.unina.picus.richieste.api.RichiesteApi.DatiInvio;
 import it.unina.picus.richieste.api.RichiesteApi.DettagliAccordo;
+import it.unina.picus.richieste.api.RichiesteApi.EsitoContatto;
 import it.unina.picus.richieste.api.RichiesteApi.RichiestaDettaglio;
+import it.unina.picus.richieste.api.RichiesteApi.RichiestaSintesi;
 import it.unina.picus.richieste.api.RichiesteApi.StatoRichiesta;
 import it.unina.picus.richieste.api.RichiesteApi.TipoDestinatario;
 import it.unina.picus.utenze.api.UtenzeApi;
@@ -37,13 +48,17 @@ import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
 import it.unina.picus.utenze.api.UtenzeApi.TipoErogatore;
 
 /**
- * Fixture dei test #28. Crea account sintetici e porta le pratiche negli stati richiesti usando
- * soltanto le operazioni pubbliche dei moduli, come farebbero gli utenti. L'unica eccezione è
- * {@link #contattoInAttesa}, dichiarata come preparazione dati.
+ * Fixture dei test #28. Crea account sintetici e porta le pratiche negli stati richiesti con le capacità
+ * pubbliche già consegnate ({@link Capacita}) e con gli endpoint HTTP reali dei contatti
+ * ({@link ContattiDisponibilitaHttp}), come farebbero gli utenti.
  *
- * <p>Se un modulo non è ancora presente nel contesto Spring il test viene <em>sospeso</em>
- * (assumption) e non fallito: la suite può stare su {@code main} prima dell'integrazione e
- * si attiva da sola quando l'implementazione arriva.</p>
+ * <p>Il database si usa solo per preparare ciò che nessuna capacità consegnata permette ancora di creare,
+ * sempre con dati sintetici: account e profili, una misura dedicata al singolo test, l'offerta delle OPT
+ * erogatrici, l'abilitazione degli operatori alla misura e la revoca di un account. La misura dedicata isola
+ * i candidati del test: compaiono soltanto gli erogatori che il test ha abilitato.</p>
+ *
+ * <p>Se una capacità non è ancora consegnata il caso viene <em>sospeso</em>; se una capacità consegnata
+ * manca, o se un erogatore abilitato dalla fixture non compare tra i candidati, il caso <em>fallisce</em>.</p>
  */
 public final class ScenarioAccessi {
 
@@ -90,77 +105,143 @@ public final class ScenarioAccessi {
 
     private final ApplicationContext contesto;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    private final Map<UUID, Account> account = new HashMap<>();
     private Account banco;
     private Long misuraId;
+    private ContattiDisponibilitaHttp contatti;
 
     /**
      * Crea la fixture di un singolo test.
      *
-     * @param contesto contesto Spring da cui leggere i moduli disponibili
+     * @param contesto contesto Spring da cui leggere le capacità disponibili
      */
     public ScenarioAccessi(ApplicationContext contesto) {
         this.contesto = contesto;
     }
 
-    // ------------------------------------------------------------------ moduli
+    // ------------------------------------------------------------------ capacità
 
     /**
-     * Restituisce il bean del modulo, oppure sospende il test se non è ancora integrato.
+     * Restituisce l'implementazione della capacità. Se manca: il test fallisce quando la capacità è già
+     * consegnata (regressione), altrimenti viene sospeso.
      *
-     * @param <T> tipo del contratto richiesto
-     * @param tipo contratto del modulo
+     * @param <T> tipo del contratto
+     * @param capacita capacità richiesta dal caso
+     * @param tipo contratto atteso, uguale a {@link Capacita#contratto()}
      * @return implementazione presente nel contesto
      */
-    public <T> T modulo(Class<T> tipo) {
+    public <T> T capacita(Capacita capacita, Class<T> tipo) {
+        assertEquals(capacita.contratto(), tipo, "contratto non corrispondente alla capacità " + capacita);
         T bean = contesto.getBeanProvider(tipo).getIfAvailable();
-        assumeTrue(bean != null,
-                () -> tipo.getSimpleName() + " non è ancora disponibile nel contesto: test #28 sospeso");
+        if (bean == null && capacita.consegnata()) {
+            fail("Capacità " + capacita + " consegnata ma assente dal contesto (" + tipo.getSimpleName()
+                    + "): regressione");
+        }
+        assumeTrue(bean != null, () -> "capacità " + capacita + " non ancora consegnata: caso sospeso");
         return bean;
     }
 
     /**
-     * Contratto del modulo Richieste.
+     * Invio, elenco proprio, coda del Banco e consultazione della richiesta.
      *
-     * @return implementazione di {@link RichiesteApi}, oppure test sospeso
+     * @return capacità consegnata
      */
-    public RichiesteApi richieste() {
-        return modulo(RichiesteApi.class);
+    public InvioRichiesteApi invio() {
+        return capacita(Capacita.INVIO_RICHIESTE, InvioRichiesteApi.class);
     }
 
     /**
-     * Contratto del modulo Catalogo.
+     * Presa in carico, ricerca, contatto, assegnazione, conferma e rifiuto definitivo.
      *
-     * @return implementazione di {@link CatalogoApi}, oppure test sospeso
+     * @return capacità consegnata
+     */
+    public CoordinamentoRichiesteApi coordinamento() {
+        return capacita(Capacita.COORDINAMENTO_RICHIESTE, CoordinamentoRichiesteApi.class);
+    }
+
+    /**
+     * Misure e comuni del catalogo.
+     *
+     * @return capacità consegnata
+     */
+    public ConsultazioneCatalogoApi consultazioneCatalogo() {
+        return capacita(Capacita.CONSULTAZIONE_CATALOGO, ConsultazioneCatalogoApi.class);
+    }
+
+    /**
+     * Erogatori compatibili con misura e comune.
+     *
+     * @return capacità consegnata
+     */
+    public RicercaErogatoriApi ricercaErogatori() {
+        return capacita(Capacita.RICERCA_EROGATORI, RicercaErogatoriApi.class);
+    }
+
+    /**
+     * Avvisi operativi dell'account.
+     *
+     * @return capacità consegnata
+     */
+    public AvvisiOperativiApi avvisi() {
+        return capacita(Capacita.AVVISI_OPERATIVI, AvvisiOperativiApi.class);
+    }
+
+    /**
+     * Contratto completo di Richieste, per le sole operazioni non ancora consegnate come capacità
+     * (annullamento, archivio del Banco, elenco delle assegnazioni).
+     *
+     * @return implementazione, oppure caso sospeso
+     */
+    public RichiesteApi richieste() {
+        return capacita(Capacita.RICHIESTE_COMPLETE, RichiesteApi.class);
+    }
+
+    /**
+     * Contratto completo del Catalogo (offerta delle OPT, catalogo completo del Banco).
+     *
+     * @return implementazione, oppure caso sospeso
      */
     public CatalogoApi catalogo() {
-        return modulo(CatalogoApi.class);
+        return capacita(Capacita.CATALOGO_COMPLETO, CatalogoApi.class);
     }
 
     /**
      * Contratto del modulo Monitoraggio.
      *
-     * @return implementazione di {@link MonitoraggioApi}, oppure test sospeso
+     * @return implementazione, oppure caso sospeso
      */
     public MonitoraggioApi monitoraggio() {
-        return modulo(MonitoraggioApi.class);
+        return capacita(Capacita.MONITORAGGIO, MonitoraggioApi.class);
     }
 
     /**
      * Contratto del modulo Comunicazioni.
      *
-     * @return implementazione di {@link ComunicazioniApi}, oppure test sospeso
+     * @return implementazione, oppure caso sospeso
      */
     public ComunicazioniApi comunicazioni() {
-        return modulo(ComunicazioniApi.class);
+        return capacita(Capacita.COMUNICAZIONI, ComunicazioniApi.class);
     }
 
     /**
      * Contratto del modulo Utenze.
      *
-     * @return implementazione di {@link UtenzeApi}, oppure test sospeso
+     * @return capacità consegnata
      */
     public UtenzeApi utenze() {
-        return modulo(UtenzeApi.class);
+        return capacita(Capacita.UTENZE, UtenzeApi.class);
+    }
+
+    /**
+     * Consultazione, risposta e storico dei contatti attraverso gli endpoint HTTP reali.
+     *
+     * @return adattatore HTTP dei contatti
+     */
+    public ContattiDisponibilitaHttp contatti() {
+        if (contatti == null) {
+            contatti = new ContattiDisponibilitaHttp(new ClientHttp((WebApplicationContext) contesto));
+        }
+        return contatti;
     }
 
     // ------------------------------------------------------------------ account
@@ -200,7 +281,7 @@ public final class ScenarioAccessi {
     }
 
     /**
-     * Account personale di un operatore del Banco della tipologia indicata.
+     * Account personale di un operatore del Banco della tipologia indicata, non abilitato alla misura.
      *
      * @param tipologia {@code INTERNO_BANCO} o {@code ESTERNO_PAGATO_BANCO}
      * @return nuovo operatore attivo
@@ -214,8 +295,8 @@ public final class ScenarioAccessi {
     }
 
     /**
-     * Erogatore compatibile con la misura di prova: per {@link TipoErogatore#OPT} una OPT limitrofa
-     * con offerta registrata, altrimenti un operatore del Banco della tipologia richiesta.
+     * Erogatore compatibile con la misura del test: per {@link TipoErogatore#OPT} una OPT limitrofa con
+     * offerta, altrimenti un operatore del Banco della tipologia richiesta abilitato alla misura.
      *
      * @param tipo tipologia di erogatore
      * @return nuovo erogatore compatibile
@@ -223,28 +304,28 @@ public final class ScenarioAccessi {
     public Account erogatore(TipoErogatore tipo) {
         if (tipo == TipoErogatore.OPT) {
             Account opt = opt(COMUNE_LIMITROFO);
-            catalogo().registraOffertaOpt(opt.identita(), misura(), false);
+            registraOfferta(opt, false);
             return opt;
         }
         Account operatore = operatore(tipo);
-        abilitaOperatoreAllaMisura(operatore, misura());
+        abilitaOperatoreAllaMisura(operatore);
         return operatore;
     }
 
     /**
-     * OPT limitrofa che offre la misura di prova tramite un professionista esterno: per la Story resta
+     * OPT limitrofa che offre la misura del test tramite un professionista esterno: per la Story resta
      * una OPT erogatrice e può annullare le richieste assegnate alla propria OPT.
      *
      * @return nuova OPT erogatrice tramite professionista
      */
     public Account erogatoreOptTramiteProfessionista() {
         Account opt = opt(COMUNE_LIMITROFO);
-        catalogo().registraOffertaOpt(opt.identita(), misura(), true);
+        registraOfferta(opt, true);
         return opt;
     }
 
     /**
-     * Sospende la sessione dell'account come farebbe una revoca (#26/#30).
+     * Revoca l'account come farebbe la revoca del Banco (#26/#30).
      *
      * @param account account da revocare
      */
@@ -262,34 +343,56 @@ public final class ScenarioAccessi {
         Optional<IdentitaAutenticata> identita = utenze().verificaCredenziali(email, PASSWORD);
         assertNotNull(identita.orElse(null), "le credenziali di un account attivo devono essere accettate");
         assertEquals(ruolo, identita.get().ruolo(), "il ruolo deve essere quello persistito");
-        return new Account(identita.get(), email, nome);
+        Account creato = new Account(identita.get(), email, nome);
+        account.put(creato.id(), creato);
+        return creato;
     }
 
-    /**
-     * Punto di estensione: il profilo misure degli operatori non ha ancora uno schema né un contratto.
-     * Quando esisterà, collegare qui l'operatore alla misura. Fino ad allora, se Catalogo non propone
-     * l'operatore, i test che lo interpellano vengono sospesi da {@link #interpella}.
-     */
-    private void abilitaOperatoreAllaMisura(Account operatore, long misura) {
-        // intenzionalmente vuoto: dipende dal futuro schema dei profili operatore
+    /** Preparazione dati: offerta della OPT per la misura del test (registrazione dell'offerta non consegnata). */
+    private void registraOfferta(Account opt, boolean tramiteProfessionista) {
+        jdbc().update("insert into catalogo_offerte_opt (opt_id, misura_id, tramite_professionista) values (?, ?, ?)",
+                opt.id(), misura(), tramiteProfessionista);
+    }
+
+    /** Preparazione dati: abilitazione dell'operatore alla misura del test ({@code utenze_operatori_misure}, V9). */
+    private void abilitaOperatoreAllaMisura(Account operatore) {
+        jdbc().update("insert into utenze_operatori_misure (account_id, misura_id) values (?, ?)",
+                operatore.id(), misura());
+    }
+
+    /** Rende compatibile con la misura del test un account già creato, OPT oppure operatore. */
+    private void abilita(Account erogatore) {
+        if (erogatore.ruolo() == RuoloUtente.OPT) {
+            registraOfferta(erogatore, false);
+        } else {
+            abilitaOperatoreAllaMisura(erogatore);
+        }
     }
 
     private JdbcTemplate jdbc() {
-        return modulo(JdbcTemplate.class);
+        return contesto.getBean(JdbcTemplate.class);
     }
 
     // ------------------------------------------------------------------ catalogo
 
     /**
-     * Prima misura attiva del catalogo, usata da tutte le richieste di prova.
+     * Misura sintetica dedicata al test, attiva e non erogabile a distanza. Viene creata nel database perché la
+     * gestione del catalogo non è ancora consegnata; la consultazione del catalogo deve vederla.
      *
      * @return identificativo della misura
      */
     public long misura() {
         if (misuraId == null) {
-            List<CatalogoApi.Misura> misure = catalogo().elencoMisureAttive();
-            assumeFalse(misure.isEmpty(), "nessuna misura attiva nel catalogo");
-            misuraId = misure.getFirst().id();
+            String codice = "T" + UUID.randomUUID().toString().replace("-", "").substring(0, 9);
+            Long id = jdbc().queryForObject("""
+                    insert into catalogo_misure (codice, nome, descrizione, attiva, erogabile_a_distanza)
+                    values (?, ?, 'Misura sintetica dei test black box della #28', true, false)
+                    returning id
+                    """, Long.class, codice, "Misura di prova " + codice);
+            assertNotNull(id, "misura di prova non creata");
+            assertTrue(consultazioneCatalogo().cercaMisura(id).filter(CatalogoApi.Misura::attiva).isPresent(),
+                    "il catalogo deve vedere la misura di prova attiva");
+            misuraId = id;
         }
         return misuraId;
     }
@@ -304,7 +407,9 @@ public final class ScenarioAccessi {
      */
     public UUID richiestaCreata(Account titolare) {
         var dati = new DatiInvio(misura(), TipoDestinatario.PERSONA, COMUNE_RICHIESTA, DESCRIZIONE);
-        return richieste().invia(titolare.identita(), dati, UUID.randomUUID()).id();
+        RichiestaSintesi sintesi = invio().invia(titolare.identita(), dati, UUID.randomUUID());
+        assertEquals(StatoRichiesta.CREATA, sintesi.stato(), "una richiesta appena inviata è Creata");
+        return sintesi.id();
     }
 
     /**
@@ -315,26 +420,29 @@ public final class ScenarioAccessi {
      */
     public UUID richiestaPresaInCarico(Account titolare) {
         UUID id = richiestaCreata(titolare);
-        richieste().prendiInCarico(banco().identita(), id);
+        coordinamento().prendiInCarico(banco().identita(), id);
         return id;
     }
 
     /**
      * Interpella l'erogatore per la richiesta Presa in carico e restituisce il contatto in attesa.
-     * Sospende il test se l'erogatore non è tra i candidati proposti.
+     * Fallisce se un erogatore abilitato dalla fixture non compare tra i candidati: è una regressione.
      *
      * @param richiestaId richiesta Presa in carico
-     * @param erogatore account da interpellare
+     * @param erogatore account da interpellare, abilitato alla misura del test
      * @return contatto di disponibilità in attesa
      */
     public ContattoDisponibilita interpella(UUID richiestaId, Account erogatore) {
-        List<Candidato> candidati = richieste().cercaErogatoriOrdinati(banco().identita(), richiestaId);
+        List<Candidato> candidati = coordinamento().cercaErogatoriOrdinati(banco().identita(), richiestaId);
         Optional<Candidato> scelto = candidati.stream()
                 .filter(c -> c.erogatore().accountId().equals(erogatore.id()))
                 .findFirst();
-        assumeTrue(scelto.isPresent(),
-                "l'erogatore di prova non è tra i candidati: completare il profilo misure dell'operatore");
-        return richieste().interpellaErogatore(banco().identita(), richiestaId, erogatore.id(),
+        if (scelto.isEmpty()) {
+            fail("L'erogatore " + erogatore.ruolo() + " " + erogatore.id() + ", abilitato alla misura " + misura()
+                    + ", non compare tra i candidati della richiesta " + richiestaId + ". Candidati: "
+                    + candidati.stream().map(c -> c.erogatore().accountId() + "/" + c.erogatore().ambito()).toList());
+        }
+        return coordinamento().interpellaErogatore(banco().identita(), richiestaId, erogatore.id(),
                 scelto.get().erogatore().ambito());
     }
 
@@ -350,15 +458,16 @@ public final class ScenarioAccessi {
     }
 
     /**
-     * Porta una richiesta Presa in carico a In programmazione con l'erogatore indicato.
+     * Porta una richiesta Presa in carico a In programmazione con l'erogatore indicato: contatto, risposta
+     * positiva dell'erogatore sull'endpoint reale e assegnazione del Banco.
      *
      * @param richiestaId richiesta Presa in carico
      * @param erogatore account che accetta e viene assegnato
      */
     public void assegna(UUID richiestaId, Account erogatore) {
         ContattoDisponibilita contatto = interpella(richiestaId, erogatore);
-        richieste().rispondiDisponibilita(erogatore.identita(), contatto.id(), true);
-        richieste().assegnaErogatore(banco().identita(), contatto.id());
+        contatti().rispondiDisponibilita(erogatore, contatto.id(), true);
+        coordinamento().assegnaErogatore(banco().identita(), contatto.id());
     }
 
     /**
@@ -383,19 +492,27 @@ public final class ScenarioAccessi {
      */
     public UUID richiestaConfermata(Account titolare, Account erogatore) {
         UUID id = richiestaInProgrammazione(titolare, erogatore);
-        richieste().confermaAccordo(banco().identita(), id, ACCORDO);
+        coordinamento().confermaAccordo(banco().identita(), id, ACCORDO);
         return id;
     }
 
     /**
-     * Richiesta Rifiutata dal Banco.
+     * Richiesta Rifiutata dal Banco. Prima del rifiuto ogni candidato compatibile viene interpellato e declina,
+     * come richiede il coordinamento.
      *
      * @param titolare OPT che invia la richiesta
      * @return identificativo della richiesta
      */
     public UUID richiestaRifiutata(Account titolare) {
         UUID id = richiestaPresaInCarico(titolare);
-        richieste().rifiutaRichiesta(banco().identita(), id);
+        for (Candidato candidato : coordinamento().cercaErogatoriOrdinati(banco().identita(), id)) {
+            Account erogatore = account.get(candidato.erogatore().accountId());
+            assertNotNull(erogatore, "candidato non creato da questo test: la misura di prova non è isolata");
+            ContattoDisponibilita contatto = coordinamento().interpellaErogatore(banco().identita(), id,
+                    erogatore.id(), candidato.erogatore().ambito());
+            contatti().rispondiDisponibilita(erogatore, contatto.id(), false);
+        }
+        coordinamento().rifiutaRichiesta(banco().identita(), id);
         return id;
     }
 
@@ -434,15 +551,15 @@ public final class ScenarioAccessi {
         UUID id = richiestaInProgrammazione(titolare, assegnato);
         switch (stato) {
             case IN_PROGRAMMAZIONE -> { }
-            case CONFERMATA -> richieste().confermaAccordo(banco().identita(), id, ACCORDO);
-            case RIFIUTATA -> richieste().rifiutaRichiesta(banco().identita(), id);
+            case CONFERMATA -> coordinamento().confermaAccordo(banco().identita(), id, ACCORDO);
+            case RIFIUTATA -> coordinamento().rifiutaRichiesta(banco().identita(), id);
             default -> throw new IllegalArgumentException("Nessun erogatore assegnato nello stato " + stato);
         }
         return id;
     }
 
     /**
-     * Contatto di disponibilità preparato nel database.
+     * Contatto in attesa intestato a un destinatario.
      *
      * @param richiestaId richiesta Presa in carico a cui appartiene il contatto
      * @param contattoId contatto in attesa intestato al destinatario
@@ -452,36 +569,31 @@ public final class ScenarioAccessi {
     public record ContattoPreparato(UUID richiestaId, UUID contattoId, long misuraId, String nomeMisura) {}
 
     /**
-     * <b>Preparazione dati, non verifica.</b> Inserisce una richiesta Presa in carico della OPT titolare e
-     * un contatto {@code IN_ATTESA} intestato al destinatario, con la stessa fixture SQL di
-     * {@code RispostaDisponibilitaPostgresqlTest} (#110).
-     *
-     * <p>Serve ai test HTTP sui contatti, già esposti, finché le capacità di invio e coordinamento
-     * (#107) non permettono di arrivare allo stesso stato con le operazioni degli utenti. Usa la misura
-     * {@code M01} e il comune {@link #COMUNE_RICHIESTA}; la descrizione è {@link #DESCRIZIONE}, così i
-     * test possono verificare che non arrivi a chi non deve vederla.</p>
+     * Contatto {@code IN_ATTESA} intestato al destinatario, ottenuto con le operazioni degli utenti: invio della
+     * OPT titolare, presa in carico e contatto del Banco. Il destinatario viene prima abilitato alla misura del
+     * test, così compare tra i candidati.
      *
      * @param titolare OPT titolare della richiesta
-     * @param destinatario account interpellato
-     * @return identificativi e dati minimi del contatto preparato
+     * @param destinatario account da interpellare, OPT oppure operatore
+     * @return identificativi e dati minimi del contatto
      */
     public ContattoPreparato contattoInAttesa(Account titolare, Account destinatario) {
-        Map<String, Object> misura = jdbc().queryForMap("select id, nome from catalogo_misure where codice = 'M01'");
-        long misuraDelContatto = ((Number) misura.get("id")).longValue();
-        String nomeMisura = (String) misura.get("nome");
-        UUID richiestaId = UUID.randomUUID();
-        jdbc().update("""
-                insert into richieste (id, titolare_id, misura_id, comune_codice, tipo_destinatario, description,
-                                       inviata_il, stato)
-                values (?, ?, ?, ?, 'PERSONA', ?, now(), 'PRESA_IN_CARICO')
-                """, richiestaId, titolare.id(), misuraDelContatto, COMUNE_RICHIESTA, DESCRIZIONE);
-        UUID contattoId = UUID.randomUUID();
-        jdbc().update("""
-                insert into richieste_contatti_disponibilita (id, richiesta_id, erogatore_id, ambito, nome_misura,
-                                                              inviato_il)
-                values (?, ?, ?, 'STESSO_COMUNE', ?, now())
-                """, contattoId, richiestaId, destinatario.id(), nomeMisura);
-        return new ContattoPreparato(richiestaId, contattoId, misuraDelContatto, nomeMisura);
+        abilita(destinatario);
+        UUID richiestaId = richiestaPresaInCarico(titolare);
+        ContattoDisponibilita contatto = interpella(richiestaId, destinatario);
+        String nomeMisura = istantanea(richiestaId).richiesta().nomeMisura();
+        return new ContattoPreparato(richiestaId, contatto.id(), misura(), nomeMisura);
+    }
+
+    /**
+     * Esito corrente di un contatto letto dal Banco con la capacità di coordinamento.
+     *
+     * @param richiestaId richiesta del contatto
+     * @param contattoId contatto da leggere
+     * @return esito registrato
+     */
+    public EsitoContatto esitoPerIlBanco(UUID richiestaId, UUID contattoId) {
+        return coordinamento().consultaContattoBanco(banco().identita(), richiestaId, contattoId).esito();
     }
 
     /**
@@ -491,7 +603,7 @@ public final class ScenarioAccessi {
      * @return dettaglio visibile al Banco
      */
     public RichiestaDettaglio istantanea(UUID richiestaId) {
-        return richieste().consultaRichiesta(banco().identita(), richiestaId);
+        return invio().consultaRichiesta(banco().identita(), richiestaId);
     }
 
     // ------------------------------------------------------------------ monitoraggio

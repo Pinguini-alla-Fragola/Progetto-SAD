@@ -31,20 +31,22 @@ import it.unina.picus.richieste.api.RichiesteApi.RichiestaDettaglio;
  *
  * <h2>Approccio</h2>
  * <ul>
- *   <li>I test usano soltanto i contratti pubblici dei moduli ({@code *.api}) e, per sessione e
- *       autenticazione, l'interfaccia HTTP. Le classi {@code interno} dei moduli non vengono usate.</li>
+ *   <li>I test usano soltanto le capacità pubbliche dei moduli ({@code *.api}, elencate in {@link Capacita})
+ *       e, dove una funzione consegnata non ha un contratto, gli endpoint HTTP reali
+ *       ({@link ContattiDisponibilitaHttp}). Le classi {@code interno} dei moduli non vengono usate.</li>
  *   <li>Le pratiche si portano negli stati richiesti con le stesse operazioni degli utenti (invio, presa
- *       in carico, ricerca, contatto, risposta, assegnazione, conferma). Il database si usa solo per
- *       preparare dati che nessun contratto consegnato permette ancora di creare: account sintetici,
- *       revoca e, per i test HTTP, un contatto in attesa ({@link ScenarioAccessi#contattoInAttesa}).
- *       L'identità usata è sempre quella restituita dal server.</li>
+ *       in carico, ricerca, contatto, risposta, assegnazione, conferma, rifiuto). Il database si usa solo per
+ *       preparare ciò che nessuna capacità consegnata permette ancora di creare: account e profili, una
+ *       misura dedicata al test, offerta delle OPT, abilitazione degli operatori e revoca. L'identità usata
+ *       è sempre quella restituita dal server.</li>
  *   <li>{@code FORBIDDEN} corrisponde a {@link SecurityException} sui contratti e a {@code 403} via HTTP;
  *       {@code UNAUTHORIZED} corrisponde a {@code 401}.</li>
  *   <li>«Senza dati né modifiche»: l'operazione negata non restituisce valori e la pratica, riletta dal
  *       Banco, resta identica in stato e dati ({@link #assertNegatoSenzaModifiche}).</li>
  *   <li>Solo dati sintetici: nessun identificativo di assistiti, nessuna credenziale reale.</li>
- *   <li>Se un modulo non è ancora nel contesto Spring il test viene sospeso (assumption) e non fallito,
- *       così la suite si attiva da sola quando arrivano le implementazioni.</li>
+ *   <li>Tre esiti distinti: eseguito; <b>sospeso</b> se usa una capacità non ancora consegnata o un endpoint
+ *       non ancora esposto; <b>fallito</b> se una capacità consegnata manca, se un erogatore abilitato dalla
+ *       fixture non compare tra i candidati o se il comportamento viola la #28.</li>
  * </ul>
  *
  * <h2>Tecniche di progettazione</h2>
@@ -115,7 +117,7 @@ public abstract class AccessiBlackBoxTest {
     /**
      * Verifica un diniego {@code FORBIDDEN} su un'operazione di sola lettura.
      *
-     * <p>Se l'operazione usa un modulo non ancora integrato, la sospensione del test
+     * <p>Se l'operazione usa una capacità non ancora consegnata, la sospensione del test
      * ({@link TestAbortedException}) viene propagata e non scambiata per un esito errato.</p>
      *
      * @param operazione operazione che deve essere negata
