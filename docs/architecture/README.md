@@ -7,6 +7,9 @@
 - [PICUS - Deployment & Container View](diagrams/PICUS-Deployment-Container-View.mmd) · [Anteprima PNG](diagrams/PICUS-Deployment-Container-View.png)
 - [PICUS - Sequenza del walking skeleton](diagrams/PICUS-Walking-Skeleton.puml) · [Anteprima PNG](diagrams/PICUS-Walking-Skeleton.png)
 - [PICUS - Schema ER PostgreSQL](diagrams/PICUS-Schema-ER.puml) · [Anteprima PNG](diagrams/PICUS-Schema-ER.png)
+- [PICUS - C&C: panoramica](diagrams/C%26C/Diagramma-C%26C.dot) · [PNG](diagrams/C%26C/Diagramma-C%26C.png) · [SVG](diagrams/C%26C/Diagramma-C%26C.svg)
+- [PICUS - C&C: Web Tier](diagrams/C%26C/web-C%26C.dot) · [PNG](diagrams/C%26C/web-C%26C.png) · [SVG](diagrams/C%26C/web-C%26C.svg)
+- [PICUS - C&C: Core Services](diagrams/C%26C/core-C%26C.dot) · [PNG](diagrams/C%26C/core-C%26C.png) · [SVG](diagrams/C%26C/core-C%26C.svg)
 
 La vista dei moduli riprende i package di `src/main/java` presenti in `main` al commit `f3c4e95`. Le dipendenze `«import»` corrispondono agli import Java delle API; le dipendenze `«use»` rappresentano le collaborazioni previste con `ComunicazioniApi` e `CatalogoApi`. I contratti pubblici sono presenti, mentre le relative implementazioni sono ancora da completare.
 
@@ -15,6 +18,87 @@ Sotto la radice Java `it.unina.picus` i moduli corrispondono ai package `utenze`
 A regime, i controller di `web` invocano i casi d’uso del proprio modulo. In `interno.dominio` risiedono le regole e le interfacce dei repository; gli adattatori di `interno.persistenza` le implementano con JPA. L’eventuale package `interno.integrazioni` resta un’estensione prevista, non ancora presente in `main`. Spring collega le implementazioni ai servizi tramite dependency injection via costruttore. [Dependency injection in Spring](https://docs.spring.io/spring-framework/reference/core/beans/dependencies/factory-collaborators.html)
 
 PICUS usa un unico database PostgreSQL per tutti i moduli, inclusi file e metadati degli allegati. Ciascun modulo accede ai propri dati tramite i suoi repository. [ADR-001](../adr/ADR-001-monolite-modulare-mvc.md) · [Task di predisposizione dell’ambiente](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/77)
+
+## Come leggere le viste Componenti e Connettori
+
+Le tre viste C&C descrivono la struttura runtime del monolite a partire da
+`main` al commit `39fe03d`. Comprendono anche componenti previsti, indicati
+in giallo, con tratteggio o con l'etichetta `[previsto]`. La panoramica
+raggruppa Web Tier e Core Services nello stesso processo JVM; le viste 2 e 3
+ne dettagliano i componenti e mantengono gli stessi contratti sul confine.
+I gruppi rappresentano responsabilità runtime, non singole classi o processi
+separati. Le frecce indicano l'invocante e il destinatario; per le chiamate
+sincrone il risultato o l'errore torna sullo stesso connettore. I codici
+rimandano alle legende, mantenendo le linee orizzontali o verticali e le
+etichette fuori dai collegamenti. Le altre viste hanno un proprio riferimento
+di versione.
+
+| Contratto aggregato | API Java e stato al riferimento della vista |
+| --- | --- |
+| API Utenze | `UtenzeApi`: credenziali, verifica dell'account e consultazione dei profili disponibili; gestione completa, attivazione e recupero previsti. |
+| API Catalogo | `ConsultazioneCatalogoApi` e `RicercaErogatoriApi` disponibili; le restanti operazioni di `CatalogoApi` sono previste. |
+| API Richieste | `InvioRichiesteApi`, `CoordinamentoRichiesteApi` e servizio di risposta alla disponibilità disponibili; `RichiesteApi` raccoglie anche contratti per incrementi successivi. |
+| API Comunicazioni | `AvvisiOperativiApi` disponibile; invii generali, allegati e riscontri di `ComunicazioniApi` previsti. |
+| API Monitoraggio | Contratti di `MonitoraggioApi` e regole di dominio presenti; controller, casi d'uso e persistenza previsti. |
+
+Le interfacce aggregate rendono leggibile la panoramica: non richiedono una
+facciata Java aggiuntiva. Le API scambiano DTO, identificativi e altri valori
+di contratto; le entità JPA rimangono nel modulo proprietario.
+
+| Connettore | Ruoli, scambi e comportamento |
+| --- | --- |
+| Accesso web | Browser client e Web Tier server; HTTP nella demo locale, HTML, JSON, risorse statiche e cookie di sessione. |
+| Chiamata API Java | Invocante e fornitore nello stesso processo; chiamata sincrona con risultato o errore restituito al chiamante. |
+| Accesso ai dati | Repository/adattatori del modulo proprietario verso PostgreSQL tramite JPA, Hibernate e pgJDBC; un database condiviso. |
+| Invio email | Collaborazione prevista dell'adattatore di M1 con un servizio esterno ancora da configurare. |
+
+Nella Vista 2 Spring Security consulta Utenze per autenticare e verificare
+l'account della sessione, prima dell'accesso ai controller. Login e logout
+sono gestiti dalla catena di sicurezza. Spring MVC seleziona l'handler e
+coordina binding, validazione e produzione della risposta: risoluzione della
+vista e Thymeleaf per HTML, conversione dei DTO per JSON, oppure redirect ed
+esiti senza corpo. Le pagine applicative aggiuntive, compresa la composizione
+delle viste Richieste con dati di Utenze e Catalogo, sono indicate come
+previste rispetto al riferimento di `main`. I controller JSON di Richieste
+già presenti delegano ai servizi del proprio modulo.
+
+Nella Vista 3 Richieste consulta Catalogo, che risolve i profili tramite
+Utenze, e invoca Comunicazioni per gli avvisi operativi. Comunicazioni usa
+la porta `DestinatariAvvisi`, implementata da Richieste, per verificare la
+coerenza di pratica, contatto e destinatario. Questo callback è una
+collaborazione runtime: l'interfaccia è definita in `comunicazioni.api`,
+senza un import degli interni di Richieste da parte di Comunicazioni.
+
+La creazione di un contatto e il relativo avviso in-app condividono la
+transazione locale. La casella degli avvisi viene consultata tramite HTTP;
+il diagramma non introduce consegna in background. La persistenza è
+raggruppata graficamente: ciascun modulo conserva l'accesso ai propri dati.
+Il database unico ospiterà anche file e metadati degli allegati previsti.
+I controlli su titolarità e assegnazione restano nei casi d'uso, oltre ai
+permessi sulle funzioni verificati dalla sicurezza web.
+[ADR-001](../adr/ADR-001-monolite-modulare-mvc.md) ·
+[ADR-003](../adr/ADR-003-isolamento-e-validazione-richieste.md)
+
+### Rigenerare le immagini C&C
+
+I sorgenti C&C usano Graphviz DOT per fissare le righe della griglia e i
+connettori ortogonali. La palette riprende le viste MVC, moduli e deployment.
+Le versioni SVG permettono di ingrandire testo e linee senza perdere nitidezza.
+Con Graphviz disponibile nel `PATH`, dalla radice del progetto:
+
+```powershell
+$ccDirectory = Join-Path (Get-Location) 'docs/architecture/diagrams/C&C'
+foreach ($ccSource in (Get-ChildItem -LiteralPath $ccDirectory -Filter '*.dot')) {
+    dot -Tsvg $ccSource.FullName -o ([IO.Path]::ChangeExtension($ccSource.FullName, '.svg'))
+    if ($LASTEXITCODE -ne 0) { throw "Errore SVG: $($ccSource.Name)" }
+    dot -Gdpi=140 -Tpng $ccSource.FullName -o ([IO.Path]::ChangeExtension($ccSource.FullName, '.png'))
+    if ($LASTEXITCODE -ne 0) { throw "Errore PNG: $($ccSource.Name)" }
+}
+```
+
+Il secondo comando richiede un'installazione Graphviz con supporto PNG.
+Il rendering verifica anche la sintassi dei sorgenti. Controllare le tre
+immagini dopo la rigenerazione, in particolare frecce, allineamenti e legende.
 
 ## API Java dei moduli
 

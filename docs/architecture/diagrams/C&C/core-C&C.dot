@@ -1,0 +1,71 @@
+digraph PICUS {
+// Palette condivisa con le viste MVC, Module&Package e Deployment.
+// DOT fissa le righe della griglia e usa solo connettori ortogonali.
+graph [fontname="Arial", fontsize=19, fontcolor="#172B3A", bgcolor="white",
+       rankdir=TB, splines=ortho, nodesep=0.48, ranksep=0.65, pad=0.22,
+       compound=true, newrank=true];
+node [shape=component, style="filled", fontname="Arial", fontsize=13,
+      margin="0.18,0.14", penwidth=1.2, color="#568573",
+      fillcolor="#EDF5F0", fontcolor="#1A4A3C"];
+edge [color="#64748B", penwidth=1.2, arrowsize=0.7,
+      fontname="Arial", fontsize=11, fontcolor="#334155"];
+
+label="PICUS · Componenti e connettori\nVista 3 · Core Services";
+labelloc=t;
+
+WEB [label="Web Tier · Vista 2\nChiamate alle API Java dei moduli", group=main,
+     color="#5480B0", fillcolor="#E9F2FC", fontcolor="#143C65"];
+subgraph cluster_core {
+  label="Core Services · Casi d'uso, regole e autorizzazioni sulle risorse";
+  fontsize=15; color="#568573"; bgcolor="#F7FAFE"; margin=24;
+  subgraph cluster_services {
+    label="Servizi applicativi e dominio dei moduli";
+    fontsize=13; color="#94A3B8"; bgcolor="#FFFFFF"; margin=22;
+    S_IN [shape=point, width=0, height=0, label="", style=invis, group=main];
+    RICH [label="M3 · Richieste\nInvio e consultazione\nCoordinamento e disponibilità", group=main];
+    CAT [label="M2 · Catalogo\nMisure, comuni e offerte\nErogatori compatibili"];
+    UT [label="M1 · Utenze\nCredenziali e account attivi\nProfili OPT e operatori"];
+    COM [label="M4 · Comunicazioni\nAvvisi operativi in-app\nGenerali e allegati [previsti]", group=main];
+    MON [label="M5 · Monitoraggio\nConteggi e schede trimestrali\n[previsto]", style="filled,dashed",
+         color="#946728", fillcolor="#FFF8EA", fontcolor="#563C17"];
+    S_OUT [shape=point, width=0, height=0, label="", style=invis, group=main];
+    {rank=same; RICH; CAT; UT;}
+    {rank=same; COM; MON;}
+    RICH -> CAT [xlabel="K1", minlen=2];
+    CAT -> UT [xlabel="K2", minlen=2];
+    RICH -> COM [dir=both, xlabel="K3", minlen=2];
+    COM -> MON [style=invis];
+    S_IN -> RICH [style=invis];
+    CAT -> MON [style=invis];
+    COM -> S_OUT [style=invis];
+  }
+  DATA [label="Persistenza dei moduli\nRepository e adattatori propri\nJPA / EntityManager · Hibernate · pgJDBC", group=main,
+        color="#3D867D", fillcolor="#E9F7F5", fontcolor="#153D38"];
+  MAIL [label="Adattatore email di M1\nLink di attivazione e recupero\n[previsto]", style="filled,dashed",
+        color="#946728", fillcolor="#FFF8EA", fontcolor="#563C17"];
+  {rank=same; DATA; MAIL;}
+  S_OUT -> DATA [ltail=cluster_services, xlabel="K4", minlen=2];
+  UT -> MAIL [xlabel="K6", style=dashed];
+}
+DB [shape=cylinder, label="PostgreSQL 17\nDatabase unico picus", group=main,
+    color="#3D867D", fillcolor="#E9F7F5", fontcolor="#153D38"];
+EMAIL [label="Servizio email esterno\n[previsto]", style="filled,dashed",
+       color="#946728", fillcolor="#FFF8EA", fontcolor="#563C17"];
+{rank=same; DB; EMAIL;}
+WEB -> S_IN [lhead=cluster_services, xlabel="API Java", minlen=2];
+DATA -> DB [xlabel="K5", minlen=2];
+MAIL -> EMAIL [xlabel="K7", style=dashed, minlen=2];
+LEGEND [shape=plain, fontcolor="#183957", label=<
+<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="8" COLOR="#7C9BB9" BGCOLOR="#F7FAFE">
+<TR><TD ALIGN="LEFT">K1 · M3 → M2: ConsultazioneCatalogoApi e RicercaErogatoriApi. K2 · M2 → M1: UtenzeApi.</TD></TR>
+<TR><TD ALIGN="LEFT">K3: M3 chiama AvvisiOperativiApi di M4; M4 richiama DestinatariAvvisi, implementata da M3.</TD></TR>
+<TR><TD ALIGN="LEFT">K4: ogni modulo usa i propri repository/adattatori e dati. Il riquadro raggruppa la persistenza.</TD></TR>
+<TR><TD ALIGN="LEFT">K5: JDBC / pgJDBC e protocollo PostgreSQL. K6–K7: invio link tramite adattatore email di M1 [previsto].</TD></TR>
+<TR><TD ALIGN="LEFT">Transazione locale: contatto e avviso in-app sono atomici. Le chiamate alle API sono sincrone.</TD></TR>
+<TR><TD ALIGN="LEFT">Collaborazioni previste: M5 usa Utenze e Catalogo; M4 risolve i destinatari generali tramite Utenze.</TD></TR>
+<TR><TD ALIGN="LEFT">Giallo, tratteggio o [previsto]: parte da realizzare. Contratti e stato nel README.</TD></TR>
+</TABLE>>];
+DB -> LEGEND [style=invis];
+EMAIL -> LEGEND [style=invis];
+
+}

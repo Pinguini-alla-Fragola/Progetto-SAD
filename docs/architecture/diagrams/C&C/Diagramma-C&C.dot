@@ -1,0 +1,46 @@
+digraph PICUS {
+// Palette condivisa con le viste MVC, Module&Package e Deployment.
+// DOT fissa le righe della griglia e usa solo connettori ortogonali.
+graph [fontname="Arial", fontsize=19, fontcolor="#172B3A", bgcolor="white",
+       rankdir=TB, splines=ortho, nodesep=0.48, ranksep=0.65, pad=0.22,
+       compound=true, newrank=true];
+node [shape=component, style="filled", fontname="Arial", fontsize=13,
+      margin="0.18,0.14", penwidth=1.2, color="#568573",
+      fillcolor="#EDF5F0", fontcolor="#1A4A3C"];
+edge [color="#64748B", penwidth=1.2, arrowsize=0.7,
+      fontname="Arial", fontsize=11, fontcolor="#334155"];
+
+label="PICUS · Componenti e connettori\nVista 1 · Panoramica del monolite";
+labelloc=t;
+
+BROWSER [label="Browser web\nOPT · Banco · Operatori", group=main,
+         color="#94A3B8", fillcolor="#F1F5F9", fontcolor="#142B46"];
+subgraph cluster_app {
+  label="Applicazione web PICUS · Unico processo JVM";
+  fontsize=15; color="#7C9BB9"; bgcolor="#F7FAFE"; margin=24;
+  WEB [label="Web Tier\nSicurezza e sessione\nRouting MVC · HTML / JSON", group=main,
+       color="#5480B0", fillcolor="#E9F2FC", fontcolor="#143C65"];
+  CORE [label="Core Services\nCasi d'uso e dominio · M1–M5\nAutorizzazioni sulle risorse e transazioni", group=main];
+  WEB -> CORE [xlabel="C2", minlen=2];
+}
+DB [shape=cylinder, label="PostgreSQL 17\nDatabase unico picus", group=main,
+    color="#3D867D", fillcolor="#E9F7F5", fontcolor="#153D38"];
+EMAIL [label="Servizio email esterno\nLink di attivazione e recupero\n[previsto]", style="filled,dashed",
+       color="#946728", fillcolor="#FFF8EA", fontcolor="#563C17"];
+{rank=same; DB; EMAIL;}
+BROWSER -> WEB [lhead=cluster_app, xlabel="C1", minlen=2];
+CORE -> DB [xlabel="C3", minlen=2];
+CORE -> EMAIL [xlabel="C4", style=dashed, minlen=2];
+LEGEND [shape=plain, fontcolor="#183957", label=<
+<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="8" COLOR="#7C9BB9" BGCOLOR="#F7FAFE">
+<TR><TD ALIGN="LEFT">C1 · Browser → Web: HTTP, HTML / JSON e cookie di sessione nella demo locale.</TD></TR>
+<TR><TD ALIGN="LEFT">C2 · Web → Core: API Java sincrone; DTO, identità verificata, risultato o errore.</TD></TR>
+<TR><TD ALIGN="LEFT">C3 · Core → Database: JDBC / pgJDBC, protocollo PostgreSQL.</TD></TR>
+<TR><TD ALIGN="LEFT">C4 · Core → Email: invio dei link tramite adattatore di M1 [previsto].</TD></TR>
+<TR><TD ALIGN="LEFT">API dei moduli: Utenze · Catalogo · Richieste · Comunicazioni · Monitoraggio [prevista].</TD></TR>
+<TR><TD ALIGN="LEFT">Giallo, tratteggio o [previsto]: parte da realizzare. Dettagli nelle viste 2 e 3 e nel README.</TD></TR>
+</TABLE>>];
+DB -> LEGEND [style=invis];
+EMAIL -> LEGEND [style=invis];
+
+}
