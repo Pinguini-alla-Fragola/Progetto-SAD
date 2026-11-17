@@ -40,10 +40,10 @@ class RichiesteVisteTest {
                 titolare, "UI-" + titolare.toString().substring(0, 8));
         richiesta = UUID.randomUUID();
         jdbc.update("""
-                insert into richieste (id, titolare_id, misura_id, comune_codice, tipo_destinatario, description, inviata_il, stato)
-                select ?, ?, id, 'napoli', 'NUCLEO', 'Esigenza <sintetica>', now(), 'IN_PROGRAMMAZIONE'
+                insert into richieste (id, titolare_id, misura_id, comune_codice, tipo_destinatario, description, inviata_il, stato, erogatore_id, erogatore_ambito)
+                select ?, ?, id, 'napoli', 'NUCLEO', 'Esigenza <sintetica>', now(), 'IN_PROGRAMMAZIONE', ?, 'STESSO_COMUNE'
                 from catalogo_misure where codice = 'M01'
-                """, richiesta, titolare);
+                """, richiesta, titolare, account());
     }
 
     @Test
@@ -101,11 +101,47 @@ class RichiesteVisteTest {
 
     @Test
     void accordoRemotoMostraIlLinkSenzaCampiDelReferenteInPresenza() throws Exception {
-        jdbc.update("update richieste set stato = 'CONFERMATA', accordo_modalita = 'A_DISTANZA', accordo_data_ora = now(), accordo_link = 'https://example.test/incontro' where id = ?", richiesta);
+        jdbc.update("update richieste set stato = 'CONFERMATA', erogatore_ambito = 'CENTRO_PICUS_A_DISTANZA', accordo_modalita = 'A_DISTANZA', accordo_data_ora = now(), accordo_link = 'https://example.test/incontro' where id = ?", richiesta);
         mvc.perform(get("/richieste/{id}", richiesta).with(user(titolare.toString()).roles("OPT")))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("https://example.test/incontro")))
                 .andExpect(content().string(not(containsString("Telefono del referente"))));
+    }
+
+    @Test
+    void soloBancoInProgrammazionePuoCompilareAccordoERifiuto() throws Exception {
+        jdbc.update("update utenze_account set ruolo = 'BANCO' where id = ?", estraneo);
+        mvc.perform(get("/richieste/{id}", richiesta).with(user(estraneo.toString()).roles("BANCO")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("id=\"form-accordo\"")))
+                .andExpect(content().string(containsString("id=\"rifiuta-richiesta\"")))
+                .andExpect(content().string(containsString("errore-telefonoReferente")));
+        mvc.perform(get("/richieste/{id}", richiesta).with(user(titolare.toString()).roles("OPT")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(not(containsString("id=\"form-accordo\""))))
+                .andExpect(content().string(not(containsString("id=\"rifiuta-richiesta\""))));
+    }
+
+    @Test
+    void accordoConfermatoEConsultabileMaNonModificabile() throws Exception {
+        jdbc.update("update utenze_account set ruolo = 'BANCO' where id = ?", estraneo);
+        jdbc.update("""
+                update richieste set stato = 'CONFERMATA', accordo_modalita = 'IN_PRESENZA',
+                accordo_data_ora = now(), accordo_luogo = 'Sede di prova', accordo_nome_referente = 'Nome',
+                accordo_cognome_referente = 'Referente', accordo_telefono_referente = '+39 081 0000000' where id = ?
+                """, richiesta);
+        mvc.perform(get("/richieste/{id}", richiesta).with(user(estraneo.toString()).roles("BANCO")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Sede di prova")))
+                .andExpect(content().string(containsString("Nome Referente")))
+                .andExpect(content().string(not(containsString("id=\"form-accordo\""))))
+                .andExpect(content().string(not(containsString("id=\"rifiuta-richiesta\""))));
+        var erogatore = jdbc.queryForObject("select erogatore_id from richieste where id = ?", UUID.class, richiesta);
+        mvc.perform(get("/richieste/{id}", richiesta).with(user(erogatore.toString()).roles("OPT")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Sede di prova")))
+                .andExpect(content().string(not(containsString("Esigenza"))))
+                .andExpect(content().string(not(containsString("id=\"form-accordo\""))));
     }
 
     @Test

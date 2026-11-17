@@ -48,6 +48,15 @@ CSRF di Spring Security.
   per volta. Dopo una risposta positiva può assegnare l'erogatore e passare
   la pratica a **In programmazione**.
   La presa in carico richiede una conferma: Annulla ed Escape conservano lo stato.
+- In **In programmazione** il Banco registra l’accordo in presenza (luogo e
+  referente con telefono) o a distanza (link), con data e ora nel fuso del
+  dispositivo indicato nel modulo. Gli errori del server compaiono accanto ai
+  campi e conservano i dati. La conferma richiede un riepilogo esplicito e rende
+  l’accordo consultabile, senza modifiche, dalla OPT titolare e dall’erogatore.
+- Il Banco può rifiutare definitivamente una pratica in ricerca o in
+  programmazione, con conferma esplicita. Durante la ricerca il comando rimane
+  disabilitato finché ci sono alternative compatibili da valutare o contatti
+  in attesa. La OPT titolare vede **Rifiutata** e «Nessun erogatore disponibile».
 - La OPT o l'operatore interpellato trova il contatto nella propria area e
   comunica disponibilità o indisponibilità. Dal contatto può aprire la pratica
   dopo l'assegnazione. Il solo candidato vede i dati minimi, mentre la
@@ -60,18 +69,17 @@ L'apertura del dettaglio conserva lo stato. Se la risposta all'invio viene
 persa, **Riprova lo stesso invio** riusa dati e `Idempotency-Key`, senza creare
 una seconda pratica.
 
-I controlli senza endpoint restano disattivati: conferma dell'accordo e
-rifiuto definitivo (#52), annullamento, archivio degli esiti, gestione delle
+I controlli senza endpoint restano disattivati: annullamento, archivio degli esiti, gestione delle
 utenze e del catalogo, offerta, comunicazioni generali e monitoraggio.
 Le regole di autorizzazione di #28 non equivalgono all'implementazione di
 tutte queste operazioni. Per una demo della ricerca degli erogatori usare
 la [fixture sintetica e la procedura di coordinamento](docs/architecture/api-coordinamento-richieste.md).
 
 I test delle viste e dei permessi sono in `RichiesteVisteTest`; i test del
-client HTTP si eseguono con Node.js 22 o successivo:
+client HTTP, dei dati dell’accordo e dei vincoli di rifiuto si eseguono con Node.js 22 o successivo:
 
 ```bash
-node --test src/test/js/area-client.test.mjs
+node --test src/test/js/*.test.mjs
 ```
 
 Il login presenta il logo accanto al modulo su desktop e sopra al modulo su

@@ -1,6 +1,7 @@
 import { api } from './area-client.js';
 import { renderList, listRow } from './list-view.js';
 import { confermaPresaInCarico } from './conferma.js';
+import { aggiornaRifiuto } from './accordo.js';
 
 const etichette = {
     CREATA: 'Creata', PRESA_IN_CARICO: 'Presa in carico', IN_PROGRAMMAZIONE: 'In programmazione',
@@ -170,13 +171,15 @@ export async function avviaCoordinamento(pagina) {
         return;
     }
     if (stato === 'IN_PROGRAMMAZIONE') {
-        esito.textContent = 'Erogatore assegnato. Il coordinamento dell’accordo è in corso.';
+        esito.textContent = 'Erogatore assegnato. Concorda i dettagli con le parti e registra l’accordo qui sotto.';
         return;
     }
     if (stato !== 'PRESA_IN_CARICO') return;
     esito.textContent = 'Caricamento dei contatti…';
     try {
         const contatti = await api('/api/richieste/' + id + '/contatti');
+        const candidati = await api('/api/richieste/' + id + '/candidati');
+        aggiornaRifiuto(contatti, candidati);
         const ultimi = new Map(contatti.map(c => [c.erogatoreId + '|' + c.ambito, c]));
         const attesa = contatti.find(c => c.esito === 'IN_ATTESA');
         if (attesa) {
@@ -185,7 +188,6 @@ export async function avviaCoordinamento(pagina) {
             esito.textContent = 'Scegli un erogatore compatibile oppure assegna uno dei candidati disponibili.';
             document.getElementById('titolo-candidati').hidden = false;
             await caricaLista('candidati', async () => {
-                const candidati = await api('/api/richieste/' + id + '/candidati');
                 const localiDaValutare = candidati.some(({ erogatore: e }) => e.ambito !== 'CENTRO_PICUS_A_DISTANZA'
                     && ultimi.get(e.accountId + '|' + e.ambito)?.esito !== 'NON_DISPONIBILE');
                 return candidati.map(c => {
