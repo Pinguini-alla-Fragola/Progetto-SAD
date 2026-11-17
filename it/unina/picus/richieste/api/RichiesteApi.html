@@ -662,6 +662,8 @@ al contatto. Il passaggio a In programmazione registra l'assegnazione nello stes
 dettagli completi e immutabili diventano consultabili nello stesso esito dalla OPT titolare
 e dall'erogatore assegnato, oltre che dal Banco.</div>
 <dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="CoordinamentoRichiesteApi.html#confermaAccordo(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,it.unina.picus.richieste.api.RichiesteApi.DettagliAccordo)">confermaAccordo</a></code>&nbsp;in interface&nbsp;<code><a href="CoordinamentoRichiesteApi.html" title="interface in it.unina.picus.richieste.api">CoordinamentoRichiesteApi</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>attore</code> - identità verificata del Banco di coordinamento</dd>
 <dd><code>richiestaId</code> - identificativo della pratica In programmazione</dd>
@@ -673,6 +675,12 @@ e dall'erogatore assegnato, oltre che dal Banco.</div>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/NoSuchElementException.html" title="class or interface in java.util" class="external-link">NoSuchElementException</a></code> - se la pratica non esiste</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - se mancano dettagli o la modalità è incompatibile</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - se la richiesta non è In programmazione con un erogatore assegnato</dd>
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list-long">
+<li><a href="#confermaAccordo(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,it.unina.picus.richieste.api.RichiesteApi.DettagliAccordo)"><code>confermaAccordo(IdentitaAutenticata, UUID, DettagliAccordo)</code></a></li>
+</ul>
+</dd>
 </dl>
 </div>
 </section>
@@ -686,6 +694,8 @@ e dall'erogatore assegnato, oltre che dal Banco.</div>
 <div class="block">Registra il rifiuto definitivo deciso dal Banco quando mancano soluzioni praticabili.
 La OPT titolare vede l'esito Rifiutata con il messaggio «Nessun erogatore disponibile».</div>
 <dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="CoordinamentoRichiesteApi.html#rifiutaRichiesta(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)">rifiutaRichiesta</a></code>&nbsp;in interface&nbsp;<code><a href="CoordinamentoRichiesteApi.html" title="interface in it.unina.picus.richieste.api">CoordinamentoRichiesteApi</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>attore</code> - identità verificata del Banco di coordinamento</dd>
 <dd><code>richiestaId</code> - identificativo della pratica</dd>
@@ -695,6 +705,12 @@ La OPT titolare vede l'esito Rifiutata con il messaggio «Nessun erogatore dispo
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/SecurityException.html" title="class or interface in java.lang" class="external-link">SecurityException</a></code> - se l'attore non è il Banco</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/NoSuchElementException.html" title="class or interface in java.util" class="external-link">NoSuchElementException</a></code> - se la pratica non esiste</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - se la richiesta non è Presa in carico o In programmazione</dd>
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list-long">
+<li><a href="#rifiutaRichiesta(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)"><code>rifiutaRichiesta(IdentitaAutenticata, UUID)</code></a></li>
+</ul>
+</dd>
 </dl>
 </div>
 </section>

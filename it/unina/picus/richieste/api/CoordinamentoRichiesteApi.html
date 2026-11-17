@@ -64,6 +64,8 @@ loadScripts(document, 'script');</script>
 <li><a href="#cercaErogatoriOrdinati(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" tabindex="0">cercaErogatoriOrdinati(UtenzeApi.IdentitaAutenticata, UUID)</a></li>
 <li><a href="#interpellaErogatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,java.util.UUID,it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione)" tabindex="0">interpellaErogatore(UtenzeApi.IdentitaAutenticata, UUID, UUID, CatalogoApi.AmbitoErogazione)</a></li>
 <li><a href="#assegnaErogatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" tabindex="0">assegnaErogatore(UtenzeApi.IdentitaAutenticata, UUID)</a></li>
+<li><a href="#confermaAccordo(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,it.unina.picus.richieste.api.RichiesteApi.DettagliAccordo)" tabindex="0">confermaAccordo(UtenzeApi.IdentitaAutenticata, UUID, RichiesteApi.DettagliAccordo)</a></li>
+<li><a href="#rifiutaRichiesta(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" tabindex="0">rifiutaRichiesta(UtenzeApi.IdentitaAutenticata, UUID)</a></li>
 </ol>
 </li>
 </ol>
@@ -85,7 +87,7 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="horizontal-scroll">
 <div class="type-signature"><span class="modifiers">public interface </span><span class="element-name type-name-label">CoordinamentoRichiesteApi</span></div>
-<div class="block">Capacità del Banco per ricerca, contatto e assegnazione; contratti di <a href="RichiesteApi.html" title="interface in it.unina.picus.richieste.api"><code>RichiesteApi</code></a>.</div>
+<div class="block">Capacità del Banco per coordinare le richieste e registrarne l'esito.</div>
 </div>
 </section>
 <section class="summary">
@@ -113,26 +115,39 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Ordina tutte le opzioni compatibili senza cambiare lo stato della pratica.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="RichiesteApi.ContattoDisponibilita.html" title="class in it.unina.picus.richieste.api">RichiesteApi.ContattoDisponibilita</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#consultaContattoBanco(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,java.util.UUID)" class="member-name-link">consultaContattoBanco</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="RichiesteApi.RichiestaDettaglio.html" title="class in it.unina.picus.richieste.api">RichiesteApi.RichiestaDettaglio</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#confermaAccordo(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,it.unina.picus.richieste.api.RichiesteApi.DettagliAccordo)" class="member-name-link">confermaAccordo</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;richiestaId,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;contattoId)</code></div>
+ <a href="RichiesteApi.DettagliAccordo.html" title="interface in it.unina.picus.richieste.api">RichiesteApi.DettagliAccordo</a>&nbsp;accordo)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Consulta il contatto della pratica dal perimetro autorizzato del Banco.</div>
+<div class="block">Conferma l'accordo per la richiesta e l'erogatore assegnato.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="RichiesteApi.ContattoDisponibilita.html" title="class in it.unina.picus.richieste.api">RichiesteApi.ContattoDisponibilita</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#interpellaErogatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,java.util.UUID,it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione)" class="member-name-link">interpellaErogatore</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#consultaContattoBanco(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,java.util.UUID)" class="member-name-link">consultaContattoBanco</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;richiestaId,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;contattoId)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Consulta il contatto della pratica dal perimetro autorizzato del Banco.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="RichiesteApi.ContattoDisponibilita.html" title="class in it.unina.picus.richieste.api">RichiesteApi.ContattoDisponibilita</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#interpellaErogatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,java.util.UUID,it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione)" class="member-name-link">interpellaErogatore</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;richiestaId,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;erogatoreId,
  <a href="../../catalogo/api/CatalogoApi.AmbitoErogazione.html" title="enum class in it.unina.picus.catalogo.api">CatalogoApi.AmbitoErogazione</a>&nbsp;ambito)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Registra un solo contatto in attesa e il suo avviso al destinatario.</div>
 </div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="RichiesteApi.RichiestaSintesi.html" title="class in it.unina.picus.richieste.api">RichiesteApi.RichiestaSintesi</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#prendiInCarico(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">prendiInCarico</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;richiestaId)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Prende esplicitamente in carico una richiesta Creata.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="RichiesteApi.RichiestaSintesi.html" title="class in it.unina.picus.richieste.api">RichiesteApi.RichiestaSintesi</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#prendiInCarico(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">prendiInCarico</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#rifiutaRichiesta(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">rifiutaRichiesta</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;richiestaId)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Prende esplicitamente in carico una richiesta Creata.</div>
+<div class="block">Registra il rifiuto definitivo della richiesta.</div>
 </div>
 </div>
 </div>
@@ -257,6 +272,54 @@ loadScripts(document, 'script');</script>
 <dd>
 <ul class="tag-list-long">
 <li><a href="RichiesteApi.html#assegnaErogatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)"><code>RichiesteApi.assegnaErogatore(IdentitaAutenticata, UUID)</code></a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="confermaAccordo(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,it.unina.picus.richieste.api.RichiesteApi.DettagliAccordo)">
+<h3>confermaAccordo</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="return-type"><a href="RichiesteApi.RichiestaDettaglio.html" title="class in it.unina.picus.richieste.api">RichiesteApi.RichiestaDettaglio</a></span>&nbsp;<span class="element-name">confermaAccordo</span><wbr><span class="parameters">(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;richiestaId,
+ <a href="RichiesteApi.DettagliAccordo.html" title="interface in it.unina.picus.richieste.api">RichiesteApi.DettagliAccordo</a>&nbsp;accordo)</span></div>
+<div class="block">Conferma l'accordo per la richiesta e l'erogatore assegnato.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>attore</code> - identità verificata del Banco</dd>
+<dd><code>richiestaId</code> - identificativo della richiesta</dd>
+<dd><code>accordo</code> - dettagli concordati</dd>
+<dt>Returns:</dt>
+<dd>dettaglio della richiesta confermata</dd>
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list-long">
+<li><a href="RichiesteApi.html#confermaAccordo(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,it.unina.picus.richieste.api.RichiesteApi.DettagliAccordo)"><code>RichiesteApi.confermaAccordo(IdentitaAutenticata, UUID, DettagliAccordo)</code></a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="rifiutaRichiesta(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)">
+<h3>rifiutaRichiesta</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="return-type"><a href="RichiesteApi.RichiestaSintesi.html" title="class in it.unina.picus.richieste.api">RichiesteApi.RichiestaSintesi</a></span>&nbsp;<span class="element-name">rifiutaRichiesta</span><wbr><span class="parameters">(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;richiestaId)</span></div>
+<div class="block">Registra il rifiuto definitivo della richiesta.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>attore</code> - identità verificata del Banco</dd>
+<dd><code>richiestaId</code> - identificativo della richiesta</dd>
+<dt>Returns:</dt>
+<dd>sintesi della richiesta rifiutata</dd>
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list-long">
+<li><a href="RichiesteApi.html#rifiutaRichiesta(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)"><code>RichiesteApi.rifiutaRichiesta(IdentitaAutenticata, UUID)</code></a></li>
 </ul>
 </dd>
 </dl>

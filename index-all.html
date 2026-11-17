@@ -85,10 +85,16 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="it/unina/picus/richieste/interno/persistenza/AccordoJpa.html" class="type-name-link" title="class in it.unina.picus.richieste.interno.persistenza">AccordoJpa</a> - Class in <a href="it/unina/picus/richieste/interno/persistenza/package-summary.html">it.unina.picus.richieste.interno.persistenza</a></dt>
 <dd>
-<div class="block">Proiezione dei dettagli che verranno registrati dal coordinamento dell'accordo.</div>
+<div class="block">Componente persistito sulla riga della richiesta.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/interno/persistenza/AccordoJpa.html#%3Cinit%3E()" class="member-name-link">AccordoJpa()</a> - Constructor for class it.unina.picus.richieste.interno.persistenza.<a href="it/unina/picus/richieste/interno/persistenza/AccordoJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">AccordoJpa</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Costruttore riservato a JPA.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/web/AccordoJson.html" class="type-name-link" title="class in it.unina.picus.richieste.web">AccordoJson</a> - Class in <a href="it/unina/picus/richieste/web/package-summary.html">it.unina.picus.richieste.web</a></dt>
+<dd>
+<div class="block">Converte il corpo HTTP nelle due varianti immutabili dell'accordo.</div>
+</dd>
 <dt><a href="it/unina/picus/catalogo/api/CatalogoApi.ErogatoreCompatibile.html#accountId()" class="member-name-link">accountId()</a> - Method in record class it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/CatalogoApi.ErogatoreCompatibile.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.ErogatoreCompatibile</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/catalogo/api/CatalogoApi.ErogatoreCompatibile.html#param-accountId"><code>accountId</code></a> record component.</div>
@@ -134,7 +140,9 @@ loadScripts(document, 'script');</script>
 <dt><a href="it/unina/picus/comunicazioni/interno/persistenza/AvvisoOperativoJpa.html#aDto()" class="member-name-link">aDto()</a> - Method in class it.unina.picus.comunicazioni.interno.persistenza.<a href="it/unina/picus/comunicazioni/interno/persistenza/AvvisoOperativoJpa.html" title="class in it.unina.picus.comunicazioni.interno.persistenza">AvvisoOperativoJpa</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/richieste/interno/persistenza/AccordoJpa.html#aDto()" class="member-name-link">aDto()</a> - Method in class it.unina.picus.richieste.interno.persistenza.<a href="it/unina/picus/richieste/interno/persistenza/AccordoJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">AccordoJpa</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Returns dettagli di dominio ricostruiti dalle colonne, oppure <code>null</code> se assenti.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/interno/dominio/RichiestaRepository.html#aggiorna(it.unina.picus.richieste.interno.dominio.RichiestaDiMisura)" class="member-name-link">aggiorna(RichiestaDiMisura)</a> - Method in interface it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/RichiestaRepository.html" title="interface in it.unina.picus.richieste.interno.dominio">RichiestaRepository</a></dt>
 <dd>
 <div class="block">Salva la transizione della pratica già bloccata nella stessa transazione.</div>
@@ -300,6 +308,12 @@ sui tentativi.</div>
 </dd>
 <dt><a href="it/unina/picus/utenze/interno/stub/StubUtenzeApi.html#BANCO" class="member-name-link">BANCO</a> - Static variable in class it.unina.picus.utenze.interno.stub.<a href="it/unina/picus/utenze/interno/stub/StubUtenzeApi.html" title="class in it.unina.picus.utenze.interno.stub">StubUtenzeApi</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/catalogo/api/RicercaErogatoriApi.html#bloccaAbilitazioneADistanza(long)" class="member-name-link">bloccaAbilitazioneADistanza(long)</a> - Method in interface it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/RicercaErogatoriApi.html" title="interface in it.unina.picus.catalogo.api">RicercaErogatoriApi</a></dt>
+<dd>
+<div class="block">Verifica se la misura ammette l'erogazione a distanza e la mantiene bloccata fino al commit.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/applicazione/ServizioRicercaErogatori.html#bloccaAbilitazioneADistanza(long)" class="member-name-link">bloccaAbilitazioneADistanza(long)</a> - Method in class it.unina.picus.catalogo.interno.applicazione.<a href="it/unina/picus/catalogo/interno/applicazione/ServizioRicercaErogatori.html" title="class in it.unina.picus.catalogo.interno.applicazione">ServizioRicercaErogatori</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/catalogo/interno/persistenza/OffertaTerritorialeJpa.html#bloccaAdiacenza(java.lang.String,java.lang.String)" class="member-name-link">bloccaAdiacenza(String, String)</a> - Method in class it.unina.picus.catalogo.interno.persistenza.<a href="it/unina/picus/catalogo/interno/persistenza/OffertaTerritorialeJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">OffertaTerritorialeJpa</a></dt>
 <dd>
 <div class="block">Protegge il legame territoriale usato dalla verifica di compatibilità.</div>
@@ -312,7 +326,7 @@ sui tentativi.</div>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/catalogo/interno/persistenza/OffertaTerritorialeJpa.html#bloccaMisura(long)" class="member-name-link">bloccaMisura(long)</a> - Method in class it.unina.picus.catalogo.interno.persistenza.<a href="it/unina/picus/catalogo/interno/persistenza/OffertaTerritorialeJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">OffertaTerritorialeJpa</a></dt>
 <dd>
-<div class="block">Blocca e rilegge la misura della pratica nella transazione di assegnazione.</div>
+<div class="block">Blocca e rilegge la misura nella transazione del caso d'uso chiamante.</div>
 </dd>
 <dt><a href="it/unina/picus/catalogo/interno/persistenza/OffertaTerritorialeJpa.html#bloccaOfferta(java.util.UUID,long)" class="member-name-link">bloccaOfferta(UUID, long)</a> - Method in class it.unina.picus.catalogo.interno.persistenza.<a href="it/unina/picus/catalogo/interno/persistenza/OffertaTerritorialeJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">OffertaTerritorialeJpa</a></dt>
 <dd>
@@ -638,9 +652,25 @@ operativi.</div>
 </dd>
 <dt><a href="it/unina/picus/catalogo/interno/persistenza/OffertaTerritorialeJpa.html#comuniLimitrofi(java.lang.String)" class="member-name-link">comuniLimitrofi(String)</a> - Method in class it.unina.picus.catalogo.interno.persistenza.<a href="it/unina/picus/catalogo/interno/persistenza/OffertaTerritorialeJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">OffertaTerritorialeJpa</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/richieste/interno/dominio/RichiestaDiMisura.html#conferma(it.unina.picus.richieste.api.RichiesteApi.DettagliAccordo)" class="member-name-link">conferma(RichiesteApi.DettagliAccordo)</a> - Method in record class it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/RichiestaDiMisura.html" title="class in it.unina.picus.richieste.interno.dominio">RichiestaDiMisura</a></dt>
+<dd>
+<div class="block">Conferma la pratica in programmazione e vi associa l'accordo validato.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/web/CoordinamentoRichiesteController.html#conferma(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,it.unina.picus.richieste.web.CorpoJson)" class="member-name-link">conferma(UtenzeApi.IdentitaAutenticata, UUID, CorpoJson)</a> - Method in class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/CoordinamentoRichiesteController.html" title="class in it.unina.picus.richieste.web">CoordinamentoRichiesteController</a></dt>
+<dd>
+<div class="block">Registra l’accordo concordato dal Banco e restituisce il dettaglio aggiornato.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/api/CoordinamentoRichiesteApi.html#confermaAccordo(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,it.unina.picus.richieste.api.RichiesteApi.DettagliAccordo)" class="member-name-link">confermaAccordo(UtenzeApi.IdentitaAutenticata, UUID, RichiesteApi.DettagliAccordo)</a> - Method in interface it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/CoordinamentoRichiesteApi.html" title="interface in it.unina.picus.richieste.api">CoordinamentoRichiesteApi</a></dt>
+<dd>
+<div class="block">Conferma l'accordo per la richiesta e l'erogatore assegnato.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.html#confermaAccordo(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,it.unina.picus.richieste.api.RichiesteApi.DettagliAccordo)" class="member-name-link">confermaAccordo(UtenzeApi.IdentitaAutenticata, UUID, RichiesteApi.DettagliAccordo)</a> - Method in interface it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.html" title="interface in it.unina.picus.richieste.api">RichiesteApi</a></dt>
 <dd>
 <div class="block">Conferma l'accordo con l'erogatore già assegnato.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/interno/applicazione/ServizioCoordinamentoRichieste.html#confermaAccordo(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,it.unina.picus.richieste.api.RichiesteApi.DettagliAccordo)" class="member-name-link">confermaAccordo(UtenzeApi.IdentitaAutenticata, UUID, RichiesteApi.DettagliAccordo)</a> - Method in class it.unina.picus.richieste.interno.applicazione.<a href="it/unina/picus/richieste/interno/applicazione/ServizioCoordinamentoRichieste.html" title="class in it.unina.picus.richieste.interno.applicazione">ServizioCoordinamentoRichieste</a></dt>
+<dd>
+<div class="block">Conferma l'accordo secondo l'ambito di assegnazione.</div>
 </dd>
 <dt><a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.html#confermaRicezione(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">confermaRicezione(UtenzeApi.IdentitaAutenticata, UUID)</a> - Method in interface it.unina.picus.comunicazioni.api.<a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.html" title="interface in it.unina.picus.comunicazioni.api">ComunicazioniApi</a></dt>
 <dd>
@@ -823,14 +853,16 @@ assegnato.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/api/CoordinamentoRichiesteApi.html" class="type-name-link" title="interface in it.unina.picus.richieste.api">CoordinamentoRichiesteApi</a> - Interface in <a href="it/unina/picus/richieste/api/package-summary.html">it.unina.picus.richieste.api</a></dt>
 <dd>
-<div class="block">Capacità del Banco per ricerca, contatto e assegnazione; contratti di <a href="it/unina/picus/richieste/api/RichiesteApi.html" title="interface in it.unina.picus.richieste.api"><code>RichiesteApi</code></a>.</div>
+<div class="block">Capacità del Banco per coordinare le richieste e registrarne l'esito.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/web/CoordinamentoRichiesteController.html" class="type-name-link" title="class in it.unina.picus.richieste.web">CoordinamentoRichiesteController</a> - Class in <a href="it/unina/picus/richieste/web/package-summary.html">it.unina.picus.richieste.web</a></dt>
 <dd>
 <div class="block">Adattatore REST dei comandi del Banco, senza logica di presentazione.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/web/CoordinamentoRichiesteController.html#%3Cinit%3E(it.unina.picus.richieste.api.CoordinamentoRichiesteApi)" class="member-name-link">CoordinamentoRichiesteController(CoordinamentoRichiesteApi)</a> - Constructor for class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/CoordinamentoRichiesteController.html" title="class in it.unina.picus.richieste.web">CoordinamentoRichiesteController</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Collega l’adattatore REST ai casi d’uso del Banco.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/web/CorpoJson.html" class="type-name-link" title="class in it.unina.picus.richieste.web">CorpoJson</a> - Record Class in <a href="it/unina/picus/richieste/web/package-summary.html">it.unina.picus.richieste.web</a></dt>
 <dd>
 <div class="block">Corpo applicativo letto con controllo delle chiavi duplicate prima del binding.</div>
@@ -864,6 +896,10 @@ assegnato.</div>
 </dl>
 <h2 class="title" id="I:D">D</h2>
 <dl class="index">
+<dt><a href="it/unina/picus/richieste/interno/persistenza/AccordoJpa.html#daDto(it.unina.picus.richieste.api.RichiesteApi.DettagliAccordo)" class="member-name-link">daDto(RichiesteApi.DettagliAccordo)</a> - Static method in class it.unina.picus.richieste.interno.persistenza.<a href="it/unina/picus/richieste/interno/persistenza/AccordoJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">AccordoJpa</a></dt>
+<dd>
+<div class="block">Prepara i dettagli da salvare insieme alla transizione di stato.</div>
+</dd>
 <dt><a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.DatiSchedaOperatore.html#dataNascita()" class="member-name-link">dataNascita()</a> - Method in record class it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.DatiSchedaOperatore.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.DatiSchedaOperatore</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/monitoraggio/api/MonitoraggioApi.DatiSchedaOperatore.html#param-dataNascita"><code>dataNascita</code></a> record component.</div>
@@ -1844,6 +1880,10 @@ operativi di Richieste.</div>
 </dl>
 <h2 class="title" id="I:L">L</h2>
 <dl class="index">
+<dt><a href="it/unina/picus/richieste/web/AccordoJson.html#leggi(java.util.Map)" class="member-name-link">leggi(Map)</a> - Static method in class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/AccordoJson.html" title="class in it.unina.picus.richieste.web">AccordoJson</a></dt>
+<dd>
+<div class="block">Traduce il corpo e rifiuta proprietà estranee o significative per l'altra modalità.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/web/InvioRichiestaJson.html#leggi(java.util.Map)" class="member-name-link">leggi(Map)</a> - Static method in class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/InvioRichiestaJson.html" title="class in it.unina.picus.richieste.web">InvioRichiestaJson</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/utenze/web/LimitatoreAccessi.html" class="type-name-link" title="class in it.unina.picus.utenze.web">LimitatoreAccessi</a> - Class in <a href="it/unina/picus/utenze/web/package-summary.html">it.unina.picus.utenze.web</a></dt>
@@ -2310,7 +2350,7 @@ nel modo giusto: le pagine HTML rimandano al login (302), le API ricevono <code>
 </dd>
 <dt><a href="it/unina/picus/richieste/interno/dominio/RichiestaDiMisura.html" class="type-name-link" title="class in it.unina.picus.richieste.interno.dominio">RichiestaDiMisura</a> - Record Class in <a href="it/unina/picus/richieste/interno/dominio/package-summary.html">it.unina.picus.richieste.interno.dominio</a></dt>
 <dd>
-<div class="block">Stato persistito della pratica: una lettura non esegue transizioni.</div>
+<div class="block">Rappresenta lo stato persistito della pratica.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/interno/dominio/RichiestaDiMisura.html#%3Cinit%3E(java.util.UUID,java.util.UUID,long,it.unina.picus.richieste.api.RichiesteApi.TipoDestinatario,java.lang.String,java.lang.String,java.time.Instant,it.unina.picus.richieste.api.RichiesteApi.StatoRichiesta,java.util.UUID,it.unina.picus.richieste.api.RichiesteApi.DettagliAccordo,java.util.UUID,it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione)" class="member-name-link">RichiestaDiMisura(UUID, UUID, long, RichiesteApi.TipoDestinatario, String, String, Instant, RichiesteApi.StatoRichiesta, UUID, RichiesteApi.DettagliAccordo, UUID, CatalogoApi.AmbitoErogazione)</a> - Constructor for record class it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/RichiestaDiMisura.html" title="class in it.unina.picus.richieste.interno.dominio">RichiestaDiMisura</a></dt>
 <dd>
@@ -2428,9 +2468,25 @@ nel modo giusto: le pagine HTML rimandano al login (302), le API ricevono <code>
 <dd>
 <div class="block">Returns the value of the <code>riferimentoInvio</code> record component.</div>
 </dd>
+<dt><a href="it/unina/picus/richieste/interno/dominio/RichiestaDiMisura.html#rifiuta()" class="member-name-link">rifiuta()</a> - Method in record class it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/RichiestaDiMisura.html" title="class in it.unina.picus.richieste.interno.dominio">RichiestaDiMisura</a></dt>
+<dd>
+<div class="block">Chiude la pratica con un rifiuto definitivo deciso dal Banco.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/web/CoordinamentoRichiesteController.html#rifiuta(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,it.unina.picus.richieste.web.CorpoJson)" class="member-name-link">rifiuta(UtenzeApi.IdentitaAutenticata, UUID, CorpoJson)</a> - Method in class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/CoordinamentoRichiesteController.html" title="class in it.unina.picus.richieste.web">CoordinamentoRichiesteController</a></dt>
+<dd>
+<div class="block">Registra il rifiuto definitivo per la richiesta indicata.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/api/CoordinamentoRichiesteApi.html#rifiutaRichiesta(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">rifiutaRichiesta(UtenzeApi.IdentitaAutenticata, UUID)</a> - Method in interface it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/CoordinamentoRichiesteApi.html" title="interface in it.unina.picus.richieste.api">CoordinamentoRichiesteApi</a></dt>
+<dd>
+<div class="block">Registra il rifiuto definitivo della richiesta.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.html#rifiutaRichiesta(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">rifiutaRichiesta(UtenzeApi.IdentitaAutenticata, UUID)</a> - Method in interface it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.html" title="interface in it.unina.picus.richieste.api">RichiesteApi</a></dt>
 <dd>
 <div class="block">Registra il rifiuto definitivo deciso dal Banco quando mancano soluzioni praticabili.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/interno/applicazione/ServizioCoordinamentoRichieste.html#rifiutaRichiesta(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">rifiutaRichiesta(UtenzeApi.IdentitaAutenticata, UUID)</a> - Method in class it.unina.picus.richieste.interno.applicazione.<a href="it/unina/picus/richieste/interno/applicazione/ServizioCoordinamentoRichieste.html" title="class in it.unina.picus.richieste.interno.applicazione">ServizioCoordinamentoRichieste</a></dt>
+<dd>
+<div class="block">Registra il rifiuto dopo aver acquisito il lock della pratica.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.StatoRichiesta.html#RIFIUTATA" class="member-name-link">RIFIUTATA</a> - Enum constant in enum class it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.StatoRichiesta.html" title="enum class in it.unina.picus.richieste.api">RichiesteApi.StatoRichiesta</a></dt>
 <dd>
@@ -2510,7 +2566,9 @@ nel modo giusto: le pagine HTML rimandano al login (302), le API ricevono <code>
 <div class="block">Service Layer: i comandi condividono il lock della pratica con le risposte degli erogatori.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/interno/applicazione/ServizioCoordinamentoRichieste.html#%3Cinit%3E(it.unina.picus.richieste.interno.dominio.RichiestaRepository,it.unina.picus.richieste.interno.dominio.ContattiRepository,it.unina.picus.catalogo.api.RicercaErogatoriApi,it.unina.picus.richieste.api.InvioRichiesteApi,it.unina.picus.comunicazioni.api.AvvisiOperativiApi,java.time.Clock)" class="member-name-link">ServizioCoordinamentoRichieste(RichiestaRepository, ContattiRepository, RicercaErogatoriApi, InvioRichiesteApi, AvvisiOperativiApi, Clock)</a> - Constructor for class it.unina.picus.richieste.interno.applicazione.<a href="it/unina/picus/richieste/interno/applicazione/ServizioCoordinamentoRichieste.html" title="class in it.unina.picus.richieste.interno.applicazione">ServizioCoordinamentoRichieste</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Collega il coordinamento alle porte di persistenza e degli altri moduli.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/interno/applicazione/ServizioInvioRichieste.html" class="type-name-link" title="class in it.unina.picus.richieste.interno.applicazione">ServizioInvioRichieste</a> - Class in <a href="it/unina/picus/richieste/interno/applicazione/package-summary.html">it.unina.picus.richieste.interno.applicazione</a></dt>
 <dd>
 <div class="block">Casi d'uso della #48, senza comandi di transizione appartenenti al coordinamento.</div>
@@ -2885,8 +2943,16 @@ capo a coda (login, area per ruolo, logout) senza database.</div>
 </dl>
 <h2 class="title" id="I:V">V</h2>
 <dl class="index">
+<dt><a href="it/unina/picus/richieste/interno/dominio/ValidazioneAccordo.html#valida(it.unina.picus.richieste.api.RichiesteApi.DettagliAccordo)" class="member-name-link">valida(RichiesteApi.DettagliAccordo)</a> - Static method in class it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/ValidazioneAccordo.html" title="class in it.unina.picus.richieste.interno.dominio">ValidazioneAccordo</a></dt>
+<dd>
+<div class="block">Valida i dettagli e aggrega gli errori per consentire la correzione nello stesso invio.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/web/ErroriRichieste.html#validazione(it.unina.picus.richieste.api.DatiRichiestaNonValidiException)" class="member-name-link">validazione(DatiRichiestaNonValidiException)</a> - Method in class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/ErroriRichieste.html" title="class in it.unina.picus.richieste.web">ErroriRichieste</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/richieste/interno/dominio/ValidazioneAccordo.html" class="type-name-link" title="class in it.unina.picus.richieste.interno.dominio">ValidazioneAccordo</a> - Class in <a href="it/unina/picus/richieste/interno/dominio/package-summary.html">it.unina.picus.richieste.interno.dominio</a></dt>
+<dd>
+<div class="block">Verifica i campi della variante di accordo e produce i valori ammessi in persistenza.</div>
+</dd>
 <dt><a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.VoceMisura.html#valore()" class="member-name-link">valore()</a> - Method in record class it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.VoceMisura.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.VoceMisura</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/monitoraggio/api/MonitoraggioApi.VoceMisura.html#param-valore"><code>valore</code></a> record component.</div>

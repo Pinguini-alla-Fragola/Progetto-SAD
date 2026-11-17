@@ -61,6 +61,7 @@ loadScripts(document, 'script');</script>
 <ol class="toc-list">
 <li><a href="#cercaErogatoriCompatibili(long,java.lang.String)" tabindex="0">cercaErogatoriCompatibili(long, String)</a></li>
 <li><a href="#bloccaCompatibilita(long,java.lang.String,java.util.UUID,it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione)" tabindex="0">bloccaCompatibilita(long, String, UUID, CatalogoApi.AmbitoErogazione)</a></li>
+<li><a href="#bloccaAbilitazioneADistanza(long)" tabindex="0">bloccaAbilitazioneADistanza(long)</a></li>
 </ol>
 </li>
 </ol>
@@ -99,17 +100,22 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#bloccaCompatibilita(long,java.lang.String,java.util.UUID,it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione)" class="member-name-link">bloccaCompatibilita</a><wbr>(long&nbsp;misuraId,
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#bloccaAbilitazioneADistanza(long)" class="member-name-link">bloccaAbilitazioneADistanza</a><wbr>(long&nbsp;misuraId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Verifica se la misura ammette l'erogazione a distanza e la mantiene bloccata fino al commit.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#bloccaCompatibilita(long,java.lang.String,java.util.UUID,it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione)" class="member-name-link">bloccaCompatibilita</a><wbr>(long&nbsp;misuraId,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;comuneCodice,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;accountId,
  <a href="CatalogoApi.AmbitoErogazione.html" title="enum class in it.unina.picus.catalogo.api">CatalogoApi.AmbitoErogazione</a>&nbsp;ambito)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Verifica l'opzione corrente mantenendo le abilitazioni bloccate fino al commit chiamante.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="CatalogoApi.ErogatoreCompatibile.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.ErogatoreCompatibile</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#cercaErogatoriCompatibili(long,java.lang.String)" class="member-name-link">cercaErogatoriCompatibili</a><wbr>(long&nbsp;misuraId,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="CatalogoApi.ErogatoreCompatibile.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.ErogatoreCompatibile</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#cercaErogatoriCompatibili(long,java.lang.String)" class="member-name-link">cercaErogatoriCompatibili</a><wbr>(long&nbsp;misuraId,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;comuneCodice)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Cerca tutte le opzioni compatibili per misura e territorio.</div>
 </div>
 </div>
@@ -170,6 +176,22 @@ adiacenza; ciascun modulo blocca esclusivamente i dati di propria competenza.</d
 <dd><code>ambito</code> - opzione del contatto positivo</dd>
 <dt>Returns:</dt>
 <dd>vero se ancora compatibile e abilitato</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="bloccaAbilitazioneADistanza(long)">
+<h3>bloccaAbilitazioneADistanza</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="return-type">boolean</span>&nbsp;<span class="element-name">bloccaAbilitazioneADistanza</span><wbr><span class="parameters">(long&nbsp;misuraId)</span></div>
+<div class="block">Verifica se la misura ammette l'erogazione a distanza e la mantiene bloccata fino al commit.
+La verifica richiede una transazione di scrittura già aperta.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>misuraId</code> - identificativo della misura già assegnata</dd>
+<dt>Returns:</dt>
+<dd>vero se la misura esiste e ammette l'erogazione a distanza</dd>
 </dl>
 </div>
 </section>

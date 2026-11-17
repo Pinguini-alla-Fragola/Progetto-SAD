@@ -127,7 +127,7 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="../../api/CatalogoApi.Misura.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.Misura</a>&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#bloccaMisura(long)" class="member-name-link">bloccaMisura</a><wbr>(long&nbsp;id)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Blocca e rilegge la misura della pratica nella transazione di assegnazione.</div>
+<div class="block">Blocca e rilegge la misura nella transazione del caso d'uso chiamante.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#bloccaOfferta(java.util.UUID,long)" class="member-name-link">bloccaOfferta</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;optId,
@@ -195,7 +195,13 @@ loadScripts(document, 'script');</script>
 <h3>bloccaMisura</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="../../api/CatalogoApi.Misura.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.Misura</a>&gt;</span>&nbsp;<span class="element-name">bloccaMisura</span><wbr><span class="parameters">(long&nbsp;id)</span></div>
-<div class="block">Blocca e rilegge la misura della pratica nella transazione di assegnazione.</div>
+<div class="block">Blocca e rilegge la misura nella transazione del caso d'uso chiamante.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>id</code> - identificativo della misura</dd>
+<dt>Returns:</dt>
+<dd>misura aggiornata sotto lock, se presente</dd>
+</dl>
 </div>
 </section>
 </li>

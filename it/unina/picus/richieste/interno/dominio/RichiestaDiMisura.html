@@ -69,6 +69,8 @@ loadScripts(document, 'script');</script>
 <li><a href="#prendiInCarico()" tabindex="0">prendiInCarico()</a></li>
 <li><a href="#verificaPresaInCarico()" tabindex="0">verificaPresaInCarico()</a></li>
 <li><a href="#assegna(java.util.UUID,it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione)" tabindex="0">assegna(UUID, CatalogoApi.AmbitoErogazione)</a></li>
+<li><a href="#conferma(it.unina.picus.richieste.api.RichiesteApi.DettagliAccordo)" tabindex="0">conferma(RichiesteApi.DettagliAccordo)</a></li>
+<li><a href="#rifiuta()" tabindex="0">rifiuta()</a></li>
 <li><a href="#stessoInvio(it.unina.picus.richieste.api.RichiesteApi.DatiInvio)" tabindex="0">stessoInvio(RichiesteApi.DatiInvio)</a></li>
 <li><a href="#toString()" tabindex="0">toString()</a></li>
 <li><a href="#hashCode()" tabindex="0">hashCode()</a></li>
@@ -104,7 +106,10 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="type-signature"><span class="modifiers">public record </span><span class="element-name type-name-label">RichiestaDiMisura</span>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;id, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;titolareId, long&nbsp;misuraId, <a href="../../api/RichiesteApi.TipoDestinatario.html" title="enum class in it.unina.picus.richieste.api">RichiesteApi.TipoDestinatario</a>&nbsp;tipoDestinatario, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;comuneCodice, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;description, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/time/Instant.html" title="class or interface in java.time" class="external-link">Instant</a>&nbsp;inviataIl, <a href="../../api/RichiesteApi.StatoRichiesta.html" title="enum class in it.unina.picus.richieste.api">RichiesteApi.StatoRichiesta</a>&nbsp;stato, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;erogatoreId, <a href="../../api/RichiesteApi.DettagliAccordo.html" title="interface in it.unina.picus.richieste.api">RichiesteApi.DettagliAccordo</a>&nbsp;accordo, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;riferimentoInvio, <a href="../../../catalogo/api/CatalogoApi.AmbitoErogazione.html" title="enum class in it.unina.picus.catalogo.api">CatalogoApi.AmbitoErogazione</a>&nbsp;erogatoreAmbito)
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Record.html" title="class or interface in java.lang" class="external-link">Record</a></span></div>
-<div class="block">Stato persistito della pratica: una lettura non esegue transizioni.</div>
+<div class="block">Rappresenta lo stato persistito della pratica. Una lettura non esegue transizioni.
+
+<p>Secondo il principio GRASP <em>Information Expert</em>, la pratica usa il proprio stato
+e l'assegnazione registrata per decidere se può accettare un esito definitivo.</div>
 </div>
 </section>
 <section class="summary">
@@ -162,63 +167,73 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the value of the <code>comuneCodice</code> record component.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#description()" class="member-name-link">description</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="RichiestaDiMisura.html" title="class in it.unina.picus.richieste.interno.dominio">RichiestaDiMisura</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#conferma(it.unina.picus.richieste.api.RichiesteApi.DettagliAccordo)" class="member-name-link">conferma</a><wbr>(<a href="../../api/RichiesteApi.DettagliAccordo.html" title="interface in it.unina.picus.richieste.api">RichiesteApi.DettagliAccordo</a>&nbsp;dettagli)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Conferma la pratica in programmazione e vi associa l'accordo validato.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#description()" class="member-name-link">description</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the value of the <code>description</code> record component.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#equals(java.lang.Object)" class="member-name-link">equals</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;o)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#equals(java.lang.Object)" class="member-name-link">equals</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;o)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Indicates whether some other object is "equal to" this one.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../../catalogo/api/CatalogoApi.AmbitoErogazione.html" title="enum class in it.unina.picus.catalogo.api">CatalogoApi.AmbitoErogazione</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#erogatoreAmbito()" class="member-name-link">erogatoreAmbito</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../../catalogo/api/CatalogoApi.AmbitoErogazione.html" title="enum class in it.unina.picus.catalogo.api">CatalogoApi.AmbitoErogazione</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#erogatoreAmbito()" class="member-name-link">erogatoreAmbito</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the value of the <code>erogatoreAmbito</code> record component.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#erogatoreId()" class="member-name-link">erogatoreId</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#erogatoreId()" class="member-name-link">erogatoreId</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the value of the <code>erogatoreId</code> record component.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final int</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hashCode()" class="member-name-link">hashCode</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final int</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hashCode()" class="member-name-link">hashCode</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns a hash code value for this object.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#id()" class="member-name-link">id</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#id()" class="member-name-link">id</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the value of the <code>id</code> record component.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="RichiestaDiMisura.html" title="class in it.unina.picus.richieste.interno.dominio">RichiestaDiMisura</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#inviata(java.util.UUID,it.unina.picus.richieste.api.RichiesteApi.DatiInvio,java.time.Instant,java.util.UUID)" class="member-name-link">inviata</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;titolareId,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="RichiestaDiMisura.html" title="class in it.unina.picus.richieste.interno.dominio">RichiestaDiMisura</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#inviata(java.util.UUID,it.unina.picus.richieste.api.RichiesteApi.DatiInvio,java.time.Instant,java.util.UUID)" class="member-name-link">inviata</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;titolareId,
  <a href="../../api/RichiesteApi.DatiInvio.html" title="class in it.unina.picus.richieste.api">RichiesteApi.DatiInvio</a>&nbsp;dati,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/time/Instant.html" title="class or interface in java.time" class="external-link">Instant</a>&nbsp;istante,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;riferimento)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Crea la pratica nel solo stato ammesso all'invio.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/time/Instant.html" title="class or interface in java.time" class="external-link">Instant</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#inviataIl()" class="member-name-link">inviataIl</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/time/Instant.html" title="class or interface in java.time" class="external-link">Instant</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#inviataIl()" class="member-name-link">inviataIl</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the value of the <code>inviataIl</code> record component.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>long</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#misuraId()" class="member-name-link">misuraId</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>long</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#misuraId()" class="member-name-link">misuraId</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the value of the <code>misuraId</code> record component.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="RichiestaDiMisura.html" title="class in it.unina.picus.richieste.interno.dominio">RichiestaDiMisura</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#prendiInCarico()" class="member-name-link">prendiInCarico</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="RichiestaDiMisura.html" title="class in it.unina.picus.richieste.interno.dominio">RichiestaDiMisura</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#prendiInCarico()" class="member-name-link">prendiInCarico</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Esegue la presa in carico esplicita del Banco.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#riferimentoInvio()" class="member-name-link">riferimentoInvio</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#riferimentoInvio()" class="member-name-link">riferimentoInvio</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the value of the <code>riferimentoInvio</code> record component.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="RichiestaDiMisura.html" title="class in it.unina.picus.richieste.interno.dominio">RichiestaDiMisura</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#rifiuta()" class="member-name-link">rifiuta</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Chiude la pratica con un rifiuto definitivo deciso dal Banco.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../api/RichiesteApi.StatoRichiesta.html" title="enum class in it.unina.picus.richieste.api">RichiesteApi.StatoRichiesta</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#stato()" class="member-name-link">stato</a>()</code></div>
@@ -347,6 +362,39 @@ loadScripts(document, 'script');</script>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="RichiestaDiMisura.html" title="class in it.unina.picus.richieste.interno.dominio">RichiestaDiMisura</a></span>&nbsp;<span class="element-name">assegna</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;accountId,
  <a href="../../../catalogo/api/CatalogoApi.AmbitoErogazione.html" title="enum class in it.unina.picus.catalogo.api">CatalogoApi.AmbitoErogazione</a>&nbsp;ambito)</span></div>
 <div class="block">Registra insieme assegnatario, ambito e passaggio In programmazione.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="conferma(it.unina.picus.richieste.api.RichiesteApi.DettagliAccordo)">
+<h3>conferma</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="RichiestaDiMisura.html" title="class in it.unina.picus.richieste.interno.dominio">RichiestaDiMisura</a></span>&nbsp;<span class="element-name">conferma</span><wbr><span class="parameters">(<a href="../../api/RichiesteApi.DettagliAccordo.html" title="interface in it.unina.picus.richieste.api">RichiesteApi.DettagliAccordo</a>&nbsp;dettagli)</span></div>
+<div class="block">Conferma la pratica in programmazione e vi associa l'accordo validato.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>dettagli</code> - accordo proposto per l’erogatore assegnato</dd>
+<dt>Returns:</dt>
+<dd>pratica Confermata con i dettagli definitivi</dd>
+<dt>Throws:</dt>
+<dd><code><a href="../../api/ConflittoRichiestaException.html" title="class in it.unina.picus.richieste.api">ConflittoRichiestaException</a></code> - se la pratica non è in programmazione o manca l’erogatore</dd>
+<dd><code><a href="../../api/DatiRichiestaNonValidiException.html" title="class in it.unina.picus.richieste.api">DatiRichiestaNonValidiException</a></code> - se i dati sono incompleti o incompatibili</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="rifiuta()">
+<h3>rifiuta</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="RichiestaDiMisura.html" title="class in it.unina.picus.richieste.interno.dominio">RichiestaDiMisura</a></span>&nbsp;<span class="element-name">rifiuta</span>()</div>
+<div class="block">Chiude la pratica con un rifiuto definitivo deciso dal Banco.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>pratica Rifiutata con la storia dell’assegnazione conservata</dd>
+<dt>Throws:</dt>
+<dd><code><a href="../../api/ConflittoRichiestaException.html" title="class in it.unina.picus.richieste.api">ConflittoRichiestaException</a></code> - se la pratica non è in ricerca o in programmazione</dd>
+</dl>
 </div>
 </section>
 </li>

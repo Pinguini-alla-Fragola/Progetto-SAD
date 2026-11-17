@@ -65,6 +65,7 @@ loadScripts(document, 'script');</script>
 </li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
+<li><a href="#daDto(it.unina.picus.richieste.api.RichiesteApi.DettagliAccordo)" tabindex="0">daDto(RichiesteApi.DettagliAccordo)</a></li>
 <li><a href="#aDto()" tabindex="0">aDto()</a></li>
 </ol>
 </li>
@@ -84,7 +85,8 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="annotations">@Embeddable
 </span><span class="modifiers">public class </span><span class="element-name type-name-label">AccordoJpa</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">Proiezione dei dettagli che verranno registrati dal coordinamento dell'accordo.</div>
+<div class="block">Componente persistito sulla riga della richiesta. La conversione delle due varianti
+applica il pattern <em>Data Mapper</em> tra i dettagli di dominio e le colonne SQL.</div>
 </div>
 </section>
 <section class="summary">
@@ -100,7 +102,9 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color"><code>protected </code></div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E()" class="member-name-link">AccordoJpa</a>()</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Costruttore riservato a JPA.</div>
+</div>
 </div>
 </section>
 </li>
@@ -109,7 +113,7 @@ loadScripts(document, 'script');</script>
 <section class="method-summary" id="method-summary">
 <h2>Method Summary</h2>
 <div id="method-summary-table">
-<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab4" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab4', 3)" class="table-tab">Concrete Methods</button></div>
+<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab1" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab1', 3)" class="table-tab">Static Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab4" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab4', 3)" class="table-tab">Concrete Methods</button></div>
 <div id="method-summary-table.tabpanel" role="tabpanel" aria-labelledby="method-summary-table-tab0">
 <div class="summary-table three-column-summary">
 <div class="table-header col-first">Modifier and Type</div>
@@ -117,7 +121,14 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>(package private) <a href="../../api/RichiesteApi.DettagliAccordo.html" title="interface in it.unina.picus.richieste.api">RichiesteApi.DettagliAccordo</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#aDto()" class="member-name-link">aDto</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns dettagli di dominio ricostruiti dalle colonne, oppure <code>null</code> se assenti.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>(package private) static <a href="AccordoJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">AccordoJpa</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#daDto(it.unina.picus.richieste.api.RichiesteApi.DettagliAccordo)" class="member-name-link">daDto</a><wbr>(<a href="../../api/RichiesteApi.DettagliAccordo.html" title="interface in it.unina.picus.richieste.api">RichiesteApi.DettagliAccordo</a>&nbsp;dettagli)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Prepara i dettagli da salvare insieme alla transizione di stato.</div>
+</div>
 </div>
 </div>
 </div>
@@ -140,6 +151,7 @@ loadScripts(document, 'script');</script>
 <h3>AccordoJpa</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="element-name">AccordoJpa</span>()</div>
+<div class="block">Costruttore riservato a JPA.</div>
 </div>
 </section>
 </li>
@@ -152,10 +164,30 @@ loadScripts(document, 'script');</script>
 <h2>Method Details</h2>
 <ul class="member-list">
 <li>
+<section class="detail" id="daDto(it.unina.picus.richieste.api.RichiesteApi.DettagliAccordo)">
+<h3>daDto</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">static</span>&nbsp;<span class="return-type"><a href="AccordoJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">AccordoJpa</a></span>&nbsp;<span class="element-name">daDto</span><wbr><span class="parameters">(<a href="../../api/RichiesteApi.DettagliAccordo.html" title="interface in it.unina.picus.richieste.api">RichiesteApi.DettagliAccordo</a>&nbsp;dettagli)</span></div>
+<div class="block">Prepara i dettagli da salvare insieme alla transizione di stato.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>dettagli</code> - accordo già validato, oppure <code>null</code> se assente</dd>
+<dt>Returns:</dt>
+<dd>componente da incorporare nella richiesta, oppure <code>null</code></dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="aDto()">
 <h3>aDto</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="return-type"><a href="../../api/RichiesteApi.DettagliAccordo.html" title="interface in it.unina.picus.richieste.api">RichiesteApi.DettagliAccordo</a></span>&nbsp;<span class="element-name">aDto</span>()</div>
+<div class="block">Returns dettagli di dominio ricostruiti dalle colonne, oppure <code>null</code> se assenti.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>dettagli di dominio ricostruiti dalle colonne, oppure <code>null</code> se assenti</dd>
+</dl>
 </div>
 </section>
 </li>
