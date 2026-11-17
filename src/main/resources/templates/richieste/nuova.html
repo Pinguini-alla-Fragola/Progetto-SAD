@@ -25,7 +25,8 @@
 
         <div class="request-create-surface">
             <noscript><p class="alert alert-info">Per inviare la richiesta abilita JavaScript nel browser.</p></noscript>
-            <form id="richiestaForm"><fieldset id="campi-invio" class="campi-inattivi">
+            <p id="avvio-invio" class="form-text" role="status">Caricamento del modulo. Se il pulsante resta disabilitato, ricarica la pagina.</p>
+            <form id="richiestaForm" method="post" th:action="@{/richieste/nuova}" th:attr="data-utente=${utenteId}"><fieldset id="campi-invio" class="campi-inattivi" disabled>
                 <legend class="sr-only">Dati della richiesta</legend>
                 <div class="form-group request-create-measure">
                     <label class="form-label" for="misuraId">Misura di accompagnamento</label>
@@ -70,7 +71,7 @@
             </fieldset>
                 <div class="request-create-actions">
                     <a href="/opt/dashboard" class="btn btn-secondary">Annulla</a>
-                    <button type="submit" class="btn btn-primary" id="btnInvia">Invia richiesta <svg class="icon" aria-hidden="true"><use href="/img/icons.svg#arrow"></use></svg></button>
+                    <button type="submit" class="btn btn-primary" id="btnInvia" disabled>Invia richiesta <svg class="icon" aria-hidden="true"><use href="/img/icons.svg#arrow"></use></svg></button>
                 </div>
                 <p id="invio-incerto" class="form-text" hidden>I dati restano bloccati durante il ritento per evitare richieste duplicate. Riprova per verificare lo stesso invio.</p>
             </form>

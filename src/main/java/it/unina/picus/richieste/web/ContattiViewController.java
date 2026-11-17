@@ -57,6 +57,7 @@ class ContattiViewController {
         }
         modello.addAttribute("misure", catalogo.elencoMisureAttive());
         modello.addAttribute("comuni", catalogo.elencoComuni());
+        modello.addAttribute("utenteId", identita.accountId());
         return "richieste/nuova";
     }
 

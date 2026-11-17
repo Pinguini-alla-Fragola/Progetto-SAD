@@ -19,6 +19,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.hamcrest.Matchers.matchesPattern;
 import org.springframework.http.MediaType;
 
 /** Verifica le viste renderizzate con dati e permessi reali del backend. */
@@ -52,6 +53,9 @@ class RichiesteVisteTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Accoglienza e ascolto")))
                 .andExpect(content().string(containsString("value=\"napoli\"")))
+                .andExpect(content().string(matchesPattern("(?s).*<form[^>]*id=\"richiestaForm\"[^>]*method=\"post\"[^>]*>.*")))
+                .andExpect(content().string(containsString("data-utente=\"" + titolare + "\"")))
+                .andExpect(content().string(matchesPattern("(?s).*<button[^>]*id=\"btnInvia\"[^>]*disabled[^>]*>.*")))
                 .andExpect(content().string(not(containsString("data-form-anteprima"))));
     }
 
