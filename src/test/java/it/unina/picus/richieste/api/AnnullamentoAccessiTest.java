@@ -316,12 +316,21 @@ class AnnullamentoAccessiTest extends AccessiBlackBoxTest {
         Account attore = attore(coordinatore, titolare);
         richieste.annullaRichiesta(attore.identita(), id, MOTIVO);
         RichiestaDettaglio dopoIlPrimo = scenario.istantanea(id);
+        long avvisiBancoDopoIlPrimo = avvisiDiAnnullamento(scenario.banco(), id);
+        long avvisiTitolareDopoIlPrimo = avvisiDiAnnullamento(titolare, id);
+        long avvisiAssegnatoDopoIlPrimo = avvisiDiAnnullamento(assegnato, id);
 
         // Su una richiesta già Annullata il motivo è facoltativo: il comando ripetuto resta valido anche senza.
         RichiestaSintesi ripetuto = richieste.annullaRichiesta(attore.identita(), id, motivoDellaRipetizione);
 
         assertEquals(StatoRichiesta.ANNULLATA, ripetuto.stato());
         assertEquals(dopoIlPrimo, scenario.istantanea(id), "il secondo comando non cambia dati");
+        assertEquals(avvisiBancoDopoIlPrimo, avvisiDiAnnullamento(scenario.banco(), id),
+                "il reinvio non deve generare un nuovo avviso per il Banco");
+        assertEquals(avvisiTitolareDopoIlPrimo, avvisiDiAnnullamento(titolare, id),
+                "il reinvio non deve generare un nuovo avviso per la OPT titolare");
+        assertEquals(avvisiAssegnatoDopoIlPrimo, avvisiDiAnnullamento(assegnato, id),
+                "il reinvio non deve generare un nuovo avviso per l'erogatore assegnato");
         var banco = scenario.banco().identita();
         assertFalse(scenario.invio().codaBanco(banco).stream().map(RichiestaSintesi::id).anyMatch(id::equals),
                 "la richiesta non torna in coda");
