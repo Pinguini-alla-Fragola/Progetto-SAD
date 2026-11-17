@@ -46,18 +46,16 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 
 import com.jayway.jsonpath.JsonPath;
 
-import it.unina.picus.shared.IntegrazionePostgresBase;
+import it.unina.picus.utenze.web.IntegrazionePostgresBase;
 
 import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
 
-/**
- * Backend del login (#25) e casi di sicurezza collegati, con la catena di Spring Security reale e
- * PostgreSQL reale. Gli account sono righe di {@code utenze_account} con hash BCrypt, quindi il
- * percorso è lo stesso della produzione: filtro JSON, {@code AutenticazionePicus},
- * {@code UtenzeService}, {@code VerificaSessioneFilter}, CSRF e permessi di ruolo.
- *
- * Ogni test usa email uniche e azzera il limitatore, così i test non dipendono dall'ordine.
- */
+/*Backend del login (#25) e casi di sicurezza collegati, con la catena di Spring Security reale e
+PostgreSQL reale. Gli account sono righe di {@code utenze_account} con hash BCrypt, quindi il
+percorso è lo stesso della produzione: filtro JSON, {@code AutenticazionePicus},
+{@code UtenzeService}, {@code VerificaSessioneFilter}, CSRF e permessi di ruolo.
+Ogni test usa email uniche e azzera il limitatore, così i test non dipendono dall'ordine.
+*/
 @SpringBootTest(properties = "logging.level.org.springframework.security=DEBUG")
 @AutoConfigureMockMvc
 @DisplayName("Login, sessione, revoca e CSRF su PostgreSQL (#25)")

@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 import java.time.Clock;
 import java.time.Duration;
@@ -12,6 +14,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -24,15 +27,22 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
+import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.test.web.servlet.MockMvc;
 
-/**
- * Verifica la finestra, il blocco temporaneo e la registrazione concorrente dei tentativi (#25,
- * AC3). Oggetti reali e un orologio finto scritto a mano; nessuna dipendenza da Spring.
- *
- * <p>Tutti gli istanti sono ricavati dalle costanti di {@link LimitatoreAccessi}: se cambiano
- * limite, attesa o finestra, i test restano validi senza modifiche. I nomi mostrati non riportano
- * numeri per non diventare falsi quando le costanti cambiano.
- */
+import it.unina.picus.utenze.web.IntegrazionePostgresBase;
+
+/* Tutti gli istanti sono ricavati dalle costanti di {@link LimitatoreAccessi}: se cambiano
+limite, attesa o finestra, i test restano validi senza modifiche. I nomi mostrati non riportano
+numeri per non diventare falsi quando le costanti cambiano.
+*/
 @DisplayName("Limitatore dei tentativi di accesso")
 class LimitatoreAccessiTest {
 
@@ -254,10 +264,6 @@ class LimitatoreAccessiTest {
         }
     }
 
-    /**
-     * Esecuzioni concorrenti. Passare non dimostra l'assenza di race condition, ma un'implementazione
-     * non atomica (leggi-controlla-scrivi separati) qui fallisce quasi sempre.
-     */
     @Nested
     @DisplayName("Concorrenza")
     class Concorrenza {
@@ -289,6 +295,91 @@ class LimitatoreAccessiTest {
 
             assertEquals((long) chiavi * MAX, contaAmmessi(eseguiInParallelo(compiti)));
             assertEquals(chiavi, limitatore.numeroChiavi());
+        }
+    }
+
+    /**
+     Scadenza del blocco attraverso il login JSON reale, con PostgreSQL e la catena di sicurezza.
+     */
+    @Nested
+    @Import(OrologioDelContesto.class)
+    @DisplayName("Scadenza del blocco attraverso il login su PostgreSQL")
+    class AttraversoIlLogin extends IntegrazionePostgresBase {
+
+        private static final String PASSWORD = "Password-di-prova-1";
+
+        @Autowired
+        private MockMvc mvc;
+        @Autowired
+        private JdbcTemplate jdbc;
+        @Autowired
+        private LimitatoreAccessi limitatoreDelContesto;
+        @Autowired
+        private OrologioFinto orologioDelContesto;
+
+        private String email;
+
+        @BeforeEach
+        void preparaAccount() {
+            orologioDelContesto.imposta(T0);
+            limitatoreDelContesto.azzeraTutto();
+            UUID id = UUID.randomUUID();
+            email = "t-" + id + "@picus.test";
+            jdbc.update("""
+                    insert into utenze_account (id, email, password_hash, nome, ruolo, stato)
+                    values (?, ?, ?, ?, ?, ?)
+                    """, id, email, new BCryptPasswordEncoder(4).encode(PASSWORD), "Account di prova", "OPT", "ATTIVO");
+        }
+
+        @Test
+        @DisplayName("Il login torna possibile esattamente dopo l'attesa e i tentativi rifiutati non la prolungano")
+        void bloccoScadeDopoLAttesa() throws Exception {
+            for (int i = 0; i < MAX; i++) {
+                assertEquals(401, statoLogin("sbagliata"), "tentativo " + (i + 1));
+            }
+
+            orologioDelContesto.imposta(T0.plus(ATTESA.dividedBy(2)));
+            assertEquals(429, statoLogin(PASSWORD), "a metà dell'attesa");
+
+            orologioDelContesto.imposta(T0.plus(ATTESA).minus(UN_MS));
+            assertEquals(429, statoLogin(PASSWORD), "un millisecondo prima della fine dell'attesa");
+
+            // Se i rifiuti fossero registrati, il blocco durerebbe ancora.
+            orologioDelContesto.imposta(T0.plus(ATTESA));
+            assertEquals(204, statoLogin(PASSWORD), "alla fine dell'attesa");
+        }
+
+        @Test
+        @DisplayName("I tentativi falliti più vecchi della finestra non contano più per il blocco")
+        void fallimentiFuoriFinestraDimenticati() throws Exception {
+            for (int i = 0; i < MAX - 1; i++) {
+                assertEquals(401, statoLogin("sbagliata"), "tentativo " + (i + 1) + " a T0");
+            }
+
+            // Se quelli di T0 contassero ancora, qui il limite verrebbe superato e arriverebbe un 429.
+            orologioDelContesto.imposta(T0.plus(FINESTRA).plus(UN_MS));
+            for (int i = 0; i < MAX - 1; i++) {
+                assertEquals(401, statoLogin("sbagliata"), "tentativo " + (i + 1) + " dopo la finestra");
+            }
+            assertEquals(204, statoLogin(PASSWORD));
+        }
+
+        private int statoLogin(String password) throws Exception {
+            return mvc.perform(post("/api/auth/login").with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"email\":\"" + email + "\",\"password\":\"" + password + "\"}"))
+                    .andReturn().getResponse().getStatus();
+        }
+    }
+
+    /** Orologio finto del contesto Spring: prevale su quello di {@code ConfigurazioneTempo}. */
+    @TestConfiguration(proxyBeanMethods = false)
+    static class OrologioDelContesto {
+
+        @Bean
+        @Primary
+        OrologioFinto orologioFinto() {
+            return new OrologioFinto(T0);
         }
     }
 
