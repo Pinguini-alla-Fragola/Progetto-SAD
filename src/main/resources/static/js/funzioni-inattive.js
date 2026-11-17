@@ -6,7 +6,6 @@ export function segnalaFunzioniInattive() {
         nota.className = 'unavailable-note';
         nota.setAttribute('role', 'tooltip');
         nota.id = 'funzione-inattiva-' + indice;
-        nota.setAttribute('role', 'tooltip');
         nota.textContent = 'Funzione non ancora implementata';
         contenitore.append(nota);
         contenitore.tabIndex = 0;
@@ -14,9 +13,6 @@ export function segnalaFunzioniInattive() {
         for (const evento of ['pointerenter', 'focus']) {
             contenitore.addEventListener(evento, () => contenitore.classList.remove('tooltip-dismissed'));
         }
-        const ripristinaTooltip = () => contenitore.classList.remove('tooltip-dismissed');
-        contenitore.addEventListener('pointerleave', ripristinaTooltip);
-        contenitore.addEventListener('blur', ripristinaTooltip);
         for (const controllo of contenitore.querySelectorAll('button, input, select, textarea')) controllo.disabled = true;
         if (contenitore.classList.contains('azione-inattiva')) {
             contenitore.setAttribute('role', 'group');
