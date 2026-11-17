@@ -60,12 +60,15 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-summary" tabindex="0">Method Summary</a></li>
 <li><a href="#constructor-detail" tabindex="0">Constructor Details</a>
 <ol class="toc-list">
-<li><a href="#%3Cinit%3E()" tabindex="0">AreaController()</a></li>
+<li><a href="#%3Cinit%3E(it.unina.picus.utenze.api.UtenzeApi,org.springframework.core.env.Environment)" tabindex="0">AreaController(UtenzeApi, Environment)</a></li>
 </ol>
 </li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
+<li><a href="#login(it.unina.picus.utenze.web.PrincipalePicus,org.springframework.ui.Model)" tabindex="0">login(PrincipalePicus, Model)</a></li>
+<li><a href="#credenziali(java.lang.String,org.springframework.ui.Model)" tabindex="0">credenziali(String, Model)</a></li>
 <li><a href="#home(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" tabindex="0">home(UtenzeApi.IdentitaAutenticata)</a></li>
+<li><a href="#dashboard(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,org.springframework.ui.Model)" tabindex="0">dashboard(UtenzeApi.IdentitaAutenticata, Model)</a></li>
 </ol>
 </li>
 </ol>
@@ -84,7 +87,7 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="annotations">@Controller
 </span><span class="modifiers">class </span><span class="element-name type-name-label">AreaController</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">Reindirizza l'account autenticato all'area riservata al suo ruolo.</div>
+<div class="block">Adattatore MVC per il login e le aree riservate dei tre ruoli.</div>
 </div>
 </section>
 <section class="summary">
@@ -97,7 +100,8 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E()" class="member-name-link">AreaController</a>()</code></div>
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(it.unina.picus.utenze.api.UtenzeApi,org.springframework.core.env.Environment)" class="member-name-link">AreaController</a><wbr>(<a href="../api/UtenzeApi.html" title="interface in it.unina.picus.utenze.api">UtenzeApi</a>&nbsp;utenze,
+ org.springframework.core.env.Environment&nbsp;ambiente)</code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 </div>
 </section>
@@ -114,10 +118,22 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>(package private) <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#home(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">home</a><wbr>(<a href="../api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;identita)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#credenziali(java.lang.String,org.springframework.ui.Model)" class="member-name-link">credenziali</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;operazione,
+ org.springframework.ui.Model&nbsp;modello)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Sceglie il percorso di destinazione a partire dall'identità autenticata.</div>
+<div class="block">Espone la vista delle credenziali mentre le azioni attendono il servizio dedicato.</div>
 </div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>(package private) <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#dashboard(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,org.springframework.ui.Model)" class="member-name-link">dashboard</a><wbr>(<a href="../api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;identita,
+ org.springframework.ui.Model&nbsp;modello)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>(package private) <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#home(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">home</a><wbr>(<a href="../api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;identita)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>(package private) <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#login(it.unina.picus.utenze.web.PrincipalePicus,org.springframework.ui.Model)" class="member-name-link">login</a><wbr>(<a href="PrincipalePicus.html" title="class in it.unina.picus.utenze.web">PrincipalePicus</a>&nbsp;principale,
+ org.springframework.ui.Model&nbsp;modello)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
 </div>
@@ -136,10 +152,11 @@ loadScripts(document, 'script');</script>
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;()">
+<section class="detail" id="&lt;init&gt;(it.unina.picus.utenze.api.UtenzeApi,org.springframework.core.env.Environment)">
 <h3>AreaController</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="element-name">AreaController</span>()</div>
+<div class="member-signature"><span class="element-name">AreaController</span><wbr><span class="parameters">(<a href="../api/UtenzeApi.html" title="interface in it.unina.picus.utenze.api">UtenzeApi</a>&nbsp;utenze,
+ org.springframework.core.env.Environment&nbsp;ambiente)</span></div>
 </div>
 </section>
 </li>
@@ -152,12 +169,44 @@ loadScripts(document, 'script');</script>
 <h2>Method Details</h2>
 <ul class="member-list">
 <li>
+<section class="detail" id="login(it.unina.picus.utenze.web.PrincipalePicus,org.springframework.ui.Model)">
+<h3>login</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="annotations">@GetMapping("/login")
+</span><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">login</span><wbr><span class="parameters">(@AuthenticationPrincipal
+ <a href="PrincipalePicus.html" title="class in it.unina.picus.utenze.web">PrincipalePicus</a>&nbsp;principale,
+ org.springframework.ui.Model&nbsp;modello)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="credenziali(java.lang.String,org.springframework.ui.Model)">
+<h3>credenziali</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="annotations">@GetMapping("/{operazione:recupera|attiva}")
+</span><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">credenziali</span><wbr><span class="parameters">(@PathVariable
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;operazione,
+ org.springframework.ui.Model&nbsp;modello)</span></div>
+<div class="block">Espone la vista delle credenziali mentre le azioni attendono il servizio dedicato.</div>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="home(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)">
 <h3>home</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="annotations">@GetMapping({"/","/dashboard"})
 </span><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">home</span><wbr><span class="parameters">(<a href="../api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;identita)</span></div>
-<div class="block">Sceglie il percorso di destinazione a partire dall'identità autenticata.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="dashboard(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,org.springframework.ui.Model)">
+<h3>dashboard</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="annotations">@GetMapping({"/banco/dashboard","/opt/dashboard","/operatore/dashboard"})
+</span><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">dashboard</span><wbr><span class="parameters">(<a href="../api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;identita,
+ org.springframework.ui.Model&nbsp;modello)</span></div>
 </div>
 </section>
 </li>

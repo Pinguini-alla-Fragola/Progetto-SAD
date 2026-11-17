@@ -205,9 +205,9 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="it/unina/picus/utenze/web/AreaController.html" class="type-name-link" title="class in it.unina.picus.utenze.web">AreaController</a> - Class in <a href="it/unina/picus/utenze/web/package-summary.html">it.unina.picus.utenze.web</a></dt>
 <dd>
-<div class="block">Reindirizza l'account autenticato all'area riservata al suo ruolo.</div>
+<div class="block">Adattatore MVC per il login e le aree riservate dei tre ruoli.</div>
 </dd>
-<dt><a href="it/unina/picus/utenze/web/AreaController.html#%3Cinit%3E()" class="member-name-link">AreaController()</a> - Constructor for class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/AreaController.html" title="class in it.unina.picus.utenze.web">AreaController</a></dt>
+<dt><a href="it/unina/picus/utenze/web/AreaController.html#%3Cinit%3E(it.unina.picus.utenze.api.UtenzeApi,org.springframework.core.env.Environment)" class="member-name-link">AreaController(UtenzeApi, Environment)</a> - Constructor for class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/AreaController.html" title="class in it.unina.picus.utenze.web">AreaController</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.DatiSchedaOperatore.html#areaLivello()" class="member-name-link">areaLivello()</a> - Method in record class it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.DatiSchedaOperatore.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.DatiSchedaOperatore</a></dt>
 <dd>
@@ -535,6 +535,10 @@ sui tentativi.</div>
 </dd>
 <dt><a href="it/unina/picus/shared/ConfigurazioneTempo.html#clock()" class="member-name-link">clock()</a> - Method in class it.unina.picus.shared.<a href="it/unina/picus/shared/ConfigurazioneTempo.html" title="class in it.unina.picus.shared">ConfigurazioneTempo</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/richieste/web/CodaViewController.html#coda(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">coda(UtenzeApi.IdentitaAutenticata)</a> - Method in class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/CodaViewController.html" title="class in it.unina.picus.richieste.web">CodaViewController</a></dt>
+<dd>
+<div class="block">Dati leggibili della coda senza estendere il DTO condiviso con gli erogatori.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/interno/dominio/RichiestaRepository.html#codaBanco()" class="member-name-link">codaBanco()</a> - Method in interface it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/RichiestaRepository.html" title="interface in it.unina.picus.richieste.interno.dominio">RichiestaRepository</a></dt>
 <dd>
 <div class="block">Elenca solo le pratiche aperte in ordine cronologico stabile.</div>
@@ -552,6 +556,14 @@ sui tentativi.</div>
 <dt><a href="it/unina/picus/richieste/interno/applicazione/ServizioInvioRichieste.html#codaBanco(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">codaBanco(UtenzeApi.IdentitaAutenticata)</a> - Method in class it.unina.picus.richieste.interno.applicazione.<a href="it/unina/picus/richieste/interno/applicazione/ServizioInvioRichieste.html" title="class in it.unina.picus.richieste.interno.applicazione">ServizioInvioRichieste</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/richieste/web/RichiesteController.html#codaBanco(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">codaBanco(UtenzeApi.IdentitaAutenticata)</a> - Method in class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/RichiesteController.html" title="class in it.unina.picus.richieste.web">RichiesteController</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/richieste/web/CodaViewController.html" class="type-name-link" title="class in it.unina.picus.richieste.web">CodaViewController</a> - Class in <a href="it/unina/picus/richieste/web/package-summary.html">it.unina.picus.richieste.web</a></dt>
+<dd>
+<div class="block">Proiezione di presentazione della coda, riservata al Banco.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/web/CodaViewController.html#%3Cinit%3E(it.unina.picus.richieste.api.InvioRichiesteApi,it.unina.picus.utenze.api.UtenzeApi,it.unina.picus.catalogo.api.ConsultazioneCatalogoApi)" class="member-name-link">CodaViewController(InvioRichiesteApi, UtenzeApi, ConsultazioneCatalogoApi)</a> - Constructor for class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/CodaViewController.html" title="class in it.unina.picus.richieste.web">CodaViewController</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/richieste/web/CodaViewController.RigaCoda.html" class="type-name-link" title="class in it.unina.picus.richieste.web">CodaViewController.RigaCoda</a> - Record Class in <a href="it/unina/picus/richieste/web/package-summary.html">it.unina.picus.richieste.web</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/catalogo/api/CatalogoApi.Comune.html#codice()" class="member-name-link">codice()</a> - Method in record class it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/CatalogoApi.Comune.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.Comune</a></dt>
 <dd>
@@ -579,6 +591,10 @@ sui tentativi.</div>
 </dd>
 <dt><a href="index.html#componenti-condivisi-heading" class="search-tag-link">Componenti condivisi</a> - Section in Overview</dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/richieste/web/CodaViewController.RigaCoda.html#comune()" class="member-name-link">comune()</a> - Method in record class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/CodaViewController.RigaCoda.html" title="class in it.unina.picus.richieste.web">CodaViewController.RigaCoda</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>comune</code> record component.</div>
+</dd>
 <dt><a href="it/unina/picus/catalogo/api/CatalogoApi.Comune.html#%3Cinit%3E(java.lang.String,java.lang.String)" class="member-name-link">Comune(String, String)</a> - Constructor for record class it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/CatalogoApi.Comune.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.Comune</a></dt>
 <dd>
 <div class="block">Creates an instance of a <code>Comune</code> record class.</div>
@@ -803,6 +819,12 @@ assegnato.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/interno/persistenza/ContattiRepositoryJpa.html#%3Cinit%3E(it.unina.picus.richieste.interno.persistenza.ContattoDisponibilitaRepository,jakarta.persistence.EntityManager)" class="member-name-link">ContattiRepositoryJpa(ContattoDisponibilitaRepository, EntityManager)</a> - Constructor for class it.unina.picus.richieste.interno.persistenza.<a href="it/unina/picus/richieste/interno/persistenza/ContattiRepositoryJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">ContattiRepositoryJpa</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/richieste/web/ContattiViewController.html" class="type-name-link" title="class in it.unina.picus.richieste.web">ContattiViewController</a> - Class in <a href="it/unina/picus/richieste/web/package-summary.html">it.unina.picus.richieste.web</a></dt>
+<dd>
+<div class="block">Presenta le viste dei contatti di disponibilità.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/web/ContattiViewController.html#%3Cinit%3E(org.springframework.beans.factory.ObjectProvider,it.unina.picus.richieste.api.InvioRichiesteApi,it.unina.picus.catalogo.api.ConsultazioneCatalogoApi,it.unina.picus.utenze.api.UtenzeApi)" class="member-name-link">ContattiViewController(ObjectProvider, InvioRichiesteApi, ConsultazioneCatalogoApi, UtenzeApi)</a> - Constructor for class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/ContattiViewController.html" title="class in it.unina.picus.richieste.web">ContattiViewController</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.DettaglioContatto.html#contatto()" class="member-name-link">contatto()</a> - Method in record class it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.DettaglioContatto.html" title="class in it.unina.picus.richieste.api">RichiesteApi.DettaglioContatto</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/richieste/api/RichiesteApi.DettaglioContatto.html#param-contatto"><code>contatto</code></a> record component.</div>
@@ -905,6 +927,10 @@ assegnato.</div>
 <dd>
 <div class="block">Ricevuta e in attesa della presa in carico del Banco.</div>
 </dd>
+<dt><a href="it/unina/picus/utenze/web/AreaController.html#credenziali(java.lang.String,org.springframework.ui.Model)" class="member-name-link">credenziali(String, Model)</a> - Method in class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/AreaController.html" title="class in it.unina.picus.utenze.web">AreaController</a></dt>
+<dd>
+<div class="block">Espone la vista delle credenziali mentre le azioni attendono il servizio dedicato.</div>
+</dd>
 </dl>
 <h2 class="title" id="I:D">D</h2>
 <dl class="index">
@@ -912,6 +938,8 @@ assegnato.</div>
 <dd>
 <div class="block">Prepara i dettagli da salvare insieme alla transizione di stato.</div>
 </dd>
+<dt><a href="it/unina/picus/utenze/web/AreaController.html#dashboard(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,org.springframework.ui.Model)" class="member-name-link">dashboard(UtenzeApi.IdentitaAutenticata, Model)</a> - Method in class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/AreaController.html" title="class in it.unina.picus.utenze.web">AreaController</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.DatiSchedaOperatore.html#dataNascita()" class="member-name-link">dataNascita()</a> - Method in record class it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.DatiSchedaOperatore.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.DatiSchedaOperatore</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/monitoraggio/api/MonitoraggioApi.DatiSchedaOperatore.html#param-dataNascita"><code>dataNascita</code></a> record component.</div>
@@ -989,6 +1017,10 @@ assegnato.</div>
 <dt><a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.Riscontro.html#destinatarioId()" class="member-name-link">destinatarioId()</a> - Method in record class it.unina.picus.comunicazioni.api.<a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.Riscontro.html" title="class in it.unina.picus.comunicazioni.api">ComunicazioniApi.Riscontro</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/comunicazioni/api/ComunicazioniApi.Riscontro.html#param-destinatarioId"><code>destinatarioId</code></a> record component.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/web/ContattiViewController.html#dettaglio(java.util.UUID,it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,org.springframework.ui.Model)" class="member-name-link">dettaglio(UUID, UtenzeApi.IdentitaAutenticata, Model)</a> - Method in class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/ContattiViewController.html" title="class in it.unina.picus.richieste.web">ContattiViewController</a></dt>
+<dd>
+<div class="block">Consulta tramite il caso d'uso, che filtra i dati e controlla il legame con la pratica.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.DettaglioContatto.html#%3Cinit%3E(it.unina.picus.richieste.api.RichiesteApi.ContattoDisponibilita,long,java.lang.String,it.unina.picus.richieste.api.RichiesteApi.TipoDestinatario,java.lang.String)" class="member-name-link">DettaglioContatto(RichiesteApi.ContattoDisponibilita, long, String, RichiesteApi.TipoDestinatario, String)</a> - Constructor for record class it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.DettaglioContatto.html" title="class in it.unina.picus.richieste.api">RichiesteApi.DettaglioContatto</a></dt>
 <dd>
@@ -1254,6 +1286,10 @@ assegnato.</div>
 <div class="block">Indicates whether some other object is "equal to" this one.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/interno/dominio/RichiestaDiMisura.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/RichiestaDiMisura.html" title="class in it.unina.picus.richieste.interno.dominio">RichiestaDiMisura</a></dt>
+<dd>
+<div class="block">Indicates whether some other object is "equal to" this one.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/web/CodaViewController.RigaCoda.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/CodaViewController.RigaCoda.html" title="class in it.unina.picus.richieste.web">CodaViewController.RigaCoda</a></dt>
 <dd>
 <div class="block">Indicates whether some other object is "equal to" this one.</div>
 </dd>
@@ -1618,6 +1654,10 @@ assegnato.</div>
 <dd>
 <div class="block">Returns a hash code value for this object.</div>
 </dd>
+<dt><a href="it/unina/picus/richieste/web/CodaViewController.RigaCoda.html#hashCode()" class="member-name-link">hashCode()</a> - Method in record class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/CodaViewController.RigaCoda.html" title="class in it.unina.picus.richieste.web">CodaViewController.RigaCoda</a></dt>
+<dd>
+<div class="block">Returns a hash code value for this object.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/web/ContattiDisponibilitaController.DatiRisposta.html#hashCode()" class="member-name-link">hashCode()</a> - Method in record class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/ContattiDisponibilitaController.DatiRisposta.html" title="class in it.unina.picus.richieste.web">ContattiDisponibilitaController.DatiRisposta</a></dt>
 <dd>
 <div class="block">Returns a hash code value for this object.</div>
@@ -1651,9 +1691,7 @@ assegnato.</div>
 <div class="block">Returns a hash code value for this object.</div>
 </dd>
 <dt><a href="it/unina/picus/utenze/web/AreaController.html#home(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">home(UtenzeApi.IdentitaAutenticata)</a> - Method in class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/AreaController.html" title="class in it.unina.picus.utenze.web">AreaController</a></dt>
-<dd>
-<div class="block">Sceglie il percorso di destinazione a partire dall'identità autenticata.</div>
-</dd>
+<dd>&nbsp;</dd>
 </dl>
 <h2 class="title" id="I:I">I</h2>
 <dl class="index">
@@ -1913,6 +1951,8 @@ operativi di Richieste.</div>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/richieste/api/RichiesteApi.AccordoADistanza.html#param-link"><code>link</code></a> record component.</div>
 </dd>
+<dt><a href="it/unina/picus/utenze/web/AreaController.html#login(it.unina.picus.utenze.web.PrincipalePicus,org.springframework.ui.Model)" class="member-name-link">login(PrincipalePicus, Model)</a> - Method in class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/AreaController.html" title="class in it.unina.picus.utenze.web">AreaController</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/shared/LoginJsonConfigurer.html" class="type-name-link" title="class in it.unina.picus.shared">LoginJsonConfigurer</a> - Class in <a href="it/unina/picus/shared/package-summary.html">it.unina.picus.shared</a></dt>
 <dd>
 <div class="block">Collega il login JSON alla stessa autenticazione del form.</div>
@@ -2101,6 +2141,10 @@ operativi di Richieste.</div>
 <dd>
 <div class="block">Solo per i test.</div>
 </dd>
+<dt><a href="it/unina/picus/richieste/web/ContattiViewController.html#nuova(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,org.springframework.ui.Model)" class="member-name-link">nuova(UtenzeApi.IdentitaAutenticata, Model)</a> - Method in class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/ContattiViewController.html" title="class in it.unina.picus.richieste.web">ContattiViewController</a></dt>
+<dd>
+<div class="block">Carica i valori di catalogo ammessi per l'invio della OPT.</div>
+</dd>
 </dl>
 <h2 class="title" id="I:O">O</h2>
 <dl class="index">
@@ -2163,6 +2207,10 @@ operativi di Richieste.</div>
 <dt><a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.ConteggioOpt.html#optId()" class="member-name-link">optId()</a> - Method in record class it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.ConteggioOpt.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.ConteggioOpt</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/monitoraggio/api/MonitoraggioApi.ConteggioOpt.html#param-optId"><code>optId</code></a> record component.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/web/CodaViewController.RigaCoda.html#optRichiedente()" class="member-name-link">optRichiedente()</a> - Method in record class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/CodaViewController.RigaCoda.html" title="class in it.unina.picus.richieste.web">CodaViewController.RigaCoda</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>optRichiedente</code> record component.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/interno/dominio/OrdinamentoErogatori.html#ordina(java.util.List,java.util.Map)" class="member-name-link">ordina(List, Map)</a> - Static method in class it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/OrdinamentoErogatori.html" title="class in it.unina.picus.richieste.interno.dominio">OrdinamentoErogatori</a></dt>
 <dd>&nbsp;</dd>
@@ -2341,6 +2389,10 @@ operativi di Richieste.</div>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/richieste/api/RichiesteApi.RichiestaDettaglio.html#param-richiesta"><code>richiesta</code></a> record component.</div>
 </dd>
+<dt><a href="it/unina/picus/richieste/web/CodaViewController.RigaCoda.html#richiesta()" class="member-name-link">richiesta()</a> - Method in record class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/CodaViewController.RigaCoda.html" title="class in it.unina.picus.richieste.web">CodaViewController.RigaCoda</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>richiesta</code> record component.</div>
+</dd>
 <dt><a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.TipoAvviso.html#RICHIESTA_ANNULLATA" class="member-name-link">RICHIESTA_ANNULLATA</a> - Enum constant in enum class it.unina.picus.comunicazioni.api.<a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.TipoAvviso.html" title="enum class in it.unina.picus.comunicazioni.api">ComunicazioniApi.TipoAvviso</a></dt>
 <dd>
 <div class="block">Annullamento della richiesta.</div>
@@ -2385,6 +2437,10 @@ nel modo giusto: le pagine HTML rimandano al login (302), le API ricevono <code>
 <dt><a href="it/unina/picus/richieste/interno/persistenza/RichiestaJpa.html#%3Cinit%3E()" class="member-name-link">RichiestaJpa()</a> - Constructor for class it.unina.picus.richieste.interno.persistenza.<a href="it/unina/picus/richieste/interno/persistenza/RichiestaJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">RichiestaJpa</a></dt>
 <dd>
 <div class="block">Costruttore riservato a JPA.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/web/ContattiViewController.html#richiestaNonTrovata()" class="member-name-link">richiestaNonTrovata()</a> - Method in class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/ContattiViewController.html" title="class in it.unina.picus.richieste.web">ContattiViewController</a></dt>
+<dd>
+<div class="block">Le pagine mostrano un errore HTML; gli endpoint API conservano il proprio contratto JSON.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/interno/dominio/RichiestaRepository.html" class="type-name-link" title="interface in it.unina.picus.richieste.interno.dominio">RichiestaRepository</a> - Interface in <a href="it/unina/picus/richieste/interno/dominio/package-summary.html">it.unina.picus.richieste.interno.dominio</a></dt>
 <dd>
@@ -2502,6 +2558,10 @@ nel modo giusto: le pagine HTML rimandano al login (302), le API ricevono <code>
 <dd>
 <div class="block">Ricerca chiusa dal Banco per assenza di soluzioni praticabili.</div>
 </dd>
+<dt><a href="it/unina/picus/richieste/web/CodaViewController.RigaCoda.html#%3Cinit%3E(it.unina.picus.richieste.api.RichiesteApi.RichiestaSintesi,java.lang.String,java.lang.String)" class="member-name-link">RigaCoda(RichiesteApi.RichiestaSintesi, String, String)</a> - Constructor for record class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/CodaViewController.RigaCoda.html" title="class in it.unina.picus.richieste.web">CodaViewController.RigaCoda</a></dt>
+<dd>
+<div class="block">Creates an instance of a <code>RigaCoda</code> record class.</div>
+</dd>
 <dt><a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.Riscontro.html#%3Cinit%3E(java.util.UUID,java.lang.String,java.time.Instant)" class="member-name-link">Riscontro(UUID, String, Instant)</a> - Constructor for record class it.unina.picus.comunicazioni.api.<a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.Riscontro.html" title="class in it.unina.picus.comunicazioni.api">ComunicazioniApi.Riscontro</a></dt>
 <dd>
 <div class="block">Creates an instance of a <code>Riscontro</code> record class.</div>
@@ -2526,6 +2586,8 @@ nel modo giusto: le pagine HTML rimandano al login (302), le API ricevono <code>
 <dd>
 <div class="block">Registra la decisione del destinatario sul contatto.</div>
 </dd>
+<dt><a href="it/unina/picus/richieste/web/ContattiViewController.html#risposta(java.util.UUID,it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,org.springframework.ui.Model)" class="member-name-link">risposta(UUID, UtenzeApi.IdentitaAutenticata, Model)</a> - Method in class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/ContattiViewController.html" title="class in it.unina.picus.richieste.web">ContattiViewController</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/catalogo/api/CatalogoApi.html#ritiraOffertaOpt(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,long)" class="member-name-link">ritiraOffertaOpt(UtenzeApi.IdentitaAutenticata, long)</a> - Method in interface it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/CatalogoApi.html" title="interface in it.unina.picus.catalogo.api">CatalogoApi</a></dt>
 <dd>
 <div class="block">Ritira l'offerta della OPT autenticata per la misura, conservando i riferimenti storici.</div>
@@ -2624,6 +2686,8 @@ nel modo giusto: le pagine HTML rimandano al login (302), le API ricevono <code>
 <div class="block">Ricostruisce i tentativi nel loro ordine persistente.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/interno/persistenza/ContattiRepositoryJpa.html#storico(java.util.UUID)" class="member-name-link">storico(UUID)</a> - Method in class it.unina.picus.richieste.interno.persistenza.<a href="it/unina/picus/richieste/interno/persistenza/ContattiRepositoryJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">ContattiRepositoryJpa</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/richieste/web/ContattiViewController.html#storico(java.util.UUID,org.springframework.ui.Model)" class="member-name-link">storico(UUID, Model)</a> - Method in class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/ContattiViewController.html" title="class in it.unina.picus.richieste.web">ContattiViewController</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/utenze/interno/stub/StubUtenzeApi.html" class="type-name-link" title="class in it.unina.picus.utenze.interno.stub">StubUtenzeApi</a> - Class in <a href="it/unina/picus/utenze/interno/stub/package-summary.html">it.unina.picus.utenze.interno.stub</a></dt>
 <dd>
@@ -2844,6 +2908,10 @@ capo a coda (login, area per ruolo, logout) senza database.</div>
 <div class="block">Returns a string representation of this record class.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/interno/dominio/RichiestaDiMisura.html#toString()" class="member-name-link">toString()</a> - Method in record class it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/RichiestaDiMisura.html" title="class in it.unina.picus.richieste.interno.dominio">RichiestaDiMisura</a></dt>
+<dd>
+<div class="block">Returns a string representation of this record class.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/web/CodaViewController.RigaCoda.html#toString()" class="member-name-link">toString()</a> - Method in record class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/CodaViewController.RigaCoda.html" title="class in it.unina.picus.richieste.web">CodaViewController.RigaCoda</a></dt>
 <dd>
 <div class="block">Returns a string representation of this record class.</div>
 </dd>
