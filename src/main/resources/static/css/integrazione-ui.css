@@ -57,7 +57,24 @@
 #coordinamento-azioni { margin-block: 1rem; }
 .picus-actions { flex-wrap: wrap; }
 
-.unavailable-note { display: block; color: var(--color-slate-600); font: .75rem/1.4 var(--font-ui); }
-.picus-list[data-funzione-inattiva] > .list-tools { display: none; }
-.picus-list > .unavailable-note { padding: 1rem; border-radius: var(--radius-sm); background: var(--color-mist); font-size: .875rem; }
-.azione-inattiva:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 4px; border-radius: var(--radius-sm); }
+.unavailable-note {
+    position: absolute;
+    z-index: 10;
+    inset: auto auto 100% 0;
+    width: max-content;
+    max-width: min(17rem, 75vw);
+    padding: .5rem .75rem;
+    border-radius: var(--radius-sm);
+    background: var(--color-deep);
+    color: var(--color-white);
+    font: .8125rem/1.4 var(--font-ui);
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+[data-funzione-inattiva]:not(.tooltip-dismissed):is(:hover, :focus-visible) > .unavailable-note {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+}
+[data-funzione-inattiva]:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 4px; border-radius: var(--radius-sm); }
