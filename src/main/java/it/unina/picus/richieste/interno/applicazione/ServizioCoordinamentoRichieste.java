@@ -9,10 +9,15 @@ import it.unina.picus.richieste.api.CoordinamentoRichiesteApi;
 import it.unina.picus.richieste.api.DatiRichiestaNonValidiException;
 import it.unina.picus.richieste.api.InvioRichiesteApi;
 import it.unina.picus.richieste.api.RisorsaRichiesteNonTrovataException;
+import it.unina.picus.richieste.api.RichiesteApi;
+import it.unina.picus.richieste.api.RichiesteApi.AccordoADistanza;
 import it.unina.picus.richieste.api.RichiesteApi.Candidato;
 import it.unina.picus.richieste.api.RichiesteApi.ContattoDisponibilita;
+import it.unina.picus.richieste.api.RichiesteApi.DettagliAccordo;
 import it.unina.picus.richieste.api.RichiesteApi.EsitoContatto;
+import it.unina.picus.richieste.api.RichiesteApi.RichiestaDettaglio;
 import it.unina.picus.richieste.api.RichiesteApi.RichiestaSintesi;
+import it.unina.picus.richieste.api.RichiesteApi.StatoRichiesta;
 import it.unina.picus.richieste.interno.dominio.ContattiRepository;
 import it.unina.picus.richieste.interno.dominio.OrdinamentoErogatori;
 import it.unina.picus.richieste.interno.dominio.RichiestaDiMisura;
@@ -39,6 +44,16 @@ public class ServizioCoordinamentoRichieste implements CoordinamentoRichiesteApi
     private final AvvisiOperativiApi avvisi;
     private final Clock clock;
 
+    /**
+     * Collega il coordinamento alle porte di persistenza e degli altri moduli.
+     *
+     * @param richieste accesso alle pratiche e al loro lock
+     * @param contatti accesso alle richieste di disponibilità
+     * @param catalogo ricerca di erogatori compatibili
+     * @param consultazione lettura del dettaglio secondo le regole di visibilità
+     * @param avvisi registrazione degli avvisi operativi
+     * @param clock orologio dei contatti
+     */
     public ServizioCoordinamentoRichieste(RichiestaRepository richieste, ContattiRepository contatti,
             RicercaErogatoriApi catalogo, InvioRichiesteApi consultazione, AvvisiOperativiApi avvisi, Clock clock) {
         this.richieste = richieste;
@@ -120,21 +135,85 @@ public class ServizioCoordinamentoRichieste implements CoordinamentoRichiesteApi
         return consultazione.consultaRichiesta(attore, richiestaId).richiesta();
     }
 
+    /**
+     * Conferma l'accordo secondo l'ambito di assegnazione. Il lock della pratica
+     * serializza i comandi e consente di salvare stato e accordo insieme.
+     *
+     * @param attore identità verificata del Banco
+     * @param richiestaId identificativo della richiesta in programmazione
+     * @param accordo dettagli concordati per la modalità assegnata
+     * @return dettaglio della richiesta confermata
+     * @throws SecurityException se l'attore non è il Banco
+     * @throws RisorsaRichiesteNonTrovataException se la richiesta non esiste
+     * @throws DatiRichiestaNonValidiException se i dettagli sono invalidi o la modalità è incompatibile
+     * @throws ConflittoRichiestaException se stato o assegnazione impediscono la conferma
+     *         o la misura non consente più l'erogazione a distanza
+     * @see RichiesteApi#confermaAccordo
+     */
+    @Override
+    @Transactional
+    public RichiestaDettaglio confermaAccordo(IdentitaAutenticata attore, UUID richiestaId,
+            DettagliAccordo accordo) {
+        verificaBanco(attore);
+        var confermata = blocca(richiestaId).conferma(accordo);
+        if (confermata.accordo() instanceof AccordoADistanza
+                && !catalogo.bloccaAbilitazioneADistanza(confermata.misuraId())) {
+            throw new ConflittoRichiestaException("L'abilitazione della misura impedisce la conferma a distanza");
+        }
+        richieste.aggiorna(confermata);
+        return consultazione.consultaRichiesta(attore, richiestaId);
+    }
+
+    /**
+     * Registra il rifiuto dopo aver acquisito il lock della pratica.
+     * Durante la ricerca il sistema verifica l'esito più recente di ogni opzione
+     * compatibile, compresa quella a distanza. Dopo l'assegnazione il Banco valuta
+     * l'esito della trattativa tenuta fuori dal flusso dei contatti.
+     *
+     * @param attore identità verificata del Banco
+     * @param richiestaId identificativo della richiesta da rifiutare
+     * @return sintesi della richiesta rifiutata
+     * @throws SecurityException se l'attore non è il Banco
+     * @throws RisorsaRichiesteNonTrovataException se la richiesta non esiste
+     * @throws ConflittoRichiestaException se lo stato è incompatibile, un contatto è in attesa
+     *         o, durante la ricerca, resta un'opzione compatibile senza diniego
+     * @see RichiesteApi#rifiutaRichiesta
+     */
+    @Override
+    @Transactional
+    public RichiestaSintesi rifiutaRichiesta(IdentitaAutenticata attore, UUID richiestaId) {
+        verificaBanco(attore);
+        var richiesta = blocca(richiestaId);
+        var rifiutata = richiesta.rifiuta();
+        verificaAssenzaContattiInAttesa(richiestaId);
+        if (richiesta.stato() == StatoRichiesta.PRESA_IN_CARICO
+                && haOpzioniNonDeclinate(richiestaId, compatibili(richiesta))) {
+            throw new ConflittoRichiestaException("Restano opzioni compatibili da valutare");
+        }
+        richieste.aggiorna(rifiutata);
+        return consultazione.consultaRichiesta(attore, richiestaId).richiesta();
+    }
+
     private List<ErogatoreCompatibile> compatibili(RichiestaDiMisura richiesta) {
         return catalogo.cercaErogatoriCompatibili(richiesta.misuraId(), richiesta.comuneCodice());
     }
 
     private void verificaEsaurimentoLocale(UUID richiestaId, List<ErogatoreCompatibile> opzioni) {
-        var ultimi = ultimiContatti(richiestaId);
-        boolean localeNonDeclinato = opzioni.stream()
-                .filter(o -> o.ambito() != AmbitoErogazione.CENTRO_PICUS_A_DISTANZA)
-                .anyMatch(o -> {
-                    var ultimo = ultimi.get(new Opzione(o.accountId(), o.ambito()));
-                    return ultimo == null || ultimo.esito() != EsitoContatto.NON_DISPONIBILE;
-                });
-        if (localeNonDeclinato) {
+        var locali = opzioni.stream().filter(o -> o.ambito() != AmbitoErogazione.CENTRO_PICUS_A_DISTANZA).toList();
+        if (haOpzioniNonDeclinate(richiestaId, locali)) {
             throw new ConflittoRichiestaException("Valutare prima la disponibilità degli erogatori locali");
         }
+    }
+
+    private boolean haOpzioniNonDeclinate(UUID richiestaId, List<ErogatoreCompatibile> opzioni) {
+        if (opzioni.isEmpty()) {
+            return false;
+        }
+        var ultimi = ultimiContatti(richiestaId);
+        return opzioni.stream().anyMatch(opzione -> {
+            var ultimo = ultimi.get(new Opzione(opzione.accountId(), opzione.ambito()));
+            return ultimo == null || ultimo.esito() != EsitoContatto.NON_DISPONIBILE;
+        });
     }
 
     private Map<Opzione, ContattoDisponibilita> ultimiContatti(UUID richiestaId) {
