@@ -22,6 +22,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.jayway.jsonpath.JsonPath;
 
+import it.unina.picus.richieste.api.RichiesteApi;
 import it.unina.picus.shared.AccessiBlackBoxTest;
 import it.unina.picus.shared.ClientHttp;
 import it.unina.picus.shared.ScenarioAccessi;
@@ -160,13 +161,14 @@ class ContattiDisponibilitaAccessiTest extends AccessiBlackBoxTest {
     @ParameterizedTest(name = "CA-02 · {0} interpellato non annulla un'altra pratica della richiedente")
     @EnumSource(TipoErogatore.class)
     void altrePraticheDellaRichiedenteNonAnnullabili(TipoErogatore tipo) {
+        RichiesteApi richieste = scenario.richieste(); // prima di preparare dati: sospensione immediata
         Account titolare = scenario.optRichiedente();
         Account interpellato = scenario.erogatore(tipo);
         scenario.richiestaConContatto(titolare, interpellato);
         UUID altra = scenario.richiestaCreata(titolare);
 
         assertNegatoSenzaModifiche(altra,
-                () -> scenario.richieste().annullaRichiesta(interpellato.identita(), altra, "Motivo di prova"));
+                () -> richieste.annullaRichiesta(interpellato.identita(), altra, "Motivo di prova"));
     }
 
     @ParameterizedTest(name = "CA-02 · un account non interpellato ({0}) non consulta né risponde")

@@ -11,6 +11,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import it.unina.picus.monitoraggio.api.MonitoraggioApi;
+import it.unina.picus.richieste.api.RichiesteApi;
+import it.unina.picus.catalogo.api.CatalogoApi;
 import it.unina.picus.shared.AccessiBlackBoxTest;
 import it.unina.picus.shared.ScenarioAccessi;
 import it.unina.picus.shared.ScenarioAccessi.Account;
@@ -72,35 +75,38 @@ class TitolaritaRichiesteAccessiTest extends AccessiBlackBoxTest {
     @Test
     @DisplayName("CA-01 · la OPT estranea non modifica la richiesta altrui")
     void optEstraneaNonAnnullaLaRichiestaAltrui() {
+        RichiesteApi richieste = scenario.richieste(); // prima di preparare dati: sospensione immediata
         Account titolare = scenario.optRichiedente();
         Account estranea = scenario.optRichiedente();
         UUID id = scenario.richiestaCreata(titolare);
 
         assertNegatoSenzaModifiche(id,
-                () -> scenario.richieste().annullaRichiesta(estranea.identita(), id, "Motivo di prova"));
+                () -> richieste.annullaRichiesta(estranea.identita(), id, "Motivo di prova"));
     }
 
     @Test
     @DisplayName("CA-01 · l'offerta di una OPT è consultabile dalla titolare e negata all'estranea")
     void offertaOptRiservataAllaTitolare() {
+        CatalogoApi catalogo = scenario.catalogo(); // prima di preparare dati: sospensione immediata
         Account titolare = scenario.erogatore(TipoErogatore.OPT);
         Account estranea = scenario.optRichiedente();
 
-        assertFalse(scenario.catalogo().elencoOffertaOpt(titolare.identita(), titolare.id()).isEmpty());
-        assertNegato(() -> scenario.catalogo().elencoOffertaOpt(estranea.identita(), titolare.id()));
+        assertFalse(catalogo.elencoOffertaOpt(titolare.identita(), titolare.id()).isEmpty());
+        assertNegato(() -> catalogo.elencoOffertaOpt(estranea.identita(), titolare.id()));
     }
 
     @Test
     @DisplayName("CA-01 · i conteggi di una OPT sono negati all'estranea, anche chiedendo tutte le OPT")
     void conteggiOptRiservatiAllaTitolare() {
+        MonitoraggioApi monitoraggio = scenario.monitoraggio(); // prima di preparare dati: sospensione immediata
         Account titolare = scenario.optRichiedente();
         Account estranea = scenario.optRichiedente();
         var trimestre = ScenarioAccessi.TRIMESTRE;
 
-        scenario.monitoraggio().consultaConteggiOpt(titolare.identita(), titolare.id(), trimestre, trimestre);
-        assertNegato(() -> scenario.monitoraggio()
+        monitoraggio.consultaConteggiOpt(titolare.identita(), titolare.id(), trimestre, trimestre);
+        assertNegato(() -> monitoraggio
                 .consultaConteggiOpt(estranea.identita(), titolare.id(), trimestre, trimestre));
-        assertNegato(() -> scenario.monitoraggio()
+        assertNegato(() -> monitoraggio
                 .consultaConteggiOpt(estranea.identita(), null, trimestre, trimestre));
     }
 

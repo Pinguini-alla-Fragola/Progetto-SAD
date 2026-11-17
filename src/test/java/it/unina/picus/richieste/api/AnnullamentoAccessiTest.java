@@ -83,11 +83,12 @@ class AnnullamentoAccessiTest extends AccessiBlackBoxTest {
     @ParameterizedTest(name = "CA-10 · {0} annulla con motivo da {1}")
     @MethodSource("coordinatoreEStato")
     void bancoERichiedenteAnnullanoInQualsiasiStato(Coordinatore coordinatore, StatoRichiesta stato) {
+        RichiesteApi richieste = scenario.richieste(); // prima di preparare dati: sospensione immediata
         Account titolare = scenario.optRichiedente();
         UUID id = scenario.richiestaInStato(stato, titolare);
         RichiestaDettaglio prima = scenario.istantanea(id);
 
-        RichiestaSintesi esito = scenario.richieste()
+        RichiestaSintesi esito = richieste
                 .annullaRichiesta(attore(coordinatore, titolare).identita(), id, MOTIVO);
 
         assertEquals(StatoRichiesta.ANNULLATA, esito.stato());
@@ -102,12 +103,13 @@ class AnnullamentoAccessiTest extends AccessiBlackBoxTest {
     @ParameterizedTest(name = "CA-10 · {0} assegnato annulla con motivo da {1}")
     @MethodSource("erogatoreEStato")
     void erogatoreAssegnatoAnnullaInQualsiasiStato(TipoErogatore tipo, StatoRichiesta stato) {
+        RichiesteApi richieste = scenario.richieste(); // prima di preparare dati: sospensione immediata
         Account titolare = scenario.optRichiedente();
         Account assegnato = scenario.erogatore(tipo);
         UUID id = scenario.richiestaAssegnataInStato(stato, titolare, assegnato);
         RichiestaDettaglio prima = scenario.istantanea(id);
 
-        RichiestaSintesi esito = scenario.richieste().annullaRichiesta(assegnato.identita(), id, MOTIVO);
+        RichiestaSintesi esito = richieste.annullaRichiesta(assegnato.identita(), id, MOTIVO);
 
         assertEquals(StatoRichiesta.ANNULLATA, esito.stato());
         RichiestaDettaglio dopo = scenario.istantanea(id);
@@ -118,12 +120,13 @@ class AnnullamentoAccessiTest extends AccessiBlackBoxTest {
     @ParameterizedTest(name = "CA-10 · OPT erogatrice tramite professionista esterno annulla da {0}")
     @EnumSource(value = StatoRichiesta.class, names = {"IN_PROGRAMMAZIONE", "CONFERMATA", "RIFIUTATA"})
     void optTramiteProfessionistaAnnulla(StatoRichiesta stato) {
+        RichiesteApi richieste = scenario.richieste(); // prima di preparare dati: sospensione immediata
         Account titolare = scenario.optRichiedente();
         Account optErogatrice = scenario.erogatoreOptTramiteProfessionista();
         UUID id = scenario.richiestaAssegnataInStato(stato, titolare, optErogatrice);
         RichiestaDettaglio prima = scenario.istantanea(id);
 
-        RichiestaSintesi esito = scenario.richieste().annullaRichiesta(optErogatrice.identita(), id, MOTIVO);
+        RichiestaSintesi esito = richieste.annullaRichiesta(optErogatrice.identita(), id, MOTIVO);
 
         assertEquals(StatoRichiesta.ANNULLATA, esito.stato());
         assertDatiConservati(prima, scenario.istantanea(id));
@@ -134,10 +137,11 @@ class AnnullamentoAccessiTest extends AccessiBlackBoxTest {
     @ParameterizedTest(name = "CA-11 · da Creata {0} annulla senza motivo")
     @EnumSource(Coordinatore.class)
     void creataAnnullabileSenzaMotivo(Coordinatore coordinatore) {
+        RichiesteApi richieste = scenario.richieste(); // prima di preparare dati: sospensione immediata
         Account titolare = scenario.optRichiedente();
         UUID id = scenario.richiestaCreata(titolare);
 
-        RichiestaSintesi esito = scenario.richieste()
+        RichiestaSintesi esito = richieste
                 .annullaRichiesta(attore(coordinatore, titolare).identita(), id, null);
 
         assertEquals(StatoRichiesta.ANNULLATA, esito.stato());
@@ -153,11 +157,11 @@ class AnnullamentoAccessiTest extends AccessiBlackBoxTest {
     @ParameterizedTest(name = "CA-12 · da {1} {0} senza motivo [{2}] è respinto e nulla cambia")
     @MethodSource("senzaMotivoFuoriDaCreata")
     void senzaMotivoRespintoFuoriDaCreata(Coordinatore coordinatore, StatoRichiesta stato, String motivo) {
+        RichiesteApi richieste = scenario.richieste(); // prima di preparare dati: sospensione immediata
         Account titolare = scenario.optRichiedente();
         UUID id = scenario.richiestaInStato(stato, titolare);
         RichiestaDettaglio prima = scenario.istantanea(id);
 
-        RichiesteApi richieste = scenario.richieste(); // fuori dalla lambda: una sospensione non è un esito
         assertThrows(IllegalArgumentException.class,
                 () -> richieste.annullaRichiesta(attore(coordinatore, titolare).identita(), id, motivo));
         assertEquals(prima, scenario.istantanea(id), "stato e dati devono restare invariati");
@@ -166,11 +170,11 @@ class AnnullamentoAccessiTest extends AccessiBlackBoxTest {
     @ParameterizedTest(name = "CA-12 · {0} assegnato senza motivo da {1} è respinto")
     @MethodSource("erogatoreEStato")
     void erogatoreSenzaMotivoRespinto(TipoErogatore tipo, StatoRichiesta stato) {
+        RichiesteApi richieste = scenario.richieste(); // prima di preparare dati: sospensione immediata
         Account assegnato = scenario.erogatore(tipo);
         UUID id = scenario.richiestaAssegnataInStato(stato, scenario.optRichiedente(), assegnato);
         RichiestaDettaglio prima = scenario.istantanea(id);
 
-        RichiesteApi richieste = scenario.richieste(); // fuori dalla lambda: una sospensione non è un esito
         assertThrows(IllegalArgumentException.class,
                 () -> richieste.annullaRichiesta(assegnato.identita(), id, null));
         assertEquals(prima, scenario.istantanea(id));
@@ -181,17 +185,19 @@ class AnnullamentoAccessiTest extends AccessiBlackBoxTest {
     @Test
     @DisplayName("CA-13 · una OPT estranea riceve FORBIDDEN in ogni stato")
     void optEstraneaNonAnnulla() {
+        RichiesteApi richieste = scenario.richieste(); // prima di preparare dati: sospensione immediata
         Account estranea = scenario.optRichiedente();
         for (StatoRichiesta stato : STATI_ANNULLABILI) {
             UUID id = scenario.richiestaInStato(stato, scenario.optRichiedente());
             assertNegatoSenzaModifiche(id,
-                    () -> scenario.richieste().annullaRichiesta(estranea.identita(), id, MOTIVO));
+                    () -> richieste.annullaRichiesta(estranea.identita(), id, MOTIVO));
         }
     }
 
     @ParameterizedTest(name = "CA-13 · {0} soltanto interpellato riceve FORBIDDEN")
     @EnumSource(TipoErogatore.class)
     void candidatoSoltantoInterpellatoNonAnnulla(TipoErogatore tipo) {
+        RichiesteApi richieste = scenario.richieste(); // prima di preparare dati: sospensione immediata
         Account titolare = scenario.optRichiedente();
         Account interpellato = scenario.erogatore(tipo);
         Account assegnato = scenario.erogatore(tipo);
@@ -200,45 +206,47 @@ class AnnullamentoAccessiTest extends AccessiBlackBoxTest {
         // con il contatto ancora in attesa
         ContattoDisponibilita contatto = scenario.interpella(id, interpellato);
         assertNegatoSenzaModifiche(id,
-                () -> scenario.richieste().annullaRichiesta(interpellato.identita(), id, MOTIVO));
+                () -> richieste.annullaRichiesta(interpellato.identita(), id, MOTIVO));
 
         // dopo il rifiuto del candidato e l'assegnazione a un altro erogatore
         scenario.contatti().rispondiDisponibilita(interpellato, contatto.id(), false);
         scenario.assegna(id, assegnato);
         scenario.coordinamento().confermaAccordo(scenario.banco().identita(), id, ScenarioAccessi.ACCORDO);
         assertNegatoSenzaModifiche(id,
-                () -> scenario.richieste().annullaRichiesta(interpellato.identita(), id, MOTIVO));
+                () -> richieste.annullaRichiesta(interpellato.identita(), id, MOTIVO));
     }
 
     @ParameterizedTest(name = "CA-13 · un operatore {0} non assegnato riceve FORBIDDEN")
     @EnumSource(value = TipoErogatore.class, names = {"INTERNO_BANCO", "ESTERNO_PAGATO_BANCO"})
     void operatoreNonAssegnatoNonAnnulla(TipoErogatore tipologia) {
+        RichiesteApi richieste = scenario.richieste(); // prima di preparare dati: sospensione immediata
         Account titolare = scenario.optRichiedente();
         Account collega = scenario.operatore(tipologia);
         UUID assegnataAlCollega = scenario.richiestaConfermata(titolare, scenario.erogatore(tipologia));
         UUID assegnataAOpt = scenario.richiestaConfermata(titolare, scenario.erogatore(TipoErogatore.OPT));
 
         assertNegatoSenzaModifiche(assegnataAlCollega,
-                () -> scenario.richieste().annullaRichiesta(collega.identita(), assegnataAlCollega, MOTIVO));
+                () -> richieste.annullaRichiesta(collega.identita(), assegnataAlCollega, MOTIVO));
         assertNegatoSenzaModifiche(assegnataAOpt,
-                () -> scenario.richieste().annullaRichiesta(collega.identita(), assegnataAOpt, MOTIVO));
+                () -> richieste.annullaRichiesta(collega.identita(), assegnataAOpt, MOTIVO));
     }
 
     @ParameterizedTest(name = "CA-13 · {0} prima soltanto interpellato annulla quando diventa assegnato")
     @EnumSource(TipoErogatore.class)
     void interpellatoPoiAssegnatoAnnulla(TipoErogatore tipo) {
+        RichiesteApi richieste = scenario.richieste(); // prima di preparare dati: sospensione immediata
         Account erogatore = scenario.erogatore(tipo);
         UUID id = scenario.richiestaPresaInCarico(scenario.optRichiedente());
 
         // il solo contatto non autorizza
         ContattoDisponibilita contatto = scenario.interpella(id, erogatore);
         assertNegatoSenzaModifiche(id,
-                () -> scenario.richieste().annullaRichiesta(erogatore.identita(), id, MOTIVO));
+                () -> richieste.annullaRichiesta(erogatore.identita(), id, MOTIVO));
 
         // l'assegnazione è un'altra relazione autorizzante
         scenario.contatti().rispondiDisponibilita(erogatore, contatto.id(), true);
         scenario.coordinamento().assegnaErogatore(scenario.banco().identita(), contatto.id());
-        RichiestaSintesi esito = scenario.richieste().annullaRichiesta(erogatore.identita(), id, MOTIVO);
+        RichiestaSintesi esito = richieste.annullaRichiesta(erogatore.identita(), id, MOTIVO);
 
         assertEquals(StatoRichiesta.ANNULLATA, esito.stato());
     }
@@ -253,6 +261,7 @@ class AnnullamentoAccessiTest extends AccessiBlackBoxTest {
     @ParameterizedTest(name = "CA-14 · annullamento di {0} da In programmazione con {1} assegnato: avvisi e dati")
     @MethodSource("annullatoreEErogatore")
     void annullamentoValidoAvvisaICoinvolti(Soggetto annullatore, TipoErogatore tipo) {
+        RichiesteApi richieste = scenario.richieste(); // prima di preparare dati: sospensione immediata
         Account titolare = scenario.optRichiedente();
         Account assegnato = scenario.erogatore(tipo);
         UUID id = scenario.richiestaInProgrammazione(titolare, assegnato);
@@ -264,7 +273,7 @@ class AnnullamentoAccessiTest extends AccessiBlackBoxTest {
             case EROGATORE_ASSEGNATO -> assegnato;
         };
 
-        scenario.richieste().annullaRichiesta(attore.identita(), id, MOTIVO);
+        richieste.annullaRichiesta(attore.identita(), id, MOTIVO);
 
         assertDatiConservati(prima, scenario.istantanea(id));
         assertEquals(contattiPrima, contatti(id), "i contatti di disponibilità registrati sono conservati");
@@ -278,10 +287,11 @@ class AnnullamentoAccessiTest extends AccessiBlackBoxTest {
     @ParameterizedTest(name = "CA-14 · da Creata, senza erogatore, l'annullamento di {0} avvisa Banco e OPT richiedente")
     @EnumSource(Coordinatore.class)
     void annullamentoDaCreataAvvisaBancoERichiedente(Coordinatore coordinatore) {
+        RichiesteApi richieste = scenario.richieste(); // prima di preparare dati: sospensione immediata
         Account titolare = scenario.optRichiedente();
         UUID id = scenario.richiestaCreata(titolare);
 
-        scenario.richieste().annullaRichiesta(attore(coordinatore, titolare).identita(), id, null);
+        richieste.annullaRichiesta(attore(coordinatore, titolare).identita(), id, null);
 
         for (Account destinatario : List.of(scenario.banco(), titolare)) {
             assertEquals(1, avvisiDiAnnullamento(destinatario, id),
@@ -291,24 +301,31 @@ class AnnullamentoAccessiTest extends AccessiBlackBoxTest {
 
     // ------------------------------------------------------------------ CA-15
 
-    @ParameterizedTest(name = "CA-15 · ripetendo l'annullamento ({0}) la richiesta resta Annullata e la ricerca chiusa")
-    @EnumSource(Coordinatore.class)
-    void ripetizioneNonRiapreLaRicerca(Coordinatore coordinatore) {
+    static Stream<Arguments> coordinatoreEMotivoDellaRipetizione() {
+        return Stream.of(Coordinatore.values())
+                .flatMap(c -> Stream.of(Arguments.of(c, MOTIVO), Arguments.of(c, null), Arguments.of(c, "   ")));
+    }
+
+    @ParameterizedTest(name = "CA-15 · {0} ripete l''annullamento con motivo [{1}]: resta Annullata e la ricerca chiusa")
+    @MethodSource("coordinatoreEMotivoDellaRipetizione")
+    void ripetizioneNonRiapreLaRicerca(Coordinatore coordinatore, String motivoDellaRipetizione) {
+        RichiesteApi richieste = scenario.richieste(); // prima di preparare dati: sospensione immediata
         Account titolare = scenario.optRichiedente();
         Account assegnato = scenario.erogatore(TipoErogatore.OPT);
         UUID id = scenario.richiestaInProgrammazione(titolare, assegnato);
         Account attore = attore(coordinatore, titolare);
-        scenario.richieste().annullaRichiesta(attore.identita(), id, MOTIVO);
+        richieste.annullaRichiesta(attore.identita(), id, MOTIVO);
         RichiestaDettaglio dopoIlPrimo = scenario.istantanea(id);
 
-        RichiestaSintesi ripetuto = scenario.richieste().annullaRichiesta(attore.identita(), id, MOTIVO);
+        // Su una richiesta già Annullata il motivo è facoltativo: il comando ripetuto resta valido anche senza.
+        RichiestaSintesi ripetuto = richieste.annullaRichiesta(attore.identita(), id, motivoDellaRipetizione);
 
         assertEquals(StatoRichiesta.ANNULLATA, ripetuto.stato());
         assertEquals(dopoIlPrimo, scenario.istantanea(id), "il secondo comando non cambia dati");
         var banco = scenario.banco().identita();
         assertFalse(scenario.invio().codaBanco(banco).stream().map(RichiestaSintesi::id).anyMatch(id::equals),
                 "la richiesta non torna in coda");
-        assertTrue(scenario.richieste().archivioBanco(banco).stream().map(RichiestaSintesi::id).anyMatch(id::equals));
+        assertTrue(richieste.archivioBanco(banco).stream().map(RichiestaSintesi::id).anyMatch(id::equals));
         var coordinamento = scenario.coordinamento();
         assertThrows(IllegalStateException.class, () -> coordinamento.cercaErogatoriOrdinati(banco, id),
                 "la ricerca resta chiusa");

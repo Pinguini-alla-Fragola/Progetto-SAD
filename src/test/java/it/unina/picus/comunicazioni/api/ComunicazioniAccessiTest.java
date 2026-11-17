@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -36,6 +37,12 @@ import it.unina.picus.utenze.api.UtenzeApi.TipoErogatore;
  */
 @DisplayName("#28 CA-07 · Comunicazioni per destinatario")
 class ComunicazioniAccessiTest extends AccessiBlackBoxTest {
+
+    /** Sospende subito i casi se la capacità Comunicazioni non è ancora consegnata, prima di preparare dati. */
+    @BeforeEach
+    void richiediCapacita() {
+        scenario.comunicazioni();
+    }
 
     private static final byte[] CONTENUTO = "Allegato sintetico #28".getBytes(StandardCharsets.UTF_8);
 

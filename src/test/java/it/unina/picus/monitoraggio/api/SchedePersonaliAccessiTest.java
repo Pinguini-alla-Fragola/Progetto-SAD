@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -32,6 +33,12 @@ import it.unina.picus.utenze.api.UtenzeApi.TipoErogatore;
  */
 @DisplayName("#28 CA-04 · Schede personali degli operatori del Banco")
 class SchedePersonaliAccessiTest extends AccessiBlackBoxTest {
+
+    /** Sospende subito i casi se la capacità Monitoraggio non è ancora consegnata, prima di preparare dati. */
+    @BeforeEach
+    void richiediCapacita() {
+        scenario.monitoraggio();
+    }
 
     @ParameterizedTest(name = "CA-04 · l'operatore {0} invia e consulta la propria scheda")
     @EnumSource(value = TipoErogatore.class, names = {"INTERNO_BANCO", "ESTERNO_PAGATO_BANCO"})

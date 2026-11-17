@@ -16,6 +16,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import it.unina.picus.monitoraggio.api.MonitoraggioApi;
+import it.unina.picus.richieste.api.RichiesteApi;
 import it.unina.picus.shared.AccessiBlackBoxTest;
 import it.unina.picus.shared.ScenarioAccessi;
 import it.unina.picus.shared.ScenarioAccessi.Account;
@@ -74,22 +76,24 @@ class BancoCoordinamentoAccessiTest extends AccessiBlackBoxTest {
     @Test
     @DisplayName("CA-05 · il Banco consulta l'archivio delle richieste con esito")
     void bancoConsultaArchivio() {
+        RichiesteApi richieste = scenario.richieste(); // prima di preparare dati: sospensione immediata
         UUID id = scenario.richiestaRifiutata(scenario.optRichiedente());
 
-        assertTrue(scenario.richieste().archivioBanco(scenario.banco().identita()).stream()
+        assertTrue(richieste.archivioBanco(scenario.banco().identita()).stream()
                 .map(RichiestaSintesi::id).anyMatch(id::equals));
     }
 
     @ParameterizedTest(name = "CA-05 · il Banco consulta la scheda di un operatore {0} e il riepilogo")
     @EnumSource(value = TipoErogatore.class, names = {"INTERNO_BANCO", "ESTERNO_PAGATO_BANCO"})
     void bancoConsultaSchede(TipoErogatore tipologia) {
+        MonitoraggioApi monitoraggio = scenario.monitoraggio(); // prima di preparare dati: sospensione immediata
         Account operatore = scenario.operatore(tipologia);
         UUID schedaId = scenario.schedaInviata(operatore);
         IdentitaAutenticata banco = scenario.banco().identita();
 
         assertEquals(operatore.id(),
-                scenario.monitoraggio().consultaSchedaOperatore(banco, schedaId).sintesi().operatoreId());
-        assertTrue(scenario.monitoraggio().riepilogaSchede(banco, ScenarioAccessi.TRIMESTRE).schede().stream()
+                monitoraggio.consultaSchedaOperatore(banco, schedaId).sintesi().operatoreId());
+        assertTrue(monitoraggio.riepilogaSchede(banco, ScenarioAccessi.TRIMESTRE).schede().stream()
                 .anyMatch(s -> s.id().equals(schedaId)));
     }
 
@@ -101,19 +105,20 @@ class BancoCoordinamentoAccessiTest extends AccessiBlackBoxTest {
     @Test
     @DisplayName("CA-05 · il Banco consulta i conteggi di una OPT e di tutte le OPT, ciascuna con i propri valori")
     void bancoConsultaConteggi() {
+        MonitoraggioApi monitoraggio = scenario.monitoraggio(); // prima di preparare dati: sospensione immediata
         Account optA = scenario.optRichiedente();
         Account optB = scenario.optRichiedente();
         long misura = scenario.misura();
         var trimestre = ScenarioAccessi.TRIMESTRE;
-        scenario.monitoraggio().registraConteggiOpt(optA.identita(), trimestre,
+        monitoraggio.registraConteggiOpt(optA.identita(), trimestre,
                 List.of(new VoceMisura(misura, VOCE_DI_PROVA, 3)));
-        scenario.monitoraggio().registraConteggiOpt(optB.identita(), trimestre,
+        monitoraggio.registraConteggiOpt(optB.identita(), trimestre,
                 List.of(new VoceMisura(misura, VOCE_DI_PROVA, 7)));
         IdentitaAutenticata banco = scenario.banco().identita();
 
-        List<ConteggioOpt> vistaA = scenario.monitoraggio().consultaConteggiOpt(banco, optA.id(), trimestre, trimestre);
-        List<ConteggioOpt> vistaB = scenario.monitoraggio().consultaConteggiOpt(banco, optB.id(), trimestre, trimestre);
-        List<ConteggioOpt> vistaTutte = scenario.monitoraggio().consultaConteggiOpt(banco, null, trimestre, trimestre);
+        List<ConteggioOpt> vistaA = monitoraggio.consultaConteggiOpt(banco, optA.id(), trimestre, trimestre);
+        List<ConteggioOpt> vistaB = monitoraggio.consultaConteggiOpt(banco, optB.id(), trimestre, trimestre);
+        List<ConteggioOpt> vistaTutte = monitoraggio.consultaConteggiOpt(banco, null, trimestre, trimestre);
 
         assertEquals(List.of(new ConteggioOpt(optA.id(), new VoceMisura(misura, VOCE_DI_PROVA, 3))), vistaA,
                 "la vista di una OPT contiene solo i suoi conteggi");

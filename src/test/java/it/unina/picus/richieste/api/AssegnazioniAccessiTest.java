@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import it.unina.picus.richieste.api.RichiesteApi;
 import it.unina.picus.shared.AccessiBlackBoxTest;
 import it.unina.picus.shared.ScenarioAccessi;
 import it.unina.picus.shared.ScenarioAccessi.Account;
@@ -78,6 +79,7 @@ class AssegnazioniAccessiTest extends AccessiBlackBoxTest {
     @ParameterizedTest(name = "CA-03 · l''elenco delle assegnazioni di {0} contiene solo le proprie")
     @EnumSource(TipoErogatore.class)
     void elencoAssegnazioniContieneSoloLeProprie(TipoErogatore tipo) {
+        RichiesteApi richieste = scenario.richieste(); // prima di preparare dati: sospensione immediata
         Account titolare = scenario.optRichiedente();
         Account assegnato = scenario.erogatore(tipo);
         Account collega = scenario.erogatore(tipo);
@@ -85,7 +87,7 @@ class AssegnazioniAccessiTest extends AccessiBlackBoxTest {
         UUID delCollega = scenario.richiestaConfermata(titolare, collega);
         UUID altraDellaRichiedente = scenario.richiestaPresaInCarico(titolare);
 
-        List<UUID> elenco = scenario.richieste().elencoAssegnazioni(assegnato.identita()).stream()
+        List<UUID> elenco = richieste.elencoAssegnazioni(assegnato.identita()).stream()
                 .map(RichiestaSintesi::id).toList();
 
         assertTrue(elenco.contains(propria), "la propria assegnazione compare");
