@@ -2,16 +2,21 @@ package it.unina.picus.richieste.interno.applicazione;
 
 import it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione;
 import it.unina.picus.catalogo.api.CatalogoApi.ErogatoreCompatibile;
+import it.unina.picus.catalogo.api.ConsultazioneCatalogoApi;
 import it.unina.picus.catalogo.api.RicercaErogatoriApi;
 import it.unina.picus.comunicazioni.api.AvvisiOperativiApi;
 import it.unina.picus.richieste.api.ConflittoRichiestaException;
 import it.unina.picus.richieste.api.CoordinamentoRichiesteApi;
 import it.unina.picus.richieste.api.DatiRichiestaNonValidiException;
+import it.unina.picus.richieste.api.EsitoRichiesteApi;
 import it.unina.picus.richieste.api.InvioRichiesteApi;
 import it.unina.picus.richieste.api.RisorsaRichiesteNonTrovataException;
+import it.unina.picus.richieste.api.RichiesteApi.AccordoADistanza;
 import it.unina.picus.richieste.api.RichiesteApi.Candidato;
 import it.unina.picus.richieste.api.RichiesteApi.ContattoDisponibilita;
+import it.unina.picus.richieste.api.RichiesteApi.DettagliAccordo;
 import it.unina.picus.richieste.api.RichiesteApi.EsitoContatto;
+import it.unina.picus.richieste.api.RichiesteApi.RichiestaDettaglio;
 import it.unina.picus.richieste.api.RichiesteApi.RichiestaSintesi;
 import it.unina.picus.richieste.interno.dominio.ContattiRepository;
 import it.unina.picus.richieste.interno.dominio.OrdinamentoErogatori;
@@ -31,19 +36,33 @@ import java.util.UUID;
 /** Service Layer: i comandi condividono il lock della pratica con le risposte degli erogatori. */
 @Service
 @Transactional(readOnly = true)
-public class ServizioCoordinamentoRichieste implements CoordinamentoRichiesteApi {
+public class ServizioCoordinamentoRichieste implements CoordinamentoRichiesteApi, EsitoRichiesteApi {
     private final RichiestaRepository richieste;
     private final ContattiRepository contatti;
     private final RicercaErogatoriApi catalogo;
+    private final ConsultazioneCatalogoApi misure;
     private final InvioRichiesteApi consultazione;
     private final AvvisiOperativiApi avvisi;
     private final Clock clock;
 
+    /**
+     * Collega il coordinamento alle porte di persistenza e degli altri moduli.
+     *
+     * @param richieste accesso alle pratiche e al loro lock
+     * @param contatti accesso alle richieste di disponibilità
+     * @param catalogo ricerca di erogatori compatibili
+     * @param misure consultazione delle modalità di erogazione
+     * @param consultazione lettura del dettaglio secondo le regole di visibilità
+     * @param avvisi registrazione degli avvisi operativi
+     * @param clock orologio dei contatti
+     */
     public ServizioCoordinamentoRichieste(RichiestaRepository richieste, ContattiRepository contatti,
-            RicercaErogatoriApi catalogo, InvioRichiesteApi consultazione, AvvisiOperativiApi avvisi, Clock clock) {
+            RicercaErogatoriApi catalogo, ConsultazioneCatalogoApi misure, InvioRichiesteApi consultazione,
+            AvvisiOperativiApi avvisi, Clock clock) {
         this.richieste = richieste;
         this.contatti = contatti;
         this.catalogo = catalogo;
+        this.misure = misure;
         this.consultazione = consultazione;
         this.avvisi = avvisi;
         this.clock = clock;
@@ -117,6 +136,42 @@ public class ServizioCoordinamentoRichieste implements CoordinamentoRichiesteApi
             throw new ConflittoRichiestaException("L'erogatore non è più abilitato per questa opzione");
         }
         richieste.aggiorna(richiesta.assegna(contatto.erogatoreId(), contatto.ambito()));
+        return consultazione.consultaRichiesta(attore, richiestaId).richiesta();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Il lock della pratica serializza conferma, rifiuto e risposta a un contatto.
+     * Stato e accordo sono persistiti nella stessa transazione.
+     */
+    @Override
+    @Transactional
+    public RichiestaDettaglio confermaAccordo(IdentitaAutenticata attore, UUID richiestaId,
+            DettagliAccordo accordo) {
+        verificaBanco(attore);
+        var confermata = blocca(richiestaId).conferma(accordo);
+        if (confermata.accordo() instanceof AccordoADistanza
+                && misure.cercaMisura(confermata.misuraId()).filter(m -> m.dati().erogabileADistanza()).isEmpty()) {
+            throw new DatiRichiestaNonValidiException(Map.of("modalita", "La misura non è erogabile a distanza"));
+        }
+        richieste.aggiorna(confermata);
+        return consultazione.consultaRichiesta(attore, richiestaId);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Il Banco valuta le alternative praticabili durante il coordinamento. Il rifiuto
+     * acquisisce il lock della pratica e verifica che nessun contatto attenda una risposta.
+     */
+    @Override
+    @Transactional
+    public RichiestaSintesi rifiutaRichiesta(IdentitaAutenticata attore, UUID richiestaId) {
+        verificaBanco(attore);
+        var rifiutata = blocca(richiestaId).rifiuta();
+        verificaAssenzaContattiInAttesa(richiestaId);
+        richieste.aggiorna(rifiutata);
         return consultazione.consultaRichiesta(attore, richiestaId).richiesta();
     }
 

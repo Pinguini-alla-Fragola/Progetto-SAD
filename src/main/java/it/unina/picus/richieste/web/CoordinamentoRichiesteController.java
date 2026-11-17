@@ -3,8 +3,10 @@ package it.unina.picus.richieste.web;
 import it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione;
 import it.unina.picus.richieste.api.CoordinamentoRichiesteApi;
 import it.unina.picus.richieste.api.DatiRichiestaNonValidiException;
+import it.unina.picus.richieste.api.EsitoRichiesteApi;
 import it.unina.picus.richieste.api.RichiesteApi.Candidato;
 import it.unina.picus.richieste.api.RichiesteApi.ContattoDisponibilita;
+import it.unina.picus.richieste.api.RichiesteApi.RichiestaDettaglio;
 import it.unina.picus.richieste.api.RichiesteApi.RichiestaSintesi;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 import org.springframework.http.MediaType;
@@ -26,8 +28,17 @@ import java.util.UUID;
 @RequestMapping(value = "/api", produces = MediaType.APPLICATION_JSON_VALUE)
 public class CoordinamentoRichiesteController {
     private final CoordinamentoRichiesteApi coordinamento;
-    public CoordinamentoRichiesteController(CoordinamentoRichiesteApi coordinamento) {
+    private final EsitoRichiesteApi esiti;
+
+    /**
+     * Collega l’adattatore REST ai casi d’uso del Banco.
+     *
+     * @param coordinamento ricerca, contatto e assegnazione
+     * @param esiti conferma dell’accordo e rifiuto definitivo
+     */
+    public CoordinamentoRichiesteController(CoordinamentoRichiesteApi coordinamento, EsitoRichiesteApi esiti) {
         this.coordinamento = coordinamento;
+        this.esiti = esiti;
     }
 
     @PostMapping("/richieste/{id}/presa-in-carico")
@@ -85,6 +96,36 @@ public class CoordinamentoRichiesteController {
             @RequestBody(required = false) CorpoJson corpo) {
         verificaCorpoVuoto(corpo);
         return coordinamento.assegnaErogatore(attore, id);
+    }
+
+    /**
+     * Registra l’accordo concordato dal Banco e restituisce il dettaglio aggiornato.
+     *
+     * @param attore identità verificata ricavata dalla sessione
+     * @param id identificativo della richiesta
+     * @param corpo proprietà JSON specifiche della modalità
+     * @return dettaglio della richiesta Confermata
+     * @see EsitoRichiesteApi#confermaAccordo
+     */
+    @PostMapping(value = "/richieste/{id}/conferma", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public RichiestaDettaglio conferma(IdentitaAutenticata attore, @PathVariable UUID id, @RequestBody CorpoJson corpo) {
+        return esiti.confermaAccordo(attore, id, AccordoJson.leggi(corpo.campi()));
+    }
+
+    /**
+     * Registra il rifiuto definitivo per la richiesta indicata.
+     *
+     * @param attore identità verificata ricavata dalla sessione
+     * @param id identificativo della richiesta
+     * @param corpo corpo assente o oggetto JSON vuoto
+     * @return sintesi della richiesta Rifiutata
+     * @see EsitoRichiesteApi#rifiutaRichiesta
+     */
+    @PostMapping("/richieste/{id}/rifiuta")
+    public RichiestaSintesi rifiuta(IdentitaAutenticata attore, @PathVariable UUID id,
+            @RequestBody(required = false) CorpoJson corpo) {
+        verificaCorpoVuoto(corpo);
+        return esiti.rifiutaRichiesta(attore, id);
     }
 
     private static void verificaCorpoVuoto(CorpoJson corpo) {

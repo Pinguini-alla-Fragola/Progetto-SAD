@@ -88,9 +88,15 @@ public class RichiestaJpa {
         return stato;
     }
 
+    /**
+     * Aggiorna stato, assegnazione e accordo nella stessa entità già bloccata dal repository.
+     *
+     * @param richiesta pratica con la transizione applicata
+     */
     void aggiorna(RichiestaDiMisura richiesta) {
         stato = richiesta.stato();
         erogatoreId = richiesta.erogatoreId();
         erogatoreAmbito = richiesta.erogatoreAmbito();
+        accordo = AccordoJpa.daDto(richiesta.accordo());
     }
 }
