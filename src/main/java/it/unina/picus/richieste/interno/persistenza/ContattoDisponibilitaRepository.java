@@ -17,6 +17,12 @@ import org.springframework.data.repository.query.Param;
  */
 public interface ContattoDisponibilitaRepository extends JpaRepository<ContattoDisponibilitaJpa, UUID> {
 
+    /** Verifica sotto il lock della pratica se c'è già un contatto in attesa. */
+    boolean existsByRichiesta_IdAndEsito(UUID richiestaId, String esito);
+
+    /** Ordine persistente dei tentativi, anche quando due invii hanno lo stesso istante. */
+    List<ContattoDisponibilitaJpa> findAllByRichiesta_IdOrderByOrdineInvioAsc(UUID richiestaId);
+
     /**
      * Cerca un contatto caricando anche la richiesta necessaria per il dettaglio.
      *
@@ -25,14 +31,6 @@ public interface ContattoDisponibilitaRepository extends JpaRepository<ContattoD
      */
     @EntityGraph(attributePaths = "richiesta")
     Optional<ContattoDisponibilitaJpa> findOneById(UUID id);
-
-    /**
-     * Elenca i contatti della richiesta in ordine di invio, usando l'identificativo a parità di data.
-     *
-     * @param richiestaId identificativo della richiesta
-     * @return contatti ordinati, eventualmente nessuno
-     */
-    List<ContattoDisponibilitaJpa> findAllByRichiesta_IdOrderByInviatoIlAscIdAsc(UUID richiestaId);
 
     /**
      * Legge i riferimenti necessari per verificare il destinatario e bloccare la richiesta.

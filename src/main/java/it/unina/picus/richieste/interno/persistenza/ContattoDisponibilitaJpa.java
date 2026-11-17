@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione;
 import it.unina.picus.richieste.api.RichiesteApi.EsitoContatto;
-import it.unina.picus.richieste.interno.dominio.StatoContattoIncompatibileException;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -26,6 +25,9 @@ import jakarta.persistence.Table;
 public class ContattoDisponibilitaJpa {
     @Id
     private UUID id;
+
+    @Column(insertable = false, updatable = false)
+    private Long ordineInvio;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "richiesta_id", nullable = false, updatable = false)
@@ -48,6 +50,21 @@ public class ContattoDisponibilitaJpa {
 
     /** Costruttore riservato a JPA. */
     protected ContattoDisponibilitaJpa() {
+    }
+
+    /** Costruisce il contatto mentre il chiamante mantiene il lock della richiesta. */
+    public static ContattoDisponibilitaJpa crea(RichiestaJpa richiesta, UUID erogatoreId,
+            AmbitoErogazione ambito, String nomeMisura, Instant istante) {
+        richiesta.aDominio().verificaPresaInCarico();
+        var contatto = new ContattoDisponibilitaJpa();
+        contatto.id = UUID.randomUUID();
+        contatto.richiesta = richiesta;
+        contatto.erogatoreId = erogatoreId;
+        contatto.ambito = ambito.name();
+        contatto.nomeMisura = nomeMisura;
+        contatto.inviatoIl = istante;
+        contatto.esito = EsitoContatto.IN_ATTESA.name();
+        return contatto;
     }
 
     /** {@return identificativo del contatto} */
@@ -81,17 +98,11 @@ public class ContattoDisponibilitaJpa {
     }
 
     /**
-     * Registra l'esito di un contatto ancora in attesa.
+     * Aggiorna la colonna che rappresenta l'esito del contatto.
      *
-     * <p>Il chiamante deve mantenere il lock sulla richiesta nella stessa transazione.
-     *
-     * @param disponibile {@code true} per confermare, {@code false} per rifiutare
-     * @throws StatoContattoIncompatibileException se il contatto ha già ricevuto una risposta
+     * @param nuovoEsito esito determinato dal caso d'uso
      */
-    public void registraRisposta(boolean disponibile) {
-        if (getEsito() != EsitoContatto.IN_ATTESA) {
-            throw new StatoContattoIncompatibileException("Il contatto non è in attesa di risposta");
-        }
-        esito = (disponibile ? EsitoContatto.DISPONIBILE : EsitoContatto.NON_DISPONIBILE).name();
+    void aggiornaEsito(EsitoContatto nuovoEsito) {
+        esito = nuovoEsito.name();
     }
 }

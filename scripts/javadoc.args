@@ -1,15 +1,18 @@
 -encoding UTF-8
--Xdoclint:all
+-Xdoclint:all,-missing
 -Werror
 -notimestamp
+-package
 -sourcepath src/main/java
--windowtitle "PICUS API"
--doctitle "API Java di PICUS"
+-windowtitle "PICUS - Documentazione Java"
+-overview docs/architecture/picus-javadoc-overview.html
+-group "Richieste" "it.unina.picus.richieste,it.unina.picus.richieste.*"
+-group "Utenze" "it.unina.picus.utenze,it.unina.picus.utenze.*"
+-group "Catalogo" "it.unina.picus.catalogo,it.unina.picus.catalogo.*"
+-group "Comunicazioni" "it.unina.picus.comunicazioni,it.unina.picus.comunicazioni.*"
+-group "Monitoraggio" "it.unina.picus.monitoraggio,it.unina.picus.monitoraggio.*"
+-group "Avvio e componenti condivisi" "it.unina.picus,it.unina.picus.shared,it.unina.picus.shared.*"
 -header "<a class='picus-brand' href='https://strawberrypenguin.it/' aria-label='PICUS, pagina iniziale del progetto'><img src='{@docRoot}/resource-files/picus-logo.svg' width='38' height='38' alt=''>PICUS</a><button type='button' class='picus-theme-toggle' hidden>Tema chiaro</button>"
 --add-stylesheet docs/architecture/picus-javadoc.css
 --add-script docs/architecture/picus-javadoc-theme.js
-it.unina.picus.utenze.api
-it.unina.picus.catalogo.api
-it.unina.picus.richieste.api
-it.unina.picus.comunicazioni.api
-it.unina.picus.monitoraggio.api
+-subpackages it.unina.picus

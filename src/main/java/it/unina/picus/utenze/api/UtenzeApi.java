@@ -3,6 +3,7 @@ package it.unina.picus.utenze.api;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.Set;
 
 /**
  * Fornisce identità verificate e le informazioni minime degli account necessarie ai moduli PICUS.
@@ -50,6 +51,24 @@ public interface UtenzeApi {
      * @return profilo minimo, oppure vuoto se l'account manca, non è attivo o non è un erogatore
      */
     Optional<ProfiloErogatore> cercaProfiloErogatoreAttivo(UUID accountId);
+
+    /**
+     * Legge in blocco i profili delle OPT attive appartenenti alla selezione.
+     * @param accountIds selezione di account organizzativi
+     * @return soli profili OPT attivi trovati, eventualmente nessuno
+     */
+    List<ProfiloErogatore> elencoOptAttive(Set<UUID> accountIds);
+
+    /**
+     * Rilegge il profilo attivo e la competenza personale, bloccandoli fino al commit chiamante.
+     * Richiede una transazione di scrittura già aperta. L'ordine è account, profilo, competenza;
+     * la revoca o la modifica concorrente non può superare questa verifica prima del commit.
+     * Per le OPT la dichiarazione di offerta è verificata dal Catalogo.
+     * @param accountId account scelto dal Banco
+     * @param misuraId competenza richiesta agli operatori
+     * @return profilo corrente o vuoto se non abilitato
+     */
+    Optional<ProfiloErogatore> bloccaProfiloPerMisura(UUID accountId, long misuraId);
 
     /**
      * Elenca gli operatori attivi del Banco il cui profilo comprende la misura indicata.
