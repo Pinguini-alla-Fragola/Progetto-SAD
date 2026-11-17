@@ -125,8 +125,28 @@ public final class DatiDiProva {
         return id;
     }
 
+    /**
+     * Forza lo stato della richiesta, per provare la difesa del server su stati che il flusso non
+     * permette di raggiungere. Per {@code CONFERMATA} completa anche erogatore e accordo, che il
+     * vincolo della V14 rende obbligatori: come erogatore usa l'ultimo contattato.
+     */
     public void impostaStato(UUID richiestaId, String stato) {
-        jdbc.update("update " + schema + "richieste set stato = ? where id = ?", stato, richiestaId);
+        if (!"CONFERMATA".equals(stato)) {
+            jdbc.update("update " + schema + "richieste set stato = ? where id = ?", stato, richiestaId);
+            return;
+        }
+        jdbc.update(
+                "update " + schema + "richieste r set stato = 'CONFERMATA',"
+                        + " erogatore_id = coalesce(r.erogatore_id, (select c.erogatore_id from " + schema
+                        + "richieste_contatti_disponibilita c where c.richiesta_id = r.id"
+                        + " order by c.inviato_il desc limit 1)),"
+                        + " erogatore_ambito = coalesce(r.erogatore_ambito, 'STESSO_COMUNE'),"
+                        + " accordo_modalita = 'IN_PRESENZA', accordo_data_ora = now() + interval '30 days',"
+                        + " accordo_luogo = 'Sede di prova', accordo_nome_referente = 'Referente',"
+                        + " accordo_cognome_referente = 'Sintetico', accordo_telefono_referente = '0810000000',"
+                        + " accordo_link = null"
+                        + " where r.id = ?",
+                richiestaId);
     }
 
     public String esitoContatto(UUID contattoId) {
