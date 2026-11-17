@@ -1,17 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" font-family="Arial">
 <rect width="960" height="600" fill="#f3f4f6"/>
 <text x="40.0" y="42.0" font-size="22" text-anchor="start" fill="#111827" font-weight="bold">Burndown · S2 - Costruzione 1</text>
-<text x="40.0" y="62.0" font-size="12" text-anchor="start" fill="#6b7280" font-weight="normal">05/11/2026 → 19/11/2026 · aggiornato al 17/11 20:38 UTC</text>
+<text x="40.0" y="62.0" font-size="12" text-anchor="start" fill="#6b7280" font-weight="normal">05/11/2026 → 19/11/2026 · aggiornato al 17/11 20:43 UTC</text>
 <rect x="40.0" y="82.0" width="208.0" height="92.0" rx="12" fill="#ffffff" fill-opacity="1.0" stroke="#e5e7eb" stroke-width="1"/>
 <rect x="40.0" y="82.0" width="6.0" height="92.0" rx="3" fill="#1d4ed8" fill-opacity="1.0" stroke="none" stroke-width="1"/>
 <text x="60.0" y="106.0" font-size="11" text-anchor="start" fill="#6b7280" font-weight="bold">RIMANENTI</text>
-<text x="60.0" y="142.0" font-size="28" text-anchor="start" fill="#1d4ed8" font-weight="bold">16</text>
+<text x="60.0" y="142.0" font-size="28" text-anchor="start" fill="#1d4ed8" font-weight="bold">49</text>
 <text x="60.0" y="162.0" font-size="11" text-anchor="start" fill="#6b7280" font-weight="normal">punti</text>
 <rect x="264.0" y="82.0" width="208.0" height="92.0" rx="12" fill="#ffffff" fill-opacity="1.0" stroke="#e5e7eb" stroke-width="1"/>
 <rect x="264.0" y="82.0" width="6.0" height="92.0" rx="3" fill="#047857" fill-opacity="1.0" stroke="none" stroke-width="1"/>
 <text x="284.0" y="106.0" font-size="11" text-anchor="start" fill="#6b7280" font-weight="bold">COMPLETATI</text>
-<text x="284.0" y="142.0" font-size="28" text-anchor="start" fill="#047857" font-weight="bold">4 / 20</text>
-<text x="284.0" y="162.0" font-size="11" text-anchor="start" fill="#6b7280" font-weight="normal">20% del lavoro</text>
+<text x="284.0" y="142.0" font-size="28" text-anchor="start" fill="#047857" font-weight="bold">19 / 68</text>
+<text x="284.0" y="162.0" font-size="11" text-anchor="start" fill="#6b7280" font-weight="normal">28% del lavoro</text>
 <rect x="488.0" y="82.0" width="208.0" height="92.0" rx="12" fill="#ffffff" fill-opacity="1.0" stroke="#e5e7eb" stroke-width="1"/>
 <rect x="488.0" y="82.0" width="6.0" height="92.0" rx="3" fill="#6d28d9" fill-opacity="1.0" stroke="none" stroke-width="1"/>
 <text x="508.0" y="106.0" font-size="11" text-anchor="start" fill="#6b7280" font-weight="bold">GIORNI RIMASTI</text>
@@ -21,18 +21,24 @@
 <rect x="712.0" y="82.0" width="6.0" height="92.0" rx="3" fill="#b91c1c" fill-opacity="1.0" stroke="none" stroke-width="1"/>
 <text x="732.0" y="106.0" font-size="11" text-anchor="start" fill="#6b7280" font-weight="bold">STATO</text>
 <text x="732.0" y="142.0" font-size="22" text-anchor="start" fill="#b91c1c" font-weight="bold">In ritardo</text>
-<text x="732.0" y="162.0" font-size="11" text-anchor="start" fill="#6b7280" font-weight="normal">14.9 punti sopra la linea ideale</text>
+<text x="732.0" y="162.0" font-size="11" text-anchor="start" fill="#6b7280" font-weight="normal">47.9 punti sopra la linea ideale</text>
 <rect x="40.0" y="192.0" width="880.0" height="394.0" rx="12" fill="#ffffff" fill-opacity="1.0" stroke="#e5e7eb" stroke-width="1"/>
 <line x1="100.0" y1="500.0" x2="890.0" y2="500.0" stroke="#f1f5f9" stroke-width="1"/>
 <text x="92.0" y="504.0" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">0</text>
-<line x1="100.0" y1="437.5" x2="890.0" y2="437.5" stroke="#f1f5f9" stroke-width="1"/>
-<text x="92.0" y="441.5" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">5</text>
-<line x1="100.0" y1="375.0" x2="890.0" y2="375.0" stroke="#f1f5f9" stroke-width="1"/>
-<text x="92.0" y="379.0" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">10</text>
-<line x1="100.0" y1="312.5" x2="890.0" y2="312.5" stroke="#f1f5f9" stroke-width="1"/>
-<text x="92.0" y="316.5" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">15</text>
-<line x1="100.0" y1="250.0" x2="890.0" y2="250.0" stroke="#f1f5f9" stroke-width="1"/>
-<text x="92.0" y="254.0" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">20</text>
+<line x1="100.0" y1="463.2" x2="890.0" y2="463.2" stroke="#f1f5f9" stroke-width="1"/>
+<text x="92.0" y="467.2" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">10</text>
+<line x1="100.0" y1="426.5" x2="890.0" y2="426.5" stroke="#f1f5f9" stroke-width="1"/>
+<text x="92.0" y="430.5" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">20</text>
+<line x1="100.0" y1="389.7" x2="890.0" y2="389.7" stroke="#f1f5f9" stroke-width="1"/>
+<text x="92.0" y="393.7" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">30</text>
+<line x1="100.0" y1="352.9" x2="890.0" y2="352.9" stroke="#f1f5f9" stroke-width="1"/>
+<text x="92.0" y="356.9" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">40</text>
+<line x1="100.0" y1="316.2" x2="890.0" y2="316.2" stroke="#f1f5f9" stroke-width="1"/>
+<text x="92.0" y="320.2" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">50</text>
+<line x1="100.0" y1="279.4" x2="890.0" y2="279.4" stroke="#f1f5f9" stroke-width="1"/>
+<text x="92.0" y="283.4" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">60</text>
+<line x1="100.0" y1="242.6" x2="890.0" y2="242.6" stroke="#f1f5f9" stroke-width="1"/>
+<text x="92.0" y="246.6" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">70</text>
 <line x1="100.0" y1="220.0" x2="100.0" y2="500.0" stroke="#f8fafc" stroke-width="1"/>
 <text x="100.0" y="516.0" font-size="10" text-anchor="middle" fill="#6b7280" font-weight="normal">05/11</text>
 <line x1="212.9" y1="220.0" x2="212.9" y2="500.0" stroke="#f8fafc" stroke-width="1"/>
@@ -49,49 +55,49 @@
 <text x="777.1" y="516.0" font-size="10" text-anchor="middle" fill="#6b7280" font-weight="normal">17/11</text>
 <line x1="890.0" y1="220.0" x2="890.0" y2="500.0" stroke="#f8fafc" stroke-width="1"/>
 <text x="890.0" y="516.0" font-size="10" text-anchor="middle" fill="#6b7280" font-weight="normal">19/11</text>
-<polygon points="100.0,325.0 156.4,325.0 156.4,337.5 100.0,325.0" fill="#f9a8d4" fill-opacity="0.5" stroke="none" stroke-width="1.5" stroke-linejoin="round"/>
-<polygon points="156.4,325.0 212.9,325.0 212.9,350.0 156.4,337.5" fill="#f9a8d4" fill-opacity="0.5" stroke="none" stroke-width="1.5" stroke-linejoin="round"/>
-<polygon points="212.9,325.0 269.3,275.0 269.3,362.5 212.9,350.0" fill="#f9a8d4" fill-opacity="0.5" stroke="none" stroke-width="1.5" stroke-linejoin="round"/>
-<polygon points="269.3,275.0 325.7,275.0 325.7,375.0 269.3,362.5" fill="#f9a8d4" fill-opacity="0.5" stroke="none" stroke-width="1.5" stroke-linejoin="round"/>
-<polygon points="325.7,275.0 382.1,275.0 382.1,387.5 325.7,375.0" fill="#f9a8d4" fill-opacity="0.5" stroke="none" stroke-width="1.5" stroke-linejoin="round"/>
-<polygon points="382.1,275.0 438.6,275.0 438.6,400.0 382.1,387.5" fill="#f9a8d4" fill-opacity="0.5" stroke="none" stroke-width="1.5" stroke-linejoin="round"/>
-<polygon points="438.6,275.0 495.0,275.0 495.0,412.5 438.6,400.0" fill="#f9a8d4" fill-opacity="0.5" stroke="none" stroke-width="1.5" stroke-linejoin="round"/>
-<polygon points="495.0,275.0 551.4,275.0 551.4,425.0 495.0,412.5" fill="#f9a8d4" fill-opacity="0.5" stroke="none" stroke-width="1.5" stroke-linejoin="round"/>
-<polygon points="551.4,275.0 607.9,275.0 607.9,437.5 551.4,425.0" fill="#f9a8d4" fill-opacity="0.5" stroke="none" stroke-width="1.5" stroke-linejoin="round"/>
-<polygon points="607.9,275.0 664.3,262.5 664.3,450.0 607.9,437.5" fill="#f9a8d4" fill-opacity="0.5" stroke="none" stroke-width="1.5" stroke-linejoin="round"/>
-<polygon points="664.3,262.5 720.7,275.0 720.7,462.5 664.3,450.0" fill="#f9a8d4" fill-opacity="0.5" stroke="none" stroke-width="1.5" stroke-linejoin="round"/>
-<polygon points="720.7,275.0 777.1,300.0 777.1,475.0 720.7,462.5" fill="#f9a8d4" fill-opacity="0.5" stroke="none" stroke-width="1.5" stroke-linejoin="round"/>
-<polygon points="777.1,300.0 825.7,300.0 825.7,485.8 777.1,475.0" fill="#f9a8d4" fill-opacity="0.5" stroke="none" stroke-width="1.5" stroke-linejoin="round"/>
-<polyline points="100.0,325.0 890.0,500.0" fill="none" fill-opacity="1.0" stroke="#6b7280" stroke-width="2" stroke-linejoin="round" stroke-dasharray="7 5"/>
-<polyline points="825.7,300.0 890.0,304.4" fill="none" fill-opacity="1.0" stroke="#ea580c" stroke-width="2.2" stroke-linejoin="round" stroke-dasharray="3 4"/>
-<polyline points="100.0,325.0 156.4,325.0 212.9,325.0 269.3,275.0 325.7,275.0 382.1,275.0 438.6,275.0 495.0,275.0 551.4,275.0 607.9,275.0 664.3,262.5 720.7,275.0 777.1,300.0 825.7,300.0" fill="none" fill-opacity="1.0" stroke="#2563eb" stroke-width="3" stroke-linejoin="round"/>
-<circle cx="100.0" cy="325.0" r="3.2" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
-<circle cx="156.4" cy="325.0" r="3.2" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
-<circle cx="212.9" cy="325.0" r="3.2" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
-<circle cx="269.3" cy="275.0" r="3.2" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
-<circle cx="325.7" cy="275.0" r="3.2" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
-<circle cx="382.1" cy="275.0" r="3.2" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
-<circle cx="438.6" cy="275.0" r="3.2" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
-<circle cx="495.0" cy="275.0" r="3.2" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
-<circle cx="551.4" cy="275.0" r="3.2" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
-<circle cx="607.9" cy="275.0" r="3.2" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
-<circle cx="664.3" cy="262.5" r="3.2" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
-<circle cx="720.7" cy="275.0" r="3.2" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
-<circle cx="777.1" cy="300.0" r="3.2" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
-<circle cx="825.7" cy="300.0" r="3.2" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
-<line x1="825.7" y1="220.0" x2="825.7" y2="500.0" stroke="#ef4444" stroke-width="1.3" stroke-dasharray="4 3"/>
-<rect x="801.7" y="216.0" width="48.0" height="18.0" rx="9" fill="#ef4444" fill-opacity="1.0" stroke="none" stroke-width="1"/>
-<text x="825.7" y="229.0" font-size="10" text-anchor="middle" fill="#ffffff" font-weight="bold">OGGI</text>
-<circle cx="890.0" cy="304.4" r="5" fill="#ea580c"/>
-<line x1="890.0" y1="278.0" x2="890.0" y2="298.4" stroke="#ea580c" stroke-width="1.2" stroke-dasharray="3 3"/>
+<polygon points="100.0,448.5 156.4,448.5 156.4,452.2 100.0,448.5" fill="#f9a8d4" fill-opacity="0.5" stroke="none" stroke-width="1.5" stroke-linejoin="round"/>
+<polygon points="156.4,448.5 212.9,448.5 212.9,455.9 156.4,452.2" fill="#f9a8d4" fill-opacity="0.5" stroke="none" stroke-width="1.5" stroke-linejoin="round"/>
+<polygon points="212.9,448.5 269.3,433.8 269.3,459.6 212.9,455.9" fill="#f9a8d4" fill-opacity="0.5" stroke="none" stroke-width="1.5" stroke-linejoin="round"/>
+<polygon points="269.3,433.8 325.7,433.8 325.7,463.2 269.3,459.6" fill="#f9a8d4" fill-opacity="0.5" stroke="none" stroke-width="1.5" stroke-linejoin="round"/>
+<polygon points="325.7,433.8 382.1,433.8 382.1,466.9 325.7,463.2" fill="#f9a8d4" fill-opacity="0.5" stroke="none" stroke-width="1.5" stroke-linejoin="round"/>
+<polygon points="382.1,433.8 438.6,433.8 438.6,470.6 382.1,466.9" fill="#f9a8d4" fill-opacity="0.5" stroke="none" stroke-width="1.5" stroke-linejoin="round"/>
+<polygon points="438.6,433.8 495.0,433.8 495.0,474.3 438.6,470.6" fill="#f9a8d4" fill-opacity="0.5" stroke="none" stroke-width="1.5" stroke-linejoin="round"/>
+<polygon points="495.0,433.8 551.4,433.8 551.4,477.9 495.0,474.3" fill="#f9a8d4" fill-opacity="0.5" stroke="none" stroke-width="1.5" stroke-linejoin="round"/>
+<polygon points="551.4,433.8 607.9,433.8 607.9,481.6 551.4,477.9" fill="#f9a8d4" fill-opacity="0.5" stroke="none" stroke-width="1.5" stroke-linejoin="round"/>
+<polygon points="607.9,433.8 664.3,426.5 664.3,485.3 607.9,481.6" fill="#f9a8d4" fill-opacity="0.5" stroke="none" stroke-width="1.5" stroke-linejoin="round"/>
+<polygon points="664.3,426.5 720.7,430.1 720.7,489.0 664.3,485.3" fill="#f9a8d4" fill-opacity="0.5" stroke="none" stroke-width="1.5" stroke-linejoin="round"/>
+<polygon points="720.7,430.1 777.1,319.9 777.1,492.6 720.7,489.0" fill="#f9a8d4" fill-opacity="0.5" stroke="none" stroke-width="1.5" stroke-linejoin="round"/>
+<polygon points="777.1,319.9 825.9,319.9 825.9,495.8 777.1,492.6" fill="#f9a8d4" fill-opacity="0.5" stroke="none" stroke-width="1.5" stroke-linejoin="round"/>
+<polyline points="100.0,448.5 890.0,500.0" fill="none" fill-opacity="1.0" stroke="#6b7280" stroke-width="2" stroke-linejoin="round" stroke-dasharray="7 5"/>
+<polyline points="825.9,319.9 890.0,326.0" fill="none" fill-opacity="1.0" stroke="#ea580c" stroke-width="2.2" stroke-linejoin="round" stroke-dasharray="3 4"/>
+<polyline points="100.0,448.5 156.4,448.5 212.9,448.5 269.3,433.8 325.7,433.8 382.1,433.8 438.6,433.8 495.0,433.8 551.4,433.8 607.9,433.8 664.3,426.5 720.7,430.1 777.1,319.9 825.9,319.9" fill="none" fill-opacity="1.0" stroke="#2563eb" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="100.0" cy="448.5" r="3.2" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+<circle cx="156.4" cy="448.5" r="3.2" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+<circle cx="212.9" cy="448.5" r="3.2" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+<circle cx="269.3" cy="433.8" r="3.2" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+<circle cx="325.7" cy="433.8" r="3.2" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+<circle cx="382.1" cy="433.8" r="3.2" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+<circle cx="438.6" cy="433.8" r="3.2" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+<circle cx="495.0" cy="433.8" r="3.2" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+<circle cx="551.4" cy="433.8" r="3.2" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+<circle cx="607.9" cy="433.8" r="3.2" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+<circle cx="664.3" cy="426.5" r="3.2" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+<circle cx="720.7" cy="430.1" r="3.2" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+<circle cx="777.1" cy="319.9" r="3.2" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+<circle cx="825.9" cy="319.9" r="3.2" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+<line x1="825.9" y1="220.0" x2="825.9" y2="500.0" stroke="#ef4444" stroke-width="1.3" stroke-dasharray="4 3"/>
+<rect x="801.9" y="216.0" width="48.0" height="18.0" rx="9" fill="#ef4444" fill-opacity="1.0" stroke="none" stroke-width="1"/>
+<text x="825.9" y="229.0" font-size="10" text-anchor="middle" fill="#ffffff" font-weight="bold">OGGI</text>
+<circle cx="890.0" cy="326.0" r="5" fill="#ea580c"/>
+<line x1="890.0" y1="278.0" x2="890.0" y2="320.0" stroke="#ea580c" stroke-width="1.2" stroke-dasharray="3 3"/>
 <rect x="600.0" y="252.0" width="290.0" height="26.0" rx="13" fill="#fff7ed" fill-opacity="1.0" stroke="#ea580c" stroke-width="1.2"/>
-<text x="745.0" y="269.0" font-size="11" text-anchor="middle" fill="#c2410c" font-weight="bold">Previsione: 16 punti non completati a fine sprint</text>
+<text x="745.0" y="269.0" font-size="11" text-anchor="middle" fill="#c2410c" font-weight="bold">Previsione: 47 punti non completati a fine sprint</text>
 <line x1="100.0" y1="534.0" x2="130.0" y2="534.0" stroke="#2563eb" stroke-width="3"/>
 <text x="138.0" y="538.0" font-size="12" text-anchor="start" fill="#374151" font-weight="normal">punti rimanenti</text>
 <line x1="260.0" y1="534.0" x2="290.0" y2="534.0" stroke="#6b7280" stroke-width="3" stroke-dasharray="7 5"/>
 <text x="298.0" y="538.0" font-size="12" text-anchor="start" fill="#374151" font-weight="normal">ideale</text>
 <line x1="340.0" y1="534.0" x2="370.0" y2="534.0" stroke="#ea580c" stroke-width="3" stroke-dasharray="3 4"/>
-<text x="378.0" y="538.0" font-size="12" text-anchor="start" fill="#374151" font-weight="normal">previsione al ritmo attuale (0.3 punti/giorno)</text>
+<text x="378.0" y="538.0" font-size="12" text-anchor="start" fill="#374151" font-weight="normal">previsione al ritmo attuale (1.5 punti/giorno)</text>
 <rect x="100.0" y="551.0" width="22.0" height="14.0" rx="3" fill="#f9a8d4" fill-opacity="0.7" stroke="none" stroke-width="1"/>
 <text x="128.0" y="562.0" font-size="12" text-anchor="start" fill="#374151" font-weight="normal">area rosa: in ritardo rispetto all&#x27;ideale</text>
 <rect x="430.0" y="551.0" width="22.0" height="14.0" rx="3" fill="#93c5fd" fill-opacity="0.7" stroke="none" stroke-width="1"/>
