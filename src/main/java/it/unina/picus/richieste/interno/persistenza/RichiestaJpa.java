@@ -22,6 +22,7 @@ import it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione;
  * Entità JPA che conserva i dati e lo stato della richiesta di misura.
  *
  * <p>La relativa riga è usata per coordinare gli aggiornamenti concorrenti dei contatti.
+ * L'aggiornamento persiste stato, assegnazione e accordo sulla stessa riga già bloccata.
  *
  * @see RichiestaRepository#cercaPerAggiornamento(UUID)
  */
@@ -88,11 +89,6 @@ public class RichiestaJpa {
         return stato;
     }
 
-    /**
-     * Aggiorna stato, assegnazione e accordo nella stessa entità già bloccata dal repository.
-     *
-     * @param richiesta pratica con la transizione applicata
-     */
     void aggiorna(RichiestaDiMisura richiesta) {
         stato = richiesta.stato();
         erogatoreId = richiesta.erogatoreId();

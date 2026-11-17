@@ -36,7 +36,7 @@ public record RichiestaDiMisura(
         if (stato != StatoRichiesta.CREATA) {
             throw new ConflittoRichiestaException("La richiesta non è Creata");
         }
-        return conAssegnazione(StatoRichiesta.PRESA_IN_CARICO, erogatoreId, erogatoreAmbito);
+        return transita(StatoRichiesta.PRESA_IN_CARICO, erogatoreId, erogatoreAmbito, accordo);
     }
 
     /** Impone lo stato previsto per contatto e assegnazione. */
@@ -51,12 +51,7 @@ public record RichiestaDiMisura(
         verificaPresaInCarico();
         Objects.requireNonNull(accountId, "Assegnatario obbligatorio");
         Objects.requireNonNull(ambito, "Ambito obbligatorio");
-        return conAssegnazione(StatoRichiesta.IN_PROGRAMMAZIONE, accountId, ambito);
-    }
-
-    private RichiestaDiMisura conAssegnazione(StatoRichiesta nuovoStato, UUID accountId, AmbitoErogazione ambito) {
-        return new RichiestaDiMisura(id, titolareId, misuraId, tipoDestinatario, comuneCodice, description,
-                inviataIl, nuovoStato, accountId, accordo, riferimentoInvio, ambito);
+        return transita(StatoRichiesta.IN_PROGRAMMAZIONE, accountId, ambito, accordo);
     }
 
     /**
@@ -77,7 +72,7 @@ public record RichiestaDiMisura(
             throw new DatiRichiestaNonValidiException(Map.of("modalita",
                     "La modalità dell'accordo deve corrispondere all'ambito dell'assegnazione"));
         }
-        return conEsito(StatoRichiesta.CONFERMATA, accordoValidato);
+        return transita(StatoRichiesta.CONFERMATA, erogatoreId, erogatoreAmbito, accordoValidato);
     }
 
     /**
@@ -90,12 +85,13 @@ public record RichiestaDiMisura(
         if (stato != StatoRichiesta.PRESA_IN_CARICO && stato != StatoRichiesta.IN_PROGRAMMAZIONE) {
             throw new ConflittoRichiestaException("Serve una richiesta Presa in carico o In programmazione");
         }
-        return conEsito(StatoRichiesta.RIFIUTATA, null);
+        return transita(StatoRichiesta.RIFIUTATA, erogatoreId, erogatoreAmbito, null);
     }
 
-    private RichiestaDiMisura conEsito(StatoRichiesta nuovoStato, DettagliAccordo dettagli) {
+    private RichiestaDiMisura transita(StatoRichiesta nuovoStato, UUID accountId,
+            AmbitoErogazione ambito, DettagliAccordo dettagli) {
         return new RichiestaDiMisura(id, titolareId, misuraId, tipoDestinatario, comuneCodice, description,
-                inviataIl, nuovoStato, erogatoreId, dettagli, riferimentoInvio, erogatoreAmbito);
+                inviataIl, nuovoStato, accountId, dettagli, riferimentoInvio, ambito);
     }
 
     /** Confronta tutti i dati dell'invio, senza confondere richieste distinte con contenuto uguale. */
