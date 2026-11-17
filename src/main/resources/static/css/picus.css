@@ -587,7 +587,7 @@ body[data-area] .picus-footer { background: var(--color-ground); }
 .request-created-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .75rem; margin-top: 1.75rem; }
 @media (max-width: 660px) {
     .request-create #campi-invio { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
-    .request-create-actions { flex-direction: column-reverse; }
+    .request-create-actions { flex-direction: column; }
     .request-created-actions { flex-direction: column; }
 }
 
