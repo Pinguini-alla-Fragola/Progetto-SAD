@@ -79,6 +79,5 @@
 [data-funzione-inattiva].tooltip-open:not(.tooltip-dismissed) > .unavailable-note {
     visibility: visible;
     opacity: 1;
-    pointer-events: auto;
 }
 [data-funzione-inattiva]:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 4px; border-radius: var(--radius-sm); }

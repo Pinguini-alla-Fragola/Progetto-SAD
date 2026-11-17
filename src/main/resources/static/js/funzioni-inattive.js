@@ -20,7 +20,7 @@ export function segnalaFunzioniInattive() {
             nota.style.top = Math.max(margine, Math.min(y, window.innerHeight - height - margine)) + 'px';
         };
         const vicinoAlPuntatore = event => {
-            if (event.target === nota || contenitore.classList.contains('tooltip-dismissed')) return;
+            if (event.pointerType === 'touch' || contenitore.classList.contains('tooltip-dismissed')) return;
             const altezza = nota.getBoundingClientRect().height;
             const y = event.clientY + 18 + altezza <= window.innerHeight - 12
                 ? event.clientY + 18 : event.clientY - altezza - 18;
@@ -38,10 +38,10 @@ export function segnalaFunzioniInattive() {
         };
         contenitore.addEventListener('pointerenter', event => {
             if (event.pointerType === 'touch') return;
-            if (nota.matches(':hover')) { clearTimeout(chiusura); return; }
             mostra();
             vicinoAlPuntatore(event);
         });
+        contenitore.addEventListener('pointermove', vicinoAlPuntatore);
         contenitore.addEventListener('pointerleave', chiudi);
         contenitore.addEventListener('focus', () => {
             if (!contenitore.matches(':focus-visible')) return;
@@ -53,8 +53,6 @@ export function segnalaFunzioniInattive() {
             posiziona(riquadro.left + 12, y);
         });
         contenitore.addEventListener('blur', chiudi);
-        nota.addEventListener('pointerenter', () => clearTimeout(chiusura));
-        nota.addEventListener('pointerleave', chiudi);
         window.addEventListener('scroll', () => contenitore.classList.remove('tooltip-open'), { passive: true });
         window.addEventListener('resize', () => contenitore.classList.remove('tooltip-open'));
         for (const controllo of contenitore.querySelectorAll('button, input, select, textarea')) controllo.disabled = true;
