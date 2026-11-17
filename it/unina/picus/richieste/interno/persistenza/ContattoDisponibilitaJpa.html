@@ -72,7 +72,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#getAmbito()" tabindex="0">getAmbito()</a></li>
 <li><a href="#getNomeMisura()" tabindex="0">getNomeMisura()</a></li>
 <li><a href="#getEsito()" tabindex="0">getEsito()</a></li>
-<li><a href="#registraRisposta(boolean)" tabindex="0">registraRisposta(boolean)</a></li>
+<li><a href="#aggiornaEsito(it.unina.picus.richieste.api.RichiesteApi.EsitoContatto)" tabindex="0">aggiornaEsito(RichiesteApi.EsitoContatto)</a></li>
 </ol>
 </li>
 </ol>
@@ -127,49 +127,49 @@ dell'erogatore indipendentemente dallo stato della richiesta.</div>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="ContattoDisponibilitaJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">ContattoDisponibilitaJpa</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#crea(it.unina.picus.richieste.interno.persistenza.RichiestaJpa,java.util.UUID,it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione,java.lang.String,java.time.Instant)" class="member-name-link">crea</a><wbr>(<a href="RichiestaJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">RichiestaJpa</a>&nbsp;richiesta,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>(package private) void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#aggiornaEsito(it.unina.picus.richieste.api.RichiesteApi.EsitoContatto)" class="member-name-link">aggiornaEsito</a><wbr>(<a href="../../api/RichiesteApi.EsitoContatto.html" title="enum class in it.unina.picus.richieste.api">RichiesteApi.EsitoContatto</a>&nbsp;nuovoEsito)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Aggiorna la colonna che rappresenta l'esito del contatto.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="ContattoDisponibilitaJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">ContattoDisponibilitaJpa</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#crea(it.unina.picus.richieste.interno.persistenza.RichiestaJpa,java.util.UUID,it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione,java.lang.String,java.time.Instant)" class="member-name-link">crea</a><wbr>(<a href="RichiestaJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">RichiestaJpa</a>&nbsp;richiesta,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;erogatoreId,
  <a href="../../../catalogo/api/CatalogoApi.AmbitoErogazione.html" title="enum class in it.unina.picus.catalogo.api">CatalogoApi.AmbitoErogazione</a>&nbsp;ambito,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;nomeMisura,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/time/Instant.html" title="class or interface in java.time" class="external-link">Instant</a>&nbsp;istante)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Costruisce il contatto mentre il chiamante mantiene il lock della richiesta.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../../catalogo/api/CatalogoApi.AmbitoErogazione.html" title="enum class in it.unina.picus.catalogo.api">CatalogoApi.AmbitoErogazione</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getAmbito()" class="member-name-link">getAmbito</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../../catalogo/api/CatalogoApi.AmbitoErogazione.html" title="enum class in it.unina.picus.catalogo.api">CatalogoApi.AmbitoErogazione</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getAmbito()" class="member-name-link">getAmbito</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns ambito di erogazione del contatto.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getErogatoreId()" class="member-name-link">getErogatoreId</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getErogatoreId()" class="member-name-link">getErogatoreId</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns identificativo dell'account destinatario del contatto.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../api/RichiesteApi.EsitoContatto.html" title="enum class in it.unina.picus.richieste.api">RichiesteApi.EsitoContatto</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getEsito()" class="member-name-link">getEsito</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../api/RichiesteApi.EsitoContatto.html" title="enum class in it.unina.picus.richieste.api">RichiesteApi.EsitoContatto</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getEsito()" class="member-name-link">getEsito</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns esito corrente del contatto.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getId()" class="member-name-link">getId</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getId()" class="member-name-link">getId</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns identificativo del contatto.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getNomeMisura()" class="member-name-link">getNomeMisura</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getNomeMisura()" class="member-name-link">getNomeMisura</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns nome della misura registrato nel contatto.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="RichiestaJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">RichiestaJpa</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getRichiesta()" class="member-name-link">getRichiesta</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns richiesta di misura a cui appartiene il contatto.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#registraRisposta(boolean)" class="member-name-link">registraRisposta</a><wbr>(boolean&nbsp;disponibile)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="RichiestaJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">RichiestaJpa</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getRichiesta()" class="member-name-link">getRichiesta</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Registra l'esito di un contatto ancora in attesa.</div>
+<div class="block">Returns richiesta di misura a cui appartiene il contatto.</div>
 </div>
 </div>
 </div>
@@ -297,18 +297,14 @@ dell'erogatore indipendentemente dallo stato della richiesta.</div>
 </section>
 </li>
 <li>
-<section class="detail" id="registraRisposta(boolean)">
-<h3>registraRisposta</h3>
+<section class="detail" id="aggiornaEsito(it.unina.picus.richieste.api.RichiesteApi.EsitoContatto)">
+<h3>aggiornaEsito</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">registraRisposta</span><wbr><span class="parameters">(boolean&nbsp;disponibile)</span></div>
-<div class="block">Registra l'esito di un contatto ancora in attesa.
-
-<p>Il chiamante deve mantenere il lock sulla richiesta nella stessa transazione.</div>
+<div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">aggiornaEsito</span><wbr><span class="parameters">(<a href="../../api/RichiesteApi.EsitoContatto.html" title="enum class in it.unina.picus.richieste.api">RichiesteApi.EsitoContatto</a>&nbsp;nuovoEsito)</span></div>
+<div class="block">Aggiorna la colonna che rappresenta l'esito del contatto.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>disponibile</code> - <code>true</code> per confermare, <code>false</code> per rifiutare</dd>
-<dt>Throws:</dt>
-<dd><code><a href="../dominio/StatoContattoIncompatibileException.html" title="class in it.unina.picus.richieste.interno.dominio">StatoContattoIncompatibileException</a></code> - se il contatto ha già ricevuto una risposta</dd>
+<dd><code>nuovoEsito</code> - esito determinato dal caso d'uso</dd>
 </dl>
 </div>
 </section>

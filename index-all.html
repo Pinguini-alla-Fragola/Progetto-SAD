@@ -151,6 +151,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/richieste/interno/persistenza/RichiestaRepositoryJpa.html#aggiorna(it.unina.picus.richieste.interno.dominio.RichiestaDiMisura)" class="member-name-link">aggiorna(RichiestaDiMisura)</a> - Method in class it.unina.picus.richieste.interno.persistenza.<a href="it/unina/picus/richieste/interno/persistenza/RichiestaRepositoryJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">RichiestaRepositoryJpa</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/richieste/interno/persistenza/ContattoDisponibilitaJpa.html#aggiornaEsito(it.unina.picus.richieste.api.RichiesteApi.EsitoContatto)" class="member-name-link">aggiornaEsito(RichiesteApi.EsitoContatto)</a> - Method in class it.unina.picus.richieste.interno.persistenza.<a href="it/unina/picus/richieste/interno/persistenza/ContattoDisponibilitaJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">ContattoDisponibilitaJpa</a></dt>
+<dd>
+<div class="block">Aggiorna la colonna che rappresenta l'esito del contatto.</div>
+</dd>
 <dt><a href="it/unina/picus/utenze/interno/persistenza/AccountRepository.html#aggiornaHash(java.util.UUID,java.lang.String)" class="member-name-link">aggiornaHash(UUID, String)</a> - Method in interface it.unina.picus.utenze.interno.persistenza.<a href="it/unina/picus/utenze/interno/persistenza/AccountRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">AccountRepository</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/catalogo/api/CatalogoApi.html#aggiornaMisura(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,long,it.unina.picus.catalogo.api.CatalogoApi.DatiMisura,boolean)" class="member-name-link">aggiornaMisura(UtenzeApi.IdentitaAutenticata, long, CatalogoApi.DatiMisura, boolean)</a> - Method in interface it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/CatalogoApi.html" title="interface in it.unina.picus.catalogo.api">CatalogoApi</a></dt>
@@ -363,10 +367,6 @@ sui tentativi.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/interno/persistenza/PreflightMigrazioniRichieste.html#canHandleInTransaction(org.flywaydb.core.api.callback.Event,org.flywaydb.core.api.callback.Context)" class="member-name-link">canHandleInTransaction(Event, Context)</a> - Method in class it.unina.picus.richieste.interno.persistenza.<a href="it/unina/picus/richieste/interno/persistenza/PreflightMigrazioniRichieste.html" title="class in it.unina.picus.richieste.interno.persistenza">PreflightMigrazioniRichieste</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="it/unina/picus/richieste/interno/persistenza/RichiestaRepository.html#carichi(it.unina.picus.richieste.api.RichiesteApi.StatoRichiesta,java.time.Instant)" class="member-name-link">carichi(RichiesteApi.StatoRichiesta, Instant)</a> - Method in interface it.unina.picus.richieste.interno.persistenza.<a href="it/unina/picus/richieste/interno/persistenza/RichiestaRepository.html" title="interface in it.unina.picus.richieste.interno.persistenza">RichiestaRepository</a></dt>
-<dd>
-<div class="block">Conteggia in un'unica query gli appuntamenti confermati non ancora trascorsi.</div>
-</dd>
 <dt><a href="it/unina/picus/richieste/interno/dominio/RichiestaRepository.html#carichiConfermati(java.time.Instant)" class="member-name-link">carichiConfermati(Instant)</a> - Method in interface it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/RichiestaRepository.html" title="interface in it.unina.picus.richieste.interno.dominio">RichiestaRepository</a></dt>
 <dd>
 <div class="block">Conta gli appuntamenti confermati futuri per erogatore con una query aggregata.</div>
@@ -445,6 +445,12 @@ sui tentativi.</div>
 </dd>
 <dt><a href="it/unina/picus/catalogo/interno/persistenza/ConsultazioneCatalogoJpa.html#cercaComune(java.lang.String)" class="member-name-link">cercaComune(String)</a> - Method in class it.unina.picus.catalogo.interno.persistenza.<a href="it/unina/picus/catalogo/interno/persistenza/ConsultazioneCatalogoJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">ConsultazioneCatalogoJpa</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/richieste/interno/dominio/ContattiRepository.html#cercaDettaglio(java.util.UUID)" class="member-name-link">cercaDettaglio(UUID)</a> - Method in interface it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/ContattiRepository.html" title="interface in it.unina.picus.richieste.interno.dominio">ContattiRepository</a></dt>
+<dd>
+<div class="block">Carica la proiezione con i dati necessari a valutare la disponibilità.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/interno/persistenza/ContattiRepositoryJpa.html#cercaDettaglio(java.util.UUID)" class="member-name-link">cercaDettaglio(UUID)</a> - Method in class it.unina.picus.richieste.interno.persistenza.<a href="it/unina/picus/richieste/interno/persistenza/ContattiRepositoryJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">ContattiRepositoryJpa</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/catalogo/api/CatalogoApi.html#cercaErogatoriCompatibili(long,java.lang.String)" class="member-name-link">cercaErogatoriCompatibili(long, String)</a> - Method in interface it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/CatalogoApi.html" title="interface in it.unina.picus.catalogo.api">CatalogoApi</a></dt>
 <dd>
 <div class="block">Combina le offerte delle OPT con i profili degli operatori attivi che erogano la misura.</div>
@@ -479,10 +485,6 @@ sui tentativi.</div>
 <dd>
 <div class="block">Rilegge e blocca la pratica fino alla fine della transazione chiamante.</div>
 </dd>
-<dt><a href="it/unina/picus/richieste/interno/persistenza/RichiestaRepository.html#cercaPerAggiornamento(java.util.UUID)" class="member-name-link">cercaPerAggiornamento(UUID)</a> - Method in interface it.unina.picus.richieste.interno.persistenza.<a href="it/unina/picus/richieste/interno/persistenza/RichiestaRepository.html" title="interface in it.unina.picus.richieste.interno.persistenza">RichiestaRepository</a></dt>
-<dd>
-<div class="block">Carica la richiesta acquisendo un lock pessimistico di scrittura sulla sua riga.</div>
-</dd>
 <dt><a href="it/unina/picus/richieste/interno/persistenza/RichiestaRepositoryJpa.html#cercaPerAggiornamento(java.util.UUID)" class="member-name-link">cercaPerAggiornamento(UUID)</a> - Method in class it.unina.picus.richieste.interno.persistenza.<a href="it/unina/picus/richieste/interno/persistenza/RichiestaRepositoryJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">RichiestaRepositoryJpa</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/richieste/interno/dominio/RichiestaRepository.html#cercaPerId(java.util.UUID)" class="member-name-link">cercaPerId(UUID)</a> - Method in interface it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/RichiestaRepository.html" title="interface in it.unina.picus.richieste.interno.dominio">RichiestaRepository</a></dt>
@@ -510,6 +512,12 @@ sui tentativi.</div>
 <dt><a href="it/unina/picus/utenze/interno/applicazione/UtenzeService.html#cercaProfiloErogatoreAttivo(java.util.UUID)" class="member-name-link">cercaProfiloErogatoreAttivo(UUID)</a> - Method in class it.unina.picus.utenze.interno.applicazione.<a href="it/unina/picus/utenze/interno/applicazione/UtenzeService.html" title="class in it.unina.picus.utenze.interno.applicazione">UtenzeService</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/utenze/interno/stub/StubUtenzeApi.html#cercaProfiloErogatoreAttivo(java.util.UUID)" class="member-name-link">cercaProfiloErogatoreAttivo(UUID)</a> - Method in class it.unina.picus.utenze.interno.stub.<a href="it/unina/picus/utenze/interno/stub/StubUtenzeApi.html" title="class in it.unina.picus.utenze.interno.stub">StubUtenzeApi</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/richieste/interno/dominio/ContattiRepository.html#cercaRiferimento(java.util.UUID)" class="member-name-link">cercaRiferimento(UUID)</a> - Method in interface it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/ContattiRepository.html" title="interface in it.unina.picus.richieste.interno.dominio">ContattiRepository</a></dt>
+<dd>
+<div class="block">Legge pratica e destinatario prima del lock.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/interno/persistenza/ContattiRepositoryJpa.html#cercaRiferimento(java.util.UUID)" class="member-name-link">cercaRiferimento(UUID)</a> - Method in class it.unina.picus.richieste.interno.persistenza.<a href="it/unina/picus/richieste/interno/persistenza/ContattiRepositoryJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">ContattiRepositoryJpa</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/richieste/interno/persistenza/ContattoDisponibilitaRepository.html#cercaRiferimento(java.util.UUID)" class="member-name-link">cercaRiferimento(UUID)</a> - Method in interface it.unina.picus.richieste.interno.persistenza.<a href="it/unina/picus/richieste/interno/persistenza/ContattoDisponibilitaRepository.html" title="interface in it.unina.picus.richieste.interno.persistenza">ContattoDisponibilitaRepository</a></dt>
 <dd>
@@ -783,11 +791,15 @@ assegnato.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/interno/dominio/ContattiRepository.html" class="type-name-link" title="interface in it.unina.picus.richieste.interno.dominio">ContattiRepository</a> - Interface in <a href="it/unina/picus/richieste/interno/dominio/package-summary.html">it.unina.picus.richieste.interno.dominio</a></dt>
 <dd>
-<div class="block">Porta per i contatti del coordinamento; non espone entità o query JPA.</div>
+<div class="block">Porta di persistenza dei contatti di disponibilità.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/interno/dominio/ContattiRepository.Riferimento.html" class="type-name-link" title="class in it.unina.picus.richieste.interno.dominio">ContattiRepository.Riferimento</a> - Record Class in <a href="it/unina/picus/richieste/interno/dominio/package-summary.html">it.unina.picus.richieste.interno.dominio</a></dt>
+<dd>
+<div class="block">Identificativi immutabili utili per autorizzare il destinatario e bloccare la pratica.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/interno/persistenza/ContattiRepositoryJpa.html" class="type-name-link" title="class in it.unina.picus.richieste.interno.persistenza">ContattiRepositoryJpa</a> - Class in <a href="it/unina/picus/richieste/interno/persistenza/package-summary.html">it.unina.picus.richieste.interno.persistenza</a></dt>
 <dd>
-<div class="block">Adatta i contatti persistiti alla porta del coordinamento.</div>
+<div class="block">Applica il pattern <em>Data Mapper</em> per condividere le proiezioni dei contatti.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/interno/persistenza/ContattiRepositoryJpa.html#%3Cinit%3E(it.unina.picus.richieste.interno.persistenza.ContattoDisponibilitaRepository,jakarta.persistence.EntityManager)" class="member-name-link">ContattiRepositoryJpa(ContattoDisponibilitaRepository, EntityManager)</a> - Constructor for class it.unina.picus.richieste.interno.persistenza.<a href="it/unina/picus/richieste/interno/persistenza/ContattiRepositoryJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">ContattiRepositoryJpa</a></dt>
 <dd>&nbsp;</dd>
@@ -998,7 +1010,7 @@ assegnato.</div>
 <dd>
 <div class="block">Coordina la consultazione e la risposta per un contatto di disponibilità già aperto.</div>
 </dd>
-<dt><a href="it/unina/picus/richieste/interno/applicazione/DisponibilitaService.html#%3Cinit%3E(it.unina.picus.richieste.interno.persistenza.RichiestaRepository,it.unina.picus.richieste.interno.persistenza.ContattoDisponibilitaRepository)" class="member-name-link">DisponibilitaService(RichiestaRepository, ContattoDisponibilitaRepository)</a> - Constructor for class it.unina.picus.richieste.interno.applicazione.<a href="it/unina/picus/richieste/interno/applicazione/DisponibilitaService.html" title="class in it.unina.picus.richieste.interno.applicazione">DisponibilitaService</a></dt>
+<dt><a href="it/unina/picus/richieste/interno/applicazione/DisponibilitaService.html#%3Cinit%3E(it.unina.picus.richieste.interno.dominio.RichiestaRepository,it.unina.picus.richieste.interno.dominio.ContattiRepository)" class="member-name-link">DisponibilitaService(RichiestaRepository, ContattiRepository)</a> - Constructor for class it.unina.picus.richieste.interno.applicazione.<a href="it/unina/picus/richieste/interno/applicazione/DisponibilitaService.html" title="class in it.unina.picus.richieste.interno.applicazione">DisponibilitaService</a></dt>
 <dd>
 <div class="block">Costruisce il servizio con i repository usati dai casi d'uso di disponibilità.</div>
 </dd>
@@ -1233,6 +1245,10 @@ assegnato.</div>
 <dd>
 <div class="block">Indicates whether some other object is "equal to" this one.</div>
 </dd>
+<dt><a href="it/unina/picus/richieste/interno/dominio/ContattiRepository.Riferimento.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/ContattiRepository.Riferimento.html" title="class in it.unina.picus.richieste.interno.dominio">ContattiRepository.Riferimento</a></dt>
+<dd>
+<div class="block">Indicates whether some other object is "equal to" this one.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/interno/dominio/RegoleAccessoRichiesta.Soggetti.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/RegoleAccessoRichiesta.Soggetti.html" title="class in it.unina.picus.richieste.interno.dominio">RegoleAccessoRichiesta.Soggetti</a></dt>
 <dd>
 <div class="block">Indicates whether some other object is "equal to" this one.</div>
@@ -1297,6 +1313,10 @@ assegnato.</div>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/richieste/api/RichiesteApi.ContattoDisponibilita.html#param-erogatoreId"><code>erogatoreId</code></a> record component.</div>
 </dd>
+<dt><a href="it/unina/picus/richieste/interno/dominio/ContattiRepository.Riferimento.html#erogatoreId()" class="member-name-link">erogatoreId()</a> - Method in record class it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/ContattiRepository.Riferimento.html" title="class in it.unina.picus.richieste.interno.dominio">ContattiRepository.Riferimento</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./it/unina/picus/richieste/interno/dominio/ContattiRepository.Riferimento.html#param-erogatoreId"><code>erogatoreId</code></a> record component.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/interno/dominio/RegoleAccessoRichiesta.Soggetti.html#erogatoreId()" class="member-name-link">erogatoreId()</a> - Method in record class it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/RegoleAccessoRichiesta.Soggetti.html" title="class in it.unina.picus.richieste.interno.dominio">RegoleAccessoRichiesta.Soggetti</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/richieste/interno/dominio/RegoleAccessoRichiesta.Soggetti.html#param-erogatoreId"><code>erogatoreId</code></a> record component.</div>
@@ -1317,6 +1337,12 @@ assegnato.</div>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/richieste/web/ErroriRichieste.Errore.html" class="type-name-link" title="class in it.unina.picus.richieste.web">ErroriRichieste.Errore</a> - Record Class in <a href="it/unina/picus/richieste/web/package-summary.html">it.unina.picus.richieste.web</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/richieste/interno/dominio/RichiestaRepository.html#esiste(java.util.UUID)" class="member-name-link">esiste(UUID)</a> - Method in interface it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/RichiestaRepository.html" title="interface in it.unina.picus.richieste.interno.dominio">RichiestaRepository</a></dt>
+<dd>
+<div class="block">Verifica l'esistenza di una pratica senza caricarne i dettagli.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/interno/persistenza/RichiestaRepositoryJpa.html#esiste(java.util.UUID)" class="member-name-link">esiste(UUID)</a> - Method in class it.unina.picus.richieste.interno.persistenza.<a href="it/unina/picus/richieste/interno/persistenza/RichiestaRepositoryJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">RichiestaRepositoryJpa</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.ContattoDisponibilita.html#esito()" class="member-name-link">esito()</a> - Method in record class it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.ContattoDisponibilita.html" title="class in it.unina.picus.richieste.api">RichiesteApi.ContattoDisponibilita</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/richieste/api/RichiesteApi.ContattoDisponibilita.html#param-esito"><code>esito</code></a> record component.</div>
@@ -1335,10 +1361,6 @@ assegnato.</div>
 <dt><a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.FileAllegato.html#%3Cinit%3E(java.lang.String,java.lang.String,byte%5B%5D)" class="member-name-link">FileAllegato(String, String, byte[])</a> - Constructor for record class it.unina.picus.comunicazioni.api.<a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.FileAllegato.html" title="class in it.unina.picus.comunicazioni.api">ComunicazioniApi.FileAllegato</a></dt>
 <dd>
 <div class="block">Conserva una copia dei byte ricevuti.</div>
-</dd>
-<dt><a href="it/unina/picus/richieste/interno/persistenza/ContattoDisponibilitaRepository.html#findAllByRichiesta_IdOrderByInviatoIlAscIdAsc(java.util.UUID)" class="member-name-link">findAllByRichiesta_IdOrderByInviatoIlAscIdAsc(UUID)</a> - Method in interface it.unina.picus.richieste.interno.persistenza.<a href="it/unina/picus/richieste/interno/persistenza/ContattoDisponibilitaRepository.html" title="interface in it.unina.picus.richieste.interno.persistenza">ContattoDisponibilitaRepository</a></dt>
-<dd>
-<div class="block">Elenca i contatti della richiesta in ordine di invio, usando l'identificativo a parità di data.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/interno/persistenza/ContattoDisponibilitaRepository.html#findAllByRichiesta_IdOrderByOrdineInvioAsc(java.util.UUID)" class="member-name-link">findAllByRichiesta_IdOrderByOrdineInvioAsc(UUID)</a> - Method in interface it.unina.picus.richieste.interno.persistenza.<a href="it/unina/picus/richieste/interno/persistenza/ContattoDisponibilitaRepository.html" title="interface in it.unina.picus.richieste.interno.persistenza">ContattoDisponibilitaRepository</a></dt>
 <dd>
@@ -1403,10 +1425,6 @@ assegnato.</div>
 <dd>
 <div class="block">Returns identificativo dell'account destinatario.</div>
 </dd>
-<dt><a href="it/unina/picus/richieste/interno/persistenza/RichiestaRepository.CaricoAppuntamenti.html#getErogatoreId()" class="member-name-link">getErogatoreId()</a> - Method in interface it.unina.picus.richieste.interno.persistenza.<a href="it/unina/picus/richieste/interno/persistenza/RichiestaRepository.CaricoAppuntamenti.html" title="interface in it.unina.picus.richieste.interno.persistenza">RichiestaRepository.CaricoAppuntamenti</a></dt>
-<dd>
-<div class="block">Returns account dell'erogatore.</div>
-</dd>
 <dt><a href="it/unina/picus/richieste/interno/persistenza/ContattoDisponibilitaJpa.html#getEsito()" class="member-name-link">getEsito()</a> - Method in class it.unina.picus.richieste.interno.persistenza.<a href="it/unina/picus/richieste/interno/persistenza/ContattoDisponibilitaJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">ContattoDisponibilitaJpa</a></dt>
 <dd>
 <div class="block">Returns esito corrente del contatto.</div>
@@ -1437,10 +1455,6 @@ assegnato.</div>
 <dd>
 <div class="block">Returns nome della misura registrato nel contatto.</div>
 </dd>
-<dt><a href="it/unina/picus/richieste/interno/persistenza/RichiestaRepository.CaricoAppuntamenti.html#getNumero()" class="member-name-link">getNumero()</a> - Method in interface it.unina.picus.richieste.interno.persistenza.<a href="it/unina/picus/richieste/interno/persistenza/RichiestaRepository.CaricoAppuntamenti.html" title="interface in it.unina.picus.richieste.interno.persistenza">RichiestaRepository.CaricoAppuntamenti</a></dt>
-<dd>
-<div class="block">Returns numero di appuntamenti nel criterio di carico.</div>
-</dd>
 <dt><a href="it/unina/picus/utenze/interno/persistenza/AccountJpa.html#getPasswordHash()" class="member-name-link">getPasswordHash()</a> - Method in class it.unina.picus.utenze.interno.persistenza.<a href="it/unina/picus/utenze/interno/persistenza/AccountJpa.html" title="class in it.unina.picus.utenze.interno.persistenza">AccountJpa</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/richieste/interno/persistenza/ContattoDisponibilitaJpa.html#getRichiesta()" class="member-name-link">getRichiesta()</a> - Method in class it.unina.picus.richieste.interno.persistenza.<a href="it/unina/picus/richieste/interno/persistenza/ContattoDisponibilitaJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">ContattoDisponibilitaJpa</a></dt>
@@ -1453,10 +1467,6 @@ assegnato.</div>
 </dd>
 <dt><a href="it/unina/picus/utenze/interno/persistenza/AccountJpa.html#getRuolo()" class="member-name-link">getRuolo()</a> - Method in class it.unina.picus.utenze.interno.persistenza.<a href="it/unina/picus/utenze/interno/persistenza/AccountJpa.html" title="class in it.unina.picus.utenze.interno.persistenza">AccountJpa</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="it/unina/picus/richieste/interno/persistenza/RichiestaJpa.html#getStato()" class="member-name-link">getStato()</a> - Method in class it.unina.picus.richieste.interno.persistenza.<a href="it/unina/picus/richieste/interno/persistenza/RichiestaJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">RichiestaJpa</a></dt>
-<dd>
-<div class="block">Returns stato corrente della richiesta.</div>
-</dd>
 <dt><a href="it/unina/picus/utenze/interno/persistenza/AccountJpa.html#getStato()" class="member-name-link">getStato()</a> - Method in class it.unina.picus.utenze.interno.persistenza.<a href="it/unina/picus/utenze/interno/persistenza/AccountJpa.html" title="class in it.unina.picus.utenze.interno.persistenza">AccountJpa</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/richieste/interno/persistenza/RichiestaJpa.html#getTipoDestinatario()" class="member-name-link">getTipoDestinatario()</a> - Method in class it.unina.picus.richieste.interno.persistenza.<a href="it/unina/picus/richieste/interno/persistenza/RichiestaJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">RichiestaJpa</a></dt>
@@ -1593,6 +1603,10 @@ assegnato.</div>
 <div class="block">Returns a hash code value for this object.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.RichiestaSintesi.html#hashCode()" class="member-name-link">hashCode()</a> - Method in record class it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.RichiestaSintesi.html" title="class in it.unina.picus.richieste.api">RichiesteApi.RichiestaSintesi</a></dt>
+<dd>
+<div class="block">Returns a hash code value for this object.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/interno/dominio/ContattiRepository.Riferimento.html#hashCode()" class="member-name-link">hashCode()</a> - Method in record class it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/ContattiRepository.Riferimento.html" title="class in it.unina.picus.richieste.interno.dominio">ContattiRepository.Riferimento</a></dt>
 <dd>
 <div class="block">Returns a hash code value for this object.</div>
 </dd>
@@ -2257,13 +2271,15 @@ operativi di Richieste.</div>
 <dd>
 <div class="block">Registra i conteggi della OPT autenticata per il trimestre.</div>
 </dd>
+<dt><a href="it/unina/picus/richieste/interno/dominio/ContattiRepository.html#registraEsito(java.util.UUID,it.unina.picus.richieste.api.RichiesteApi.EsitoContatto)" class="member-name-link">registraEsito(UUID, RichiesteApi.EsitoContatto)</a> - Method in interface it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/ContattiRepository.html" title="interface in it.unina.picus.richieste.interno.dominio">ContattiRepository</a></dt>
+<dd>
+<div class="block">Persiste l'esito calcolato dal caso d'uso sotto il lock della pratica.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/interno/persistenza/ContattiRepositoryJpa.html#registraEsito(java.util.UUID,it.unina.picus.richieste.api.RichiesteApi.EsitoContatto)" class="member-name-link">registraEsito(UUID, RichiesteApi.EsitoContatto)</a> - Method in class it.unina.picus.richieste.interno.persistenza.<a href="it/unina/picus/richieste/interno/persistenza/ContattiRepositoryJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">ContattiRepositoryJpa</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/catalogo/api/CatalogoApi.html#registraOffertaOpt(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,long,boolean)" class="member-name-link">registraOffertaOpt(UtenzeApi.IdentitaAutenticata, long, boolean)</a> - Method in interface it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/CatalogoApi.html" title="interface in it.unina.picus.catalogo.api">CatalogoApi</a></dt>
 <dd>
 <div class="block">Dichiara o aggiorna l'offerta della OPT autenticata per una misura attiva.</div>
-</dd>
-<dt><a href="it/unina/picus/richieste/interno/persistenza/ContattoDisponibilitaJpa.html#registraRisposta(boolean)" class="member-name-link">registraRisposta(boolean)</a> - Method in class it.unina.picus.richieste.interno.persistenza.<a href="it/unina/picus/richieste/interno/persistenza/ContattoDisponibilitaJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">ContattoDisponibilitaJpa</a></dt>
-<dd>
-<div class="block">Registra l'esito di un contatto ancora in attesa.</div>
 </dd>
 <dt><a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.AvvisoOperativo.html#registratoIl()" class="member-name-link">registratoIl()</a> - Method in record class it.unina.picus.comunicazioni.api.<a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.AvvisoOperativo.html" title="class in it.unina.picus.comunicazioni.api">ComunicazioniApi.AvvisoOperativo</a></dt>
 <dd>
@@ -2338,12 +2354,6 @@ operativi di Richieste.</div>
 <div class="block">Distingue le richieste di API da quelle di pagine HTML, per rispondere senza autenticazione valida
 nel modo giusto: le pagine HTML rimandano al login (302), le API ricevono <code>401</code> senza redirect.</div>
 </dd>
-<dt><a href="it/unina/picus/richieste/interno/dominio/ContattiRepository.html#richiestaDelContatto(java.util.UUID)" class="member-name-link">richiestaDelContatto(UUID)</a> - Method in interface it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/ContattiRepository.html" title="interface in it.unina.picus.richieste.interno.dominio">ContattiRepository</a></dt>
-<dd>
-<div class="block">Legge il riferimento immutabile senza caricare l'esito prima del lock della pratica.</div>
-</dd>
-<dt><a href="it/unina/picus/richieste/interno/persistenza/ContattiRepositoryJpa.html#richiestaDelContatto(java.util.UUID)" class="member-name-link">richiestaDelContatto(UUID)</a> - Method in class it.unina.picus.richieste.interno.persistenza.<a href="it/unina/picus/richieste/interno/persistenza/ContattiRepositoryJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">ContattiRepositoryJpa</a></dt>
-<dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.RichiestaDettaglio.html#%3Cinit%3E(it.unina.picus.richieste.api.RichiesteApi.RichiestaSintesi,java.util.UUID,it.unina.picus.richieste.api.RichiesteApi.TipoDestinatario,java.lang.String,java.lang.String,java.util.UUID,it.unina.picus.richieste.api.RichiesteApi.DettagliAccordo)" class="member-name-link">RichiestaDettaglio(RichiesteApi.RichiestaSintesi, UUID, RichiesteApi.TipoDestinatario, String, String, UUID, RichiesteApi.DettagliAccordo)</a> - Constructor for record class it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.RichiestaDettaglio.html" title="class in it.unina.picus.richieste.api">RichiesteApi.RichiestaDettaglio</a></dt>
 <dd>
 <div class="block">Creates an instance of a <code>RichiestaDettaglio</code> record class.</div>
@@ -2364,6 +2374,10 @@ nel modo giusto: le pagine HTML rimandano al login (302), le API ricevono <code>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/richieste/api/RichiesteApi.ContattoDisponibilita.html#param-richiestaId"><code>richiestaId</code></a> record component.</div>
 </dd>
+<dt><a href="it/unina/picus/richieste/interno/dominio/ContattiRepository.Riferimento.html#richiestaId()" class="member-name-link">richiestaId()</a> - Method in record class it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/ContattiRepository.Riferimento.html" title="class in it.unina.picus.richieste.interno.dominio">ContattiRepository.Riferimento</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./it/unina/picus/richieste/interno/dominio/ContattiRepository.Riferimento.html#param-richiestaId"><code>richiestaId</code></a> record component.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/interno/persistenza/RichiestaJpa.html" class="type-name-link" title="class in it.unina.picus.richieste.interno.persistenza">RichiestaJpa</a> - Class in <a href="it/unina/picus/richieste/interno/persistenza/package-summary.html">it.unina.picus.richieste.interno.persistenza</a></dt>
 <dd>
 <div class="block">Entità JPA che conserva i dati e lo stato della richiesta di misura.</div>
@@ -2375,14 +2389,6 @@ nel modo giusto: le pagine HTML rimandano al login (302), le API ricevono <code>
 <dt><a href="it/unina/picus/richieste/interno/dominio/RichiestaRepository.html" class="type-name-link" title="interface in it.unina.picus.richieste.interno.dominio">RichiestaRepository</a> - Interface in <a href="it/unina/picus/richieste/interno/dominio/package-summary.html">it.unina.picus.richieste.interno.dominio</a></dt>
 <dd>
 <div class="block">Porta di persistenza del modulo Richieste.</div>
-</dd>
-<dt><a href="it/unina/picus/richieste/interno/persistenza/RichiestaRepository.html" class="type-name-link" title="interface in it.unina.picus.richieste.interno.persistenza">RichiestaRepository</a> - Interface in <a href="it/unina/picus/richieste/interno/persistenza/package-summary.html">it.unina.picus.richieste.interno.persistenza</a></dt>
-<dd>
-<div class="block">Accede alle richieste di misura tramite il pattern <em>Repository</em>, implementato con Spring Data JPA.</div>
-</dd>
-<dt><a href="it/unina/picus/richieste/interno/persistenza/RichiestaRepository.CaricoAppuntamenti.html" class="type-name-link" title="interface in it.unina.picus.richieste.interno.persistenza">RichiestaRepository.CaricoAppuntamenti</a> - Interface in <a href="it/unina/picus/richieste/interno/persistenza/package-summary.html">it.unina.picus.richieste.interno.persistenza</a></dt>
-<dd>
-<div class="block">Proiezione aggregata senza caricare le pratiche degli altri candidati.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/interno/persistenza/RichiestaRepositoryJpa.html" class="type-name-link" title="class in it.unina.picus.richieste.interno.persistenza">RichiestaRepositoryJpa</a> - Class in <a href="it/unina/picus/richieste/interno/persistenza/package-summary.html">it.unina.picus.richieste.interno.persistenza</a></dt>
 <dd>
@@ -2464,6 +2470,10 @@ nel modo giusto: le pagine HTML rimandano al login (302), le API ricevono <code>
 </dd>
 <dt><a href="it/unina/picus/richieste/web/InvioRichiestaJson.html#riferimento(java.lang.String)" class="member-name-link">riferimento(String)</a> - Static method in class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/InvioRichiestaJson.html" title="class in it.unina.picus.richieste.web">InvioRichiestaJson</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/richieste/interno/dominio/ContattiRepository.Riferimento.html#%3Cinit%3E(java.util.UUID,java.util.UUID)" class="member-name-link">Riferimento(UUID, UUID)</a> - Constructor for record class it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/ContattiRepository.Riferimento.html" title="class in it.unina.picus.richieste.interno.dominio">ContattiRepository.Riferimento</a></dt>
+<dd>
+<div class="block">Creates an instance of a <code>Riferimento</code> record class.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/interno/dominio/RichiestaDiMisura.html#riferimentoInvio()" class="member-name-link">riferimentoInvio()</a> - Method in record class it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/RichiestaDiMisura.html" title="class in it.unina.picus.richieste.interno.dominio">RichiestaDiMisura</a></dt>
 <dd>
 <div class="block">Returns the value of the <code>riferimentoInvio</code> record component.</div>
@@ -2600,18 +2610,6 @@ nel modo giusto: le pagine HTML rimandano al login (302), le API ricevono <code>
 <dt><a href="it/unina/picus/utenze/api/UtenzeApi.AccountSintetico.html#stato()" class="member-name-link">stato()</a> - Method in record class it.unina.picus.utenze.api.<a href="it/unina/picus/utenze/api/UtenzeApi.AccountSintetico.html" title="class in it.unina.picus.utenze.api">UtenzeApi.AccountSintetico</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/utenze/api/UtenzeApi.AccountSintetico.html#param-stato"><code>stato</code></a> record component.</div>
-</dd>
-<dt><a href="it/unina/picus/richieste/interno/dominio/StatoContattoIncompatibileException.html" class="type-name-link" title="class in it.unina.picus.richieste.interno.dominio">StatoContattoIncompatibileException</a> - Exception Class in <a href="it/unina/picus/richieste/interno/dominio/package-summary.html">it.unina.picus.richieste.interno.dominio</a></dt>
-<dd>
-<div class="block">Indica che la richiesta o il contatto si trovano in uno stato incompatibile con la risposta.</div>
-</dd>
-<dt><a href="it/unina/picus/richieste/interno/dominio/StatoContattoIncompatibileException.html#%3Cinit%3E(java.lang.String)" class="member-name-link">StatoContattoIncompatibileException(String)</a> - Constructor for exception class it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/StatoContattoIncompatibileException.html" title="class in it.unina.picus.richieste.interno.dominio">StatoContattoIncompatibileException</a></dt>
-<dd>
-<div class="block">Crea l'eccezione con il motivo del rifiuto.</div>
-</dd>
-<dt><a href="it/unina/picus/richieste/web/ContattiDisponibilitaController.html#statoIncompatibile()" class="member-name-link">statoIncompatibile()</a> - Method in class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/ContattiDisponibilitaController.html" title="class in it.unina.picus.richieste.web">ContattiDisponibilitaController</a></dt>
-<dd>
-<div class="block">Restituisce 409 quando lo stato della richiesta o del contatto impedisce la risposta.</div>
 </dd>
 <dt><a href="it/unina/picus/catalogo/api/CatalogoApi.AmbitoErogazione.html#STESSO_COMUNE" class="member-name-link">STESSO_COMUNE</a> - Enum constant in enum class it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/CatalogoApi.AmbitoErogazione.html" title="enum class in it.unina.picus.catalogo.api">CatalogoApi.AmbitoErogazione</a></dt>
 <dd>
@@ -2834,6 +2832,10 @@ capo a coda (login, area per ruolo, logout) senza database.</div>
 <div class="block">Returns a string representation of this record class.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.RichiestaSintesi.html#toString()" class="member-name-link">toString()</a> - Method in record class it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.RichiestaSintesi.html" title="class in it.unina.picus.richieste.api">RichiesteApi.RichiestaSintesi</a></dt>
+<dd>
+<div class="block">Returns a string representation of this record class.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/interno/dominio/ContattiRepository.Riferimento.html#toString()" class="member-name-link">toString()</a> - Method in record class it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/ContattiRepository.Riferimento.html" title="class in it.unina.picus.richieste.interno.dominio">ContattiRepository.Riferimento</a></dt>
 <dd>
 <div class="block">Returns a string representation of this record class.</div>
 </dd>

@@ -63,7 +63,6 @@ loadScripts(document, 'script');</script>
 <li><a href="#existsByRichiesta_IdAndEsito(java.util.UUID,java.lang.String)" tabindex="0">existsByRichiesta_IdAndEsito(UUID, String)</a></li>
 <li><a href="#findAllByRichiesta_IdOrderByOrdineInvioAsc(java.util.UUID)" tabindex="0">findAllByRichiesta_IdOrderByOrdineInvioAsc(UUID)</a></li>
 <li><a href="#findOneById(java.util.UUID)" tabindex="0">findOneById(UUID)</a></li>
-<li><a href="#findAllByRichiesta_IdOrderByInviatoIlAscIdAsc(java.util.UUID)" tabindex="0">findAllByRichiesta_IdOrderByInviatoIlAscIdAsc(UUID)</a></li>
 <li><a href="#cercaRiferimento(java.util.UUID)" tabindex="0">cercaRiferimento(UUID)</a></li>
 </ol>
 </li>
@@ -131,18 +130,13 @@ necessari prima dell'aggiornamento.</div>
 <div class="block">Verifica sotto il lock della pratica se c'è già un contatto in attesa.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="ContattoDisponibilitaJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">ContattoDisponibilitaJpa</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#findAllByRichiesta_IdOrderByInviatoIlAscIdAsc(java.util.UUID)" class="member-name-link">findAllByRichiesta_IdOrderByInviatoIlAscIdAsc</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;richiestaId)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#findAllByRichiesta_IdOrderByOrdineInvioAsc(java.util.UUID)" class="member-name-link">findAllByRichiesta_IdOrderByOrdineInvioAsc</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;richiestaId)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Elenca i contatti della richiesta in ordine di invio, usando l'identificativo a parità di data.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="ContattoDisponibilitaJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">ContattoDisponibilitaJpa</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#findAllByRichiesta_IdOrderByOrdineInvioAsc(java.util.UUID)" class="member-name-link">findAllByRichiesta_IdOrderByOrdineInvioAsc</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;richiestaId)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Ordine persistente dei tentativi, anche quando due invii hanno lo stesso istante.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="ContattoDisponibilitaJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">ContattoDisponibilitaJpa</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#findOneById(java.util.UUID)" class="member-name-link">findOneById</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;id)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="ContattoDisponibilitaJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">ContattoDisponibilitaJpa</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#findOneById(java.util.UUID)" class="member-name-link">findOneById</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;id)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Cerca un contatto caricando anche la richiesta necessaria per il dettaglio.</div>
 </div>
 </div>
@@ -208,21 +202,6 @@ necessari prima dell'aggiornamento.</div>
 <dd><code>id</code> - identificativo del contatto</dd>
 <dt>Returns:</dt>
 <dd>il contatto con la richiesta, oppure un valore vuoto se non esiste</dd>
-</dl>
-</div>
-</section>
-</li>
-<li>
-<section class="detail" id="findAllByRichiesta_IdOrderByInviatoIlAscIdAsc(java.util.UUID)">
-<h3>findAllByRichiesta_IdOrderByInviatoIlAscIdAsc</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="ContattoDisponibilitaJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">ContattoDisponibilitaJpa</a>&gt;</span>&nbsp;<span class="element-name">findAllByRichiesta_IdOrderByInviatoIlAscIdAsc</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;richiestaId)</span></div>
-<div class="block">Elenca i contatti della richiesta in ordine di invio, usando l'identificativo a parità di data.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>richiestaId</code> - identificativo della richiesta</dd>
-<dt>Returns:</dt>
-<dd>contatti ordinati, eventualmente nessuno</dd>
 </dl>
 </div>
 </section>

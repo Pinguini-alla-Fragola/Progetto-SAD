@@ -69,7 +69,6 @@ loadScripts(document, 'script');</script>
 <li><a href="#consultaContatto(java.util.UUID,it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" tabindex="0">consultaContatto(UUID, UtenzeApi.IdentitaAutenticata)</a></li>
 <li><a href="#rispondiDisponibilita(java.util.UUID,it.unina.picus.richieste.web.ContattiDisponibilitaController.DatiRisposta,it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" tabindex="0">rispondiDisponibilita(UUID, ContattiDisponibilitaController.DatiRisposta, UtenzeApi.IdentitaAutenticata)</a></li>
 <li><a href="#elencoContatti(java.util.UUID,it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" tabindex="0">elencoContatti(UUID, UtenzeApi.IdentitaAutenticata)</a></li>
-<li><a href="#statoIncompatibile()" tabindex="0">statoIncompatibile()</a></li>
 </ol>
 </li>
 </ol>
@@ -92,8 +91,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Espone via HTTP la consultazione, la risposta e lo storico dei contatti di disponibilità.
 
 <p>Agisce da adattatore HTTP. Riceve dal resolver Utenze l'identità corrente usata
-dai casi d'uso, delega i controlli e la registrazione al servizio e traduce i suoi errori
-in risposte HTTP.</div>
+dai casi d'uso e delega i controlli e la registrazione al servizio.
+Il gestore comune del modulo traduce gli errori applicativi in risposte HTTP.</div>
 <dl class="notes">
 <dt>See Also:</dt>
 <dd>
@@ -167,11 +166,6 @@ in risposte HTTP.</div>
  <a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Registra la decisione del destinatario sul contatto.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>(package private) void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#statoIncompatibile()" class="member-name-link">statoIncompatibile</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Restituisce 409 quando lo stato della richiesta o del contatto impedisce la risposta.</div>
 </div>
 </div>
 </div>
@@ -268,17 +262,6 @@ in risposte HTTP.</div>
 <dt>Returns:</dt>
 <dd>contatti e rispettivi esiti</dd>
 </dl>
-</div>
-</section>
-</li>
-<li>
-<section class="detail" id="statoIncompatibile()">
-<h3>statoIncompatibile</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="annotations">@ExceptionHandler(<a href="../interno/dominio/StatoContattoIncompatibileException.html" title="class in it.unina.picus.richieste.interno.dominio">StatoContattoIncompatibileException</a>.class)
-@ResponseStatus(CONFLICT)
-</span><span class="return-type">void</span>&nbsp;<span class="element-name">statoIncompatibile</span>()</div>
-<div class="block">Restituisce 409 quando lo stato della richiesta o del contatto impedisce la risposta.</div>
 </div>
 </section>
 </li>

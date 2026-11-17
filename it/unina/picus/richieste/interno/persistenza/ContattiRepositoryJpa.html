@@ -56,6 +56,7 @@ loadScripts(document, 'script');</script>
 <div class="toc-header">Contents&nbsp;<input type="text" class="filter-input" disabled placeholder="Filter contents (type .)" aria-label="Filter table of contents" autocomplete="off" spellcheck="false"><input type="reset" class="reset-filter" disabled tabindex="-1" value="Reset"></div>
 <ol class="toc-list" tabindex="-1">
 <li><a href="#" tabindex="0">Description</a></li>
+<li><a href="#nested-class-summary" tabindex="0">Nested Class Summary</a></li>
 <li><a href="#constructor-summary" tabindex="0">Constructor Summary</a></li>
 <li><a href="#method-summary" tabindex="0">Method Summary</a></li>
 <li><a href="#constructor-detail" tabindex="0">Constructor Details</a>
@@ -65,7 +66,9 @@ loadScripts(document, 'script');</script>
 </li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
-<li><a href="#richiestaDelContatto(java.util.UUID)" tabindex="0">richiestaDelContatto(UUID)</a></li>
+<li><a href="#cercaRiferimento(java.util.UUID)" tabindex="0">cercaRiferimento(UUID)</a></li>
+<li><a href="#cercaDettaglio(java.util.UUID)" tabindex="0">cercaDettaglio(UUID)</a></li>
+<li><a href="#registraEsito(java.util.UUID,it.unina.picus.richieste.api.RichiesteApi.EsitoContatto)" tabindex="0">registraEsito(UUID, RichiesteApi.EsitoContatto)</a></li>
 <li><a href="#cerca(java.util.UUID)" tabindex="0">cerca(UUID)</a></li>
 <li><a href="#storico(java.util.UUID)" tabindex="0">storico(UUID)</a></li>
 <li><a href="#inAttesa(java.util.UUID)" tabindex="0">inAttesa(UUID)</a></li>
@@ -93,11 +96,20 @@ loadScripts(document, 'script');</script>
 </span><span class="modifiers">public class </span><span class="element-name type-name-label">ContattiRepositoryJpa</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>
 implements <a href="../dominio/ContattiRepository.html" title="interface in it.unina.picus.richieste.interno.dominio">ContattiRepository</a></span></div>
-<div class="block">Adatta i contatti persistiti alla porta del coordinamento.</div>
+<div class="block">Applica il pattern <em>Data Mapper</em> per condividere le proiezioni dei contatti.</div>
 </div>
 </section>
 <section class="summary">
 <ul class="summary-list">
+<!-- ======== NESTED CLASS SUMMARY ======== -->
+<li>
+<section class="nested-class-summary" id="nested-class-summary">
+<h2>Nested Class Summary</h2>
+<div class="inherited-list">
+<h3 id="nested-classes-inherited-from-class-it.unina.picus.richieste.interno.dominio.ContattiRepository">Nested classes/interfaces inherited from interface&nbsp;<a href="../dominio/ContattiRepository.html#nested-class-summary" title="interface in it.unina.picus.richieste.interno.dominio">ContattiRepository</a></h3>
+<code><a href="../dominio/ContattiRepository.Riferimento.html" title="class in it.unina.picus.richieste.interno.dominio">ContattiRepository.Riferimento</a></code></div>
+</section>
+</li>
 <!-- ======== CONSTRUCTOR SUMMARY ======== -->
 <li>
 <section class="constructor-summary" id="constructor-summary">
@@ -128,6 +140,16 @@ implements <a href="../dominio/ContattiRepository.html" title="interface in it.u
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Legge il contatto corrente.</div>
 </div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="../../api/RichiesteApi.DettaglioContatto.html" title="class in it.unina.picus.richieste.api">RichiesteApi.DettaglioContatto</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#cercaDettaglio(java.util.UUID)" class="member-name-link">cercaDettaglio</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;id)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Carica la proiezione con i dati necessari a valutare la disponibilità.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="../dominio/ContattiRepository.Riferimento.html" title="class in it.unina.picus.richieste.interno.dominio">ContattiRepository.Riferimento</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#cercaRiferimento(java.util.UUID)" class="member-name-link">cercaRiferimento</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;id)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Legge pratica e destinatario prima del lock.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#inAttesa(java.util.UUID)" class="member-name-link">inAttesa</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;richiestaId)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -142,10 +164,11 @@ implements <a href="../dominio/ContattiRepository.html" title="interface in it.u
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Registra un tentativo e rende visibile la riga nella transazione chiamante.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#richiestaDelContatto(java.util.UUID)" class="member-name-link">richiestaDelContatto</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;id)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../api/RichiesteApi.ContattoDisponibilita.html" title="class in it.unina.picus.richieste.api">RichiesteApi.ContattoDisponibilita</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#registraEsito(java.util.UUID,it.unina.picus.richieste.api.RichiesteApi.EsitoContatto)" class="member-name-link">registraEsito</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;id,
+ <a href="../../api/RichiesteApi.EsitoContatto.html" title="enum class in it.unina.picus.richieste.api">RichiesteApi.EsitoContatto</a>&nbsp;esito)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Legge il riferimento immutabile senza caricare l'esito prima del lock della pratica.</div>
+<div class="block">Persiste l'esito calcolato dal caso d'uso sotto il lock della pratica.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../../api/RichiesteApi.ContattoDisponibilita.html" title="class in it.unina.picus.richieste.api">RichiesteApi.ContattoDisponibilita</a>&gt;</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#storico(java.util.UUID)" class="member-name-link">storico</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;richiestaId)</code></div>
@@ -187,15 +210,57 @@ implements <a href="../dominio/ContattiRepository.html" title="interface in it.u
 <h2>Method Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="richiestaDelContatto(java.util.UUID)">
-<h3>richiestaDelContatto</h3>
+<section class="detail" id="cercaRiferimento(java.util.UUID)">
+<h3>cercaRiferimento</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&gt;</span>&nbsp;<span class="element-name">richiestaDelContatto</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;id)</span></div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../dominio/ContattiRepository.html#richiestaDelContatto(java.util.UUID)">ContattiRepository</a></code></span></div>
-<div class="block">Legge il riferimento immutabile senza caricare l'esito prima del lock della pratica.</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="../dominio/ContattiRepository.Riferimento.html" title="class in it.unina.picus.richieste.interno.dominio">ContattiRepository.Riferimento</a>&gt;</span>&nbsp;<span class="element-name">cercaRiferimento</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;id)</span></div>
+<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../dominio/ContattiRepository.html#cercaRiferimento(java.util.UUID)">ContattiRepository</a></code></span></div>
+<div class="block">Legge pratica e destinatario prima del lock. L'esito viene caricato dopo il lock.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="../dominio/ContattiRepository.html#richiestaDelContatto(java.util.UUID)">richiestaDelContatto</a></code>&nbsp;in interface&nbsp;<code><a href="../dominio/ContattiRepository.html" title="interface in it.unina.picus.richieste.interno.dominio">ContattiRepository</a></code></dd>
+<dd><code><a href="../dominio/ContattiRepository.html#cercaRiferimento(java.util.UUID)">cercaRiferimento</a></code>&nbsp;in interface&nbsp;<code><a href="../dominio/ContattiRepository.html" title="interface in it.unina.picus.richieste.interno.dominio">ContattiRepository</a></code></dd>
+<dt>Parameters:</dt>
+<dd><code>id</code> - identificativo del contatto</dd>
+<dt>Returns:</dt>
+<dd>riferimento al contatto, se presente</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="cercaDettaglio(java.util.UUID)">
+<h3>cercaDettaglio</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="../../api/RichiesteApi.DettaglioContatto.html" title="class in it.unina.picus.richieste.api">RichiesteApi.DettaglioContatto</a>&gt;</span>&nbsp;<span class="element-name">cercaDettaglio</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;id)</span></div>
+<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../dominio/ContattiRepository.html#cercaDettaglio(java.util.UUID)">ContattiRepository</a></code></span></div>
+<div class="block">Carica la proiezione con i dati necessari a valutare la disponibilità.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="../dominio/ContattiRepository.html#cercaDettaglio(java.util.UUID)">cercaDettaglio</a></code>&nbsp;in interface&nbsp;<code><a href="../dominio/ContattiRepository.html" title="interface in it.unina.picus.richieste.interno.dominio">ContattiRepository</a></code></dd>
+<dt>Parameters:</dt>
+<dd><code>id</code> - identificativo del contatto</dd>
+<dt>Returns:</dt>
+<dd>dettaglio minimo del contatto, se presente</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="registraEsito(java.util.UUID,it.unina.picus.richieste.api.RichiesteApi.EsitoContatto)">
+<h3>registraEsito</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../../api/RichiesteApi.ContattoDisponibilita.html" title="class in it.unina.picus.richieste.api">RichiesteApi.ContattoDisponibilita</a></span>&nbsp;<span class="element-name">registraEsito</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;id,
+ <a href="../../api/RichiesteApi.EsitoContatto.html" title="enum class in it.unina.picus.richieste.api">RichiesteApi.EsitoContatto</a>&nbsp;esito)</span></div>
+<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../dominio/ContattiRepository.html#registraEsito(java.util.UUID,it.unina.picus.richieste.api.RichiesteApi.EsitoContatto)">ContattiRepository</a></code></span></div>
+<div class="block">Persiste l'esito calcolato dal caso d'uso sotto il lock della pratica.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="../dominio/ContattiRepository.html#registraEsito(java.util.UUID,it.unina.picus.richieste.api.RichiesteApi.EsitoContatto)">registraEsito</a></code>&nbsp;in interface&nbsp;<code><a href="../dominio/ContattiRepository.html" title="interface in it.unina.picus.richieste.interno.dominio">ContattiRepository</a></code></dd>
+<dt>Parameters:</dt>
+<dd><code>id</code> - identificativo del contatto</dd>
+<dd><code>esito</code> - esito da salvare</dd>
+<dt>Returns:</dt>
+<dd>contatto con l'esito registrato</dd>
 </dl>
 </div>
 </section>

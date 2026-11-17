@@ -61,6 +61,7 @@ loadScripts(document, 'script');</script>
 <ol class="toc-list">
 <li><a href="#registra(it.unina.picus.richieste.interno.dominio.RichiestaDiMisura)" tabindex="0">registra(RichiestaDiMisura)</a></li>
 <li><a href="#cercaPerId(java.util.UUID)" tabindex="0">cercaPerId(UUID)</a></li>
+<li><a href="#esiste(java.util.UUID)" tabindex="0">esiste(UUID)</a></li>
 <li><a href="#cercaPerAggiornamento(java.util.UUID)" tabindex="0">cercaPerAggiornamento(UUID)</a></li>
 <li><a href="#aggiorna(it.unina.picus.richieste.interno.dominio.RichiestaDiMisura)" tabindex="0">aggiorna(RichiestaDiMisura)</a></li>
 <li><a href="#carichiConfermati(java.time.Instant)" tabindex="0">carichiConfermati(Instant)</a></li>
@@ -136,9 +137,14 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Elenca solo le pratiche aperte in ordine cronologico stabile.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="RichiestaDiMisura.html" title="class in it.unina.picus.richieste.interno.dominio">RichiestaDiMisura</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#registra(it.unina.picus.richieste.interno.dominio.RichiestaDiMisura)" class="member-name-link">registra</a><wbr>(<a href="RichiestaDiMisura.html" title="class in it.unina.picus.richieste.interno.dominio">RichiestaDiMisura</a>&nbsp;richiesta)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#esiste(java.util.UUID)" class="member-name-link">esiste</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;id)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Verifica l'esistenza di una pratica senza caricarne i dettagli.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="RichiestaDiMisura.html" title="class in it.unina.picus.richieste.interno.dominio">RichiestaDiMisura</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#registra(it.unina.picus.richieste.interno.dominio.RichiestaDiMisura)" class="member-name-link">registra</a><wbr>(<a href="RichiestaDiMisura.html" title="class in it.unina.picus.richieste.interno.dominio">RichiestaDiMisura</a>&nbsp;richiesta)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Registra atomicamente l'invio oppure restituisce quello già presente con la stessa chiave.</div>
 </div>
 </div>
@@ -170,6 +176,21 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="RichiestaDiMisura.html" title="class in it.unina.picus.richieste.interno.dominio">RichiestaDiMisura</a>&gt;</span>&nbsp;<span class="element-name">cercaPerId</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;id)</span></div>
 <div class="block">Cerca una pratica senza modificarla.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="esiste(java.util.UUID)">
+<h3>esiste</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="return-type">boolean</span>&nbsp;<span class="element-name">esiste</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;id)</span></div>
+<div class="block">Verifica l'esistenza di una pratica senza caricarne i dettagli.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>id</code> - identificativo della pratica</dd>
+<dt>Returns:</dt>
+<dd>se la pratica esiste</dd>
+</dl>
 </div>
 </section>
 </li>

@@ -70,7 +70,6 @@ loadScripts(document, 'script');</script>
 <li><a href="#getMisuraId()" tabindex="0">getMisuraId()</a></li>
 <li><a href="#getComuneCodice()" tabindex="0">getComuneCodice()</a></li>
 <li><a href="#getTipoDestinatario()" tabindex="0">getTipoDestinatario()</a></li>
-<li><a href="#getStato()" tabindex="0">getStato()</a></li>
 <li><a href="#aggiorna(it.unina.picus.richieste.interno.dominio.RichiestaDiMisura)" tabindex="0">aggiorna(RichiestaDiMisura)</a></li>
 </ol>
 </li>
@@ -98,7 +97,7 @@ L'aggiornamento persiste stato, assegnazione e accordo sulla stessa riga già bl
 <dt>See Also:</dt>
 <dd>
 <ul class="tag-list-long">
-<li><a href="RichiestaRepository.html#cercaPerAggiornamento(java.util.UUID)"><code>RichiestaRepository.cercaPerAggiornamento(UUID)</code></a></li>
+<li><a href="RichiestaRepositoryJpa.html#cercaPerAggiornamento(java.util.UUID)"><code>RichiestaRepositoryJpa.cercaPerAggiornamento(UUID)</code></a></li>
 </ul>
 </dd>
 </dl>
@@ -155,14 +154,9 @@ L'aggiornamento persiste stato, assegnazione e accordo sulla stessa riga già bl
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns identificativo della misura richiesta.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../api/RichiesteApi.StatoRichiesta.html" title="enum class in it.unina.picus.richieste.api">RichiesteApi.StatoRichiesta</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getStato()" class="member-name-link">getStato</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../api/RichiesteApi.TipoDestinatario.html" title="enum class in it.unina.picus.richieste.api">RichiesteApi.TipoDestinatario</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTipoDestinatario()" class="member-name-link">getTipoDestinatario</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns stato corrente della richiesta.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../api/RichiesteApi.TipoDestinatario.html" title="enum class in it.unina.picus.richieste.api">RichiesteApi.TipoDestinatario</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTipoDestinatario()" class="member-name-link">getTipoDestinatario</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns tipo di destinatario della misura.</div>
 </div>
 </div>
@@ -255,19 +249,6 @@ L'aggiornamento persiste stato, assegnazione e accordo sulla stessa riga già bl
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>tipo di destinatario della misura</dd>
-</dl>
-</div>
-</section>
-</li>
-<li>
-<section class="detail" id="getStato()">
-<h3>getStato</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../../api/RichiesteApi.StatoRichiesta.html" title="enum class in it.unina.picus.richieste.api">RichiesteApi.StatoRichiesta</a></span>&nbsp;<span class="element-name">getStato</span>()</div>
-<div class="block">Returns stato corrente della richiesta.</div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd>stato corrente della richiesta</dd>
 </dl>
 </div>
 </section>

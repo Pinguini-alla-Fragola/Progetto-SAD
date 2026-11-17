@@ -67,6 +67,7 @@ loadScripts(document, 'script');</script>
 <ol class="toc-list">
 <li><a href="#registra(it.unina.picus.richieste.interno.dominio.RichiestaDiMisura)" tabindex="0">registra(RichiestaDiMisura)</a></li>
 <li><a href="#cercaPerId(java.util.UUID)" tabindex="0">cercaPerId(UUID)</a></li>
+<li><a href="#esiste(java.util.UUID)" tabindex="0">esiste(UUID)</a></li>
 <li><a href="#cercaPerAggiornamento(java.util.UUID)" tabindex="0">cercaPerAggiornamento(UUID)</a></li>
 <li><a href="#aggiorna(it.unina.picus.richieste.interno.dominio.RichiestaDiMisura)" tabindex="0">aggiorna(RichiestaDiMisura)</a></li>
 <li><a href="#carichiConfermati(java.time.Instant)" tabindex="0">carichiConfermati(Instant)</a></li>
@@ -161,9 +162,14 @@ implements <a href="../dominio/RichiestaRepository.html" title="interface in it.
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Elenca solo le pratiche aperte in ordine cronologico stabile.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../dominio/RichiestaDiMisura.html" title="class in it.unina.picus.richieste.interno.dominio">RichiestaDiMisura</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#registra(it.unina.picus.richieste.interno.dominio.RichiestaDiMisura)" class="member-name-link">registra</a><wbr>(<a href="../dominio/RichiestaDiMisura.html" title="class in it.unina.picus.richieste.interno.dominio">RichiestaDiMisura</a>&nbsp;richiesta)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#esiste(java.util.UUID)" class="member-name-link">esiste</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;id)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Verifica l'esistenza di una pratica senza caricarne i dettagli.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../dominio/RichiestaDiMisura.html" title="class in it.unina.picus.richieste.interno.dominio">RichiestaDiMisura</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#registra(it.unina.picus.richieste.interno.dominio.RichiestaDiMisura)" class="member-name-link">registra</a><wbr>(<a href="../dominio/RichiestaDiMisura.html" title="class in it.unina.picus.richieste.interno.dominio">RichiestaDiMisura</a>&nbsp;richiesta)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Registra atomicamente l'invio oppure restituisce quello già presente con la stessa chiave.</div>
 </div>
 </div>
@@ -223,6 +229,24 @@ implements <a href="../dominio/RichiestaRepository.html" title="interface in it.
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../dominio/RichiestaRepository.html#cercaPerId(java.util.UUID)">cercaPerId</a></code>&nbsp;in interface&nbsp;<code><a href="../dominio/RichiestaRepository.html" title="interface in it.unina.picus.richieste.interno.dominio">RichiestaRepository</a></code></dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="esiste(java.util.UUID)">
+<h3>esiste</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">esiste</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;id)</span></div>
+<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../dominio/RichiestaRepository.html#esiste(java.util.UUID)">RichiestaRepository</a></code></span></div>
+<div class="block">Verifica l'esistenza di una pratica senza caricarne i dettagli.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="../dominio/RichiestaRepository.html#esiste(java.util.UUID)">esiste</a></code>&nbsp;in interface&nbsp;<code><a href="../dominio/RichiestaRepository.html" title="interface in it.unina.picus.richieste.interno.dominio">RichiestaRepository</a></code></dd>
+<dt>Parameters:</dt>
+<dd><code>id</code> - identificativo della pratica</dd>
+<dt>Returns:</dt>
+<dd>se la pratica esiste</dd>
 </dl>
 </div>
 </section>
