@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Accedi · PICUS</title>
+    <link rel="icon" href="/img/picus.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/css/picus.css">
+    <script src="/js/login.js" type="module"></script>
+</head>
+<body class="auth-page">
+<a th:replace="~{fragments/layout :: skip}" href="#contenuto">Vai al contenuto</a>
+<header class="picus-navbar">
+    <div class="nav-inner">
+        <span class="picus-logo"><img src="/img/picus.svg" width="36" height="36" alt=""> PICUS</span>
+    </div>
+</header>
+
+<main id="contenuto" class="picus-container auth-shell" tabindex="-1">
+    <div class="auth-brand-panel">
+        <div class="auth-brand-mark"><img src="/img/picus.svg" width="112" height="112" alt=""><p>PICUS</p></div>
+        <p class="auth-brand-description">Coordinare le risorse.<br> Accompagnare le persone.</p>
+        <p class="auth-brand-note">Lo spazio di lavoro del Banco, delle organizzazioni partner e degli operatori.</p>
+    </div>
+    <div class="auth-content">
+        <h1>Accedi a PICUS</h1>
+        <p class="auth-intro">Entra nella tua area di lavoro.</p>
+
+        <div id="messaggio-errore" role="alert" class="alert alert-danger" th:if="${param.error != null or param.attesa != null}">
+            <span id="testo-errore" th:text="${param.attesa != null} ? 'Accesso temporaneamente bloccato. Riprova tra poco.' : 'Credenziali non valide.'"></span>
+        </div>
+
+        <p th:if="${param.logout != null}" class="alert alert-success" role="status">Disconnessione completata.</p>
+
+        <form id="formLogin" th:action="@{/login}" method="post">
+            <div class="form-group">
+                <label class="form-label" for="email">Email</label>
+                <input type="email" id="email" name="username" maxlength="254" class="form-control" required placeholder="nome@organizzazione.it" autocomplete="email">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-control" required autocomplete="current-password">
+            </div>
+            <button type="submit" class="btn btn-primary btn-block" id="btnLogin">Accedi</button>
+        </form>
+
+        <div class="auth-help">
+            <a href="/recupera">Password dimenticata?</a>
+            <a href="/attiva">Richiedi un link di attivazione</a>
+        </div>
+
+        <section class="demo-selector" aria-labelledby="titolo-demo" th:if="${demo}">
+            <h2 id="titolo-demo">Profili dimostrativi</h2>
+            <button type="button" class="demo-pill-btn" data-email="banco@picus.test">
+                Banco di coordinamento <svg class="icon" aria-hidden="true"><use href="/img/icons.svg#arrow"></use></svg>
+            </button>
+            <button type="button" class="demo-pill-btn" th:data-email="${emailOptDemo}">
+                Associazione Solidale Napoli (OPT A) <svg class="icon" aria-hidden="true"><use href="/img/icons.svg#arrow"></use></svg>
+            </button>
+            <button type="button" class="demo-pill-btn" th:unless="${skeleton}" data-email="opt-b@picus.test">
+                Cooperativa Sociale Flegrea (OPT B) <svg class="icon" aria-hidden="true"><use href="/img/icons.svg#arrow"></use></svg>
+            </button>
+            <button type="button" class="demo-pill-btn" data-email="operatore@picus.test">
+                Operatore del Banco <svg class="icon" aria-hidden="true"><use href="/img/icons.svg#arrow"></use></svg>
+            </button>
+        </section>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

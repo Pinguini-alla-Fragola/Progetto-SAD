@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dettaglio richiesta · PICUS</title>
+    <link rel="icon" href="/img/picus.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/css/picus.css">
+    <link rel="stylesheet" href="/css/integrazione-ui.css">
+    <script src="/js/dettaglio-richiesta.js" type="module"></script>
+</head>
+<body class="flow-page request-page">
+<a th:replace="~{fragments/layout :: skip}" href="#contenuto">Vai al contenuto</a>
+<header class="picus-navbar">
+    <div class="nav-inner">
+        <a th:replace="~{fragments/layout :: brand}" href="/">PICUS</a>
+        <a th:href="${dashboard}" class="nav-link"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#back"></use></svg> Area di lavoro</a>
+    </div>
+</header>
+<main id="contenuto" class="request-detail" tabindex="-1"
+      th:attr="data-richiesta-id=${richiestaId},data-stato=${richiesta.stato.name()},data-banco=${banco},data-misura=${richiesta.nomeMisura},data-opt=${nomeOptRichiedente}">
+    <header class="request-heading">
+        <div><h1 th:text="${richiesta.nomeMisura}">Dettaglio della richiesta</h1><p>Richiesta di misura di accompagnamento</p></div>
+        <span class="badge-stato" th:classappend="${'badge-' + #strings.toLowerCase(richiesta.stato.name())}"
+              th:text="${#strings.capitalize(#strings.toLowerCase(#strings.replace(richiesta.stato.name(), '_', ' ')))}">Creata</span>
+    </header>
+
+    <div class="request-state-message" th:switch="${richiesta.stato.name()}">
+        <p th:case="'CREATA'">La richiesta è stata inviata. Il prossimo passaggio è la presa in carico da parte del Banco.</p>
+        <p th:case="'PRESA_IN_CARICO'">Il Banco sta cercando un erogatore disponibile. La richiesta è in lavorazione.</p>
+        <p th:case="'IN_PROGRAMMAZIONE'">L’erogatore è stato assegnato. Sono da concordare i dettagli dell’accordo.</p>
+        <p th:case="'CONFERMATA'">L’accordo è confermato. Di seguito trovi i dettagli dell’appuntamento.</p>
+        <p th:case="'RIFIUTATA'">Nessun erogatore disponibile. La ricerca si è conclusa senza una soluzione disponibile.</p>
+        <p th:case="'ANNULLATA'">La richiesta è annullata. I dati già registrati sono conservati nella pratica.</p>
+    </div>
+
+    <div class="request-layout">
+        <div class="request-information">
+            <section aria-labelledby="titolo-riepilogo">
+                <h2 id="titolo-riepilogo">Riepilogo della richiesta</h2>
+                <dl class="request-facts-grid">
+                    <div th:if="${nomeOptRichiedente != null}"><dt>OPT richiedente</dt><dd th:text="${nomeOptRichiedente}"></dd></div>
+                    <div><dt>Data e ora di invio</dt><dd><time th:datetime="${richiesta.inviataIl}" th:text="${dataInvio}"></time></dd></div>
+                    <div><dt>Comune di intervento</dt><dd th:text="${comune}"></dd></div>
+                    <div><dt>Destinatario della misura</dt><dd th:text="${dettaglio.tipoDestinatario.name() == 'NUCLEO' ? 'Nucleo familiare' : 'Persona'}"></dd></div>
+                    <div th:if="${nomeErogatore != null}"><dt>Erogatore assegnato</dt><dd th:text="${nomeErogatore}"></dd></div>
+                </dl>
+            </section>
+            <section class="request-section" th:if="${dettaglio.titolareId != null}" aria-labelledby="titolo-bisogno">
+                <h2 id="titolo-bisogno">Bisogno e contesto</h2>
+                <p class="request-description" th:if="${dettaglio.description != null}" th:text="${dettaglio.description}"></p>
+                <p class="picus-meta" th:unless="${dettaglio.description != null}">Non è stata aggiunta una descrizione.</p>
+            </section>
+            <section class="request-section" th:if="${accordoPresenza != null || accordoRemoto != null}" aria-labelledby="titolo-appuntamento">
+                <h2 id="titolo-appuntamento">Appuntamento confermato</h2>
+                <p class="appointment-date" th:text="${dataAccordo}"></p>
+                <th:block th:if="${accordoPresenza != null}">
+                    <p>In presenza · <span th:text="${accordoPresenza.luogo}"></span></p>
+                    <p th:text="${accordoPresenza.nomeReferente + ' ' + accordoPresenza.cognomeReferente}"></p>
+                    <p>Telefono del referente: <span th:text="${accordoPresenza.telefonoReferente}"></span></p>
+                </th:block>
+                <th:block th:if="${accordoRemoto != null}">
+                    <p>A distanza</p>
+                    <a th:href="${accordoRemoto.link}" th:text="${accordoRemoto.link}" target="_blank" rel="noopener noreferrer"></a>
+                </th:block>
+            </section>
+        </div>
+
+        <aside class="request-coordination" th:if="${banco}" aria-labelledby="titolo-coordinamento">
+            <h2 id="titolo-coordinamento">Coordinamento del Banco</h2>
+            <p id="coordinamento-esito" class="picus-esito" role="status"></p>
+            <div id="coordinamento-azioni" class="picus-actions"></div>
+            <section class="agreement-editor" th:if="${richiesta.stato.name() == 'IN_PROGRAMMAZIONE'}" aria-labelledby="titolo-accordo">
+                <h3 id="titolo-accordo">Registra l’accordo</h3>
+                <p class="picus-meta">Compila i dettagli concordati con la OPT e l’erogatore. La conferma chiude la programmazione.</p>
+                <form id="form-accordo" class="picus-form">
+                    <fieldset>
+                        <legend class="sr-only">Dettagli dell’appuntamento</legend>
+                        <label class="campo" for="accordo-modalita">Modalità
+                            <select id="accordo-modalita" name="modalita" class="form-control" aria-describedby="accordo-modalita-aiuto errore-modalita" required>
+                                <option value="IN_PRESENZA">In presenza</option>
+                                <option value="A_DISTANZA">A distanza</option>
+                            </select>
+                        </label>
+                        <p id="accordo-modalita-aiuto" class="field-help">Scegli la modalità dell’assegnazione: gli erogatori locali operano in presenza; il Centro PICUS a distanza usa un link.</p>
+                        <p id="errore-modalita" class="field-error picus-errore"></p>
+                        <label class="campo" for="accordo-data">Data e ora dell’appuntamento
+                            <input id="accordo-data" name="dataOra" class="form-control" type="datetime-local" min="0001-01-01T00:00" max="9999-12-31T23:59" aria-describedby="accordo-fuso errore-dataOra" required>
+                        </label>
+                        <p id="accordo-fuso" class="field-help">Data e ora nel fuso del dispositivo.</p>
+                        <p id="errore-dataOra" class="field-error picus-errore"></p>
+                        <div id="campi-presenza" class="agreement-fields">
+                            <label class="campo" for="accordo-luogo">Luogo dell’appuntamento
+                                <input id="accordo-luogo" name="luogo" class="form-control" type="text" maxlength="500" aria-describedby="errore-luogo" required>
+                            </label>
+                            <p id="errore-luogo" class="field-error picus-errore"></p>
+                            <div class="agreement-contact">
+                                <div><label class="campo" for="accordo-nome">Nome del referente
+                                    <input id="accordo-nome" name="nomeReferente" class="form-control" type="text" maxlength="255" aria-describedby="errore-nomeReferente" required>
+                                </label><p id="errore-nomeReferente" class="field-error picus-errore"></p></div>
+                                <div><label class="campo" for="accordo-cognome">Cognome del referente
+                                    <input id="accordo-cognome" name="cognomeReferente" class="form-control" type="text" maxlength="255" aria-describedby="errore-cognomeReferente" required>
+                                </label><p id="errore-cognomeReferente" class="field-error picus-errore"></p></div>
+                            </div>
+                            <label class="campo" for="accordo-telefono">Telefono del referente
+                                <input id="accordo-telefono" name="telefonoReferente" class="form-control" type="tel" maxlength="50" aria-describedby="errore-telefonoReferente" required>
+                            </label>
+                            <p id="errore-telefonoReferente" class="field-error picus-errore"></p>
+                        </div>
+                        <div id="campi-remoto" class="agreement-fields" hidden>
+                            <label class="campo" for="accordo-link">Link dell’appuntamento
+                                <input id="accordo-link" name="link" class="form-control" type="url" maxlength="2048" placeholder="https://" aria-describedby="errore-link" disabled>
+                            </label>
+                            <p id="errore-link" class="field-error picus-errore"></p>
+                        </div>
+                        <p class="field-help">Dopo la conferma i dettagli dell’accordo non sono modificabili.</p>
+                        <button type="submit" class="btn btn-primary">Conferma accordo</button>
+                    </fieldset>
+                    <p id="esito-accordo" class="picus-esito" role="status" tabindex="-1"></p>
+                </form>
+            </section>
+            <h3 id="titolo-candidati" hidden>Erogatori compatibili</h3>
+            <div id="candidati" class="picus-list"></div>
+            <a class="btn btn-secondary btn-sm" th:href="@{/banco/richieste/{id}/contatti(id=${richiestaId})}">Storico dei contatti</a>
+            <section class="request-refusal" th:if="${richiesta.stato.name() == 'PRESA_IN_CARICO' || richiesta.stato.name() == 'IN_PROGRAMMAZIONE'}" aria-labelledby="titolo-rifiuto">
+                <h3 id="titolo-rifiuto">Nessuna soluzione disponibile?</h3>
+                <p id="rifiuto-motivo" class="picus-meta" th:text="${richiesta.stato.name() == 'PRESA_IN_CARICO' ? 'Verifica delle alternative in corso…' : 'Usa il rifiuto definitivo solo quando le trattative e le alternative sono esaurite.'}"></p>
+                <button id="rifiuta-richiesta" type="button" class="btn btn-danger btn-sm" aria-describedby="rifiuto-motivo" th:disabled="${richiesta.stato.name() == 'PRESA_IN_CARICO'}">Rifiuta richiesta</button>
+            </section>
+            <a id="esito-recupero" class="btn btn-secondary btn-sm" th:href="@{/richieste/{id}(id=${richiestaId})}" hidden>Verifica l’esito e aggiorna la pratica</a>
+        </aside>
+
+        <section class="request-reference" aria-labelledby="titolo-riferimenti">
+            <h2 id="titolo-riferimenti">Riferimenti della pratica</h2>
+            <p><span>Identificativo</span><code id="dettaglio-id" th:text="${richiesta.id}"></code></p>
+            <details class="request-future">
+                <summary>Altre operazioni</summary>
+                <div class="picus-actions future-actions">
+                    <span class="azione-inattiva" data-funzione-inattiva><button type="button" class="btn btn-secondary btn-sm" disabled>Annulla la richiesta</button></span>
+                </div>
+            </details>
+        </section>
+    </div>
+    <a th:href="${dashboard}" class="btn btn-secondary request-back">Torna all’area di lavoro</a>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

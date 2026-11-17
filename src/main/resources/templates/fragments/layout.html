@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<body>
+<a th:fragment="skip" class="skip-link" href="#contenuto">Vai al contenuto</a>
+
+<a th:fragment="brand" class="picus-logo" href="/" aria-label="PICUS, area di lavoro">
+    <img src="/img/picus.svg" width="36" height="36" alt="">
+    <span>PICUS</span>
+</a>
+
+<footer th:fragment="footer" class="picus-footer">
+    <div class="footer-inner">
+        <p><strong>PICUS</strong></p>
+        <a href="https://strawberrypenguin.it" target="_blank" rel="noopener noreferrer">
+            <img src="/img/strawberry-penguin.svg" class="team-logo" width="40" height="40" alt="">
+            <span>Designed by <strong>PinguiniAllaFragola</strong></span>
+            <span class="sr-only"> (si apre in una nuova scheda)</span>
+        </a>
+    </div>
+</footer>
+</body>
+</html>

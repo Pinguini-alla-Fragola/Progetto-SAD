@@ -33,6 +33,81 @@ Il gruppo sta definendo i processi as-is e to-be nell'iterazione preparatoria.
 - [Regole di contribuzione](.github/CONTRIBUTING.md)
 
 
+## Interfaccia web MVP
+
+Con il database e il profilo `demo` avviati come descritto sotto, aprire
+`http://localhost:8080/login`. L'interfaccia usa le sessioni e la protezione
+CSRF di Spring Security.
+
+- La OPT può inviare una richiesta selezionando misura e comune dal catalogo,
+  ritrovare le proprie richieste e consultarne il dettaglio. La conferma di invio
+  riepiloga misura e comune e permette di aprire subito il dettaglio.
+- Il Banco vede la coda in ordine di arrivo e può scegliere l'ordine
+  inverso nei filtri. Ogni riga mostra OPT richiedente, stato,
+  data e ora; l'identificativo è consultabile nei riferimenti espandibili della riga,
+  anche su mobile. Prende esplicitamente in carico
+  una richiesta, consulta gli erogatori compatibili e interpella un account
+  per volta. Dopo una risposta positiva può assegnare l'erogatore e passare
+  la pratica a **In programmazione**.
+  La presa in carico richiede una conferma: Annulla ed Escape conservano lo stato.
+- In **In programmazione** il Banco registra l’accordo in presenza (luogo e
+  referente con telefono) o a distanza (link), con data e ora nel fuso del
+  dispositivo indicato nel modulo. Gli errori del server compaiono accanto ai
+  campi e conservano i dati. La conferma richiede un riepilogo esplicito e rende
+  l’accordo consultabile, senza modifiche, dalla OPT titolare e dall’erogatore.
+- Il Banco può rifiutare definitivamente una pratica in ricerca o in
+  programmazione, con conferma esplicita. Durante la ricerca il comando rimane
+  disabilitato finché ci sono alternative compatibili da valutare o contatti
+  in attesa. La OPT titolare vede **Rifiutata** e «Nessun erogatore disponibile».
+- La OPT o l'operatore interpellato trova il contatto nella propria area e
+  comunica disponibilità o indisponibilità. Dal contatto può aprire la pratica
+  dopo l'assegnazione. Il solo candidato vede i dati minimi, mentre la
+  descrizione del bisogno resta riservata alla OPT titolare e al Banco.
+- Il Banco consulta anche lo storico dei contatti, gli account attivi e il
+  catalogo delle misure attive. I pulsanti **Aggiorna** ricaricano gli elenchi.
+
+La disponibilità del candidato e l'assegnazione sono passaggi distinti.
+L'apertura del dettaglio conserva lo stato. Se la risposta all'invio viene
+persa, **Riprova lo stesso invio** riusa dati e `Idempotency-Key`, senza creare
+una seconda pratica. Dopo un ricaricamento, nella stessa scheda, il modulo
+recupera il riferimento della OPT autenticata. Reinserendo gli stessi dati si
+verifica l'invio originale. Dopo averlo controllato in **Le mie richieste**,
+**Ho verificato, inizia una nuova richiesta** consente di inviare dati diversi
+e conserva il riferimento precedente per un ritento con gli stessi dati.
+La memoria di sessione conserva chiavi, impronte e stato dei riferimenti.
+La conferma o un rifiuto certo rimuovono il riferimento del singolo invio.
+Con memoria non disponibile il modulo blocca l'invio. Se la sessione cambia
+in un'altra scheda, occorre ricaricare il modulo prima di inviare.
+Il pulsante viene abilitato solo dopo l'inizializzazione dello script;
+il fallback nativo usa POST per tenere i dati fuori dall'URL.
+
+La disponibilità registrata resta visibile anche se il candidato non può
+consultare il dettaglio: un `403` non determina lo stato della pratica né
+segnala un'assegnazione ancora in attesa.
+
+I controlli senza endpoint restano disattivati: annullamento, archivio degli esiti, gestione delle
+utenze e del catalogo, offerta, comunicazioni generali e monitoraggio.
+Il messaggio «Funzione non ancora implementata» compare al passaggio del cursore
+o con il focus da tastiera, anche sui campi delle anteprime. Il cursore di divieto
+segnala i controlli non disponibili; il tooltip flottante segue il puntatore lasciando
+un po’ di spazio, può sovrapporsi al riquadro e resta nei bordi della finestra.
+Escape lo chiude.
+Le regole di autorizzazione di #28 non equivalgono all'implementazione di
+tutte queste operazioni. Per una demo della ricerca degli erogatori usare
+la [fixture sintetica e la procedura di coordinamento](docs/architecture/api-coordinamento-richieste.md).
+
+I test delle viste e dei permessi sono in `RichiesteVisteTest`; i test del
+client HTTP, dei dati dell’accordo e dei vincoli di rifiuto si eseguono con Node.js 22 o successivo:
+
+```bash
+node --test src/test/js/*.test.mjs
+```
+
+Il login presenta il logo accanto al modulo su desktop e sopra al modulo su
+mobile. Il dettaglio separa riepilogo, bisogno, coordinamento e riferimenti;
+una pagina 404 dedicata gestisce percorsi e pratiche inesistenti nelle viste,
+mentre gli endpoint API conservano gli errori JSON.
+
 ## Prerequisiti
 
 - Java **25 LTS**.
