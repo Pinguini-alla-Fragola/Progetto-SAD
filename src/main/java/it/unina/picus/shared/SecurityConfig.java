@@ -99,9 +99,9 @@ class SecurityConfig {
                 .sessionManagement(Customizer.withDefaults())
                 .with(new LoginJsonConfigurer(json), Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/api/auth/csrf").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/auth/csrf", "/recupera", "/attiva").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
-                        .requestMatchers("/login", "/error", "/css/**", "/js/**", "/img/**", "/favicon.ico").permitAll()
+                        .requestMatchers("/login", "/error", "/css/**", "/js/**", "/img/**", "/fonts/**", "/favicon.ico").permitAll()
                         // Autorizzazione prima del binding MVC, anche con corpo o UUID malformati.
                         .requestMatchers(HttpMethod.POST, "/api/richieste").hasRole("OPT")
                         .requestMatchers(HttpMethod.GET, "/api/richieste/mie").hasRole("OPT")
