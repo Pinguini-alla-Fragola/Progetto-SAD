@@ -28,12 +28,29 @@ function mostraErrore(causa, assente) {
     };
     errore.textContent = messaggi[causa.stato] || 'Operazione non riuscita. Riprova.';
     errore.hidden = false;
+    errore.focus();
 }
 
 function mostraEsito(elemento, esito) {
     elemento.textContent = etichetteEsito[esito] || esito;
     elemento.dataset.esito = esito;
     elemento.hidden = false;
+}
+
+function mostraRisposta(contatto, spostaFocus = false) {
+    mostraEsito(perId('esito-contatto'), contatto.esito);
+    const risposto = contatto.esito !== 'IN_ATTESA';
+    perId('sezione-azioni').hidden = risposto;
+    const conferma = perId('messaggio-conferma');
+    conferma.hidden = !risposto;
+    if (!risposto) return;
+    const disponibile = contatto.esito === 'DISPONIBILE';
+    conferma.dataset.esito = contatto.esito;
+    perId('titolo-esito').textContent = disponibile ? 'Disponibilità comunicata' : 'Indisponibilità comunicata';
+    perId('testo-esito').textContent = disponibile
+        ? 'Hai comunicato la tua disponibilità al Banco.'
+        : 'Hai comunicato la tua indisponibilità. Il Banco può interpellare un altro erogatore.';
+    if (spostaFocus) perId('titolo-esito').focus();
 }
 
 async function mostraAssegnazione(contatto) {
@@ -48,7 +65,7 @@ async function mostraAssegnazione(contatto) {
     } catch (causa) {
         // Prima dell'assegnazione il candidato non ha accesso al dettaglio completo.
         if (causa.stato !== 403) {
-            perId('attesa-assegnazione').firstChild.textContent = 'Non è stato possibile aggiornare l’assegnazione. ';
+            perId('testo-attesa').textContent = 'La disponibilità è registrata. Non è stato possibile aggiornare l’assegnazione. Aggiorna lo stato per riprovare.';
         }
     }
 }
@@ -57,7 +74,6 @@ async function collegaRisposta(contattoId) {
     const percorso = '/api/contatti-disponibilita/' + encodeURIComponent(contattoId);
     const azioni = perId('sezione-azioni');
     const pulsanti = [...azioni.querySelectorAll('button')];
-    const esito = perId('esito-contatto');
     try {
         const dettaglio = await api(percorso);
         perId('misura-titolo').textContent = dettaglio.nomeMisura;
@@ -66,9 +82,7 @@ async function collegaRisposta(contattoId) {
         perId('richiesta-id').textContent = dettaglio.contatto.richiestaId;
         perId('contatto-remoto').hidden = dettaglio.contatto.ambito !== 'CENTRO_PICUS_A_DISTANZA';
         perId('dati-contatto').hidden = false;
-        mostraEsito(esito, dettaglio.contatto.esito);
-        azioni.hidden = dettaglio.contatto.esito !== 'IN_ATTESA';
-        perId('risposta-presente').hidden = !azioni.hidden;
+        mostraRisposta(dettaglio.contatto);
         await mostraAssegnazione(dettaglio.contatto);
     } catch (causa) {
         mostraErrore(causa, 'Il contatto non è disponibile.');
@@ -79,24 +93,25 @@ async function collegaRisposta(contattoId) {
 
     for (const pulsante of pulsanti) {
         pulsante.addEventListener('click', async () => {
+            if (pulsante.disabled) return;
             pulsanti.forEach(azione => { azione.disabled = true; });
+            azioni.setAttribute('aria-busy', 'true');
+            const etichetta = pulsante.textContent;
+            pulsante.textContent = 'Invio della risposta…';
             errore.hidden = true;
             try {
                 const disponibile = pulsante.dataset.disponibile === 'true';
                 const contatto = await api(percorso + '/risposta', {
                     method: 'POST', body: { disponibile }
                 });
-                mostraEsito(esito, contatto.esito);
-                perId('testo-esito').textContent = disponibile
-                    ? 'Hai comunicato la tua disponibilità al Banco. La richiesta resta in presa in carico fino all’assegnazione.'
-                    : 'Hai comunicato la tua indisponibilità. Il Banco può interpellare un altro erogatore.';
-                perId('messaggio-conferma').hidden = false;
-                azioni.hidden = true;
+                mostraRisposta(contatto, true);
                 await mostraAssegnazione(contatto);
             } catch (causa) {
                 mostraErrore(causa, 'Il contatto non è disponibile.');
                 if ([401, 403, 404, 409].includes(causa.stato)) azioni.hidden = true;
             } finally {
+                azioni.removeAttribute('aria-busy');
+                pulsante.textContent = etichetta;
                 pulsanti.forEach(azione => { azione.disabled = false; });
             }
         });
