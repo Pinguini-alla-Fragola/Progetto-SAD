@@ -35,6 +35,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpSession;
@@ -60,10 +61,13 @@ Ogni test usa email uniche e azzera il limitatore, così i test non dipendono da
 Le soglie del blocco sono quelle fissate dalla #25 (cinque fallimenti), scritte qui come valori e non
 lette dal codice di produzione: se il limite cambiasse, questi test devono fallire.
 
-Le aree dei ruoli sono servite da DashboardDiProva, importato in IntegrazionePostgresBase: su main le
-dashboard sono solo destinazioni di redirect senza handler, quindi senza di esso l'accesso consentito
-risponderebbe 404 e non si potrebbe verificare il 200.
+L'accesso alle aree dei ruoli (200 per il proprio ruolo, 403 per gli altri) si verifica su percorsi
+di prova dedicati sotto /banco/**, /opt/** e /operatore/**, serviti da AreeDiProva: hanno le stesse
+regole di sicurezza delle dashboard ma non le mappano, così non entrano in conflitto con il
+controller delle dashboard reali (#108). Il redirect alle dashboard reali resta un'asserzione
+separata. AreeDiProva è importato solo da questa classe, che per questo ha un contesto Spring proprio.
 */
+@Import(AccessoLoginPostgresTest.AreeDiProva.class)
 @DisplayName("Login, sessione, revoca e CSRF su PostgreSQL (#25)")
 class AccessoLoginPostgresTest extends IntegrazionePostgresBase {
 
@@ -71,8 +75,9 @@ class AccessoLoginPostgresTest extends IntegrazionePostgresBase {
     private static final String ERRORE_GENERICO = "{\"errore\":\"Credenziali non valide\"}";
     private static final String ERRORE_BLOCCO =
             "{\"errore\":\"Accesso temporaneamente bloccato. Riprova tra poco.\"}";
+    /** Percorsi di prova serviti da {@link AreeDiProva}, uno per area protetta. */
     private static final Map<String, String> AREE = Map.of(
-            "BANCO", "/banco/dashboard", "OPT", "/opt/dashboard", "OPERATORE", "/operatore/dashboard");
+            "BANCO", "/banco/prova-accesso", "OPT", "/opt/prova-accesso", "OPERATORE", "/operatore/prova-accesso");
 
     /** Fallimenti ammessi prima del blocco, fissati dalla #25 (AC3). */
     private static final int FALLIMENTI_AMMESSI = 5;
@@ -118,9 +123,9 @@ class AccessoLoginPostgresTest extends IntegrazionePostgresBase {
 
     //login per ruolo e aree
 
-    @ParameterizedTest(name = "{0}: login, reindirizzamento alla propria area e area aperta")
+    @ParameterizedTest(name = "{0}: login, reindirizzamento alla propria dashboard e area aperta")
     @CsvSource({"BANCO,/banco/dashboard", "OPT,/opt/dashboard", "OPERATORE,/operatore/dashboard"})
-    void loginApreLAreaDelProprioRuolo(String ruolo, String area) throws Exception {
+    void loginApreLAreaDelProprioRuolo(String ruolo, String dashboard) throws Exception {
         Account account = nuovoAccount(ruolo, "ATTIVO");
 
         MvcResult esito = accedi(account.email(), PASSWORD, null);
@@ -128,10 +133,12 @@ class AccessoLoginPostgresTest extends IntegrazionePostgresBase {
         assertEquals(204, esito.getResponse().getStatus());
         MockHttpSession sessione = sessione(esito);
         assertTrue(autenticata(sessione));
+        // Redirect esatto alla dashboard reale del ruolo.
         mvc.perform(get("/").session(sessione))
                 .andExpect(status().isFound())
-                .andExpect(redirectedUrl(area));
-        mvc.perform(get(area).session(sessione))
+                .andExpect(redirectedUrl(dashboard));
+        // La sessione apre davvero l'area del ruolo.
+        mvc.perform(get(AREE.get(ruolo)).session(sessione))
                 .andExpect(status().isOk());
     }
 
@@ -494,16 +501,14 @@ class AccessoLoginPostgresTest extends IntegrazionePostgresBase {
     }
 
     /**
-     * Handler di prova per le tre dashboard, che su main non hanno un controller: permette di verificare
-     * il 200 dell'area consentita con la catena di sicurezza reale. È importato in
-     * {@link IntegrazionePostgresBase}, così tutte le classi di integrazione condividono lo stesso
-     * contesto. Va rimosso quando le dashboard avranno un controller vero, altrimenti la mappatura
-     * risulterebbe duplicata all'avvio.
+     * Handler di prova sotto i prefissi protetti delle tre aree: permette di verificare il 200
+     * dell'accesso consentito con la catena di sicurezza reale. Usa percorsi propri, non le dashboard,
+     * per non collidere con il controller delle dashboard reali (#108).
      */
     @RestController
-    static class DashboardDiProva {
+    static class AreeDiProva {
 
-        @GetMapping({"/banco/dashboard", "/opt/dashboard", "/operatore/dashboard"})
+        @GetMapping({"/banco/prova-accesso", "/opt/prova-accesso", "/operatore/prova-accesso"})
         String area(HttpServletRequest richiesta) {
             return "area di prova " + richiesta.getRequestURI();
         }

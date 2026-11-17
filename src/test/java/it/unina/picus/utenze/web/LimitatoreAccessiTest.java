@@ -373,6 +373,20 @@ class LimitatoreAccessiTest {
         }
 
         @Test
+        @DisplayName("Un fallimento di 5 minuti meno 1 ms prima conta ancora: il tentativo successivo è bloccato")
+        void fallimentiContanoPerTuttaLaFinestra() throws Exception {
+            for (int i = 0; i < FALLIMENTI_AMMESSI - 1; i++) {
+                assertEquals(401, statoLogin("sbagliata"), "tentativo " + (i + 1) + " a T0");
+            }
+
+            // Con una finestra più corta di 5 minuti i fallimenti di T0 sarebbero già scaduti e qui
+            // non arriverebbe il 429.
+            orologioDelContesto.imposta(T0.plus(FINESTRA_DELLA_STORIA).minus(UN_MS));
+            assertEquals(401, statoLogin("sbagliata"), "quinto fallimento, ancora nella finestra");
+            assertEquals(429, statoLogin(PASSWORD), "tentativo subito dopo il quinto fallimento");
+        }
+
+        @Test
         @DisplayName("I tentativi falliti più vecchi della finestra non contano più per il blocco")
         void fallimentiFuoriFinestraDimenticati() throws Exception {
             for (int i = 0; i < FALLIMENTI_AMMESSI - 1; i++) {
