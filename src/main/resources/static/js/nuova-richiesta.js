@@ -33,7 +33,9 @@ form.addEventListener('submit', async event => {
             method: 'POST', body: invio.dati, headers: { 'Idempotency-Key': invio.chiave }
         });
         form.hidden = true;
-        document.getElementById('confId').textContent = richiesta.id;
+        document.getElementById('invio-intestazione').hidden = true;
+        document.getElementById('conferma-misura').textContent = form.elements.misuraId.selectedOptions[0].textContent;
+        document.getElementById('conferma-comune').textContent = form.elements.comuneCodice.selectedOptions[0].textContent;
         document.getElementById('linkDettaglio').href = '/richieste/' + encodeURIComponent(richiesta.id);
         const conferma = document.getElementById('conferma');
         conferma.hidden = false;
@@ -54,7 +56,7 @@ form.addEventListener('submit', async event => {
             form.querySelector('[name="' + CSS.escape(nome) + '"]')?.setAttribute('aria-invalid', 'true');
         }
         form.querySelector('[aria-invalid]')?.focus();
-        button.textContent = invio ? 'Riprova lo stesso invio' : 'Invia la richiesta al Banco';
+        button.textContent = invio ? 'Riprova lo stesso invio' : 'Invia richiesta';
     } finally {
         occupato = false;
         button.disabled = false;

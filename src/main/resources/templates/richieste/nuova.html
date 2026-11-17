@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nuova Richiesta di Misura &mdash; PICUS</title>
+    <title>Nuova richiesta · PICUS</title>
     <link rel="icon" href="/img/picus.svg" type="image/svg+xml">
     <link rel="stylesheet" href="/css/picus.css">
     <script src="/js/nuova-richiesta.js" type="module"></script>
     <link rel="stylesheet" href="/css/integrazione-ui.css">
 </head>
-<body class="flow-page">
+<body class="flow-page request-create-page">
     <a th:replace="~{fragments/layout :: skip}" href="#contenuto">Vai al contenuto</a>
     <header class="picus-navbar">
         <div class="nav-inner">
@@ -18,25 +18,17 @@
         </div>
     </header>
 
-    <main id="contenuto" class="mobile-wrapper" tabindex="-1">
-        <header class="mobile-header">
-            <div>
-                <h1>Nuova richiesta di misura</h1>
-            </div>
+    <main id="contenuto" class="request-create" tabindex="-1">
+        <header id="invio-intestazione" class="request-create-heading">
+            <h1>Nuova richiesta</h1>
         </header>
 
-        <div class="mobile-body">
-            <div class="alert alert-info">
-                <div>
-                    <strong>Tutela dei dati degli assistiti.</strong> Non inserire mai nome, cognome, codice fiscale, recapiti o altri riferimenti identificativi della persona o del nucleo assistito.
-                </div>
-            </div>
-
+        <div class="request-create-surface">
             <noscript><p class="alert alert-info">Per inviare la richiesta abilita JavaScript nel browser.</p></noscript>
             <form id="richiestaForm"><fieldset id="campi-invio" class="campi-inattivi">
                 <legend class="sr-only">Dati della richiesta</legend>
-                <div class="form-group">
-                    <label class="form-label" for="misuraId">Misura di accompagnamento *</label>
+                <div class="form-group request-create-measure">
+                    <label class="form-label" for="misuraId">Misura di accompagnamento</label>
                     <select id="misuraId" name="misuraId" class="form-control" required aria-describedby="errore-misuraId">
                         <option value="">Seleziona una misura</option>
                         <option th:each="m : ${misure}" th:value="${m.id}" th:text="${m.dati.nome}"></option>
@@ -44,8 +36,8 @@
                     <p id="errore-misuraId" class="form-text picus-errore"></p>
                 </div>
 
-                <fieldset class="form-group" aria-describedby="errore-tipoDestinatario">
-                    <legend class="form-label">Tipologia di destinatario *</legend>
+                <fieldset class="form-group request-create-recipient" aria-describedby="errore-tipoDestinatario">
+                    <legend class="form-label">Destinatario</legend>
                     <div class="radio-pill-group">
                         <label class="radio-pill">
                             <input type="radio" name="tipoDestinatario" value="PERSONA" checked>
@@ -56,41 +48,44 @@
                             <span>Nucleo familiare</span>
                         </label>
                     </div>
+                    <p id="errore-tipoDestinatario" class="form-text picus-errore"></p>
                 </fieldset>
-                <p id="errore-tipoDestinatario" class="form-text picus-errore"></p>
 
                 <div class="form-group">
-                    <label class="form-label" for="comune">Comune di intervento *</label>
-                    <select id="comune" name="comuneCodice" class="form-control" required aria-describedby="comune-help errore-comuneCodice">
+                    <label class="form-label" for="comune">Comune di intervento</label>
+                    <select id="comune" name="comuneCodice" class="form-control" required aria-describedby="errore-comuneCodice">
                         <option value="">Seleziona un comune</option>
                         <option th:each="c : ${comuni}" th:value="${c.codice}" th:text="${c.nome}"></option>
                     </select>
-                    <div class="form-text" id="comune-help">Utilizzato dal Banco per individuare gli erogatori nello stesso comune o nei comuni limitrofi.</div>
                     <p id="errore-comuneCodice" class="form-text picus-errore"></p>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label" for="description">Descrizione del bisogno (facoltativa)</label>
-                    <textarea id="description" name="description" class="form-control" rows="3" maxlength="1000" aria-describedby="errore-description" placeholder="Indica eventuali esigenze logistiche o linguistiche in forma strettamente impersonale..."></textarea>
+                <div class="form-group request-create-description">
+                    <label class="form-label" for="description">Descrizione del bisogno <span class="field-optional">Facoltativa</span></label>
+                    <textarea id="description" name="description" class="form-control" rows="4" maxlength="1000" aria-describedby="privacy-invio errore-description" placeholder="Esigenze logistiche o linguistiche…"></textarea>
+                    <p id="privacy-invio" class="request-privacy">Non inserire dati personali degli assistiti.</p>
                     <p id="errore-description" class="form-text picus-errore"></p>
                 </div>
 
             </fieldset>
-                <button type="submit" class="btn btn-primary btn-block nuova-richiesta-stile-1" id="btnInvia">
-                    Invia la richiesta al Banco
-                </button>
+                <div class="request-create-actions">
+                    <a href="/opt/dashboard" class="btn btn-secondary">Annulla</a>
+                    <button type="submit" class="btn btn-primary" id="btnInvia">Invia richiesta <svg class="icon" aria-hidden="true"><use href="/img/icons.svg#arrow"></use></svg></button>
+                </div>
                 <p id="invio-incerto" class="form-text" hidden>I dati restano bloccati durante il ritento per evitare richieste duplicate. Riprova per verificare lo stesso invio.</p>
             </form>
 
             <p id="errore-invio" class="picus-esito picus-errore" role="alert"></p>
-            <div id="conferma" role="status" tabindex="-1" class="alert alert-success nuova-richiesta-stile-2" hidden>
-                <div class="nuova-richiesta-stile-3">Richiesta registrata con successo</div>
-                <div class="nuova-richiesta-stile-4">Identificativo della pratica: <code id="confId"></code></div>
-                <div class="nuova-richiesta-stile-5">Stato assegnato: <span class="badge-stato ">Creata</span></div>
-                <div class="nuova-richiesta-stile-6">
-                    <a id="linkDettaglio" href="#" class="btn btn-secondary btn-block btn-sm">Apri Scheda Pratica &rarr;</a>
+            <section id="conferma" role="status" tabindex="-1" class="request-created" aria-labelledby="conferma-titolo" hidden>
+                <svg class="request-created-mark" viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="24" r="23"/><path d="m14 24 7 7 14-14"/></svg>
+                <h1 id="conferma-titolo">Richiesta inviata</h1>
+                <p>Il Banco la prenderà in carico.</p>
+                <p class="request-created-summary"><strong id="conferma-misura"></strong><span id="conferma-comune"></span></p>
+                <div class="request-created-actions">
+                    <a id="linkDettaglio" href="#" class="btn btn-primary">Apri dettaglio <svg class="icon" aria-hidden="true"><use href="/img/icons.svg#arrow"></use></svg></a>
+                    <a href="/opt/dashboard" class="btn btn-secondary">Le mie richieste</a>
                 </div>
-            </div>
+            </section>
         </div>
     </main>
     <footer th:replace="~{fragments/layout :: footer}"></footer>

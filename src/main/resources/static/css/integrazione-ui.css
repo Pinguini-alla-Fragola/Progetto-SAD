@@ -1,9 +1,3 @@
-.nuova-richiesta-stile-1 { padding: 12px; font-size: 15px; }
-.nuova-richiesta-stile-2 { flex-direction: column; align-items: flex-start; gap: 8px; }
-.nuova-richiesta-stile-3 { font-weight: 700; font-size: 15px; }
-.nuova-richiesta-stile-4 { font-size: 13px; }
-.nuova-richiesta-stile-5 { font-size: 13px; }
-.nuova-richiesta-stile-6 { margin-top: 10px; width: 100%; }
 .dettaglio-richiesta-stile-1 { font-size: 13px; font-family: var(--font-mono); margin-bottom: 12px; }
 .dettaglio-richiesta-stile-2 { font-size: 15px; margin-bottom: 12px; }
 .dettaglio-richiesta-stile-3 { margin-top: 12px; }
@@ -41,8 +35,8 @@
 .risposta-contatto-stile-12 { margin-top: 12px; width: 100%; }
 
 .campi-inattivi { border: 0; margin: 0; padding: 0; }
-.campi-inattivi :disabled, .azione-inattiva[data-funzione-inattiva] { filter: grayscale(1); }
-.azione-inattiva { display: inline-block; max-width: 100%; }
+.campi-inattivi :disabled { filter: grayscale(1); }
+.azione-inattiva { display: inline-flex; flex-direction: column; align-items: flex-start; gap: .375rem; max-width: 100%; }
 .azione-inattiva:has(> .btn-block) { display: block; }
 .azione-inattiva[data-funzione-inattiva] > :disabled { pointer-events: none; }
 .area-panel [data-funzione-inattiva] .list-state,
@@ -63,20 +57,7 @@
 #coordinamento-azioni { margin-block: 1rem; }
 .picus-actions { flex-wrap: wrap; }
 
-@media (hover: hover) and (pointer: fine) {
-    [data-funzione-inattiva]:hover { z-index: 5; }
-    [data-funzione-inattiva]:hover::after {
-        content: "Funzione non ancora disponibile.";
-        position: absolute;
-        z-index: 5;
-        inset: auto auto calc(100% + .375rem) 0;
-        width: max-content;
-        max-width: min(16rem, 80vw);
-        padding: .5rem .75rem;
-        border-radius: var(--radius-sm);
-        background: var(--color-deep);
-        color: var(--color-white);
-        font: .8125rem/1.4 var(--font-ui);
-        pointer-events: none;
-    }
-}
+.unavailable-note { display: block; color: var(--color-slate-600); font: .75rem/1.4 var(--font-ui); }
+.picus-list[data-funzione-inattiva] > .list-tools { display: none; }
+.picus-list > .unavailable-note { padding: 1rem; border-radius: var(--radius-sm); background: var(--color-mist); font-size: .875rem; }
+.azione-inattiva:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 4px; border-radius: var(--radius-sm); }

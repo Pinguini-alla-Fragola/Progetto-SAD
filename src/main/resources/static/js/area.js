@@ -2,6 +2,7 @@ import { esci } from './area-client.js';
 import { setupWorkspace } from './workspace.js';
 import { renderList } from './list-view.js';
 import { caricaRichieste, caricaAvvisi, caricaCatalogo } from './richieste-area.js';
+import { segnalaFunzioniInattive } from './funzioni-inattive.js';
 
 const byId = id => document.getElementById(id);
 const area = document.body.dataset.area;
@@ -72,6 +73,7 @@ for (const contenitore of document.querySelectorAll('#voci-conteggi, #voci-sched
 for (const form of document.querySelectorAll('[data-form-anteprima]')) {
     form.addEventListener('submit', event => event.preventDefault());
 }
+segnalaFunzioniInattive();
 const lavori = [];
 if (area === 'banco') lavori.push(caricaRichieste(area), caricaCatalogo());
 else {

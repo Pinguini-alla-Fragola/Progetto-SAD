@@ -1,4 +1,7 @@
 import { api } from './area-client.js';
+import { segnalaFunzioniInattive } from './funzioni-inattive.js';
+
+segnalaFunzioniInattive();
 
 const etichetteEsito = {
     IN_ATTESA: 'In attesa',

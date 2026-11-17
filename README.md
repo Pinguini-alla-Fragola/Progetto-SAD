@@ -40,7 +40,8 @@ Con il database e il profilo `demo` avviati come descritto sotto, aprire
 CSRF di Spring Security.
 
 - La OPT può inviare una richiesta selezionando misura e comune dal catalogo,
-  ritrovare le proprie richieste e consultarne il dettaglio.
+  ritrovare le proprie richieste e consultarne il dettaglio. La conferma di invio
+  riepiloga misura e comune e permette di aprire subito il dettaglio.
 - Il Banco vede la coda dalla richiesta più recente e può scegliere l'ordine
   cronologico di arrivo nei filtri. Ogni riga mostra OPT richiedente, stato,
   data e ora; l'identificativo compare soltanto nel dettaglio. Prende esplicitamente in carico
@@ -71,6 +72,7 @@ una seconda pratica.
 
 I controlli senza endpoint restano disattivati: annullamento, archivio degli esiti, gestione delle
 utenze e del catalogo, offerta, comunicazioni generali e monitoraggio.
+Mostrano l’etichetta «Funzione non ancora implementata», visibile anche su mobile.
 Le regole di autorizzazione di #28 non equivalgono all'implementazione di
 tutte queste operazioni. Per una demo della ricerca degli erogatori usare
 la [fixture sintetica e la procedura di coordinamento](docs/architecture/api-coordinamento-richieste.md).
