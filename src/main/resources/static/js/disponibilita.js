@@ -63,8 +63,10 @@ async function mostraAssegnazione(contatto) {
         perId('assegnazione-contatto').hidden = false;
         perId('attesa-assegnazione').hidden = true;
     } catch (causa) {
-        // Prima dell'assegnazione il candidato non ha accesso al dettaglio completo.
-        if (causa.stato !== 403) {
+        // Il 403 non distingue una pratica ancora in ricerca da una assegnata ad altri.
+        if (causa.stato === 403) {
+            perId('testo-attesa').textContent = 'La tua disponibilità è registrata. Il dettaglio della pratica non è consultabile da questo account.';
+        } else {
             perId('testo-attesa').textContent = 'La disponibilità è registrata. Non è stato possibile aggiornare l’assegnazione. Aggiorna lo stato per riprovare.';
         }
     }

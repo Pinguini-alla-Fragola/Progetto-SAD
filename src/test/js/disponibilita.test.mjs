@@ -94,3 +94,10 @@ test('una richiesta assegnata mostra il collegamento alla pratica al posto dell�
     assert.equal(ui.nodo('attesa-assegnazione').hidden, true);
     assert.equal(ui.nodo('link-pratica-assegnata').href, '/richieste/richiesta');
 });
+
+test('un dettaglio non consultabile conferma la disponibilità senza dedurre lo stato della pratica', async t => {
+    const ui = await schermata(t, 'DISPONIBILE');
+    assert.match(ui.nodo('testo-attesa').textContent, /disponibilità.*registrata/i);
+    assert.doesNotMatch(ui.nodo('testo-attesa').textContent, /presa in carico|in programmazione|attesa di assegnazione/i);
+    assert.equal(ui.nodo('assegnazione-contatto').hidden, true);
+});
