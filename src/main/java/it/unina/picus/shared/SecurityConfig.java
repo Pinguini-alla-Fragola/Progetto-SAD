@@ -108,7 +108,8 @@ class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/contatti-disponibilita/*").hasAnyRole("OPT", "OPERATORE")
                         .requestMatchers(HttpMethod.POST, "/api/contatti-disponibilita/*/risposta").hasAnyRole("OPT", "OPERATORE")
                         .requestMatchers(HttpMethod.POST, "/api/richieste/*/presa-in-carico",
-                                "/api/richieste/*/contatti", "/api/contatti-disponibilita/*/assegnazione").hasRole("BANCO")
+                                "/api/richieste/*/contatti", "/api/contatti-disponibilita/*/assegnazione",
+                                "/api/richieste/*/conferma", "/api/richieste/*/rifiuta").hasRole("BANCO")
                         .requestMatchers(HttpMethod.GET, "/api/richieste/coda", "/api/richieste/*/candidati",
                                 "/api/richieste/*/contatti", "/api/richieste/*/contatti/*").hasRole("BANCO")
                         // ogni ruolo vede solo la propria area

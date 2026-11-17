@@ -9,7 +9,10 @@ import jakarta.persistence.Embeddable;
 import java.net.URI;
 import java.time.Instant;
 
-/** Proiezione dei dettagli che verranno registrati dal coordinamento dell'accordo. */
+/**
+ * Componente persistito sulla riga della richiesta. La conversione delle due varianti
+ * applica il pattern <em>Data Mapper</em> tra i dettagli di dominio e le colonne SQL.
+ */
 @Embeddable
 public class AccordoJpa {
     @Column(name = "accordo_modalita")
@@ -27,8 +30,39 @@ public class AccordoJpa {
     @Column(name = "accordo_telefono_referente", length = 50)
     private String telefonoReferente;
 
+    /** Costruttore riservato a JPA. */
     protected AccordoJpa() {}
 
+    /**
+     * Prepara i dettagli da salvare insieme alla transizione di stato.
+     *
+     * @param dettagli accordo già validato, oppure {@code null} se assente
+     * @return componente da incorporare nella richiesta, oppure {@code null}
+     */
+    static AccordoJpa daDto(DettagliAccordo dettagli) {
+        if (dettagli == null) {
+            return null;
+        }
+        var entita = new AccordoJpa();
+        switch (dettagli) {
+            case AccordoInPresenza presenza -> {
+                entita.modalita = "IN_PRESENZA";
+                entita.dataOra = presenza.dataOra();
+                entita.luogo = presenza.luogo();
+                entita.nomeReferente = presenza.nomeReferente();
+                entita.cognomeReferente = presenza.cognomeReferente();
+                entita.telefonoReferente = presenza.telefonoReferente();
+            }
+            case AccordoADistanza remoto -> {
+                entita.modalita = "A_DISTANZA";
+                entita.dataOra = remoto.dataOra();
+                entita.link = remoto.link().toString();
+            }
+        }
+        return entita;
+    }
+
+    /** {@return dettagli di dominio ricostruiti dalle colonne, oppure {@code null} se assenti} */
     DettagliAccordo aDto() {
         if (modalita == null) {
             return null;
