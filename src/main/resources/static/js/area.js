@@ -60,7 +60,9 @@ for (const contenitore of document.querySelectorAll('#voci-conteggi, #voci-sched
     for (const [label, type] of [['Voce', 'text'], ['Conteggio', 'number']]) {
         const campo = document.createElement('label');
         campo.className = 'campo';
-        campo.textContent = label;
+        const etichetta = document.createElement('span');
+        etichetta.textContent = label;
+        campo.append(etichetta);
         const input = document.createElement('input');
         input.className = 'form-control';
         input.type = type;

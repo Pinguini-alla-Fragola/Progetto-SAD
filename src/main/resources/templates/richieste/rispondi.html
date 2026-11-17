@@ -40,8 +40,11 @@
                 <div class="detail-label">Tipologia di destinatario</div>
                 <div class="detail-value risposta-contatto-stile-3" id="tipo-destinatario"></div>
 
-                <div class="detail-label">Identificativo della pratica</div>
-                <div class="detail-value risposta-contatto-stile-4" id="richiesta-id"></div>
+                <details class="contact-reference">
+                    <summary>Riferimenti della pratica</summary>
+                    <div class="detail-label">Identificativo</div>
+                    <div class="detail-value risposta-contatto-stile-4" id="richiesta-id"></div>
+                </details>
             </div>
 
             <p class="picus-meta" id="risposta-presente" hidden>Hai già inviato una risposta.</p>
@@ -67,7 +70,7 @@
                 <strong class="risposta-contatto-stile-10">Riscontro registrato con successo</strong>
                 <p id="testo-esito" class="risposta-contatto-stile-11"></p>
                 <div class="risposta-contatto-stile-12">
-                    <a th:href="${dashboard}" class="btn btn-secondary btn-block btn-sm">Torna al Cruscotto</a>
+                    <a th:href="${dashboard}" class="btn btn-secondary btn-block btn-sm">Torna all’area di lavoro</a>
                 </div>
             </div>
         </div>

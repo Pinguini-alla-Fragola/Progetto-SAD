@@ -24,15 +24,15 @@
 <button class="sidebar-backdrop" type="button" aria-label="Chiudi menu di navigazione" tabindex="-1" hidden></button>
 <main id="contenuto" class="picus-container area" tabindex="-1">
     <nav class="area-nav" id="workspace-sidebar" aria-label="Sezioni dell’area di lavoro">
-<a href="#richieste"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#case"></use></svg><span>Incarichi</span></a>
+<a href="#richieste"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#case"></use></svg><span>Disponibilità</span></a>
 <a href="#comunicazioni"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#mail"></use></svg><span>Comunicazioni</span></a>
 <a href="#schede"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#chart"></use></svg><span>Scheda trimestrale</span></a>
     </nav>
     <div class="area-content">
-        <header class="area-intro"><h1 id="workspace-title">Incarichi</h1></header>
+        <header class="area-intro"><h1 id="workspace-title">Disponibilità</h1></header>
         <p id="area-esito" class="picus-esito" role="status"></p>
-<section class="area-panel" id="richieste" tabindex="-1" aria-label="Incarichi">
-<div class="panel-heading"><h2 class="picus-card-title">Contatti di disponibilità</h2><button class="btn btn-secondary btn-sm" type="button" data-aggiorna="avvisi">Aggiorna contatti</button></div><div class="picus-list" id="assegnazioni" aria-live="polite"></div>
+<section class="area-panel" id="richieste" tabindex="-1" aria-label="Disponibilità">
+<div class="panel-heading"><h2 class="picus-card-title">Richieste ricevute</h2><button class="btn btn-secondary btn-sm" type="button" data-aggiorna="avvisi">Aggiorna contatti</button></div><div class="picus-list" id="assegnazioni" aria-live="polite"></div>
 </section>
 <section class="area-panel" id="comunicazioni" tabindex="-1" aria-label="Comunicazioni">
 <h2 class="sr-only">Comunicazioni ricevute</h2><div class="picus-list" id="messaggi" aria-live="polite" data-funzione-inattiva></div>
@@ -43,7 +43,7 @@
 <button type="button" role="tab" id="scheda-tab-inviate" aria-controls="scheda-view-inviate" aria-selected="false" tabindex="-1">Schede inviate</button>
 </div>
 <div role="tabpanel" id="scheda-view-compila" aria-labelledby="scheda-tab-compila" tabindex="0">
-<h2 class="picus-card-title">Scheda personale trimestrale</h2><form id="scheda" class="picus-form form-layout" data-form-anteprima><fieldset class="campi-inattivi" disabled>
+<h2 class="sr-only">Scheda personale trimestrale</h2><form id="scheda" class="picus-form form-layout" data-form-anteprima><fieldset class="campi-inattivi" disabled>
 <fieldset class="form-section"><legend>Periodo</legend><div class="form-section-content"><div class="picus-fields fields-period">
 <label class="campo ">Anno<input class="form-control" name="anno" type="number" required min="2000" max="9999" data-anno></label>
 <label class="campo ">Trimestre<select class="form-control" name="trimestre" required ><option value="1">1º trimestre</option><option value="2">2º trimestre</option><option value="3">3º trimestre</option><option value="4">4º trimestre</option></select></label>
@@ -60,14 +60,14 @@
 </div></div></fieldset><fieldset class="form-section"><legend>Ore e costo</legend><div class="form-section-content"><div class="picus-fields fields-period">
 <label class="campo ">Ore lavorate<input class="form-control" name="ore" type="number" required min="0" step="0.01"></label>
 <label class="campo ">Costo orario lordo (€)<input class="form-control" name="costoOrario" type="number" required min="0" step="0.01"></label>
-</div></div></fieldset><fieldset class="form-section"><legend>Conteggi dichiarati</legend><div class="form-section-content"><div class="count-head" aria-hidden="true"><span>Voce</span><span>Conteggio</span><span></span></div><div id="voci-scheda" class="count-rows"></div><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-secondary btn-sm" type="button" id="altra-voce">Aggiungi voce</button></span></div></fieldset><fieldset class="form-section"><legend>Dichiarazione</legend><div class="form-section-content"><div class="picus-fields fields-one">
+</div></div></fieldset><fieldset class="form-section"><legend>Conteggi dichiarati</legend><div class="form-section-content"><div class="count-head" aria-hidden="true"><span>Voce</span><span>Conteggio</span></div><div id="voci-scheda" class="count-rows"></div><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-secondary btn-sm" type="button" id="altra-voce">Aggiungi voce</button></span></div></fieldset><fieldset class="form-section"><legend>Dichiarazione</legend><div class="form-section-content"><div class="picus-fields fields-one">
 <label class="campo ">Firma dichiarata (facoltativa)<input class="form-control" name="firma" type="text" ></label>
 </div></div></fieldset>
 <div class="form-submit"><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-primary" type="submit">Invia scheda</button></span><p class="picus-esito" role="status"></p></div>
 </fieldset></form>
 </div>
 <div role="tabpanel" id="scheda-view-inviate" aria-labelledby="scheda-tab-inviate" tabindex="0" hidden>
-<h2 class="picus-card-title">Schede inviate</h2><div class="picus-list" id="schede-mie" aria-live="polite" data-funzione-inattiva></div>
+<h2 class="sr-only">Schede inviate</h2><div class="picus-list" id="schede-mie" aria-live="polite" data-funzione-inattiva></div>
 </div>
 </div>
 </section>

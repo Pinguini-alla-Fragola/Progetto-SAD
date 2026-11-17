@@ -144,10 +144,21 @@ export async function caricaAvvisi() {
             }
             const dettaglio = risultato.value;
             const contatto = dettaglio.contatto;
-            return riga(dettaglio.nomeMisura,
-                [etichetta(contatto.esito), dettaglio.comuneCodice, etichetta(contatto.ambito), data(avviso.registratoIl), contatto.richiestaId].join(' · '),
-                [link(contatto.esito === 'IN_ATTESA' ? 'Rispondi' : 'Apri contatto', '/richieste/contatti/' + contatto.id)],
-                { stato: contatto.esito, ambito: contatto.ambito });
+            const nodo = elemento('article', null, 'picus-list-row availability-row');
+            const riepilogo = elemento('div');
+            const intestazione = elemento('div', null, 'availability-heading');
+            const stato = elemento('span', etichetta(contatto.esito), 'badge-stato');
+            stato.dataset.esito = contatto.esito;
+            intestazione.append(elemento('strong', dettaglio.nomeMisura), stato);
+            const orario = elemento('time', data(avviso.registratoIl), 'picus-meta');
+            orario.dateTime = avviso.registratoIl;
+            riepilogo.append(intestazione,
+                elemento('p', ['Comune: ' + dettaglio.comuneCodice, etichetta(contatto.ambito)].join(' · '), 'picus-meta'), orario);
+            nodo.append(riepilogo, link(contatto.esito === 'IN_ATTESA' ? 'Rispondi' : 'Apri contatto', '/richieste/contatti/' + contatto.id));
+            return listRow(nodo, {
+                text: [dettaglio.nomeMisura, dettaglio.comuneCodice, etichetta(contatto.esito), etichetta(contatto.ambito), data(avviso.registratoIl), contatto.richiestaId].join(' '),
+                filters: { stato: contatto.esito, ambito: contatto.ambito }
+            });
         });
     }, 'Nessuna richiesta di disponibilità ricevuta.', ['stato', 'ambito']);
 }

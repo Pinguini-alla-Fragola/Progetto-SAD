@@ -73,7 +73,9 @@ una seconda pratica.
 I controlli senza endpoint restano disattivati: annullamento, archivio degli esiti, gestione delle
 utenze e del catalogo, offerta, comunicazioni generali e monitoraggio.
 Il messaggio «Funzione non ancora implementata» compare al passaggio del cursore
-o con il focus da tastiera; Escape lo chiude.
+o con il focus da tastiera, anche sui campi delle anteprime. Il cursore di divieto
+segnala i controlli non disponibili; il tooltip flottante lascia spazio al puntatore,
+può sovrapporsi al riquadro e resta nei bordi della finestra. Escape lo chiude.
 Le regole di autorizzazione di #28 non equivalgono all'implementazione di
 tutte queste operazioni. Per una demo della ricerca degli erogatori usare
 la [fixture sintetica e la procedura di coordinamento](docs/architecture/api-coordinamento-richieste.md).

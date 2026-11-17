@@ -35,13 +35,13 @@
 <section class="area-panel" id="richieste" tabindex="-1" aria-label="Richieste">
 <div class="workspace-tabs" data-tabs><div class="tab-list" role="tablist" aria-label="Richieste organizzazione">
 <button type="button" role="tab" id="richieste-tab-mie" aria-controls="richieste-view-mie" aria-selected="true" tabindex="0">Richieste inviate</button>
-<button type="button" role="tab" id="richieste-tab-assegnazioni" aria-controls="richieste-view-assegnazioni" aria-selected="false" tabindex="-1">Disponibilità ricevute</button>
+<button type="button" role="tab" id="richieste-tab-assegnazioni" aria-controls="richieste-view-assegnazioni" aria-selected="false" tabindex="-1">Richieste di disponibilità</button>
 </div>
 <div role="tabpanel" id="richieste-view-mie" aria-labelledby="richieste-tab-mie" tabindex="0">
 <div class="panel-heading"><h2 class="picus-card-title">Richieste dell’organizzazione</h2><div class="picus-actions"><button class="btn btn-secondary btn-sm" type="button" data-aggiorna="richieste">Aggiorna elenco</button><a class="btn btn-primary" href="/richieste/nuova">Nuova richiesta</a></div></div><div class="picus-list" id="richieste-mie" aria-live="polite"></div>
 </div>
 <div role="tabpanel" id="richieste-view-assegnazioni" aria-labelledby="richieste-tab-assegnazioni" tabindex="0" hidden>
-<div class="panel-heading"><h2 class="picus-card-title">Contatti di disponibilità</h2><button class="btn btn-secondary btn-sm" type="button" data-aggiorna="avvisi">Aggiorna contatti</button></div><div class="picus-list" id="assegnazioni" aria-live="polite"></div>
+<div class="panel-heading"><h2 class="sr-only">Richieste di disponibilità</h2><button class="btn btn-secondary btn-sm" type="button" data-aggiorna="avvisi">Aggiorna contatti</button></div><div class="picus-list" id="assegnazioni" aria-live="polite"></div>
 </div>
 </div>
 </section>
@@ -54,8 +54,8 @@
 <h2 class="picus-card-title">Misure dichiarate</h2><div class="picus-list" id="offerta-opt" aria-live="polite" data-funzione-inattiva></div>
 </div>
 <div role="tabpanel" id="offerta-view-modifica" aria-labelledby="offerta-tab-modifica" tabindex="0" hidden>
-<h2 class="picus-card-title">Dichiara le misure erogate</h2><form id="dichiara-offerta" class="picus-form form-layout" data-form-anteprima><fieldset class="campi-inattivi" disabled>
-<fieldset class="form-section"><legend>Misure erogate</legend><div class="form-section-content"><fieldset class="campo-scelte" data-misure ><legend>Misure</legend><div class="picus-choices"></div></fieldset></div></fieldset><fieldset class="form-section"><legend>Erogazione</legend><div class="form-section-content"><label class="picus-check"><input name="professionista" type="checkbox" > Erogazione tramite professionista</label></div></fieldset>
+<h2 class="sr-only">Dichiara le misure erogate</h2><form id="dichiara-offerta" class="picus-form form-layout" data-form-anteprima><fieldset class="campi-inattivi" disabled>
+<fieldset class="form-section"><legend>Misure erogate</legend><div class="form-section-content"><fieldset class="campo-scelte" data-misure ><legend class="sr-only">Misure</legend><div class="picus-choices"></div></fieldset></div></fieldset><fieldset class="form-section"><legend>Erogazione</legend><div class="form-section-content"><label class="picus-check"><input name="professionista" type="checkbox" > Tramite professionista</label></div></fieldset>
 <div class="form-submit"><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-primary" type="submit">Salva offerta</button></span><p class="picus-esito" role="status"></p></div>
 </fieldset></form>
 </div>
@@ -66,7 +66,7 @@
 </section>
 <section class="area-panel" id="monitoraggio" tabindex="-1" aria-label="Monitoraggio">
 <div class="workspace-tabs" data-tabs><div class="tab-list" role="tablist" aria-label="Conteggi trimestrali">
-<button type="button" role="tab" id="conteggi-tab-compila" aria-controls="conteggi-view-compila" aria-selected="true" tabindex="0">Compila conteggi</button>
+<button type="button" role="tab" id="conteggi-tab-compila" aria-controls="conteggi-view-compila" aria-selected="true" tabindex="0">Compila</button>
 <button type="button" role="tab" id="conteggi-tab-inviati" aria-controls="conteggi-view-inviati" aria-selected="false" tabindex="-1">Invii registrati</button>
 </div>
 <div role="tabpanel" id="conteggi-view-compila" aria-labelledby="conteggi-tab-compila" tabindex="0">
@@ -75,13 +75,13 @@
 <label class="campo ">Anno<input class="form-control" name="anno" type="number" required min="2000" max="9999" data-anno></label>
 <label class="campo ">Trimestre<select class="form-control" name="trimestre" required ><option value="1">1º trimestre</option><option value="2">2º trimestre</option><option value="3">3º trimestre</option><option value="4">4º trimestre</option></select></label>
 </div></div></fieldset><fieldset class="form-section"><legend>Misura</legend><div class="form-section-content"><div class="picus-fields fields-one">
-<label class="campo ">Misura<select class="form-control" name="misuraId" required data-misure-storiche></select></label>
-</div></div></fieldset><fieldset class="form-section"><legend>Voci del tracciato</legend><div class="form-section-content"><div class="count-head" aria-hidden="true"><span>Voce</span><span>Conteggio</span><span></span></div><div id="voci-conteggi" class="count-rows"></div><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-secondary btn-sm" type="button" id="altra-voce-opt">Aggiungi voce</button></span><p class="form-text">Indica 0 per dichiarare un conteggio nullo.</p></div></fieldset>
+<label class="campo "><span class="sr-only">Misura</span><select class="form-control" name="misuraId" required data-misure-storiche></select></label>
+</div></div></fieldset><fieldset class="form-section"><legend>Voci del tracciato</legend><div class="form-section-content"><div class="count-head" aria-hidden="true"><span>Voce</span><span>Conteggio</span></div><div id="voci-conteggi" class="count-rows"></div><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-secondary btn-sm" type="button" id="altra-voce-opt">Aggiungi voce</button></span><p class="form-text">Indica 0 per dichiarare un conteggio nullo.</p></div></fieldset>
 <div class="form-submit"><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-primary" type="submit">Salva conteggi</button></span><p class="picus-esito" role="status"></p></div>
 </fieldset></form>
 </div>
 <div role="tabpanel" id="conteggi-view-inviati" aria-labelledby="conteggi-tab-inviati" tabindex="0" hidden>
-<h2 class="picus-card-title">Invii registrati</h2><div class="picus-list" id="conteggi-lista" aria-live="polite" data-funzione-inattiva></div>
+<h2 class="sr-only">Invii registrati</h2><div class="picus-list" id="conteggi-lista" aria-live="polite" data-funzione-inattiva></div>
 </div>
 </div>
 </section>

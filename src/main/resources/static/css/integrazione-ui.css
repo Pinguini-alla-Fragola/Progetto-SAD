@@ -38,11 +38,11 @@
 .campi-inattivi :disabled { filter: grayscale(1); }
 .azione-inattiva { display: inline-flex; flex-direction: column; align-items: flex-start; gap: .375rem; max-width: 100%; }
 .azione-inattiva:has(> .btn-block) { display: block; }
-.azione-inattiva[data-funzione-inattiva] > :disabled { pointer-events: none; }
+[data-funzione-inattiva] :disabled { pointer-events: none; }
 .area-panel [data-funzione-inattiva] .list-state,
 .area-panel [data-funzione-inattiva] .picus-empty { display: none; }
 .area-panel [data-funzione-inattiva] .list-tools { color: var(--color-slate-600); }
-[data-funzione-inattiva] { position: relative; cursor: not-allowed; }
+[data-funzione-inattiva], [data-funzione-inattiva] * { cursor: not-allowed; }
 .badge-stato[data-esito="DISPONIBILE"] { background: var(--color-success-bg); color: var(--color-success); }
 .badge-stato[data-esito="NON_DISPONIBILE"] { background: var(--color-danger-bg); color: var(--color-danger); }
 .contatto-storico { margin: 0; padding: 0; list-style: none; }
@@ -56,11 +56,15 @@
 .detail-value, .picus-list-row > div { min-width: 0; overflow-wrap: anywhere; }
 #coordinamento-azioni { margin-block: 1rem; }
 .picus-actions { flex-wrap: wrap; }
+.availability-heading { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem 1rem; }
+.availability-row time { display: block; }
+.contact-reference { margin-top: 1rem; }
+.contact-reference summary { min-height: 2.75rem; align-content: center; cursor: pointer; font-size: .875rem; font-weight: 650; }
 
 .unavailable-note {
-    position: absolute;
-    z-index: 10;
-    inset: auto auto 100% 0;
+    position: fixed;
+    z-index: 40;
+    margin: 0;
     width: max-content;
     max-width: min(17rem, 75vw);
     padding: .5rem .75rem;
@@ -72,7 +76,7 @@
     opacity: 0;
     pointer-events: none;
 }
-[data-funzione-inattiva]:not(.tooltip-dismissed):is(:hover, :focus-visible) > .unavailable-note {
+[data-funzione-inattiva].tooltip-open:not(.tooltip-dismissed) > .unavailable-note {
     visibility: visible;
     opacity: 1;
     pointer-events: auto;
