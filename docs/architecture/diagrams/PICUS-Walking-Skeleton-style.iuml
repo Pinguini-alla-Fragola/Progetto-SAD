@@ -1,0 +1,53 @@
+' Palette coerente con le viste C&C, MVC, moduli e deployment.
+hide footbox
+hide stereotype
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam defaultFontColor #172B3A
+skinparam dpi 140
+skinparam roundcorner 0
+skinparam maxMessageSize 300
+skinparam BoxPadding 12
+skinparam sequence {
+  ArrowColor #64748B
+  ArrowThickness 1.2
+  LifeLineBorderColor #94A3B8
+  ParticipantBackgroundColor #EDF5F0
+  ParticipantBorderColor #568573
+  ParticipantFontColor #1A4A3C
+  ParticipantFontStyle bold
+  ParticipantBackgroundColor<<web>> #E9F2FC
+  ParticipantBorderColor<<web>> #5480B0
+  ParticipantFontColor<<web>> #143C65
+  ParticipantBackgroundColor<<dati>> #E9F7F5
+  ParticipantBorderColor<<dati>> #3D867D
+  ParticipantFontColor<<dati>> #153D38
+  ActorBackgroundColor #F1F5F9
+  ActorBorderColor #94A3B8
+  ActorFontColor #142B46
+  GroupBorderColor #7C9BB9
+  GroupBackgroundColor #F7FAFE
+  GroupBodyBackgroundColor #FFFFFF
+  GroupHeaderFontColor #183957
+  GroupFontColor #183957
+  DividerBackgroundColor #E9F2FC
+  DividerBorderColor #5480B0
+  DividerFontColor #143C65
+  ReferenceBackgroundColor #F7FAFE
+  ReferenceBorderColor #7C9BB9
+  ReferenceFontColor #183957
+}
+skinparam note {
+  BackgroundColor #FFF8EA
+  BorderColor #946728
+  FontColor #563C17
+  FontSize 12
+}
+skinparam legend {
+  BackgroundColor #F7FAFE
+  BorderColor #7C9BB9
+  FontColor #183957
+  FontSize 12
+}

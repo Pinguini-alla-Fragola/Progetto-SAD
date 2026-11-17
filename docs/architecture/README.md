@@ -5,7 +5,9 @@
 - [PICUS - Flusso dell'architettura MVC](diagrams/PICUS-Architettura-MVC.mmd) · [Anteprima PNG](diagrams/PICUS-Architettura-MVC.png)
 - [PICUS - Module&Package View](diagrams/PICUS-Module-Package-View.mmd) · [Anteprima PNG](diagrams/PICUS-Module-Package-View.png)
 - [PICUS - Deployment & Container View](diagrams/PICUS-Deployment-Container-View.mmd) · [Anteprima PNG](diagrams/PICUS-Deployment-Container-View.png)
-- [PICUS - Sequenza del walking skeleton](diagrams/PICUS-Walking-Skeleton.puml) · [Anteprima PNG](diagrams/PICUS-Walking-Skeleton.png)
+- [Walking skeleton · WS-01 Accesso, sessione e logout](diagrams/PICUS-Walking-Skeleton.puml) · [PNG](diagrams/PICUS-Walking-Skeleton.png) · [SVG](diagrams/PICUS-Walking-Skeleton.svg)
+- [Walking skeleton · WS-02 Invio e ripetizione senza duplicati](diagrams/PICUS-Walking-Skeleton-Invio.puml) · [PNG](diagrams/PICUS-Walking-Skeleton-Invio.png) · [SVG](diagrams/PICUS-Walking-Skeleton-Invio.svg)
+- [Walking skeleton · WS-03 Consultazione e dinieghi](diagrams/PICUS-Walking-Skeleton-Consultazione.puml) · [PNG](diagrams/PICUS-Walking-Skeleton-Consultazione.png) · [SVG](diagrams/PICUS-Walking-Skeleton-Consultazione.svg)
 - [PICUS - Schema ER PostgreSQL](diagrams/PICUS-Schema-ER.puml) · [Anteprima PNG](diagrams/PICUS-Schema-ER.png)
 - [PICUS - C&C: panoramica](diagrams/C%26C/Diagramma-C%26C.dot) · [PNG](diagrams/C%26C/Diagramma-C%26C.png) · [SVG](diagrams/C%26C/Diagramma-C%26C.svg)
 - [PICUS - C&C: Web Tier](diagrams/C%26C/web-C%26C.dot) · [PNG](diagrams/C%26C/web-C%26C.png) · [SVG](diagrams/C%26C/web-C%26C.svg)
@@ -129,16 +131,71 @@ dettagliano nelle relative storie. [ADR-002](../adr/ADR-002-ciclo-di-vita-richie
 
 ## Contratti del walking skeleton
 
-La sequenza descrive il flusso previsto per lo Sprint 2 usando i contratti Java di `main` al commit `e7a39aa`. Mostra l’accesso e la chiusura della sessione, l’invio in stato `CREATA`, l’elenco della OPT titolare, la coda del Banco e la consultazione del dettaglio con il diniego a una OPT estranea. I casi negativi di accesso e validazione sono ripresi nelle verifiche della [#78](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/78).
+Le tre sequenze descrivono accesso, invio in `CREATA` e consultazione rispetto
+al codice di `main` al commit `39fe03d`, lo stesso riferimento delle viste C&C.
+Il percorso resta quello del walking skeleton: non introduce le operazioni di
+coordinamento degli incrementi successivi. Le risposte applicative mostrate
+sono JSON; le pagine aggiuntive restano previste rispetto a questa baseline.
+I casi negativi sono collegati alla [#78](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/78).
+
+- **WS-01** mostra accesso, controllo comune delle richieste protette e logout.
+  Il controllo precede il binding HTTP: un diniego termina quella richiesta.
+  Ogni account usa una sessione distinta. Il login JSON risponde `204`, `401`
+  per credenziali errate/account non attivo e `429` per il blocco temporaneo.
+  Dopo cinque fallimenti in cinque minuti, i tentativi successivi entro
+  sessanta secondi dall'ultimo sono bloccati. Per una sessione non valida le
+  API rispondono `401`, mentre le pagine HTML rimandano al login con `302`.
+  Ruolo non autorizzato: `403`. Il logout JSON invalida la sessione e risponde
+  `204`; il form HTML usa il reindirizzamento al login. Le protezioni tecniche
+  dei comandi restano implicite nel ruolo di Spring Security.
+- **WS-02** mostra le due letture del catalogo, indipendenti, e l'invio della
+  OPT. I campi vengono controllati prima di costruire il DTO, poi il caso
+  d'uso verifica e normalizza i dati. Un invio riconosciuto con gli stessi
+  dati restituisce la richiesta già salvata; con dati diversi restituisce
+  `409`. Il riferimento del singolo invio è facoltativo e si riutilizza se
+  l'esito del tentativo precedente è incerto. Un nuovo invio resta distinto,
+  anche con contenuto uguale. Il vincolo nel database gestisce anche i
+  tentativi concorrenti. Il successo restituisce `201`, la sintesi e
+  l'indirizzo del dettaglio dopo il commit della transazione.
+- **WS-03** mostra elenco della OPT titolare, coda del Banco e dettaglio con
+  verifica della relazione con la pratica. Le letture non cambiano lo stato.
+  Il caso d'uso risolve i nomi delle misure tramite Catalogo. La coda comprende
+  Creata, Presa in carico e In programmazione, ordinate per data di invio e ID.
+  Il dettaglio inesistente produce `404`; l'accesso estraneo produce `403`.
+  L'eventuale erogatore assegnato riceve solo i dati autorizzati.
+
+I riquadri `ref` di WS-02 e WS-03 richiamano il controllo comune di WS-01:
+l'operazione prosegue soltanto se ammessa. Gli errori dei dati d'invio o degli
+identificativi HTTP mostrati in WS-02 e WS-03 restituiscono `400`, senza nuova
+richiesta. I riquadri `break` interrompono l'interazione
+nel caso indicato. Frecce continue per le invocazioni, tratteggiate per le
+risposte; colori coerenti con il C&C e ordine dei partecipanti stabile nelle
+sequenze che mostrano gli stessi componenti.
 
 | Confine | Dati scambiati |
 | --- | --- |
 | Spring Security → `utenze.api` | Verifica delle credenziali e, per le richieste protette, verifica dell’account ricavato dalla sessione. Il controller riceve l’identità verificata e la passa al caso d’uso. |
-| `richieste` → `catalogo.api` | Identificativo della misura e codice del comune. Il catalogo restituisce i riferimenti validi e lo stato della misura. |
-| Form → `richieste.web` | DTO di invio con misura, tipo di destinatario (persona o nucleo), comune e `description` facoltativa. |
-| `richieste` → viste Thymeleaf | DTO di elenco e dettaglio con identificativo, data, misura e stato. Il dettaglio include la descrizione per la OPT titolare e il Banco autorizzato. La coda del Banco è in ordine di arrivo. |
+| `richieste` → `catalogo.api` | `ConsultazioneCatalogoApi` risolve misura, comune e nome della misura da includere nei DTO. |
+| Browser → `richieste.web` | JSON con misura, persona/nucleo, comune e `description` facoltativa; il controller costruisce `DatiInvio` e chiama `InvioRichiesteApi`. |
+| `richieste` → browser | DTO JSON di elenco e dettaglio con identificativo, data, misura e stato. Descrizione e identificativo del titolare sono riservati a OPT titolare e Banco. |
 
-Il server ricava la titolarità dalla sessione e dai dati persistiti. Controller e viste ricevono DTO, mentre le entità JPA restano nel modulo che le gestisce. [ADR-003](../adr/ADR-003-isolamento-e-validazione-richieste.md)
+Il server ricava la titolarità dalla sessione e dai dati persistiti. Le entità
+JPA restano nel modulo che le gestisce. Le frecce verso PostgreSQL riassumono
+l'accesso tramite i repository JPA del modulo. La descrizione è restituita
+come testo: il client la visualizza senza interpretarla come HTML. I valori
+respinti non sono riportati negli errori o nei log applicativi.
+[ADR-003](../adr/ADR-003-isolamento-e-validazione-richieste.md)
+
+I tre sorgenti condividono lo [stile del walking skeleton](diagrams/PICUS-Walking-Skeleton-style.iuml).
+Per rigenerare PNG e SVG con Java e PlantUML, dalla radice del progetto:
+
+```powershell
+java -jar <percorso-plantuml.jar> -charset UTF-8 -tpng 'docs/architecture/diagrams/PICUS-Walking-Skeleton*.puml'
+java -jar <percorso-plantuml.jar> -charset UTF-8 -tsvg 'docs/architecture/diagrams/PICUS-Walking-Skeleton*.puml'
+```
+
+Controllare tutte le esportazioni dopo la rigenerazione: frecce orizzontali,
+testi leggibili, assenza di sovrapposizioni e corrispondenza con i sorgenti.
 
 ## Persistenza iniziale
 

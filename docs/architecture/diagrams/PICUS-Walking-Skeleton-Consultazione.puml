@@ -1,0 +1,75 @@
+@startuml PICUS-Walking-Skeleton-Consultazione
+!include PICUS-Walking-Skeleton-style.iuml
+' WS-03: comportamento della baseline main 39fe03d.
+title <size:22><b>PICUS · Walking skeleton</b></size>\n<size:16>WS-03 · Consultazione e dinieghi</size>
+
+actor "Browser\nAccount del caso" as Browser
+participant "Spring Security" as Security <<web>>
+participant "Controller HTTP" as Web <<web>>
+participant "InvioRichiesteApi\nCaso d'uso" as Richieste
+participant "ConsultazioneCatalogoApi" as Catalogo
+participant "PostgreSQL\nTramite repository JPA" as Db <<dati>>
+
+== Elenco della OPT titolare ==
+Browser -> Security: GET /api/richieste/mie
+ref over Browser, Security
+  WS-01 · Controllo comune
+  Sessione OPT ammessa oppure diniego
+end ref
+Security -> Web: Identità OPT verificata
+Web -> Richieste: elencoRichiesteOpt(attore)
+Richieste -> Db: Legge per account della OPT titolare
+Db --> Richieste: Richieste proprie, ordinate per invio e ID
+Richieste -> Catalogo: cercaMisura(id) per le misure dell'elenco
+Catalogo --> Richieste: Nomi delle misure
+Richieste --> Web: Elenco di RichiestaSintesi
+Web --> Browser: 200 · Elenco JSON
+
+== Coda del Banco ==
+Browser -> Security: GET /api/richieste/coda
+ref over Browser, Security
+  WS-01 · Controllo comune
+  Sessione Banco ammessa oppure diniego
+end ref
+Security -> Web: Identità Banco verificata
+Web -> Richieste: codaBanco(attore)
+Richieste -> Db: Legge le richieste aperte\nOrdine crescente per invio e ID
+Db --> Richieste: Creata, Presa in carico, In programmazione
+Richieste -> Catalogo: cercaMisura(id) per le misure dell'elenco
+Catalogo --> Richieste: Nomi delle misure
+Richieste --> Web: Elenco ordinato di RichiestaSintesi
+Web --> Browser: 200 · Coda JSON
+
+== Dettaglio della richiesta ==
+Browser -> Security: GET /api/richieste/{id}
+ref over Browser, Security
+  WS-01 · Controllo comune
+  Sessione ammessa oppure diniego
+end ref
+Security -> Web: Identità verificata
+Web -> Richieste: consultaRichiesta(attore, richiestaId)
+Richieste -> Db: Legge la richiesta per ID
+Db --> Richieste: Richiesta oppure esito vuoto
+break Richiesta inesistente
+  Richieste --> Web: Risorsa non trovata
+  Web --> Browser: 404 · Nessun dato della richiesta
+end
+Richieste -> Richieste: Verifica ruolo, titolarità e assegnazione
+alt Banco, OPT titolare o erogatore assegnato
+  Richieste -> Catalogo: cercaMisura(misuraId) per il nome
+  Catalogo --> Richieste: Dati della misura
+  Richieste --> Web: RichiestaDettaglio filtrato per l'attore
+  Web --> Browser: 200 · Dettaglio JSON autorizzato
+else Account estraneo senza assegnazione
+  Richieste --> Web: Accesso negato
+  Web --> Browser: 403 · Nessun dato della richiesta
+end
+
+legend bottom
+  I tre casi sono letture indipendenti. Ogni account usa la propria sessione.
+  Le letture non modificano lo stato. Nel primo invio la richiesta è Creata e non ha erogatore.
+  Titolare e Banco vedono la descrizione; l'assegnatario non riceve descrizione e ID del titolare.
+  La descrizione è testo semplice: il client la visualizza senza interpretarla come HTML.
+  I dinieghi comuni sono descritti in WS-01; errori di formato HTTP restituiscono 400.
+end legend
+@enduml

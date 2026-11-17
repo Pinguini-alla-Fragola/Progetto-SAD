@@ -1,0 +1,84 @@
+@startuml PICUS-Walking-Skeleton-Invio
+!include PICUS-Walking-Skeleton-style.iuml
+' WS-02: comportamento della baseline main 39fe03d.
+title <size:22><b>PICUS · Walking skeleton</b></size>\n<size:16>WS-02 · Invio e ripetizione senza duplicati</size>
+
+actor "Browser\nOPT" as Browser
+participant "Spring Security" as Security <<web>>
+participant "Controller HTTP" as Web <<web>>
+participant "InvioRichiesteApi\nCaso d'uso" as Richieste
+participant "ConsultazioneCatalogoApi" as Catalogo
+participant "PostgreSQL\nTramite repository JPA" as Db <<dati>>
+
+== Valori selezionabili ==
+Browser -> Security: GET /api/catalogo/misure\nGET /api/catalogo/comuni
+ref over Browser, Security
+  WS-01 · Controllo comune per ciascuna lettura
+  Un diniego interrompe la richiesta
+end ref
+Security -> Web: Letture ammesse con identità verificata
+Web -> Catalogo: elencoMisureAttive() / elencoComuni()
+Catalogo --> Web: Misure attive / Comuni
+Web --> Browser: 200 · Dati JSON per i campi selezionabili
+
+== Invio della richiesta ==
+note over Browser, Web
+  Misura, persona/nucleo e comune; descrizione facoltativa.
+  Se presente, il riferimento del singolo invio viene
+  riutilizzato quando si riprova dopo un esito incerto.
+end note
+Browser -> Security: POST /api/richieste\nDati JSON e riferimento invio facoltativo
+ref over Browser, Security
+  WS-01 · Sessione e permesso di invio
+  Solo una OPT può proseguire
+end ref
+Security -> Web: Identità OPT verificata
+Web -> Web: Legge il JSON e controlla i campi ammessi
+break JSON, campi o riferimento non validi
+  Web --> Browser: 400 · Nessuna nuova richiesta
+end
+
+Web -> Richieste: invia(attore, dati, riferimentoInvio)
+group Caso d'uso transazionale
+  Richieste -> Richieste: Verifica ruolo OPT\nValida e normalizza i dati
+  break Dati non validi
+    Richieste --> Web: Errore di validazione
+    Web --> Browser: 400 · Nessuna nuova richiesta
+  end
+
+  opt Riferimento del singolo invio presente
+    Richieste -> Db: Cerca un invio già registrato\nper OPT e riferimento
+    Db --> Richieste: Richiesta precedente oppure esito vuoto
+  end
+  alt Invio già registrato
+    Richieste -> Richieste: Riusa la richiesta precedente
+  else Nuovo invio
+    Richieste -> Catalogo: cercaMisura(misuraId)\ncercaComune(comuneCodice)
+    Catalogo --> Richieste: Misura e stato / Comune
+    break Misura non attiva o comune sconosciuto
+      Richieste --> Web: Errore sui riferimenti di catalogo
+      Web --> Browser: 400 · Nessuna nuova richiesta
+    end
+    Richieste -> Db: Registra ID, data, OPT titolare e CREATA\nErogatore assente
+    Db --> Richieste: Richiesta nuova o precedente concorrente
+  end
+
+  Richieste -> Richieste: Confronta i dati dell'invio riconosciuto
+  break Stesso riferimento già usato con dati diversi
+    Richieste --> Web: Conflitto con l'invio registrato
+    Web --> Browser: 409 · Nessuna nuova richiesta
+  end
+  Richieste -> Catalogo: cercaMisura(misuraId)\nRisolve il nome per la sintesi
+  Catalogo --> Richieste: Dati della misura
+end
+Richieste --> Web: RichiestaSintesi · ID, data, misura e stato
+Web --> Browser: 201 · JSON e indirizzo del dettaglio\nStesso ID se l'invio era già registrato
+
+legend bottom
+  I due GET iniziali sono richieste indipendenti; il client presenta i dati ricevuti.
+  Stesso invio e stessi dati normalizzati: stessa richiesta, senza duplicati.
+  Un nuovo invio è distinto, anche con contenuto uguale. Il riferimento è facoltativo.
+  Il vincolo nel database coordina anche invii concorrenti; successo dopo il commit.
+  I valori respinti e il testo della descrizione sono esclusi da errori e log applicativi.
+end legend
+@enduml
