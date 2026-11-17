@@ -14,6 +14,14 @@ public interface RichiestaRepository {
     /** Cerca una pratica senza modificarla. */
     Optional<RichiestaDiMisura> cercaPerId(UUID id);
 
+    /**
+     * Verifica l'esistenza di una pratica senza caricarne i dettagli.
+     *
+     * @param id identificativo della pratica
+     * @return se la pratica esiste
+     */
+    boolean esiste(UUID id);
+
     /** Rilegge e blocca la pratica fino alla fine della transazione chiamante. */
     Optional<RichiestaDiMisura> cercaPerAggiornamento(UUID id);
 
