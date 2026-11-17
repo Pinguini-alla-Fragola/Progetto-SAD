@@ -3,6 +3,7 @@ package it.unina.picus.richieste.interno.persistenza;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.UUID;
@@ -37,6 +38,11 @@ class MigrazioniRichiesteTest {
 
     @Container
     static final PostgreSQLContainer POSTGRES = new PostgreSQLContainer(PostgresqlDiProva.IMMAGINE);
+
+    /** SQLSTATE PostgreSQL: foreign_key_violation. */
+    private static final String VIOLAZIONE_CHIAVE_ESTERNA = "23503";
+    /** SQLSTATE PostgreSQL: unique_violation. */
+    private static final String VIOLAZIONE_UNICITA = "23505";
 
     private static final Instant T1 = Instant.parse("2026-10-01T09:00:00Z");
     private static final Instant T2 = Instant.parse("2026-10-02T09:00:00Z");
@@ -86,7 +92,7 @@ class MigrazioniRichiesteTest {
     }
 
     @Test
-    @DisplayName("Da V10 con avvisi coerenti: avvisi conservati e vincoli V11 e V13 attivi dopo l'upgrade")
+    @DisplayName("Da V10 con avvisi coerenti: avvisi conservati e vincolo V11 attivo dopo l'upgrade")
     void upgradeDaV10ConAvvisi() {
         flyway("10").migrate();
         long m01 = misura("M01");
@@ -109,10 +115,55 @@ class MigrazioniRichiesteTest {
 
         assertThatThrownBy(() -> contatto(presa, erogatoreA, Instant.now(), "IN_ATTESA"))
                 .as("V11: un solo contatto in attesa per richiesta")
-                .isInstanceOf(DataIntegrityViolationException.class);
-        assertThatThrownBy(() -> avviso(presa, declinato, erogatoreB))
-                .as("V13: l'avviso deve corrispondere a pratica e destinatario del contatto")
-                .isInstanceOf(DataIntegrityViolationException.class);
+                .isInstanceOf(DataIntegrityViolationException.class)
+                .satisfies(ex -> assertThat(statoSql(ex)).isEqualTo(VIOLAZIONE_UNICITA));
+    }
+
+    @Test
+    @DisplayName("Dopo l'upgrade la FK V13 rifiuta un avviso con destinatario diverso su un contatto ancora senza avvisi")
+    void chiaveEsternaAvvisoDestinatario() {
+        flyway("10").migrate();
+        long m01 = misura("M01");
+        UUID titolare = opt("OPT titolare");
+        UUID erogatore = opt("OPT erogatrice");
+        UUID estranea = opt("OPT estranea");
+        UUID presa = richiesta(titolare, m01, "PRESA_IN_CARICO", null);
+        UUID senzaAvvisi = contatto(presa, erogatore, T1, "IN_ATTESA");
+
+        flyway(null).migrate();
+
+        // Il contatto non ha avvisi: l'unicità per contatto e tipo non può intervenire.
+        assertThatThrownBy(() -> avviso(presa, senzaAvvisi, estranea))
+                .isInstanceOf(DataIntegrityViolationException.class)
+                .satisfies(ex -> {
+                    assertThat(statoSql(ex)).isEqualTo(VIOLAZIONE_CHIAVE_ESTERNA);
+                    assertThat(messaggi(ex)).contains("avvisi_destinatario_contatto_fk");
+                });
+        assertThat(conta("select count(*) from comunicazioni_avvisi_operativi")).isZero();
+
+        avviso(presa, senzaAvvisi, erogatore);
+        assertThat(conta("select count(*) from comunicazioni_avvisi_operativi")).as("l'avviso coerente è accettato")
+                .isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("Dopo l'upgrade un secondo avviso dello stesso tipo per lo stesso contatto viola l'unicità")
+    void unicitaAvvisoPerContatto() {
+        flyway("10").migrate();
+        long m01 = misura("M01");
+        UUID titolare = opt("OPT titolare");
+        UUID erogatore = opt("OPT erogatrice");
+        UUID presa = richiesta(titolare, m01, "PRESA_IN_CARICO", null);
+        UUID aperto = contatto(presa, erogatore, T1, "IN_ATTESA");
+        avviso(presa, aperto, erogatore);
+
+        flyway(null).migrate();
+
+        // Stesso contatto e stesso destinatario: la FK è soddisfatta, interviene solo l'unicità.
+        assertThatThrownBy(() -> avviso(presa, aperto, erogatore))
+                .isInstanceOf(DataIntegrityViolationException.class)
+                .satisfies(ex -> assertThat(statoSql(ex)).isEqualTo(VIOLAZIONE_UNICITA));
+        assertThat(conta("select count(*) from comunicazioni_avvisi_operativi")).isEqualTo(1);
     }
 
     @Test
@@ -237,6 +288,16 @@ class MigrazioniRichiesteTest {
 
     private int conta(String sql, Object... parametri) {
         return jdbc.queryForObject(sql, Integer.class, parametri);
+    }
+
+    /** SQLSTATE restituito da PostgreSQL, cercato lungo la catena delle cause. */
+    private static String statoSql(Throwable eccezione) {
+        for (Throwable corrente = eccezione; corrente != null; corrente = corrente.getCause()) {
+            if (corrente instanceof SQLException sql && sql.getSQLState() != null) {
+                return sql.getSQLState();
+            }
+        }
+        return null;
     }
 
     private static String messaggi(Throwable eccezione) {

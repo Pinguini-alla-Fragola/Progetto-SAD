@@ -2,11 +2,9 @@ package it.unina.picus.richieste.interno.dominio;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,16 +34,19 @@ class OrdinamentoErogatoriTest {
     }
 
     @Test
-    @DisplayName("A pari prossimità gli operatori interni ed esterni del Banco precedono le OPT anche con più carico")
+    @DisplayName("A pari prossimità gli operatori del Banco precedono le OPT anche con più carico; tra loro decide il carico")
     void operatoriDelBancoPrimaDelleOpt() {
         var opt = opzione("OPT", TipoErogatore.OPT, AmbitoErogazione.STESSO_COMUNE);
         var esterno = opzione("Esterno", TipoErogatore.ESTERNO_PAGATO_BANCO, AmbitoErogazione.STESSO_COMUNE);
         var interno = opzione("Interno", TipoErogatore.INTERNO_BANCO, AmbitoErogazione.STESSO_COMUNE);
 
-        var ordinati = OrdinamentoErogatori.ordina(List.of(opt, esterno, interno),
-                Map.of(esterno.accountId(), 5, interno.accountId(), 3));
+        // L'esterno ha meno carico dell'interno e la OPT meno di entrambi: una precedenza fissa
+        // dell'interno sull'esterno, o del carico sul ruolo, produrrebbe un ordine diverso.
+        var ordinati = OrdinamentoErogatori.ordina(List.of(opt, interno, esterno),
+                Map.of(esterno.accountId(), 1, interno.accountId(), 3, opt.accountId(), 0));
 
-        assertThat(nomi(ordinati)).containsExactly("Interno", "Esterno", "OPT");
+        assertThat(nomi(ordinati)).containsExactly("Esterno", "Interno", "OPT");
+        assertThat(ordinati).extracting(Candidato::caricoAppuntamenti).containsExactly(1, 3, 0);
     }
 
     @Test
@@ -78,16 +79,19 @@ class OrdinamentoErogatoriTest {
     @Test
     @DisplayName("A parità completa decidono il nome senza distinzione di maiuscole e poi l'UUID")
     void paritaRisolteInModoStabile() {
-        var beta = opzione("beta", TipoErogatore.OPT, AmbitoErogazione.STESSO_COMUNE);
-        var alfa = opzione("Alfa", TipoErogatore.OPT, AmbitoErogazione.STESSO_COMUNE);
-        var omonimo1 = opzione("Omonimo", TipoErogatore.OPT, AmbitoErogazione.STESSO_COMUNE);
-        var omonimo2 = opzione("Omonimo", TipoErogatore.OPT, AmbitoErogazione.STESSO_COMUNE);
-        var omonimiAttesi = Stream.of(omonimo1.accountId(), omonimo2.accountId()).sorted(Comparator.naturalOrder()).toList();
+        // "Beta" precede "alfa" in un confronto che distingue le maiuscole: l'ordine atteso vale
+        // solo se il nome è confrontato senza distinzione. Gli UUID fissi arrivano in ordine inverso.
+        var beta = opzione("Beta", TipoErogatore.OPT, AmbitoErogazione.STESSO_COMUNE);
+        var alfa = opzione("alfa", TipoErogatore.OPT, AmbitoErogazione.STESSO_COMUNE);
+        var omonimoMinore = opzione(UUID.fromString("00000000-0000-0000-0000-000000000001"), "Omonimo",
+                TipoErogatore.OPT, AmbitoErogazione.STESSO_COMUNE);
+        var omonimoMaggiore = opzione(UUID.fromString("00000000-0000-0000-0000-000000000002"), "Omonimo",
+                TipoErogatore.OPT, AmbitoErogazione.STESSO_COMUNE);
 
-        var ordinati = OrdinamentoErogatori.ordina(List.of(omonimo2, beta, omonimo1, alfa), Map.of());
+        var ordinati = OrdinamentoErogatori.ordina(List.of(omonimoMaggiore, beta, omonimoMinore, alfa), Map.of());
 
-        assertThat(ordinati).extracting(c -> c.erogatore().accountId())
-                .containsExactly(alfa.accountId(), beta.accountId(), omonimiAttesi.get(0), omonimiAttesi.get(1));
+        assertThat(ordinati).extracting(c -> c.erogatore().accountId()).containsExactly(
+                alfa.accountId(), beta.accountId(), omonimoMinore.accountId(), omonimoMaggiore.accountId());
     }
 
     @Test
@@ -116,7 +120,11 @@ class OrdinamentoErogatoriTest {
     }
 
     private static ErogatoreCompatibile opzione(String nome, TipoErogatore tipo, AmbitoErogazione ambito) {
-        return new ErogatoreCompatibile(UUID.randomUUID(), nome, tipo, "napoli", ambito);
+        return opzione(UUID.randomUUID(), nome, tipo, ambito);
+    }
+
+    private static ErogatoreCompatibile opzione(UUID account, String nome, TipoErogatore tipo, AmbitoErogazione ambito) {
+        return new ErogatoreCompatibile(account, nome, tipo, "napoli", ambito);
     }
 
     private static List<String> nomi(List<Candidato> candidati) {

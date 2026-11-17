@@ -251,11 +251,14 @@ class CoordinamentoRichiesteControllerTest {
             UUID centro = dati.operatore("Centro PICUS Pozzuoli", "INTERNO_BANCO", "pozzuoli", true, m01);
             Instant futuro = Instant.now().plus(7, ChronoUnit.DAYS);
             Instant passato = Instant.now().minus(7, ChronoUnit.DAYS);
+            // Stesso comune: esterno 1, interno 2, OPT 0 appuntamenti validi. L'ordine atteso
+            // (esterno, interno, OPT) distingue la precedenza per ruolo dal minor carico.
             dati.appuntamento(titolare, m01, esterno, futuro, "CONFERMATA");
-            dati.appuntamento(titolare, m01, esterno, futuro.plus(1, ChronoUnit.DAYS), "CONFERMATA");
+            dati.appuntamento(titolare, m01, operatore, futuro, "CONFERMATA");
+            dati.appuntamento(titolare, m01, operatore, futuro.plus(1, ChronoUnit.DAYS), "CONFERMATA");
             dati.appuntamento(titolare, m01, operatore, passato, "CONFERMATA");
             dati.appuntamento(titolare, m01, operatore, futuro, "ANNULLATA");
-            dati.appuntamento(titolare, m01, optLocale, futuro, "CONFERMATA");
+            dati.appuntamento(titolare, m01, optLocale, passato, "CONFERMATA");
             UUID richiesta = presaInCaricoDiProva();
 
             String corpo = mvc.perform(get("/api/richieste/{id}/candidati", richiesta).with(come(banco, BANCO)))
@@ -265,11 +268,11 @@ class CoordinamentoRichiesteControllerTest {
             List<String> account = JsonPath.read(corpo, "$[*].erogatore.accountId");
             List<String> ambiti = JsonPath.read(corpo, "$[*].erogatore.ambito");
             List<Integer> carichi = JsonPath.read(corpo, "$[*].caricoAppuntamenti");
-            assertThat(account).containsExactly(operatore.toString(), esterno.toString(), optLocale.toString(),
+            assertThat(account).containsExactly(esterno.toString(), operatore.toString(), optLocale.toString(),
                     centro.toString(), optLimitrofa.toString(), centro.toString());
             assertThat(ambiti).containsExactly(STESSO_COMUNE, STESSO_COMUNE, STESSO_COMUNE,
                     COMUNE_LIMITROFO, COMUNE_LIMITROFO, A_DISTANZA);
-            assertThat(carichi).containsExactly(0, 2, 1, 0, 0, 0);
+            assertThat(carichi).containsExactly(1, 2, 0, 0, 0, 0);
             assertThat(account).doesNotContain(titolare.toString(), optEstranea.toString());
         }
 

@@ -27,6 +27,8 @@ import it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione;
 import it.unina.picus.richieste.api.ConflittoRichiestaException;
 import it.unina.picus.richieste.api.CoordinamentoRichiesteApi;
 import it.unina.picus.richieste.api.RichiesteApi.ContattoDisponibilita;
+import it.unina.picus.richieste.api.RichiesteApi.EsitoContatto;
+import it.unina.picus.richieste.api.RichiesteApi.RichiestaSintesi;
 import it.unina.picus.shared.DatiSintetici;
 import it.unina.picus.shared.IntegrazionePostgresql;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
@@ -122,10 +124,12 @@ class ServizioCoordinamentoRichiesteConcorrenzaTest {
                 () -> coordinamento.assegnaErogatore(banco, primo.id()),
                 () -> coordinamento.assegnaErogatore(banco, secondo.id())));
 
-        assertThat(successi(esiti)).hasSize(1);
-        assertThat(conflitti(esiti)).hasSize(1);
+        // inParallelo conserva l'ordine dei comandi: l'indice dell'esito riuscito indica il contatto vincente.
+        boolean vinceIlPrimo = esiti.get(0) instanceof RichiestaSintesi;
+        assertThat(esiti.get(vinceIlPrimo ? 0 : 1)).isInstanceOf(RichiestaSintesi.class);
+        assertThat(esiti.get(vinceIlPrimo ? 1 : 0)).isInstanceOf(ConflittoRichiestaException.class);
         assertThat(dati.stato(richiesta)).isEqualTo("IN_PROGRAMMAZIONE");
-        assertThat(dati.erogatoreAssegnato(richiesta)).isIn(optLocale, operatore);
+        assertThat(dati.erogatoreAssegnato(richiesta)).isEqualTo(vinceIlPrimo ? optLocale : operatore);
         assertThat(dati.ambitoAssegnato(richiesta)).isEqualTo("STESSO_COMUNE");
     }
 
@@ -141,11 +145,26 @@ class ServizioCoordinamentoRichiesteConcorrenzaTest {
                 () -> coordinamento.interpellaErogatore(banco, richiesta, operatore, AmbitoErogazione.STESSO_COMUNE)));
 
         assertThat(esiti.get(0)).as("la risposta del destinatario è sempre registrata")
-                .isInstanceOf(ContattoDisponibilita.class);
+                .isInstanceOfSatisfying(ContattoDisponibilita.class,
+                        risposta -> assertThat(risposta.esito()).isEqualTo(EsitoContatto.NON_DISPONIBILE));
+        Object interpello = esiti.get(1);
+        assertThat(interpello).as("solo un contatto creato o un conflitto applicativo, mai un errore tecnico")
+                .isInstanceOfAny(ContattoDisponibilita.class, ConflittoRichiestaException.class);
         assertThat(dati.esitoContatto(aperto.id())).isEqualTo("NON_DISPONIBILE");
-        assertThat(dati.contattiInAttesa(richiesta)).isLessThanOrEqualTo(1);
-        assertThat(dati.contatti(richiesta)).isEqualTo(esiti.get(1) instanceof ContattoDisponibilita ? 2 : 1);
-        assertThat(dati.avvisi(richiesta)).isEqualTo(dati.contatti(richiesta));
+        if (interpello instanceof ContattoDisponibilita nuovo) {
+            // La risposta è arrivata per prima: il nuovo contatto è l'unico in attesa, con il suo avviso.
+            assertThat(nuovo.erogatoreId()).isEqualTo(operatore);
+            assertThat(dati.esitoContatto(nuovo.id())).isEqualTo("IN_ATTESA");
+            assertThat(dati.contatti(richiesta)).isEqualTo(2);
+            assertThat(dati.contattiInAttesa(richiesta)).isEqualTo(1);
+            assertThat(dati.avvisi(richiesta)).isEqualTo(2);
+        } else {
+            // L'interpello ha trovato il contatto ancora in attesa: nessun contatto né avviso in più.
+            assertThat(dati.contatti(richiesta)).isEqualTo(1);
+            assertThat(dati.contattiInAttesa(richiesta)).isZero();
+            assertThat(dati.avvisi(richiesta)).isEqualTo(1);
+        }
+        assertThat(dati.avvisiCoerentiConIlContatto(richiesta)).isEqualTo(dati.avvisi(richiesta));
         assertThat(dati.stato(richiesta)).isEqualTo("PRESA_IN_CARICO");
     }
 
@@ -162,11 +181,14 @@ class ServizioCoordinamentoRichiesteConcorrenzaTest {
 
         assertThat(successi(esiti)).hasSize(1);
         assertThat(conflitti(esiti)).hasSize(1);
-        if (esiti.get(0) instanceof RuntimeException) {
+        if (esiti.get(0) instanceof ConflittoRichiestaException) {
+            assertThat(esiti.get(1)).isInstanceOf(ContattoDisponibilita.class);
             assertThat(dati.stato(richiesta)).isEqualTo("PRESA_IN_CARICO");
             assertThat(dati.erogatoreAssegnato(richiesta)).isNull();
             assertThat(dati.contattiInAttesa(richiesta)).isEqualTo(1);
         } else {
+            assertThat(esiti.get(0)).isInstanceOf(RichiestaSintesi.class);
+            assertThat(esiti.get(1)).isInstanceOf(ConflittoRichiestaException.class);
             assertThat(dati.stato(richiesta)).isEqualTo("IN_PROGRAMMAZIONE");
             assertThat(dati.erogatoreAssegnato(richiesta)).isEqualTo(optLocale);
             assertThat(dati.contattiInAttesa(richiesta)).isZero();
