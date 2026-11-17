@@ -120,7 +120,8 @@ public class ServizioCoordinamentoRichieste implements CoordinamentoRichiesteApi
     @Transactional
     public RichiestaSintesi assegnaErogatore(IdentitaAutenticata attore, UUID contattoId) {
         verificaBanco(attore);
-        var richiestaId = contatti.richiestaDelContatto(contattoId).orElseThrow(RisorsaRichiesteNonTrovataException::new);
+        var richiestaId = contatti.cercaRiferimento(contattoId).map(ContattiRepository.Riferimento::richiestaId)
+                .orElseThrow(RisorsaRichiesteNonTrovataException::new);
         var richiesta = blocca(richiestaId);
         richiesta.verificaPresaInCarico();
         var contatto = contatti.cerca(contattoId).orElseThrow(RisorsaRichiesteNonTrovataException::new);

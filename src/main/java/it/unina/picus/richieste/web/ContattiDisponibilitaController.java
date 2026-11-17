@@ -4,21 +4,16 @@ import java.util.List;
 
 import java.util.UUID;
 
-import org.springframework.http.HttpStatus;
-
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.unina.picus.richieste.api.RichiesteApi.ContattoDisponibilita;
 import it.unina.picus.richieste.api.RichiesteApi.DettaglioContatto;
 import it.unina.picus.richieste.interno.applicazione.DisponibilitaService;
-import it.unina.picus.richieste.interno.dominio.StatoContattoIncompatibileException;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 
 import jakarta.validation.Valid;
@@ -28,8 +23,8 @@ import jakarta.validation.constraints.NotNull;
  * Espone via HTTP la consultazione, la risposta e lo storico dei contatti di disponibilità.
  *
  * <p>Agisce da adattatore HTTP. Riceve dal resolver Utenze l'identità corrente usata
- * dai casi d'uso, delega i controlli e la registrazione al servizio e traduce i suoi errori
- * in risposte HTTP.
+ * dai casi d'uso e delega i controlli e la registrazione al servizio.
+ * Il gestore comune del modulo traduce gli errori applicativi in risposte HTTP.
  *
  * @see DisponibilitaService
  */
@@ -84,12 +79,6 @@ class ContattiDisponibilitaController {
     @GetMapping("/richieste/{richiestaId}/contatti")
     List<ContattoDisponibilita> elencoContatti(@PathVariable UUID richiestaId, IdentitaAutenticata attore) {
         return disponibilita.elencoContatti(attore, richiestaId);
-    }
-
-    /** Restituisce 409 quando lo stato della richiesta o del contatto impedisce la risposta. */
-    @ExceptionHandler(StatoContattoIncompatibileException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    void statoIncompatibile() {
     }
 
     /**

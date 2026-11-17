@@ -6,6 +6,7 @@ import java.util.UUID;
 import it.unina.picus.richieste.api.RichiesteApi.StatoRichiesta;
 import it.unina.picus.richieste.api.RichiesteApi.TipoDestinatario;
 
+import it.unina.picus.richieste.interno.dominio.RichiestaRepository;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Embedded;
@@ -83,10 +84,6 @@ public class RichiestaJpa {
         return tipoDestinatario;
     }
 
-    /** {@return stato corrente della richiesta} */
-    public StatoRichiesta getStato() {
-        return stato;
-    }
 
     /**
      * Aggiorna stato, assegnazione e accordo nella stessa entità già bloccata dal repository.
