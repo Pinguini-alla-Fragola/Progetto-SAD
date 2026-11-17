@@ -6,7 +6,6 @@ import java.util.UUID;
 import it.unina.picus.richieste.api.RichiesteApi.StatoRichiesta;
 import it.unina.picus.richieste.api.RichiesteApi.TipoDestinatario;
 
-import it.unina.picus.richieste.interno.dominio.RichiestaRepository;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Embedded;
@@ -24,7 +23,7 @@ import it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione;
  *
  * <p>La relativa riga è usata per coordinare gli aggiornamenti concorrenti dei contatti.
  *
- * @see RichiestaRepository#cercaPerAggiornamento(UUID)
+ * @see RichiestaRepositoryJpa#cercaPerAggiornamento(UUID)
  */
 @Entity
 @Table(name = "richieste")
@@ -83,7 +82,6 @@ public class RichiestaJpa {
     public TipoDestinatario getTipoDestinatario() {
         return tipoDestinatario;
     }
-
 
     void aggiorna(RichiestaDiMisura richiesta) {
         stato = richiesta.stato();
