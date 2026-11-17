@@ -88,7 +88,7 @@ public class CoordinamentoRichiesteController {
     }
 
     private static void verificaCorpoVuoto(CorpoJson corpo) {
-        if (corpo != null && corpo.campi() != null && !corpo.campi().isEmpty()) {
+        if (corpo != null && (corpo.campi() == null || !corpo.campi().isEmpty())) {
             throw nonValido("comando", "Questo comando non prevede campi aggiuntivi");
         }
     }

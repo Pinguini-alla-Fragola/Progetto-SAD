@@ -80,6 +80,10 @@ aggiornato dopo il login tramite `GET /api/auth/csrf`; i corpi previsti usano JS
 | `POST /api/contatti-disponibilita/{id}/assegnazione` | Solo Banco: risposta positiva → In programmazione; corpo assente o `{}`. |
 | `GET /api/avvisi` | Avvisi del solo account corrente, con riferimenti alla pratica e al contatto. |
 
+Per i comandi senza campi, soltanto un corpo assente o l'oggetto JSON vuoto `{}`
+sono validi. Il valore JSON `null` presente nel corpo riceve `400` e lascia
+invariato lo stato della richiesta.
+
 La creazione del contatto accetta soltanto:
 
 ```json
