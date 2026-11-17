@@ -5,6 +5,7 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.testcontainers.DockerClientFactory;
 import org.testcontainers.postgresql.PostgreSQLContainer;
+import org.springframework.context.annotation.Import;
 
 /*
 Base di <b>tutti</b> i test di integrazione: un solo PostgreSQL reale (Testcontainers) condiviso
@@ -19,6 +20,7 @@ propri: ogni differenza crea un contesto in più.
 */
 @SpringBootTest
 @AutoConfigureMockMvc
+@Import(AccessoLoginPostgresTest.DashboardDiProva.class)
 public abstract class IntegrazionePostgresBase {
 
     @ServiceConnection

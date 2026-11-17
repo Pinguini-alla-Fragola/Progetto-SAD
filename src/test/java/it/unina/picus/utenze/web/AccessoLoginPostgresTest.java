@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -34,8 +35,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpSession;
@@ -43,21 +42,28 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.jayway.jsonpath.JsonPath;
 
-import it.unina.picus.utenze.web.IntegrazionePostgresBase;
+import jakarta.servlet.http.HttpServletRequest;
 
-import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
-
-/*Backend del login (#25) e casi di sicurezza collegati, con la catena di Spring Security reale e
+/*
+Backend del login (#25) e casi di sicurezza collegati, con la catena di Spring Security reale e
 PostgreSQL reale. Gli account sono righe di {@code utenze_account} con hash BCrypt, quindi il
 percorso è lo stesso della produzione: filtro JSON, {@code AutenticazionePicus},
 {@code UtenzeService}, {@code VerificaSessioneFilter}, CSRF e permessi di ruolo.
 Ogni test usa email uniche e azzera il limitatore, così i test non dipendono dall'ordine.
+
+Le soglie del blocco sono quelle fissate dalla #25 (cinque fallimenti), scritte qui come valori e non
+lette dal codice di produzione: se il limite cambiasse, questi test devono fallire.
+
+Le aree dei ruoli sono servite da DashboardDiProva, importato in IntegrazionePostgresBase: su main le
+dashboard sono solo destinazioni di redirect senza handler, quindi senza di esso l'accesso consentito
+risponderebbe 404 e non si potrebbe verificare il 200.
 */
-@SpringBootTest(properties = "logging.level.org.springframework.security=DEBUG")
-@AutoConfigureMockMvc
 @DisplayName("Login, sessione, revoca e CSRF su PostgreSQL (#25)")
 class AccessoLoginPostgresTest extends IntegrazionePostgresBase {
 
@@ -67,6 +73,13 @@ class AccessoLoginPostgresTest extends IntegrazionePostgresBase {
             "{\"errore\":\"Accesso temporaneamente bloccato. Riprova tra poco.\"}";
     private static final Map<String, String> AREE = Map.of(
             "BANCO", "/banco/dashboard", "OPT", "/opt/dashboard", "OPERATORE", "/operatore/dashboard");
+
+    /** Fallimenti ammessi prima del blocco, fissati dalla #25 (AC3). */
+    private static final int FALLIMENTI_AMMESSI = 5;
+
+    /** Una richiesta che una OPT con profilo può davvero salvare (201): misura e comune del catalogo iniziale. */
+    private static final String RICHIESTA_VALIDA =
+            "{\"misuraId\":1,\"tipoDestinatario\":\"PERSONA\",\"comuneCodice\":\"napoli\"}";
 
     @Autowired
     private MockMvc mvc;
@@ -105,7 +118,7 @@ class AccessoLoginPostgresTest extends IntegrazionePostgresBase {
 
     //login per ruolo e aree
 
-    @ParameterizedTest(name = "{0}: login e reindirizzamento alla propria area")
+    @ParameterizedTest(name = "{0}: login, reindirizzamento alla propria area e area aperta")
     @CsvSource({"BANCO,/banco/dashboard", "OPT,/opt/dashboard", "OPERATORE,/operatore/dashboard"})
     void loginApreLAreaDelProprioRuolo(String ruolo, String area) throws Exception {
         Account account = nuovoAccount(ruolo, "ATTIVO");
@@ -118,21 +131,19 @@ class AccessoLoginPostgresTest extends IntegrazionePostgresBase {
         mvc.perform(get("/").session(sessione))
                 .andExpect(status().isFound())
                 .andExpect(redirectedUrl(area));
+        mvc.perform(get(area).session(sessione))
+                .andExpect(status().isOk());
     }
 
-    @ParameterizedTest(name = "{0}: le aree degli altri ruoli sono negate")
+    @ParameterizedTest(name = "{0}: la propria area risponde 200, quelle degli altri ruoli 403")
     @ValueSource(strings = {"BANCO", "OPT", "OPERATORE"})
     void areeRiservateAgliAltriRuoli(String ruolo) throws Exception {
         MockHttpSession sessione = accedi(nuovoAccount(ruolo, "ATTIVO"));
 
         for (Map.Entry<String, String> area : AREE.entrySet()) {
             if (area.getKey().equals(ruolo)) {
-                MvcResult propria = mvc.perform(get(area.getValue()).session(sessione)).andReturn();
-                int stato = propria.getResponse().getStatus();
-                assertNotEquals(403, stato, "area propria negata: " + area.getValue());
-                assertNotEquals(401, stato, "area propria non autenticata: " + area.getValue());
-                String redirect = propria.getResponse().getRedirectedUrl();
-                assertTrue(redirect == null || !redirect.startsWith("/login"), "rimando al login: " + redirect);
+                mvc.perform(get(area.getValue()).session(sessione))
+                        .andExpect(status().isOk());
             } else {
                 mvc.perform(get(area.getValue()).session(sessione))
                         .andExpect(status().isForbidden());
@@ -184,7 +195,7 @@ class AccessoLoginPostgresTest extends IntegrazionePostgresBase {
     @DisplayName("Dopo cinque tentativi falliti il sesto è bloccato con 429, anche con la password giusta")
     void bloccoTemporaneoDopoCinqueFallimenti() throws Exception {
         Account account = nuovoAccount("OPT", "ATTIVO");
-        for (int i = 0; i < LimitatoreAccessi.MAX_FALLIMENTI; i++) {
+        for (int i = 0; i < FALLIMENTI_AMMESSI; i++) {
             assertEquals(401, accedi(account.email(), "sbagliata", null).getResponse().getStatus());
         }
 
@@ -203,12 +214,12 @@ class AccessoLoginPostgresTest extends IntegrazionePostgresBase {
     @DisplayName("Un accesso riuscito azzera i tentativi falliti")
     void accessoRiuscitoAzzeraIlContatore() throws Exception {
         Account account = nuovoAccount("OPT", "ATTIVO");
-        for (int i = 0; i < LimitatoreAccessi.MAX_FALLIMENTI - 1; i++) {
+        for (int i = 0; i < FALLIMENTI_AMMESSI - 1; i++) {
             assertEquals(401, accedi(account.email(), "sbagliata", null).getResponse().getStatus());
         }
         assertEquals(204, accedi(account.email(), PASSWORD, null).getResponse().getStatus());
 
-        for (int i = 0; i < LimitatoreAccessi.MAX_FALLIMENTI; i++) {
+        for (int i = 0; i < FALLIMENTI_AMMESSI; i++) {
             assertEquals(401, accedi(account.email(), "sbagliata", null).getResponse().getStatus(),
                     "tentativo " + (i + 1) + " dopo l'azzeramento");
         }
@@ -247,8 +258,8 @@ class AccessoLoginPostgresTest extends IntegrazionePostgresBase {
                     throw new AssertionError("Esito inatteso: " + stato);
                 }
             }
-            assertEquals(LimitatoreAccessi.MAX_FALLIMENTI, nonAutorizzati);
-            assertEquals(tentativi - LimitatoreAccessi.MAX_FALLIMENTI, bloccati);
+            assertEquals(FALLIMENTI_AMMESSI, nonAutorizzati);
+            assertEquals(tentativi - FALLIMENTI_AMMESSI, bloccati);
         } finally {
             pool.shutdownNow();
         }
@@ -262,7 +273,10 @@ class AccessoLoginPostgresTest extends IntegrazionePostgresBase {
         Account account = nuovoAccount("OPT", "ATTIVO");
         MockHttpSession preesistente = new MockHttpSession();
         String idPrima = preesistente.getId();
-        assertEquals(401, statoDi(get("/api/richieste/mie"), preesistente));
+        // Come un browser che rimanda il cookie della sessione anonima: la strategia di Spring Security
+        // ruota l'ID solo se la richiesta ne dichiara uno valido.
+        assertEquals(401, mvc.perform(get("/api/richieste/mie").session(preesistente).with(idSessioneInviato(idPrima)))
+                .andReturn().getResponse().getStatus());
 
         MvcResult esito = accedi(account.email(), PASSWORD, preesistente);
 
@@ -320,7 +334,7 @@ class AccessoLoginPostgresTest extends IntegrazionePostgresBase {
     }
 
     @Test
-    @DisplayName("Revoca: stesso esito qualunque metodo, con o senza token CSRF")
+    @DisplayName("Revoca: stesso esito qualunque metodo, con o senza token CSRF, e nessuna richiesta salvata")
     void revocaPrimaDiCsrfEPermessi() throws Exception {
         Account account = nuovoAccount("OPT", "ATTIVO");
         MockHttpSession conToken = accedi(account);
@@ -328,13 +342,12 @@ class AccessoLoginPostgresTest extends IntegrazionePostgresBase {
         revoca(account);
 
         mvc.perform(post("/api/richieste").with(csrf()).session(conToken)
-                        .contentType(MediaType.APPLICATION_JSON).content("{}"))
+                        .contentType(MediaType.APPLICATION_JSON).content(RICHIESTA_VALIDA))
                 .andExpect(status().isUnauthorized());
         mvc.perform(post("/api/richieste").session(senzaToken)
-                        .contentType(MediaType.APPLICATION_JSON).content("{}"))
+                        .contentType(MediaType.APPLICATION_JSON).content(RICHIESTA_VALIDA))
                 .andExpect(status().isUnauthorized());
-        assertEquals(0, jdbc.queryForObject(
-                "select count(*) from richieste where titolare_id = ?", Integer.class, account.id()));
+        assertEquals(0, richiesteDi(account));
     }
 
     @Test
@@ -352,21 +365,25 @@ class AccessoLoginPostgresTest extends IntegrazionePostgresBase {
     //CSRF
 
     @Test
-    @DisplayName("Con sessione valida, un POST senza token CSRF riceve 403 e non modifica nulla")
+    @DisplayName("Con sessione valida, un POST senza token CSRF riceve 403 e non salva nulla; con il token la stessa richiesta è salvata")
     void postSenzaTokenConSessioneValida() throws Exception {
         Account account = nuovoAccount("OPT", "ATTIVO");
         MockHttpSession sessione = accedi(account);
 
         mvc.perform(post("/api/richieste").session(sessione)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"misuraId\":1,\"tipoDestinatario\":\"PERSONA\",\"comuneCodice\":\"napoli\"}"))
+                        .contentType(MediaType.APPLICATION_JSON).content(RICHIESTA_VALIDA))
                 .andExpect(status().isForbidden());
-        assertEquals(0, jdbc.queryForObject(
-                "select count(*) from richieste where titolare_id = ?", Integer.class, account.id()));
+        assertEquals(0, richiesteDi(account));
 
         mvc.perform(post("/api/auth/logout").session(sessione)).andExpect(status().isForbidden());
         assertFalse(sessione.isInvalid());
         assertEquals(200, statoDi(get("/api/richieste/mie"), sessione));
+
+        // Controllo positivo: stesso account, stesso corpo, token valido.
+        mvc.perform(post("/api/richieste").with(csrf()).session(sessione)
+                        .contentType(MediaType.APPLICATION_JSON).content(RICHIESTA_VALIDA))
+                .andExpect(status().isCreated());
+        assertEquals(1, richiesteDi(account));
     }
 
     @Test
@@ -404,6 +421,7 @@ class AccessoLoginPostgresTest extends IntegrazionePostgresBase {
 
     //helper
 
+    /** Account di prova; per una OPT crea anche il profilo, necessario per salvare richieste. */
     private Account nuovoAccount(String ruolo, String stato) {
         UUID id = UUID.randomUUID();
         String email = "t-" + id + "@picus.test";
@@ -411,6 +429,11 @@ class AccessoLoginPostgresTest extends IntegrazionePostgresBase {
                 insert into utenze_account (id, email, password_hash, nome, ruolo, stato)
                 values (?, ?, ?, ?, ?, ?)
                 """, id, email, hash, "Account di prova", ruolo, stato);
+        if ("OPT".equals(ruolo)) {
+            String codiceStruttura = "T-" + id.toString().replace("-", "").substring(0, 26);
+            jdbc.update("insert into utenze_profili_opt (account_id, codice_struttura, comune_codice) values (?, ?, 'napoli')",
+                    id, codiceStruttura);
+        }
         return new Account(id, email);
     }
 
@@ -418,11 +441,19 @@ class AccessoLoginPostgresTest extends IntegrazionePostgresBase {
         jdbc.update("update utenze_account set stato = 'REVOCATO' where id = ?", account.id());
     }
 
+    private int richiesteDi(Account account) {
+        return jdbc.queryForObject("select count(*) from richieste where titolare_id = ?", Integer.class, account.id());
+    }
+
+    /**
+     * Login JSON. Con una sessione preesistente la richiesta dichiara anche il suo ID, come farebbe il
+     * cookie inviato dal browser: senza, MockMvc installa la sessione ma non l'ID richiesto.
+     */
     private MvcResult accedi(String email, String password, MockHttpSession preesistente) throws Exception {
         MockHttpServletRequestBuilder richiesta = post("/api/auth/login").with(csrf())
                 .contentType(MediaType.APPLICATION_JSON).content(credenziali(email, password));
         if (preesistente != null) {
-            richiesta.session(preesistente);
+            richiesta.session(preesistente).with(idSessioneInviato(preesistente.getId()));
         }
         return mvc.perform(richiesta).andReturn();
     }
@@ -432,6 +463,14 @@ class AccessoLoginPostgresTest extends IntegrazionePostgresBase {
         MvcResult esito = accedi(account.email(), PASSWORD, null);
         assertEquals(204, esito.getResponse().getStatus());
         return sessione(esito);
+    }
+
+    /** Imposta l'ID di sessione dichiarato dal client, come il cookie JSESSIONID. */
+    private static RequestPostProcessor idSessioneInviato(String id) {
+        return richiesta -> {
+            richiesta.setRequestedSessionId(id);
+            return richiesta;
+        };
     }
 
     private int statoDi(MockHttpServletRequestBuilder richiesta, MockHttpSession sessione) throws Exception {
@@ -453,5 +492,20 @@ class AccessoLoginPostgresTest extends IntegrazionePostgresBase {
         return sessione != null && !sessione.isInvalid()
                 && sessione.getAttribute(SPRING_SECURITY_CONTEXT_KEY) != null;
     }
-}
 
+    /**
+     * Handler di prova per le tre dashboard, che su main non hanno un controller: permette di verificare
+     * il 200 dell'area consentita con la catena di sicurezza reale. È importato in
+     * {@link IntegrazionePostgresBase}, così tutte le classi di integrazione condividono lo stesso
+     * contesto. Va rimosso quando le dashboard avranno un controller vero, altrimenti la mappatura
+     * risulterebbe duplicata all'avvio.
+     */
+    @RestController
+    static class DashboardDiProva {
+
+        @GetMapping({"/banco/dashboard", "/opt/dashboard", "/operatore/dashboard"})
+        String area(HttpServletRequest richiesta) {
+            return "area di prova " + richiesta.getRequestURI();
+        }
+    }
+}

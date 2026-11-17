@@ -28,6 +28,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import it.unina.picus.utenze.web.IntegrazionePostgresBase;
+import java.net.URI;
 
 import jakarta.servlet.http.Cookie;
 
@@ -77,10 +78,20 @@ class LoginFormELogoutPostgresTest extends IntegrazionePostgresBase {
         MockHttpSession preesistente = new MockHttpSession();
         String idPrima = preesistente.getId();
 
-        mvc.perform(dalForm(email, PASSWORD, preesistente)).andReturn();
+        // Come il cookie del browser: la richiesta dichiara l'ID della sessione anonima.
+        MvcResult esito = mvc.perform(dalForm(email, PASSWORD, preesistente)
+                        .with(richiesta -> {
+                            richiesta.setRequestedSessionId(idPrima);
+                            return richiesta;
+                        }))
+                .andReturn();
 
-        assertTrue(autenticata(preesistente));
-        assertNotEquals(idPrima, preesistente.getId());
+        assertEquals(302, esito.getResponse().getStatus());
+        assertEquals("/", esito.getResponse().getRedirectedUrl());
+        MockHttpSession dopo = (MockHttpSession) esito.getRequest().getSession(false);
+        assertNotNull(dopo);
+        assertTrue(autenticata(dopo));
+        assertNotEquals(idPrima, dopo.getId());
     }
 
     @Test
@@ -146,8 +157,7 @@ class LoginFormELogoutPostgresTest extends IntegrazionePostgresBase {
 
         String destinazione = esito.getResponse().getRedirectedUrl();
         assertNotNull(destinazione);
-        assertTrue(destinazione.contains("/opt/dashboard"), "destinazione dopo il login: " + destinazione);
-    }
+        assertEquals("/opt/dashboard", URI.create(destinazione).getPath(), "destinazione dopo il login: " + destinazione);    }
 
     // risposte senza sessione
 
