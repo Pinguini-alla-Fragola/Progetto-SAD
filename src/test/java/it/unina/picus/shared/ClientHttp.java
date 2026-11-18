@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,6 +25,8 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.util.ServletRequestPathUtils;
 
+import com.jayway.jsonpath.JsonPath;
+
 import it.unina.picus.shared.ScenarioAccessi.Account;
 
 import jakarta.servlet.Filter;
@@ -33,10 +37,14 @@ import jakarta.servlet.Filter;
  * con {@code email} e {@code password}; il token CSRF si legge da {@link #TOKEN_CSRF} e si invia
  * nell'header indicato dal server.
  *
- * <p>Prima di attribuire un esito a una risorsa, i test verificano con {@link #richiediEndpointEsposto} o
- * {@link #richiediEndpointConsegnato} che la stessa richiesta abbia un handler reale: la sicurezza risponde
- * {@code 401} anche a un URL senza controller, quindi un {@code 401} da solo non dimostra che la risorsa sia
- * protetta.</p>
+ * <p>Prima di attribuire un esito a una risorsa, i test verificano con {@link #richiediEndpointConsegnato}
+ * che la stessa richiesta abbia un handler reale: la sicurezza risponde {@code 401} anche a un URL senza
+ * controller, quindi un {@code 401} da solo non dimostra che la risorsa sia protetta. Un endpoint di una
+ * capacità non ancora consegnata usa {@link #richiediEndpointDellaCapacita}: la sospensione dipende dallo stato
+ * dichiarato in {@link Capacita}, non dalla presenza dell'handler.</p>
+ *
+ * <p>I dinieghi e gli errori si verificano sul corpo completo: {@link #assertDiniegoSenzaCorpo} per il
+ * {@code 403} e {@link #assertErrorePubblico} per gli errori JSON.</p>
  */
 public final class ClientHttp {
 
@@ -113,15 +121,19 @@ public final class ClientHttp {
     }
 
     /**
-     * Sospende il test se l'endpoint di una capacità non ancora consegnata non è esposto: il caso non viene
-     * contato come coperto.
+     * Collega l'endpoint allo stato di consegna dichiarato in {@link Capacita}: se la capacità non è ancora
+     * consegnata il caso si sospende, senza guardare il mapping; se è consegnata l'endpoint deve avere un
+     * handler, altrimenti il test fallisce con {@link #richiediEndpointConsegnato}.
      *
+     * @param capacita capacità che comprende l'endpoint
      * @param richiesta richiesta che il test esegue
      * @throws Exception errore imprevisto del mapping
      */
-    public void richiediEndpointEsposto(MockHttpServletRequestBuilder richiesta) throws Exception {
-        boolean esposto = mappato(richiesta);
-        assumeTrue(esposto, () -> "endpoint non ancora esposto: " + descrivi(richiesta));
+    public void richiediEndpointDellaCapacita(Capacita capacita, MockHttpServletRequestBuilder richiesta)
+            throws Exception {
+        assumeTrue(capacita.consegnata(),
+                () -> "capacità " + capacita + " non ancora consegnata: caso sospeso (" + descrivi(richiesta) + ")");
+        richiediEndpointConsegnato(richiesta);
     }
 
     /**
@@ -133,6 +145,39 @@ public final class ClientHttp {
     public void richiediEndpointConsegnato(MockHttpServletRequestBuilder richiesta) throws Exception {
         boolean esposto = mappato(richiesta);
         assertTrue(esposto, () -> "endpoint consegnato ma senza handler (regressione): " + descrivi(richiesta));
+    }
+
+    /**
+     * Diniego di una API: {@code 403} con corpo vuoto, come lo produce {@code GestioneRifiuti}. Il corpo vuoto
+     * esclude qualunque dato della risorsa, del titolare o della descrizione, non solo l'identificativo.
+     *
+     * @param risposta risposta del server
+     * @throws Exception se il corpo non è leggibile
+     */
+    public static void assertDiniegoSenzaCorpo(MockHttpServletResponse risposta) throws Exception {
+        assertEquals(403, risposta.getStatus(), "atteso FORBIDDEN (403)");
+        assertEquals("", risposta.getContentAsString(), "il 403 delle API ha il corpo vuoto");
+    }
+
+    /**
+     * Errore JSON di {@code ErroriRichieste}: soli campi pubblici {@code codice}, {@code messaggio} e
+     * {@code campi}, con codice e messaggio fissi del contratto e nessun campo: nessun dato della pratica, della
+     * OPT o della risorsa.
+     *
+     * @param risposta risposta del server
+     * @param stato stato HTTP atteso
+     * @param codice codice pubblico atteso
+     * @param messaggio messaggio fisso atteso
+     * @throws Exception se il corpo non è leggibile
+     */
+    public static void assertErrorePubblico(MockHttpServletResponse risposta, int stato, String codice,
+            String messaggio) throws Exception {
+        assertEquals(stato, risposta.getStatus());
+        Map<String, Object> errore = JsonPath.read(risposta.getContentAsString(), "$");
+        assertEquals(Set.of("codice", "messaggio", "campi"), errore.keySet(), "solo i campi pubblici dell'errore");
+        assertEquals(codice, errore.get("codice"));
+        assertEquals(messaggio, errore.get("messaggio"));
+        assertEquals(Map.of(), errore.get("campi"), "nessun campo nell'errore");
     }
 
     private String descrivi(MockHttpServletRequestBuilder richiesta) {

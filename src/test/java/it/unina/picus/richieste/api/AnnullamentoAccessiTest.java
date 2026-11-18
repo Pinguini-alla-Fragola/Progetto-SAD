@@ -42,6 +42,7 @@ import it.unina.picus.utenze.api.UtenzeApi.TipoErogatore;
  * <p>Scelte da confermare con il team:</p>
  * <ul>
  *   <li>un motivo vuoto o di soli spazi è trattato come mancante (CA-12);</li>
+ *   <li>i reinvii senza motivo su Annullata non sono coperti finché la regola non è allineata tra #28 e #54;</li>
  *   <li>la matrice di annullamento di {@code regole-funzionali.md} limita ancora l'annullamento a
  *       Confermata: i test seguono #28, che lo ammette in ogni stato, anche da Rifiutata.</li>
  * </ul>
@@ -303,7 +304,7 @@ class AnnullamentoAccessiTest extends AccessiBlackBoxTest {
 
     static Stream<Arguments> coordinatoreEMotivoDellaRipetizione() {
         return Stream.of(Coordinatore.values())
-                .flatMap(c -> Stream.of(Arguments.of(c, MOTIVO), Arguments.of(c, null), Arguments.of(c, "   ")));
+                .map(c -> Arguments.of(c, MOTIVO));
     }
 
     @ParameterizedTest(name = "CA-15 · {0} ripete l''annullamento con motivo [{1}]: resta Annullata e la ricerca chiusa")
@@ -320,7 +321,6 @@ class AnnullamentoAccessiTest extends AccessiBlackBoxTest {
         long avvisiTitolareDopoIlPrimo = avvisiDiAnnullamento(titolare, id);
         long avvisiAssegnatoDopoIlPrimo = avvisiDiAnnullamento(assegnato, id);
 
-        // Su una richiesta già Annullata il motivo è facoltativo: il comando ripetuto resta valido anche senza.
         RichiestaSintesi ripetuto = richieste.annullaRichiesta(attore.identita(), id, motivoDellaRipetizione);
 
         assertEquals(StatoRichiesta.ANNULLATA, ripetuto.stato());

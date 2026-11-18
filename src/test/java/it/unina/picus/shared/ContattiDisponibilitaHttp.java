@@ -1,6 +1,5 @@
 package it.unina.picus.shared;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
@@ -33,7 +32,9 @@ import it.unina.picus.shared.ScenarioAccessi.Account;
  * <p>Gli esiti HTTP sono tradotti nelle eccezioni dei contratti, così i casi restano scritti con le stesse
  * convenzioni: {@code 403} diventa {@link SecurityException}, {@code 404} {@link NoSuchElementException},
  * {@code 409} {@link IllegalStateException} e {@code 400} {@link IllegalArgumentException}. Ogni altro esito fa
- * fallire il test. Un diniego non deve contenere l'identificativo della risorsa richiesta.</p>
+ * fallire il test. Prima della traduzione si verifica il corpo completo: il {@code 403} è vuoto
+ * ({@code GestioneRifiuti}); {@code 404}, {@code 409} e {@code 400} hanno il solo errore JSON pubblico di
+ * {@code ErroriRichieste}, con codice e messaggio fissi e nessun campo.</p>
  */
 public final class ContattiDisponibilitaHttp {
 
@@ -43,6 +44,11 @@ public final class ContattiDisponibilitaHttp {
     public static final String RISPONDI_CONTATTO = "/api/contatti-disponibilita/{id}/risposta";
     /** Storico dei contatti di una richiesta, riservato al Banco. */
     public static final String CONTATTI_RICHIESTA = "/api/richieste/{id}/contatti";
+
+    // Messaggi fissi di ErroriRichieste per le eccezioni che queste rotte possono produrre.
+    private static final String NON_TROVATA = "Richiesta non trovata";
+    private static final String CONFLITTO = "Il comando è in conflitto con i dati già registrati";
+    private static final String FORMATO_NON_VALIDO = "Formato dei dati non valido";
 
     private final ClientHttp http;
     private final Map<UUID, MockHttpSession> sessioni = new HashMap<>();
@@ -120,15 +126,37 @@ public final class ContattiDisponibilitaHttp {
         if (stato == 200) {
             return corpo;
         }
-        assertFalse(corpo.contains(risorsa.toString()), "un esito negativo non deve restituire dati della risorsa");
+        // Il corpo completo si verifica prima di tradurre l'esito nell'eccezione del contratto.
         String esito = "HTTP " + stato + " su " + risorsa;
         switch (stato) {
-            case 403 -> throw new SecurityException("FORBIDDEN: " + esito);
-            case 404 -> throw new NoSuchElementException("NOT_FOUND: " + esito);
-            case 409 -> throw new IllegalStateException("CONFLICT: " + esito);
-            case 400 -> throw new IllegalArgumentException("BAD_REQUEST: " + esito);
+            case 403 -> {
+                esegui(() -> {
+                    ClientHttp.assertDiniegoSenzaCorpo(risposta);
+                    return null;
+                });
+                throw new SecurityException("FORBIDDEN: " + esito);
+            }
+            case 404 -> {
+                verificaErrore(risposta, 404, "NOT_FOUND", NON_TROVATA);
+                throw new NoSuchElementException("NOT_FOUND: " + esito);
+            }
+            case 409 -> {
+                verificaErrore(risposta, 409, "CONFLICT", CONFLITTO);
+                throw new IllegalStateException("CONFLICT: " + esito);
+            }
+            case 400 -> {
+                verificaErrore(risposta, 400, "BAD_REQUEST", FORMATO_NON_VALIDO);
+                throw new IllegalArgumentException("BAD_REQUEST: " + esito);
+            }
             default -> throw new AssertionError("esito HTTP inatteso: " + esito + " " + corpo);
         }
+    }
+
+    private static void verificaErrore(MockHttpServletResponse risposta, int stato, String codice, String messaggio) {
+        esegui(() -> {
+            ClientHttp.assertErrorePubblico(risposta, stato, codice, messaggio);
+            return null;
+        });
     }
 
     private static ContattoDisponibilita contatto(Map<String, Object> json) {
