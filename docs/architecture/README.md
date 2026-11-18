@@ -272,8 +272,14 @@ il CC-02.
 ```powershell
 $stati = 'docs/architecture/diagrams/PICUS-Stati-Richiesta'
 dot -Tpng "$stati.dot" -o "$stati.png"
-dot -Tsvg "$stati.dot" -o "$stati.svg"
+dot -Tsvg -Gdpi=72 "$stati.dot" -o "$stati.svg"
+(Get-Content "$stati.svg" -Raw) -replace '<svg width="[\d.]+pt" height="[\d.]+pt"', '<svg width="100%"' | Set-Content "$stati.svg" -NoNewline
 ```
+
+Con `-Gdpi=72` l'SVG mantiene la finestra di visualizzazione coerente con il
+disegno: con la risoluzione del PNG, Graphviz scala due volte e l'immagine
+risulta tagliata. L'ultimo comando toglie la dimensione fissa, così l'SVG si
+adatta alla larghezza disponibile, come nell'anteprima di GitHub.
 
 ## Persistenza iniziale
 
