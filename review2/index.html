@@ -227,6 +227,31 @@
         .tbl.adr .tr > div { font-size: calc(28 * var(--sc) * 1px); }
         .tbl.adr .tr.head > div { font-size: calc(31.3 * var(--sc) * 1px); }
 
+        /* ---------- Nuove slide (versione Workflow) ---------- */
+        .tbl.sto { --cols: 130px 790px; --rh: 66; --hh: 60; }
+        .tbl.sto .tr > div { font-size: calc(28 * var(--sc) * 1px); }
+        .tbl.sto .tr.head > div { font-size: calc(31.3 * var(--sc) * 1px); }
+        .tbl.drv2 { --cols: 430px 490px 495px; --rh: 130; --hh: 62; }
+        .tbl.drv2 .tr > div { font-size: calc(26 * var(--sc) * 1px); }
+        .tbl.drv2 .tr.head > div { font-size: calc(31.3 * var(--sc) * 1px); }
+        .tbl.drv2 .tr:not(.head) > div:nth-child(2) { background: #E8F0EE; font-weight: 700; }
+        .tbl.adr2 { --cols: 250px 400px 395px 370px; --rh: 150; --hh: 62; }
+        .tbl.adr2 .tr > div { font-size: calc(24 * var(--sc) * 1px); }
+        .tbl.adr2 .tr.head > div { font-size: calc(28 * var(--sc) * 1px); }
+        .tbl.adr2 .tr:not(.head) > div:nth-child(2) { font-weight: 700; }
+        .tbl.adr2 .tr:not(.head) > div:first-child { color: var(--red); }
+        .box.deco { font-weight: 400; }
+        .box.card { border: 2px solid var(--line); border-radius: 6px; }
+        .shot {
+            position: absolute; left: calc(var(--x) * 1px); top: calc(var(--y) * 1px);
+            width: calc(var(--w) * 1px); height: auto; display: block;
+            border: 1px solid var(--line); background: #fff;
+        }
+        .appr { position: absolute; left: calc(var(--x) * 1px); top: calc(var(--y) * 1px); width: calc(var(--w) * 1px); }
+        .appr img { display: block; width: 100%; height: auto; }
+        .appr .gif { position: absolute; left: 4.7%; top: 22.6%; width: 69.8%; }
+        .mono { font-family: "Courier New", Consolas, monospace; }
+
         /* ---------- Mascotte ---------- */
         .mascot { position: absolute; left: calc(var(--x) * 1px); top: calc(var(--y) * 1px); width: calc(var(--w) * 1px); }
         .mascot img { display: block; width: 100%; height: auto; }
@@ -460,6 +485,9 @@
             .mascot.m-center { margin: 28px auto 0; }
 
             /* barra dei comandi: sul telefono resta sempre visibile */
+            .box.deco { display: none; }
+            .shot { position: static; width: 100%; max-width: 440px; margin-inline: auto; }
+            .appr { position: relative; left: auto; top: auto; width: 100%; max-width: 300px; margin-inline: auto; }
             .ui-bar { bottom: calc(14px + env(safe-area-inset-bottom)); }
             .ui button { min-width: 48px; height: 48px; }
             .ui .lang button { min-width: 36px; padding: 0 4px; }
@@ -502,7 +530,7 @@
     <main id="stage" class="no-anim" aria-roledescription="presentazione">
 
         <!-- 1 ───────────────────────────── Copertina -->
-        <section class="slide bg-cream" data-bg="#FFF8EC" aria-label="Slide 1 di 10: PICUS, review della seconda iterazione">
+        <section class="slide bg-cream" data-bg="#FFF8EC" aria-label="Slide 1 di 11: PICUS, review della seconda iterazione">
             <p class="t hd" style="--x:90;--y:60" data-a="left">Pinguini alla Fragola</p>
             <div class="mascot m-right" style="--x:1230;--y:150;--w:260;--t:.3s" data-a="pop"><a class="home-link" href="../index.html" title="Torna alla pagina iniziale" aria-label="Torna alla pagina iniziale"><img src="pinguino.png" alt="" width="200" height="200"></a></div>
             <h2 class="t ttl" style="--x:90;--y:200;--fs:140;--lh:1.1;--t:.2s" data-a="left">PICUS</h2>
@@ -510,45 +538,76 @@
             <p class="t mu" style="--x:95;--y:500;--fs:40;--t:1.4s" data-a="up">Prima iterazione di costruzione</p>
             <p class="t strong" style="--x:95;--y:575;--fs:40;--c:var(--red);--t:1.9s" data-a="up">Baseline architetturale e walking skeleton</p>
             <p class="t mu" style="--x:95;--y:790;--fs:30;--t:2.6s" data-a="up">Software Architecture Design · a.a. 2026/27</p>
-            <p class="t pn" data-a="fade" style="--t:3s">01 / 10</p>
+            <p class="t pn" data-a="fade" style="--t:3s">01 / 11</p>
         </section>
 
-        <!-- 2 ───────────────────────────── Obiettivo e incremento MVP -->
-        <section class="slide bg-white" data-bg="#FFFFFF" aria-label="Slide 2 di 10: obiettivo e incremento MVP">
-            <h2 class="t ttl" data-a="left">Obiettivo e incremento MVP</h2>
-            <p class="t mu" style="--x:95;--y:180;--fs:33;--t:.2s" data-a="up">Coordinare una richiesta OPT fino all’accordo confermato o al rifiuto definitivo</p>
+        <!-- 2 ───────────────────────────── Sprint Goal e perimetro MVP -->
+        <section class="slide bg-white" data-bg="#FFFFFF" aria-label="Slide 2 di 11: Sprint Goal e perimetro MVP">
+            <p class="t hd" style="--x:90;--y:34;--fs:25;--t:.05s" data-a="left">Incremento</p>
+            <h2 class="t ttl" data-a="left">Sprint Goal e perimetro MVP</h2>
+            <p class="t mu" style="--x:95;--y:180;--fs:33;--t:.2s" data-a="up">Coordinare una richiesta OPT fino all’accordo confermato o al rifiuto definitivo.</p>
 
-            <h3 class="t hd" style="--x:95;--y:262;--fs:36.3;--t:.6s" data-a="up">Sei storie nel percorso</h3>
-            <div class="item" style="--x:95;--y:336;--nw:111;--fs:31.3;--nfs:32.5;--t:1s" data-a="left" data-cascade="storie"><span class="num">#25</span><span class="txt">Accesso con email e password, sessione e logout</span></div>
-            <div class="item" style="--x:95;--y:408;--nw:111;--fs:31.3;--nfs:32.5;--t:1.3s" data-a="left" data-cascade="storie"><span class="num">#28</span><span class="txt">Permessi per ruolo, titolarità, contatto e assegnazione</span></div>
-            <div class="item" style="--x:95;--y:480;--nw:111;--fs:31.3;--nfs:32.5;--t:1.6s" data-a="left" data-cascade="storie"><span class="num">#48</span><span class="txt">Invio della richiesta e consultazione della propria pratica</span></div>
-            <div class="item" style="--x:95;--y:552;--nw:111;--fs:31.3;--nfs:32.5;--t:1.9s" data-a="left" data-cascade="storie"><span class="num">#49</span><span class="txt">Presa in carico, scelta dell’erogatore e assegnazione</span></div>
-            <div class="item" style="--x:95;--y:624;--nw:111;--fs:31.3;--nfs:32.5;--t:2.2s" data-a="left" data-cascade="storie"><span class="num">#51</span><span class="txt">Risposta dell’erogatore alla richiesta di disponibilità</span></div>
-            <div class="item" style="--x:95;--y:696;--nw:111;--fs:31.3;--nfs:32.5;--t:2.5s" data-a="left" data-cascade="storie"><span class="num">#52</span><span class="txt">Conferma dell’accordo oppure rifiuto definitivo</span></div>
-
-            <p class="t mu" style="--x:95;--y:790;--fs:28.8;--t:3.4s" data-a="up">Prerequisiti demo: account sintetici, catalogo e offerta già predisposti</p>
-            <p class="t pn" data-a="fade" style="--t:3.8s">02 / 10</p>
-        </section>
-
-        <!-- 3 ───────────────────────────── Driver architetturali e ADD -->
-        <section class="slide bg-cream" data-bg="#FFF8EC" aria-label="Slide 3 di 10: driver architetturali e ADD">
-            <h2 class="t ttl" data-a="left">Driver architetturali e ADD</h2>
-            <p class="t mu" style="--x:95;--y:180;--fs:33;--t:.2s" data-a="up">I requisiti del percorso guidano decomposizione, meccanismi e verifiche</p>
-
-            <div class="tbl qs drv" role="table" aria-label="Driver, scelte architetturali e riscontri" style="--x:95;--y:258">
-                <div class="tr head" role="row" style="--t:.7s"><div role="columnheader">Driver</div><div role="columnheader">Scelta architetturale</div><div role="columnheader">Riscontro atteso</div></div>
-                <div class="tr" role="row" style="--t:1.5s"><div role="rowheader">Sicurezza <br>QS-01A</div><div role="cell" data-label="Scelta architetturale">Sessione server e controllo <br>sulla singola risorsa</div><div role="cell" data-label="Riscontro atteso">403 all’estraneo. <br>Zero dati della pratica.</div></div>
-                <div class="tr" role="row" style="--t:2.4s"><div role="rowheader">Privacy <br>QS-02A</div><div role="cell" data-label="Scelta architetturale">DTO dedicati e lista esplicita <br>dei campi ammessi</div><div role="cell" data-label="Riscontro atteso">Invio extra respinto. <br>Zero nuove richieste.</div></div>
-                <div class="tr" role="row" style="--t:3.3s"><div role="rowheader">Usabilità <br>QS-04A</div><div role="cell" data-label="Scelta architetturale">Viste MVC con Thymeleaf <br>e layout per smartphone</div><div role="cell" data-label="Riscontro atteso">4 referenti su 5 entro 2 min. <br>Prova utenti da eseguire.</div></div>
-                <div class="tr" role="row" style="--t:4.2s"><div role="rowheader">Vincoli <br>ed evoluzione</div><div role="cell" data-label="Scelta architetturale">Java 25, Spring Boot, PostgreSQL. <br>Moduli con API pubbliche.</div><div role="cell" data-label="Riscontro atteso">Ambiente riproducibile. <br>Confini pronti a evolvere.</div></div>
+            <div class="tbl qs sto" role="table" aria-label="Storie e contributo al percorso" style="--x:95;--y:262">
+                <div class="tr head" role="row" style="--t:.6s"><div role="columnheader">Storia</div><div role="columnheader">Contributo al percorso</div></div>
+                <div class="tr" role="row" style="--t:.9s"><div role="rowheader">#25</div><div role="cell" data-label="Contributo al percorso">Accesso con email e password, sessione e logout</div></div>
+                <div class="tr" role="row" style="--t:1.2s"><div role="rowheader">#28</div><div role="cell" data-label="Contributo al percorso">Permessi per ruolo, titolarità, contatto e assegnazione</div></div>
+                <div class="tr" role="row" style="--t:1.5s"><div role="rowheader">#48</div><div role="cell" data-label="Contributo al percorso">Invio e consultazione della propria richiesta</div></div>
+                <div class="tr" role="row" style="--t:1.8s"><div role="rowheader">#49</div><div role="cell" data-label="Contributo al percorso">Presa in carico, scelta dell’erogatore e assegnazione</div></div>
+                <div class="tr" role="row" style="--t:2.1s"><div role="rowheader">#51</div><div role="cell" data-label="Contributo al percorso">Risposta dell’erogatore sulla disponibilità</div></div>
+                <div class="tr" role="row" style="--t:2.4s"><div role="rowheader">#52</div><div role="cell" data-label="Contributo al percorso">Conferma dell’accordo o rifiuto definitivo</div></div>
             </div>
-            <p class="t pn" data-a="fade" style="--t:4.9s">03 / 10</p>
+
+            <h3 class="t strong" style="--x:1060;--y:268;--fs:34;--t:3s" data-a="up">Percorso con accordo</h3>
+            <div class="box" style="--x:1060;--y:330;--w:450;--h:68;--fs:32;--fill:var(--cream);--st:var(--red);--t:3.4s" data-a="build"><span class="act">Creata</span></div>
+            <span class="vseg" style="--x:1284;--y:400;--h:30;--t:4.0s" data-a="grow" aria-hidden="true"></span>
+            <div class="box" style="--x:1060;--y:432;--w:450;--h:68;--fs:32;--fill:var(--cream);--st:var(--red);--t:4.2s" data-a="build"><span class="act">Presa in carico</span></div>
+            <span class="vseg" style="--x:1284;--y:502;--h:30;--t:4.8s" data-a="grow" aria-hidden="true"></span>
+            <div class="box" style="--x:1060;--y:534;--w:450;--h:68;--fs:32;--fill:var(--cream);--st:var(--red);--t:5s" data-a="build"><span class="act">In programmazione</span></div>
+            <span class="vseg" style="--x:1284;--y:604;--h:30;--t:5.6s" data-a="grow" aria-hidden="true"></span>
+            <div class="box hot" style="--x:1060;--y:636;--w:450;--h:68;--fs:32;--fill:var(--red);--tc:#fff;--st:var(--pink);--t:5.8s" data-a="build"><span class="act">Confermata</span></div>
+            <p class="t mu" style="--x:1060;--y:734;--fs:26;--t:6.6s" data-a="up">Esito alternativo dell’MVP</p>
+            <p class="t hd" style="--x:1060;--y:772;--fs:36;--t:6.8s" data-a="up">Rifiutata</p>
+            <p class="t pn" data-a="fade" style="--t:7.2s">02 / 11</p>
         </section>
 
-        <!-- 4 ───────────────────────────── Module View -->
-        <section class="slide bg-white" data-bg="#FFFFFF" aria-label="Slide 4 di 10: Module View">
-            <h2 class="t ttl" data-a="left">Baseline architetturale: Module View</h2>
-            <p class="t mu" style="--x:95;--y:180;--fs:33;--t:.2s" data-a="up">Cinque moduli per responsabilità, con contratti pubblici e dati propri</p>
+        <!-- 3 ───────────────────────────── Driver architetturali -->
+        <section class="slide bg-cream" data-bg="#FFF8EC" aria-label="Slide 3 di 11: driver architetturali">
+            <p class="t hd" style="--x:90;--y:34;--fs:25;--t:.05s" data-a="left">Attribute-Driven Design</p>
+            <h2 class="t ttl" data-a="left">Driver architetturali</h2>
+            <p class="t mu" style="--x:95;--y:180;--fs:33;--t:.2s" data-a="up">Gli scenari di qualità orientano le scelte e indicano come verificarle.</p>
+
+            <div class="tbl qs drv2" role="table" aria-label="Driver, meccanismi e verifiche" style="--x:95;--y:258">
+                <div class="tr head" role="row" style="--t:.7s"><div role="columnheader">Driver</div><div role="columnheader">Meccanismo</div><div role="columnheader">Verifica</div></div>
+                <div class="tr" role="row" style="--t:1.5s"><div role="rowheader">Sicurezza · QS-01A <br>Ogni OPT vede le proprie <br>richieste.</div><div role="cell" data-label="Meccanismo">Sessione sul server e permesso <br>sulla singola richiesta.</div><div role="cell" data-label="Verifica">Una OPT estranea riceve 403, <br>senza dati della pratica.</div></div>
+                <div class="tr" role="row" style="--t:2.4s"><div role="rowheader">Privacy · QS-02A <br>Nessun identificativo degli <br>assistiti.</div><div role="cell" data-label="Meccanismo">DTO dedicati con lista esplicita <br>dei campi ammessi.</div><div role="cell" data-label="Verifica">Un campo extra fa respingere <br>l’invio. Nessuna richiesta <br>salvata.</div></div>
+                <div class="tr" role="row" style="--t:3.3s"><div role="rowheader">Usabilità · QS-04A <br>Invio da smartphone.</div><div role="cell" data-label="Meccanismo">Viste MVC con Thymeleaf e <br>layout responsive.</div><div role="cell" data-label="Verifica">4 referenti su 5 entro 2 <br>minuti. Prova con utenti <br>da eseguire.</div></div>
+            </div>
+
+            <p class="t hd" style="--x:95;--y:742;--fs:30;--t:4.4s" data-a="up">Vincoli</p>
+            <p class="t" style="--x:290;--y:742;--fs:29;--t:4.6s" data-a="up">Java 25, Spring Boot e PostgreSQL. Un solo rilascio, riproducibile con Docker Compose.</p>
+            <p class="t pn" data-a="fade" style="--t:5.2s">03 / 11</p>
+        </section>
+
+        <!-- 4 ───────────────────────────── Decisioni e trade-off -->
+        <section class="slide bg-white" data-bg="#FFFFFF" aria-label="Slide 4 di 11: decisioni e trade-off">
+            <p class="t hd" style="--x:90;--y:34;--fs:25;--t:.05s" data-a="left">Baseline architetturale</p>
+            <h2 class="t ttl" data-a="left">Decisioni e trade-off</h2>
+            <p class="t mu" style="--x:95;--y:180;--fs:33;--t:.2s" data-a="up">Tre ADR documentano la scelta, l’alternativa considerata e il costo accettato.</p>
+
+            <div class="tbl qs adr2" role="table" aria-label="Decisioni architetturali" style="--x:95;--y:250">
+                <div class="tr head" role="row" style="--t:.7s"><div role="columnheader">Domanda</div><div role="columnheader">Scelta</div><div role="columnheader">Alternativa scartata</div><div role="columnheader">Costo accettato</div></div>
+                <div class="tr" role="row" style="--t:1.5s"><div role="rowheader">ADR-001 <br>Organizzazione <br>del codice</div><div role="cell" data-label="Scelta">Monolite modulare MVC. <br>Cinque moduli con <br>API e DTO.</div><div role="cell" data-label="Alternativa scartata">Microservizi nello Sprint 2. <br>Rete, identità e consistenza <br>distribuite.</div><div role="cell" data-label="Costo accettato">Processo, database e <br>rilascio condivisi. Confini <br>verificati in review.</div></div>
+                <div class="tr" role="row" style="--t:2.4s"><div role="rowheader">ADR-002 <br>Ciclo della <br>richiesta</div><div role="cell" data-label="Scelta">Sei stati in un solo ciclo, <br>con presa in carico <br>esplicita.</div><div role="cell" data-label="Alternativa scartata">Ciclo separato per <br>l’appuntamento, da <br>sincronizzare.</div><div role="cell" data-label="Costo accettato">Stato, assegnazione e <br>accordo aggiornati nella <br>stessa transazione.</div></div>
+                <div class="tr" role="row" style="--t:3.3s"><div role="rowheader">ADR-003 <br>Permessi e input</div><div role="cell" data-label="Scelta">Ruolo, relazione con la <br>pratica e lista dei campi <br>ammessi.</div><div role="cell" data-label="Alternativa scartata">Solo ruolo. Due OPT <br>avrebbero gli stessi <br>permessi sulla pratica.</div><div role="cell" data-label="Costo accettato">Ogni nuovo comando ha <br>una regola di accesso <br>e un DTO.</div></div>
+            </div>
+            <p class="t pn" data-a="fade" style="--t:4.4s">04 / 11</p>
+        </section>
+
+        <!-- 5 ───────────────────────────── Module View -->
+        <section class="slide bg-cream" data-bg="#FFF8EC" aria-label="Slide 5 di 11: Module View">
+            <p class="t hd" style="--x:90;--y:34;--fs:25;--t:.05s" data-a="left">Baseline architetturale</p>
+            <h2 class="t ttl" data-a="left">Module View</h2>
+            <p class="t mu" style="--x:95;--y:180;--fs:31;--t:.2s" data-a="up">Cinque moduli organizzati per responsabilità, con contratti pubblici e dati propri.</p>
 
             <div class="tbl states mods" role="table" aria-label="Moduli e responsabilità" style="--x:95;--y:262">
                 <div class="tr" role="row" style="--t:.6s"><div role="rowheader">M1 – Utenze</div><div role="cell">Account, identità, ruoli e profili</div></div>
@@ -559,19 +618,20 @@
             </div>
 
             <h3 class="t hd" style="--x:1110;--y:262;--fs:33.8;--t:2.4s" data-a="up">Struttura di un modulo</h3>
-            <div class="box" style="--x:1110;--y:330;--w:400;--h:92;--fs:27;--fill:var(--cream);--st:var(--red);--t:2.8s" data-a="build"><span class="role">web</span> <span class="act">Adattatori HTTP e viste</span></div>
-            <div class="box" style="--x:1110;--y:440;--w:400;--h:92;--fs:27;--fill:var(--cream);--st:var(--red);--t:3.4s" data-a="build"><span class="role">api</span> <span class="act">Interfacce e DTO pubblici</span></div>
-            <div class="box" style="--x:1110;--y:550;--w:400;--h:116;--fs:27;--fill:var(--cream);--st:var(--red);--t:4s" data-a="build"><span class="role">interno</span> <span class="act">Applicazione, dominio, <br class="d">persistenza</span></div>
+            <div class="box" style="--x:1110;--y:330;--w:400;--h:92;--fs:27;--fill:var(--cream);--st:var(--red);--t:2.8s" data-a="build"><span class="role">web/</span> <span class="act">Adattatori HTTP e viste MVC</span></div>
+            <div class="box" style="--x:1110;--y:440;--w:400;--h:92;--fs:27;--fill:var(--cream);--st:var(--red);--t:3.4s" data-a="build"><span class="role">api/</span> <span class="act">Interfacce pubbliche e DTO</span></div>
+            <div class="box" style="--x:1110;--y:550;--w:400;--h:116;--fs:27;--fill:var(--cream);--st:var(--red);--t:4s" data-a="build"><span class="role">interno/</span> <span class="act">Applicazione, dominio <br class="d">e persistenza</span></div>
 
-            <p class="t strong" style="--x:95;--y:700;--fs:30;--t:4.8s" data-a="up">Richieste collabora con Utenze, Catalogo e Comunicazioni tramite le loro API</p>
-            <p class="t mu" style="--x:95;--y:756;--fs:28;--t:5.2s" data-a="up">Entità e repository restano nel modulo proprietario. shared contiene componenti tecnici comuni.</p>
-            <p class="t pn" data-a="fade" style="--t:5.6s">04 / 10</p>
+            <p class="t strong" style="--x:95;--y:700;--fs:30;--t:4.8s" data-a="up">Richieste usa le API di Utenze, Catalogo e Comunicazioni.</p>
+            <p class="t mu" style="--x:95;--y:756;--fs:28;--t:5.2s" data-a="up">Il package shared raccoglie i componenti tecnici comuni.</p>
+            <p class="t pn" data-a="fade" style="--t:5.6s">05 / 11</p>
         </section>
 
-        <!-- 5 ───────────────────────────── C&C View -->
-        <section class="slide bg-dark on-dark" data-bg="#163441" aria-label="Slide 5 di 10: C&amp;C View">
-            <h2 class="t ttl" data-a="left">Baseline architetturale: C&amp;C View</h2>
-            <p class="t mint" style="--x:95;--y:180;--fs:33;--t:.2s" data-a="up">Il percorso attraversa componenti nello stesso processo e un database relazionale</p>
+        <!-- 6 ───────────────────────────── Component & Connector View -->
+        <section class="slide bg-dark on-dark" data-bg="#163441" aria-label="Slide 6 di 11: Component &amp; Connector View">
+            <p class="t hd pink" style="--x:90;--y:34;--fs:25;--t:.05s" data-a="left">Baseline architetturale</p>
+            <h2 class="t ttl" data-a="left">Component &amp; Connector View</h2>
+            <p class="t mint" style="--x:95;--y:180;--fs:29;--t:.2s" data-a="up">Le richieste HTTP entrano in un solo processo JVM. L’applicazione accede a PostgreSQL via JDBC.</p>
 
             <span class="frame" style="--x:355;--y:292;--w:880;--h:250;--fc:var(--pink);--t:.6s" data-a="fade" aria-hidden="true"></span>
 
@@ -579,144 +639,162 @@
             <p class="t mint lbl" style="--x:336;--y:398;--w:50;--fs:18;--t:1.9s" data-a="fade">HTTP</p>
             <span class="arrow" style="--x:320;--y:432;--w:70;--ac:var(--mint);--t:1.9s" data-a="arrow" aria-hidden="true"></span>
             <div class="fgroup" style="--fc:var(--pink)">
-            <p class="t mint strong" style="--x:385;--y:304;--fs:25;--t:.9s" data-a="up">picus.jar · unico processo JVM</p>
-            <div class="box" style="--x:390;--y:362;--w:230;--h:140;--fs:24;--fill:var(--cream);--st:var(--mint);--t:2.2s" data-a="build"><span class="role">Spring Security</span> <span class="act">e Controller MVC</span></div>
+            <p class="t mint strong" style="--x:385;--y:304;--fs:25;--t:.9s" data-a="up">picus.jar · Processo JVM</p>
+            <div class="box" style="--x:390;--y:362;--w:230;--h:140;--fs:24;--fill:var(--cream);--st:var(--mint);--t:2.2s" data-a="build"><span class="role">Spring Security</span> <span class="act">Controller MVC</span></div>
             <p class="t mint lbl" style="--x:644;--y:398;--w:50;--fs:18;--t:2.9s" data-a="fade">DTO</p>
             <span class="arrow" style="--x:620;--y:432;--w:70;--ac:var(--mint);--t:2.9s" data-a="arrow" aria-hidden="true"></span>
             <div class="box" style="--x:690;--y:362;--w:230;--h:140;--fs:24;--fill:var(--cream);--st:var(--mint);--t:3.2s" data-a="build"><span class="role">Casi d’uso</span> <span class="act">e dominio</span></div>
             <p class="t mint lbl" style="--x:932;--y:398;--w:50;--fs:18;--t:3.9s" data-a="fade">Porte</p>
             <span class="arrow" style="--x:920;--y:432;--w:70;--ac:var(--mint);--t:3.9s" data-a="arrow" aria-hidden="true"></span>
-            <div class="box" style="--x:990;--y:362;--w:230;--h:140;--fs:24;--fill:var(--cream);--st:var(--mint);--t:4.2s" data-a="build"><span class="role">Repository</span> <span class="act">e adattatori JPA</span></div>
+            <div class="box" style="--x:990;--y:362;--w:230;--h:140;--fs:24;--fill:var(--cream);--st:var(--mint);--t:4.2s" data-a="build"><span class="role">Repository</span> <span class="act">Adattatori JPA</span></div>
             </div>
             <p class="t mint lbl" style="--x:1231;--y:398;--w:60;--fs:18;--t:4.9s" data-a="fade">JDBC</p>
             <span class="arrow" style="--x:1220;--y:432;--w:70;--ac:var(--mint);--t:4.9s" data-a="arrow" aria-hidden="true"></span>
-            <div class="box hot" style="--x:1290;--y:362;--w:230;--h:140;--fs:24;--fill:var(--red);--tc:#fff;--st:var(--pink);--t:5.2s" data-a="build"><span class="role">PostgreSQL</span> <span class="act">DB picus</span></div>
+            <div class="box hot" style="--x:1290;--y:362;--w:230;--h:140;--fs:24;--fill:var(--red);--tc:#fff;--st:var(--pink);--t:5.2s" data-a="build"><span class="role">PostgreSQL</span> <span class="act">Database picus</span></div>
 
             <h3 class="t hd pink" style="--x:95;--y:600;--fs:33.8;--t:6s" data-a="up">Collaborazioni interne</h3>
-            <p class="t mint" style="--x:95;--y:664;--fs:29;--lh:1.35;--t:6.3s" data-a="up">API Java e DTO, chiamate sincrone. <br>Dependency injection via costruttore.</p>
+            <p class="t mint" style="--x:95;--y:664;--fs:29;--lh:1.35;--t:6.3s" data-a="up">Chiamate sincrone su API Java e DTO. <br>Dipendenze iniettate via costruttore.</p>
             <h3 class="t hd pink" style="--x:835;--y:600;--fs:33.8;--t:6.8s" data-a="up">Confine del caso d’uso</h3>
             <p class="t mint" style="--x:835;--y:664;--fs:29;--lh:1.35;--t:7.1s" data-a="up">Permessi e regole prima della scrittura. <br>Transazioni locali per aggiornare gli stati.</p>
-            <p class="t pn" data-a="fade" style="--t:7.6s">05 / 10</p>
+            <p class="t pn" data-a="fade" style="--t:7.6s">06 / 11</p>
         </section>
 
-        <!-- 6 ───────────────────────────── Deployment View -->
-        <section class="slide bg-cream" data-bg="#FFF8EC" aria-label="Slide 6 di 10: Deployment View">
-            <h2 class="t ttl" data-a="left">Baseline architetturale: Deployment View</h2>
-            <p class="t mu" style="--x:95;--y:180;--fs:33;--t:.2s" data-a="up">Un ambiente locale riproducibile con Docker Compose</p>
+        <!-- 7 ───────────────────────────── Deployment View -->
+        <section class="slide bg-cream" data-bg="#FFF8EC" aria-label="Slide 7 di 11: Deployment View">
+            <p class="t hd" style="--x:90;--y:34;--fs:25;--t:.05s" data-a="left">Baseline architetturale</p>
+            <h2 class="t ttl" data-a="left">Deployment View</h2>
+            <p class="t mu" style="--x:95;--y:180;--fs:33;--t:.2s" data-a="up">Docker Compose in locale e su un VPS OVHcloud KVM2.</p>
 
             <span class="frame" style="--x:420;--y:255;--w:1090;--h:355;--fc:var(--ink);--t:.6s" data-a="fade" aria-hidden="true"></span>
 
-            <div class="box" style="--x:90;--y:352;--w:240;--h:150;--fs:26;--fill:var(--sand);--st:var(--red);--t:1.3s" data-a="build"><span class="role">Browser web</span> <span class="act">127.0.0.1:8080</span></div>
+            <div class="box" style="--x:90;--y:352;--w:240;--h:150;--fs:26;--fill:var(--sand);--st:var(--red);--t:1.3s" data-a="build"><span class="role">Browser</span> <span class="act">127.0.0.1:8080</span></div>
             <p class="t mu lbl" style="--x:335;--y:392;--w:80;--fs:19;--t:2s" data-a="fade">HTTP</p>
             <span class="arrow" style="--x:330;--y:427;--w:130;--ac:var(--red);--t:2s" data-a="arrow" aria-hidden="true"></span>
             <div class="fgroup" style="--fc:var(--ink)">
-            <p class="t strong" style="--x:452;--y:270;--fs:27;--t:.9s" data-a="up">Macchina host · Docker Compose</p>
+            <p class="t strong" style="--x:452;--y:270;--fs:27;--t:.9s" data-a="up">Host · Docker Compose</p>
             <div class="box lines hot" style="--x:460;--y:330;--w:420;--h:240;--fs:26;--fill:var(--red);--tc:#fff;--st:var(--ink);--t:2.4s" data-a="build"><span class="role">picus-webapp</span> <span class="act">JVM Java 25 · picus.jar <br class="d">Spring Boot e Tomcat</span></div>
-            <p class="t mu lbl" style="--x:880;--y:392;--w:140;--fs:19;--t:3.2s" data-a="fade">JDBC:5432</p>
+            <p class="t mu lbl" style="--x:880;--y:392;--w:140;--fs:19;--t:3.2s" data-a="fade">JDBC 5432</p>
             <span class="arrow" style="--x:880;--y:427;--w:140;--ac:var(--red);--t:3.2s" data-a="arrow" aria-hidden="true"></span>
-            <div class="box lines" style="--x:1020;--y:330;--w:450;--h:240;--fs:26;--fill:var(--sand);--st:var(--red);--t:3.6s" data-a="build"><span class="role">picus-db</span> <span class="act">PostgreSQL 17 <br class="d">Database picus <br class="d">Volume picus-dati</span></div>
+            <div class="box lines" style="--x:1020;--y:330;--w:450;--h:240;--fs:26;--fill:var(--sand);--st:var(--red);--t:3.6s" data-a="build"><span class="role">picus-db</span> <span class="act">PostgreSQL 17 · database picus <br class="d">Volume persistente picus-dati</span></div>
             </div>
 
-            <p class="t strong" style="--x:95;--y:662;--fs:30;--t:4.5s" data-a="up">Flyway applica le migrazioni. La webapp parte dopo l’healthcheck del database.</p>
-            <p class="t mu" style="--x:95;--y:722;--fs:28;--t:5s" data-a="up">Database sulla rete Compose. HTTPS, email e produzione sono evoluzioni successive.</p>
-            <p class="t pn" data-a="fade" style="--t:5.4s">06 / 10</p>
+            <p class="t strong" style="--x:95;--y:662;--fs:30;--t:4.5s" data-a="up">Il deploy dello Sprint 2 è ospitato nell’Unione europea (GDPR).</p>
+            <p class="t pn" data-a="fade" style="--t:5.2s">07 / 11</p>
         </section>
 
-        <!-- 7 ───────────────────────────── Decisioni architetturali -->
-        <section class="slide bg-white" data-bg="#FFFFFF" aria-label="Slide 7 di 10: decisioni architetturali e regole">
-            <h2 class="t ttl" data-a="left">Decisioni architetturali e regole</h2>
-            <p class="t mu" style="--x:95;--y:180;--fs:33;--t:.2s" data-a="up">Gli ADR collegano le scelte ai driver e ne esplicitano le conseguenze</p>
+        <!-- 8 ───────────────────────────── Walking skeleton (demo live) -->
+        <section class="slide bg-dark on-dark" data-bg="#163441" aria-label="Slide 8 di 11: Walking skeleton, demo live">
+            <p class="t hd pink" style="--x:90;--y:34;--fs:25;--t:.05s" data-a="left">Demo live · 2 minuti</p>
+            <h2 class="t ttl" data-a="left">Walking skeleton</h2>
+            <p class="t mint" style="--x:95;--y:180;--fs:33;--t:.2s" data-a="up">Una richiesta con dati sintetici, dall’invio della OPT alla consultazione dell’accordo.</p>
 
-            <div class="tbl qs adr" role="table" aria-label="Decisioni architetturali" style="--x:95;--y:250">
-                <div class="tr head" role="row" style="--t:.7s"><div role="columnheader">ADR</div><div role="columnheader">Scelta</div><div role="columnheader">Alternativa valutata</div><div role="columnheader">Conseguenza</div></div>
-                <div class="tr" role="row" style="--t:1.5s"><div role="rowheader">001</div><div role="cell" data-label="Scelta">Monolite modulare MVC <br>API e DTO tra moduli</div><div role="cell" data-label="Alternativa valutata">Strati globali <br>o microservizi iniziali</div><div role="cell" data-label="Conseguenza">Un solo rilascio. <br>Confini da controllare.</div></div>
-                <div class="tr" role="row" style="--t:2.4s"><div role="rowheader">002</div><div role="cell" data-label="Scelta">Ciclo unico a sei stati <br>Presa in carico esplicita</div><div role="cell" data-label="Alternativa valutata">Ciclo separato <br>dell’appuntamento</div><div role="cell" data-label="Conseguenza">Stato e accordo coerenti. <br>Transizioni atomiche.</div></div>
-                <div class="tr" role="row" style="--t:3.3s"><div role="rowheader">003</div><div role="cell" data-label="Scelta">Permessi sulla risorsa <br>Campi ammessi espliciti</div><div role="cell" data-label="Alternativa valutata">Solo ruolo sulle rotte <br>Binding permissivo</div><div role="cell" data-label="Conseguenza">Dati filtrati per attore. <br>Controlli per ogni comando.</div></div>
-            </div>
+            <p class="t hd pink" style="--x:95;--y:274;--fs:40;--t:.6s" data-a="up">01</p>
+            <h3 class="t strong" style="--x:190;--y:262;--fs:36;--c:var(--cream);--t:.75s" data-a="up">OPT</h3>
+            <p class="t" style="--x:190;--y:312;--fs:29;--c:var(--cream);--t:.9s" data-a="up">Invia la richiesta con misura, destinatario e comune.</p>
+            <p class="t mint" style="--x:190;--y:356;--fs:24;--t:1.05s" data-a="up">Creata</p>
 
-            <h3 class="t hd" style="--x:95;--y:712;--fs:33.8;--t:4.3s" data-a="up">Regole di dipendenza</h3>
-            <p class="t bd" style="--x:95;--y:772;--fs:29;--t:4.6s" data-a="up">Collaborazioni solo tramite api. Nessun accesso a interno o ai repository di un altro modulo.</p>
-            <p class="t pn" data-a="fade" style="--t:5s">07 / 10</p>
+            <p class="t hd pink" style="--x:95;--y:404;--fs:40;--t:1.5s" data-a="up">02</p>
+            <h3 class="t strong" style="--x:190;--y:392;--fs:36;--c:var(--cream);--t:1.65s" data-a="up">Banco</h3>
+            <p class="t" style="--x:190;--y:442;--fs:29;--c:var(--cream);--t:1.8s" data-a="up">Prende in carico la pratica e contatta un candidato.</p>
+            <p class="t mint" style="--x:190;--y:486;--fs:24;--t:1.95s" data-a="up">Presa in carico</p>
+
+            <p class="t hd pink" style="--x:95;--y:534;--fs:40;--t:2.4s" data-a="up">03</p>
+            <h3 class="t strong" style="--x:190;--y:522;--fs:36;--c:var(--cream);--t:2.55s" data-a="up">Erogatore</h3>
+            <p class="t" style="--x:190;--y:572;--fs:29;--c:var(--cream);--t:2.7s" data-a="up">Comunica la sua disponibilità al Banco.</p>
+            <p class="t mint" style="--x:190;--y:616;--fs:24;--t:2.85s" data-a="up">Presa in carico</p>
+
+            <p class="t hd pink" style="--x:95;--y:664;--fs:40;--t:3.3s" data-a="up">04</p>
+            <h3 class="t strong" style="--x:190;--y:652;--fs:36;--c:var(--cream);--t:3.45s" data-a="up">Banco e OPT</h3>
+            <p class="t" style="--x:190;--y:702;--fs:29;--c:var(--cream);--t:3.6s" data-a="up">Il Banco assegna, poi conferma. La OPT consulta.</p>
+            <p class="t mint" style="--x:190;--y:746;--fs:24;--t:3.75s" data-a="up">In programmazione, poi Confermata</p>
+
+            <div class="box deco" style="--x:1000;--y:262;--w:510;--h:520;--fs:30;--fill:rgba(255,255,255,.08);--st:var(--pink);--t:4.2s" data-a="build"></div>
+            <p class="t hd pink" style="--x:1045;--y:330;--fs:24;--t:4.8s" data-a="up">Esito da mostrare</p>
+            <h3 class="t strong" style="--x:1045;--y:392;--fs:58;--c:var(--cream);--t:5s" data-a="up">Stesso ID</h3>
+            <p class="t hd pink" style="--x:1045;--y:466;--fs:58;--t:5.2s" data-a="up">Confermata</p>
+            <p class="t" style="--x:1045;--y:580;--fs:30;--lh:1.3;--c:var(--cream);--t:5.5s" data-a="up">La OPT titolare riapre la pratica <br>e vede i dettagli dell’accordo <br>salvato.</p>
+            <p class="t pn" data-a="fade" style="--t:6.2s">08 / 11</p>
         </section>
 
-        <!-- 8 ───────────────────────────── Walking skeleton e demo -->
-        <section class="slide bg-blush" data-bg="#FDEDEF" aria-label="Slide 8 di 10: walking skeleton e demo">
-            <h2 class="t ttl" data-a="left">Walking skeleton e demo</h2>
-            <p class="t mu" style="--x:95;--y:180;--fs:33;--t:.2s" data-a="up">Un happy path completo tra OPT, Banco ed erogatore</p>
+        <!-- 9 ───────────────────────────── Dai criteri di accettazione ai test -->
+        <section class="slide bg-cream" data-bg="#FFF8EC" aria-label="Slide 9 di 11: dai criteri di accettazione ai test">
+            <p class="t hd" style="--x:90;--y:34;--fs:25;--t:.05s" data-a="left">Verifica</p>
+            <h2 class="t ttl" data-a="left">Dai criteri di accettazione ai test</h2>
+            <p class="t mu" style="--x:95;--y:180;--fs:33;--t:.2s" data-a="up">I gruppi @Nested riprendono la numerazione dei criteri della user story.</p>
 
-            <div class="box" style="--x:90;--y:252;--w:310;--h:96;--fs:29;--fill:var(--cream);--st:var(--red);--t:.6s" data-a="build"><span class="act">Creata</span></div>
-            <span class="arrow" style="--x:400;--y:300;--w:55;--ac:var(--red);--t:1.2s" data-a="arrow" aria-hidden="true"></span>
-            <div class="box" style="--x:455;--y:252;--w:310;--h:96;--fs:29;--fill:var(--cream);--st:var(--red);--t:1.5s" data-a="build"><span class="act">Presa in carico</span></div>
-            <span class="arrow" style="--x:765;--y:300;--w:55;--ac:var(--red);--t:2.1s" data-a="arrow" aria-hidden="true"></span>
-            <div class="box" style="--x:820;--y:252;--w:310;--h:96;--fs:29;--fill:var(--cream);--st:var(--red);--t:2.4s" data-a="build"><span class="act">In programmazione</span></div>
-            <span class="arrow" style="--x:1130;--y:300;--w:55;--ac:var(--red);--t:3s" data-a="arrow" aria-hidden="true"></span>
-            <div class="box hot" style="--x:1185;--y:252;--w:310;--h:96;--fs:29;--fill:var(--red);--tc:#fff;--st:var(--pink);--t:3.3s" data-a="build"><span class="act">Confermata</span></div>
+            <div class="box deco card" style="--x:95;--y:252;--w:650;--h:372;--fs:28;--fill:#fff;--st:var(--line);--t:.6s" data-a="build"></div>
+            <p class="t hd mono" style="--x:125;--y:278;--fs:22;--t:1.2s" data-a="up">USER STORY #48</p>
+            <h3 class="t strong" style="--x:125;--y:312;--fs:40;--t:1.4s" data-a="up">Criterio 4 · QS-02A</h3>
+            <p class="t" style="--x:125;--y:376;--fs:28;--lh:1.3;--t:1.6s" data-a="up">Il server rifiuta i campi identificativi extra <br>senza creare la richiesta.</p>
+            <img class="shot" src="img/criterio-4.png" alt="Il criterio di accettazione nella user story #48" style="--x:125;--y:490;--w:590;--t:2.4s" data-a="fade">
 
-            <p class="t hd" style="--x:95;--y:410;--fs:48;--t:4s" data-a="up">01</p>
-            <h3 class="t strong" style="--x:95;--y:482;--fs:36;--t:4.15s" data-a="up">OPT</h3>
-            <p class="t bd" style="--x:95;--y:538;--fs:28;--t:4.3s" data-a="up">Accede e invia misura, <br>destinatario e comune</p>
+            <span class="arrow" style="--x:745;--y:438;--w:80;--ac:var(--red);--t:3.2s" data-a="arrow" aria-hidden="true"></span>
 
-            <p class="t hd" style="--x:465;--y:410;--fs:48;--t:4.6s" data-a="up">02</p>
-            <h3 class="t strong" style="--x:465;--y:482;--fs:36;--t:4.75s" data-a="up">Banco</h3>
-            <p class="t bd" style="--x:465;--y:538;--fs:28;--t:4.9s" data-a="up">Prende in carico <br>e interpella un candidato</p>
+            <div class="box deco card" style="--x:825;--y:252;--w:685;--h:372;--fs:28;--fill:#fff;--st:var(--line);--t:3.6s" data-a="build"></div>
+            <p class="t hd mono" style="--x:855;--y:278;--fs:22;--t:4.2s" data-a="up">RichiesteControllerTest · PR #130</p>
+            <h3 class="t strong mono" style="--x:855;--y:312;--fs:38;--t:4.4s" data-a="up">CampiIdentificativi</h3>
+            <p class="t" style="--x:855;--y:376;--fs:28;--lh:1.3;--t:4.6s" data-a="up">24 casi parametrizzati verificano il rifiuto <br>e l’assenza di nuove richieste.</p>
+            <img class="shot" src="img/test-campi-identificativi.png" alt="Il test CampiIdentificativi nel codice" style="--x:855;--y:490;--w:625;--t:5.4s" data-a="fade">
 
-            <p class="t hd" style="--x:835;--y:410;--fs:48;--t:5.2s" data-a="up">03</p>
-            <h3 class="t strong" style="--x:835;--y:482;--fs:36;--t:5.35s" data-a="up">Erogatore</h3>
-            <p class="t bd" style="--x:835;--y:538;--fs:28;--t:5.5s" data-a="up">Comunica la disponibilità <br>al Banco</p>
-
-            <p class="t hd" style="--x:1205;--y:410;--fs:48;--t:5.8s" data-a="up">04</p>
-            <h3 class="t strong" style="--x:1205;--y:482;--fs:36;--t:5.95s" data-a="up">Banco e OPT</h3>
-            <p class="t bd" style="--x:1205;--y:538;--fs:28;--t:6.1s" data-a="up">Assegnazione, conferma <br>e consultazione <br>dei dettagli</p>
-
-            <p class="t strong" style="--x:95;--y:770;--fs:31.3;--lh:1.3;--t:6.9s" data-a="up">Risultato osservabile: stesso ID, stato persistito <br>e accordo visibile alla OPT titolare</p>
-            <p class="t pn" data-a="fade" style="--t:7.4s">08 / 10</p>
+            <p class="t hd mono" style="--x:95;--y:672;--fs:34;--t:6s" data-a="up">Given</p>
+            <p class="t" style="--x:95;--y:726;--fs:29;--t:6.15s" data-a="up">Dati sintetici e un campo extra</p>
+            <p class="t hd mono" style="--x:590;--y:672;--fs:34;--t:6.3s" data-a="up">When</p>
+            <p class="t" style="--x:590;--y:726;--fs:29;--t:6.45s" data-a="up">Invio HTTP con MockMvc</p>
+            <p class="t hd mono" style="--x:1070;--y:672;--fs:34;--t:6.6s" data-a="up">Then</p>
+            <p class="t" style="--x:1070;--y:726;--fs:29;--t:6.75s" data-a="up">Richiesta rifiutata. Zero scritture.</p>
+            <p class="t pn" data-a="fade" style="--t:7.2s">09 / 11</p>
         </section>
 
-        <!-- 9 ───────────────────────────── Evidenze e tracciabilità -->
-        <section class="slide bg-cream" data-bg="#FFF8EC" aria-label="Slide 9 di 10: evidenze e tracciabilità">
-            <h2 class="t ttl" data-a="left">Evidenze e tracciabilità</h2>
-            <p class="t mu" style="--x:95;--y:180;--fs:33;--t:.2s" data-a="up">Dalle storie ai contratti, alle PR e alle verifiche sul software</p>
+        <!-- 10 ───────────────────────────── La review della PR #106 -->
+        <section class="slide bg-blush" data-bg="#FDEDEF" aria-label="Slide 10 di 11: la review della PR #106">
+            <p class="t hd" style="--x:90;--y:34;--fs:25;--t:.05s" data-a="left">Collaborazione</p>
+            <h2 class="t ttl" data-a="left">La review della PR #106</h2>
+            <p class="t hd" style="--x:95;--y:170;--fs:28;--t:.2s" data-a="up">Workflow del team</p>
 
-            <div class="tbl qs ev" role="table" aria-label="Evidenze nel repository" style="--x:95;--y:240">
-                <div class="tr head" role="row" style="--t:.7s"><div role="columnheader">Perimetro</div><div role="columnheader">Evidenze nel repository</div></div>
-                <div class="tr" role="row" style="--t:1.5s;--rh:100"><div role="rowheader">#25 e #28</div><div role="cell" data-label="Evidenze nel repository">Accesso e sessione: PR #89 <br>Regole per ruolo e risorsa: PR #106</div></div>
-                <div class="tr" role="row" style="--t:2.4s;--rh:100"><div role="rowheader">#48, #49 e #51</div><div role="cell" data-label="Evidenze nel repository">Invio e coordinamento: PR #107 <br>Risposta alla disponibilità: PR #93</div></div>
-                <div class="tr" role="row" style="--t:3.3s;--rh:100"><div role="rowheader">#52</div><div role="cell" data-label="Evidenze nel repository">Conferma e rifiuto: PR #117 integrata in main <br>Permessi, dati obbligatori e immutabilità verificati via HTTP</div></div>
-                <div class="tr" role="row" style="--t:4.2s;--rh:130"><div role="rowheader">Test e integrazione</div><div role="cell" data-label="Evidenze nel repository">PostgreSQL con Testcontainers: PR #110 <br>Suite in consolidamento: #111, #114 e task #116 <br>Controlli documentati: accessi negati, transizioni, migrazioni e comandi concorrenti</div></div>
+            <div class="box" style="--x:90;--y:212;--w:330;--h:84;--fs:27;--fill:var(--cream);--st:var(--red);--t:.5s" data-a="build"><span class="role">Branch</span> <span class="act">per funzionalità</span></div>
+            <span class="arrow" style="--x:420;--y:254;--w:35;--ac:var(--red);--t:1.1s" data-a="arrow" aria-hidden="true"></span>
+            <div class="box" style="--x:455;--y:212;--w:330;--h:84;--fs:27;--fill:var(--cream);--st:var(--red);--t:1.3s" data-a="build"><span class="role">Pull request</span> <span class="act">collegata alla issue</span></div>
+            <span class="arrow" style="--x:785;--y:254;--w:35;--ac:var(--red);--t:1.9s" data-a="arrow" aria-hidden="true"></span>
+            <div class="box" style="--x:820;--y:212;--w:330;--h:84;--fs:27;--fill:var(--cream);--st:var(--red);--t:2.1s" data-a="build"><span class="role">Review</span> <span class="act">ed eventuali correzioni</span></div>
+            <span class="arrow" style="--x:1150;--y:254;--w:35;--ac:var(--red);--t:2.7s" data-a="arrow" aria-hidden="true"></span>
+            <div class="box hot" style="--x:1185;--y:212;--w:330;--h:84;--fs:27;--fill:var(--ink);--tc:var(--cream);--st:var(--ink);--t:2.9s" data-a="build"><span class="role">Merge su main</span> <span class="act">dopo l’approvazione</span></div>
+
+            <img class="shot" src="img/pr106-merged.png" alt="La pull request #106 unita in main" style="--x:95;--y:326;--w:640;--t:3.5s" data-a="fade">
+
+            <h3 class="t strong" style="--x:95;--y:408;--fs:33;--t:4s" data-a="up">Richiesta di modifica e risposta</h3>
+            <img class="shot" src="img/pr106-commento.png" alt="Il commento di richiesta di modifica e la risposta" style="--x:95;--y:462;--w:640;--t:4.3s" data-a="fade">
+
+            <h3 class="t strong" style="--x:905;--y:408;--fs:33;--t:5s" data-a="up">Approvazione</h3>
+            <div class="appr" style="--x:905;--y:462;--w:300;--t:5.3s" data-a="fade">
+                <img src="img/pr106-approvazione.png" alt="L’approvazione della review" width="318" height="362">
+                <img class="gif" src="img/pr106-gatto.gif" alt="" width="202" height="200">
             </div>
-
-            <p class="t strong" style="--x:95;--y:782;--fs:29;--t:5.2s" data-a="up">Il collaudo della UI completa chiude la verifica del percorso prima della demo</p>
-            <p class="t pn" data-a="fade" style="--t:5.6s">09 / 10</p>
+            <p class="t pn" data-a="fade" style="--t:6s">10 / 11</p>
         </section>
 
-        <!-- 10 ───────────────────────────── Prossime iterazioni -->
-        <section class="slide bg-dark on-dark" data-bg="#163441" aria-label="Slide 10 di 10: prossime iterazioni, completare il prodotto">
-            <h2 class="t ttl" style="--fs:55" data-a="left">Prossime iterazioni: completare il prodotto</h2>
-            <p class="t mint" style="--x:95;--y:180;--fs:33;--t:.2s" data-a="up">Il prossimo incremento estende PICUS alle funzionalità ancora mancanti</p>
+        <!-- 11 ───────────────────────────── Prossime iterazioni -->
+        <section class="slide bg-dark on-dark" data-bg="#163441" aria-label="Slide 11 di 11: roadmap, prossime iterazioni">
+            <p class="t hd pink" style="--x:90;--y:34;--fs:25;--t:.05s" data-a="left">Roadmap</p>
+            <h2 class="t ttl" data-a="left">Prossime iterazioni</h2>
+            <p class="t mint" style="--x:95;--y:180;--fs:33;--t:.2s" data-a="up">La priorità proposta è chiudere il ciclo delle comunicazioni del Banco.</p>
 
-            <div class="item big" style="--x:96;--y:262;--nw:116">
-                <span class="num" style="--t:.6s" data-a="pop">01</span>
-                <div class="txt"><h3 style="--t:.8s" data-a="up">Comunicazioni</h3><p style="--t:1s" data-a="up">Invii del Banco, destinatari <br>e conferme di ricezione.</p></div>
-            </div>
-            <div class="item big" style="--x:96;--y:452;--nw:116">
-                <span class="num" style="--t:1.6s" data-a="pop">02</span>
-                <div class="txt"><h3 style="--t:1.8s" data-a="up">Rendicontazione</h3><p style="--t:2s" data-a="up">Schede degli operatori, conteggi OPT <br>e riepiloghi trimestrali.</p></div>
-            </div>
-            <div class="item big" style="--x:96;--y:642;--nw:116">
-                <span class="num" style="--t:2.6s" data-a="pop">03</span>
-                <div class="txt"><h3 style="--t:2.8s" data-a="up">Amministrazione</h3><p style="--t:3s" data-a="up">Gestione di account, catalogo <br>e offerta degli erogatori.</p></div>
-            </div>
-            <div class="item big" style="--x:830;--y:262;--nw:116">
-                <span class="num" style="--t:3.6s" data-a="pop">04</span>
-                <div class="txt"><h3 style="--t:3.8s" data-a="up">Completamento dei flussi</h3><p style="--t:4s" data-a="up">Recupero accesso, annullamento <br>e altre operazioni di backlog.</p></div>
-            </div>
-            <div class="item big" style="--x:830;--y:452;--nw:116">
-                <span class="num" style="--t:4.6s" data-a="pop">05</span>
-                <div class="txt"><h3 style="--t:4.8s" data-a="up">Architecture backlog</h3><p style="--t:5s" data-a="up">Confini di M5 per gRPC, <br>backup e ripristino, <br>contatti senza risposta.</p></div>
-            </div>
+            <div class="box deco" style="--x:95;--y:268;--w:560;--h:480;--fs:30;--fill:var(--blush);--st:var(--pink);--t:.5s" data-a="build"></div>
+            <p class="t hd mono" style="--x:130;--y:330;--fs:21;--t:1s" data-a="up">Proposta per il prossimo sprint</p>
+            <h3 class="t strong" style="--x:130;--y:392;--fs:54;--t:1.2s" data-a="up">Comunicazioni</h3>
+            <p class="t" style="--x:130;--y:492;--fs:32;--lh:1.3;--t:1.5s" data-a="up">Invii del Banco, destinatari e <br>conferme di ricezione.</p>
+            <p class="t hd mono" style="--x:130;--y:690;--fs:28;--t:2s" data-a="up">Epic #22</p>
 
-            <div class="mascot m-center" style="--x:1265;--y:640;--w:200;--t:5.4s" data-a="pop"><a class="home-link" href="../index.html" title="Torna alla pagina iniziale" aria-label="Torna alla pagina iniziale"><img src="pinguino.png" alt="" width="200" height="200"></a></div>
-            <p class="t pn" data-a="fade" style="--t:5.8s">10 / 10</p>
+            <h3 class="t hd pink" style="--x:720;--y:276;--fs:36;--t:2.4s" data-a="up">Rendicontazione</h3>
+            <p class="t" style="--x:720;--y:326;--fs:28;--lh:1.3;--c:var(--cream);--t:2.55s" data-a="up">Schede operatori, conteggi OPT <br>e riepiloghi trimestrali.</p>
+            <h3 class="t hd pink" style="--x:720;--y:410;--fs:36;--t:3s" data-a="up">Amministrazione</h3>
+            <p class="t" style="--x:720;--y:460;--fs:28;--lh:1.3;--c:var(--cream);--t:3.15s" data-a="up">Gestione di account, catalogo <br>e offerta degli erogatori.</p>
+            <h3 class="t hd pink" style="--x:720;--y:544;--fs:36;--t:3.6s" data-a="up">Completamento dei flussi</h3>
+            <p class="t" style="--x:720;--y:594;--fs:28;--lh:1.3;--c:var(--cream);--t:3.75s" data-a="up">Recupero accesso, annullamento <br>e altre operazioni.</p>
+            <h3 class="t hd pink" style="--x:720;--y:678;--fs:36;--t:4.2s" data-a="up">Architecture backlog</h3>
+            <p class="t" style="--x:720;--y:728;--fs:28;--lh:1.3;--c:var(--cream);--t:4.35s" data-a="up">Ripristino, contatti senza risposta <br>e confini di M5 per gRPC.</p>
+
+            <div class="mascot m-center" style="--x:1330;--y:560;--w:170;--t:5.2s" data-a="pop"><a class="home-link" href="../index.html" title="Torna alla pagina iniziale" aria-label="Torna alla pagina iniziale"><img src="pinguino.png" alt="" width="200" height="200"></a></div>
+            <p class="t pn" data-a="fade" style="--t:5.6s">11 / 11</p>
         </section>
     </main>
 
@@ -726,7 +804,7 @@
         <button type="button" id="prev" title="Slide precedente (←)" aria-label="Slide precedente">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
         </button>
-        <span class="count" id="count" aria-live="off">1 / 10</span>
+        <span class="count" id="count" aria-live="off">1 / 11</span>
         <button type="button" id="next" title="Slide successiva (→)" aria-label="Slide successiva">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
         </button>
@@ -813,8 +891,8 @@
 
             // attributi traducibili (etichette per gli screen reader, suggerimenti, intestazioni delle tabelle)
             const attrs = [];
-            document.querySelectorAll('[aria-label], [title], [data-label], [aria-roledescription]').forEach((el) => {
-                ['aria-label', 'title', 'data-label', 'aria-roledescription'].forEach((name) => {
+            document.querySelectorAll('[aria-label], [title], [data-label], [aria-roledescription], [alt]').forEach((el) => {
+                ['aria-label', 'title', 'data-label', 'aria-roledescription', 'alt'].forEach((name) => {
                     if (el.hasAttribute(name)) attrs.push({ el, name, it: el.getAttribute(name) });
                 });
             });
