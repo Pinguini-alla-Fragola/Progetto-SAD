@@ -790,6 +790,8 @@
             const DICTS = { en: window.PICUS_EN || {}, pa: window.PICUS_PA || {} };
             const LANGS = ['it', 'en', 'pa'];
             let dict = {};
+            // in punjabi anche le cifre si scrivono in gurmukhi (dizionario con '@digits')
+            const toDigits = (t) => (dict['@digits'] === 'gurmukhi' ? t.replace(/[0-9]/g, (d) => '੦੧੨੩੪੫੬੭੮੯'[d]) : t);
             const LANG_KEY = 'picus-lang';
             const langBtns = [...document.querySelectorAll('[data-lang]')];
             const metaDesc = document.querySelector('meta[name="description"]');
@@ -843,16 +845,23 @@
                 const en = lang !== 'it'; // true per ogni lingua diversa dall'originale
                 const missing = [];
                 document.documentElement.lang = lang;
-                document.title = en ? (dict['@title'] || itTitle) : itTitle;
-                if (metaDesc) metaDesc.setAttribute('content', en ? (dict['@desc'] || itDesc) : itDesc);
+                document.title = en ? toDigits(dict['@title'] || itTitle) : itTitle;
+                if (metaDesc) metaDesc.setAttribute('content', en ? toDigits(dict['@desc'] || itDesc) : itDesc);
                 leaves.forEach((leaf) => {
                     const text = en ? dict[leaf.key] : undefined;
                     if (en && text === undefined && /[A-Za-zÀ-ÿ]/.test(leaf.key)) missing.push(leaf.key);
                     leaf.el.textContent = '';
-                    if (text !== undefined) leaf.el.appendChild(englishNodes(text, leaf.d));
-                    else leaf.nodes.forEach((n) => leaf.el.appendChild(n.cloneNode(true)));
+                    if (text !== undefined) {
+                        leaf.el.appendChild(englishNodes(toDigits(text), leaf.d));
+                    } else {
+                        leaf.nodes.forEach((n) => {
+                            const c = n.cloneNode(true);
+                            if (en && c.nodeType === Node.TEXT_NODE) c.textContent = toDigits(c.textContent);
+                            leaf.el.appendChild(c);
+                        });
+                    }
                 });
-                attrs.forEach(({ el, name, it }) => el.setAttribute(name, en ? translateAttr(it) : it));
+                attrs.forEach(({ el, name, it }) => el.setAttribute(name, en ? toDigits(translateAttr(it)) : it));
                 langBtns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
                 if (missing.length) console.warn('Traduzioni mancanti (' + lang + '):', missing);
             }
@@ -897,6 +906,7 @@
             function setLang(next) {
                 if (next === lang) return;
                 applyLang(next);
+                count.textContent = toDigits((current + 1) + ' / ' + total);
                 try { localStorage.setItem(LANG_KEY, lang); } catch (e) { /* ignorato */ }
                 stage.classList.add('still'); // la slide in corso cambia lingua senza ripartire da capo
                 prepare();
@@ -981,7 +991,7 @@
 
                 document.body.style.setProperty('--page-bg', slides[n].dataset.bg);
                 progress.style.setProperty('--p', (n + 1) / total);
-                count.textContent = (n + 1) + ' / ' + total;
+                count.textContent = toDigits((n + 1) + ' / ' + total);
                 prevBtn.disabled = n === 0;
                 nextBtn.disabled = n === total - 1;
 
