@@ -1,14 +1,6 @@
 # Review delle iterazioni
 
-Per ogni iterazione aggiungere un resoconto con:
+Le slide raccolgono il lavoro presentato nelle prime due review di PICUS.
 
-- obiettivo dell'iterazione;
-- elementi del backlog completati e incompleti, con motivazioni;
-- risultato o incremento dimostrato;
-- feedback effettivamente ricevuto;
-- aggiornamenti proposti al Product Backlog;
-- rischi e punti aperti;
-- collegamenti a issue, Pull Request ed evidenze disponibili.
-
-Durante la preparazione il risultato consiste negli artefatti di analisi;
-il completamento di una task non attesta l'implementazione della funzionalità.
+- [Review della prima iterazione (PowerPoint)](review-iterazione-1.pptx)
+- [Review dello Sprint 2 (PowerPoint)](review-sprint-2.pptx)
