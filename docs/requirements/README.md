@@ -1,28 +1,23 @@
 # Requisiti e modelli di analisi
 
-Analisi e modelli PICUS allineati al contesto del **5/11/2026** e alla documentazione v0.10. Le [regole funzionali](regole-funzionali.md) e il [registro](open-questions.md) distinguono decisioni e quesiti aperti.
+Qui sono raccolti i requisiti e i modelli di analisi di PICUS. I diagrammi
+mostrano il contesto, i processi attuali e quelli previsti, inclusa la gestione
+degli account. I documenti di riferimento sono le [regole di accesso](regole-accessi.md)
+e le [regole funzionali](regole-funzionali.md).
 
-- [Revisione del backlog](revisione-backlog-2026-11-04.md)
-- [MVP proposto](proposta-mvp.md): sei Story dopo l’accorpamento #52/#53, con la porzione pertinente del vincolo #28
-- [Regole comuni account e credenziali](regole-accessi.md)
-- [Tracciati di monitoraggio in bozza](tracciati-monitoraggio.md)
-- [Guida dei diagrammi to-be](guida-diagramma-to-be.md)
-- Word di progetto nell’area OneDrive condivisa; [esportazione PDF](../Documentazione_SAD_2026.pdf).
-
-## Soggetti e confini
-
-Il Banco di coordinamento conferma gli accordi e inserisce manualmente i dati nel portale ministeriale. Ogni OPT opera tramite un unico account organizzativo, anche quando eroga tramite un professionista. Gli interni e gli esterni pagati dal Banco operano con account personali e compilano ciascuno la propria scheda trimestrale. La OPT mantiene il contatto con gli assistiti, che restano fuori dall’applicazione.
-
-## Diagrammi
-
-- Contesto CTX-01 v0.7: [drawio](diagrams/context/Context%20Diagram.drawio), [PNG](diagrams/context/Context%20Diagram.png). I permessi per l’annullamento sono nelle [regole funzionali](regole-funzionali.md#matrice-di-annullamento).
-- Bozza iniziale del contesto: [PNG](diagrams/context/DiagrammaIniziale_PICUS.png).
-- ASIS-01A: [Mermaid](diagrams/ASIS-01-richieste.mmd), [SVG](diagrams/ASIS-01-richieste.svg), [PNG](diagrams/ASIS-01-richieste.png).
-- ASIS-01B: [Mermaid](diagrams/ASIS-01-rendicontazione.mmd), [SVG](diagrams/ASIS-01-rendicontazione.svg), [PNG](diagrams/ASIS-01-rendicontazione.png).
-- TOBE-01A v0.7: [Mermaid](diagrams/to-be/TOBE-01A-richieste-disponibilita.mmd), [SVG](diagrams/to-be/TOBE-01A-richieste-disponibilita.svg), [PNG](diagrams/to-be/TOBE-01A-richieste-disponibilita.png).
-- TOBE-01B v0.4: [Mermaid](diagrams/to-be/TOBE-01B-appuntamento-esito.mmd), [SVG](diagrams/to-be/TOBE-01B-appuntamento-esito.svg), [PNG](diagrams/to-be/TOBE-01B-appuntamento-esito.png).
-- TOBE-02 v0.4: [Mermaid](diagrams/to-be/TOBE-02-rendicontazione.mmd), [SVG](diagrams/to-be/TOBE-02-rendicontazione.svg), [PNG](diagrams/to-be/TOBE-02-rendicontazione.png).
-
-Sorgenti ed esportazioni IAM sono in [diagrams/iam](diagrams/iam/). L’as-is ricostruisce il processo storico.
-
-Il Product Backlog resta la fonte per pianificazione e avanzamento. #52 assorbe #53, chiusa, e #69 copre la consultazione dei conteggi OPT. Le prove dei QS sono pianificate.
+| Diagramma | Anteprima |
+| --- | --- |
+| Diagramma di contesto | ![Diagramma di contesto](diagrams/context/Context%20Diagram.png) |
+| Prima bozza del contesto | ![Prima bozza del contesto](diagrams/context/DiagrammaIniziale_PICUS.png) |
+| ASIS-01A · Gestione delle richieste | ![Gestione attuale delle richieste](diagrams/as-is/ASIS-01A/ASIS-01-richieste.png) |
+| ASIS-01B · Rendicontazione | ![Rendicontazione attuale](diagrams/as-is/ASIS-01B/ASIS-01-rendicontazione.png) |
+| TOBE-01A · Invio della richiesta e ricerca della disponibilità | ![Invio e disponibilità](diagrams/to-be/TOBE-01A/TOBE-01A-richieste-disponibilita.png) |
+| TOBE-01B · Appuntamento ed esito della richiesta | ![Appuntamento ed esito](diagrams/to-be/TOBE-01B/TOBE-01B-appuntamento-esito.png) |
+| TOBE-02 · Rendicontazione | ![Rendicontazione prevista](diagrams/to-be/TOBE-02/TOBE-02-rendicontazione.png) |
+| IAM-24 · Caricamento delle utenze OPT da CSV | ![Caricamento da CSV](diagrams/iam/IAM-24/IAM-24-caricamento-csv-opt.png) |
+| IAM-25 · Accesso | ![Accesso](diagrams/iam/IAM-25/IAM-25-accesso.png) |
+| IAM-26 · Revoca dell’utenza OPT | ![Revoca utenza OPT](diagrams/iam/IAM-26/IAM-26-revoca-opt.png) |
+| IAM-27 · Creazione dell’account operatore | ![Creazione account operatore](diagrams/iam/IAM-27/IAM-27-creazione-operatore.png) |
+| IAM-28 · Accessi per ruolo | ![Accessi per ruolo](diagrams/iam/IAM-28/IAM-28-accessi-per-ruolo.png) |
+| IAM-30 · Revoca dell’account operatore | ![Revoca account operatore](diagrams/iam/IAM-30/IAM-30-revoca-operatore.png) |
+| IAM-33 · Recupero password | ![Recupero password](diagrams/iam/IAM-33/IAM-33-recupero-password.png) |

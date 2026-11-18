@@ -1,6 +1,6 @@
 # Regole funzionali di riferimento
 
-Versione 0.4 del **14/11/2026**, aggiornata con il ciclo a sei stati e le regole di annullamento. Il [registro](open-questions.md) distingue le decisioni dai quesiti residui.
+Versione 0.4 del **14/11/2026**, aggiornata con il ciclo a sei stati e le regole di annullamento.
 
 ## Richiesta e accordo
 
@@ -48,7 +48,7 @@ Il vincolo #28 si verifica per incremento con casi consentiti e negati. Il [cata
 | OPT erogatrice | Quelle assegnate al proprio account, anche se eroga tramite un professionista |
 | Operatore interno o esterno pagato dal Banco | Quelle assegnate al proprio account personale |
 
-Il motivo è facoltativo da Creata e obbligatorio negli altri stati. PICUS avvisa Banco, OPT richiedente ed erogatore se assegnato, anche durante la programmazione. Il server nega l’operazione a chi è soltanto interpellato o a un collega dell’assegnatario. Una richiesta già Annullata resta tale. In caso di diniego stato e dati restano invariati. Forma e visibilità del motivo restano in [Q-04](open-questions.md#q-04-confine-e-annullamento).
+Il motivo è facoltativo da Creata e obbligatorio negli altri stati. PICUS avvisa Banco, OPT richiedente ed erogatore se assegnato, anche durante la programmazione. Il server nega l’operazione a chi è soltanto interpellato o a un collega dell’assegnatario. Una richiesta già Annullata resta tale. In caso di diniego stato e dati restano invariati. Forma e visibilità del motivo restano in Q-04.
 
 ## Offerta e disponibilità
 
@@ -60,6 +60,6 @@ Il ritiro dell’offerta o la disattivazione di una misura non cancellano riferi
 
 Le comunicazioni possono raggiungere tutte le OPT o un loro gruppo tramite account organizzativi, oppure tutti gli operatori del Banco (interni ed esterni pagati dal Banco) o un loro gruppo tramite account personali. «Confermo la ricezione» registra la prima data e ora per account e comunicazione. Per la OPT il riscontro è dell’organizzazione. La sola apertura lascia il riscontro in sospeso.
 
-Conteggi OPT: anno/trimestre, misura e voce. Vista trimestrale e cumulativa sul periodo derivano dagli stessi dati; nessun secondo inserimento. Cumulativo di conteggi dichiarati, non persone uniche; categorie sovrapponibili restano distinte e dato mancante non equivale a zero. [Tracciati](tracciati-monitoraggio.md) e #41 per controlli, correzioni e significato delle voci.
+Conteggi OPT: anno/trimestre, misura e voce. Vista trimestrale e cumulativa sul periodo derivano dagli stessi dati; nessun secondo inserimento. Cumulativo di conteggi dichiarati, non persone uniche; categorie sovrapponibili restano distinte e dato mancante non equivale a zero. Vedi #41 per controlli, correzioni e significato delle voci.
 
 Interni ed esterni pagati dal Banco inviano ciascuno la propria scheda personale, indipendente dalle richieste. #57 riepiloga il singolo trimestre delle schede, #69 consulta il monitoraggio organizzativo OPT. Inclusione e attribuzione delle attività svolte tramite professionisti nei conteggi OPT restano in #41/Q-13. Inserimento ministeriale manuale.
