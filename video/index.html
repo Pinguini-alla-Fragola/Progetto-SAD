@@ -48,27 +48,25 @@
         h1 { margin: 0 0 0.4rem; font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 800; }
         .lead { margin: 0 0 1.75rem; color: var(--text-secondary); line-height: 1.5; }
 
-        .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+        .player { margin-top: 1.5rem; }
 
-        .choice {
-            display: block;
-            padding: 1.25rem 1.1rem;
+        .toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-top: 1rem;
+            padding: 0.8rem 1.25rem;
             border: 1px solid var(--border-color);
             border-radius: 0.75rem;
             background-color: var(--surface-color);
-            color: inherit;
-            text-decoration: none;
-            line-height: 1.4;
-            cursor: pointer;
+            color: var(--text-primary);
             font: inherit;
-            text-align: left;
+            font-weight: 600;
+            cursor: pointer;
         }
-        .choice:hover, .choice:focus-visible { border-color: var(--accent-color); outline: none; }
-        .choice strong { display: block; margin-bottom: 0.25rem; font-size: 1.1rem; font-weight: 600; }
-        .choice span { color: var(--text-secondary); font-size: 0.92rem; }
-
-        .player { margin-top: 1.75rem; }
-        .player[hidden] { display: none; }
+        .toggle:hover, .toggle:focus-visible { border-color: var(--accent-color); outline: none; }
+        .toggle:disabled { opacity: 0.6; cursor: progress; }
+        .toggle svg { width: 1.2rem; height: 1.2rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
         video {
             display: block;
@@ -80,7 +78,7 @@
         }
 
         @media (max-width: 560px) {
-            .choices { grid-template-columns: 1fr; }
+            .toggle { width: 100%; justify-content: center; }
         }
     </style>
 </head>
@@ -88,21 +86,14 @@
     <main>
         <a class="back" href="../index.html">← Torna alla pagina iniziale</a>
         <h1>Video della demo</h1>
-        <p class="lead">Sprint Review del 19 novembre 2026. Scegli come vedere il video: con il commento vocale oppure senza.</p>
+        <p class="lead">Sprint Review del 19 novembre 2026.</p>
 
-        <div class="choices" role="group" aria-label="Versione del video">
-            <a class="choice" href="#voce" data-v="voce">
-                <strong>Con voce</strong>
-                <span>La demo con il commento parlato.</span>
-            </a>
-            <a class="choice" href="#senza-voce" data-v="senza-voce">
-                <strong>Senza voce</strong>
-                <span>La stessa demo, senza commento.</span>
-            </a>
-        </div>
-
-        <section class="player" id="player" hidden aria-live="polite">
-            <video id="video" controls controlslist="nodownload" playsinline preload="none"></video>
+        <section class="player">
+            <video id="video" controls controlslist="nodownload" playsinline preload="metadata"></video>
+            <button type="button" class="toggle" id="toggle" aria-live="polite">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg>
+                <span id="toggle-label">Senza voce</span>
+            </button>
         </section>
     </main>
 
@@ -111,37 +102,53 @@
             // i video stanno nel branch landing-video, per non appesantire il sito
             var BASE = 'https://raw.githubusercontent.com/Pinguini-alla-Fragola/Progetto-SAD/landing-video/';
             var files = {
-                'voce': { src: BASE + 'picus-demo.mp4', label: 'Con voce' },
-                'senza-voce': { src: BASE + 'picus-demo-senza-voce.mp4', label: 'Senza voce' }
+                'voce': BASE + 'picus-demo.mp4',
+                'senza-voce': BASE + 'picus-demo-senza-voce.mp4'
             };
-            var player = document.getElementById('player');
             var video = document.getElementById('video');
-            var current = null;
+            var toggle = document.getElementById('toggle');
+            var label = document.getElementById('toggle-label');
+            var current = location.hash === '#senza-voce' ? 'senza-voce' : 'voce';
+
+            // il pulsante propone l'altra versione
+            function renderButton() {
+                label.textContent = current === 'voce' ? 'Senza voce' : 'Con voce';
+                toggle.setAttribute('aria-label', current === 'voce'
+                    ? 'Passa alla versione senza voce' : 'Passa alla versione con voce');
+            }
+
+            // le due versioni hanno la stessa durata: si riparte dallo stesso istante
+            function swap() {
+                var next = current === 'voce' ? 'senza-voce' : 'voce';
+                var time = video.currentTime || 0;
+                var wasPlaying = !video.paused && !video.ended;
+                toggle.disabled = true;
+                video.addEventListener('loadedmetadata', function onReady() {
+                    video.removeEventListener('loadedmetadata', onReady);
+                    video.currentTime = time;
+                    toggle.disabled = false;
+                    if (wasPlaying) {
+                        var p = video.play();
+                        if (p && p.catch) p.catch(function () {});
+                    }
+                });
+                video.addEventListener('error', function onError() {
+                    video.removeEventListener('error', onError);
+                    toggle.disabled = false;
+                });
+                current = next;
+                video.src = files[current];
+                video.load();
+                renderButton();
+                try { history.replaceState(null, '', '#' + current); } catch (e) { /* ignorato */ }
+            }
 
             // niente menu del tasto destro sul video (meno scorciatoie per scaricarlo)
             video.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+            toggle.addEventListener('click', swap);
 
-            function show() {
-                var key = location.hash.slice(1);
-                var f = files[key];
-                if (!f) {
-                    video.pause();
-                    player.hidden = true;
-                    current = null;
-                    return;
-                }
-                if (current !== key) {
-                    video.pause();
-                    video.src = f.src;
-                    video.load();
-                    current = key;
-                }
-                player.hidden = false;
-                player.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }
-
-            window.addEventListener('hashchange', show);
-            show();
+            video.src = files[current];
+            renderButton();
         })();
     </script>
 </body>
