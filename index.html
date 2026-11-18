@@ -145,6 +145,52 @@
             font-weight: 600;
         }
 
+        .review-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.55rem;
+        }
+
+        .review-row .review {
+            justify-content: center;
+            flex: 1 1 0;
+            min-width: 0;
+        }
+
+        .review-row .review--date {
+            flex: 1 0 auto;
+            justify-content: space-between;
+            white-space: nowrap;
+        }
+
+        .review-row .review--small {
+            flex: 0 0 auto;
+            padding-inline: 0.8rem;
+        }
+
+        .review-row .review--soon {
+            color: var(--text-secondary);
+            border-style: dashed;
+            font-weight: 600;
+            cursor: default;
+        }
+
+        @media (max-width: 420px) {
+            .review-row {
+                flex-wrap: nowrap;
+                gap: 0.4rem;
+            }
+
+            .review-row .review {
+                padding-inline: 0.6rem;
+                font-size: 0.85rem;
+            }
+
+            .review-row .review--small {
+                padding-inline: 0.55rem;
+            }
+        }
+
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
@@ -215,10 +261,15 @@
                             <span aria-hidden="true">→</span>
                         </a>
                     </li>
-                    <li>
-                        <div class="review review--pending">
+                    <li class="review-row">
+                        <!-- TODO: collegare il PowerPoint della Sprint 2 Review al posto di "#" -->
+                        <a class="review review--available review--date" href="#">
                             <time class="review-title" datetime="2026-11-19">19 novembre 2026</time>
-                        </div>
+                            <span aria-hidden="true">→</span>
+                        </a>
+                        <!-- TODO: collegare il video quando disponibile -->
+                        <div class="review review--soon review--small" aria-disabled="true">Video</div>
+                        <a class="review review--available review--small" href="https://demo.picus.strawberrypenguin.it" target="_blank" rel="noopener noreferrer">Demo</a>
                     </li>
                     <li>
                         <div class="review review--pending">
