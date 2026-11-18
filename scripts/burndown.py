@@ -2,6 +2,8 @@
 """Burndown di uno sprint da un GitHub Project (v2): scrive un CSV e un grafico SVG.
 
 Punti di un task: campo Number, altrimenti la taglia (PUNTI_PER_TAGLIA), altrimenti 1.
+Il lavoro rimasto dipende dallo stato (RESIDUO_PER_STATO): Ready 75%, In progress 50%, In review 25%,
+Done 0% del peso. Lo stato nel tempo viene dalla cronologia degli eventi di stato dell'issue.
 Esclude Pull Request, Epic e contenuti non disponibili. Solo libreria standard.
 
 Variabili d'ambiente (le prime tre sono obbligatorie):
@@ -20,6 +22,8 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 PUNTI_PER_TAGLIA = {"XS": 1, "S": 2, "M": 3, "L": 5, "XL": 8}   # da concordare nel team
+# quota di punti ancora da fare per stato; Done vale 0 (task terminato, si sottrae l'intero peso)
+RESIDUO_PER_STATO = {"Backlog": 1.0, "Ready": 0.75, "In progress": 0.5, "In review": 0.25, "Done": 0.0}
 UTC = timezone.utc
 
 # TIPO_PROPRIETARIO diventa "user" o "organization"
@@ -34,7 +38,10 @@ query($login:String!, $num:Int!, $after:String) {
           createdAt updatedAt
           content {
             __typename
-            ... on Issue { number title closedAt issueType { name } }
+            ... on Issue { number title closedAt issueType { name }
+              timelineItems(first:100, itemTypes:[PROJECT_V2_ITEM_STATUS_CHANGED_EVENT]) {
+                nodes { ... on ProjectV2ItemStatusChangedEvent { createdAt previousStatus status } }
+              } }
             ... on PullRequest { number title closedAt }
             ... on DraftIssue { title }
           }
@@ -95,8 +102,12 @@ def scarica_dati(cfg):
         fatto = campi.get(cfg["campo_stato"], {}).get("name") == cfg["valore_fatto"]
         # completato: chiusura dell'issue se c'è, altrimenti ultimo aggiornamento
         chiuso = (data(contenuto.get("closedAt")) or data(riga["updatedAt"])) if fatto else None
+        stato_ora = campi.get(cfg["campo_stato"], {}).get("name")
+        eventi = sorted((data(e["createdAt"]), e.get("previousStatus"), e.get("status"))
+                        for e in (contenuto.get("timelineItems") or {}).get("nodes", []) if e)
         s["task"].append({"titolo": contenuto.get("title", "?"), "punti": float(punti),
-                          "creato": data(riga["createdAt"]), "chiuso": chiuso})
+                          "creato": data(riga["createdAt"]), "chiuso": chiuso,
+                          "stato_ora": stato_ora, "eventi": eventi})
     return sprint
 
 
@@ -114,6 +125,26 @@ def scegli_sprint(dati, titolo, oggi):
     return max(dati, key=lambda nome: dati[nome]["inizio"])
 
 
+def stato_a(task, istante):
+    """Stato del task a un istante: dopo l'ultimo evento già avvenuto; prima del primo, lo stato che
+    quell'evento lasciava; senza eventi, lo stato attuale. Se è chiuso, vale Done."""
+    if task["chiuso"] and task["chiuso"] <= istante:
+        return "Done"
+    eventi = task.get("eventi") or []
+    passati = [e for e in eventi if e[0] <= istante]
+    if passati:
+        return passati[-1][2]
+    if eventi:
+        return eventi[0][1] or "Backlog"
+    ora = task.get("stato_ora") or "Backlog"
+    return "Backlog" if ora == "Done" else ora      # Done senza chiusura già avvenuta: non ancora finito
+
+
+def residuo(task, istante):
+    """Punti ancora da fare per il task a un istante, secondo RESIDUO_PER_STATO (stato ignoto = 100%)."""
+    return task["punti"] * RESIDUO_PER_STATO.get(stato_a(task, istante), 1.0)
+
+
 def calcola_punti(sprint, adesso):
     """Punti a ogni mezzanotte dello sprint fino a adesso, più adesso se lo sprint è in corso.
     Restituisce (base, righe) con righe = [(giorni dall'inizio, scope, completati, rimanenti)]."""
@@ -127,7 +158,7 @@ def calcola_punti(sprint, adesso):
     righe = []
     for istante in istanti:
         scope = sum(t["punti"] for t in task if aggiunto(t) <= istante)
-        fatti = sum(t["punti"] for t in task if t["chiuso"] and t["chiuso"] <= istante)
+        fatti = scope - sum(residuo(t, istante) for t in task if aggiunto(t) <= istante)
         righe.append(((istante - t0).total_seconds() / 86400, scope, fatti, scope - fatti))
     base = righe[0][1] if righe and righe[0][1] > 0 else sum(t["punti"] for t in task)
     return base, righe
