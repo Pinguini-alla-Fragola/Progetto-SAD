@@ -1,1 +1,211 @@
-<svg id="my-svg" width="100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="statediagram" style="max-width: 1447.89px; background-color: white;" viewBox="4 -49 1447.888671875 571.4666137695312" role="graphics-document document" aria-roledescription="stateDiagram" aria-describedby="chart-desc-my-svg" aria-labelledby="chart-title-my-svg"><title id="chart-title-my-svg">PICUS - Stati della richiesta</title><desc id="chart-desc-my-svg">Protocollo dei comandi di RichiesteApi. Gli stati e le transizioni seguono ADR-002.</desc><style>#my-svg{font-family:Arial;font-size:14px;fill:#172B3A;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#my-svg .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#my-svg .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#my-svg .error-icon{fill:hsl(31.5789473684, 76%, 100%);}#my-svg .error-text{fill:#000000;stroke:#000000;}#my-svg .edge-thickness-normal{stroke-width:1px;}#my-svg .edge-thickness-thick{stroke-width:3.5px;}#my-svg .edge-pattern-solid{stroke-dasharray:0;}#my-svg .edge-thickness-invisible{stroke-width:0;fill:none;}#my-svg .edge-pattern-dashed{stroke-dasharray:3;}#my-svg .edge-pattern-dotted{stroke-dasharray:2;}#my-svg .marker{fill:#64748B;stroke:#64748B;}#my-svg .marker.cross{stroke:#64748B;}#my-svg svg{font-family:Arial;font-size:14px;}#my-svg p{margin:0;}#my-svg defs [id$="-barbEnd"]{fill:#64748B;stroke:#64748B;}#my-svg g.stateGroup text{fill:#5480B0;stroke:none;font-size:10px;}#my-svg g.stateGroup text{fill:#172B3A;stroke:none;font-size:10px;}#my-svg g.stateGroup .state-title{font-weight:bolder;fill:#E9F2FC;}#my-svg g.stateGroup rect{fill:#E9F2FC;stroke:#5480B0;}#my-svg g.stateGroup line{stroke:#64748B;stroke-width:1;}#my-svg .transition{stroke:#64748B;stroke-width:1;fill:none;}#my-svg .stateGroup .composit{fill:#f4f4f4;border-bottom:1px;}#my-svg .stateGroup .alt-composit{fill:#e0e0e0;border-bottom:1px;}#my-svg .state-note{stroke:hsl(52.6829268293, 60%, 73.9215686275%);fill:#fff5ad;}#my-svg .state-note text{fill:#333;stroke:none;font-size:10px;}#my-svg .stateLabel .box{stroke:none;stroke-width:0;fill:#E9F2FC;opacity:0.5;}#my-svg .edgeLabel .label rect{fill:#FFFFFF;opacity:0.5;}#my-svg .edgeLabel{background-color:#F7FAFE;text-align:center;}#my-svg .edgeLabel p{background-color:#F7FAFE;}#my-svg .edgeLabel rect{opacity:0.5;background-color:#F7FAFE;fill:#F7FAFE;}#my-svg .edgeLabel .label text{fill:#172B3A;}#my-svg .label div .edgeLabel{color:#172B3A;}#my-svg .stateLabel text{fill:#E9F2FC;font-size:10px;font-weight:bold;}#my-svg .node circle.state-start{fill:#64748B;stroke:#64748B;}#my-svg .node .fork-join{fill:#64748B;stroke:#64748B;}#my-svg .node circle.state-end{fill:#5480B0;stroke:#f4f4f4;stroke-width:1.5;}#my-svg .end-state-inner{fill:#F7FAFE;stroke-width:1.5;}#my-svg .node rect{fill:#E9F2FC;stroke:#5480B0;stroke-width:1px;}#my-svg .node polygon{fill:#E9F2FC;stroke:#5480B0;stroke-width:1px;}#my-svg [id$="-barbEnd"]{fill:#64748B;}#my-svg .statediagram-cluster rect{fill:#E9F2FC;stroke:#5480B0;stroke-width:1px;}#my-svg .cluster-label,#my-svg .nodeLabel{color:#E9F2FC;}#my-svg .statediagram-cluster rect.outer{rx:5px;ry:5px;}#my-svg .statediagram-state .divider{stroke:#5480B0;}#my-svg .statediagram-state .title-state{rx:5px;ry:5px;}#my-svg .statediagram-cluster.statediagram-cluster .inner{fill:#F7FAFE;}#my-svg .statediagram-cluster.statediagram-cluster-alt .inner{fill:#E9F2FC;}#my-svg .statediagram-cluster .inner{rx:0;ry:0;}#my-svg .statediagram-state rect.basic{rx:5px;ry:5px;}#my-svg .statediagram-state rect.divider{stroke-dasharray:10,10;fill:#E9F2FC;}#my-svg .note-edge{stroke-dasharray:5;}#my-svg .statediagram-note rect{fill:#fff5ad;stroke:hsl(52.6829268293, 60%, 73.9215686275%);stroke-width:1px;rx:0;ry:0;}#my-svg .statediagram-note rect{fill:#fff5ad;stroke:hsl(52.6829268293, 60%, 73.9215686275%);stroke-width:1px;rx:0;ry:0;}#my-svg .statediagram-note text{fill:#333;}#my-svg .statediagram-note .nodeLabel{color:#333;}#my-svg .statediagram .edgeLabel{color:red;}#my-svg [id$="-dependencyStart"],#my-svg [id$="-dependencyEnd"]{fill:#64748B;stroke:#64748B;stroke-width:1;}#my-svg .statediagramTitleText{text-anchor:middle;font-size:18px;fill:#172B3A;}#my-svg [data-look="neo"].statediagram-cluster rect{fill:#E9F2FC;stroke:url(#my-svg-gradient);stroke-width:1;}#my-svg [data-look="neo"].statediagram-cluster rect.outer{rx:5px;ry:5px;filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg .node .neo-node{stroke:#5480B0;}#my-svg [data-look="neo"].node rect,#my-svg [data-look="neo"].cluster rect,#my-svg [data-look="neo"].node polygon{stroke:url(#my-svg-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg [data-look="neo"].swimlane.cluster rect{filter:none;}#my-svg [data-look="neo"].node path{stroke:url(#my-svg-gradient);stroke-width:1px;}#my-svg [data-look="neo"].node .outer-path{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg [data-look="neo"].node .neo-line path{stroke:#5480B0;filter:none;}#my-svg [data-look="neo"].node circle{stroke:url(#my-svg-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg [data-look="neo"].node circle .state-start{fill:#000000;}#my-svg [data-look="neo"].icon-shape .icon{fill:url(#my-svg-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg [data-look="neo"].icon-shape .icon-neo path{stroke:url(#my-svg-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg .edgeLabel .label rect{opacity:1;}#my-svg .edgeLabel text{font-size:13px;}#my-svg .node.statediagram-state rect,#my-svg .statediagram-cluster rect.outer{rx:0px!important;ry:0px!important;}#my-svg .statediagram-state .text-inner-tspan{font-weight:700;}#my-svg .statediagramTitleText{font-size:18px;font-weight:700;fill:rgb(23, 43, 58);}#my-svg .statediagram-cluster rect{stroke:rgb(124, 155, 185);}#my-svg .cluster-label text{fill:rgb(24, 57, 87);}#my-svg .node[id*="-Creata-"]{--stato-sfondo:#e6eef0;--stato-testo:#253f4c;}#my-svg .node[id*="-Carico-"],#my-svg .node[id*="-Programmazione-"]{--stato-sfondo:#fbedd6;--stato-testo:#795117;}#my-svg .node[id*="-Confermata-"]{--stato-sfondo:#e8f2e9;--stato-testo:#192c3a;}#my-svg .node[id*="-Rifiutata-"]{--stato-sfondo:#faecee;--stato-testo:#9c3844;}#my-svg .node[id*="-Annullata-"]{--stato-sfondo:#edf1ef;--stato-testo:#3a545e;}#my-svg .node.statediagram-state rect{fill:var(--stato-sfondo);stroke:var(--stato-testo);}#my-svg .node.statediagram-state .text-inner-tspan{fill:var(--stato-testo);}#my-svg :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}</style><g><defs><marker id="my-svg_stateDiagram-barbEnd" refX="19" refY="7" markerWidth="20" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto"><path d="M 19,7 L9,13 L14,7 L9,1 Z"/></marker></defs><g class="root"><g class="clusters"><g class="statediagram-state statediagram-cluster" id="my-svg-state-Annullabile-7" data-id="Annullabile" data-look="classic"><g><rect class="outer" x="12" y="66" width="1431.888671875" height="270.26666078567507" data-look="classic"/></g><g class="cluster-label" transform="translate(634.85791015625, 64)"><g><rect class="background" style="stroke: none"/><text y="-10.1" style=""><tspan class="text-outer-tspan row" x="0" y="-0.1em" dy="1.1em"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">Stati</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> da</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> cui</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> si</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> può</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> annullare</tspan></tspan></text></g></g><rect class="inner" x="12" y="83.99999904632568" width="1431.888671875" height="248.2666617393494"/></g></g><g class="edges edgePaths"><path d="M50,220.8999981880188L74,220.8999981880188" id="my-svg-edge0" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge0" data-points="W3sieCI6NTAsInkiOjIyMC44OTk5OTgxODgwMTg4fSx7IngiOjc0LCJ5IjoyMjAuODk5OTk4MTg4MDE4OH1d" data-look="classic" marker-end="url(#my-svg_stateDiagram-barbEnd)"/><path d="M222,220.8999981880188L391.6162109375,220.8999981880188" id="my-svg-edge1" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge1" data-points="W3sieCI6MjIyLCJ5IjoyMjAuODk5OTk4MTg4MDE4OH0seyJ4IjozOTEuNjE2MjEwOTM3NSwieSI6MjIwLjg5OTk5ODE4ODAxODh9XQ==" data-look="classic" marker-end="url(#my-svg_stateDiagram-barbEnd)"/><path d="M539.6162109375,219.1666651725769L562.5451431256345,219.1666651725769Q569.6162109375,219.1666651725769 569.6162109375,212.09559736071142L569.6162109375,177.97106647672143Q569.6162109375,170.89999866485596 576.6872787493655,170.89999866485596L804.4287109375,170.89999866485596" id="my-svg-edge2" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge2" data-points="W3sieCI6NTM5LjYxNjIxMDkzNzUsInkiOjIxOS4xNjY2NjUxNzI1NzY5fSx7IngiOjU2OS42MTYyMTA5Mzc1LCJ5IjoyMTkuMTY2NjY1MTcyNTc2OX0seyJ4Ijo1NjkuNjE2MjEwOTM3NSwieSI6MTcwLjg5OTk5ODY2NDg1NTk2fSx7IngiOjgwNC40Mjg3MTA5Mzc1LCJ5IjoxNzAuODk5OTk4NjY0ODU1OTZ9XQ==" data-look="classic" marker-end="url(#my-svg_stateDiagram-barbEnd)"/><path d="M952.4287109375,169.16666564941406L975.3576431256345,169.16666564941406Q982.4287109375,169.16666564941406 982.4287109375,162.09559783754858L982.4287109375,142.07106685819116Q982.4287109375,134.99999904632568 989.4997787493655,134.99999904632568L1271.888671875,134.99999904632568" id="my-svg-edge3" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge3" data-points="W3sieCI6OTUyLjQyODcxMDkzNzUsInkiOjE2OS4xNjY2NjU2NDk0MTQwNn0seyJ4Ijo5ODIuNDI4NzEwOTM3NSwieSI6MTY5LjE2NjY2NTY0OTQxNDA2fSx7IngiOjk4Mi40Mjg3MTA5Mzc1LCJ5IjoxMzQuOTk5OTk5MDQ2MzI1Njh9LHsieCI6MTI3MS44ODg2NzE4NzUsInkiOjEzNC45OTk5OTkwNDYzMjU2OH1d" data-look="classic" marker-end="url(#my-svg_stateDiagram-barbEnd)"/><path d="M539.6162109375,222.6333312034607L562.5451431256345,222.6333312034607Q569.6162109375,222.6333312034607 569.6162109375,229.70439901532617L569.6162109375,271.9955960255674Q569.6162109375,279.0666638374329 576.6872787493655,279.0666638374329L1234.8176040631345,279.0666638374329Q1241.888671875,279.0666638374329 1241.888671875,271.9955960255674L1241.888671875,268.97106504620996Q1241.888671875,261.8999972343445 1248.9597396868655,261.8999972343445L1271.888671875,261.8999972343445" id="my-svg-edge4" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge4" data-points="W3sieCI6NTM5LjYxNjIxMDkzNzUsInkiOjIyMi42MzMzMzEyMDM0NjA3fSx7IngiOjU2OS42MTYyMTA5Mzc1LCJ5IjoyMjIuNjMzMzMxMjAzNDYwN30seyJ4Ijo1NjkuNjE2MjEwOTM3NSwieSI6Mjc5LjA2NjY2MzgzNzQzMjl9LHsieCI6MTI0MS44ODg2NzE4NzUsInkiOjI3OS4wNjY2NjM4Mzc0MzI5fSx7IngiOjEyNDEuODg4NjcxODc1LCJ5IjoyNjEuODk5OTk3MjM0MzQ0NX0seyJ4IjoxMjcxLjg4ODY3MTg3NSwieSI6MjYxLjg5OTk5NzIzNDM0NDV9XQ==" data-look="classic" marker-end="url(#my-svg_stateDiagram-barbEnd)"/><path d="M952.4287109375,172.63333168029786L975.3576431256346,172.63333168029783Q982.4287109375,172.63333168029783 982.4287109375,179.7043994921633L982.4287109375,203.96226339159523Q982.4287109375,211.0333312034607 989.4997787493655,211.0333312034607L1234.8176040631345,211.0333312034607Q1241.888671875,211.0333312034607 1241.888671875,218.10439901532618L1241.888671875,251.3622633915952Q1241.888671875,258.4333312034607 1248.9597396868655,258.4333312034607L1271.888671875,258.4333312034607" id="my-svg-edge5" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge5" data-points="W3sieCI6OTUyLjQyODcxMDkzNzUsInkiOjE3Mi42MzMzMzE2ODAyOTc4Nn0seyJ4Ijo5ODIuNDI4NzEwOTM3NSwieSI6MTcyLjYzMzMzMTY4MDI5NzgzfSx7IngiOjk4Mi40Mjg3MTA5Mzc1LCJ5IjoyMTEuMDMzMzMxMjAzNDYwN30seyJ4IjoxMjQxLjg4ODY3MTg3NSwieSI6MjExLjAzMzMzMTIwMzQ2MDd9LHsieCI6MTI0MS44ODg2NzE4NzUsInkiOjI1OC40MzMzMzEyMDM0NjA3fSx7IngiOjEyNzEuODg4NjcxODc1LCJ5IjoyNTguNDMzMzMxMjAzNDYwN31d" data-look="classic" marker-end="url(#my-svg_stateDiagram-barbEnd)"/><path d="M727.9443359375,26L727.9443359375,66" id="my-svg-edge6" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge6" data-points="W3sieCI6NzI3Ljk0NDMzNTkzNzUsInkiOjI2fSx7IngiOjcyNy45NDQzMzU5Mzc1LCJ5Ijo2Nn1d" data-look="classic" marker-end="url(#my-svg_stateDiagram-barbEnd)"/><path d="M727.9443359375,336.26666078567507L727.9443359375,482.46665773391726" id="my-svg-edge7" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge7" data-points="W3sieCI6NzI3Ljk0NDMzNTkzNzUsInkiOjMzNi4yNjY2NjA3ODU2NzUwN30seyJ4Ijo3MjcuOTQ0MzM1OTM3NSwieSI6NDgyLjQ2NjY1NzczMzkxNzI2fV0=" data-look="classic" marker-end="url(#my-svg_stateDiagram-barbEnd)"/></g><g class="edgeLabels"><g class="edgeLabel" transform="translate(306.80810546875, 220.29999780654907)"><g class="label" data-id="edge1" transform="translate(-0.186767578125, -22.799999237060547)"><g><rect class="background" style="" x="-60.7578125" y="-0.9999990463256836" width="121.6162109375" height="50.79999923706055"/><text y="-10.1" text-anchor="middle" style=""><tspan class="text-outer-tspan row" x="0" y="-0.1em" dy="1.1em" text-anchor="middle"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">[Banco]</tspan></tspan><tspan class="text-outer-tspan row" x="0" y="1em" dy="1.1em" text-anchor="middle"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">prendiInCarico()</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> /</tspan></tspan><tspan class="text-outer-tspan row" x="0" y="2.1em" dy="1.1em" text-anchor="middle"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">[ricerca</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> consentita]</tspan></tspan></text></g></g></g><g class="edgeLabel" transform="translate(690.0224609375, 170.29999828338623)"><g class="label" data-id="edge2" transform="translate(-0.1875, -22.799999237060547)"><g><rect class="background" style="" x="-90.3515625" y="-0.9999990463256836" width="180.8125" height="50.79999923706055"/><text y="-10.1" text-anchor="middle" style=""><tspan class="text-outer-tspan row" x="0" y="-0.1em" dy="1.1em" text-anchor="middle"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">[Banco</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> e</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> disponibilità</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> valida]</tspan></tspan><tspan class="text-outer-tspan row" x="0" y="1em" dy="1.1em" text-anchor="middle"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">assegnaErogatore()</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> /</tspan></tspan><tspan class="text-outer-tspan row" x="0" y="2.1em" dy="1.1em" text-anchor="middle"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">[erogatore</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> assegnato]</tspan></tspan></text></g></g></g><g class="edgeLabel" transform="translate(1112.15869140625, 134.39999866485596)"><g class="label" data-id="edge3" transform="translate(-0.1875, -22.799999237060547)"><g><rect class="background" style="" x="-78.671875" y="-0.9999990463256836" width="157.453125" height="50.79999923706055"/><text y="-10.1" text-anchor="middle" style=""><tspan class="text-outer-tspan row" x="0" y="-0.1em" dy="1.1em" text-anchor="middle"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">[Banco</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> e</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> accordo</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> valido]</tspan></tspan><tspan class="text-outer-tspan row" x="0" y="1em" dy="1.1em" text-anchor="middle"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">confermaAccordo()</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> /</tspan></tspan><tspan class="text-outer-tspan row" x="0" y="2.1em" dy="1.1em" text-anchor="middle"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">[accordo</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> consultabile]</tspan></tspan></text></g></g></g><g class="edgeLabel" transform="translate(878.4287109375, 278.166662311554)"><g class="label" data-id="edge4" transform="translate(-0.188720703125, -29.950000762939453)"><g><rect class="background" style="" x="-56.4609375" y="-0.9999990463256836" width="114.0302734375" height="66.20000076293945"/><text y="-10.1" text-anchor="middle" style=""><tspan class="text-outer-tspan row" x="0" y="-0.1em" dy="1.1em" text-anchor="middle"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">[Banco,</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> opzioni</tspan></tspan><tspan class="text-outer-tspan row" x="0" y="1em" dy="1.1em" text-anchor="middle"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">esaurite]</tspan></tspan><tspan class="text-outer-tspan row" x="0" y="2.1em" dy="1.1em" text-anchor="middle"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">rifiutaRichiesta()</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> /</tspan></tspan><tspan class="text-outer-tspan row" x="0" y="3.2em" dy="1.1em" text-anchor="middle"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">[fuori</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> dalla</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> coda]</tspan></tspan></text></g></g></g><g class="edgeLabel" transform="translate(1112.15869140625, 210.43333082199098)"><g class="label" data-id="edge5" transform="translate(-0.190673828125, -22.799999237060547)"><g><rect class="background" style="" x="-99.6796875" y="-0.9999990463256836" width="199.4599609375" height="50.79999923706055"/><text y="-10.1" text-anchor="middle" style=""><tspan class="text-outer-tspan row" x="0" y="-0.1em" dy="1.1em" text-anchor="middle"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">[Banco</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> e</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> accordo</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> impraticabile]</tspan></tspan><tspan class="text-outer-tspan row" x="0" y="1em" dy="1.1em" text-anchor="middle"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">rifiutaRichiesta()</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> /</tspan></tspan><tspan class="text-outer-tspan row" x="0" y="2.1em" dy="1.1em" text-anchor="middle"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">[fuori</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> dalla</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> coda]</tspan></tspan></text></g></g></g><g class="edgeLabel" transform="translate(727.5458984375, 409.36665925979617)"><g class="label" data-id="edge7" transform="translate(0, -29.950000762939453)"><g><rect class="background" style="" x="-66.6015625" y="-0.9999990463256836" width="133.203125" height="66.20000076293945"/><text y="-10.1" text-anchor="middle" style=""><tspan class="text-outer-tspan row" x="0" y="-0.1em" dy="1.1em" text-anchor="middle"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">[account</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> autorizzato,</tspan></tspan><tspan class="text-outer-tspan row" x="0" y="1em" dy="1.1em" text-anchor="middle"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">motivo</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> se</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> richiesto]</tspan></tspan><tspan class="text-outer-tspan row" x="0" y="2.1em" dy="1.1em" text-anchor="middle"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">annullaRichiesta()</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> /</tspan></tspan><tspan class="text-outer-tspan row" x="0" y="3.2em" dy="1.1em" text-anchor="middle"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">[dettagli</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> conservati]</tspan></tspan></text></g></g></g></g><g class="nodes"><g class="node  statediagram-state" id="my-svg-state-Carico-4" data-look="classic" transform="translate(465.6162109375, 220.8999981880188)"><rect class="basic label-container" style="" rx="5" ry="5" x="-74" y="-15.999999523162842" width="148" height="31.999999046325684"/><g class="label" style="" transform="translate(-66, -7.999999523162842)"><rect/><g><rect class="background" style="stroke: none"/><text y="-10.1" style=""><tspan class="text-outer-tspan row" x="0" y="-0.1em" dy="1.1em"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">Presa</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> in</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> carico</tspan></tspan></text></g></g></g><g class="node  statediagram-state" id="my-svg-state-Programmazione-5" data-look="classic" transform="translate(878.4287109375, 170.89999866485596)"><rect class="basic label-container" style="" rx="5" ry="5" x="-74" y="-15.999999523162842" width="148" height="31.999999046325684"/><g class="label" style="" transform="translate(-66, -7.999999523162842)"><rect/><g><rect class="background" style="stroke: none"/><text y="-10.1" style=""><tspan class="text-outer-tspan row" x="0" y="-0.1em" dy="1.1em"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">In</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> programmazione</tspan></tspan></text></g></g></g><g class="node default" id="my-svg-state-Annullabile_start-0" data-look="classic" transform="translate(43, 220.8999981880188)"><circle class="state-start" r="7" width="14" height="14"/></g><g class="node  statediagram-state" id="my-svg-state-Creata-1" data-look="classic" transform="translate(148, 220.8999981880188)"><rect class="basic label-container" style="" rx="5" ry="5" x="-74" y="-15.999999523162842" width="148" height="31.999999046325684"/><g class="label" style="" transform="translate(-66, -7.999999523162842)"><rect/><g><rect class="background" style="stroke: none"/><text y="-10.1" style=""><tspan class="text-outer-tspan row" x="0" y="-0.1em" dy="1.1em"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">Creata</tspan></tspan></text></g></g></g><g class="node  statediagram-state" id="my-svg-state-Confermata-3" data-look="classic" transform="translate(1345.888671875, 134.99999904632568)"><rect class="basic label-container" style="" rx="5" ry="5" x="-74" y="-15.999999523162842" width="148" height="31.999999046325684"/><g class="label" style="" transform="translate(-66, -7.999999523162842)"><rect/><g><rect class="background" style="stroke: none"/><text y="-10.1" style=""><tspan class="text-outer-tspan row" x="0" y="-0.1em" dy="1.1em"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">Confermata</tspan></tspan></text></g></g></g><g class="node  statediagram-state" id="my-svg-state-Rifiutata-5" data-look="classic" transform="translate(1345.888671875, 260.1666642189026)"><rect class="basic label-container" style="" rx="5" ry="5" x="-74" y="-15.999999523162842" width="148" height="31.999999046325684"/><g class="label" style="" transform="translate(-66, -7.999999523162842)"><rect/><g><rect class="background" style="stroke: none"/><text y="-10.1" style=""><tspan class="text-outer-tspan row" x="0" y="-0.1em" dy="1.1em"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">Rifiutata</tspan></tspan></text></g></g></g><g class="node default" id="my-svg-state-root_start-6" data-look="classic" transform="translate(727.9443359375, 19)"><circle class="state-start" r="7" width="14" height="14"/></g><g class="node  statediagram-state" id="my-svg-state-Annullata-7" data-look="classic" transform="translate(727.9443359375, 498.46665678024294)"><rect class="basic label-container" style="" rx="5" ry="5" x="-74" y="-15.999999523162842" width="148" height="31.999999046325684"/><g class="label" style="" transform="translate(-66, -7.999999523162842)"><rect/><g><rect class="background" style="stroke: none"/><text y="-10.1" style=""><tspan class="text-outer-tspan row" x="0" y="-0.1em" dy="1.1em"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">Annullata</tspan></tspan></text></g></g></g></g></g></g><defs><filter id="my-svg-drop-shadow" height="130%" width="130%"><feDropShadow dx="4" dy="4" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"/></filter></defs><defs><filter id="my-svg-drop-shadow-small" height="150%" width="150%"><feDropShadow dx="2" dy="2" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"/></filter></defs><linearGradient id="my-svg-gradient" gradientUnits="objectBoundingBox" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#5480B0" stop-opacity="1"/><stop offset="100%" stop-color="hsl(91.5789473684, 36%, 85.0980392157%)" stop-opacity="1"/></linearGradient><text text-anchor="middle" x="727.9443359375" y="-25" class="statediagramTitleText">PICUS · Stati della richiesta {protocol}</text></svg>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 9.0.0 (20230911.1827)
+ -->
+<!-- Title: PICUS &#45; Stati della richiesta Pages: 1 -->
+<svg width="100%"
+ viewBox="0.00 0.00 1569.60 567.94" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(14.4 553.54)">
+<title>PICUS &#45; Stati della richiesta</title>
+<polygon fill="#ffffff" stroke="none" points="-14.4,14.4 -14.4,-553.54 1555.2,-553.54 1555.2,14.4 -14.4,14.4"/>
+<text text-anchor="start" x="652.65" y="-519.04" font-family="Arial" font-weight="bold" font-size="18.00" fill="#172b3a">PICUS · Stati della richiesta</text>
+<!-- Annullabile -->
+<g id="node1" class="node">
+<title>Annullabile</title>
+<polygon fill="#f7fafe" stroke="#7c9bb9" stroke-width="1.15" points="1540.8,-510.14 0,-510.14 0,-209.9 1540.8,-209.9 1540.8,-510.14"/>
+</g>
+<!-- Creata -->
+<g id="node2" class="node">
+<title>Creata</title>
+<polygon fill="#e6eef0" stroke="#253f4c" stroke-width="1.15" points="300.4,-460.03 200.4,-460.03 200.4,-420 300.4,-420 300.4,-460.03"/>
+<text text-anchor="start" x="229.4" y="-436.17" font-family="Arial" font-weight="bold" font-size="13.00" fill="#253f4c">Creata</text>
+</g>
+<!-- Carico -->
+<g id="node3" class="node">
+<title>Carico</title>
+<polygon fill="#fbedd6" stroke="#795117" stroke-width="1.15" points="685.39,-460.03 535.41,-460.03 535.41,-420 685.39,-420 685.39,-460.03"/>
+<text text-anchor="start" x="562.4" y="-436.17" font-family="Arial" font-weight="bold" font-size="13.00" fill="#795117">Presa in carico</text>
+</g>
+<!-- Programmazione -->
+<g id="node4" class="node">
+<title>Programmazione</title>
+<polygon fill="#fbedd6" stroke="#795117" stroke-width="1.15" points="1115.4,-460.03 945.4,-460.03 945.4,-420 1115.4,-420 1115.4,-460.03"/>
+<text text-anchor="start" x="968.9" y="-436.17" font-family="Arial" font-weight="bold" font-size="13.00" fill="#795117">In programmazione</text>
+</g>
+<!-- Confermata -->
+<g id="node5" class="node">
+<title>Confermata</title>
+<polygon fill="#e8f2e9" stroke="#2f6b3a" stroke-width="1.15" points="1515.42,-460.03 1385.38,-460.03 1385.38,-420 1515.42,-420 1515.42,-460.03"/>
+<text text-anchor="start" x="1413.27" y="-436.17" font-family="Arial" font-weight="bold" font-size="13.00" fill="#192c3a">Confermata</text>
+</g>
+<!-- Rifiutata -->
+<g id="node6" class="node">
+<title>Rifiutata</title>
+<polygon fill="#faecee" stroke="#9c3844" stroke-width="1.15" points="1095.42,-290.03 965.38,-290.03 965.38,-250 1095.42,-250 1095.42,-290.03"/>
+<text text-anchor="start" x="1003.4" y="-266.17" font-family="Arial" font-weight="bold" font-size="13.00" fill="#9c3844">Rifiutata</text>
+</g>
+<!-- Annullata -->
+<g id="node7" class="node">
+<title>Annullata</title>
+<polygon fill="#edf1ef" stroke="#3a545e" stroke-width="1.15" points="835.42,-40.03 705.38,-40.03 705.38,0 835.42,0 835.42,-40.03"/>
+<text text-anchor="start" x="739.65" y="-16.17" font-family="Arial" font-weight="bold" font-size="13.00" fill="#3a545e">Annullata</text>
+</g>
+<!-- Start -->
+<g id="node8" class="node">
+<title>Start</title>
+<ellipse fill="#64748b" stroke="#64748b" stroke-width="1.15" cx="40.4" cy="-440.02" rx="7.2" ry="7.2"/>
+</g>
+<!-- Titolo -->
+<g id="node9" class="node">
+<title>Titolo</title>
+<text text-anchor="start" x="680.77" y="-491.17" font-family="Arial" font-weight="bold" font-size="13.00" fill="#183957">Stati da cui si può annullare</text>
+</g>
+<!-- l_invia -->
+<g id="node10" class="node">
+<title>l_invia</title>
+<polygon fill="#ffffff" stroke="none" stroke-width="1.15" points="172.22,-463.55 118.58,-463.55 118.58,-416.48 172.22,-416.48 172.22,-463.55"/>
+<text text-anchor="start" x="130.02" y="-449.99" font-family="Arial" font-size="12.00" fill="#172b3a">[OPT]</text>
+<text text-anchor="start" x="125.9" y="-435.74" font-family="Arial" font-size="12.00" fill="#172b3a">invia() /</text>
+<text text-anchor="start" x="122.9" y="-421.49" font-family="Arial" font-size="12.00" fill="#172b3a">[in coda]</text>
+</g>
+<!-- l_prendi -->
+<g id="node11" class="node">
+<title>l_prendi</title>
+<polygon fill="#ffffff" stroke="none" stroke-width="1.15" points="492.84,-463.55 391.95,-463.55 391.95,-416.48 492.84,-416.48 492.84,-463.55"/>
+<text text-anchor="start" x="422.15" y="-449.99" font-family="Arial" font-size="12.00" fill="#172b3a">[Banco]</text>
+<text text-anchor="start" x="396.27" y="-435.74" font-family="Arial" font-size="12.00" fill="#172b3a">prendiInCarico() /</text>
+<text text-anchor="start" x="403.02" y="-421.49" font-family="Arial" font-size="12.00" fill="#172b3a">[ricerca aperta]</text>
+</g>
+<!-- l_assegna -->
+<g id="node12" class="node">
+<title>l_assegna</title>
+<polygon fill="#ffffff" stroke="none" stroke-width="1.15" points="889.6,-470.68 751.21,-470.68 751.21,-409.36 889.6,-409.36 889.6,-470.68"/>
+<text text-anchor="start" x="755.53" y="-457.12" font-family="Arial" font-size="12.00" fill="#172b3a">[Banco, risposta positiva</text>
+<text text-anchor="start" x="782.53" y="-442.87" font-family="Arial" font-size="12.00" fill="#172b3a">dell&#39;erogatore]</text>
+<text text-anchor="start" x="764.53" y="-428.62" font-family="Arial" font-size="12.00" fill="#172b3a">assegnaErogatore() /</text>
+<text text-anchor="start" x="762.65" y="-414.37" font-family="Arial" font-size="12.00" fill="#172b3a">[erogatore assegnato]</text>
+</g>
+<!-- l_conferma -->
+<g id="node13" class="node">
+<title>l_conferma</title>
+<polygon fill="#ffffff" stroke="none" stroke-width="1.15" points="1315.22,-463.55 1165.58,-463.55 1165.58,-416.48 1315.22,-416.48 1315.22,-463.55"/>
+<text text-anchor="start" x="1169.9" y="-449.99" font-family="Arial" font-size="12.00" fill="#172b3a">[Banco, accordo completo]</text>
+<text text-anchor="start" x="1186.78" y="-435.74" font-family="Arial" font-size="12.00" fill="#172b3a">confermaAccordo() /</text>
+<text text-anchor="start" x="1189.03" y="-421.49" font-family="Arial" font-size="12.00" fill="#172b3a">[dettagli immutabili]</text>
+</g>
+<!-- l_rif_prog -->
+<g id="node14" class="node">
+<title>l_rif_prog</title>
+<polygon fill="#ffffff" stroke="none" stroke-width="1.15" points="1114.97,-385.68 945.83,-385.68 945.83,-324.36 1114.97,-324.36 1114.97,-385.68"/>
+<text text-anchor="start" x="950.15" y="-372.12" font-family="Arial" font-size="12.00" fill="#172b3a">[Banco, accordo impraticabile,</text>
+<text text-anchor="start" x="962.9" y="-357.87" font-family="Arial" font-size="12.00" fill="#172b3a">nessun contatto in attesa]</text>
+<text text-anchor="start" x="983.9" y="-343.62" font-family="Arial" font-size="12.00" fill="#172b3a">rifiutaRichiesta() /</text>
+<text text-anchor="start" x="950.15" y="-329.37" font-family="Arial" font-size="12.00" fill="#172b3a">[nessun erogatore disponibile]</text>
+</g>
+<!-- l_rif_carico -->
+<g id="node15" class="node">
+<title>l_rif_carico</title>
+<polygon fill="#ffffff" stroke="none" stroke-width="1.15" points="892.47,-307.8 708.33,-307.8 708.33,-232.23 892.47,-232.23 892.47,-307.8"/>
+<text text-anchor="start" x="718.27" y="-294.24" font-family="Arial" font-size="12.00" fill="#172b3a">[Banco, ogni opzione negativa,</text>
+<text text-anchor="start" x="712.65" y="-279.99" font-family="Arial" font-size="12.00" fill="#172b3a">remoto compreso se compatibile,</text>
+<text text-anchor="start" x="732.9" y="-265.74" font-family="Arial" font-size="12.00" fill="#172b3a">nessun contatto in attesa]</text>
+<text text-anchor="start" x="753.9" y="-251.49" font-family="Arial" font-size="12.00" fill="#172b3a">rifiutaRichiesta() /</text>
+<text text-anchor="start" x="720.15" y="-237.24" font-family="Arial" font-size="12.00" fill="#172b3a">[nessun erogatore disponibile]</text>
+</g>
+<!-- l_annulla -->
+<g id="node16" class="node">
+<title>l_annulla</title>
+<polygon fill="#ffffff" stroke="none" stroke-width="1.15" points="832.85,-157.8 707.95,-157.8 707.95,-82.23 832.85,-82.23 832.85,-157.8"/>
+<text text-anchor="start" x="712.27" y="-144.24" font-family="Arial" font-size="12.00" fill="#172b3a">[Banco, OPT titolare o</text>
+<text text-anchor="start" x="714.15" y="-129.99" font-family="Arial" font-size="12.00" fill="#172b3a">erogatore assegnato,</text>
+<text text-anchor="start" x="712.27" y="-115.74" font-family="Arial" font-size="12.00" fill="#172b3a">motivo se non Creata]</text>
+<text text-anchor="start" x="718.65" y="-101.49" font-family="Arial" font-size="12.00" fill="#172b3a">annullaRichiesta() /</text>
+<text text-anchor="start" x="719.02" y="-87.24" font-family="Arial" font-size="12.00" fill="#172b3a">[dettagli conservati]</text>
+</g>
+<!-- b_rc -->
+<!-- a0 -->
+<!-- Creata&#45;&gt;l_prendi -->
+<g id="edge3" class="edge">
+<title>Creata&#45;&gt;l_prendi</title>
+<path fill="none" stroke="#64748b" stroke-width="1.2" d="M300.85,-440.02C328.96,-440.02 363.85,-440.02 391.96,-440.02"/>
+</g>
+<!-- Carico&#45;&gt;l_assegna -->
+<g id="edge5" class="edge">
+<title>Carico&#45;&gt;l_assegna</title>
+<path fill="none" stroke="#64748b" stroke-width="1.2" d="M685.62,-440.02C707.04,-440.02 730.26,-440.02 751.3,-440.02"/>
+</g>
+<!-- Carico&#45;&gt;b_rc -->
+<g id="edge11" class="edge">
+<title>Carico&#45;&gt;b_rc</title>
+<path fill="none" stroke="#64748b" stroke-width="1.2" d="M610.4,-419.51C610.4,-376.41 610.4,-279.66 610.4,-270.69"/>
+</g>
+<!-- Programmazione&#45;&gt;l_conferma -->
+<g id="edge7" class="edge">
+<title>Programmazione&#45;&gt;l_conferma</title>
+<path fill="none" stroke="#64748b" stroke-width="1.2" d="M1115.82,-440.02C1132.39,-440.02 1149.65,-440.02 1165.84,-440.02"/>
+</g>
+<!-- Programmazione&#45;&gt;l_rif_prog -->
+<g id="edge9" class="edge">
+<title>Programmazione&#45;&gt;l_rif_prog</title>
+<path fill="none" stroke="#64748b" stroke-width="1.2" d="M1030.4,-419.87C1030.4,-409.66 1030.4,-397.04 1030.4,-385.66"/>
+</g>
+<!-- Start&#45;&gt;l_invia -->
+<g id="edge1" class="edge">
+<title>Start&#45;&gt;l_invia</title>
+<path fill="none" stroke="#64748b" stroke-width="1.2" d="M47.95,-440.02C62.53,-440.02 95.18,-440.02 118.67,-440.02"/>
+</g>
+<!-- l_invia&#45;&gt;Creata -->
+<g id="edge2" class="edge">
+<title>l_invia&#45;&gt;Creata</title>
+<path fill="none" stroke="#64748b" stroke-width="1.2" d="M172.17,-440.02C177.88,-440.02 184.14,-440.02 190.54,-440.02"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.2" points="190.17,-442.82 198.17,-440.02 190.17,-437.22 190.17,-442.82"/>
+</g>
+<!-- l_prendi&#45;&gt;Carico -->
+<g id="edge4" class="edge">
+<title>l_prendi&#45;&gt;Carico</title>
+<path fill="none" stroke="#64748b" stroke-width="1.2" d="M492.81,-440.02C503.12,-440.02 514.25,-440.02 525.4,-440.02"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.2" points="525.36,-442.82 533.36,-440.02 525.36,-437.22 525.36,-442.82"/>
+</g>
+<!-- l_assegna&#45;&gt;Programmazione -->
+<g id="edge6" class="edge">
+<title>l_assegna&#45;&gt;Programmazione</title>
+<path fill="none" stroke="#64748b" stroke-width="1.2" d="M889.45,-440.02C904.2,-440.02 920.03,-440.02 935.56,-440.02"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.2" points="935.36,-442.82 943.36,-440.02 935.36,-437.22 935.36,-442.82"/>
+</g>
+<!-- l_conferma&#45;&gt;Confermata -->
+<g id="edge8" class="edge">
+<title>l_conferma&#45;&gt;Confermata</title>
+<path fill="none" stroke="#64748b" stroke-width="1.2" d="M1315.03,-440.02C1334.59,-440.02 1355.7,-440.02 1375.29,-440.02"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.2" points="1375.26,-442.82 1383.26,-440.02 1375.26,-437.22 1375.26,-442.82"/>
+</g>
+<!-- l_rif_prog&#45;&gt;Rifiutata -->
+<g id="edge10" class="edge">
+<title>l_rif_prog&#45;&gt;Rifiutata</title>
+<path fill="none" stroke="#64748b" stroke-width="1.2" d="M1030.4,-324.81C1030.4,-316.76 1030.4,-308.06 1030.4,-300.02"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.2" points="1033.2,-300.1 1030.4,-292.1 1027.6,-300.1 1033.2,-300.1"/>
+</g>
+<!-- l_rif_carico&#45;&gt;Rifiutata -->
+<g id="edge13" class="edge">
+<title>l_rif_carico&#45;&gt;Rifiutata</title>
+<path fill="none" stroke="#64748b" stroke-width="1.2" d="M892.29,-270.02C913.26,-270.02 935.3,-270.02 955.46,-270.02"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.2" points="955.38,-272.82 963.38,-270.02 955.38,-267.22 955.38,-272.82"/>
+</g>
+<!-- l_annulla&#45;&gt;Annullata -->
+<g id="edge15" class="edge">
+<title>l_annulla&#45;&gt;Annullata</title>
+<path fill="none" stroke="#64748b" stroke-width="1.2" d="M770.4,-82.5C770.4,-71.77 770.4,-60.23 770.4,-50.02"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.2" points="773.2,-50.15 770.4,-42.15 767.6,-50.15 773.2,-50.15"/>
+</g>
+<!-- b_rc&#45;&gt;l_rif_carico -->
+<g id="edge12" class="edge">
+<title>b_rc&#45;&gt;l_rif_carico</title>
+<path fill="none" stroke="#64748b" stroke-width="1.2" d="M611.25,-270.02C617.98,-270.02 663.74,-270.02 708.56,-270.02"/>
+</g>
+<!-- a0&#45;&gt;l_annulla -->
+<g id="edge14" class="edge">
+<title>a0&#45;&gt;l_annulla</title>
+<path fill="none" stroke="#64748b" stroke-width="1.2" d="M770.4,-209.44C770.4,-205.34 770.4,-180.02 770.4,-157.36"/>
+</g>
+</g>
+</svg>
