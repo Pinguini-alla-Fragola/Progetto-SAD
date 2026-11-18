@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PICUS – Video della demo</title>
+    <meta name="description" content="Video della demo di PICUS per la Sprint Review del 19 novembre, con o senza commento vocale.">
+    <link rel="icon" type="image/svg+xml" href="../logo.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&amp;display=swap" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg-color: #0d1117;
+            --surface-color: #161b22;
+            --border-color: #30363d;
+            --text-primary: #f0f6fc;
+            --text-secondary: #8b949e;
+            --accent-color: #58a6ff;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: clamp(1rem, 4vw, 3rem);
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        main { width: min(100%, 960px); }
+
+        .back {
+            display: inline-block;
+            margin-bottom: 1.25rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+        }
+        .back:hover, .back:focus-visible { color: var(--accent-color); }
+
+        h1 { margin: 0 0 0.4rem; font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 800; }
+        .lead { margin: 0 0 1.75rem; color: var(--text-secondary); line-height: 1.5; }
+
+        .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+        .choice {
+            display: block;
+            padding: 1.25rem 1.1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            background-color: var(--surface-color);
+            color: inherit;
+            text-decoration: none;
+            line-height: 1.4;
+            cursor: pointer;
+            font: inherit;
+            text-align: left;
+        }
+        .choice:hover, .choice:focus-visible { border-color: var(--accent-color); outline: none; }
+        .choice strong { display: block; margin-bottom: 0.25rem; font-size: 1.1rem; font-weight: 600; }
+        .choice span { color: var(--text-secondary); font-size: 0.92rem; }
+
+        .player { margin-top: 1.75rem; }
+        .player[hidden] { display: none; }
+
+        video {
+            display: block;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            background: #000;
+        }
+
+        @media (max-width: 560px) {
+            .choices { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <a class="back" href="../index.html">← Torna alla pagina iniziale</a>
+        <h1>Video della demo</h1>
+        <p class="lead">Sprint Review del 19 novembre 2026. Scegli come vedere il video: con il commento vocale oppure senza.</p>
+
+        <div class="choices" role="group" aria-label="Versione del video">
+            <a class="choice" href="#voce" data-v="voce">
+                <strong>Con voce</strong>
+                <span>La demo con il commento parlato.</span>
+            </a>
+            <a class="choice" href="#senza-voce" data-v="senza-voce">
+                <strong>Senza voce</strong>
+                <span>La stessa demo, senza commento.</span>
+            </a>
+        </div>
+
+        <section class="player" id="player" hidden aria-live="polite">
+            <video id="video" controls controlslist="nodownload" playsinline preload="none"></video>
+        </section>
+    </main>
+
+    <script>
+        (function () {
+            var files = {
+                'voce': { src: 'picus-demo.mp4', label: 'Con voce' },
+                'senza-voce': { src: 'picus-demo-senza-voce.mp4', label: 'Senza voce' }
+            };
+            var player = document.getElementById('player');
+            var video = document.getElementById('video');
+            var current = null;
+
+            // niente menu del tasto destro sul video (meno scorciatoie per scaricarlo)
+            video.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+
+            function show() {
+                var key = location.hash.slice(1);
+                var f = files[key];
+                if (!f) {
+                    video.pause();
+                    player.hidden = true;
+                    current = null;
+                    return;
+                }
+                if (current !== key) {
+                    video.pause();
+                    video.src = f.src;
+                    video.load();
+                    current = key;
+                }
+                player.hidden = false;
+                player.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            window.addEventListener('hashchange', show);
+            show();
+        })();
+    </script>
+</body>
+</html>
