@@ -332,6 +332,17 @@
         .ui .count { min-width: 56px; text-align: center; font-variant-numeric: tabular-nums; color: var(--mint); }
         .ui .sep { width: 1px; height: 22px; background: rgba(255, 255, 255, .22); margin: 0 4px; }
 
+        /* punjabi (gurmukhi): Arial non ha i glifi, si passa a un font di sistema che li ha */
+        html[lang="pa"] body, html[lang="pa"] .ui {
+            font-family: Arial, "Noto Sans Gurmukhi", "Nirmala UI", "Raavi", "Gurmukhi MN", "Gurmukhi Sangam MN", sans-serif;
+        }
+
+        /* scelta della lingua */
+        .ui .lang { display: inline-flex; align-items: center; gap: 2px; }
+        .ui .lang button { min-width: 38px; padding: 0 9px; font-size: 13px; letter-spacing: .06em; color: var(--mint); }
+        .ui .lang button[lang="pa"] { font-size: 16px; letter-spacing: 0; }
+        .ui .lang button[aria-pressed="true"] { background: rgba(255, 255, 255, .2); color: #fff; cursor: default; }
+
         /* ==========================================================
            Telefono e tablet in verticale (fino a 820 px): niente palco
            scalato, ma una colonna che scorre con caratteri leggibili.
@@ -410,12 +421,23 @@
             /* barra dei comandi: sul telefono resta sempre visibile */
             .ui-bar { bottom: calc(14px + env(safe-area-inset-bottom)); }
             .ui button { min-width: 48px; height: 48px; }
+            .ui .lang button { min-width: 36px; padding: 0 4px; }
+            .ui .count { min-width: 46px; }
             body.idle .ui:not(:focus-within) { opacity: 1; pointer-events: auto; }
             body.idle .ui-bar:not(:focus-within) { transform: translateX(-50%); }
         }
 
         @media (max-width: 820px) and (min-width: 440px) { :root { --sc: .62; } }
         @media (max-width: 820px) and (min-width: 600px) { :root { --sc: .7; } }
+
+        /* dopo il cambio di lingua la slide resta ferma: niente costruzione da capo */
+        #stage.still .slide[data-state="active"] [data-a],
+        #stage.still .slide[data-state="active"] [data-a="words"] .w,
+        #stage.still .slide[data-state="active"] .box .trace rect,
+        #stage.still .slide[data-state="active"] [data-a="arrow"]::before,
+        #stage.still .slide[data-state="active"] [data-a="arrow"]::after,
+        #stage.still .slide[data-state="active"] .tbl .tr > div,
+        #stage.still .slide[data-state="active"] .mascot img { animation: none !important; }
 
         /* ---------- Movimento ridotto ---------- */
         @media (prefers-reduced-motion: reduce) {
@@ -434,7 +456,7 @@
 <body>
 
     <h1 class="sr-only">PICUS – Sprint Review del 5 novembre – Pinguini alla Fragola</h1>
-    <noscript><p style="padding:2rem;font:18px Arial,sans-serif">Questa presentazione richiede JavaScript.</p></noscript>
+    <noscript><p style="padding:2rem;font:18px Arial,sans-serif">Questa presentazione richiede JavaScript. · This presentation requires JavaScript. · ਇਸ ਪੇਸ਼ਕਾਰੀ ਲਈ JavaScript ਦੀ ਲੋੜ ਹੈ।</p></noscript>
 
     <main id="stage" class="no-anim" aria-roledescription="presentazione">
 
@@ -644,12 +666,20 @@
         <button type="button" id="next" title="Slide successiva (→)" aria-label="Slide successiva">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
         </button>
+        <span class="sep" aria-hidden="true"></span>
+        <div class="lang" role="group" aria-label="Lingua">
+            <button type="button" data-lang="it" lang="it" title="Italiano (L)" aria-pressed="true">IT</button>
+            <button type="button" data-lang="en" lang="en" title="English (L)" aria-pressed="false">EN</button>
+            <button type="button" data-lang="pa" lang="pa" title="ਪੰਜਾਬੀ (L)" aria-pressed="false">ਪੰ</button>
+        </div>
         <span class="sep" id="full-sep" aria-hidden="true"></span>
         <button type="button" id="full" title="Schermo intero (F)" aria-label="Schermo intero">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
         </button>
     </div>
 
+    <script src="en.js"></script>
+    <script src="pa.js"></script>
     <script>
         (() => {
             const stage = document.getElementById('stage');
@@ -692,31 +722,123 @@
                 return words;
             }
 
-            const groups = new Map();
-            let singles = 0;
-            stage.querySelectorAll('[data-a="up"], [data-a="left"]').forEach((el) => {
-                const isLeaf = ![...el.children].some((c) => c.tagName !== 'BR');
-                let words;
-                if (isLeaf) {
-                    if (!el.textContent.trim()) return;
-                    words = makeWords(el);
-                } else if (el.dataset.cascade) {
-                    words = [...el.querySelectorAll(':scope > .num, :scope > .txt')].flatMap((c) => makeWords(c));
-                } else {
-                    return;
-                }
-                el.dataset.wa = el.dataset.a;
-                el.dataset.a = 'words';
-                const key = el.dataset.cascade || `solo-${singles++}`;
-                if (!groups.has(key)) groups.set(key, { els: [], words: [] });
-                groups.get(key).els.push(el);
-                groups.get(key).words.push(...words);
+            /* ---- lingua: l'italiano resta nel sorgente, l'inglese è in en.js ---- */
+            const DICTS = { en: window.PICUS_EN || {}, pa: window.PICUS_PA || {} };
+            const LANGS = ['it', 'en', 'pa'];
+            let dict = {};
+            const LANG_KEY = 'picus-lang';
+            const langBtns = [...document.querySelectorAll('[data-lang]')];
+            const metaDesc = document.querySelector('meta[name="description"]');
+            const itTitle = document.title;
+            const itDesc = metaDesc ? metaDesc.getAttribute('content') : '';
+            let lang = 'it';
+
+            const isLeaf = (el) => ![...el.children].some((c) => c.tagName !== 'BR');
+            // chiave di un testo: le interruzioni di riga contano come spazio
+            const flat = (el) => [...el.childNodes]
+                .map((n) => (n.nodeType === Node.TEXT_NODE ? n.textContent : n.nodeName === 'BR' ? ' ' : ''))
+                .join('').replace(/\s+/g, ' ').trim();
+
+            // testi traducibili, con i nodi originali per tornare all'italiano
+            const leaves = [...document.querySelectorAll('#stage *, h1.sr-only')]
+                .filter((el) => el.tagName !== 'BR' && isLeaf(el)
+                    && [...el.childNodes].some((n) => n.nodeType === Node.TEXT_NODE && n.textContent.trim()))
+                .map((el) => ({ el, key: flat(el), nodes: [...el.childNodes].map((n) => n.cloneNode(true)), d: !!el.querySelector('br.d') }));
+
+            // attributi traducibili (etichette per gli screen reader, suggerimenti, intestazioni delle tabelle)
+            const attrs = [];
+            document.querySelectorAll('[aria-label], [title], [data-label], [aria-roledescription]').forEach((el) => {
+                ['aria-label', 'title', 'data-label', 'aria-roledescription'].forEach((name) => {
+                    if (el.hasAttribute(name)) attrs.push({ el, name, it: el.getAttribute(name) });
+                });
             });
-            // le voci di un elenco partono tutte dallo stesso istante: le righe si susseguono
-            groups.forEach((g) => {
-                const base = g.els[0].style.getPropertyValue('--t');
-                g.els.forEach((el) => el.style.setProperty('--t', base));
-            });
+
+            const translateAttr = (s) => {
+                const m = /^Slide (\d+) di (\d+): (.*)$/.exec(s);
+                if (m) return (dict['@slide'] || 'Slide {n} of {t}: {x}').replace('{n}', m[1]).replace('{t}', m[2]).replace('{x}', dict[m[3]] ?? m[3]);
+                return dict[s] ?? s;
+            };
+
+            // "|" nel testo inglese diventa un a capo (con la stessa classe dell'originale)
+            function englishNodes(text, d) {
+                const frag = document.createDocumentFragment();
+                text.split('|').forEach((part, i, all) => {
+                    if (i) {
+                        const br = document.createElement('br');
+                        if (d) br.className = 'd';
+                        frag.appendChild(br);
+                    }
+                    frag.appendChild(document.createTextNode(part.trim() + (i < all.length - 1 ? ' ' : '')));
+                });
+                return frag;
+            }
+
+            function applyLang(next) {
+                lang = LANGS.includes(next) ? next : 'it';
+                dict = DICTS[lang] || {};
+                const en = lang !== 'it'; // true per ogni lingua diversa dall'originale
+                const missing = [];
+                document.documentElement.lang = lang;
+                document.title = en ? (dict['@title'] || itTitle) : itTitle;
+                if (metaDesc) metaDesc.setAttribute('content', en ? (dict['@desc'] || itDesc) : itDesc);
+                leaves.forEach((leaf) => {
+                    const text = en ? dict[leaf.key] : undefined;
+                    if (en && text === undefined && /[A-Za-zÀ-ÿ]/.test(leaf.key)) missing.push(leaf.key);
+                    leaf.el.textContent = '';
+                    if (text !== undefined) leaf.el.appendChild(englishNodes(text, leaf.d));
+                    else leaf.nodes.forEach((n) => leaf.el.appendChild(n.cloneNode(true)));
+                });
+                attrs.forEach(({ el, name, it }) => el.setAttribute(name, en ? translateAttr(it) : it));
+                langBtns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
+                if (missing.length) console.warn('Traduzioni mancanti (' + lang + '):', missing);
+            }
+
+            // lingua iniziale: ?lang=en nell'indirizzo, poi l'ultima scelta salvata, poi l'italiano
+            let startLang = 'it';
+            try { startLang = new URLSearchParams(location.search).get('lang') || localStorage.getItem(LANG_KEY) || 'it'; } catch (e) { /* ignorato */ }
+            applyLang(startLang);
+
+            /* ---- animazioni di costruzione: si preparano a ogni cambio di lingua ---- */
+            let groups = new Map();
+            function prepare() {
+                stage.querySelectorAll('[data-wa]').forEach((el) => { el.dataset.a = el.dataset.wa; delete el.dataset.wa; });
+                groups = new Map();
+                let singles = 0;
+                stage.querySelectorAll('[data-a="up"], [data-a="left"]').forEach((el) => {
+                    const leafEl = isLeaf(el);
+                    let words;
+                    if (leafEl) {
+                        if (!el.textContent.trim()) return;
+                        words = makeWords(el);
+                    } else if (el.dataset.cascade) {
+                        words = [...el.querySelectorAll(':scope > .num, :scope > .txt')].flatMap((c) => makeWords(c));
+                    } else {
+                        return;
+                    }
+                    el.dataset.wa = el.dataset.a;
+                    el.dataset.a = 'words';
+                    const key = el.dataset.cascade || `solo-${singles++}`;
+                    if (!groups.has(key)) groups.set(key, { els: [], words: [] });
+                    groups.get(key).els.push(el);
+                    groups.get(key).words.push(...words);
+                });
+                // le voci di un elenco partono tutte dallo stesso istante: le righe si susseguono
+                groups.forEach((g) => {
+                    const base = g.els[0].style.getPropertyValue('--t');
+                    g.els.forEach((el) => el.style.setProperty('--t', base));
+                });
+            }
+            prepare();
+
+            function setLang(next) {
+                if (next === lang) return;
+                applyLang(next);
+                try { localStorage.setItem(LANG_KEY, lang); } catch (e) { /* ignorato */ }
+                stage.classList.add('still'); // la slide in corso cambia lingua senza ripartire da capo
+                prepare();
+                fit();
+            }
+            langBtns.forEach((b) => b.addEventListener('click', () => setLang(b.dataset.lang)));
 
             // Posizione verticale di una parola dentro la slide, senza tener conto delle animazioni in corso.
             function topInSlide(node) {
@@ -783,6 +905,7 @@
                 n = Math.max(0, Math.min(total - 1, n));
                 if (n === current) return;
                 current = n;
+                stage.classList.remove('still');
 
                 slides.forEach((slide, i) => {
                     const state = i < n ? 'before' : i > n ? 'after' : 'active';
@@ -841,6 +964,7 @@
                     case 'Home': e.preventDefault(); go(0); break;
                     case 'End': e.preventDefault(); go(total - 1); break;
                     case 'f': case 'F': toggleFullscreen(); break;
+                    case 'l': case 'L': setLang(LANGS[(LANGS.indexOf(lang) + 1) % LANGS.length]); break;
                     default:
                         if (/^[1-9]$/.test(e.key)) go(Number(e.key) - 1);
                 }
