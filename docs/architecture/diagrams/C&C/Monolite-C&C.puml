@@ -38,32 +38,24 @@ frame "Applicazione PICUS · Unico processo JVM" as JVM {
     portin " " as M_WEB
     portout " " as M_SQL
   }
-  component "DataSource condiviso\nPool di connessioni JDBC" as DS <<dati>> {
-    portin " " as DS_C
-    portin " " as DS_A
-    portin " " as DS_R
-    portin " " as DS_M
-    portin " " as DS_U
-    portout " " as DS_SQL
-  }
   component "Adattatore email\nAttivazione e recupero" as MAIL {
     portin " " as MAIL_IN
     portout " " as MAIL_OUT
   }
 }
-component "PostgreSQL\nDatabase unico picus\nDati e allegati" as DB <<dati>> {
+component "PostgreSQL\nDatabase unico picus\nEndpoint condiviso · 5432" as DB <<dati>> {
   portin " " as DB_SQL
 }
 component "Servizio email esterno" as EMAIL {
   portin " " as EMAIL_IN
 }
 
-' Allinea le porte dei moduli e tiene il percorso email a destra dei dati.
+' Allinea le porte dei moduli e separa il percorso email dagli accessi ai dati.
 C_WEB -[hidden]right-> A_WEB
 A_WEB -[hidden]right-> R_WEB
 R_WEB -[hidden]right-> M_WEB
 M_WEB -[hidden]right-> U_WEB
-DS_U -[hidden]right-> MAIL_IN
+MAIL_OUT -[hidden]down-> DB_SQL
 DB_SQL -[hidden]right-> EMAIL_IN
 
 B_WEB -[#5480B0]--> W_HTTP : HTTP
@@ -72,12 +64,11 @@ W_A ---> A_WEB
 W_R ---> R_WEB
 W_M ---> M_WEB
 W_U ---> U_WEB
-C_SQL -[#3D867D]--> DS_C
-A_SQL -[#3D867D]--> DS_A
-R_SQL -[#3D867D]--> DS_R
-M_SQL -[#3D867D]--> DS_M
-U_SQL -[#3D867D]--> DS_U
-DS_SQL -[#3D867D]--> DB_SQL : JDBC
+C_SQL -[#3D867D]--> DB_SQL
+A_SQL -[#3D867D]--> DB_SQL
+R_SQL -[#3D867D]--> DB_SQL
+M_SQL -[#3D867D]--> DB_SQL
+U_SQL -[#3D867D]--> DB_SQL
 U_MAIL ---> MAIL_IN
 MAIL_OUT ---> EMAIL_IN : Invio email
 @enduml

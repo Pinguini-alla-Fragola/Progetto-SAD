@@ -34,7 +34,7 @@ accesso JDBC al database e invio email.
 
 **CC-02 · Ingresso web e accesso ai dati.** Apre il componente applicazione
 di CC-01 e mostra i collegamenti del Gestore web con i cinque componenti
-funzionali, il DataSource condiviso e l'adattatore email di Utenze.
+funzionali, l'accesso condiviso a PostgreSQL e l'adattatore email di Utenze.
 Il Gestore web raggruppa sicurezza, sessione, dispatcher, controller e
 produzione delle risposte HTML/JSON. Ogni componente funzionale comprende
 i propri servizi applicativi, le regole di dominio e gli adattatori di
@@ -52,9 +52,8 @@ Le invocazioni sono sincrone e usano i contratti riportati sotto.
 - **Riquadro con simbolo UML del componente:** istanza o gruppo di istanze
   software in esecuzione. I nomi identificano responsabilità runtime.
 - **Quadratino sul bordo:** porta, cioè punto di interazione del componente.
-  Ogni connettore usa porte distinte. Il ruolo di invocante o fornitore è
-  indicato dal verso della freccia, indipendentemente dal lato del riquadro
-  su cui è collocata la porta.
+  In CC-02 i cinque connettori dei moduli condividono la porta di
+  PostgreSQL.
 - **Linea continua con freccia:** connettore orientato da chi avvia la
   chiamata verso chi la riceve. Il risultato o l'errore torna sullo stesso
   connettore; la freccia non indica una dipendenza tra package.
@@ -67,14 +66,14 @@ Le invocazioni sono sincrone e usano i contratti riportati sotto.
 In CC-02 i connettori blu rappresentano HTTP, quelli grigi le chiamate Java
 e quelli verde acqua gli accessi ai dati. In CC-03 tutte le chiamate Java
 usano connettori grigi. I connettori seguono segmenti orizzontali e verticali
-con angoli retti, porte separate e percorsi senza sovrapposizioni. I diagrammi
-contengono componenti, porte, connettori e relative etichette.
+con angoli retti. I diagrammi contengono componenti, porte, connettori e
+relative etichette.
 
 | Connettore | Ruoli e scambi |
 | --- | --- |
 | HTTP | Browser client e applicazione server; richieste, HTML/JSON, file, risorse statiche e sessione. |
 | Chiamata Java | Invocante e fornitore nella stessa JVM; identità verificata, comandi, DTO e risultati. |
-| Accesso ai dati | Gli adattatori JPA usano Hibernate e il DataSource condiviso. Il DataSource gestisce le connessioni a PostgreSQL tramite pgJDBC. |
+| Accesso ai dati | Gli adattatori JPA accedono allo stesso database PostgreSQL tramite Hibernate e pgJDBC. |
 | Invio email | Adattatore di Utenze e servizio esterno; link di attivazione e recupero dell'account. |
 
 ### Collaborazioni interne
@@ -95,13 +94,12 @@ contengono componenti, porte, connettori e relative etichette.
 | Utenze → adattatore email | Invio dei link di attivazione e recupero. |
 
 Ciascuno dei cinque componenti funzionali accede alle proprie entità e
-tabelle tramite il proprio adattatore di persistenza. In CC-02 i cinque
-collegamenti convergono nel DataSource condiviso nella JVM. Un solo
-connettore JDBC rappresenta l'accesso all'endpoint PostgreSQL, sulla porta
-`5432` nell'ambiente Docker Compose. Il database conserva anche file e
-metadati degli allegati. Gli altri gestori usano le API del proprietario
-dei dati. Le entità JPA restano interne e i contratti scambiano DTO e
-identificativi.
+tabelle tramite il proprio adattatore di persistenza. In CC-02 ogni
+adattatore ha un connettore verso l'unico endpoint PostgreSQL, sulla
+porta `5432` nell'ambiente Docker Compose. Il database conserva anche
+file e metadati degli allegati. Gli altri gestori usano le API del
+proprietario dei dati. Le entità JPA restano interne e i contratti
+scambiano DTO e identificativi.
 
 Sicurezza e sessione sono verificate all'ingresso web. I servizi applicativi
 controllano ruolo, titolarità e assegnazione sulle singole risorse. La
