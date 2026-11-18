@@ -49,10 +49,15 @@
 
         .logo-wrapper img {
             display: block;
-            width: clamp(270px, 29vw, 480px);
+            width: clamp(300px, 32vw, 440px);
             height: auto;
+            aspect-ratio: 4 / 3;
             max-height: 68vh;
-            object-fit: contain;
+            object-fit: cover;
+            border: 1px solid var(--border-color);
+            border-radius: 1.25rem;
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+            background-color: var(--surface-color);
         }
 
         .content {
@@ -200,7 +205,7 @@
 
             .logo-wrapper img {
                 width: 100%;
-                max-width: 250px;
+                max-width: 360px;
                 max-height: none;
             }
 
@@ -235,7 +240,10 @@
 <body>
     <main class="container">
         <div class="logo-wrapper">
-            <img src="pinguino-costruzione.webp" alt="Il pinguino di PICUS al lavoro">
+            <picture>
+                <source media="(prefers-reduced-motion: reduce)" srcset="pinguino-pc-statico.webp">
+                <img src="pinguino-pc.gif" width="440" height="330" alt="Il pinguino di PICUS, con l'elmetto da cantiere, lavora al computer con il logo della fragola, sdraiato su un'amaca in giardino">
+            </picture>
         </div>
         <div class="content">
             <h1 lang="en">Hold on, we're almost ready to shine.</h1>
