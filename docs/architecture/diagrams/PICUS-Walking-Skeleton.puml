@@ -1,65 +1,90 @@
 @startuml PICUS-Walking-Skeleton
-!include PICUS-Walking-Skeleton-style.iuml
-' WS-01: comportamento della baseline main 39fe03d.
-title <size:22><b>PICUS · Walking skeleton</b></size>\n<size:16>WS-01 · Accesso, sessione e logout</size>
+' Flusso della demo su main al commit f1242eb, limitato allo Sprint 2.
+hide footbox
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontColor #172B3A
+skinparam dpi 140
 
-actor "Browser\nOPT · Banco" as Browser
-participant "Spring Security" as Security <<web>>
-participant "UtenzeApi" as Utenze
+skinparam sequence {
+  ArrowColor #465D71
+  LifeLineBorderColor #94A3B8
+  ActorBorderColor #60768A
+  ActorBackgroundColor #F1F5F9
+  ParticipantBorderColor #568573
+  ParticipantBackgroundColor #EDF5F0
+  ParticipantFontStyle bold
+  DividerBackgroundColor #E9F2FC
+  DividerBorderColor #5480B0
+  GroupBorderColor #7C9BB9
+}
+
+skinparam note {
+  BackgroundColor #FFF8EA
+  BorderColor #946728
+}
+
+title <size:22><b>PICUS · Walking skeleton</b></size>\n<size:16>Dall'accesso alla consultazione della richiesta</size>
+
+actor "OPT A\nTitolare" as Opt
+actor "Banco" as Banco
+actor "OPT B\nEstranea alla richiesta" as Estranea
+participant "Ingresso web\nSpring Security e MVC" as Web #E9F2FC
+participant "Utenze" as Utenze
+participant "Catalogo" as Catalogo
+participant "Richieste" as Richieste
+database "PostgreSQL" as Db #E9F7F5
 
 == Accesso ==
-Browser -> Security: POST /api/auth/login\nEmail e password · JSON
-Security -> Security: Verifica il limite dei tentativi
-alt Tentativo temporaneamente bloccato
-  Security --> Browser: 429 · Messaggio generico di attesa
-else Tentativo ammesso
-  Security -> Utenze: verificaCredenziali(email, password)
-  Utenze --> Security: Identità oppure esito vuoto
-  alt Credenziali valide e account attivo
-    Security -> Security: Autentica e salva la sessione\nCambia l'identificativo della sessione
-    Security --> Browser: 204 · Accesso riuscito
-  else Credenziali errate o account non attivo
-    Security --> Browser: 401 · Credenziali non valide
-  end
+Opt -> Web: Accede all'area OPT
+Web -> Utenze: Verifica le credenziali
+Utenze --> Web: Identità e ruolo
+Web --> Opt: Sessione e area OPT
+
+== Invio ==
+Opt -> Web: Apre il modulo di invio
+Web -> Catalogo: Carica misure attive e comuni
+Catalogo --> Web: Valori selezionabili
+Web --> Opt: Modulo di invio
+Opt -> Web: Invia misura, persona o nucleo,\ncomune e descrizione facoltativa
+break Campi non ammessi
+  Web --> Opt: 400 · Nessuna richiesta creata
 end
-note over Browser, Security
-  Dopo 5 fallimenti in 5 minuti, i tentativi successivi
-  entro 60 secondi dall'ultimo sono bloccati.
-  L'apertura dell'area è una navigazione successiva.
+Web -> Richieste: Invia con l'identità della sessione
+Richieste -> Catalogo: Verifica misura e comune
+Richieste -> Db: Salva la richiesta in CREATA\ncon la OPT A come titolare
+Richieste --> Web: ID e sintesi della richiesta
+Web --> Opt: 201 · Conferma con ID e stato
+note over Web, Richieste
+  Un ritento con la stessa Idempotency-Key
+  e gli stessi dati restituisce lo stesso ID.
 end note
 
-== Controllo comune a ogni richiesta protetta ==
-Browser -> Security: Richiesta con cookie di sessione
-group Controllo comune richiamato da WS-02 e WS-03
-opt Sessione autenticata presente
-  Security -> Utenze: verificaAccountSessione(accountId)
-  Utenze --> Security: Identità corrente oppure esito vuoto
-end
-alt Sessione assente, scaduta o account non attivo
-  opt Account della sessione non più attivo
-    Security -> Security: Chiude la sessione
-  end
-  alt Endpoint API
-    Security --> Browser: 401 · Nessun dato o modifica
-  else Pagina HTML
-    Security --> Browser: 302 · Reindirizzamento al login
-  end
-else Funzione vietata al ruolo
-  Security --> Browser: 403 · Nessun dato o modifica
-else Richiesta ammessa
-  Security -> Security: Autorizza l'inoltro\nIdentità verificata disponibile
-end
-end
+== Consultazione ==
+Opt -> Web: Apre l'elenco delle proprie richieste
+Web -> Richieste: Consulta le richieste della OPT A
+Richieste -> Db: Legge per titolare
+Richieste --> Web: Richieste della OPT A
+Web --> Opt: Elenco con l'ID appena creato
 
-== Chiusura di una sessione valida ==
-Browser -> Security: POST /api/auth/logout
-Security -> Security: Invalida la sessione\nRimuove il cookie di sessione
-Security --> Browser: 204 · Sessione terminata
+Banco -> Web: Accede con il proprio account
+Web --> Banco: Sessione e area Banco
+Banco -> Web: Carica la coda
+Web -> Richieste: Consulta le richieste aperte
+Richieste -> Db: Legge in ordine di arrivo
+Richieste --> Web: Richieste aperte in ordine di arrivo
+Web --> Banco: Coda con lo stesso ID
 
-legend bottom
-  Ogni account usa una sessione distinta. I comandi sono protetti da Spring Security.
-  Il controllo comune precede il binding HTTP; un diniego termina la singola richiesta.
-  WS-02 e WS-03 richiamano questo controllo con un riquadro «ref».
-  Freccia continua: invocazione · Freccia tratteggiata: risposta.
-end legend
+note over Opt, Banco
+  La titolare e il Banco possono aprire il dettaglio.
+end note
+Estranea -> Web: Chiede il dettaglio dello stesso ID\ncon la propria sessione
+Web -> Richieste: Consulta il dettaglio
+Richieste -> Db: Legge la richiesta per ID
+Richieste -> Richieste: Verifica il legame con la richiesta
+Richieste --> Web: Accesso negato
+Web --> Estranea: 403 · Nessun dato della richiesta
+
+Opt -> Web: Esce dall'area
+Web --> Opt: Sessione invalidata e ritorno al login
 @enduml
