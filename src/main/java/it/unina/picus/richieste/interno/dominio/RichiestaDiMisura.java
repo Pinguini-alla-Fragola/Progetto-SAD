@@ -94,45 +94,6 @@ public record RichiestaDiMisura(
                 inviataIl, nuovoStato, accountId, dettagli, riferimentoInvio, ambito);
     }
 
-    /**
-     * Conferma la pratica in programmazione e vi associa l'accordo validato.
-     *
-     * @param dettagli accordo proposto per l’erogatore assegnato
-     * @return pratica Confermata con i dettagli definitivi
-     * @throws ConflittoRichiestaException se la pratica non è in programmazione o manca l’erogatore
-     * @throws DatiRichiestaNonValidiException se i dati sono incompleti o incompatibili
-     */
-    public RichiestaDiMisura conferma(DettagliAccordo dettagli) {
-        if (stato != StatoRichiesta.IN_PROGRAMMAZIONE || erogatoreId == null) {
-            throw new ConflittoRichiestaException("Serve una richiesta In programmazione con erogatore assegnato");
-        }
-        var accordoValidato = ValidazioneAccordo.valida(dettagli);
-        boolean assegnazioneADistanza = erogatoreAmbito == AmbitoErogazione.CENTRO_PICUS_A_DISTANZA;
-        if (assegnazioneADistanza != (accordoValidato instanceof AccordoADistanza)) {
-            throw new DatiRichiestaNonValidiException(Map.of("modalita",
-                    "La modalità dell'accordo deve corrispondere all'ambito dell'assegnazione"));
-        }
-        return conEsito(StatoRichiesta.CONFERMATA, accordoValidato);
-    }
-
-    /**
-     * Chiude la pratica con un rifiuto definitivo deciso dal Banco.
-     *
-     * @return pratica Rifiutata con la storia dell’assegnazione conservata
-     * @throws ConflittoRichiestaException se la pratica non è in ricerca o in programmazione
-     */
-    public RichiestaDiMisura rifiuta() {
-        if (stato != StatoRichiesta.PRESA_IN_CARICO && stato != StatoRichiesta.IN_PROGRAMMAZIONE) {
-            throw new ConflittoRichiestaException("Serve una richiesta Presa in carico o In programmazione");
-        }
-        return conEsito(StatoRichiesta.RIFIUTATA, null);
-    }
-
-    private RichiestaDiMisura conEsito(StatoRichiesta nuovoStato, DettagliAccordo dettagli) {
-        return new RichiestaDiMisura(id, titolareId, misuraId, tipoDestinatario, comuneCodice, description,
-                inviataIl, nuovoStato, erogatoreId, dettagli, riferimentoInvio, erogatoreAmbito);
-    }
-
     /** Confronta tutti i dati dell'invio, senza confondere richieste distinte con contenuto uguale. */
     public boolean stessoInvio(DatiInvio dati) {
         return misuraId == dati.misuraId() && tipoDestinatario == dati.tipoDestinatario()
