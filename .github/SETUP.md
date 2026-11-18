@@ -72,10 +72,12 @@ sulla CI e sulla collaborazione.
 con Node.js 24 sulle pull request, sui push a `main` e `develop` e su avvio manuale.
 
 [Verifica diagrammi](workflows/diagrams.yml) rigenera i sorgenti Mermaid, PlantUML
-e DOT interessati dalle modifiche. Il confronto degli SVG usa testi e riferimenti
-dei collegamenti emessi da PlantUML e DOT, indipendentemente dalle coordinate.
-Il controllo dei PNG rileva file troncati o di formato errato. Una modifica a uno
-stile `.iuml` verifica tutti i sorgenti PlantUML. L'avvio da **Actions → Verifica
+e DOT interessati dalle modifiche. Ogni sorgente deve avere un'anteprima SVG
+versionata. Il confronto usa i testi, i riferimenti dei collegamenti Mermaid,
+PlantUML e DOT e l'ordine dei messaggi PlantUML, indipendentemente dalle coordinate.
+Per i PNG presenti controlla il formato, i checksum dei blocchi e la decodifica.
+Una modifica a uno stile `.iuml` verifica tutti i sorgenti PlantUML.
+L'avvio da **Actions → Verifica
 diagrammi → Run workflow** controlla l'intero insieme di diagrammi.
 
 In **Settings → Actions → General** mantenere il token di default in sola

@@ -10,6 +10,7 @@ on:
       - 'docs/**/*.svg'
       - 'docs/**/*.png'
       - 'scripts/verifica_diagrammi.py'
+      - 'scripts/test_verifica_diagrammi.py'
       - '.github/workflows/diagrams.yml'
   push:
     branches: [main, develop]
@@ -21,6 +22,7 @@ on:
       - 'docs/**/*.svg'
       - 'docs/**/*.png'
       - 'scripts/verifica_diagrammi.py'
+      - 'scripts/test_verifica_diagrammi.py'
       - '.github/workflows/diagrams.yml'
   workflow_dispatch:
 
@@ -60,7 +62,7 @@ jobs:
           PUPPETEER_CACHE_DIR: ${{ runner.temp }}/puppeteer
         run: |
           sudo apt-get update -qq
-          sudo apt-get install --yes --no-install-recommends graphviz
+          sudo apt-get install --yes --no-install-recommends graphviz python3-pil
           curl --fail --location --silent --show-error --retry 3 \
             --output "$RUNNER_TEMP/plantuml.jar" \
             https://github.com/plantuml/plantuml/releases/download/v1.2026.10/plantuml-1.2026.10.jar
@@ -71,12 +73,15 @@ jobs:
             --save-exact @mermaid-js/mermaid-cli@12.2.0 mermaid@12.3.0 puppeteer@25.18.1
           printf '%s\n' '{"args":["--no-sandbox"]}' > "$RUNNER_TEMP/puppeteer.json"
 
+      - name: Verifica le regressioni del controllo
+        run: /usr/bin/python3 -m unittest discover -s scripts -p 'test_verifica_diagrammi.py'
+
       - name: Rigenera e verifica i diagrammi
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
           PUPPETEER_CACHE_DIR: ${{ runner.temp }}/puppeteer
         run: |
-          python3 scripts/verifica_diagrammi.py --base "$BASE_SHA" \
+          /usr/bin/python3 scripts/verifica_diagrammi.py --base "$BASE_SHA" \
             --plantuml-jar "$RUNNER_TEMP/plantuml.jar" \
             --mmdc "$RUNNER_TEMP/mermaid/node_modules/.bin/mmdc" \
             --puppeteer-config "$RUNNER_TEMP/puppeteer.json"

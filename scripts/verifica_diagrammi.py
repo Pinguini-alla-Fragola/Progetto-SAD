@@ -9,12 +9,15 @@ import sys
 from tempfile import TemporaryDirectory
 from xml.etree import ElementTree
 
+from PIL import Image
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SORGENTI = {".mmd", ".puml", ".dot"}
 ANTEPRIME = (".svg", ".png")
 CONFIGURAZIONE = {Path(".github/workflows/diagrams.yml"), Path("scripts/verifica_diagrammi.py")}
 SVG = "{http://www.w3.org/2000/svg}"
+FINE_PNG = b"\x00\x00\x00\x00IEND\xaeB\x60\x82"
 
 
 def percorsi_git(*args):
@@ -72,6 +75,18 @@ def parole_svg(elemento):
     return tuple(re.findall(r"\w+|[^\w\s]", " ".join(elemento.itertext())))
 
 
+def freccia_mermaid(elemento, id_radice):
+    # Il prefisso dei marker dipende anche dal nome assegnato al diagramma.
+    marker = tuple(
+        elemento.get(estremo, "").removeprefix(f"url(#{id_radice}")
+        for estremo in ("marker-start", "marker-end")
+    )
+    return (
+        "Mermaid", elemento.get("data-et"), elemento.get("data-id"),
+        elemento.get("data-from"), elemento.get("data-to"), *marker,
+    )
+
+
 def contenuto_svg(file):
     radice = ElementTree.parse(file).getroot()
     if radice.tag != SVG + "svg":
@@ -79,6 +94,7 @@ def contenuto_svg(file):
 
     testi = Counter()
     collegamenti = Counter()
+    messaggi_plantuml = []
     for elemento in radice.iter():
         if elemento.tag in (SVG + "text", SVG + "foreignObject"):
             testi.update(parole_svg(elemento))
@@ -87,28 +103,40 @@ def contenuto_svg(file):
             collegamenti[("DOT", elemento.findtext(SVG + "title", default=""))] += 1
         if "data-entity-1" in elemento.attrib and "data-entity-2" in elemento.attrib:
             etichetta = tuple(parola for testo in elemento.iter(SVG + "text") for parola in parole_svg(testo))
-            collegamenti[("PlantUML", elemento.get("data-entity-1"), elemento.get("data-entity-2"), etichetta)] += 1
+            collegamento = ("PlantUML", elemento.get("data-entity-1"), elemento.get("data-entity-2"), etichetta)
+            collegamenti[collegamento] += 1
+            if elemento.tag == SVG + "g" and "message" in elemento.get("class", "").split():
+                messaggi_plantuml.append(collegamento)
+        if elemento.tag in (SVG + "path", SVG + "line") and elemento.get("data-et") in {"edge", "message"}:
+            collegamenti[freccia_mermaid(elemento, radice.get("id", ""))] += 1
 
-    return testi, collegamenti
+    return testi, collegamenti, messaggi_plantuml
+
+
+def verifica_png(file):
+    try:
+        with file.open("rb") as dati:
+            dati.seek(-len(FINE_PNG), 2)
+            if dati.read() != FINE_PNG:
+                raise ValueError("blocco IEND assente o non valido")
+        with Image.open(file, formats=("PNG",)) as immagine:
+            immagine.verify()
+        with Image.open(file, formats=("PNG",)) as immagine:
+            immagine.load()
+    except (OSError, SyntaxError, ValueError, Image.DecompressionBombError) as errore:
+        raise ValueError(f"{file.relative_to(ROOT)} non è un PNG integro: {errore}") from errore
 
 
 def verifica_anteprime(sorgente, svg_generato, file_versionati):
-    anteprime = {sorgente.with_suffix(estensione) for estensione in ANTEPRIME} & file_versionati
-    if not anteprime:
-        raise ValueError("manca un'anteprima PNG o SVG con lo stesso nome del sorgente")
+    svg = sorgente.with_suffix(".svg")
+    if svg not in file_versionati:
+        raise ValueError(f"manca l'anteprima SVG versionata: {svg}")
+    if contenuto_svg(ROOT / svg) != contenuto_svg(svg_generato):
+        raise ValueError(f"{svg} differisce dal diagramma rigenerato. Aggiorna l'esportazione.")
 
-    contenuto_generato = contenuto_svg(svg_generato)
-    for anteprima in sorted(anteprime):
-        file = ROOT / anteprima
-        if file.suffix == ".svg":
-            if contenuto_svg(file) != contenuto_generato:
-                raise ValueError(f"{anteprima} differisce dal diagramma rigenerato. Aggiorna l'esportazione.")
-        else:
-            dati = file.read_bytes()
-            if not dati.startswith(b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR") or not dati.endswith(
-                b"\x00\x00\x00\x00IEND\xaeB\x60\x82"
-            ):
-                raise ValueError(f"{anteprima} non è un PNG integro")
+    png = sorgente.with_suffix(".png")
+    if png in file_versionati:
+        verifica_png(ROOT / png)
 
 
 def main():
