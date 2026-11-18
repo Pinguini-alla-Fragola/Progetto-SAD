@@ -1,8 +1,10 @@
 package it.unina.picus.richieste.web;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -419,11 +421,18 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
     @DisplayName("AC5 - un contatto ancora in attesa, da solo, basta a respingere il rifiuto definitivo")
     void ac5_rifiutoRespintoConContattoInAttesa() throws Exception {
         UUID richiestaId = inviaEPrendiInCarico(misuraId);
-        rispondi(erogatrice, interpella(richiestaId, erogatrice, "STESSO_COMUNE"), false);
+        UUID diniego = interpella(richiestaId, erogatrice, "STESSO_COMUNE");
+        rispondi(erogatrice, diniego, false);
         UUID inAttesa = interpella(richiestaId, altraCandidata, "STESSO_COMUNE");
-        // Dopo l'interpello la candidata ritira l'offerta: non è più compatibile e l'altra ha già
-        // declinato, quindi resta come unico motivo di blocco il contatto in attesa.
-        ritiraOfferta(altraCandidata, misuraId);
+        dati.ritiraOfferta(altraCandidata, misuraId);
+
+        // Precondizione: la candidata non è più fra le opzioni del Banco e l'unica rimasta ha già
+        // declinato, quindi il solo motivo di blocco è il contatto in attesa.
+        come(banco).get("/api/richieste/{id}/candidati", richiestaId)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[*].erogatore.accountId", not(hasItem(altraCandidata.toString()))))
+                .andExpect(jsonPath("$[*].erogatore.accountId", contains(erogatrice.toString())));
+        assertEquals("NON_DISPONIBILE", dati.esitoContatto(diniego), "l'unica opzione rimasta ha declinato");
 
         assertConflitto(rifiuta(richiestaId, null));
 
@@ -680,15 +689,6 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
     /** Operatore del Centro PICUS in un comune non adiacente a Napoli: raggiungibile solo a distanza. */
     private UUID centroPicus(long misura) {
         return dati.operatore("Centro PICUS", "INTERNO_BANCO", DatiSintetici.COMUNE_LONTANO, true, misura);
-    }
-
-    /**
-     * Ritira l'offerta della OPT per la misura conservando la riga, come prevede il ritiro di
-     * {@code CatalogoApi}. Non esiste ancora un endpoint HTTP per farlo.
-     */
-    private void ritiraOfferta(UUID opt, long misura) {
-        assertEquals(1, jdbc.update(
-                "update catalogo_offerte_opt set attiva = false where opt_id = ? and misura_id = ?", opt, misura));
     }
 
     /** La OPT titolare invia una richiesta per la misura e il Banco la prende in carico. */
