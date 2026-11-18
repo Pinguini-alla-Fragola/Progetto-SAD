@@ -34,7 +34,8 @@ la pratica Presa in carico e il contatto nello storico. Ripetere il preflight
 finché rimane al massimo un contatto aperto, poi sospendere le scritture e
 aggiornare. Non trasformare una mancata risposta in indisponibilità.
 Se i riscontri non sono ottenibili, rinviare l'upgrade e coinvolgere il PO
-per Q-19/#66: il contesto non autorizza ritiro o timeout automatici.
+per [Q-19](requirements/open-questions.md#q-19-erogatore-senza-risposta).
+Fino al chiarimento, evitare il ritiro automatico e la scadenza automatica del contatto.
 
 Per avvisi orfani, duplicati o indirizzati ad altri account, sospendere
 l'upgrade e far verificare al responsabile dei dati ogni riga riportata.

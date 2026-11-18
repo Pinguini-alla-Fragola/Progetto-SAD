@@ -3,7 +3,8 @@
 Qui sono raccolti i requisiti e i modelli di analisi di PICUS. I diagrammi
 mostrano il contesto, i processi attuali e quelli previsti, inclusa la gestione
 degli account. I documenti di riferimento sono le [regole di accesso](regole-accessi.md)
-e le [regole funzionali](regole-funzionali.md).
+e le [regole funzionali](regole-funzionali.md). Le domande aperte sono
+raccolte nel [registro dei chiarimenti](open-questions.md).
 
 | Diagramma | Anteprima |
 | --- | --- |
