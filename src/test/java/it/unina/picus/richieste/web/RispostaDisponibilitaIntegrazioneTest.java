@@ -312,7 +312,8 @@ class RispostaDisponibilitaIntegrazioneTest {
                 .andExpect(status().isForbidden())
                 .andExpect(content().string(""));
         rispondi(come(account(estraneo)), contattoId, false)
-                .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(""));
 
         assertContattoInAttesaERichiestaPresaInCarico();
         // il diniego non ha consumato il contatto: il destinatario può ancora rispondere
