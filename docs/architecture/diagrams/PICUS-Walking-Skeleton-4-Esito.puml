@@ -12,48 +12,48 @@ participant "Catalogo" as Catalogo
 participant "Richieste" as Richieste
 database "PostgreSQL" as Db #E9F7F5
 
-== Esito A · Conferma dell'accordo ==
-Banco -> Web: Registra l'accordo con i dati della modalità
-note right of Banco
-  In presenza: data, ora, luogo,
-  referente e telefono.
-  A distanza: data, ora e link.
-end note
-Web -> Richieste: Conferma con l'identità del Banco
-Richieste -> Db: Blocca la richiesta e verifica lo stato IN_PROGRAMMAZIONE
-opt Assegnazione a distanza
-  Richieste -> Catalogo: Rilegge l'abilitazione\ndel remoto per la misura
-  Catalogo --> Richieste: Remoto ancora consentito
+alt Conferma · «In programmazione» con erogatore assegnato
+  Banco -> Web: Registra l'accordo con i dati della modalità
+  note right of Banco
+    In presenza: data, ora, luogo,
+    referente e telefono.
+    A distanza: data, ora e link.
+  end note
+  Web -> Richieste: Conferma con l'identità del Banco
+  Richieste -> Db: Verifica lo stato e l'erogatore assegnato
+  opt Assegnazione a distanza
+    Richieste -> Catalogo: Verifica se la misura è erogabile a distanza
+    Catalogo --> Richieste: Esito della verifica
+  end
+  break Dati dell'accordo non validi
+    Web --> Banco: 400 · Stato invariato
+  end
+  break Stato incompatibile o remoto non più consentito
+    Web --> Banco: 409 · Stato invariato
+  end
+  Richieste -> Db: Salva i dettagli e lo stato CONFERMATA
+  Richieste --> Web: Richiesta confermata
+  Web --> Banco: Richiesta «Confermata»
+  Opt -> Web: Apre il dettaglio della richiesta
+  Web -> Richieste: Consulta il dettaglio
+  Richieste -> Db: Legge la richiesta con i dettagli
+  Richieste --> Web: Stato e dettagli dell'accordo
+  Web --> Opt: «Confermata» con data, ora e luogo o link
+else Rifiuto · «Presa in carico» o «In programmazione»
+  Banco -> Web: Rifiuta definitivamente la richiesta
+  Web -> Richieste: Rifiuta con l'identità del Banco
+  Richieste -> Db: Verifica lo stato e i contatti della richiesta
+  break Stato incompatibile, contatto in attesa\no opzioni ancora da valutare in «Presa in carico»
+    Web --> Banco: 409 · Stato invariato
+  end
+  Richieste -> Db: Salva lo stato RIFIUTATA
+  Richieste --> Web: Richiesta rifiutata
+  Web --> Banco: Richiesta «Rifiutata»
+  Opt -> Web: Apre il dettaglio della richiesta
+  Web -> Richieste: Consulta il dettaglio
+  Richieste --> Web: Stato «Rifiutata»
+  Web --> Opt: «Rifiutata · Nessun erogatore disponibile»
 end
-break Dati incompleti
-  Web --> Banco: 400 · Stato invariato
-end
-break Stato incompatibile o remoto non più consentito
-  Web --> Banco: 409 · Resta «In programmazione»
-end
-Richieste -> Db: Salva i dettagli e lo stato CONFERMATA
-Richieste --> Web: Richiesta confermata
-Web --> Banco: Richiesta «Confermata»
-Opt -> Web: Apre il dettaglio della richiesta
-Web -> Richieste: Consulta il dettaglio
-Richieste -> Db: Legge la richiesta con i dettagli
-Richieste --> Web: Stato e dettagli dell'accordo
-Web --> Opt: «Confermata» con data, ora e luogo o link
-
-== Esito B · Rifiuto definitivo ==
-Banco -> Web: Rifiuta definitivamente la richiesta
-Web -> Richieste: Rifiuta con l'identità del Banco
-Richieste -> Db: Blocca la richiesta e verifica lo stato
-break Risposta in attesa o condizioni non soddisfatte
-  Web --> Banco: 409 · Stato invariato
-end
-Richieste -> Db: Salva lo stato RIFIUTATA
-Richieste --> Web: Richiesta rifiutata
-Web --> Banco: Richiesta «Rifiutata»
-Opt -> Web: Apre il dettaglio della richiesta
-Web -> Richieste: Consulta il dettaglio
-Richieste --> Web: Stato «Rifiutata»
-Web --> Opt: «Rifiutata · Nessun erogatore disponibile»
 
 == Accesso estraneo negato e uscita ==
 Estranea -> Web: Chiede il dettaglio della stessa richiesta\ncon la propria sessione

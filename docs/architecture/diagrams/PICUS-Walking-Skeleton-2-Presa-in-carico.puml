@@ -48,9 +48,9 @@ Web --> Banco: Stesso comune, limitrofi, remoto
 == Contatto ==
 Banco -> Web: Sceglie un'opzione e la contatta
 Web -> Richieste: Crea il contatto con erogatore e ambito
-Richieste -> Db: Blocca la richiesta e verifica che\nnon ci sia un contatto in attesa
-break Contatto già in attesa o opzione non valida
-  Web --> Banco: 409 · Nessun contatto creato
+Richieste -> Db: Verifica lo stato della richiesta\ne gli eventuali contatti in attesa
+break Contatto non creato
+  Web --> Banco: 400 · Erogatore o ambito non compatibile\noppure 409 · Stato incompatibile, contatto in attesa\no opzioni locali da esaurire prima del remoto
 end
 Richieste -> Db: Salva il contatto IN_ATTESA
 Richieste -> Comunicazioni: Registra l'avviso per l'erogatore

@@ -21,8 +21,12 @@ Web --> Erogatore: Misura, comune e ambito
 Erogatore -> Web: Risponde alla richiesta di disponibilità
 Web -> Richieste: Registra la risposta
 Richieste -> Db: Salva la risposta sul contatto
+Richieste --> Web: Risposta registrata
+Web --> Erogatore: Risposta inviata
+Banco -> Web: Consulta lo storico dei contatti
+Web -> Richieste: Legge i contatti della richiesta
+Richieste --> Web: Contatti con le risposte
 alt Non disponibile
-  Richieste --> Web: Contatto declinato
   Web --> Banco: Risposta negativa nello storico
   note over Banco, Richieste
     La richiesta resta «Presa in carico».
@@ -30,26 +34,19 @@ alt Non disponibile
     e valuta il remoto quando i candidati locali hanno declinato.
   end note
 else Disponibile
-  Richieste --> Web: Risposta positiva registrata
-  Web --> Erogatore: Risposta inviata
-  Banco -> Web: Consulta lo storico dei contatti
-  Web -> Richieste: Legge i contatti della richiesta
-  Richieste --> Web: Contatti con le risposte
   Web --> Banco: Risposta positiva dell'erogatore
+  Banco -> Web: Assegna l'erogatore che ha risposto
+  Web -> Richieste: Assegna con l'identità del Banco
+  Richieste -> Db: Verifica lo stato «Presa in carico»\ne l'ultimo contatto per erogatore e ambito
+  Richieste -> Catalogo: Verifica che l'erogatore sia ancora compatibile
+  Catalogo --> Richieste: Esito della verifica
+  break Stato incompatibile, risposta non positiva o superata,\ncontatto in attesa o erogatore non più compatibile
+    Web --> Banco: 409 · Stato invariato
+  end
+  Richieste -> Db: Salva erogatore, ambito e stato IN_PROGRAMMAZIONE
+  Richieste --> Web: Richiesta assegnata
+  Web --> Banco: Richiesta «In programmazione»
+  Opt -> Web: Apre il dettaglio della richiesta
+  Web --> Opt: Stato «In programmazione»
 end
-
-== Assegnazione ==
-Banco -> Web: Assegna l'erogatore che ha risposto
-Web -> Richieste: Assegna con l'identità del Banco
-Richieste -> Db: Blocca la richiesta e verifica lo stato PRESA_IN_CARICO
-Richieste -> Catalogo: Rilegge sotto blocco profilo,\ncompetenza e offerta dell'erogatore
-Catalogo --> Richieste: Erogatore ancora attivo e compatibile
-break Risposta non positiva, altro contatto in attesa\no erogatore non più compatibile
-  Web --> Banco: 409 · Stato invariato
-end
-Richieste -> Db: Salva erogatore, ambito e stato IN_PROGRAMMAZIONE
-Richieste --> Web: Richiesta assegnata
-Web --> Banco: Richiesta «In programmazione»
-Opt -> Web: Apre il dettaglio della richiesta
-Web --> Opt: Stato «In programmazione»
 @enduml
