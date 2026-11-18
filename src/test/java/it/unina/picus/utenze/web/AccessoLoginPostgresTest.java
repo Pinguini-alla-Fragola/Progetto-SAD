@@ -486,6 +486,7 @@ class AccessoLoginPostgresTest extends IntegrazionePostgresBase {
         return (MockHttpSession) esito.getRequest().getSession(false);
     }
 
+
     private static boolean autenticata(MockHttpSession sessione) {
         return sessione != null && !sessione.isInvalid()
                 && sessione.getAttribute(SPRING_SECURITY_CONTEXT_KEY) != null;
