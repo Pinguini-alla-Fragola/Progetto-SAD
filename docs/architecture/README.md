@@ -9,7 +9,7 @@
 - [Walking skeleton 2 di 4 · Presa in carico, ricerca e contatto](diagrams/PICUS-Walking-Skeleton-2-Presa-in-carico.puml) · [PNG](diagrams/PICUS-Walking-Skeleton-2-Presa-in-carico.png) · [SVG](diagrams/PICUS-Walking-Skeleton-2-Presa-in-carico.svg)
 - [Walking skeleton 3 di 4 · Risposta e assegnazione](diagrams/PICUS-Walking-Skeleton-3-Assegnazione.puml) · [PNG](diagrams/PICUS-Walking-Skeleton-3-Assegnazione.png) · [SVG](diagrams/PICUS-Walking-Skeleton-3-Assegnazione.svg)
 - [Walking skeleton 4 di 4 · Conferma o rifiuto](diagrams/PICUS-Walking-Skeleton-4-Esito.puml) · [PNG](diagrams/PICUS-Walking-Skeleton-4-Esito.png) · [SVG](diagrams/PICUS-Walking-Skeleton-4-Esito.svg)
-- [Stati della richiesta · Protocollo dei comandi](diagrams/PICUS-Stati-Richiesta.mmd) · [PNG](diagrams/PICUS-Stati-Richiesta.png) · [SVG](diagrams/PICUS-Stati-Richiesta.svg)
+- [Stati della richiesta · Protocollo dei comandi](diagrams/PICUS-Stati-Richiesta.dot) · [PNG](diagrams/PICUS-Stati-Richiesta.png) · [SVG](diagrams/PICUS-Stati-Richiesta.svg)
 - [PICUS - Schema ER PostgreSQL](diagrams/PICUS-Schema-ER.puml) · [Anteprima PNG](diagrams/PICUS-Schema-ER.png)
 - [C&C · CC-01 Struttura runtime](diagrams/C%26C/Diagramma-C%26C.puml) · [PNG](diagrams/C%26C/Diagramma-C%26C.png) · [SVG](diagrams/C%26C/Diagramma-C%26C.svg)
 - [C&C · CC-02 Ingresso web e accesso ai dati](diagrams/C%26C/Monolite-C%26C.dot) · [PNG](diagrams/C%26C/Monolite-C%26C.png) · [SVG](diagrams/C%26C/Monolite-C%26C.svg)
@@ -235,8 +235,9 @@ testi leggibili, assenza di sovrapposizioni e corrispondenza con i sorgenti.
 Il diagramma UML di protocollo mostra i comandi principali di
 [`RichiesteApi`](../../src/main/java/it/unina/picus/richieste/api/RichiesteApi.java)
 che fanno cambiare stato a una richiesta. Le frecce si leggono come
-`[precondizione] operazione / [postcondizione]`. Il ciclo a sei stati è
-definito in [ADR-002](../adr/ADR-002-ciclo-di-vita-richiesta.md).
+`[precondizione] operazione() / [postcondizione]`. Nella precondizione il
+primo termine è l'attore che invoca l'operazione, per esempio `Banco` o `OPT`.
+Il ciclo a sei stati è definito in [ADR-002](../adr/ADR-002-ciclo-di-vita-richiesta.md).
 
 Un nuovo invio valido della OPT con `invia()` inizializza la richiesta a
 Creata. La risposta di un candidato mantiene la richiesta Presa in carico.
@@ -250,13 +251,14 @@ Banco, la OPT titolare o l'erogatore assegnato secondo la
 [matrice di annullamento](../requirements/regole-funzionali.md#matrice-di-annullamento).
 Il motivo è facoltativo solo partendo da Creata.
 
-Per rigenerare le esportazioni con Mermaid CLI 12.2.0, eseguire dalla radice
-del progetto.
+Per rigenerare le esportazioni con Graphviz, eseguire dalla radice del
+progetto. Il sorgente fissa le posizioni dei nodi e usa il layout `neato`, come
+il CC-02.
 
 ```powershell
 $stati = 'docs/architecture/diagrams/PICUS-Stati-Richiesta'
-mmdc -i "$stati.mmd" -o "$stati.png" -b white --size 1440 -s 1.5
-mmdc -i "$stati.mmd" -o "$stati.svg" -b white
+dot -Tpng "$stati.dot" -o "$stati.png"
+dot -Tsvg "$stati.dot" -o "$stati.svg"
 ```
 
 ## Persistenza iniziale

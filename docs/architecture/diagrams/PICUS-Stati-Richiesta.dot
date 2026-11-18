@@ -1,0 +1,47 @@
+digraph Stati {
+  // Coordinate in punti, come nel CC-02. I vertici senza simbolo fissano le pieghe dei connettori.
+  graph [
+    layout=neato, inputscale=72, overlap=true, splines=line,
+    outputorder=nodesfirst, bgcolor="#FFFFFF", dpi=140, pad=0.20,
+    labelloc=t, fontname=Arial, fontcolor="#172B3A", fontsize=18,
+    label=<<B>PICUS · Stati della richiesta</B>>
+  ]
+  node [pin=true, shape=box, style=filled, fixedsize=true, fontname=Arial, fontsize=13, penwidth=1.15]
+  edge [color="#64748B", penwidth=1.2, arrowsize=0.8]
+  Annullabile [pos="770,210!", width=21.4, height=4.17, fillcolor="#F7FAFE", color="#7C9BB9", label=""]
+
+  Creata [pos="250,290!", width=1.389, height=0.556, fillcolor="#E6EEF0", color="#253F4C", fontcolor="#253F4C", style="filled", label=<<B>Creata</B>>]
+  Carico [pos="610,290!", width=2.083, height=0.556, fillcolor="#FBEDD6", color="#795117", fontcolor="#795117", style="filled", label=<<B>Presa in carico</B>>]
+  Programmazione [pos="1030,290!", width=2.361, height=0.556, fillcolor="#FBEDD6", color="#795117", fontcolor="#795117", style="filled", label=<<B>In programmazione</B>>]
+  Confermata [pos="1450,290!", width=1.806, height=0.556, fillcolor="#E8F2E9", color="#2F6B3A", fontcolor="#192C3A", style="filled", label=<<B>Confermata</B>>]
+  Rifiutata [pos="1030,120!", width=1.806, height=0.556, fillcolor="#FAECEE", color="#9C3844", fontcolor="#9C3844", style="filled", label=<<B>Rifiutata</B>>]
+  Annullata [pos="770,-130!", width=1.806, height=0.556, fillcolor="#EDF1EF", color="#3A545E", fontcolor="#3A545E", style="filled", label=<<B>Annullata</B>>]
+  Start [pos="40,290!", shape=circle, width=0.2, height=0.2, fillcolor="#64748B", color="#64748B", label=""]
+  node [shape=plaintext, fixedsize=false, width=0, height=0, style=filled, fillcolor="#FFFFFF", fontcolor="#172B3A", fontsize=12, margin="0.06,0.03"]
+  Titolo [pos="770,345!", style="", fontsize=13, fontcolor="#183957", label=<<B>Stati da cui si può annullare</B>>]
+  l_invia [pos="145,290!", label=<[OPT]<BR/>invia() /<BR/>[in coda]>]
+  l_prendi [pos="442,290!", label=<[Banco]<BR/>prendiInCarico() /<BR/>[ricerca aperta]>]
+  l_assegna [pos="820,290!", label=<[Banco, risposta positiva<BR/>dell'erogatore]<BR/>assegnaErogatore() /<BR/>[erogatore assegnato]>]
+  l_conferma [pos="1240,290!", label=<[Banco, accordo completo]<BR/>confermaAccordo() /<BR/>[dettagli immutabili]>]
+  l_rif_prog [pos="1030,205!", label=<[Banco, accordo impraticabile]<BR/>rifiutaRichiesta() /<BR/>[nessun erogatore disponibile]>]
+  l_rif_carico [pos="800,120!", label=<[Banco, opzioni esaurite]<BR/>rifiutaRichiesta() /<BR/>[nessun erogatore disponibile]>]
+  l_annulla [pos="770,-30!", label=<[Banco, OPT o erogatore,<BR/>motivo se non Creata]<BR/>annullaRichiesta() /<BR/>[dettagli conservati]>]
+  node [shape=point, width=0.01, height=0.01, label="", style=invis]
+  b_rc [pos="610,120!"]
+  a0 [pos="770,60!"]
+  Start -> l_invia [arrowhead=none]
+  l_invia -> Creata
+  Creata -> l_prendi [arrowhead=none]
+  l_prendi -> Carico
+  Carico -> l_assegna [arrowhead=none]
+  l_assegna -> Programmazione
+  Programmazione -> l_conferma [arrowhead=none]
+  l_conferma -> Confermata
+  Programmazione -> l_rif_prog [arrowhead=none]
+  l_rif_prog -> Rifiutata
+  Carico -> b_rc [arrowhead=none]
+  b_rc -> l_rif_carico [arrowhead=none]
+  l_rif_carico -> Rifiutata
+  a0 -> l_annulla [arrowhead=none]
+  l_annulla -> Annullata
+}
