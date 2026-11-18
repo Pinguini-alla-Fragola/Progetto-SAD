@@ -1,0 +1,42 @@
+@startuml
+!include C&C-style.iuml
+left to right direction
+skinparam nodesep 65
+skinparam ranksep 75
+title PICUS · Componenti e connettori\nCC-03 · Collaborazioni tra componenti applicativi
+
+frame "Applicazione PICUS · Unico processo JVM" as JVM {
+' portin/portout dispongono i quadratini sui lati; le frecce indicano le invocazioni.
+  component "Richieste\nPratiche, contatti e accordi" as R {
+    portout " " as R_C
+    portout " " as R_A
+    portout " " as R_CHECK
+  }
+  component "Monitoraggio\nConteggi, schede e riepiloghi" as M {
+    portout " " as M_C
+    portout " " as M_U
+  }
+  component "Catalogo\nMisure, territori e offerte" as C {
+    portin " " as C_R
+    portin " " as C_M
+    portout " " as C_U
+  }
+  component "Comunicazioni\nMessaggi, allegati e avvisi" as A {
+    portin " " as A_R
+    portin " " as A_CHECK
+    portout " " as A_U
+  }
+  component "Utenze\nAccount e profili" as U {
+    portin " " as U_C
+    portin " " as U_A
+    portin " " as U_M
+  }
+}
+R_C ---> C_R : Catalogo
+R_A ---> A_R : Avvisi
+R_CHECK <--- A_CHECK : Verifica riferimenti
+A_U ---> U_A : Destinatari
+C_U ---> U_C : Profili
+M_C ---> C_M : Misure
+M_U ---> U_M : Account
+@enduml

@@ -1,0 +1,137 @@
+digraph CC02 {
+  // Coordinate in punti. I vertici senza simbolo fissano le pieghe dei connettori.
+  graph [
+    layout=neato, inputscale=72, overlap=true, splines=line,
+    outputorder=nodesfirst, bgcolor="#FFFFFF", dpi=140, pad=0.20,
+    labelloc=t, fontname=Arial, fontcolor="#172B3A", fontsize=18,
+    label=<<B>PICUS · Componenti e connettori</B><BR/><FONT POINT-SIZE="14">CC-02 · Ingresso web e accesso ai dati</FONT>>
+  ]
+  node [
+    pin=true, shape=box, style=filled, fixedsize=true, fontname=Arial,
+    fontsize=12, penwidth=1.15, color="#7C9BB9", fontcolor="#183957"
+  ]
+  JVM [pos="500,383!", width=13.4, height=6.88, label="", fillcolor="#F7FAFE"]
+
+  node [shape=component, width=2.3, height=1.25, fillcolor="#EDF5F0", color="#568573", fontcolor="#1A4A3C"]
+  Browser [pos="500,699!", width=3, height=1, fillcolor="#F1F5F9", color="#94A3B8", fontcolor="#142B46",
+    label=<<B>Browser web</B><BR/>OPT · Banco · Operatori<BR/>1..* istanze>]
+  Web [pos="500,555!", width=5, height=1, fillcolor="#E9F2FC", color="#5480B0", fontcolor="#143C65",
+    label=<<B>Gestore web</B><BR/>Sicurezza e sessione · Controller<BR/>Spring MVC · HTML / JSON>]
+  Utenze [pos="120,401!",
+    label=<<B>Utenze</B><BR/>Account e profili<BR/>Servizi e persistenza>]
+  Richieste [pos="310,401!",
+    label=<<B>Richieste</B><BR/>Pratiche e accordi<BR/>Servizi e persistenza>]
+  Catalogo [pos="500,401!",
+    label=<<B>Catalogo</B><BR/>Misure, territori e offerte<BR/>Servizi e persistenza>]
+  Comunicazioni [pos="690,401!",
+    label=<<B>Comunicazioni</B><BR/>Messaggi, allegati e avvisi<BR/>Servizi e persistenza>]
+  Monitoraggio [pos="880,401!",
+    label=<<B>Monitoraggio</B><BR/>Conteggi, schede e riepiloghi<BR/>Servizi e persistenza>]
+  Adattatore [pos="120,205!", height=1,
+    label=<<B>Adattatore email</B><BR/>Attivazione e recupero>]
+  Email [pos="120,75!", label=<<B>Servizio email esterno</B>>]
+  PostgreSQL [pos="500,75!", width=2.8, fillcolor="#E9F7F5", color="#3D867D", fontcolor="#153D38",
+    label=<<B>PostgreSQL</B><BR/>Database unico picus<BR/>Endpoint condiviso · 5432>]
+
+  node [shape=plaintext, fixedsize=false, width=0, height=0, style="", fontcolor="#334155"]
+  TitoloJVM [pos="171,613!", fontsize=13, fontcolor="#183957",
+    label=<<B>Applicazione PICUS · Unico processo JVM</B>>]
+  EtichettaHTTP [pos="534,642!", label="HTTP"]
+  EtichettaJDBC [pos="528,220!", label="JDBC"]
+  EtichettaEmail [pos="78,147!", label="Invio email"]
+
+  node [shape=box, fixedsize=true, style=filled, width=0.13, height=0.13,
+    label="", color="#334155", fillcolor="#FFFFFF"]
+  browser_http [pos="500,663!"]
+  web_http [pos="500,591!"]
+  web_u [pos="335,519!"]
+  web_r [pos="415,519!"]
+  web_c [pos="500,519!"]
+  web_a [pos="585,519!"]
+  web_m [pos="665,519!"]
+
+  u_web [pos="120,446!"]
+  r_web [pos="310,446!"]
+  c_web [pos="500,446!"]
+  a_web [pos="690,446!"]
+  m_web [pos="880,446!"]
+  u_jdbc [pos="144,356!"]
+  r_jdbc [pos="310,356!"]
+  c_jdbc [pos="500,356!"]
+  a_jdbc [pos="690,356!"]
+  m_jdbc [pos="880,356!"]
+
+  u_mail [pos="75,356!"]
+  mail_in [pos="75,241!"]
+  mail_out [pos="120,169!"]
+  email_in [pos="120,120!"]
+  db_jdbc [pos="500,120!"]
+
+  // Molteplicità allineate a destra delle porte, fuori dal percorso delle frecce.
+  node [shape=plaintext, fixedsize=false, style="", width=0, height=0, margin=0, fontsize=10, label="1"]
+  m_browser_http [pos="514,652!"]
+  m_web_http [pos="514,602!"]
+  m_web_u [pos="349,508!"]
+  m_web_r [pos="429,508!"]
+  m_web_c [pos="514,508!"]
+  m_web_a [pos="599,508!"]
+  m_web_m [pos="679,508!"]
+
+  m_u_web [pos="134,457!"]
+  m_r_web [pos="324,457!"]
+  m_c_web [pos="514,457!"]
+  m_a_web [pos="704,457!"]
+  m_m_web [pos="894,457!"]
+  m_u_jdbc [pos="158,345!"]
+  m_r_jdbc [pos="324,345!"]
+  m_c_jdbc [pos="514,345!"]
+  m_a_jdbc [pos="704,345!"]
+  m_m_jdbc [pos="894,345!"]
+
+  m_u_mail [pos="89,345!"]
+  m_mail_in [pos="89,252!"]
+  m_mail_out [pos="134,158!"]
+  m_email_in [pos="134,129!"]
+  m_db_jdbc [pos="514,129!"]
+
+  node [shape=point, fixedsize=true, style=invis, width=0, height=0, label=""]
+  wu_1 [pos="335,487!"]; wu_2 [pos="120,487!"]
+  wr_1 [pos="415,470!"]; wr_2 [pos="310,470!"]
+  wa_1 [pos="585,470!"]; wa_2 [pos="690,470!"]
+  wm_1 [pos="665,487!"]; wm_2 [pos="880,487!"]
+
+  edge [color="#64748B", penwidth=1.25, arrowsize=0.70]
+  browser_http -> web_http [color="#5480B0"]
+  web_c -> c_web
+  u_mail -> mail_in
+  mail_out -> email_in
+  web_u -> wu_1 [arrowhead=none, headclip=false]
+  web_r -> wr_1 [arrowhead=none, headclip=false]
+  web_a -> wa_1 [arrowhead=none, headclip=false]
+  web_m -> wm_1 [arrowhead=none, headclip=false]
+  wu_1 -> wu_2 [arrowhead=none, tailclip=false, headclip=false]
+  wr_1 -> wr_2 [arrowhead=none, tailclip=false, headclip=false]
+  wa_1 -> wa_2 [arrowhead=none, tailclip=false, headclip=false]
+  wm_1 -> wm_2 [arrowhead=none, tailclip=false, headclip=false]
+  wu_2 -> u_web [tailclip=false]
+  wr_2 -> r_web [tailclip=false]
+  wa_2 -> a_web [tailclip=false]
+  wm_2 -> m_web [tailclip=false]
+
+  // Le diramazioni condividono il tratto finale verso l'unica porta PostgreSQL.
+  node [shape=point, style=filled, width=0.055, height=0.055, color="#3D867D", fillcolor="#3D867D"]
+  jdbc_u [pos="144,266!"]
+  jdbc_r [pos="310,266!"]
+  jdbc_c [pos="500,266!"]
+  jdbc_a [pos="690,266!"]
+  jdbc_m [pos="880,266!"]
+  edge [color="#3D867D", arrowhead=none]
+  u_jdbc -> jdbc_u
+  r_jdbc -> jdbc_r
+  c_jdbc -> jdbc_c
+  a_jdbc -> jdbc_a
+  m_jdbc -> jdbc_m
+  jdbc_u -> jdbc_r -> jdbc_c
+  jdbc_m -> jdbc_a -> jdbc_c
+  jdbc_c -> db_jdbc [arrowhead=normal]
+}

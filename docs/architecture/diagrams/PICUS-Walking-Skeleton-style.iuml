@@ -1,0 +1,24 @@
+' Stile condiviso dai diagrammi del walking skeleton.
+hide footbox
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontColor #172B3A
+skinparam dpi 140
+
+skinparam sequence {
+  ArrowColor #465D71
+  LifeLineBorderColor #94A3B8
+  ActorBorderColor #60768A
+  ActorBackgroundColor #F1F5F9
+  ParticipantBorderColor #568573
+  ParticipantBackgroundColor #EDF5F0
+  ParticipantFontStyle bold
+  DividerBackgroundColor #E9F2FC
+  DividerBorderColor #5480B0
+  GroupBorderColor #7C9BB9
+}
+
+skinparam note {
+  BackgroundColor #FFF8EA
+  BorderColor #946728
+}
