@@ -3,10 +3,8 @@ package it.unina.picus.richieste.web;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasKey;
-import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -55,12 +53,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.ResultMatcher;
 
 import it.unina.picus.shared.AccessoDiProva;
+import it.unina.picus.shared.ClientHttp;
 import it.unina.picus.shared.DatiSintetici;
 import it.unina.picus.shared.IntegrazionePostgresql;
 import it.unina.picus.shared.SessioneDiProva;
+
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Test di integrazione della user story #52 «Conferma dell'accordo o rifiuto della richiesta»,
@@ -79,8 +79,8 @@ import it.unina.picus.shared.SessioneDiProva;
  *
  * Visibilità e persistenza hanno verifiche distinte: i dettagli dell'accordo si leggono dalle
  * API e dalla pagina di dettaglio di chi è autorizzato, quelli registrati dalla riga su
- * PostgreSQL. Ogni {@code 409} viene verificato anche nel corpo: errore JSON comune del modulo
- * Richieste, senza dati della pratica.
+ * PostgreSQL. Gli errori si verificano sul corpo completo: messaggio pubblico fisso del modulo
+ * Richieste, nessun campo per i {@code 409}, il campo da completare per i {@code 400}.
  */
 @IntegrazionePostgresql
 @Tag("issue-52")
@@ -96,6 +96,13 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
     private static final String TELEFONO = "+39 081 000 0000";
     private static final String LINK = "https://videochiamata.example/stanza-di-prova";
     private static final String NESSUN_EROGATORE = "Nessun erogatore disponibile";
+
+    /** Messaggi pubblici fissi di {@code ErroriRichieste}. */
+    private static final String CONFLITTO = "Il comando è in conflitto con i dati già registrati";
+    private static final String DATI_DA_CONTROLLARE = "Controlla i campi della richiesta";
+    private static final String FORMATO_NON_VALIDO = "Formato dei dati non valido";
+
+    private static final JsonMapper JSON = JsonMapper.builder().build();
 
     /**
      * Comandi inviati insieme nei test di concorrenza. Durante l'attesa del lock ognuno occupa
@@ -274,6 +281,7 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
         conferma(richiestaId, json(Map.of("modalita", "IN_PRESENZA")))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.codice").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.messaggio").value(DATI_DA_CONTROLLARE))
                 .andExpect(jsonPath("$.campi", hasKey("dataOra")))
                 .andExpect(jsonPath("$.campi", hasKey("luogo")))
                 .andExpect(jsonPath("$.campi", hasKey("nomeReferente")))
@@ -297,11 +305,15 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
     @DisplayName("#116 - un corpo con chiavi duplicate riceve 400 e non scrive nulla")
     void corpoConChiaviDuplicate() throws Exception {
         UUID richiestaId = richiestaInProgrammazione(erogatrice);
-        String duplicato = json(inPresenza()).replaceFirst("\\{", "{\"luogo\": \"Altra sede\", ");
+        // scritto a mano: un serializzatore non produrrebbe mai due volte la stessa chiave
+        String duplicato = """
+                {"modalita": "IN_PRESENZA", "dataOra": "%s", "luogo": "%s", "luogo": "Altra sede",
+                 "nomeReferente": "%s", "cognomeReferente": "%s", "telefonoReferente": "%s"}
+                """.formatted(DATA_ORA, LUOGO, NOME, COGNOME, TELEFONO);
 
-        conferma(richiestaId, duplicato)
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.codice").value("BAD_REQUEST"));
+        MvcResult esito = conferma(richiestaId, duplicato).andReturn();
+
+        ClientHttp.assertErrorePubblico(esito.getResponse(), 400, "BAD_REQUEST", FORMATO_NON_VALIDO);
 
         assertInProgrammazioneSenzaAccordo(richiestaId, erogatrice);
     }
@@ -313,7 +325,7 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
         // Il catalogo cambia dopo l'assegnazione: il Banco non può più confermare a distanza.
         jdbc.update("update catalogo_misure set erogabile_a_distanza = false where id = ?", scenario.misuraId());
 
-        assertConflitto(conferma(scenario.richiestaId(), json(aDistanza())), scenario.richiestaId());
+        assertConflitto(conferma(scenario.richiestaId(), json(aDistanza())));
 
         assertInProgrammazioneSenzaAccordo(scenario.richiestaId(), scenario.centroPicus());
     }
@@ -376,10 +388,10 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
     @DisplayName("AC5 - finché restano candidati locali non interpellati il rifiuto definitivo è respinto")
     void ac5_rifiutoRespintoConCandidatiLocaliDaValutare() throws Exception {
         UUID richiestaId = inviaEPrendiInCarico(misuraId);
-        assertConflitto(rifiuta(richiestaId, null), richiestaId);
+        assertConflitto(rifiuta(richiestaId, null));
 
         rispondi(erogatrice, interpella(richiestaId, erogatrice, "STESSO_COMUNE"), false);
-        assertConflitto(rifiuta(richiestaId, null), richiestaId);
+        assertConflitto(rifiuta(richiestaId, null));
 
         assertPresaInCaricoPerLaTitolare(richiestaId);
     }
@@ -394,7 +406,7 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
         UUID richiestaId = inviaEPrendiInCarico(misuraRemota);
         rispondi(locale, interpella(richiestaId, locale, "STESSO_COMUNE"), false);
 
-        assertConflitto(rifiuta(richiestaId, null), richiestaId);
+        assertConflitto(rifiuta(richiestaId, null));
         assertPresaInCaricoPerLaTitolare(richiestaId);
 
         rispondi(centroPicus, interpella(richiestaId, centroPicus, "CENTRO_PICUS_A_DISTANZA"), false);
@@ -404,15 +416,23 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
     }
 
     @Test
-    @DisplayName("AC5 - con un contatto ancora in attesa il rifiuto definitivo è respinto")
+    @DisplayName("AC5 - un contatto ancora in attesa, da solo, basta a respingere il rifiuto definitivo")
     void ac5_rifiutoRespintoConContattoInAttesa() throws Exception {
         UUID richiestaId = inviaEPrendiInCarico(misuraId);
         rispondi(erogatrice, interpella(richiestaId, erogatrice, "STESSO_COMUNE"), false);
-        interpella(richiestaId, altraCandidata, "STESSO_COMUNE");
+        UUID inAttesa = interpella(richiestaId, altraCandidata, "STESSO_COMUNE");
+        // Dopo l'interpello la candidata ritira l'offerta: non è più compatibile e l'altra ha già
+        // declinato, quindi resta come unico motivo di blocco il contatto in attesa.
+        ritiraOfferta(altraCandidata, misuraId);
 
-        assertConflitto(rifiuta(richiestaId, null), richiestaId);
+        assertConflitto(rifiuta(richiestaId, null));
 
         assertPresaInCaricoPerLaTitolare(richiestaId);
+        assertEquals("IN_ATTESA", dati.esitoContatto(inAttesa), "il rifiuto respinto non tocca il contatto");
+        // quando la candidata risponde non resta alcun motivo di blocco
+        rispondi(altraCandidata, inAttesa, false);
+        rifiuta(richiestaId, null).andExpect(status().isOk());
+        assertRifiutataPerLaTitolare(richiestaId);
     }
 
     @Test
@@ -430,9 +450,7 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
     void ac5_rifiutoConCampiRespinto() throws Exception {
         UUID richiestaId = richiestaInProgrammazione(erogatrice);
 
-        rifiuta(richiestaId, json(Map.of("motivazione", "Nessuna soluzione")))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.codice").value("BAD_REQUEST"));
+        assertDatiDaCompletare(rifiuta(richiestaId, json(Map.of("motivazione", "Nessuna soluzione"))), "comando");
 
         assertInProgrammazioneSenzaAccordo(richiestaId, erogatrice);
     }
@@ -466,9 +484,9 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
         conferma(richiestaId, json(inPresenza())).andExpect(status().isOk());
         Map<String, Object> salvato = rigaDellaRichiesta(richiestaId);
 
-        assertConflitto(conferma(richiestaId, json(con(inPresenza(), "luogo", "Altra sede"))), richiestaId);
-        assertConflitto(conferma(richiestaId, json(con(inPresenza(), "dataOra", "2030-04-01T09:00:00+02:00"))), richiestaId);
-        assertConflitto(rifiuta(richiestaId, null), richiestaId);
+        assertConflitto(conferma(richiestaId, json(con(inPresenza(), "luogo", "Altra sede"))));
+        assertConflitto(conferma(richiestaId, json(con(inPresenza(), "dataOra", "2030-04-01T09:00:00+02:00"))));
+        assertConflitto(rifiuta(richiestaId, null));
 
         assertEquals(salvato, rigaDellaRichiesta(richiestaId));
         assertConfermataInPresenza(come(titolare).get("/api/richieste/{id}", richiestaId), erogatrice);
@@ -480,10 +498,10 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
         UUID richiestaId = richiestaNelloStato(stato);
         Map<String, Object> prima = rigaDellaRichiesta(richiestaId);
 
-        assertConflitto(conferma(richiestaId, json(inPresenza())), richiestaId);
+        assertConflitto(conferma(richiestaId, json(inPresenza())));
         if (!stato.equals("PRESA_IN_CARICO")) {
             // da Presa in carico il rifiuto è ammesso: i suoi casi sono negli AC5
-            assertConflitto(rifiuta(richiestaId, null), richiestaId);
+            assertConflitto(rifiuta(richiestaId, null));
         }
 
         assertEquals(prima, rigaDellaRichiesta(richiestaId));
@@ -526,6 +544,19 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
                 .andExpect(content().string(""));
 
         assertInProgrammazioneSenzaAccordo(richiestaId, erogatrice);
+    }
+
+    @ParameterizedTest(name = "#116 - l''operatore {0} assegnato non può registrare il rifiuto definitivo")
+    @ValueSource(strings = {"INTERNO_BANCO", "ESTERNO_PAGATO_BANCO"})
+    void operatoreAssegnatoNonRifiuta(String tipologia) throws Exception {
+        UUID operatore = dati.operatore("Operatore assegnato", tipologia, "napoli", false, misuraId);
+        UUID richiestaId = richiestaInProgrammazione(operatore);
+
+        come(operatore).post("/api/richieste/{id}/rifiuta", null, richiestaId)
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(""));
+
+        assertInProgrammazioneSenzaAccordo(richiestaId, operatore);
     }
 
     @Test
@@ -601,7 +632,7 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
                 ? sessione.post("/api/richieste/{id}/conferma", json(inPresenza()), richiestaId)
                 : sessione.post("/api/richieste/{id}/rifiuta", null, richiestaId));
 
-        int vincitore = unicoAccettato(esiti, richiestaId);
+        int vincitore = unicoAccettato(esiti);
         if (vincitore % 2 == 0) {
             assertAccordoInPresenzaPersistito(richiestaId, erogatrice);
             assertConfermataInPresenza(come(titolare).get("/api/richieste/{id}", richiestaId), erogatrice);
@@ -618,7 +649,7 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
         List<MvcResult> esiti = inParalleloSulLock(richiestaId, (sessione, i) -> sessione.post(
                 "/api/richieste/{id}/conferma", json(con(inPresenza(), "luogo", "Sede " + i)), richiestaId));
 
-        int vincitore = unicoAccettato(esiti, richiestaId);
+        int vincitore = unicoAccettato(esiti);
         Map<String, Object> salvato = rigaDellaRichiesta(richiestaId);
         assertAll("accordo su PostgreSQL",
                 () -> assertEquals("CONFERMATA", salvato.get("stato")),
@@ -649,6 +680,15 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
     /** Operatore del Centro PICUS in un comune non adiacente a Napoli: raggiungibile solo a distanza. */
     private UUID centroPicus(long misura) {
         return dati.operatore("Centro PICUS", "INTERNO_BANCO", DatiSintetici.COMUNE_LONTANO, true, misura);
+    }
+
+    /**
+     * Ritira l'offerta della OPT per la misura conservando la riga, come prevede il ritiro di
+     * {@code CatalogoApi}. Non esiste ancora un endpoint HTTP per farlo.
+     */
+    private void ritiraOfferta(UUID opt, long misura) {
+        assertEquals(1, jdbc.update(
+                "update catalogo_offerte_opt set attiva = false where opt_id = ? and misura_id = ?", opt, misura));
     }
 
     /** La OPT titolare invia una richiesta per la misura e il Banco la prende in carico. */
@@ -871,7 +911,7 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
      * Verifica che un solo comando sia stato accettato e che tutti gli altri abbiano ricevuto un
      * {@code 409} nel formato comune; restituisce l'indice del comando accettato.
      */
-    private int unicoAccettato(List<MvcResult> esiti, UUID richiestaId) throws Exception {
+    private int unicoAccettato(List<MvcResult> esiti) throws Exception {
         int vincitore = -1;
         int accettati = 0;
         int inConflitto = 0;
@@ -881,7 +921,7 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
                 accettati++;
                 vincitore = i;
             } else if (stato == 409) {
-                assertConflitto(esiti.get(i), richiestaId);
+                assertConflitto(esiti.get(i));
                 inConflitto++;
             }
         }
@@ -923,22 +963,9 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
         return copia;
     }
 
-    /** Serializza un oggetto JSON piatto: testi tra virgolette, numeri e booleani così come sono. */
+    /** Corpo JSON prodotto con {@link JsonMapper}, come quello di un client reale. */
     private static String json(Map<String, ?> campi) {
-        StringBuilder testo = new StringBuilder("{");
-        for (var campo : campi.entrySet()) {
-            if (testo.length() > 1) {
-                testo.append(", ");
-            }
-            testo.append('"').append(campo.getKey()).append("\": ");
-            Object valore = campo.getValue();
-            if (valore instanceof String stringa) {
-                testo.append('"').append(stringa.replace("\\", "\\\\").replace("\"", "\\\"")).append('"');
-            } else {
-                testo.append(valore);
-            }
-        }
-        return testo.append('}').toString();
+        return JSON.writeValueAsString(campi);
     }
 
     // ------------------------------------------------------------------ verifiche ricorrenti
@@ -1005,39 +1032,27 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
         }
     }
 
-    /** 400 nel formato comune del modulo, con il campo da completare indicato in {@code campi}. */
+    /** 400 nel formato pubblico del modulo, con il campo da completare indicato in {@code campi}. */
     private static void assertDatiDaCompletare(ResultActions risposta, String campo) throws Exception {
         risposta.andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.codice").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.messaggio").value(DATI_DA_CONTROLLARE))
                 .andExpect(jsonPath("$.campi", hasKey(campo)))
                 .andExpect(jsonPath("$.campi." + campo).isNotEmpty());
     }
 
-    private void assertConflitto(ResultActions risposta, UUID richiestaId) throws Exception {
-        assertConflitto(risposta.andReturn(), richiestaId);
+    private static void assertConflitto(ResultActions risposta) throws Exception {
+        assertConflitto(risposta.andReturn());
     }
 
     /**
-     * Verifica un conflitto nel formato comune del modulo Richieste: stato {@code 409}, corpo
-     * JSON con i soli {@code codice}, {@code messaggio} e {@code campi}, nessun dato della
-     * pratica (identificativi, partecipanti, descrizione, dettagli dell'accordo).
+     * Verifica un conflitto nel formato pubblico del modulo Richieste: stato {@code 409}, corpo JSON
+     * con il solo messaggio fisso e nessun campo. Il corpo è così determinato per intero e non può
+     * contenere dati della pratica.
      */
-    private void assertConflitto(MvcResult risposta, UUID richiestaId) throws Exception {
-        for (ResultMatcher verifica : List.of(
-                status().isConflict(),
-                content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON),
-                jsonPath("$.*", hasSize(3)),
-                jsonPath("$.codice").value("CONFLICT"),
-                jsonPath("$.messaggio").isNotEmpty(),
-                jsonPath("$.campi").isEmpty())) {
-            verifica.match(risposta);
-        }
-
-        String corpo = risposta.getResponse().getContentAsString(StandardCharsets.UTF_8);
-        for (String datoDellaPratica : List.of(richiestaId.toString(), titolare.toString(), erogatrice.toString(),
-                DESCRIZIONE_RISERVATA, LUOGO, TELEFONO, LINK)) {
-            assertFalse(corpo.contains(datoDellaPratica), "il 409 non deve contenere " + datoDellaPratica);
-        }
+    private static void assertConflitto(MvcResult risposta) throws Exception {
+        content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON).match(risposta);
+        ClientHttp.assertErrorePubblico(risposta.getResponse(), 409, "CONFLICT", CONFLITTO);
     }
 
     /**
