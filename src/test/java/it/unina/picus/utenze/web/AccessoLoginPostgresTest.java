@@ -57,7 +57,7 @@ Le soglie del blocco sono quelle fissate dalla #25 (cinque fallimenti), scritte 
 lette dal codice di produzione: se il limite cambiasse, questi test devono fallire.
 
 L'accesso alle aree dei ruoli (200 per il proprio ruolo, 403 per gli altri) si verifica sulle
-dashboard reali servite da AreaController (#108 e #127).
+dashboard reali servite da AreaController (#108).
 */
 @DisplayName("Login, sessione, revoca e CSRF su PostgreSQL (#25)")
 class AccessoLoginPostgresTest extends IntegrazionePostgresBase {
