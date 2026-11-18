@@ -33,14 +33,6 @@ public interface ContattoDisponibilitaRepository extends JpaRepository<ContattoD
     Optional<ContattoDisponibilitaJpa> findOneById(UUID id);
 
     /**
-     * Elenca i contatti della richiesta in ordine di invio, usando l'identificativo a parità di data.
-     *
-     * @param richiestaId identificativo della richiesta
-     * @return contatti ordinati, eventualmente nessuno
-     */
-    List<ContattoDisponibilitaJpa> findAllByRichiesta_IdOrderByInviatoIlAscIdAsc(UUID richiestaId);
-
-    /**
      * Legge i riferimenti necessari per verificare il destinatario e bloccare la richiesta.
      *
      * <p>La proiezione lascia il contatto fuori dal contesto di persistenza. Il servizio può quindi

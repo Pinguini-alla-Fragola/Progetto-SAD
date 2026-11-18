@@ -28,4 +28,13 @@ public interface RicercaErogatoriApi {
      * @return vero se ancora compatibile e abilitato
      */
     boolean bloccaCompatibilita(long misuraId, String comuneCodice, UUID accountId, AmbitoErogazione ambito);
+
+    /**
+     * Verifica se la misura ammette l'erogazione a distanza e la mantiene bloccata fino al commit.
+     * La verifica richiede una transazione di scrittura già aperta.
+     *
+     * @param misuraId identificativo della misura già assegnata
+     * @return vero se la misura esiste e ammette l'erogazione a distanza
+     */
+    boolean bloccaAbilitazioneADistanza(long misuraId);
 }

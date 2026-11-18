@@ -32,7 +32,12 @@ public class OffertaTerritorialeJpa {
                 """, String.class).setParameter("comune", comune).getResultList();
     }
 
-    /** Blocca e rilegge la misura della pratica nella transazione di assegnazione. */
+    /**
+     * Blocca e rilegge la misura nella transazione del caso d'uso chiamante.
+     *
+     * @param id identificativo della misura
+     * @return misura aggiornata sotto lock, se presente
+     */
     public Optional<Misura> bloccaMisura(long id) {
         return Optional.ofNullable(blocca(MisuraJpa.class, id)).map(MisuraJpa::aDto);
     }

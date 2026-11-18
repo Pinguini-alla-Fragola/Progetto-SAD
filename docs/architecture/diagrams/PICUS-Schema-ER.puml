@@ -11,10 +11,6 @@ skinparam defaultFontColor #172B3A
 skinparam classFontStyle bold
 skinparam classAttributeIconSize 0
 skinparam ArrowColor #465D71
-skinparam legend {
-  BackgroundColor #F4F7FA
-  BorderColor #BAC9D6
-}
 
 skinparam class {
   BorderColor #60768A
@@ -101,11 +97,4 @@ utenze_account ||-left-o| utenze_profili_operatore
 utenze_account |o.down.o{ richieste : erogatore_id
 utenze_profili_opt ||.down.o{ richieste
 utenze_profili_operatore -[hidden]down- utenze_profili_opt
-
-legend bottom
-  <b>PK</b> Chiave primaria   <b>FK</b> Chiave esterna   <b>UK</b> Colonna univoca
-  <b>Adiacenze</b> Coppia univoca (comune_a, comune_b), con comune_a < comune_b
-  <b>Stati della richiesta</b> CREATA, PRESA_IN_CARICO, IN_PROGRAMMAZIONE,
-  CONFERMATA, RIFIUTATA, ANNULLATA   <b>Default</b> CREATA
-endlegend
 @enduml

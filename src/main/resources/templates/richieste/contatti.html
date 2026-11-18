@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Storico dei contatti · PICUS</title>
+    <link rel="icon" href="/img/picus.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/css/picus.css">
+    <script src="/js/disponibilita.js" type="module"></script>
+    <link rel="stylesheet" href="/css/integrazione-ui.css">
+</head>
+<body class="flow-page">
+<a th:replace="~{fragments/layout :: skip}" href="#contenuto">Vai al contenuto</a>
+<header class="picus-navbar">
+    <div class="nav-inner">
+        <a th:replace="~{fragments/layout :: brand}" href="/">PICUS</a>
+        <a href="/banco/dashboard" class="nav-link"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#back"></use></svg>Area Banco</a>
+    </div>
+</header>
+
+<main id="contenuto" class="mobile-wrapper" tabindex="-1" th:attr="data-richiesta-id=${richiestaId},data-contatti-disponibili=${contattiDisponibili}">
+    <header class="mobile-header"><h1>Storico dei contatti</h1></header>
+    <div class="mobile-body">
+        <p class="picus-meta">Richiesta <code th:text="${richiestaId}"></code></p>
+        <p id="caricamento" class="picus-meta" role="status" th:hidden="${!contattiDisponibili}">Caricamento dello storico…</p>
+        <p id="errore-contatto" class="alert alert-danger" role="alert" hidden></p>
+        <p id="nessun-contatto" class="picus-meta" role="status" hidden>Nessun contatto registrato per la richiesta.</p>
+        <span th:unless="${contattiDisponibili}" class="azione-inattiva" data-funzione-inattiva>
+            <button type="button" class="btn btn-secondary" disabled>Consulta i contatti</button>
+        </span>
+        <ul id="storico-contatti" class="picus-list contatto-storico"></ul>
+        <template id="modello-contatto">
+            <li class="picus-list-row contatto-riga">
+                <div class="contatto-erogatore">Account erogatore <code data-campo="erogatore"></code></div>
+                <p data-campo="ambito" class="picus-meta"></p>
+                <span data-campo="esito" class="badge-stato"></span>
+            </li>
+        </template>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

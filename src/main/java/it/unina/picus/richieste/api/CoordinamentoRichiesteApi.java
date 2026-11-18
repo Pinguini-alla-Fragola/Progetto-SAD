@@ -3,12 +3,14 @@ package it.unina.picus.richieste.api;
 import it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione;
 import it.unina.picus.richieste.api.RichiesteApi.Candidato;
 import it.unina.picus.richieste.api.RichiesteApi.ContattoDisponibilita;
+import it.unina.picus.richieste.api.RichiesteApi.DettagliAccordo;
+import it.unina.picus.richieste.api.RichiesteApi.RichiestaDettaglio;
 import it.unina.picus.richieste.api.RichiesteApi.RichiestaSintesi;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 import java.util.List;
 import java.util.UUID;
 
-/** Capacità del Banco per ricerca, contatto e assegnazione; contratti di {@link RichiesteApi}. */
+/** Capacità del Banco per coordinare le richieste e registrarne l'esito. */
 public interface CoordinamentoRichiesteApi {
     /**
      * Consulta il contatto della pratica dal perimetro autorizzato del Banco.
@@ -56,4 +58,23 @@ public interface CoordinamentoRichiesteApi {
      * @see RichiesteApi#assegnaErogatore(IdentitaAutenticata, UUID)
      */
     RichiestaSintesi assegnaErogatore(IdentitaAutenticata attore, UUID contattoId);
+
+    /**
+     * Conferma l'accordo per la richiesta e l'erogatore assegnato.
+     * @param attore identità verificata del Banco
+     * @param richiestaId identificativo della richiesta
+     * @param accordo dettagli concordati
+     * @return dettaglio della richiesta confermata
+     * @see RichiesteApi#confermaAccordo(IdentitaAutenticata, UUID, DettagliAccordo)
+     */
+    RichiestaDettaglio confermaAccordo(IdentitaAutenticata attore, UUID richiestaId, DettagliAccordo accordo);
+
+    /**
+     * Registra il rifiuto definitivo della richiesta.
+     * @param attore identità verificata del Banco
+     * @param richiestaId identificativo della richiesta
+     * @return sintesi della richiesta rifiutata
+     * @see RichiesteApi#rifiutaRichiesta(IdentitaAutenticata, UUID)
+     */
+    RichiestaSintesi rifiutaRichiesta(IdentitaAutenticata attore, UUID richiestaId);
 }

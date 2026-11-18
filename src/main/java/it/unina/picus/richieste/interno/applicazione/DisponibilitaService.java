@@ -7,16 +7,15 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import it.unina.picus.richieste.api.ConflittoRichiestaException;
 import it.unina.picus.richieste.api.RichiesteApi;
-import it.unina.picus.richieste.api.RisorsaRichiesteNonTrovataException;
-import it.unina.picus.shared.ControlloAccesso;
 import it.unina.picus.richieste.api.RichiesteApi.ContattoDisponibilita;
 import it.unina.picus.richieste.api.RichiesteApi.DettaglioContatto;
-import it.unina.picus.richieste.api.RichiesteApi.StatoRichiesta;
-import it.unina.picus.richieste.interno.dominio.StatoContattoIncompatibileException;
-import it.unina.picus.richieste.interno.persistenza.ContattoDisponibilitaJpa;
-import it.unina.picus.richieste.interno.persistenza.ContattoDisponibilitaRepository;
-import it.unina.picus.richieste.interno.persistenza.RichiestaRepository;
+import it.unina.picus.richieste.api.RichiesteApi.EsitoContatto;
+import it.unina.picus.richieste.api.RisorsaRichiesteNonTrovataException;
+import it.unina.picus.richieste.interno.dominio.ContattiRepository;
+import it.unina.picus.richieste.interno.dominio.RichiestaRepository;
+import it.unina.picus.shared.ControlloAccesso;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
 
@@ -31,7 +30,7 @@ import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
 public class DisponibilitaService {
 
     private final RichiestaRepository richieste;
-    private final ContattoDisponibilitaRepository contatti;
+    private final ContattiRepository contatti;
 
     /**
      * Costruisce il servizio con i repository usati dai casi d'uso di disponibilità.
@@ -39,7 +38,7 @@ public class DisponibilitaService {
      * @param richieste repository delle richieste di misura
      * @param contatti repository dei contatti di disponibilità
      */
-    public DisponibilitaService(RichiestaRepository richieste, ContattoDisponibilitaRepository contatti) {
+    public DisponibilitaService(RichiestaRepository richieste, ContattiRepository contatti) {
         this.richieste = richieste;
         this.contatti = contatti;
     }
@@ -56,13 +55,10 @@ public class DisponibilitaService {
      */
     public DettaglioContatto consultaContatto(IdentitaAutenticata attore, UUID contattoId) {
         verificaRuoloErogatore(attore);
-        var contatto = contatti.findOneById(contattoId)
+        var dettaglio = contatti.cercaDettaglio(contattoId)
                 .orElseThrow(RisorsaRichiesteNonTrovataException::new);
-        verificaDestinatario(attore, contatto.getErogatoreId());
-
-        var richiesta = contatto.getRichiesta();
-        return new DettaglioContatto(aDto(contatto), richiesta.getMisuraId(), contatto.getNomeMisura(),
-                richiesta.getTipoDestinatario(), richiesta.getComuneCodice());
+        verificaDestinatario(attore, dettaglio.contatto().erogatoreId());
+        return dettaglio;
     }
 
     /**
@@ -78,7 +74,7 @@ public class DisponibilitaService {
      * @return contatto con l'esito registrato
      * @throws SecurityException se l'attore non è un erogatore o non è il destinatario
      * @throws NoSuchElementException se il contatto o la richiesta non esistono
-     * @throws StatoContattoIncompatibileException se il contatto non è in attesa o la richiesta
+     * @throws ConflittoRichiestaException se il contatto non è in attesa o la richiesta
      *         non è in presa in carico
      * @see RichiesteApi#rispondiDisponibilita(IdentitaAutenticata, UUID, boolean)
      */
@@ -88,18 +84,17 @@ public class DisponibilitaService {
         verificaRuoloErogatore(attore);
         var riferimento = contatti.cercaRiferimento(contattoId)
                 .orElseThrow(RisorsaRichiesteNonTrovataException::new);
-        verificaDestinatario(attore, riferimento.getErogatoreId());
+        verificaDestinatario(attore, riferimento.erogatoreId());
 
-        var richiesta = richieste.cercaPerAggiornamento(riferimento.getRichiestaId())
+        var richiesta = richieste.cercaPerAggiornamento(riferimento.richiestaId())
                 .orElseThrow(RisorsaRichiesteNonTrovataException::new);
-        if (richiesta.getStato() != StatoRichiesta.PRESA_IN_CARICO) {
-            throw new StatoContattoIncompatibileException("La richiesta non è in presa in carico");
+        richiesta.verificaPresaInCarico();
+        var contatto = contatti.cerca(contattoId).orElseThrow(RisorsaRichiesteNonTrovataException::new);
+        if (contatto.esito() != EsitoContatto.IN_ATTESA) {
+            throw new ConflittoRichiestaException("Il contatto non è in attesa di risposta");
         }
-
-        var contatto = contatti.findById(contattoId)
-                .orElseThrow(RisorsaRichiesteNonTrovataException::new);
-        contatto.registraRisposta(disponibile);
-        return aDto(contatto);
+        var esito = disponibile ? EsitoContatto.DISPONIBILE : EsitoContatto.NON_DISPONIBILE;
+        return contatti.registraEsito(contattoId, esito);
     }
 
     /**
@@ -115,12 +110,10 @@ public class DisponibilitaService {
     public List<ContattoDisponibilita> elencoContatti(IdentitaAutenticata attore, UUID richiestaId) {
         ControlloAccesso.richiedi(attore != null && attore.accountId() != null && attore.ruolo() == RuoloUtente.BANCO,
                 "Lo storico dei contatti è riservato al Banco");
-        if (!richieste.existsById(richiestaId)) {
+        if (!richieste.esiste(richiestaId)) {
             throw new RisorsaRichiesteNonTrovataException();
         }
-        return contatti.findAllByRichiesta_IdOrderByOrdineInvioAsc(richiestaId).stream()
-                .map(DisponibilitaService::aDto)
-                .toList();
+        return contatti.storico(richiestaId);
     }
 
     private static void verificaRuoloErogatore(IdentitaAutenticata attore) {
@@ -133,8 +126,4 @@ public class DisponibilitaService {
         ControlloAccesso.richiedi(attore.accountId().equals(erogatoreId), "Contatto indirizzato a un altro account");
     }
 
-    private static ContattoDisponibilita aDto(ContattoDisponibilitaJpa contatto) {
-        return new ContattoDisponibilita(contatto.getId(), contatto.getRichiesta().getId(),
-                contatto.getErogatoreId(), contatto.getAmbito(), contatto.getEsito());
-    }
 }

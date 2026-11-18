@@ -3,7 +3,8 @@
 La [#49](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/49)
 aggiunge presa in carico, ricerca, contatto e assegnazione al flusso di invio
 della #48. Riutilizza login, sessioni, CSRF e risposta alla disponibilità
-già presenti. Non introduce viste o nuovi test.
+già presenti. La [#52](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/52)
+aggiunge la conferma dell'accordo e il rifiuto definitivo.
 
 ## Confini e transazioni
 
@@ -32,8 +33,9 @@ appartenenza al Centro PICUS, ambito assegnato e avvisi persistenti. V11
 aggiunge l'indice parziale PostgreSQL sul contatto in attesa. V12 assegna
 un ordine persistente ai contatti, anche a parità di istante di invio.
 V13 verifica anche a database che pratica e destinatario dell'avviso coincidano
-con il contatto, e ammette un solo avviso per contatto e tipo. Le migrazioni
-già pubblicate restano invariate.
+con il contatto, e ammette un solo avviso per contatto e tipo. V14 richiede
+un accordo completo per le richieste Confermata e permette di conservarlo
+per le richieste Annullata.
 Le offerte e le competenze devono essere dichiarate nei dati di catalogo
 e nei profili: non si attribuiscono automaticamente tutte le misure agli
 operatori o a una OPT senza offerta.
@@ -78,6 +80,8 @@ aggiornato dopo il login tramite `GET /api/auth/csrf`; i corpi previsti usano JS
 | `GET /api/contatti-disponibilita/{id}` | Dati minimi del solo destinatario, già disponibile. |
 | `POST /api/contatti-disponibilita/{id}/risposta` | Risposta del destinatario, già disponibile. |
 | `POST /api/contatti-disponibilita/{id}/assegnazione` | Solo Banco: risposta positiva → In programmazione; corpo assente o `{}`. |
+| `POST /api/richieste/{id}/conferma` | Solo Banco. Registra l'accordo in presenza o a distanza, secondo l'assegnazione. |
+| `POST /api/richieste/{id}/rifiuta` | Solo Banco. Registra il rifiuto definitivo; corpo assente o `{}`. |
 | `GET /api/avvisi` | Avvisi del solo account corrente, con riferimenti alla pratica e al contatto. |
 
 Per i comandi senza campi, soltanto un corpo assente o l'oggetto JSON vuoto `{}`
@@ -103,8 +107,7 @@ La consultazione mantiene lo stato. Il rifiuto di un candidato conserva
 serve il comando esplicito del Banco sull'ultimo contatto di quell'opzione,
 con account ancora attivo e compatibile
 e nessun altro contatto in attesa. Assegnatario, ambito e **In programmazione**
-vengono salvati insieme. Non sono aggiunti comandi di conferma dell'accordo,
-rifiuto definitivo o annullamento.
+vengono salvati insieme.
 
 La verifica finale mantiene lock condivisi fino al commit nella stessa
 transazione dell'assegnazione. Ordine: pratica (scrittura), misura,
@@ -126,6 +129,44 @@ Comunicazioni verifica i riferimenti immutabili attraverso `DestinatariAvvisi`,
 porta implementata dal modulo Richieste, prima di scrivere la propria casella.
 Ripetere lo stesso avviso è innocuo; cambiare pratica o destinatario del
 medesimo contatto viene rifiutato. Nessun dato della pratica entra nell'avviso.
+
+## Accordo e rifiuto definitivo
+
+Per confermare un accordo in presenza il Banco invia data e ora con offset,
+luogo, nome e cognome del referente e telefono.
+
+```json
+{
+  "modalita": "IN_PRESENZA",
+  "dataOra": "2026-12-03T10:30:00+01:00",
+  "luogo": "Sede di esempio",
+  "nomeReferente": "Nome",
+  "cognomeReferente": "Cognome",
+  "telefonoReferente": "+39 081 0000000"
+}
+```
+
+Per l'assegnazione `CENTRO_PICUS_A_DISTANZA` il Banco invia data, ora e link.
+
+```json
+{
+  "modalita": "A_DISTANZA",
+  "dataOra": "2026-12-03T10:30:00+01:00",
+  "link": "https://meet.example.org/accordo"
+}
+```
+
+Il servizio blocca la pratica e salva insieme stato Confermata e dettagli.
+Per il remoto, il catalogo blocca e rilegge l'abilitazione della misura nella
+stessa transazione. Se la misura non consente più il remoto, la conferma
+restituisce `409` e la richiesta resta In programmazione.
+
+In Presa in carico il rifiuto richiede che ogni opzione compatibile, compreso
+il remoto, abbia un ultimo esito negativo. In programmazione spetta al Banco
+valutare l'esito della trattativa. In entrambi gli stati il server impedisce
+il rifiuto mentre è in attesa una risposta. La OPT titolare vede lo stato
+Rifiutata e il messaggio «Nessun erogatore disponibile» nel dettaglio della
+propria richiesta. L'annullamento segue la #54.
 
 ## Aggiornamento di un database esistente
 
@@ -165,6 +206,11 @@ e concordare una correzione puntuale e tracciata prima di ripetere il controllo.
 Il software non riassegna né elimina automaticamente avvisi già consegnati.
 Ripristino e aggiornamento devono essere provati sulla copia riconciliata
 prima del database condiviso; non usare `flyway repair` per aggirare il controllo.
+
+Durante l'aggiornamento a V14, PostgreSQL verifica lo stato, l'assegnazione
+e i dettagli degli accordi già presenti. Se trova una riga incoerente,
+interrompe la migrazione e conserva i dati. Riconciliare le righe con i dati
+concordati e verificare l'aggiornamento su una copia prima di riprenderlo.
 
 ## Dati sintetici per la demo
 
