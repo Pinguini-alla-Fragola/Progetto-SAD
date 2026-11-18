@@ -58,10 +58,6 @@ Comunicazioni -> Db: Salva l'avviso nella casella dell'erogatore
 Richieste --> Web: Contatto in attesa
 Web --> Banco: Contatto registrato
 
-note over Richieste, Db
-  Contatto e avviso sono salvati nella stessa transazione.
-  Lo stato resta «Presa in carico».
-end note
 Erogatore -> Web: Apre i propri avvisi
 Web -> Comunicazioni: Legge gli avvisi dell'account
 Comunicazioni --> Web: Avvisi con i soli riferimenti

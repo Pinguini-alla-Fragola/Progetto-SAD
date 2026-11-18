@@ -22,7 +22,7 @@ end note
 Web -> Richieste: Conferma con l'identità del Banco
 Richieste -> Db: Blocca la richiesta e verifica lo stato IN_PROGRAMMAZIONE
 opt Assegnazione a distanza
-  Richieste -> Catalogo: Rilegge sotto blocco l'abilitazione\ndel remoto per la misura
+  Richieste -> Catalogo: Rilegge l'abilitazione\ndel remoto per la misura
   Catalogo --> Richieste: Remoto ancora consentito
 end
 break Dati incompleti
@@ -44,11 +44,6 @@ Web --> Opt: «Confermata» con data, ora e luogo o link
 Banco -> Web: Rifiuta definitivamente la richiesta
 Web -> Richieste: Rifiuta con l'identità del Banco
 Richieste -> Db: Blocca la richiesta e verifica lo stato
-note over Richieste, Db
-  Ammessi PRESA_IN_CARICO e IN_PROGRAMMAZIONE.
-  In «Presa in carico» ogni opzione, remoto compreso,
-  deve avere un ultimo esito negativo.
-end note
 break Risposta in attesa o condizioni non soddisfatte
   Web --> Banco: 409 · Stato invariato
 end
