@@ -9,9 +9,9 @@
 - [Walking skeleton · WS-02 Invio e ripetizione senza duplicati](diagrams/PICUS-Walking-Skeleton-Invio.puml) · [PNG](diagrams/PICUS-Walking-Skeleton-Invio.png) · [SVG](diagrams/PICUS-Walking-Skeleton-Invio.svg)
 - [Walking skeleton · WS-03 Consultazione e dinieghi](diagrams/PICUS-Walking-Skeleton-Consultazione.puml) · [PNG](diagrams/PICUS-Walking-Skeleton-Consultazione.png) · [SVG](diagrams/PICUS-Walking-Skeleton-Consultazione.svg)
 - [PICUS - Schema ER PostgreSQL](diagrams/PICUS-Schema-ER.puml) · [Anteprima PNG](diagrams/PICUS-Schema-ER.png)
-- [PICUS - C&C: panoramica](diagrams/C%26C/Diagramma-C%26C.dot) · [PNG](diagrams/C%26C/Diagramma-C%26C.png) · [SVG](diagrams/C%26C/Diagramma-C%26C.svg)
-- [PICUS - C&C: Web Tier](diagrams/C%26C/web-C%26C.dot) · [PNG](diagrams/C%26C/web-C%26C.png) · [SVG](diagrams/C%26C/web-C%26C.svg)
-- [PICUS - C&C: Core Services](diagrams/C%26C/core-C%26C.dot) · [PNG](diagrams/C%26C/core-C%26C.png) · [SVG](diagrams/C%26C/core-C%26C.svg)
+- [C&C · CC-01 Struttura runtime](diagrams/C%26C/Diagramma-C%26C.puml) · [PNG](diagrams/C%26C/Diagramma-C%26C.png) · [SVG](diagrams/C%26C/Diagramma-C%26C.svg)
+- [C&C · CC-02 Ingresso web e accesso ai dati](diagrams/C%26C/Monolite-C%26C.puml) · [PNG](diagrams/C%26C/Monolite-C%26C.png) · [SVG](diagrams/C%26C/Monolite-C%26C.svg)
+- [C&C · CC-03 Collaborazioni tra componenti applicativi](diagrams/C%26C/Collaborazioni-C%26C.puml) · [PNG](diagrams/C%26C/Collaborazioni-C%26C.png) · [SVG](diagrams/C%26C/Collaborazioni-C%26C.svg)
 
 La vista dei moduli riprende i package di `src/main/java` presenti in `main` al commit `f3c4e95`. Le dipendenze `«import»` corrispondono agli import Java delle API; le dipendenze `«use»` rappresentano le collaborazioni previste con `ComunicazioniApi` e `CatalogoApi`. I contratti pubblici sono presenti, mentre le relative implementazioni sono ancora da completare.
 
@@ -23,84 +23,109 @@ PICUS usa un unico database PostgreSQL per tutti i moduli, inclusi file e metada
 
 ## Come leggere le viste Componenti e Connettori
 
-Le tre viste C&C descrivono la struttura runtime del monolite a partire da
-`main` al commit `39fe03d`. Comprendono anche componenti previsti, indicati
-in giallo, con tratteggio o con l'etichetta `[previsto]`. La panoramica
-raggruppa Web Tier e Core Services nello stesso processo JVM; le viste 2 e 3
-ne dettagliano i componenti e mantengono gli stessi contratti sul confine.
-I gruppi rappresentano responsabilità runtime, non singole classi o processi
-separati. Le frecce indicano l'invocante e il destinatario; per le chiamate
-sincrone il risultato o l'errore torna sullo stesso connettore. I codici
-rimandano alle legende, mantenendo le linee orizzontali o verticali e le
-etichette fuori dai collegamenti. Le altre viste hanno un proprio riferimento
-di versione.
+Le tre viste rappresentano l'architettura completa del monolite PICUS e le
+interazioni tra i suoi componenti durante l'esecuzione. Seguono il monolite
+modulare di [ADR-001](../adr/ADR-001-monolite-modulare-mvc.md) e i confini di
+accesso ai dati di [ADR-003](../adr/ADR-003-isolamento-e-validazione-richieste.md).
 
-| Contratto aggregato | API Java e stato al riferimento della vista |
+**CC-01 · Struttura runtime.** Mostra le istanze dei browser, un'applicazione
+PICUS in un processo JVM, PostgreSQL e il servizio email esterno. Le OPT, il
+Banco e gli operatori usano lo stesso tipo di client. `1..*` indica che più
+browser possono interagire con l'applicazione. I connettori sono HTTP,
+accesso JDBC al database e invio email.
+
+**CC-02 · Ingresso web e accesso ai dati.** Apre il componente applicazione
+di CC-01 e mostra i collegamenti del Gestore web con i cinque componenti
+funzionali, i rispettivi accessi al database e l'adattatore email di Utenze.
+Il Gestore web raggruppa sicurezza, sessione, dispatcher, controller e
+produzione delle risposte HTML/JSON. Ogni componente funzionale comprende
+i propri servizi applicativi, le regole di dominio e gli adattatori di
+persistenza JPA. Il confine azzurro racchiude un unico processo JVM.
+
+**CC-03 · Collaborazioni tra componenti applicativi.** Dettaglia le chiamate
+Java tra i cinque gruppi di oggetti in esecuzione. Richieste consulta
+Catalogo e crea gli avvisi tramite Comunicazioni; Comunicazioni richiama
+Richieste per verificare i riferimenti della pratica. Catalogo e
+Comunicazioni consultano Utenze; Monitoraggio consulta Catalogo e Utenze.
+Le invocazioni sono sincrone e usano i contratti riportati sotto.
+
+### Notazione e connettori
+
+- **Riquadro con simbolo UML del componente:** istanza o gruppo di istanze
+  software in esecuzione. I nomi identificano responsabilità runtime.
+- **Quadratino sul bordo:** porta, cioè punto di interazione del componente.
+  Ogni connettore usa porte distinte. Il ruolo di invocante o fornitore è
+  indicato dal verso della freccia, indipendentemente dal lato del riquadro
+  su cui è collocata la porta.
+- **Linea continua con freccia:** connettore orientato da chi avvia la
+  chiamata verso chi la riceve. Il risultato o l'errore torna sullo stesso
+  connettore; la freccia non indica una dipendenza tra package.
+- **Richieste/Comunicazioni:** due connettori distinti rappresentano la
+  chiamata per creare gli avvisi e il richiamo per verificare i riferimenti
+  della pratica, ciascuno con le proprie porte. Il richiamo è viola.
+- **Colori:** grigio per i client, blu per l'ingresso web, verde per i
+  componenti applicativi, verde acqua per il database.
+
+In CC-02 i connettori blu rappresentano HTTP, quelli grigi le chiamate Java
+e quelli verde acqua gli accessi JDBC. In CC-03 il collegamento viola
+evidenzia la verifica richiamata da Comunicazioni verso Richieste. I
+connettori dei dettagli sono rettilinei, con porte separate e percorsi
+senza sovrapposizioni. Le spiegazioni e i contratti sono raccolti qui;
+i diagrammi contengono componenti, porte, connettori e relative etichette.
+
+| Connettore | Ruoli e scambi |
 | --- | --- |
-| API Utenze | `UtenzeApi`: credenziali, verifica dell'account e consultazione dei profili disponibili; gestione completa, attivazione e recupero previsti. |
-| API Catalogo | `ConsultazioneCatalogoApi` e `RicercaErogatoriApi` disponibili; le restanti operazioni di `CatalogoApi` sono previste. |
-| API Richieste | `InvioRichiesteApi`, `CoordinamentoRichiesteApi` e servizio di risposta alla disponibilità disponibili; `RichiesteApi` raccoglie anche contratti per incrementi successivi. |
-| API Comunicazioni | `AvvisiOperativiApi` disponibile; invii generali, allegati e riscontri di `ComunicazioniApi` previsti. |
-| API Monitoraggio | Contratti di `MonitoraggioApi` e regole di dominio presenti; controller, casi d'uso e persistenza previsti. |
+| HTTP | Browser client e applicazione server; richieste, HTML/JSON, file, risorse statiche e sessione. |
+| Chiamata Java | Invocante e fornitore nella stessa JVM; identità verificata, comandi, DTO e risultati. |
+| JDBC | Adattatore di persistenza del gestore e PostgreSQL; accesso ai dati tramite Hibernate e pgJDBC. |
+| Invio email | Adattatore di Utenze e servizio esterno; link di attivazione e recupero dell'account. |
 
-Le interfacce aggregate rendono leggibile la panoramica: non richiedono una
-facciata Java aggiuntiva. Le API scambiano DTO, identificativi e altri valori
-di contratto; le entità JPA rimangono nel modulo proprietario.
+### Collaborazioni interne
 
-| Connettore | Ruoli, scambi e comportamento |
+| Invocante → fornitore | Contratto e responsabilità |
 | --- | --- |
-| Accesso web | Browser client e Web Tier server; HTTP nella demo locale, HTML, JSON, risorse statiche e cookie di sessione. |
-| Chiamata API Java | Invocante e fornitore nello stesso processo; chiamata sincrona con risultato o errore restituito al chiamante. |
-| Accesso ai dati | Repository/adattatori del modulo proprietario verso PostgreSQL tramite JPA, Hibernate e pgJDBC; un database condiviso. |
-| Invio email | Collaborazione prevista dell'adattatore di M1 con un servizio esterno ancora da configurare. |
+| Gestore web → Utenze | Autenticazione, profili e gestione degli account; verifica dell'identità tramite `UtenzeApi`. |
+| Gestore web → Catalogo | `CatalogoApi`: misure, comuni, offerte e ricerca degli erogatori. |
+| Gestore web → Richieste | `RichiesteApi` e servizio di disponibilità: invio, consultazione e coordinamento delle pratiche. |
+| Gestore web → Comunicazioni | `ComunicazioniApi`: messaggi, allegati, avvisi e riscontri. |
+| Gestore web → Monitoraggio | `MonitoraggioApi`: conteggi, schede personali e riepiloghi trimestrali. |
+| Richieste → Catalogo | `ConsultazioneCatalogoApi` e `RicercaErogatoriApi`: riferimenti e opzioni compatibili. |
+| Catalogo → Utenze | `UtenzeApi`: profili e competenze degli erogatori. |
+| Richieste → Comunicazioni | `AvvisiOperativiApi` e `ComunicazioniApi`: avvisi di disponibilità e annullamento. |
+| Comunicazioni → Richieste | `DestinatariAvvisi`: verifica della corrispondenza tra pratica, contatto e destinatario. |
+| Comunicazioni → Utenze | `UtenzeApi`: account destinatari dei messaggi generali. |
+| Monitoraggio → Catalogo e Utenze | Misure, account e profili necessari alla rendicontazione. |
+| Utenze → adattatore email | Invio dei link di attivazione e recupero. |
 
-Nella Vista 2 Spring Security consulta Utenze per autenticare e verificare
-l'account della sessione, prima dell'accesso ai controller. Login e logout
-sono gestiti dalla catena di sicurezza. Spring MVC seleziona l'handler e
-coordina binding, validazione e produzione della risposta: risoluzione della
-vista e Thymeleaf per HTML, conversione dei DTO per JSON, oppure redirect ed
-esiti senza corpo. Le pagine applicative aggiuntive, compresa la composizione
-delle viste Richieste con dati di Utenze e Catalogo, sono indicate come
-previste rispetto al riferimento di `main`. I controller JSON di Richieste
-già presenti delegano ai servizi del proprio modulo.
+Ciascuno dei cinque componenti funzionali accede alle proprie entità e
+tabelle tramite la propria persistenza. I collegamenti a PostgreSQL rappresentano questi
+accessi distinti allo stesso database, che conserva anche file e metadati
+degli allegati. Gli altri gestori usano le API del proprietario dei dati.
+Le entità JPA restano interne; i contratti scambiano DTO e identificativi.
 
-Nella Vista 3 Richieste consulta Catalogo, che risolve i profili tramite
-Utenze, e invoca Comunicazioni per gli avvisi operativi. Comunicazioni usa
-la porta `DestinatariAvvisi`, implementata da Richieste, per verificare la
-coerenza di pratica, contatto e destinatario. Questo callback è una
-collaborazione runtime: l'interfaccia è definita in `comunicazioni.api`,
-senza un import degli interni di Richieste da parte di Comunicazioni.
-
-La creazione di un contatto e il relativo avviso in-app condividono la
-transazione locale. La casella degli avvisi viene consultata tramite HTTP;
-il diagramma non introduce consegna in background. La persistenza è
-raggruppata graficamente: ciascun modulo conserva l'accesso ai propri dati.
-Il database unico ospiterà anche file e metadati degli allegati previsti.
-I controlli su titolarità e assegnazione restano nei casi d'uso, oltre ai
-permessi sulle funzioni verificati dalla sicurezza web.
-[ADR-001](../adr/ADR-001-monolite-modulare-mvc.md) ·
-[ADR-003](../adr/ADR-003-isolamento-e-validazione-richieste.md)
+Sicurezza e sessione sono verificate all'ingresso web. I servizi applicativi
+controllano ruolo, titolarità e assegnazione sulle singole risorse. La
+creazione di un contatto e dell'avviso in-app condivide la transazione
+locale. La casella degli avvisi si consulta tramite il Gestore web.
 
 ### Rigenerare le immagini C&C
 
-I sorgenti C&C usano Graphviz DOT per fissare le righe della griglia e i
-connettori ortogonali. La palette riprende le viste MVC, moduli e deployment.
-Le versioni SVG permettono di ingrandire testo e linee senza perdere nitidezza.
-Con Graphviz disponibile nel `PATH`, dalla radice del progetto:
+I sorgenti usano la notazione componenti e porte di PlantUML, con
+[stile condiviso](diagrams/C%26C/C%26C-style.iuml). La palette riprende le
+altre viste architetturali. Le esportazioni SVG consentono di ingrandire
+i dettagli mantenendo la leggibilità.
+
+Con Java, PlantUML e Graphviz disponibili, dalla radice del progetto:
 
 ```powershell
-$ccDirectory = Join-Path (Get-Location) 'docs/architecture/diagrams/C&C'
-foreach ($ccSource in (Get-ChildItem -LiteralPath $ccDirectory -Filter '*.dot')) {
-    dot -Tsvg $ccSource.FullName -o ([IO.Path]::ChangeExtension($ccSource.FullName, '.svg'))
-    if ($LASTEXITCODE -ne 0) { throw "Errore SVG: $($ccSource.Name)" }
-    dot -Gdpi=140 -Tpng $ccSource.FullName -o ([IO.Path]::ChangeExtension($ccSource.FullName, '.png'))
-    if ($LASTEXITCODE -ne 0) { throw "Errore PNG: $($ccSource.Name)" }
-}
+java -jar <percorso-plantuml.jar> -charset UTF-8 -tpng 'docs/architecture/diagrams/C&C/*.puml'
+java -jar <percorso-plantuml.jar> -charset UTF-8 -tsvg 'docs/architecture/diagrams/C&C/*.puml'
 ```
 
-Il secondo comando richiede un'installazione Graphviz con supporto PNG.
-Il rendering verifica anche la sintassi dei sorgenti. Controllare le tre
-immagini dopo la rigenerazione, in particolare frecce, allineamenti e legende.
+Le esportazioni sono verificate con PlantUML 1.2026.10 e Graphviz 16.1.1.
+Per selezionare Graphviz esplicitamente aggiungere
+`-graphvizdot <percorso-dot.exe>` ai comandi. Dopo la rigenerazione
+controllare le tre immagini, le porte, le frecce e le etichette.
 
 ## API Java dei moduli
 
@@ -132,7 +157,8 @@ dettagliano nelle relative storie. [ADR-002](../adr/ADR-002-ciclo-di-vita-richie
 ## Contratti del walking skeleton
 
 Le tre sequenze descrivono accesso, invio in `CREATA` e consultazione rispetto
-al codice di `main` al commit `39fe03d`, lo stesso riferimento delle viste C&C.
+al codice di `main` al commit `39fe03d`. Le viste C&C descrivono invece
+l'architettura completa del monolite.
 Il percorso resta quello del walking skeleton: non introduce le operazioni di
 coordinamento degli incrementi successivi. Le risposte applicative mostrate
 sono JSON; le pagine aggiuntive restano previste rispetto a questa baseline.

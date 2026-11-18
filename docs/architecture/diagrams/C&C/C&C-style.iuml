@@ -1,0 +1,45 @@
+' Palette condivisa con MVC, moduli, deployment e walking skeleton.
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam defaultFontColor #172B3A
+skinparam shadowing false
+skinparam roundcorner 0
+skinparam componentStyle uml2
+skinparam linetype polyline
+skinparam nodesep 40
+skinparam ranksep 35
+skinparam padding 8
+skinparam dpi 140
+skinparam ArrowColor #64748B
+skinparam ArrowThickness 1.3
+skinparam ArrowFontColor #334155
+skinparam ArrowFontSize 12
+hide stereotype
+skinparam component {
+  BackgroundColor #EDF5F0
+  BorderColor #568573
+  FontColor #1A4A3C
+  FontStyle bold
+  BackgroundColor<<client>> #F1F5F9
+  BorderColor<<client>> #94A3B8
+  FontColor<<client>> #142B46
+  BackgroundColor<<web>> #E9F2FC
+  BorderColor<<web>> #5480B0
+  FontColor<<web>> #143C65
+  BackgroundColor<<dati>> #E9F7F5
+  BorderColor<<dati>> #3D867D
+  FontColor<<dati>> #153D38
+}
+skinparam frame {
+  BackgroundColor #F7FAFE
+  BorderColor #7C9BB9
+  FontColor #183957
+  FontStyle bold
+}
+skinparam port {
+  BackgroundColor #FFFFFF
+  BorderColor #334155
+  FontColor #334155
+  FontSize 11
+}

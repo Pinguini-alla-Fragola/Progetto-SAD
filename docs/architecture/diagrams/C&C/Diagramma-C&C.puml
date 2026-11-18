@@ -1,0 +1,30 @@
+@startuml
+!include C&C-style.iuml
+top to bottom direction
+skinparam ranksep 55
+title PICUS · Componenti e connettori\nCC-01 · Struttura runtime
+
+component "browser : Browser web\nOPT · Banco · Operatori\n1..* istanze" as B <<client>> {
+  portout " " as B_WEB
+}
+
+component "picus : Applicazione web\nUn processo JVM\nSpring Boot" as APP <<web>> {
+  portin " " as APP_WEB
+  portout " " as APP_DATA
+  portout " " as APP_MAIL
+}
+
+component "db : PostgreSQL\nDatabase picus\nDati e allegati" as DB <<dati>> {
+  portin " " as DB_SQL
+}
+
+component "email : Servizio email\nAttivazione e recupero account" as EMAIL {
+  portin " " as EMAIL_IN
+}
+
+B_WEB -[#5480B0]down-> APP_WEB : HTTP
+APP_DATA -[#3D867D]down-> DB_SQL : JDBC
+APP_MAIL -down-> EMAIL_IN : Invio email
+DB -[hidden]right- EMAIL
+
+@enduml

@@ -1,0 +1,70 @@
+@startuml
+!include C&C-style.iuml
+top to bottom direction
+skinparam nodesep 55
+skinparam ranksep 55
+title PICUS · Componenti e connettori\nCC-02 · Ingresso web e accesso ai dati
+
+component "Browser web\nOPT · Banco · Operatori\n1..* istanze" as B <<client>> {
+  portout " " as B_WEB
+}
+frame "Applicazione PICUS · Unico processo JVM" as JVM {
+  component "Gestore web\nSicurezza e sessione · Controller\nSpring MVC · HTML / JSON" as WEB <<web>> {
+    portin " " as W_HTTP
+    portout " " as W_U
+    portout " " as W_R
+    portout " " as W_C
+    portout " " as W_A
+    portout " " as W_M
+  }
+  component "Utenze\nAccount e profili\nServizi e persistenza" as U {
+    portin " " as U_WEB
+    portout " " as U_SQL
+    portout " " as U_MAIL
+  }
+  component "Richieste\nPratiche e accordi\nServizi e persistenza" as R {
+    portin " " as R_WEB
+    portout " " as R_SQL
+  }
+  component "Catalogo\nMisure, territori e offerte\nServizi e persistenza" as C {
+    portin " " as C_WEB
+    portout " " as C_SQL
+  }
+  component "Comunicazioni\nMessaggi, allegati e avvisi\nServizi e persistenza" as A {
+    portin " " as A_WEB
+    portout " " as A_SQL
+  }
+  component "Monitoraggio\nConteggi, schede e riepiloghi\nServizi e persistenza" as M {
+    portin " " as M_WEB
+    portout " " as M_SQL
+  }
+  component "Adattatore email\nAttivazione e recupero" as MAIL {
+    portin " " as MAIL_IN
+    portout " " as MAIL_OUT
+  }
+}
+component "PostgreSQL\nDatabase unico picus\nDati e allegati" as DB <<dati>> {
+  portin " " as DB_U
+  portin " " as DB_R
+  portin " " as DB_C
+  portin " " as DB_A
+  portin " " as DB_M
+}
+component "Servizio email esterno" as EMAIL {
+  portin " " as EMAIL_IN
+}
+
+B_WEB -[#5480B0]-> W_HTTP : HTTP
+W_U --> U_WEB
+W_R --> R_WEB
+W_C --> C_WEB
+W_A --> A_WEB
+W_M --> M_WEB
+U_SQL -[#3D867D]-> DB_U
+R_SQL -[#3D867D]-> DB_R
+C_SQL -[#3D867D]-> DB_C
+A_SQL -[#3D867D]-> DB_A
+M_SQL -[#3D867D]-> DB_M
+U_MAIL --> MAIL_IN
+MAIL_OUT --> EMAIL_IN : Invio email
+@enduml
