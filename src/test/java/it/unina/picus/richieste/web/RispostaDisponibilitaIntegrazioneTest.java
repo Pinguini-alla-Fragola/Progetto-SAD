@@ -49,6 +49,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.ResultMatcher;
 
 import it.unina.picus.shared.AccessoDiProva;
 import it.unina.picus.shared.DatiSintetici;
@@ -416,8 +417,7 @@ class RispostaDisponibilitaIntegrazioneTest {
                     accettate++;
                     disponibileAccettato = i % 2 == 0;
                 } else if (stato == 409) {
-                    String corpo = esito.getResponse().getContentAsString(StandardCharsets.UTF_8);
-                    assertEquals("CONFLICT", JsonPath.read(corpo, "$.codice"), "corpo del 409 concorrente");
+                    assertConflittoSenzaDatiDellaPratica(esito);
                     inConflitto++;
                 }
             }
@@ -688,14 +688,22 @@ class RispostaDisponibilitaIntegrazioneTest {
      * della pratica (identificativi, partecipanti, descrizione).
      */
     private void assertConflittoSenzaDatiDellaPratica(ResultActions risposta) throws Exception {
-        risposta.andExpect(status().isConflict())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.*", hasSize(3)))
-                .andExpect(jsonPath("$.codice").value("CONFLICT"))
-                .andExpect(jsonPath("$.messaggio").isNotEmpty())
-                .andExpect(jsonPath("$.campi").isEmpty());
+        assertConflittoSenzaDatiDellaPratica(risposta.andReturn());
+    }
 
-        String corpo = risposta.andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
+    /** Stesse verifiche su una risposta già ricevuta, come quelle delle richieste concorrenti. */
+    private void assertConflittoSenzaDatiDellaPratica(MvcResult risposta) throws Exception {
+        for (ResultMatcher verifica : List.of(
+                status().isConflict(),
+                content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON),
+                jsonPath("$.*", hasSize(3)),
+                jsonPath("$.codice").value("CONFLICT"),
+                jsonPath("$.messaggio").isNotEmpty(),
+                jsonPath("$.campi").isEmpty())) {
+            verifica.match(risposta);
+        }
+
+        String corpo = risposta.getResponse().getContentAsString(StandardCharsets.UTF_8);
         for (String datoDellaPratica : List.of(richiestaId.toString(), contattoId.toString(),
                 titolare.toString(), destinatario.toString(), DESCRIZIONE_RISERVATA)) {
             assertFalse(corpo.contains(datoDellaPratica), "il 409 non deve contenere " + datoDellaPratica);

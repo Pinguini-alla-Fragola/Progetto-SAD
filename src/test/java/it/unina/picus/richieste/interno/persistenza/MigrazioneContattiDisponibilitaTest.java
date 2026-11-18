@@ -3,9 +3,11 @@ package it.unina.picus.richieste.interno.persistenza;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.flywaydb.core.Flyway;
@@ -31,9 +33,10 @@ import it.unina.picus.shared.PostgresqlDiProva;
  *
  * <p>Ogni test crea un database vuoto nel container, lo porta a V5 con le stesse location di
  * {@code application.yml}, inserisce una richiesta con {@link DatiSintetici}, fotografa lo
- * schema esistente e applica V6. La fotografia confronta, prima e dopo V6, tipo completo,
- * obbligatorietà e valore predefinito delle colonne, definizione dei vincoli e degli indici
- * delle tabelle precedenti.</p>
+ * schema esistente e la riga della richiesta, poi applica V6. La fotografia dello schema
+ * confronta, prima e dopo V6, tipo completo, obbligatorietà e valore predefinito delle colonne,
+ * definizione dei vincoli e degli indici delle tabelle precedenti; quella della riga confronta
+ * tutti i valori della richiesta.</p>
  */
 @Testcontainers
 @DisplayName("#92 C1 - Migrazione V6 dei contatti di disponibilità su PostgreSQL")
@@ -48,7 +51,10 @@ class MigrazioneContattiDisponibilitaTest {
     private String url;
     private JdbcTemplate jdbc;
     private DatiSintetici dati;
+    private UUID titolare;
+    private long misuraId;
     private UUID richiestaPrecedente;
+    private Map<String, Object> richiestaPrima;
     private UUID erogatore;
     private List<String> colonnePrima;
     private List<String> vincoliPrima;
@@ -66,10 +72,12 @@ class MigrazioneContattiDisponibilitaTest {
         assertEquals("5", flyway("5").info().current().getVersion().getVersion());
 
         dati = new DatiSintetici(jdbc);
-        UUID titolare = dati.opt("OPT titolare", "napoli");
+        titolare = dati.opt("OPT titolare", "napoli");
         erogatore = dati.opt("OPT erogatrice", "napoli");
-        richiestaPrecedente = dati.richiesta(titolare, dati.misura("M01"), "napoli", "PRESA_IN_CARICO",
+        misuraId = dati.misura("M01");
+        richiestaPrecedente = dati.richiesta(titolare, misuraId, "napoli", "PRESA_IN_CARICO",
                 Instant.parse("2026-10-01T09:00:00Z"));
+        richiestaPrima = rigaDellaRichiestaPrecedente();
         colonnePrima = colonneDelleTabellePrecedenti();
         vincoliPrima = vincoliDelleTabellePrecedenti();
         indiciPrima = indiciDelleTabellePrecedenti();
@@ -85,6 +93,18 @@ class MigrazioneContattiDisponibilitaTest {
                 () -> assertEquals("6", flyway("6").info().current().getVersion().getVersion()),
                 () -> assertEquals(0, contaContatti(), "la nuova tabella nasce vuota"),
                 () -> assertEquals("PRESA_IN_CARICO", dati.stato(richiestaPrecedente)));
+    }
+
+    @Test
+    @DisplayName("V6 conserva tutti i valori delle richieste già presenti, compresi titolare, misura e descrizione")
+    void datiDelleRichiestePrecedentiConservati() {
+        Object descrizione = richiestaPrima.get("description");
+        assertAll("richiesta inserita a V5",
+                () -> assertEquals(titolare, richiestaPrima.get("titolare_id")),
+                () -> assertEquals(misuraId, richiestaPrima.get("misura_id")),
+                () -> assertTrue(descrizione instanceof String testo && !testo.isBlank(), "descrizione non vuota"));
+
+        assertEquals(richiestaPrima, rigaDellaRichiestaPrecedente(), "valori della richiesta dopo V6");
     }
 
     @Test
@@ -219,6 +239,11 @@ class MigrazioneContattiDisponibilitaTest {
                         + " values (?, ?, ?, ?, 'Accoglienza e ascolto', now(), ?)",
                 id, richiestaId, erogatoreId, ambito, esito);
         return id;
+    }
+
+    /** Tutte le colonne della richiesta inserita a V5, lette con i tipi restituiti dal driver. */
+    private Map<String, Object> rigaDellaRichiestaPrecedente() {
+        return jdbc.queryForMap("select * from richieste where id = ?", richiestaPrecedente);
     }
 
     private int contaContatti() {
