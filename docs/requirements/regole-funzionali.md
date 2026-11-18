@@ -1,14 +1,14 @@
 # Regole funzionali di riferimento
 
-Versione 0.4 del **14/11/2026**, aggiornata con il ciclo a sei stati e le regole di annullamento. Il [registro](open-questions.md) distingue le decisioni dai quesiti residui.
+Versione 0.4 del **14/11/2026**, aggiornata con il ciclo a sei stati e le regole di annullamento.
 
 ## Richiesta e accordo
 
 - Il modulo richiede misura del catalogo, persona/nucleo e comune. Accetta anche `description`, testo semplice facoltativo per descrivere il bisogno senza identificativi degli assistiti. Il dettaglio con la descrizione è riservato alla OPT titolare e al Banco autorizzato. Il sistema gestisce ID, data di invio, OPT titolare e stato. Il modulo esclude gli allegati.
 - L’invio valido crea la richiesta in stato Creata, in coda e senza assegnatario. La presa in carico esplicita del Banco la porta a Presa in carico. La semplice consultazione lascia la richiesta in coda.
 - Coda in ordine di arrivo. L’elenco include le OPT compatibili, anche se erogano tramite professionisti, e gli operatori interni o esterni pagati dal Banco. Prima stesso comune, poi limitrofi. A parità di prossimità precedono gli operatori del Banco, poi si considera il minor carico. In assenza di una soluzione locale si valuta il remoto PICUS compatibile e infine il rifiuto. Periodo/stati del carico e spareggi restano da definire.
-- Il Banco sceglie chi interpellare e contatta un erogatore per volta. La notifica e la risposta competono all’account organizzativo della OPT o all’account personale dell’operatore del Banco interpellato. Il rifiuto di un candidato mantiene la richiesta Presa in carico e consente di cercare un’alternativa. Individuato un erogatore disponibile, il Banco lo assegna e la richiesta passa a In programmazione. Ritiro, avviso e risposte tardive in #66/Q-19.
-- Banco ed erogatore concordano i dettagli tramite il modulo di contatto. Solo il Banco di coordinamento registra i dettagli e conferma l’accordo. In presenza registra data, ora, luogo, nome/cognome e telefono del referente. A distanza registra data, ora e link. Scambio di proposte, dati e vincoli in #38/Q-09.
+- Il Banco sceglie chi interpellare e contatta un erogatore per volta. La notifica e la risposta competono all’account organizzativo della OPT o all’account personale dell’operatore del Banco interpellato. Il rifiuto di un candidato mantiene la richiesta Presa in carico e consente di cercare un’alternativa. Individuato un erogatore disponibile, il Banco lo assegna e la richiesta passa a In programmazione. Ritiro, avviso e risposte tardive in [Q-19](open-questions.md#q-19-erogatore-senza-risposta).
+- Banco ed erogatore concordano i dettagli tramite il modulo di contatto. Solo il Banco di coordinamento registra i dettagli e conferma l’accordo. In presenza registra data, ora, luogo, nome/cognome e telefono del referente. A distanza registra data, ora e link. Scambio di proposte, dati e vincoli in [Q-09](open-questions.md#q-09-negoziazione-dellappuntamento).
 - Conferma, stato e visibilità costituiscono un solo esito: l’accordo completo diventa Confermata e la OPT consulta i dettagli; li comunica all’assistito fuori dall’app. Nessuna verifica della prestazione svolta.
 - Dopo la conferma i dettagli sono immutabili. L’annullamento conserva i dettagli e lascia chiusa la ricerca.
 
@@ -60,6 +60,6 @@ Il ritiro dell’offerta o la disattivazione di una misura non cancellano riferi
 
 Le comunicazioni possono raggiungere tutte le OPT o un loro gruppo tramite account organizzativi, oppure tutti gli operatori del Banco (interni ed esterni pagati dal Banco) o un loro gruppo tramite account personali. «Confermo la ricezione» registra la prima data e ora per account e comunicazione. Per la OPT il riscontro è dell’organizzazione. La sola apertura lascia il riscontro in sospeso.
 
-Conteggi OPT: anno/trimestre, misura e voce. Vista trimestrale e cumulativa sul periodo derivano dagli stessi dati; nessun secondo inserimento. Cumulativo di conteggi dichiarati, non persone uniche; categorie sovrapponibili restano distinte e dato mancante non equivale a zero. [Tracciati](tracciati-monitoraggio.md) e #41 per controlli, correzioni e significato delle voci.
+Conteggi OPT: anno/trimestre, misura e voce. Vista trimestrale e cumulativa sul periodo derivano dagli stessi dati; nessun secondo inserimento. Cumulativo di conteggi dichiarati, non persone uniche; categorie sovrapponibili restano distinte e dato mancante non equivale a zero. Vedi #41 per controlli, correzioni e significato delle voci.
 
 Interni ed esterni pagati dal Banco inviano ciascuno la propria scheda personale, indipendente dalle richieste. #57 riepiloga il singolo trimestre delle schede, #69 consulta il monitoraggio organizzativo OPT. Inclusione e attribuzione delle attività svolte tramite professionisti nei conteggi OPT restano in #41/Q-13. Inserimento ministeriale manuale.

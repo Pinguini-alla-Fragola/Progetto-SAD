@@ -1,13 +1,13 @@
 # ADR-001: Adottare un monolite modulare MVC
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-07
 - **Decision owners:** @CapHello
 - **Related issues:** [#76](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/76), [#77](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/77), [#25](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/25), [#28](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/28), [#48](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/48), [#49](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/49), [#51](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/51), [#52](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/52)
 
 ## Context
 
-PICUS parte da un unico progetto Spring Boot con Java 25 e Maven Wrapper. Il walking skeleton dello Sprint 2 copre accesso, invio e consultazione delle richieste e coda del Banco. Il percorso dell’MVP prosegue con ricerca dell’erogatore, risposta alla disponibilità e conferma dell’accordo o rifiuto definitivo. [Proposta di MVP](../requirements/proposta-mvp.md)
+PICUS parte da un unico progetto Spring Boot con Java 25 e Maven Wrapper. Il walking skeleton dello Sprint 2 copre accesso, invio e consultazione delle richieste e coda del Banco. Il percorso dell’MVP prosegue con ricerca dell’erogatore, risposta alla disponibilità e conferma dell’accordo o rifiuto definitivo.
 
 La struttura deve permettere di evolvere i flussi di coordinamento, comunicazione e monitoraggio con responsabilità distinte. Per il primo percorso servono controlli di accesso server per ogni richiesta, validazione dei campi ammessi e un’interfaccia utilizzabile da smartphone. La #77 prevede un ambiente riproducibile con un’applicazione e un database PostgreSQL. [QS-01A](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/blob/2bb87e6c7c5b454d40af4a2b1b9635f07e8dfb2c/docs/quality-scenarios/QS-01A-consultazione-richieste.md) · [QS-02A](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/blob/2bb87e6c7c5b454d40af4a2b1b9635f07e8dfb2c/docs/quality-scenarios/QS-02A-identificativi-assistiti.md) · [QS-04A](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/blob/2bb87e6c7c5b454d40af4a2b1b9635f07e8dfb2c/docs/quality-scenarios/QS-04A-invio-richiesta-smartphone.md)
 

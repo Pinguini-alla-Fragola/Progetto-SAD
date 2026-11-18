@@ -43,7 +43,7 @@ class PreflightMigrazioniRichieste implements Callback {
             if (righe.next()) {
                 throw new FlywayException("Preflight PICUS V" + versione + ": storico da riconciliare. "
                         + "Eseguire scripts/db/preflight-richieste.sql e seguire la procedura in "
-                        + "docs/architecture/api-coordinamento-richieste.md prima di ripetere l'upgrade. "
+                        + "docs/aggiornamento-database.md prima di ripetere l'upgrade. "
                         + "Nessun contatto o avviso è stato modificato dal controllo.");
             }
         } catch (SQLException ex) {
