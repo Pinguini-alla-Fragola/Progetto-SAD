@@ -108,9 +108,11 @@
 
     <script>
         (function () {
+            // i video stanno nel branch landing-video, per non appesantire il sito
+            var BASE = 'https://raw.githubusercontent.com/Pinguini-alla-Fragola/Progetto-SAD/landing-video/';
             var files = {
-                'voce': { src: 'picus-demo.mp4', label: 'Con voce' },
-                'senza-voce': { src: 'picus-demo-senza-voce.mp4', label: 'Senza voce' }
+                'voce': { src: BASE + 'picus-demo.mp4', label: 'Con voce' },
+                'senza-voce': { src: BASE + 'picus-demo-senza-voce.mp4', label: 'Senza voce' }
             };
             var player = document.getElementById('player');
             var video = document.getElementById('video');
