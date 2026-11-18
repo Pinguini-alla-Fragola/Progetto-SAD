@@ -8,8 +8,6 @@ decisioni ancora aperte sono distinte; implementazione e approvazioni non sono p
 
 - [Requisiti e modelli di analisi](requirements/README.md)
 - [Scenari di qualità](quality-scenarios/README.md)
-- [Registro dei chiarimenti](requirements/open-questions.md)
-- [Proposta di MVP](requirements/proposta-mvp.md)
 - [Architettura](architecture/README.md)
 - [Registro delle decisioni](adr/README.md)
 - [Review delle iterazioni](reviews/README.md)

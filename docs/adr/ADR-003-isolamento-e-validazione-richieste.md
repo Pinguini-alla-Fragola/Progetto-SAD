@@ -1,6 +1,6 @@
 # ADR-003: Applicare l’isolamento delle richieste e validare i campi ammessi
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-07
 - **Decision owners:** @giallo04
 - **Related issues:** [#76](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/76), [#78](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/78), [#25](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/25), [#28](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/28), [#48](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/48), [#49](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/49), [#51](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/51), [#52](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/52), [#54](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/54)

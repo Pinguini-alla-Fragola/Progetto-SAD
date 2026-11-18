@@ -46,7 +46,7 @@ jobs:
           javadoc -quiet -classpath "$classpath" -d "$RUNNER_TEMP/javadoc-api-check" '@scripts/javadoc-api.args'
           javadoc -classpath "$classpath" -d "$RUNNER_TEMP/javadoc-site" '@scripts/javadoc.args'
           test -s "$RUNNER_TEMP/javadoc-site/index.html"
-          cp docs/architecture/picus-logo.svg "$RUNNER_TEMP/javadoc-site/resource-files/picus-logo.svg"
+          cp docs/assets/picus-logo.svg "$RUNNER_TEMP/javadoc-site/resource-files/picus-logo.svg"
 
       - name: Aggiorna il branch javadoc
         shell: bash
