@@ -2,6 +2,7 @@ package it.unina.picus.shared;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -43,8 +44,9 @@ import jakarta.servlet.Filter;
  * capacità non ancora consegnata usa {@link #richiediEndpointDellaCapacita}: la sospensione dipende dallo stato
  * dichiarato in {@link Capacita}, non dalla presenza dell'handler.</p>
  *
- * <p>I dinieghi e gli errori si verificano sul corpo completo: {@link #assertDiniegoSenzaCorpo} per il
- * {@code 403} e {@link #assertErrorePubblico} per gli errori JSON.</p>
+ * <p>I dinieghi e gli errori si verificano sul corpo completo: {@link #assertNonAutenticatoSenzaDati} per il
+ * {@code 401}, {@link #assertDiniegoSenzaCorpo} per il {@code 403} e {@link #assertErrorePubblico} per gli
+ * errori JSON.</p>
  */
 public final class ClientHttp {
 
@@ -155,8 +157,26 @@ public final class ClientHttp {
      * @throws Exception se il corpo non è leggibile
      */
     public static void assertDiniegoSenzaCorpo(MockHttpServletResponse risposta) throws Exception {
-        assertEquals(403, risposta.getStatus(), "atteso FORBIDDEN (403)");
-        assertEquals("", risposta.getContentAsString(), "il 403 delle API ha il corpo vuoto");
+        assertStatoSenzaCorpo(risposta, 403, "FORBIDDEN");
+    }
+
+    /**
+     * Richiesta di API senza sessione valida (assente, scaduta o revocata): {@code 401} senza {@code Location},
+     * perché una API non rimanda al login, e con corpo vuoto, come lo producono l'entry point e i gestori di
+     * {@code SecurityConfig} e {@code VerificaSessioneFilter}.
+     *
+     * @param risposta risposta del server
+     * @throws Exception se il corpo non è leggibile
+     */
+    public static void assertNonAutenticatoSenzaDati(MockHttpServletResponse risposta) throws Exception {
+        assertStatoSenzaCorpo(risposta, 401, "UNAUTHORIZED");
+        assertNull(risposta.getHeader("Location"), "una API non deve rimandare al login");
+    }
+
+    private static void assertStatoSenzaCorpo(MockHttpServletResponse risposta, int stato, String nome)
+            throws Exception {
+        assertEquals(stato, risposta.getStatus(), "atteso " + nome + " (" + stato + ")");
+        assertEquals("", risposta.getContentAsString(), "il " + stato + " delle API ha il corpo vuoto");
     }
 
     /**

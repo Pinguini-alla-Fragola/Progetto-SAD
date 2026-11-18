@@ -2,7 +2,6 @@ package it.unina.picus.utenze.web;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
@@ -46,6 +45,9 @@ import it.unina.picus.shared.ScenarioAccessi.ContattoPreparato;
  *   <li>i test sulle <b>risorse reali</b>: prima di attribuire l'esito a una risorsa verificano che
  *       metodo e percorso abbiano un handler, e un diniego {@code 403} deve avere il corpo vuoto.</li>
  * </ul>
+ *
+ * <p>Ogni {@code 401} di CA-08 si verifica con {@link ClientHttp#assertNonAutenticatoSenzaDati}: niente
+ * {@code Location} e corpo vuoto, quindi nessun dato della risorsa, non solo nessun identificativo.</p>
  *
  * <p>Su {@code main} sono esposti i contatti di disponibilità ({@link #CONSULTA_CONTATTO},
  * {@link #RISPONDI_CONTATTO}, {@link #CONTATTI_RICHIESTA}) e il dettaglio della richiesta
@@ -113,10 +115,8 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
         MockHttpServletResponse esitoLettura = http.esegui(lettura);
         MockHttpServletResponse esitoScrittura = http.esegui(scrittura);
 
-        assertEquals(401, esitoLettura.getStatus());
-        assertNull(esitoLettura.getHeader("Location"), "una API non deve rimandare al login");
-        assertEquals(401, esitoScrittura.getStatus());
-        assertNull(esitoScrittura.getHeader("Location"), "una API non deve rimandare al login");
+        ClientHttp.assertNonAutenticatoSenzaDati(esitoLettura);
+        ClientHttp.assertNonAutenticatoSenzaDati(esitoScrittura);
     }
 
     // ------------------------------------------------------------------ risorse reali senza sessione
@@ -149,9 +149,7 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
 
         MockHttpServletResponse risposta = http.esegui(richiesta);
 
-        assertEquals(401, risposta.getStatus());
-        assertNull(risposta.getHeader("Location"), "una API non deve rimandare al login");
-        assertFalse(risposta.getContentAsString().contains(id.toString()), "nessun dato della risorsa");
+        ClientHttp.assertNonAutenticatoSenzaDati(risposta);
         assertEquals("IN_ATTESA", esitoPerIlBanco(contatto), "il contatto non deve cambiare");
     }
 
@@ -212,9 +210,7 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
         sessione.invalidate();
         MockHttpServletResponse risposta = http.esegui(leggiRichiesta(sessione, id));
 
-        assertEquals(401, risposta.getStatus());
-        assertNull(risposta.getHeader("Location"), "una API non deve rimandare al login");
-        assertFalse(risposta.getContentAsString().contains(id.toString()), "nessun dato della richiesta");
+        ClientHttp.assertNonAutenticatoSenzaDati(risposta);
         assertEquals(prima, scenario.istantanea(id));
     }
 
@@ -231,8 +227,7 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
         scenario.revoca(titolare);
         MockHttpServletResponse risposta = http.esegui(leggiRichiesta(sessione, id));
 
-        assertEquals(401, risposta.getStatus());
-        assertFalse(risposta.getContentAsString().contains(id.toString()), "nessun dato della richiesta");
+        ClientHttp.assertNonAutenticatoSenzaDati(risposta);
         assertEquals(prima, scenario.istantanea(id));
     }
 
@@ -247,8 +242,7 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
         MockHttpServletResponse risposta = http.esegui(annulla(id, MOTIVO).session(anonima.sessione())
                 .header(anonima.csrf().header(), anonima.csrf().token()));
 
-        assertEquals(401, risposta.getStatus());
-        assertFalse(risposta.getContentAsString().contains(id.toString()), "nessun dato della richiesta");
+        ClientHttp.assertNonAutenticatoSenzaDati(risposta);
         assertEquals(prima, scenario.istantanea(id), "stato e dati invariati");
     }
 
@@ -266,7 +260,7 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
         MockHttpServletResponse risposta = http.esegui(annulla(id, MOTIVO).session(sessione)
                 .header(csrf.header(), csrf.token()));
 
-        assertEquals(401, risposta.getStatus());
+        ClientHttp.assertNonAutenticatoSenzaDati(risposta);
         assertEquals(prima, scenario.istantanea(id), "stato e dati invariati");
     }
 
@@ -341,9 +335,7 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
                 .header(csrf.header(), csrf.token()));
 
         for (MockHttpServletResponse esito : List.of(lettura, risposta)) {
-            assertEquals(401, esito.getStatus());
-            assertNull(esito.getHeader("Location"), "una API non deve rimandare al login");
-            assertFalse(esito.getContentAsString().contains(contatto.contattoId().toString()), "nessun dato");
+            ClientHttp.assertNonAutenticatoSenzaDati(esito);
         }
         assertEquals("IN_ATTESA", esitoPerIlBanco(contatto), "il tentativo non deve registrare la risposta");
     }
