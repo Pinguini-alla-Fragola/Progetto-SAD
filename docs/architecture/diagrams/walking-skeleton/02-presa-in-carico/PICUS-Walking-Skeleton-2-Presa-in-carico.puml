@@ -1,6 +1,6 @@
 @startuml PICUS-Walking-Skeleton-2-Presa-in-carico
 ' Prosegue il diagramma 1: la richiesta è in CREATA.
-!include PICUS-Walking-Skeleton-style.iuml
+!include ../PICUS-Walking-Skeleton-style.iuml
 
 title <size:22><b>PICUS · Walking skeleton 2 di 4</b></size>\n<size:16>Presa in carico, ricerca dell'erogatore e contatto</size>
 
