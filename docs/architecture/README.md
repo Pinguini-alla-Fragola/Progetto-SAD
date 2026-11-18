@@ -34,7 +34,7 @@ accesso JDBC al database e invio email.
 
 **CC-02 · Ingresso web e accesso ai dati.** Apre il componente applicazione
 di CC-01 e mostra i collegamenti del Gestore web con i cinque componenti
-funzionali, i rispettivi accessi al database e l'adattatore email di Utenze.
+funzionali, il DataSource condiviso e l'adattatore email di Utenze.
 Il Gestore web raggruppa sicurezza, sessione, dispatcher, controller e
 produzione delle risposte HTML/JSON. Ogni componente funzionale comprende
 i propri servizi applicativi, le regole di dominio e gli adattatori di
@@ -65,17 +65,16 @@ Le invocazioni sono sincrone e usano i contratti riportati sotto.
   componenti applicativi, verde acqua per il database.
 
 In CC-02 i connettori blu rappresentano HTTP, quelli grigi le chiamate Java
-e quelli verde acqua gli accessi JDBC. In CC-03 tutte le chiamate Java
-usano connettori grigi. I connettori usano solo segmenti orizzontali e
-verticali, con angoli retti,
-porte separate e percorsi senza sovrapposizioni. Le spiegazioni e i contratti sono raccolti qui;
-i diagrammi contengono componenti, porte, connettori e relative etichette.
+e quelli verde acqua gli accessi ai dati. In CC-03 tutte le chiamate Java
+usano connettori grigi. I connettori seguono segmenti orizzontali e verticali
+con angoli retti, porte separate e percorsi senza sovrapposizioni. I diagrammi
+contengono componenti, porte, connettori e relative etichette.
 
 | Connettore | Ruoli e scambi |
 | --- | --- |
 | HTTP | Browser client e applicazione server; richieste, HTML/JSON, file, risorse statiche e sessione. |
 | Chiamata Java | Invocante e fornitore nella stessa JVM; identità verificata, comandi, DTO e risultati. |
-| JDBC | Adattatore di persistenza del gestore e PostgreSQL; accesso ai dati tramite Hibernate e pgJDBC. |
+| Accesso ai dati | Gli adattatori JPA usano Hibernate e il DataSource condiviso. Il DataSource gestisce le connessioni a PostgreSQL tramite pgJDBC. |
 | Invio email | Adattatore di Utenze e servizio esterno; link di attivazione e recupero dell'account. |
 
 ### Collaborazioni interne
@@ -96,10 +95,13 @@ i diagrammi contengono componenti, porte, connettori e relative etichette.
 | Utenze → adattatore email | Invio dei link di attivazione e recupero. |
 
 Ciascuno dei cinque componenti funzionali accede alle proprie entità e
-tabelle tramite la propria persistenza. I collegamenti a PostgreSQL rappresentano questi
-accessi distinti allo stesso database, che conserva anche file e metadati
-degli allegati. Gli altri gestori usano le API del proprietario dei dati.
-Le entità JPA restano interne; i contratti scambiano DTO e identificativi.
+tabelle tramite il proprio adattatore di persistenza. In CC-02 i cinque
+collegamenti convergono nel DataSource condiviso nella JVM. Un solo
+connettore JDBC rappresenta l'accesso all'endpoint PostgreSQL, sulla porta
+`5432` nell'ambiente Docker Compose. Il database conserva anche file e
+metadati degli allegati. Gli altri gestori usano le API del proprietario
+dei dati. Le entità JPA restano interne e i contratti scambiano DTO e
+identificativi.
 
 Sicurezza e sessione sono verificate all'ingresso web. I servizi applicativi
 controllano ruolo, titolarità e assegnazione sulle singole risorse. La

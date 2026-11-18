@@ -11,11 +11,11 @@ component "Browser web\nOPT · Banco · Operatori\n1..* istanze" as B <<client>>
 frame "Applicazione PICUS · Unico processo JVM" as JVM {
   component "Gestore web\nSicurezza e sessione · Controller\nSpring MVC · HTML / JSON" as WEB <<web>> {
     portin " " as W_HTTP
-    portout " " as W_U
-    portout " " as W_R
     portout " " as W_C
     portout " " as W_A
+    portout " " as W_R
     portout " " as W_M
+    portout " " as W_U
   }
   component "Utenze\nAccount e profili\nServizi e persistenza" as U {
     portin " " as U_WEB
@@ -38,33 +38,46 @@ frame "Applicazione PICUS · Unico processo JVM" as JVM {
     portin " " as M_WEB
     portout " " as M_SQL
   }
+  component "DataSource condiviso\nPool di connessioni JDBC" as DS <<dati>> {
+    portin " " as DS_C
+    portin " " as DS_A
+    portin " " as DS_R
+    portin " " as DS_M
+    portin " " as DS_U
+    portout " " as DS_SQL
+  }
   component "Adattatore email\nAttivazione e recupero" as MAIL {
     portin " " as MAIL_IN
     portout " " as MAIL_OUT
   }
 }
 component "PostgreSQL\nDatabase unico picus\nDati e allegati" as DB <<dati>> {
-  portin " " as DB_U
-  portin " " as DB_R
-  portin " " as DB_C
-  portin " " as DB_A
-  portin " " as DB_M
+  portin " " as DB_SQL
 }
 component "Servizio email esterno" as EMAIL {
   portin " " as EMAIL_IN
 }
 
+' Allinea le porte dei moduli e tiene il percorso email a destra dei dati.
+C_WEB -[hidden]right-> A_WEB
+A_WEB -[hidden]right-> R_WEB
+R_WEB -[hidden]right-> M_WEB
+M_WEB -[hidden]right-> U_WEB
+DS_U -[hidden]right-> MAIL_IN
+DB_SQL -[hidden]right-> EMAIL_IN
+
 B_WEB -[#5480B0]--> W_HTTP : HTTP
-W_U ---> U_WEB
-W_R ---> R_WEB
 W_C ---> C_WEB
 W_A ---> A_WEB
+W_R ---> R_WEB
 W_M ---> M_WEB
-U_SQL -[#3D867D]--> DB_U
-R_SQL -[#3D867D]--> DB_R
-C_SQL -[#3D867D]--> DB_C
-A_SQL -[#3D867D]--> DB_A
-M_SQL -[#3D867D]--> DB_M
+W_U ---> U_WEB
+C_SQL -[#3D867D]--> DS_C
+A_SQL -[#3D867D]--> DS_A
+R_SQL -[#3D867D]--> DS_R
+M_SQL -[#3D867D]--> DS_M
+U_SQL -[#3D867D]--> DS_U
+DS_SQL -[#3D867D]--> DB_SQL : JDBC
 U_MAIL ---> MAIL_IN
 MAIL_OUT ---> EMAIL_IN : Invio email
 @enduml
