@@ -1,6 +1,6 @@
 # ADR-002: Ciclo della richiesta e assegnazione dell’erogatore
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-07
 - **Decision owners:** @salvatoredc04
 - **Related issues:** [#76](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/76), [#29](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/29), [#48](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/48), [#49](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/49), [#51](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/51), [#52](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/52), [#54](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/54)
@@ -9,7 +9,7 @@
 
 La OPT invia una richiesta di misura. Il Banco la prende in carico, cerca un erogatore e coordina l’accordo. Il team ha definito il ciclo a sei stati e le regole di annullamento il 14 novembre 2026, aggiornando le scelte discusse nella #29. [Regole funzionali](../requirements/regole-funzionali.md#richiesta-e-accordo)
 
-Il walking skeleton registra la richiesta e la presenta alla OPT titolare e al Banco. Le storie #49, #51 e #52 completano il percorso dell’MVP fino alla conferma o al rifiuto definitivo. L’annullamento ha un proprio incremento, tracciato nella #54. [Proposta di MVP](../requirements/proposta-mvp.md)
+Il walking skeleton registra la richiesta e la presenta alla OPT titolare e al Banco. Le storie #49, #51 e #52 completano il percorso dell’MVP fino alla conferma o al rifiuto definitivo. L’annullamento ha un proprio incremento, tracciato nella #54.
 
 ## Considered options
 
@@ -41,4 +41,4 @@ Il server consente soltanto le transizioni della tabella e verifica stato, autor
 - Gli utenti vedono un solo stato coerente con l’accordo. I contatti e le risposte restano registrati separatamente dallo stato della pratica.
 - Il modulo `richieste` deve coordinare contatti e transizioni. Le prove verificano il contatto sequenziale, il passaggio a `In programmazione` con l’erogatore assegnato, il rifiuto definitivo, la conferma con dati completi e la conservazione dello stato se due comandi concorrenti risultano incompatibili.
 - Un eventuale requisito futuro di riprogrammazione o tracciamento della prestazione richiederebbe di rivalutare un ciclo separato per l’appuntamento.
-- Le prove di annullamento seguono la #54 e QS-01B. Forma e visibilità del motivo restano in Q-04. Negoziazione e gestione del contatto senza risposta restano in Q-09 e Q-19. [Registro dei chiarimenti](../requirements/open-questions.md)
+- Le prove di annullamento seguono la #54 e QS-01B. Forma e visibilità del motivo restano in Q-04. Negoziazione e gestione del contatto senza risposta restano in Q-09 e Q-19.
