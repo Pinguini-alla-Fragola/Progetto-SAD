@@ -69,8 +69,8 @@ Le invocazioni sono sincrone e usano i contratti riportati sotto.
 In CC-02 i connettori blu rappresentano HTTP, quelli grigi le chiamate Java
 e quelli verde acqua gli accessi JDBC. In CC-03 il collegamento viola
 evidenzia la verifica richiamata da Comunicazioni verso Richieste. I
-connettori dei dettagli sono rettilinei, con porte separate e percorsi
-senza sovrapposizioni. Le spiegazioni e i contratti sono raccolti qui;
+connettori usano solo segmenti orizzontali e verticali, con angoli retti,
+porte separate e percorsi senza sovrapposizioni. Le spiegazioni e i contratti sono raccolti qui;
 i diagrammi contengono componenti, porte, connettori e relative etichette.
 
 | Connettore | Ruoli e scambi |

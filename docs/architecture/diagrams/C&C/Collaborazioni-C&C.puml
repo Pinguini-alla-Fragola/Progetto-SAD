@@ -32,11 +32,11 @@ frame "Applicazione PICUS · Unico processo JVM" as JVM {
     portin " " as U_M
   }
 }
-R_C --> C_R : Catalogo
-R_A --> A_R : Avvisi
-A_CHECK -[#8069AE]-> R_CHECK : Verifica riferimenti
-A_U --> U_A : Destinatari
-C_U --> U_C : Profili
-M_C --> C_M : Misure
-M_U --> U_M : Account
+R_C ---> C_R : Catalogo
+R_A ---> A_R : Avvisi
+R_CHECK <-[#8069AE]-- A_CHECK : Verifica riferimenti
+A_U ---> U_A : Destinatari
+C_U ---> U_C : Profili
+M_C ---> C_M : Misure
+M_U ---> U_M : Account
 @enduml

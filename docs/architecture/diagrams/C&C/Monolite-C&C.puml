@@ -54,17 +54,17 @@ component "Servizio email esterno" as EMAIL {
   portin " " as EMAIL_IN
 }
 
-B_WEB -[#5480B0]-> W_HTTP : HTTP
-W_U --> U_WEB
-W_R --> R_WEB
-W_C --> C_WEB
-W_A --> A_WEB
-W_M --> M_WEB
-U_SQL -[#3D867D]-> DB_U
-R_SQL -[#3D867D]-> DB_R
-C_SQL -[#3D867D]-> DB_C
-A_SQL -[#3D867D]-> DB_A
-M_SQL -[#3D867D]-> DB_M
-U_MAIL --> MAIL_IN
-MAIL_OUT --> EMAIL_IN : Invio email
+B_WEB -[#5480B0]--> W_HTTP : HTTP
+W_U ---> U_WEB
+W_R ---> R_WEB
+W_C ---> C_WEB
+W_A ---> A_WEB
+W_M ---> M_WEB
+U_SQL -[#3D867D]--> DB_U
+R_SQL -[#3D867D]--> DB_R
+C_SQL -[#3D867D]--> DB_C
+A_SQL -[#3D867D]--> DB_A
+M_SQL -[#3D867D]--> DB_M
+U_MAIL ---> MAIL_IN
+MAIL_OUT ---> EMAIL_IN : Invio email
 @enduml

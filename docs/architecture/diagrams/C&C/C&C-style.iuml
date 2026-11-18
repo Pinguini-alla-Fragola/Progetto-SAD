@@ -6,7 +6,8 @@ skinparam defaultFontColor #172B3A
 skinparam shadowing false
 skinparam roundcorner 0
 skinparam componentStyle uml2
-skinparam linetype polyline
+' Segmenti orizzontali/verticali; i sorgenti riservano spazio con connettori lunghi.
+skinparam linetype ortho
 skinparam nodesep 40
 skinparam ranksep 35
 skinparam padding 8

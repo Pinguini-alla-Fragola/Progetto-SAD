@@ -22,9 +22,9 @@ component "email : Servizio email\nAttivazione e recupero account" as EMAIL {
   portin " " as EMAIL_IN
 }
 
-B_WEB -[#5480B0]down-> APP_WEB : HTTP
-APP_DATA -[#3D867D]down-> DB_SQL : JDBC
-APP_MAIL -down-> EMAIL_IN : Invio email
+B_WEB -[#5480B0]--> APP_WEB : HTTP
+APP_DATA -[#3D867D]--> DB_SQL : JDBC
+APP_MAIL ---> EMAIL_IN : Invio email
 DB -[hidden]right- EMAIL
 
 @enduml
