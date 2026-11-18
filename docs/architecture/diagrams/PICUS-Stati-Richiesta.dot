@@ -1,4 +1,4 @@
-digraph Stati {
+digraph "PICUS - Stati della richiesta" {
   // Coordinate in punti, come nel CC-02. I vertici senza simbolo fissano le pieghe dei connettori.
   graph [
     layout=neato, inputscale=72, overlap=true, splines=line,
@@ -23,9 +23,9 @@ digraph Stati {
   l_prendi [pos="442,290!", label=<[Banco]<BR/>prendiInCarico() /<BR/>[ricerca aperta]>]
   l_assegna [pos="820,290!", label=<[Banco, risposta positiva<BR/>dell'erogatore]<BR/>assegnaErogatore() /<BR/>[erogatore assegnato]>]
   l_conferma [pos="1240,290!", label=<[Banco, accordo completo]<BR/>confermaAccordo() /<BR/>[dettagli immutabili]>]
-  l_rif_prog [pos="1030,205!", label=<[Banco, accordo impraticabile]<BR/>rifiutaRichiesta() /<BR/>[nessun erogatore disponibile]>]
-  l_rif_carico [pos="800,120!", label=<[Banco, opzioni esaurite]<BR/>rifiutaRichiesta() /<BR/>[nessun erogatore disponibile]>]
-  l_annulla [pos="770,-30!", label=<[Banco, OPT o erogatore,<BR/>motivo se non Creata]<BR/>annullaRichiesta() /<BR/>[dettagli conservati]>]
+  l_rif_prog [pos="1030,205!", label=<[Banco, accordo impraticabile,<BR/>nessun contatto in attesa]<BR/>rifiutaRichiesta() /<BR/>[nessun erogatore disponibile]>]
+  l_rif_carico [pos="800,120!", label=<[Banco, ogni opzione negativa,<BR/>remoto compreso se compatibile,<BR/>nessun contatto in attesa]<BR/>rifiutaRichiesta() /<BR/>[nessun erogatore disponibile]>]
+  l_annulla [pos="770,-30!", label=<[Banco, OPT titolare o<BR/>erogatore assegnato,<BR/>motivo se non Creata]<BR/>annullaRichiesta() /<BR/>[dettagli conservati]>]
   node [shape=point, width=0.01, height=0.01, label="", style=invis]
   b_rc [pos="610,120!"]
   a0 [pos="770,60!"]

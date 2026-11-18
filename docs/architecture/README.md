@@ -251,6 +251,20 @@ Banco, la OPT titolare o l'erogatore assegnato secondo la
 [matrice di annullamento](../requirements/regole-funzionali.md#matrice-di-annullamento).
 Il motivo è facoltativo solo partendo da Creata.
 
+Il titolo accessibile dell'SVG è il nome del grafo nel sorgente DOT, «PICUS -
+Stati della richiesta». La tabella seguente è l'equivalente testuale del
+diagramma e va tenuta allineata alle sue transizioni.
+
+| Da | Operazione | Chi la esegue e condizioni | A |
+| --- | --- | --- | --- |
+| Avvio | `invia()` | OPT titolare, con invio valido | Creata |
+| Creata | `prendiInCarico()` | Banco | Presa in carico, ricerca aperta |
+| Presa in carico | `assegnaErogatore()` | Banco, con risposta positiva dell'erogatore | In programmazione |
+| In programmazione | `confermaAccordo()` | Banco, con accordo completo | Confermata, dettagli immutabili |
+| Presa in carico | `rifiutaRichiesta()` | Banco, con ogni opzione negativa, remoto compreso se compatibile, e nessun contatto in attesa | Rifiutata |
+| In programmazione | `rifiutaRichiesta()` | Banco, con accordo impraticabile e nessun contatto in attesa | Rifiutata |
+| Creata, Presa in carico, In programmazione, Confermata, Rifiutata | `annullaRichiesta()` | Banco, OPT titolare o erogatore assegnato, con motivo se non si parte da Creata | Annullata, dettagli conservati |
+
 Per rigenerare le esportazioni con Graphviz, eseguire dalla radice del
 progetto. Il sorgente fissa le posizioni dei nodi e usa il layout `neato`, come
 il CC-02.
