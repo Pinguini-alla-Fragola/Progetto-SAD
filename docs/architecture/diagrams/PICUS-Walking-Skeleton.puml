@@ -55,10 +55,6 @@ Richieste -> Catalogo: Verifica misura e comune
 Richieste -> Db: Salva la richiesta in CREATA\ncon la OPT A come titolare
 Richieste --> Web: ID e sintesi della richiesta
 Web --> Opt: 201 · Conferma con ID e stato
-note over Web, Richieste
-  Un ritento con la stessa Idempotency-Key
-  e gli stessi dati restituisce lo stesso ID.
-end note
 
 == Consultazione ==
 Opt -> Web: Apre l'elenco delle proprie richieste
