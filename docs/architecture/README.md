@@ -235,8 +235,9 @@ testi leggibili, assenza di sovrapposizioni e corrispondenza con i sorgenti.
 Il diagramma UML di protocollo mostra i comandi principali di
 [`RichiesteApi`](../../src/main/java/it/unina/picus/richieste/api/RichiesteApi.java)
 che fanno cambiare stato a una richiesta. Le frecce si leggono come
-`[precondizione] operazione / [postcondizione]`. Il ciclo a sei stati è
-definito in [ADR-002](../adr/ADR-002-ciclo-di-vita-richiesta.md).
+`[precondizione] operazione() / [postcondizione]`. Nella precondizione il
+primo termine è l'attore che invoca l'operazione, per esempio `Banco` o `OPT`.
+Il ciclo a sei stati è definito in [ADR-002](../adr/ADR-002-ciclo-di-vita-richiesta.md).
 
 Un nuovo invio valido della OPT con `invia()` inizializza la richiesta a
 Creata. La risposta di un candidato mantiene la richiesta Presa in carico.
@@ -250,14 +251,35 @@ Banco, la OPT titolare o l'erogatore assegnato secondo la
 [matrice di annullamento](../requirements/regole-funzionali.md#matrice-di-annullamento).
 Il motivo è facoltativo solo partendo da Creata.
 
-Per rigenerare le esportazioni con Mermaid CLI 12.2.0, eseguire dalla radice
-del progetto.
+Il titolo accessibile dell'SVG è il nome del grafo nel sorgente DOT, «PICUS -
+Stati della richiesta». La tabella seguente è l'equivalente testuale del
+diagramma e va tenuta allineata alle sue transizioni.
+
+| Da | Operazione | Chi la esegue e condizioni | A |
+| --- | --- | --- | --- |
+| Avvio | `invia()` | OPT titolare, con invio valido | Creata |
+| Creata | `prendiInCarico()` | Banco | Presa in carico, ricerca aperta |
+| Presa in carico | `assegnaErogatore()` | Banco, con risposta positiva dell'erogatore | In programmazione |
+| In programmazione | `confermaAccordo()` | Banco, con accordo completo | Confermata, dettagli immutabili |
+| Presa in carico | `rifiutaRichiesta()` | Banco, con ogni opzione negativa, remoto compreso se compatibile, e nessun contatto in attesa | Rifiutata |
+| In programmazione | `rifiutaRichiesta()` | Banco, con accordo impraticabile e nessun contatto in attesa | Rifiutata |
+| Creata, Presa in carico, In programmazione, Confermata, Rifiutata | `annullaRichiesta()` | Banco, OPT titolare o erogatore assegnato, con motivo se non si parte da Creata | Annullata, dettagli conservati |
+
+Per rigenerare le esportazioni con Graphviz, eseguire dalla radice del
+progetto. Il sorgente fissa le posizioni dei nodi e usa il layout `neato`, come
+il CC-02.
 
 ```powershell
 $stati = 'docs/architecture/diagrams/PICUS-Stati-Richiesta'
-mmdc -i "$stati.mmd" -o "$stati.png" -b white --size 1440 -s 1.5
-mmdc -i "$stati.mmd" -o "$stati.svg" -b white
+dot -Tpng "$stati.dot" -o "$stati.png"
+dot -Tsvg -Gdpi=72 "$stati.dot" -o "$stati.svg"
+(Get-Content "$stati.svg" -Raw) -replace '<svg width="[\d.]+pt" height="[\d.]+pt"', '<svg width="100%"' | Set-Content "$stati.svg" -NoNewline
 ```
+
+Con `-Gdpi=72` l'SVG mantiene la finestra di visualizzazione coerente con il
+disegno: con la risoluzione del PNG, Graphviz scala due volte e l'immagine
+risulta tagliata. L'ultimo comando toglie la dimensione fissa, così l'SVG si
+adatta alla larghezza disponibile, come nell'anteprima di GitHub.
 
 ## Persistenza iniziale
 
