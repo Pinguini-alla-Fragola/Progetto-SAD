@@ -208,6 +208,8 @@
             width: calc(var(--w) * 1px); height: calc(var(--h) * 1px);
             border: 3px dashed var(--fc); border-radius: 18px; opacity: .85;
         }
+        .fgroup { display: contents; }
+        .box.lines .act { line-height: 1.29; }
         .lbl { text-align: center; }
         .tr > div:nth-child(4) { --ci: 3; }
 
@@ -427,6 +429,16 @@
 
 
             .frame { display: none; }
+            .fgroup {
+                display: block; margin-top: 10px; padding: 12px 14px 16px;
+                border: 3px dashed var(--fc); border-radius: 18px;
+            }
+            .fgroup > * + * { margin-top: 8px; }
+            .fgroup > :first-child { margin-top: 0; }
+            .arrow { display: block; }
+            .slide > .arrow, .fgroup > .arrow { margin: 6px auto; }
+            .box { width: auto; }
+            .box.lines br.d { display: inline; }
             .lbl { margin-top: 0; }
             .tbl.mods .tr { grid-template-columns: 42% 58%; }
 
@@ -539,11 +551,12 @@
             <p class="t mint" style="--x:95;--y:180;--fs:33;--t:.2s" data-a="up">Il percorso attraversa componenti nello stesso processo e un database relazionale</p>
 
             <span class="frame" style="--x:355;--y:292;--w:880;--h:250;--fc:var(--pink);--t:.6s" data-a="fade" aria-hidden="true"></span>
-            <p class="t mint strong" style="--x:385;--y:304;--fs:25;--t:.9s" data-a="up">picus.jar · unico processo JVM</p>
 
-            <div class="box" style="--x:90;--y:362;--w:230;--h:140;--fs:24;--fill:var(--cream);--st:var(--mint);--t:1.2s" data-a="build"><span class="role">Browser</span> <span class="act">OPT, Banco, <br class="d">erogatore</span></div>
+            <div class="box lines" style="--x:90;--y:362;--w:230;--h:140;--fs:24;--fill:var(--cream);--st:var(--mint);--t:1.2s" data-a="build"><span class="role">Browser</span> <span class="act">OPT, Banco, <br class="d">erogatore</span></div>
             <p class="t mint lbl" style="--x:336;--y:398;--w:50;--fs:18;--t:1.9s" data-a="fade">HTTP</p>
             <span class="arrow" style="--x:320;--y:432;--w:70;--ac:var(--mint);--t:1.9s" data-a="arrow" aria-hidden="true"></span>
+            <div class="fgroup" style="--fc:var(--pink)">
+            <p class="t mint strong" style="--x:385;--y:304;--fs:25;--t:.9s" data-a="up">picus.jar · unico processo JVM</p>
             <div class="box" style="--x:390;--y:362;--w:230;--h:140;--fs:24;--fill:var(--cream);--st:var(--mint);--t:2.2s" data-a="build"><span class="role">Spring Security</span> <span class="act">e Controller MVC</span></div>
             <p class="t mint lbl" style="--x:644;--y:398;--w:50;--fs:18;--t:2.9s" data-a="fade">DTO</p>
             <span class="arrow" style="--x:620;--y:432;--w:70;--ac:var(--mint);--t:2.9s" data-a="arrow" aria-hidden="true"></span>
@@ -551,6 +564,7 @@
             <p class="t mint lbl" style="--x:932;--y:398;--w:50;--fs:18;--t:3.9s" data-a="fade">Porte</p>
             <span class="arrow" style="--x:920;--y:432;--w:70;--ac:var(--mint);--t:3.9s" data-a="arrow" aria-hidden="true"></span>
             <div class="box" style="--x:990;--y:362;--w:230;--h:140;--fs:24;--fill:var(--cream);--st:var(--mint);--t:4.2s" data-a="build"><span class="role">Repository</span> <span class="act">e adattatori JPA</span></div>
+            </div>
             <p class="t mint lbl" style="--x:1231;--y:398;--w:60;--fs:18;--t:4.9s" data-a="fade">JDBC</p>
             <span class="arrow" style="--x:1220;--y:432;--w:70;--ac:var(--mint);--t:4.9s" data-a="arrow" aria-hidden="true"></span>
             <div class="box hot" style="--x:1290;--y:362;--w:230;--h:140;--fs:24;--fill:var(--red);--tc:#fff;--st:var(--pink);--t:5.2s" data-a="build"><span class="role">PostgreSQL</span> <span class="act">DB picus</span></div>
@@ -568,15 +582,17 @@
             <p class="t mu" style="--x:95;--y:180;--fs:33;--t:.2s" data-a="up">Un ambiente locale riproducibile con Docker Compose</p>
 
             <span class="frame" style="--x:420;--y:255;--w:1090;--h:355;--fc:var(--ink);--t:.6s" data-a="fade" aria-hidden="true"></span>
-            <p class="t strong" style="--x:452;--y:270;--fs:27;--t:.9s" data-a="up">Macchina host · Docker Compose</p>
 
             <div class="box" style="--x:90;--y:352;--w:240;--h:150;--fs:26;--fill:var(--sand);--st:var(--red);--t:1.3s" data-a="build"><span class="role">Browser web</span> <span class="act">127.0.0.1:8080</span></div>
             <p class="t mu lbl" style="--x:335;--y:392;--w:80;--fs:19;--t:2s" data-a="fade">HTTP</p>
             <span class="arrow" style="--x:330;--y:427;--w:130;--ac:var(--red);--t:2s" data-a="arrow" aria-hidden="true"></span>
-            <div class="box hot" style="--x:460;--y:330;--w:420;--h:240;--fs:26;--fill:var(--red);--tc:#fff;--st:var(--ink);--t:2.4s" data-a="build"><span class="role">picus-webapp</span> <span class="act">JVM Java 25 · picus.jar <br class="d">Spring Boot e Tomcat</span></div>
+            <div class="fgroup" style="--fc:var(--ink)">
+            <p class="t strong" style="--x:452;--y:270;--fs:27;--t:.9s" data-a="up">Macchina host · Docker Compose</p>
+            <div class="box lines hot" style="--x:460;--y:330;--w:420;--h:240;--fs:26;--fill:var(--red);--tc:#fff;--st:var(--ink);--t:2.4s" data-a="build"><span class="role">picus-webapp</span> <span class="act">JVM Java 25 · picus.jar <br class="d">Spring Boot e Tomcat</span></div>
             <p class="t mu lbl" style="--x:880;--y:392;--w:140;--fs:19;--t:3.2s" data-a="fade">JDBC:5432</p>
             <span class="arrow" style="--x:880;--y:427;--w:140;--ac:var(--red);--t:3.2s" data-a="arrow" aria-hidden="true"></span>
-            <div class="box" style="--x:1020;--y:330;--w:450;--h:240;--fs:26;--fill:var(--sand);--st:var(--red);--t:3.6s" data-a="build"><span class="role">picus-db</span> <span class="act">PostgreSQL 17 <br class="d">Database picus <br class="d">Volume picus-dati</span></div>
+            <div class="box lines" style="--x:1020;--y:330;--w:450;--h:240;--fs:26;--fill:var(--sand);--st:var(--red);--t:3.6s" data-a="build"><span class="role">picus-db</span> <span class="act">PostgreSQL 17 <br class="d">Database picus <br class="d">Volume picus-dati</span></div>
+            </div>
 
             <p class="t strong" style="--x:95;--y:662;--fs:30;--t:4.5s" data-a="up">Flyway applica le migrazioni. La webapp parte dopo l’healthcheck del database.</p>
             <p class="t mu" style="--x:95;--y:722;--fs:28;--t:5s" data-a="up">Database sulla rete Compose. HTTPS, email e produzione sono evoluzioni successive.</p>
