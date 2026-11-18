@@ -1,23 +1,29 @@
 package it.unina.picus.richieste.web;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.jayway.jsonpath.JsonPath;
 
-import it.unina.picus.AccessoDiProva;
-import it.unina.picus.DatiDiProva;
-import it.unina.picus.SessioneDiProva;
-import it.unina.picus.TestIntegrazionePostgres;
-
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,12 +31,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
+
+import javax.sql.DataSource;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -42,31 +49,40 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.ResultMatcher;
+
+import it.unina.picus.shared.AccessoDiProva;
+import it.unina.picus.shared.DatiSintetici;
+import it.unina.picus.shared.IntegrazionePostgresql;
+import it.unina.picus.shared.SessioneDiProva;
 
 /**
  * Test di integrazione della user story #52 «Conferma dell'accordo o rifiuto della richiesta»,
  * richiesti dalla #116: endpoint HTTP reali, login reale e PostgreSQL.
  *
  * Ogni test riporta nel nome l'Acceptance Criterion della #52 che verifica (AC1..AC9). I test
- * marcati «#116» coprono i criteri della task che la user story non esprime: compatibilità
- * della modalità, assenza di scritture parziali, richieste che hanno già un esito, accessi senza
+ * marcati «#116» coprono i criteri della task che la user story non esprime: compatibilità della
+ * modalità, assenza di scritture parziali, richieste che hanno già un esito, accessi senza
  * sessione e comandi concorrenti.
  *
  * Lo scenario nasce dal flusso dell'applicazione: la OPT titolare invia la richiesta, il Banco
- * la prende in carico, interpella un candidato, ne riceve la disponibilità e lo assegna. Nel
- * database si inseriscono soltanto account, profili, offerte, misure e comuni, che
- * l'applicazione non permette ancora di creare. Ogni test usa una misura nuova, quindi i suoi
- * candidati sono solo quelli che crea.
+ * la prende in carico, interpella un candidato, ne riceve la disponibilità e lo assegna. Ogni
+ * attore accede con il login reale e opera nella propria sessione. Nel database si inseriscono
+ * con {@link DatiSintetici} soltanto account, profili, offerte e l'abilitazione a distanza delle
+ * misure, che l'applicazione non permette ancora di gestire.
  *
- * Il testo «Nessun erogatore disponibile» dell'AC5 è compito dell'interfaccia: qui si verifica
- * che la OPT titolare riceva lo stato {@code RIFIUTATA} da cui l'interfaccia lo ricava.
+ * Visibilità e persistenza hanno verifiche distinte: i dettagli dell'accordo si leggono dalle
+ * API e dalla pagina di dettaglio di chi è autorizzato, quelli registrati dalla riga su
+ * PostgreSQL. Ogni {@code 409} viene verificato anche nel corpo: errore JSON comune del modulo
+ * Richieste, senza dati della pratica.
  */
-@TestIntegrazionePostgres
+@IntegrazionePostgresql
 @Tag("issue-52")
 @DisplayName("#52 Conferma dell'accordo o rifiuto della richiesta: integrazione su HTTP e PostgreSQL")
 class ConfermaAccordoORifiutoIntegrazioneTest {
@@ -79,6 +95,14 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
     private static final String COGNOME = "Sintetico";
     private static final String TELEFONO = "+39 081 000 0000";
     private static final String LINK = "https://videochiamata.example/stanza-di-prova";
+    private static final String NESSUN_EROGATORE = "Nessun erogatore disponibile";
+
+    /**
+     * Comandi inviati insieme nei test di concorrenza. Durante l'attesa del lock ognuno occupa
+     * una connessione: con quella del test e quella del controllo restano sotto il pool
+     * predefinito di Hikari (10).
+     */
+    private static final int COMANDI_CONCORRENTI = 6;
 
     /** Account autenticati diversi dal Banco. */
     enum NonBanco {
@@ -102,9 +126,12 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
     private JdbcTemplate jdbc;
 
     @Autowired
+    private DataSource dataSource;
+
+    @Autowired
     private PasswordEncoder encoder;
 
-    private DatiDiProva dati;
+    private DatiSintetici dati;
     private AccessoDiProva accesso;
     private final Map<UUID, SessioneDiProva> sessioni = new HashMap<>();
 
@@ -118,17 +145,18 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
 
     @BeforeEach
     void preparaAttori() {
-        dati = new DatiDiProva(jdbc);
+        dati = new DatiSintetici(jdbc);
+        dati.svuota();
         accesso = new AccessoDiProva(mvc, jdbc, encoder);
         sessioni.clear();
 
-        misuraId = dati.creaMisura();
-        banco = dati.creaAccount("BANCO", "Banco di prova");
-        titolare = dati.creaOptConProfilo("OPT titolare");
-        erogatrice = dati.creaOptErogatrice("OPT erogatrice", misuraId);
-        altraCandidata = dati.creaOptErogatrice("OPT candidata alternativa", misuraId);
-        optEstranea = dati.creaOptConProfilo("OPT estranea");
-        operatoreEstraneo = dati.creaOperatore("Operatore estraneo");
+        misuraId = dati.misura("M01");
+        banco = dati.banco("Banco di prova");
+        titolare = dati.opt("OPT titolare", "napoli");
+        erogatrice = optErogatrice("OPT erogatrice", misuraId);
+        altraCandidata = optErogatrice("OPT candidata alternativa", misuraId);
+        optEstranea = dati.opt("OPT estranea", "napoli");
+        operatoreEstraneo = dati.operatore("Operatore estraneo", "INTERNO_BANCO", "napoli", false);
     }
 
     // ------------------------------------------------------------------ AC1, AC2
@@ -141,6 +169,7 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
         ResultActions esito = conferma(richiestaId, json(inPresenza()));
 
         assertConfermataInPresenza(esito, erogatrice);
+        assertAccordoInPresenzaPersistito(richiestaId, erogatrice);
         assertConfermataInPresenza(come(banco).get("/api/richieste/{id}", richiestaId), erogatrice);
         assertConfermataInPresenza(come(titolare).get("/api/richieste/{id}", richiestaId), erogatrice);
         assertConfermataInPresenza(come(erogatrice).get("/api/richieste/{id}", richiestaId), erogatrice)
@@ -149,16 +178,20 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
                 .andExpect(jsonPath("$.description").doesNotExist());
         come(titolare).get("/api/richieste/mie")
                 .andExpect(jsonPath("$[?(@.id == '" + richiestaId + "')].stato", hasItem("CONFERMATA")));
+        for (UUID autorizzato : List.of(titolare, erogatrice)) {
+            assertPaginaDelDettaglioMostra(autorizzato, richiestaId, LUOGO, NOME + " " + COGNOME, TELEFONO);
+        }
     }
 
-    @Test
-    @DisplayName("AC1 - i dettagli confermati sono disponibili anche all'operatore del Banco assegnato")
-    void ac1_confermaConOperatoreAssegnato() throws Exception {
-        UUID operatore = dati.creaOperatoreErogatore("Operatore assegnato", misuraId);
+    @ParameterizedTest(name = "AC1 - i dettagli confermati sono disponibili anche all''operatore {0} assegnato")
+    @ValueSource(strings = {"INTERNO_BANCO", "ESTERNO_PAGATO_BANCO"})
+    void ac1_confermaConOperatoreAssegnato(String tipologia) throws Exception {
+        UUID operatore = dati.operatore("Operatore assegnato", tipologia, "napoli", false, misuraId);
         UUID richiestaId = richiestaInProgrammazione(operatore);
 
         conferma(richiestaId, json(inPresenza())).andExpect(status().isOk());
 
+        assertAccordoInPresenzaPersistito(richiestaId, operatore);
         assertConfermataInPresenza(come(operatore).get("/api/richieste/{id}", richiestaId), operatore);
         assertConfermataInPresenza(come(titolare).get("/api/richieste/{id}", richiestaId), operatore);
     }
@@ -171,10 +204,14 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
         ResultActions esito = conferma(scenario.richiestaId(), json(aDistanza()));
 
         assertConfermataADistanza(esito, scenario.centroPicus());
+        assertAccordoADistanzaPersistito(scenario.richiestaId(), scenario.centroPicus());
         assertConfermataADistanza(come(banco).get("/api/richieste/{id}", scenario.richiestaId()), scenario.centroPicus());
         assertConfermataADistanza(come(titolare).get("/api/richieste/{id}", scenario.richiestaId()), scenario.centroPicus());
         assertConfermataADistanza(
                 come(scenario.centroPicus()).get("/api/richieste/{id}", scenario.richiestaId()), scenario.centroPicus());
+        for (UUID autorizzato : List.of(titolare, scenario.centroPicus())) {
+            assertPaginaDelDettaglioMostra(autorizzato, scenario.richiestaId(), LINK);
+        }
     }
 
     // ------------------------------------------------------------------ AC3 e compatibilità (#116)
@@ -253,6 +290,7 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
         conferma(richiestaId, json(senza(inPresenza(), "telefonoReferente"))).andExpect(status().isBadRequest());
 
         assertConfermataInPresenza(conferma(richiestaId, json(inPresenza())), erogatrice);
+        assertAccordoInPresenzaPersistito(richiestaId, erogatrice);
     }
 
     @Test
@@ -269,13 +307,13 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
     }
 
     @Test
-    @DisplayName("#116 - se la misura non è più erogabile a distanza la conferma a distanza è respinta")
+    @DisplayName("#116 - se la misura non è più erogabile a distanza la conferma a distanza riceve 409 e non scrive nulla")
     void misuraNonPiuErogabileADistanza() throws Exception {
         ScenarioADistanza scenario = richiestaADistanzaInProgrammazione();
         // Il catalogo cambia dopo l'assegnazione: il Banco non può più confermare a distanza.
-        dati.impostaErogabileADistanza(scenario.misuraId(), false);
+        jdbc.update("update catalogo_misure set erogabile_a_distanza = false where id = ?", scenario.misuraId());
 
-        assertDatiDaCompletare(conferma(scenario.richiestaId(), json(aDistanza())), "modalita");
+        assertConflitto(conferma(scenario.richiestaId(), json(aDistanza())), scenario.richiestaId());
 
         assertInProgrammazioneSenzaAccordo(scenario.richiestaId(), scenario.centroPicus());
     }
@@ -298,7 +336,7 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
     // ------------------------------------------------------------------ AC5
 
     @Test
-    @DisplayName("AC5 - rifiuto da In programmazione: Rifiutata e visibile alla OPT titolare, senza motivazione")
+    @DisplayName("AC5 - rifiuto da In programmazione: Rifiutata e «Nessun erogatore disponibile» per la OPT titolare")
     void ac5_rifiutoDaInProgrammazione() throws Exception {
         UUID richiestaId = richiestaInProgrammazione(erogatrice);
 
@@ -326,7 +364,8 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
     @Test
     @DisplayName("AC5 - rifiuto da Presa in carico quando la misura non ha erogatori compatibili")
     void ac5_rifiutoDaPresaInCaricoSenzaCandidati() throws Exception {
-        UUID richiestaId = inviaEPrendiInCarico(dati.creaMisura());
+        // dopo svuota() nessuno offre la M02 e nessuna misura è erogabile a distanza
+        UUID richiestaId = inviaEPrendiInCarico(dati.misura("M02"));
 
         rifiuta(richiestaId, null).andExpect(status().isOk());
 
@@ -337,25 +376,26 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
     @DisplayName("AC5 - finché restano candidati locali non interpellati il rifiuto definitivo è respinto")
     void ac5_rifiutoRespintoConCandidatiLocaliDaValutare() throws Exception {
         UUID richiestaId = inviaEPrendiInCarico(misuraId);
-        assertConflitto(rifiuta(richiestaId, null));
+        assertConflitto(rifiuta(richiestaId, null), richiestaId);
 
         rispondi(erogatrice, interpella(richiestaId, erogatrice, "STESSO_COMUNE"), false);
-        assertConflitto(rifiuta(richiestaId, null));
+        assertConflitto(rifiuta(richiestaId, null), richiestaId);
 
-        assertStatoPerLaTitolare(richiestaId, "PRESA_IN_CARICO");
+        assertPresaInCaricoPerLaTitolare(richiestaId);
     }
 
     @Test
     @DisplayName("AC5 - il remoto compatibile va valutato prima del rifiuto definitivo")
     void ac5_rifiutoRespintoSeRestaIlRemoto() throws Exception {
-        long misuraRemota = dati.creaMisuraADistanza();
-        UUID locale = dati.creaOptErogatrice("OPT erogatrice locale", misuraRemota);
-        UUID centroPicus = dati.creaOperatoreCentroPicus("Centro PICUS", misuraRemota, dati.creaComuneIsolato());
+        long misuraRemota = dati.misura("M03");
+        dati.abilitaADistanza(misuraRemota);
+        UUID locale = optErogatrice("OPT erogatrice locale", misuraRemota);
+        UUID centroPicus = centroPicus(misuraRemota);
         UUID richiestaId = inviaEPrendiInCarico(misuraRemota);
         rispondi(locale, interpella(richiestaId, locale, "STESSO_COMUNE"), false);
 
-        assertConflitto(rifiuta(richiestaId, null));
-        assertStatoPerLaTitolare(richiestaId, "PRESA_IN_CARICO");
+        assertConflitto(rifiuta(richiestaId, null), richiestaId);
+        assertPresaInCaricoPerLaTitolare(richiestaId);
 
         rispondi(centroPicus, interpella(richiestaId, centroPicus, "CENTRO_PICUS_A_DISTANZA"), false);
         rifiuta(richiestaId, null).andExpect(status().isOk());
@@ -370,19 +410,19 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
         rispondi(erogatrice, interpella(richiestaId, erogatrice, "STESSO_COMUNE"), false);
         interpella(richiestaId, altraCandidata, "STESSO_COMUNE");
 
-        assertConflitto(rifiuta(richiestaId, null));
+        assertConflitto(rifiuta(richiestaId, null), richiestaId);
 
-        assertStatoPerLaTitolare(richiestaId, "PRESA_IN_CARICO");
+        assertPresaInCaricoPerLaTitolare(richiestaId);
     }
 
     @Test
-    @DisplayName("AC5 - il rifiuto non richiede una motivazione: corpo assente o vuoto")
+    @DisplayName("AC5 - il rifiuto non richiede una motivazione: basta un corpo vuoto")
     void ac5_rifiutoSenzaMotivazione() throws Exception {
-        UUID conCorpoVuoto = richiestaInProgrammazione(erogatrice);
+        UUID richiestaId = richiestaInProgrammazione(erogatrice);
 
-        rifiuta(conCorpoVuoto, "{}").andExpect(status().isOk());
+        rifiuta(richiestaId, "{}").andExpect(status().isOk());
 
-        assertRifiutataPerLaTitolare(conCorpoVuoto);
+        assertRifiutataPerLaTitolare(richiestaId);
     }
 
     @Test
@@ -394,7 +434,7 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.codice").value("BAD_REQUEST"));
 
-        assertStatoPerLaTitolare(richiestaId, "IN_PROGRAMMAZIONE");
+        assertInProgrammazioneSenzaAccordo(richiestaId, erogatrice);
     }
 
     // ------------------------------------------------------------------ AC6
@@ -404,9 +444,11 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
     void ac6_diniegoDelCandidatoNonRifiutaLaRichiesta() throws Exception {
         UUID richiestaId = inviaEPrendiInCarico(misuraId);
 
-        rispondi(erogatrice, interpella(richiestaId, erogatrice, "STESSO_COMUNE"), false);
+        UUID diniego = interpella(richiestaId, erogatrice, "STESSO_COMUNE");
+        rispondi(erogatrice, diniego, false);
 
-        assertStatoPerLaTitolare(richiestaId, "PRESA_IN_CARICO");
+        assertPresaInCaricoPerLaTitolare(richiestaId);
+        assertEquals("NON_DISPONIBILE", dati.esitoContatto(diniego), "esito del candidato su PostgreSQL");
         come(banco).get("/api/richieste/{id}/candidati", richiestaId)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[*].erogatore.accountId", hasItem(altraCandidata.toString())));
@@ -422,13 +464,13 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
     void ac7_accordoConfermatoNonModificabile() throws Exception {
         UUID richiestaId = richiestaInProgrammazione(erogatrice);
         conferma(richiestaId, json(inPresenza())).andExpect(status().isOk());
-        Map<String, Object> salvato = dati.accordoPersistito(richiestaId);
+        Map<String, Object> salvato = rigaDellaRichiesta(richiestaId);
 
-        assertConflitto(conferma(richiestaId, json(con(inPresenza(), "luogo", "Altra sede"))));
-        assertConflitto(conferma(richiestaId, json(con(inPresenza(), "dataOra", "2030-04-01T09:00:00+02:00"))));
-        assertConflitto(rifiuta(richiestaId, null));
+        assertConflitto(conferma(richiestaId, json(con(inPresenza(), "luogo", "Altra sede"))), richiestaId);
+        assertConflitto(conferma(richiestaId, json(con(inPresenza(), "dataOra", "2030-04-01T09:00:00+02:00"))), richiestaId);
+        assertConflitto(rifiuta(richiestaId, null), richiestaId);
 
-        assertEquals(salvato, dati.accordoPersistito(richiestaId));
+        assertEquals(salvato, rigaDellaRichiesta(richiestaId));
         assertConfermataInPresenza(come(titolare).get("/api/richieste/{id}", richiestaId), erogatrice);
     }
 
@@ -436,20 +478,20 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
     @ValueSource(strings = {"CREATA", "PRESA_IN_CARICO", "CONFERMATA", "RIFIUTATA", "ANNULLATA"})
     void comandiSuUnaRichiestaNonInLavorazione(String stato) throws Exception {
         UUID richiestaId = richiestaNelloStato(stato);
-        Map<String, Object> prima = dati.accordoPersistito(richiestaId);
+        Map<String, Object> prima = rigaDellaRichiesta(richiestaId);
 
-        assertConflitto(conferma(richiestaId, json(inPresenza())));
+        assertConflitto(conferma(richiestaId, json(inPresenza())), richiestaId);
         if (!stato.equals("PRESA_IN_CARICO")) {
             // da Presa in carico il rifiuto è ammesso: i suoi casi sono negli AC5
-            assertConflitto(rifiuta(richiestaId, null));
+            assertConflitto(rifiuta(richiestaId, null), richiestaId);
         }
 
-        assertEquals(prima, dati.accordoPersistito(richiestaId));
+        assertEquals(prima, rigaDellaRichiesta(richiestaId));
     }
 
     // ------------------------------------------------------------------ AC8 e dinieghi (#116)
 
-    @ParameterizedTest(name = "AC8 - {0} non può confermare l'accordo: 403 e stato e dati invariati")
+    @ParameterizedTest(name = "AC8 - {0} non può confermare l''accordo: 403 e stato e dati invariati")
     @EnumSource(NonBanco.class)
     void ac8_soloIlBancoConferma(NonBanco attore) throws Exception {
         UUID richiestaId = richiestaInProgrammazione(erogatrice);
@@ -461,14 +503,15 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
         assertInProgrammazioneSenzaAccordo(richiestaId, erogatrice);
     }
 
-    @Test
-    @DisplayName("AC8 - l'operatore del Banco assegnato non può confermare l'accordo")
-    void ac8_operatoreAssegnatoNonConferma() throws Exception {
-        UUID operatore = dati.creaOperatoreErogatore("Operatore assegnato", misuraId);
+    @ParameterizedTest(name = "AC8 - l''operatore {0} assegnato non può confermare l''accordo")
+    @ValueSource(strings = {"INTERNO_BANCO", "ESTERNO_PAGATO_BANCO"})
+    void ac8_operatoreAssegnatoNonConferma(String tipologia) throws Exception {
+        UUID operatore = dati.operatore("Operatore assegnato", tipologia, "napoli", false, misuraId);
         UUID richiestaId = richiestaInProgrammazione(operatore);
 
         come(operatore).post("/api/richieste/{id}/conferma", json(inPresenza()), richiestaId)
-                .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(""));
 
         assertInProgrammazioneSenzaAccordo(richiestaId, operatore);
     }
@@ -499,16 +542,18 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
     }
 
     @Test
-    @DisplayName("#116 - dopo la revoca dell'account Banco la sua sessione non può più confermare")
+    @DisplayName("#116 - dopo la revoca dell'account Banco la sua sessione non può più confermare né rifiutare")
     void accountBancoRevocato() throws Exception {
         UUID richiestaId = richiestaInProgrammazione(erogatrice);
-        UUID altroBanco = dati.creaAccount("BANCO", "Banco revocato");
+        UUID altroBanco = dati.banco("Banco revocato");
         SessioneDiProva sessione = come(altroBanco);
         sessione.get("/api/richieste/{id}", richiestaId).andExpect(status().isOk());
 
-        dati.revoca(altroBanco);
+        dati.impostaStatoAccount(altroBanco, "REVOCATO");
 
         sessione.post("/api/richieste/{id}/conferma", json(inPresenza()), richiestaId)
+                .andExpect(status().isUnauthorized());
+        sessione.post("/api/richieste/{id}/rifiuta", null, richiestaId)
                 .andExpect(status().isUnauthorized());
         assertInProgrammazioneSenzaAccordo(richiestaId, erogatrice);
     }
@@ -541,27 +586,27 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
 
     // ------------------------------------------------------------------ comandi concorrenti (#116)
 
+    /**
+     * Il test tiene il lock della riga della richiesta, lo stesso che il servizio acquisisce
+     * prima di applicare conferma o rifiuto. I comandi partono e si fermano su quel lock: il test
+     * attende di osservarli tutti in attesa su PostgreSQL, quindi contemporaneamente in corso nel
+     * punto in cui si decide l'esito, e solo allora rilascia il lock.
+     */
     @Test
-    @DisplayName("#116 - conferme e rifiuti concorrenti: uno solo riceve 200, gli altri 409, esito coerente")
+    @DisplayName("#116 - conferme e rifiuti concorrenti fermi sul lock: uno solo riceve 200, gli altri 409, esito coerente")
     void confermaERifiutoConcorrenti() throws Exception {
         UUID richiestaId = richiestaInProgrammazione(erogatrice);
-        int comandi = 8;
 
-        List<MvcResult> esiti = inParallelo(comandi, i -> i % 2 == 0
-                ? sessioneBanco(i).post("/api/richieste/{id}/conferma", json(inPresenza()), richiestaId)
-                : sessioneBanco(i).post("/api/richieste/{id}/rifiuta", null, richiestaId));
+        List<MvcResult> esiti = inParalleloSulLock(richiestaId, (sessione, i) -> i % 2 == 0
+                ? sessione.post("/api/richieste/{id}/conferma", json(inPresenza()), richiestaId)
+                : sessione.post("/api/richieste/{id}/rifiuta", null, richiestaId));
 
-        int vincitore = unicoAccettato(esiti);
-        Map<String, Object> salvato = dati.accordoPersistito(richiestaId);
+        int vincitore = unicoAccettato(esiti, richiestaId);
         if (vincitore % 2 == 0) {
-            assertAll(
-                    () -> assertEquals("CONFERMATA", salvato.get("stato")),
-                    () -> assertEquals("IN_PRESENZA", salvato.get("accordo_modalita")),
-                    () -> assertEquals(LUOGO, salvato.get("accordo_luogo")));
+            assertAccordoInPresenzaPersistito(richiestaId, erogatrice);
+            assertConfermataInPresenza(come(titolare).get("/api/richieste/{id}", richiestaId), erogatrice);
         } else {
-            assertAll(
-                    () -> assertEquals("RIFIUTATA", salvato.get("stato")),
-                    () -> assertNull(salvato.get("accordo_modalita")));
+            assertRifiutataPerLaTitolare(richiestaId);
         }
     }
 
@@ -569,15 +614,17 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
     @DisplayName("#116 - conferme concorrenti con dettagli diversi: resta solo l'accordo della conferma accettata")
     void confermeConcorrenti() throws Exception {
         UUID richiestaId = richiestaInProgrammazione(erogatrice);
-        int comandi = 6;
 
-        List<MvcResult> esiti = inParallelo(comandi, i -> sessioneBanco(i).post(
+        List<MvcResult> esiti = inParalleloSulLock(richiestaId, (sessione, i) -> sessione.post(
                 "/api/richieste/{id}/conferma", json(con(inPresenza(), "luogo", "Sede " + i)), richiestaId));
 
-        int vincitore = unicoAccettato(esiti);
-        assertAll(
-                () -> assertEquals("CONFERMATA", dati.accordoPersistito(richiestaId).get("stato")),
-                () -> assertEquals("Sede " + vincitore, dati.accordoPersistito(richiestaId).get("accordo_luogo")));
+        int vincitore = unicoAccettato(esiti, richiestaId);
+        Map<String, Object> salvato = rigaDellaRichiesta(richiestaId);
+        assertAll("accordo su PostgreSQL",
+                () -> assertEquals("CONFERMATA", salvato.get("stato")),
+                () -> assertEquals("Sede " + vincitore, salvato.get("accordo_luogo")));
+        come(titolare).get("/api/richieste/{id}", richiestaId)
+                .andExpect(jsonPath("$.accordo.luogo").value("Sede " + vincitore));
     }
 
     // ------------------------------------------------------------------ passi del flusso
@@ -592,11 +639,16 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
         return sessione;
     }
 
-    /** Sessioni distinte dello stesso account Banco, come più postazioni aperte insieme. */
-    private final Map<Integer, SessioneDiProva> sessioniBanco = new HashMap<>();
+    /** OPT di Napoli che offre la misura: compare fra i candidati dello stesso comune. */
+    private UUID optErogatrice(String nome, long misura) {
+        UUID opt = dati.opt(nome, "napoli");
+        dati.offerta(opt, misura);
+        return opt;
+    }
 
-    private SessioneDiProva sessioneBanco(int indice) {
-        return sessioniBanco.get(indice);
+    /** Operatore del Centro PICUS in un comune non adiacente a Napoli: raggiungibile solo a distanza. */
+    private UUID centroPicus(long misura) {
+        return dati.operatore("Centro PICUS", "INTERNO_BANCO", DatiSintetici.COMUNE_LONTANO, true, misura);
     }
 
     /** La OPT titolare invia una richiesta per la misura e il Banco la prende in carico. */
@@ -656,8 +708,9 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
     private record ScenarioADistanza(UUID richiestaId, UUID centroPicus, long misuraId) {}
 
     private ScenarioADistanza richiestaADistanzaInProgrammazione() throws Exception {
-        long misuraRemota = dati.creaMisuraADistanza();
-        UUID centroPicus = dati.creaOperatoreCentroPicus("Centro PICUS", misuraRemota, dati.creaComuneIsolato());
+        long misuraRemota = dati.misura("M04");
+        dati.abilitaADistanza(misuraRemota);
+        UUID centroPicus = centroPicus(misuraRemota);
         UUID richiestaId = inviaEPrendiInCarico(misuraRemota);
         assegna(richiestaId, centroPicus, "CENTRO_PICUS_A_DISTANZA");
         return new ScenarioADistanza(richiestaId, centroPicus, misuraRemota);
@@ -665,7 +718,8 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
 
     /**
      * Richiesta portata nello stato indicato con le operazioni disponibili. Solo l'annullamento,
-     * che appartiene alla #54, è forzato nel database a partire da una richiesta confermata.
+     * che appartiene alla #54, è forzato nel database a partire da una richiesta confermata: i
+     * vincoli della V14 ammettono l'accordo anche su una richiesta annullata.
      */
     private UUID richiestaNelloStato(String stato) throws Exception {
         return switch (stato) {
@@ -675,7 +729,7 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
                 UUID id = richiestaInProgrammazione(erogatrice);
                 conferma(id, json(inPresenza())).andExpect(status().isOk());
                 if (stato.equals("ANNULLATA")) {
-                    dati.impostaStato(id, "ANNULLATA");
+                    jdbc.update("update richieste set stato = 'ANNULLATA' where id = ?", id);
                 }
                 yield id;
             }
@@ -713,30 +767,52 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
         };
     }
 
+    /** Stato, assegnazione e colonne dell'accordo della richiesta, letti da PostgreSQL. */
+    private Map<String, Object> rigaDellaRichiesta(UUID richiestaId) {
+        return jdbc.queryForMap("""
+                select stato, erogatore_id, erogatore_ambito, accordo_modalita, accordo_data_ora, accordo_luogo,
+                       accordo_nome_referente, accordo_cognome_referente, accordo_telefono_referente, accordo_link
+                from richieste where id = ?
+                """, richiestaId);
+    }
+
     // ------------------------------------------------------------------ concorrenza
 
     @FunctionalInterface
     private interface Comando {
-        ResultActions esegui(int indice) throws Exception;
+        ResultActions esegui(SessioneDiProva sessione, int indice) throws Exception;
     }
 
-    /** Esegue i comandi tutti insieme, ciascuno in una sessione Banco distinta, e ne raccoglie i risultati. */
-    private List<MvcResult> inParallelo(int numero, Comando comando) throws Exception {
-        for (int i = 0; i < numero; i++) {
-            sessioniBanco.put(i, accesso.accedi(banco));
+    /**
+     * Esegue i comandi, ciascuno in una sessione Banco distinta, mentre il test tiene il lock
+     * della richiesta. Li rilascia solo dopo averli visti tutti in attesa su PostgreSQL.
+     */
+    private List<MvcResult> inParalleloSulLock(UUID richiestaId, Comando comando) throws Exception {
+        // sessioni distinte dello stesso account Banco, come più postazioni aperte insieme
+        List<SessioneDiProva> sessioniBanco = new ArrayList<>();
+        for (int i = 0; i < COMANDI_CONCORRENTI; i++) {
+            sessioniBanco.add(accesso.accedi(banco));
         }
-        ExecutorService esecutore = Executors.newFixedThreadPool(numero);
-        CountDownLatch via = new CountDownLatch(1);
+
+        ExecutorService esecutore = Executors.newFixedThreadPool(COMANDI_CONCORRENTI);
         List<Future<MvcResult>> futuri = new ArrayList<>();
         try {
-            for (int i = 0; i < numero; i++) {
-                int indice = i;
-                futuri.add(esecutore.submit(() -> {
-                    via.await();
-                    return comando.esegui(indice).andReturn();
-                }));
+            try (Connection blocco = dataSource.getConnection()) {
+                blocco.setAutoCommit(false);
+                int processoDelBlocco = bloccaRichiesta(blocco, richiestaId);
+                try {
+                    for (int i = 0; i < COMANDI_CONCORRENTI; i++) {
+                        SessioneDiProva sessione = sessioniBanco.get(i);
+                        int indice = i;
+                        futuri.add(esecutore.submit(() -> comando.esegui(sessione, indice).andReturn()));
+                    }
+                    attendiComandiFermiSulLock(processoDelBlocco, COMANDI_CONCORRENTI);
+                    assertEquals("IN_PROGRAMMAZIONE", dati.stato(richiestaId),
+                            "nessun comando applicato prima del rilascio del lock");
+                } finally {
+                    blocco.rollback();
+                }
             }
-            via.countDown();
             List<MvcResult> esiti = new ArrayList<>();
             for (Future<MvcResult> futuro : futuri) {
                 esiti.add(futuro.get(30, TimeUnit.SECONDS));
@@ -747,18 +823,65 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
         }
     }
 
-    /** Verifica che un solo comando sia stato accettato e gli altri respinti con 409; restituisce l'indice del primo. */
-    private static int unicoAccettato(List<MvcResult> esiti) throws Exception {
+    /**
+     * Blocca la riga della richiesta nella transazione della connessione indicata.
+     *
+     * @return identificativo del processo PostgreSQL che tiene il lock
+     */
+    private static int bloccaRichiesta(Connection connessione, UUID richiesta) throws SQLException {
+        try (PreparedStatement blocca = connessione.prepareStatement("select id from richieste where id = ? for update")) {
+            blocca.setObject(1, richiesta);
+            try (ResultSet riga = blocca.executeQuery()) {
+                assertTrue(riga.next(), "la richiesta da bloccare esiste");
+            }
+        }
+        try (Statement interrogazione = connessione.createStatement();
+             ResultSet processo = interrogazione.executeQuery("select pg_backend_pid()")) {
+            assertTrue(processo.next());
+            return processo.getInt(1);
+        }
+    }
+
+    /**
+     * Attende che le transazioni in attesa dietro il lock siano almeno quelle indicate. La prima
+     * aspetta direttamente il processo del blocco, le successive si accodano dietro la prima: per
+     * questo la catena delle attese si segue in modo ricorsivo.
+     */
+    private void attendiComandiFermiSulLock(int processoDelBlocco, int attese) throws InterruptedException {
+        long scadenza = System.nanoTime() + TimeUnit.SECONDS.toNanos(30);
+        int inAttesa;
+        do {
+            inAttesa = jdbc.queryForObject("""
+                    with recursive in_attesa(pid) as (
+                        select a.pid from pg_stat_activity a where ? = any(pg_blocking_pids(a.pid))
+                        union
+                        select a.pid from pg_stat_activity a join in_attesa b on b.pid = any(pg_blocking_pids(a.pid))
+                    )
+                    select count(*) from in_attesa
+                    """, Integer.class, processoDelBlocco);
+            if (inAttesa >= attese) {
+                return;
+            }
+            Thread.sleep(20);
+        } while (System.nanoTime() < scadenza);
+        fail("dopo 30 secondi solo " + inAttesa + " comandi su " + attese + " attendono il lock della richiesta");
+    }
+
+    /**
+     * Verifica che un solo comando sia stato accettato e che tutti gli altri abbiano ricevuto un
+     * {@code 409} nel formato comune; restituisce l'indice del comando accettato.
+     */
+    private int unicoAccettato(List<MvcResult> esiti, UUID richiestaId) throws Exception {
         int vincitore = -1;
         int accettati = 0;
         int inConflitto = 0;
         for (int i = 0; i < esiti.size(); i++) {
-            var risposta = esiti.get(i).getResponse();
-            if (risposta.getStatus() == 200) {
+            int stato = esiti.get(i).getResponse().getStatus();
+            if (stato == 200) {
                 accettati++;
                 vincitore = i;
-            } else if (risposta.getStatus() == 409) {
-                assertEquals("CONFLICT", JsonPath.read(risposta.getContentAsString(StandardCharsets.UTF_8), "$.codice"));
+            } else if (stato == 409) {
+                assertConflitto(esiti.get(i), richiestaId);
                 inConflitto++;
             }
         }
@@ -843,6 +966,45 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
         assertEquals(ISTANTE, istante(risposta, "$.accordo.dataOra"));
     }
 
+    /** Accordo in presenza registrato su PostgreSQL con i valori inviati dal Banco. */
+    private void assertAccordoInPresenzaPersistito(UUID richiestaId, UUID erogatore) {
+        Map<String, Object> riga = rigaDellaRichiesta(richiestaId);
+        assertAll("accordo in presenza su PostgreSQL",
+                () -> assertEquals("CONFERMATA", riga.get("stato")),
+                () -> assertEquals(erogatore, riga.get("erogatore_id")),
+                () -> assertEquals("IN_PRESENZA", riga.get("accordo_modalita")),
+                () -> assertEquals(ISTANTE, ((Timestamp) riga.get("accordo_data_ora")).toInstant()),
+                () -> assertEquals(LUOGO, riga.get("accordo_luogo")),
+                () -> assertEquals(NOME, riga.get("accordo_nome_referente")),
+                () -> assertEquals(COGNOME, riga.get("accordo_cognome_referente")),
+                () -> assertEquals(TELEFONO, riga.get("accordo_telefono_referente")),
+                () -> assertNull(riga.get("accordo_link")));
+    }
+
+    /** Accordo a distanza registrato su PostgreSQL con i valori inviati dal Banco. */
+    private void assertAccordoADistanzaPersistito(UUID richiestaId, UUID erogatore) {
+        Map<String, Object> riga = rigaDellaRichiesta(richiestaId);
+        assertAll("accordo a distanza su PostgreSQL",
+                () -> assertEquals("CONFERMATA", riga.get("stato")),
+                () -> assertEquals(erogatore, riga.get("erogatore_id")),
+                () -> assertEquals("CENTRO_PICUS_A_DISTANZA", riga.get("erogatore_ambito")),
+                () -> assertEquals("A_DISTANZA", riga.get("accordo_modalita")),
+                () -> assertEquals(ISTANTE, ((Timestamp) riga.get("accordo_data_ora")).toInstant()),
+                () -> assertEquals(LINK, riga.get("accordo_link")),
+                () -> assertNull(riga.get("accordo_luogo")),
+                () -> assertNull(riga.get("accordo_telefono_referente")));
+    }
+
+    /** La pagina di dettaglio dell'interfaccia, servita all'account, contiene i testi indicati. */
+    private void assertPaginaDelDettaglioMostra(UUID account, UUID richiestaId, String... testi) throws Exception {
+        ResultActions pagina = come(account).get("/richieste/{id}", richiestaId)
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML));
+        for (String testo : testi) {
+            pagina.andExpect(content().string(containsString(testo)));
+        }
+    }
+
     /** 400 nel formato comune del modulo, con il campo da completare indicato in {@code campi}. */
     private static void assertDatiDaCompletare(ResultActions risposta, String campo) throws Exception {
         risposta.andExpect(status().isBadRequest())
@@ -851,9 +1013,31 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
                 .andExpect(jsonPath("$.campi." + campo).isNotEmpty());
     }
 
-    private static void assertConflitto(ResultActions risposta) throws Exception {
-        risposta.andExpect(status().isConflict())
-                .andExpect(jsonPath("$.codice").value("CONFLICT"));
+    private void assertConflitto(ResultActions risposta, UUID richiestaId) throws Exception {
+        assertConflitto(risposta.andReturn(), richiestaId);
+    }
+
+    /**
+     * Verifica un conflitto nel formato comune del modulo Richieste: stato {@code 409}, corpo
+     * JSON con i soli {@code codice}, {@code messaggio} e {@code campi}, nessun dato della
+     * pratica (identificativi, partecipanti, descrizione, dettagli dell'accordo).
+     */
+    private void assertConflitto(MvcResult risposta, UUID richiestaId) throws Exception {
+        for (ResultMatcher verifica : List.of(
+                status().isConflict(),
+                content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON),
+                jsonPath("$.*", hasSize(3)),
+                jsonPath("$.codice").value("CONFLICT"),
+                jsonPath("$.messaggio").isNotEmpty(),
+                jsonPath("$.campi").isEmpty())) {
+            verifica.match(risposta);
+        }
+
+        String corpo = risposta.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        for (String datoDellaPratica : List.of(richiestaId.toString(), titolare.toString(), erogatrice.toString(),
+                DESCRIZIONE_RISERVATA, LUOGO, TELEFONO, LINK)) {
+            assertFalse(corpo.contains(datoDellaPratica), "il 409 non deve contenere " + datoDellaPratica);
+        }
     }
 
     /**
@@ -861,8 +1045,9 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
      * le colonne dell'accordo sono vuote e nessuno dei partecipanti vede un accordo confermato.
      */
     private void assertInProgrammazioneSenzaAccordo(UUID richiestaId, UUID erogatore) throws Exception {
-        Map<String, Object> salvato = dati.accordoPersistito(richiestaId);
+        Map<String, Object> salvato = rigaDellaRichiesta(richiestaId);
         assertEquals("IN_PROGRAMMAZIONE", salvato.get("stato"));
+        assertEquals(erogatore, salvato.get("erogatore_id"));
         salvato.forEach((colonna, valore) -> {
             if (colonna.startsWith("accordo_")) {
                 assertNull(valore, "colonna " + colonna + " scritta da un comando respinto");
@@ -877,20 +1062,29 @@ class ConfermaAccordoORifiutoIntegrazioneTest {
         }
     }
 
+    /**
+     * Rifiuto registrato su PostgreSQL e visibile alla OPT titolare: stato nelle API e nei suoi
+     * elenchi, messaggio «Nessun erogatore disponibile» nella pagina di dettaglio.
+     */
     private void assertRifiutataPerLaTitolare(UUID richiestaId) throws Exception {
+        Map<String, Object> salvato = rigaDellaRichiesta(richiestaId);
+        assertAll("rifiuto su PostgreSQL",
+                () -> assertEquals("RIFIUTATA", salvato.get("stato")),
+                () -> assertNull(salvato.get("accordo_modalita")));
         come(titolare).get("/api/richieste/{id}", richiestaId)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.richiesta.stato").value("RIFIUTATA"))
                 .andExpect(jsonPath("$.accordo").doesNotExist());
         come(titolare).get("/api/richieste/mie")
                 .andExpect(jsonPath("$[?(@.id == '" + richiestaId + "')].stato", hasItem("RIFIUTATA")));
-        assertNull(dati.accordoPersistito(richiestaId).get("accordo_modalita"));
+        assertPaginaDelDettaglioMostra(titolare, richiestaId, NESSUN_EROGATORE);
     }
 
-    private void assertStatoPerLaTitolare(UUID richiestaId, String stato) throws Exception {
+    private void assertPresaInCaricoPerLaTitolare(UUID richiestaId) throws Exception {
+        assertEquals("PRESA_IN_CARICO", dati.stato(richiestaId), "stato su PostgreSQL");
         come(titolare).get("/api/richieste/{id}", richiestaId)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.richiesta.stato").value(stato));
+                .andExpect(jsonPath("$.richiesta.stato").value("PRESA_IN_CARICO"));
     }
 
     /** Legge un istante serializzato come testo ISO 8601 oppure come secondi dall'epoca. */
