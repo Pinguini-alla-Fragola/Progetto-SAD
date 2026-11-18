@@ -1,6 +1,6 @@
 @startuml PICUS-Walking-Skeleton-4-Esito
 ' Prosegue il diagramma 3. I due esiti sono alternativi: una richiesta ne ha uno solo.
-!include PICUS-Walking-Skeleton-style.iuml
+!include ../PICUS-Walking-Skeleton-style.iuml
 
 title <size:22><b>PICUS · Walking skeleton 4 di 4</b></size>\n<size:16>Esito della richiesta: conferma dell'accordo o rifiuto definitivo</size>
 

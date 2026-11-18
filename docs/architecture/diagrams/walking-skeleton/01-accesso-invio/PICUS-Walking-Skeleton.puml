@@ -1,6 +1,6 @@
 @startuml PICUS-Walking-Skeleton
 ' Primo passo del percorso: la OPT accede e invia la richiesta, che nasce in CREATA.
-!include PICUS-Walking-Skeleton-style.iuml
+!include ../PICUS-Walking-Skeleton-style.iuml
 
 title <size:22><b>PICUS · Walking skeleton 1 di 4</b></size>\n<size:16>Dall'accesso all'invio della richiesta</size>
 
