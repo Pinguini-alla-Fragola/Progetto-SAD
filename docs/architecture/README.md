@@ -60,14 +60,14 @@ Le invocazioni sono sincrone e usano i contratti riportati sotto.
   connettore; la freccia non indica una dipendenza tra package.
 - **Richieste/Comunicazioni:** due connettori distinti rappresentano la
   chiamata per creare gli avvisi e il richiamo per verificare i riferimenti
-  della pratica, ciascuno con le proprie porte. Il richiamo è viola.
+  della pratica, ciascuno con le proprie porte.
 - **Colori:** grigio per i client, blu per l'ingresso web, verde per i
   componenti applicativi, verde acqua per il database.
 
 In CC-02 i connettori blu rappresentano HTTP, quelli grigi le chiamate Java
-e quelli verde acqua gli accessi JDBC. In CC-03 il collegamento viola
-evidenzia la verifica richiamata da Comunicazioni verso Richieste. I
-connettori usano solo segmenti orizzontali e verticali, con angoli retti,
+e quelli verde acqua gli accessi JDBC. In CC-03 tutte le chiamate Java
+usano connettori grigi. I connettori usano solo segmenti orizzontali e
+verticali, con angoli retti,
 porte separate e percorsi senza sovrapposizioni. Le spiegazioni e i contratti sono raccolti qui;
 i diagrammi contengono componenti, porte, connettori e relative etichette.
 

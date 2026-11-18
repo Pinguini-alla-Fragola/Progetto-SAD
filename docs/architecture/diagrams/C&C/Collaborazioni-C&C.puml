@@ -34,7 +34,7 @@ frame "Applicazione PICUS · Unico processo JVM" as JVM {
 }
 R_C ---> C_R : Catalogo
 R_A ---> A_R : Avvisi
-R_CHECK <-[#8069AE]-- A_CHECK : Verifica riferimenti
+R_CHECK <--- A_CHECK : Verifica riferimenti
 A_U ---> U_A : Destinatari
 C_U ---> U_C : Profili
 M_C ---> C_M : Misure
