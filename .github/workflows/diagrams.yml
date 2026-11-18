@@ -1,0 +1,87 @@
+name: Verifica diagrammi
+
+on:
+  pull_request:
+    paths:
+      - 'docs/**/*.mmd'
+      - 'docs/**/*.puml'
+      - 'docs/**/*.iuml'
+      - 'docs/**/*.dot'
+      - 'docs/**/*.svg'
+      - 'docs/**/*.png'
+      - 'scripts/verifica_diagrammi.py'
+      - 'scripts/test_verifica_diagrammi.py'
+      - '.github/workflows/diagrams.yml'
+  push:
+    branches: [main, develop]
+    paths:
+      - 'docs/**/*.mmd'
+      - 'docs/**/*.puml'
+      - 'docs/**/*.iuml'
+      - 'docs/**/*.dot'
+      - 'docs/**/*.svg'
+      - 'docs/**/*.png'
+      - 'scripts/verifica_diagrammi.py'
+      - 'scripts/test_verifica_diagrammi.py'
+      - '.github/workflows/diagrams.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: diagrams-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Rendering e anteprime dei diagrammi
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Configura Java 25
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Configura Node.js 24
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: Prepara i renderer
+        env:
+          PUPPETEER_CACHE_DIR: ${{ runner.temp }}/puppeteer
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install --yes --no-install-recommends graphviz python3-pil
+          curl --fail --location --silent --show-error --retry 3 \
+            --output "$RUNNER_TEMP/plantuml.jar" \
+            https://github.com/plantuml/plantuml/releases/download/v1.2026.10/plantuml-1.2026.10.jar
+          printf '%s  %s\n' \
+            e9bc9e6b2eb715e8c0c929f3dcb5fc1923be13f37599b09c293c66d354e88686 \
+            "$RUNNER_TEMP/plantuml.jar" | sha256sum --check
+          npm install --prefix "$RUNNER_TEMP/mermaid" --no-audit --no-fund \
+            --save-exact @mermaid-js/mermaid-cli@12.2.0 mermaid@12.3.0 puppeteer@25.18.1
+          printf '%s\n' '{"args":["--no-sandbox"]}' > "$RUNNER_TEMP/puppeteer.json"
+
+      - name: Verifica le regressioni del controllo
+        run: /usr/bin/python3 -m unittest discover -s scripts -p 'test_verifica_diagrammi.py'
+
+      - name: Rigenera e verifica i diagrammi
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          PUPPETEER_CACHE_DIR: ${{ runner.temp }}/puppeteer
+        run: |
+          /usr/bin/python3 scripts/verifica_diagrammi.py --base "$BASE_SHA" \
+            --plantuml-jar "$RUNNER_TEMP/plantuml.jar" \
+            --mmdc "$RUNNER_TEMP/mermaid/node_modules/.bin/mmdc" \
+            --puppeteer-config "$RUNNER_TEMP/puppeteer.json"

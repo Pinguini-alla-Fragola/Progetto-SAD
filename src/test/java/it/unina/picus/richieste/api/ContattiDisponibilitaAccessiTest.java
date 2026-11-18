@@ -117,8 +117,7 @@ class ContattiDisponibilitaAccessiTest extends AccessiBlackBoxTest {
         MockHttpServletResponse negata = http.esegui(get(CONSULTA_CONTATTO, contatto.contattoId())
                 .session(http.accedi(estraneo)).accept(MediaType.APPLICATION_JSON));
 
-        assertEquals(403, negata.getStatus());
-        assertFalse(negata.getContentAsString().contains(contatto.contattoId().toString()), "nessun dato del contatto");
+        ClientHttp.assertDiniegoSenzaCorpo(negata);
     }
 
     @ParameterizedTest(name = "CA-02 · {0} interpellato risponde al proprio contatto")

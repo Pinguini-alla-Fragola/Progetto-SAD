@@ -1,0 +1,65 @@
+@startuml PICUS-Walking-Skeleton-2-Presa-in-carico
+' Prosegue il diagramma 1: la richiesta è in CREATA.
+!include PICUS-Walking-Skeleton-style.iuml
+
+title <size:22><b>PICUS · Walking skeleton 2 di 4</b></size>\n<size:16>Presa in carico, ricerca dell'erogatore e contatto</size>
+
+actor "OPT A\nTitolare" as Opt
+actor "Banco" as Banco
+actor "Erogatore\nOPT B o operatore" as Erogatore
+participant "Ingresso web\nSpring Security e MVC" as Web #E9F2FC
+participant "Catalogo" as Catalogo
+participant "Richieste" as Richieste
+participant "Comunicazioni" as Comunicazioni
+database "PostgreSQL" as Db #E9F7F5
+
+== Coda del Banco ==
+Banco -> Web: Accede con il proprio account
+Web --> Banco: Sessione e area Banco
+Banco -> Web: Carica la coda
+Web -> Richieste: Consulta le richieste aperte
+Richieste -> Db: Legge in ordine di arrivo
+Richieste --> Web: Richieste aperte in ordine di arrivo
+Web --> Banco: Coda con la richiesta in «Creata»
+
+== Presa in carico ==
+Banco -> Web: Prende in carico la richiesta dalla coda
+Web -> Richieste: Presa in carico con l'identità del Banco
+Richieste -> Db: Blocca la richiesta e verifica lo stato CREATA
+break Stato diverso da CREATA
+  Web --> Banco: 409 · Stato invariato
+end
+Richieste -> Db: Salva lo stato PRESA_IN_CARICO
+Richieste --> Web: Richiesta aggiornata
+Web --> Banco: Richiesta in «Presa in carico»
+Opt -> Web: Apre il dettaglio della richiesta
+Web --> Opt: Stato «Presa in carico»
+
+== Ricerca dell'erogatore ==
+Banco -> Web: Chiede i candidati
+Web -> Richieste: Cerca gli erogatori della richiesta
+Richieste -> Catalogo: Offerte delle OPT e operatori\nper misura e comune
+Catalogo --> Richieste: Opzioni attive e compatibili
+Richieste -> Db: Legge il carico degli appuntamenti confermati
+Richieste -> Richieste: Ordina per prossimità, poi Banco prima delle OPT,\npoi minor carico
+Richieste --> Web: Opzioni ordinate
+Web --> Banco: Stesso comune, limitrofi, remoto
+
+== Contatto ==
+Banco -> Web: Sceglie un'opzione e la contatta
+Web -> Richieste: Crea il contatto con erogatore e ambito
+Richieste -> Db: Verifica lo stato della richiesta\ne gli eventuali contatti in attesa
+break Contatto non creato
+  Web --> Banco: 400 · Erogatore o ambito non compatibile\noppure 409 · Stato incompatibile, contatto in attesa\no opzioni locali da esaurire prima del remoto
+end
+Richieste -> Db: Salva il contatto IN_ATTESA
+Richieste -> Comunicazioni: Registra l'avviso per l'erogatore
+Comunicazioni -> Db: Salva l'avviso nella casella dell'erogatore
+Richieste --> Web: Contatto in attesa
+Web --> Banco: Contatto registrato
+
+Erogatore -> Web: Apre i propri avvisi
+Web -> Comunicazioni: Legge gli avvisi dell'account
+Comunicazioni --> Web: Avvisi con i soli riferimenti
+Web --> Erogatore: Avviso di richiesta di disponibilità
+@enduml

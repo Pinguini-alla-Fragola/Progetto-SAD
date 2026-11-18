@@ -1,0 +1,67 @@
+@startuml PICUS-Walking-Skeleton-4-Esito
+' Prosegue il diagramma 3. I due esiti sono alternativi: una richiesta ne ha uno solo.
+!include PICUS-Walking-Skeleton-style.iuml
+
+title <size:22><b>PICUS · Walking skeleton 4 di 4</b></size>\n<size:16>Esito della richiesta: conferma dell'accordo o rifiuto definitivo</size>
+
+actor "OPT A\nTitolare" as Opt
+actor "Banco" as Banco
+actor "OPT C\nEstranea alla richiesta" as Estranea
+participant "Ingresso web\nSpring Security e MVC" as Web #E9F2FC
+participant "Catalogo" as Catalogo
+participant "Richieste" as Richieste
+database "PostgreSQL" as Db #E9F7F5
+
+alt Conferma · «In programmazione» con erogatore assegnato
+  Banco -> Web: Registra l'accordo con i dati della modalità
+  note right of Banco
+    In presenza: data, ora, luogo,
+    referente e telefono.
+    A distanza: data, ora e link.
+  end note
+  Web -> Richieste: Conferma con l'identità del Banco
+  Richieste -> Db: Verifica lo stato e l'erogatore assegnato
+  opt Assegnazione a distanza
+    Richieste -> Catalogo: Verifica se la misura è erogabile a distanza
+    Catalogo --> Richieste: Esito della verifica
+  end
+  break Dati dell'accordo non validi
+    Web --> Banco: 400 · Stato invariato
+  end
+  break Stato incompatibile o remoto non più consentito
+    Web --> Banco: 409 · Stato invariato
+  end
+  Richieste -> Db: Salva i dettagli e lo stato CONFERMATA
+  Richieste --> Web: Richiesta confermata
+  Web --> Banco: Richiesta «Confermata»
+  Opt -> Web: Apre il dettaglio della richiesta
+  Web -> Richieste: Consulta il dettaglio
+  Richieste -> Db: Legge la richiesta con i dettagli
+  Richieste --> Web: Stato e dettagli dell'accordo
+  Web --> Opt: «Confermata» con data, ora e luogo o link
+else Rifiuto · «Presa in carico» o «In programmazione»
+  Banco -> Web: Rifiuta definitivamente la richiesta
+  Web -> Richieste: Rifiuta con l'identità del Banco
+  Richieste -> Db: Verifica lo stato e i contatti della richiesta
+  break Stato incompatibile, contatto in attesa\no opzioni ancora da valutare in «Presa in carico»
+    Web --> Banco: 409 · Stato invariato
+  end
+  Richieste -> Db: Salva lo stato RIFIUTATA
+  Richieste --> Web: Richiesta rifiutata
+  Web --> Banco: Richiesta «Rifiutata»
+  Opt -> Web: Apre il dettaglio della richiesta
+  Web -> Richieste: Consulta il dettaglio
+  Richieste --> Web: Stato «Rifiutata»
+  Web --> Opt: «Rifiutata · Nessun erogatore disponibile»
+end
+
+== Accesso estraneo negato e uscita ==
+Estranea -> Web: Chiede il dettaglio della stessa richiesta\ncon la propria sessione
+Web -> Richieste: Consulta il dettaglio
+Richieste -> Db: Legge la richiesta per ID
+Richieste -> Richieste: Verifica il legame con la richiesta
+Richieste --> Web: Accesso negato
+Web --> Estranea: 403 · Nessun dato della richiesta
+Opt -> Web: Esce dall'area
+Web --> Opt: Sessione invalidata e ritorno al login
+@enduml

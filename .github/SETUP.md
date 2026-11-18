@@ -68,6 +68,18 @@ finché non esiste `pom.xml`. Quando il POM compare, esige il Maven Wrapper e
 usa Java 25 con `verify`. La revisione dei workflow è rinviata al confronto
 sulla CI e sulla collaborazione.
 
+[JavaScript CI](workflows/javascript.yml) esegue `node --test src/test/js/*.test.mjs`
+con Node.js 24 sulle pull request, sui push a `main` e `develop` e su avvio manuale.
+
+[Verifica diagrammi](workflows/diagrams.yml) rigenera i sorgenti Mermaid, PlantUML
+e DOT interessati dalle modifiche. Ogni sorgente deve avere un'anteprima SVG
+versionata. Il confronto usa i testi, i riferimenti dei collegamenti Mermaid,
+PlantUML e DOT e l'ordine dei messaggi PlantUML, indipendentemente dalle coordinate.
+Per i PNG presenti controlla il formato, i checksum dei blocchi e la decodifica.
+Una modifica a uno stile `.iuml` verifica tutti i sorgenti PlantUML.
+L'avvio da **Actions → Verifica
+diagrammi → Run workflow** controlla l'intero insieme di diagrammi.
+
 In **Settings → Actions → General** mantenere il token di default in sola
 lettura, limitare le Action consentite a quelle revisionate e non abilitare
 la creazione/approvazione automatica delle PR. Le Action nei workflow sono

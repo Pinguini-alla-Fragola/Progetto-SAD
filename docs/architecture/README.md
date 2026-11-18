@@ -1,12 +1,19 @@
 # Architettura
 
 - [CTX-01 v0.7 · Diagramma di contesto](../requirements/diagrams/context/Context%20Diagram.drawio) · [Anteprima PNG](../requirements/diagrams/context/Context%20Diagram.png)
-- [PICUS - System Context](diagrams/PICUS-System-Context.mmd) · [Anteprima PNG](diagrams/PICUS-System-Context.png)
-- [PICUS - Flusso dell'architettura MVC](diagrams/PICUS-Architettura-MVC.mmd) · [Anteprima PNG](diagrams/PICUS-Architettura-MVC.png)
-- [PICUS - Module&Package View](diagrams/PICUS-Module-Package-View.mmd) · [Anteprima PNG](diagrams/PICUS-Module-Package-View.png)
-- [PICUS - Deployment & Container View](diagrams/PICUS-Deployment-Container-View.mmd) · [Anteprima PNG](diagrams/PICUS-Deployment-Container-View.png)
-- [PICUS - Sequenza del walking skeleton](diagrams/PICUS-Walking-Skeleton.puml) · [Anteprima PNG](diagrams/PICUS-Walking-Skeleton.png)
-- [PICUS - Schema ER PostgreSQL](diagrams/PICUS-Schema-ER.puml) · [Anteprima PNG](diagrams/PICUS-Schema-ER.png)
+- [PICUS - System Context](diagrams/PICUS-System-Context.mmd) · [Anteprima SVG](diagrams/PICUS-System-Context.svg)
+- [PICUS - Flusso dell'architettura MVC](diagrams/PICUS-Architettura-MVC.mmd) · [Anteprima SVG](diagrams/PICUS-Architettura-MVC.svg)
+- [PICUS - Module&Package View](diagrams/PICUS-Module-Package-View.mmd) · [Anteprima SVG](diagrams/PICUS-Module-Package-View.svg)
+- [PICUS - Deployment & Container View](diagrams/PICUS-Deployment-Container-View.mmd) · [Anteprima SVG](diagrams/PICUS-Deployment-Container-View.svg)
+- [Walking skeleton 1 di 4 · Accesso e invio](diagrams/PICUS-Walking-Skeleton.puml) · [PNG](diagrams/PICUS-Walking-Skeleton.png) · [SVG](diagrams/PICUS-Walking-Skeleton.svg)
+- [Walking skeleton 2 di 4 · Presa in carico, ricerca e contatto](diagrams/PICUS-Walking-Skeleton-2-Presa-in-carico.puml) · [PNG](diagrams/PICUS-Walking-Skeleton-2-Presa-in-carico.png) · [SVG](diagrams/PICUS-Walking-Skeleton-2-Presa-in-carico.svg)
+- [Walking skeleton 3 di 4 · Risposta e assegnazione](diagrams/PICUS-Walking-Skeleton-3-Assegnazione.puml) · [PNG](diagrams/PICUS-Walking-Skeleton-3-Assegnazione.png) · [SVG](diagrams/PICUS-Walking-Skeleton-3-Assegnazione.svg)
+- [Walking skeleton 4 di 4 · Conferma o rifiuto](diagrams/PICUS-Walking-Skeleton-4-Esito.puml) · [PNG](diagrams/PICUS-Walking-Skeleton-4-Esito.png) · [SVG](diagrams/PICUS-Walking-Skeleton-4-Esito.svg)
+- [Stati della richiesta · Protocollo dei comandi](diagrams/PICUS-Stati-Richiesta.mmd) · [PNG](diagrams/PICUS-Stati-Richiesta.png) · [SVG](diagrams/PICUS-Stati-Richiesta.svg)
+- [PICUS - Schema ER PostgreSQL](diagrams/PICUS-Schema-ER.puml) · [Anteprima SVG](diagrams/PICUS-Schema-ER.svg)
+- [C&C · CC-01 Struttura runtime](diagrams/C%26C/Diagramma-C%26C.puml) · [PNG](diagrams/C%26C/Diagramma-C%26C.png) · [SVG](diagrams/C%26C/Diagramma-C%26C.svg)
+- [C&C · CC-02 Ingresso web e accesso ai dati](diagrams/C%26C/Monolite-C%26C.dot) · [PNG](diagrams/C%26C/Monolite-C%26C.png) · [SVG](diagrams/C%26C/Monolite-C%26C.svg)
+- [C&C · CC-03 Collaborazioni tra componenti applicativi](diagrams/C%26C/Collaborazioni-C%26C.puml) · [PNG](diagrams/C%26C/Collaborazioni-C%26C.png) · [SVG](diagrams/C%26C/Collaborazioni-C%26C.svg)
 
 La vista dei moduli riprende i package di `src/main/java` presenti in `main` al commit `f3c4e95`. Le dipendenze `«import»` corrispondono agli import Java delle API; le dipendenze `«use»` rappresentano le collaborazioni previste con `ComunicazioniApi` e `CatalogoApi`. I contratti pubblici sono presenti, mentre le relative implementazioni sono ancora da completare.
 
@@ -15,6 +22,117 @@ Sotto la radice Java `it.unina.picus` i moduli corrispondono ai package `utenze`
 A regime, i controller di `web` invocano i casi d’uso del proprio modulo. In `interno.dominio` risiedono le regole e le interfacce dei repository; gli adattatori di `interno.persistenza` le implementano con JPA. L’eventuale package `interno.integrazioni` resta un’estensione prevista, non ancora presente in `main`. Spring collega le implementazioni ai servizi tramite dependency injection via costruttore. [Dependency injection in Spring](https://docs.spring.io/spring-framework/reference/core/beans/dependencies/factory-collaborators.html)
 
 PICUS usa un unico database PostgreSQL per tutti i moduli, inclusi file e metadati degli allegati. Ciascun modulo accede ai propri dati tramite i suoi repository. [ADR-001](../adr/ADR-001-monolite-modulare-mvc.md) · [Task di predisposizione dell’ambiente](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/77)
+
+## Come leggere le viste Componenti e Connettori
+
+Le tre viste rappresentano l'architettura completa del monolite PICUS e le
+interazioni tra i suoi componenti durante l'esecuzione. Seguono il monolite
+modulare di [ADR-001](../adr/ADR-001-monolite-modulare-mvc.md) e i confini di
+accesso ai dati di [ADR-003](../adr/ADR-003-isolamento-e-validazione-richieste.md).
+
+**CC-01 · Struttura runtime.** Mostra le istanze dei browser, un'applicazione
+PICUS in un processo JVM, PostgreSQL e il servizio email esterno. Le OPT, il
+Banco e gli operatori usano lo stesso tipo di client. `1..*` indica che più
+browser possono interagire con l'applicazione. I connettori sono HTTP,
+accesso JDBC al database e invio email.
+
+**CC-02 · Ingresso web e accesso ai dati.** Apre il componente applicazione
+di CC-01 e mostra i collegamenti del Gestore web con i cinque componenti
+funzionali, l'accesso condiviso a PostgreSQL e l'adattatore email di Utenze.
+Il Gestore web raggruppa sicurezza, sessione, dispatcher, controller e
+produzione delle risposte HTML/JSON. Ogni componente funzionale comprende
+i propri servizi applicativi, le regole di dominio e gli adattatori di
+persistenza JPA. Il confine azzurro racchiude un unico processo JVM.
+
+**CC-03 · Collaborazioni tra componenti applicativi.** Dettaglia le chiamate
+Java tra i cinque gruppi di oggetti in esecuzione. Richieste consulta
+Catalogo e crea gli avvisi tramite Comunicazioni; Comunicazioni richiama
+Richieste per verificare i riferimenti della pratica. Catalogo e
+Comunicazioni consultano Utenze; Monitoraggio consulta Catalogo e Utenze.
+Le invocazioni sono sincrone e usano i contratti riportati sotto.
+
+### Notazione e connettori
+
+- **Riquadro con simbolo UML del componente:** istanza o gruppo di istanze
+  software in esecuzione. I nomi identificano responsabilità runtime.
+- **Quadratino sul bordo:** porta, cioè punto di interazione del componente.
+  Nel CC-02 il numero accanto al quadratino indica la molteplicità della
+  porta per istanza del componente. I cinque percorsi JDBC condividono
+  la porta di PostgreSQL.
+- **Linea continua con freccia:** connettore orientato da chi avvia la
+  chiamata verso chi la riceve. Il risultato o l'errore torna sullo stesso
+  connettore; la freccia non indica una dipendenza tra package.
+- **Richieste/Comunicazioni:** due connettori distinti rappresentano la
+  chiamata per creare gli avvisi e il richiamo per verificare i riferimenti
+  della pratica, ciascuno con le proprie porte.
+- **Colori:** grigio per i client, blu per l'ingresso web, verde per i
+  componenti applicativi, verde acqua per il database.
+
+In CC-02 i connettori blu rappresentano HTTP, quelli grigi le chiamate Java
+e quelli verde acqua gli accessi ai dati. In CC-03 tutte le chiamate Java
+usano connettori grigi. I connettori seguono segmenti orizzontali e verticali
+con angoli retti. I diagrammi contengono componenti, porte, connettori e
+relative etichette.
+
+| Connettore | Ruoli e scambi |
+| --- | --- |
+| HTTP | Browser client e applicazione server; richieste, HTML/JSON, file, risorse statiche e sessione. |
+| Chiamata Java | Invocante e fornitore nella stessa JVM; identità verificata, comandi, DTO e risultati. |
+| Accesso ai dati | Gli adattatori JPA accedono allo stesso database PostgreSQL tramite Hibernate e pgJDBC. |
+| Invio email | Adattatore di Utenze e servizio esterno; link di attivazione e recupero dell'account. |
+
+### Collaborazioni interne
+
+| Invocante → fornitore | Contratto e responsabilità |
+| --- | --- |
+| Gestore web → Utenze | Autenticazione, profili e gestione degli account; verifica dell'identità tramite `UtenzeApi`. |
+| Gestore web → Catalogo | `CatalogoApi`: misure, comuni, offerte e ricerca degli erogatori. |
+| Gestore web → Richieste | `RichiesteApi` e servizio di disponibilità: invio, consultazione e coordinamento delle pratiche. |
+| Gestore web → Comunicazioni | `ComunicazioniApi`: messaggi, allegati, avvisi e riscontri. |
+| Gestore web → Monitoraggio | `MonitoraggioApi`: conteggi, schede personali e riepiloghi trimestrali. |
+| Richieste → Catalogo | `ConsultazioneCatalogoApi` e `RicercaErogatoriApi`: riferimenti e opzioni compatibili. |
+| Catalogo → Utenze | `UtenzeApi`: profili e competenze degli erogatori. |
+| Richieste → Comunicazioni | `AvvisiOperativiApi` e `ComunicazioniApi`: avvisi di disponibilità e annullamento. |
+| Comunicazioni → Richieste | `DestinatariAvvisi`: verifica della corrispondenza tra pratica, contatto e destinatario. |
+| Comunicazioni → Utenze | `UtenzeApi`: account destinatari dei messaggi generali. |
+| Monitoraggio → Catalogo e Utenze | Misure, account e profili necessari alla rendicontazione. |
+| Utenze → adattatore email | Invio dei link di attivazione e recupero. |
+
+Ciascuno dei cinque componenti funzionali accede alle proprie entità e
+tabelle tramite il proprio adattatore di persistenza. In CC-02 i
+collegamenti dei moduli condividono l'ultimo tratto verso l'unica
+porta di PostgreSQL, corrispondente a `5432` nell'ambiente Docker Compose.
+Il database conserva anche file e metadati degli allegati. Gli altri
+gestori usano le API del proprietario dei dati. Le entità JPA restano
+interne e i contratti scambiano DTO e identificativi.
+
+Sicurezza e sessione sono verificate all'ingresso web. I servizi applicativi
+controllano ruolo, titolarità e assegnazione sulle singole risorse. La
+creazione di un contatto e dell'avviso in-app condivide la transazione
+locale. La casella degli avvisi si consulta tramite il Gestore web.
+
+### Rigenerare le immagini C&C
+
+CC-01 e CC-03 usano PlantUML con uno
+[stile condiviso](diagrams/C%26C/C%26C-style.iuml). CC-02 usa Graphviz DOT
+con posizioni fisse per i componenti, le porte e i percorsi dei connettori.
+Le tre viste usano la stessa palette.
+
+Sostituire `percorso/plantuml.jar` con il percorso del JAR ed eseguire dalla
+radice del progetto con Graphviz disponibile nel PATH.
+
+```powershell
+java -jar 'percorso/plantuml.jar' -charset UTF-8 -tpng 'docs/architecture/diagrams/C&C/*.puml'
+java -jar 'percorso/plantuml.jar' -charset UTF-8 -tsvg 'docs/architecture/diagrams/C&C/*.puml'
+$cc02 = 'docs/architecture/diagrams/C&C/Monolite-C&C'
+dot -Tpng "$cc02.dot" -o "$cc02.png"
+dot -Tsvg "$cc02.dot" -o "$cc02.svg"
+```
+
+Le esportazioni sono verificate con PlantUML 1.2026.10 e Graphviz 16.1.1.
+Per selezionare Graphviz esplicitamente aggiungere
+`-graphvizdot <percorso-dot.exe>` ai comandi. Dopo la rigenerazione
+controllare le tre immagini, le porte, le frecce e le etichette.
 
 ## API Java dei moduli
 
@@ -43,18 +161,125 @@ Le interfacce descrivono gli esiti attesi per le successive implementazioni.
 Negoziazione, ritiro dei contatti e tracciato definitivo delle schede si
 dettagliano nelle relative storie. [ADR-002](../adr/ADR-002-ciclo-di-vita-richiesta.md) · [Registro dei chiarimenti](../requirements/open-questions.md)
 
-## Contratti del walking skeleton
+## Walking skeleton
 
-La sequenza descrive il flusso previsto per lo Sprint 2 usando i contratti Java di `main` al commit `e7a39aa`. Mostra l’accesso e la chiusura della sessione, l’invio in stato `CREATA`, l’elenco della OPT titolare, la coda del Banco e la consultazione del dettaglio con il diniego a una OPT estranea. I casi negativi di accesso e validazione sono ripresi nelle verifiche della [#78](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/78).
+La sequenza segue una richiesta dello Sprint 2 nella demo web di `main` al
+commit [`f1242eb`](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/commit/f1242ebcad0013731f6a2bd366a770cf23c7167e).
+Dopo l'invio della OPT titolare, la richiesta è in stato `CREATA`. Lo stesso
+ID compare nell'elenco della titolare e nella coda del Banco. Il riquadro
+`break` termina il flusso in caso di campi non ammessi. Una seconda OPT, con
+una sessione distinta, riceve `403` se prova a leggere il dettaglio di quella
+richiesta.
+[Baseline #76](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/76) ·
+[Verifiche #78](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/78)
 
-| Confine | Dati scambiati |
+| Operazione nel browser | Rotta e risultato |
 | --- | --- |
-| Spring Security → `utenze.api` | Verifica delle credenziali e, per le richieste protette, verifica dell’account ricavato dalla sessione. Il controller riceve l’identità verificata e la passa al caso d’uso. |
-| `richieste` → `catalogo.api` | Identificativo della misura e codice del comune. Il catalogo restituisce i riferimenti validi e lo stato della misura. |
-| Form → `richieste.web` | DTO di invio con misura, tipo di destinatario (persona o nucleo), comune e `description` facoltativa. |
-| `richieste` → viste Thymeleaf | DTO di elenco e dettaglio con identificativo, data, misura e stato. Il dettaglio include la descrizione per la OPT titolare e il Banco autorizzato. La coda del Banco è in ordine di arrivo. |
+| Accede all'area | `POST /login` autentica l'account e avvia il reindirizzamento verso l'area del ruolo. |
+| Apre il modulo | `GET /richieste/nuova` renderizza la vista Thymeleaf con misure attive e comuni caricati da Catalogo. |
+| Invia la richiesta | `POST /api/richieste` riceve il JSON con misura, persona o nucleo, comune e `description` facoltativa. Risponde `201` con la sintesi e l'header `Location` verso il dettaglio API. |
+| Consulta elenco e coda | `GET /api/richieste/mie` restituisce le richieste della OPT autenticata. `GET /banco/richieste/coda` restituisce al Banco le richieste aperte in ordine di arrivo. |
+| Apre il dettaglio | `GET /richieste/{id}` renderizza la vista autorizzata. L'API corrispondente è `GET /api/richieste/{id}`. |
+| Esce dall'area | Dopo `POST /api/auth/logout`, che risponde `204` e invalida la sessione, il browser torna al login. |
 
-Il server ricava la titolarità dalla sessione e dai dati persistiti. Controller e viste ricevono DTO, mentre le entità JPA restano nel modulo che le gestisce. [ADR-003](../adr/ADR-003-isolamento-e-validazione-richieste.md)
+- **Sessione e ruolo.** Spring Security verifica l'account della sessione e
+  applica i permessi della rotta prima del binding. I POST richiedono un token CSRF. Dopo cinque
+  fallimenti di accesso in cinque minuti, i tentativi successivi entro sessanta
+  secondi dall'ultimo sono bloccati. Una sessione non valida comporta `401`
+  sulle API protette o un reindirizzamento al login sulle pagine protette.
+  Un ruolo privo di permessi riceve `403`.
+- **Invio.** Richieste ricava la titolarità dall'identità verificata. Campi
+  inattesi o valori non validi danno `400` senza creare una richiesta.
+  L'interfaccia riutilizza la stessa `Idempotency-Key` dopo un esito incerto.
+  La chiave è facoltativa per l'API. Se la stessa OPT riusa la chiave, l'API
+  restituisce lo stesso ID quando i dati normalizzati coincidono e `409`
+  quando differiscono. Il vincolo in PostgreSQL copre anche i ritenti
+  concorrenti.
+- **Consultazione.** Richieste verifica il legame con la pratica prima di
+  restituire i dati. Titolare e Banco vedono la descrizione in testo semplice
+  se presente. Un ID inesistente dà `404`. La coda include Creata, Presa in
+  carico e In programmazione, ordinate per data di invio e ID.
+
+L'ingresso web raggruppa Spring Security e i controller MVC e REST. Le frecce
+verso PostgreSQL riassumono gli accessi tramite i repository JPA. I valori
+respinti sono esclusi da risposte e log. [ADR-003](../adr/ADR-003-isolamento-e-validazione-richieste.md)
+
+### Dalla richiesta creata all'esito
+
+Il walking skeleton prosegue in tre diagrammi che coprono il ciclo di
+[ADR-002](../adr/ADR-002-ciclo-di-vita-richiesta.md) dopo `Creata`. Ogni
+diagramma riparte dallo stato in cui termina il precedente. Gli endpoint sono
+descritti nel [backend di coordinamento](api-coordinamento-richieste.md).
+
+| Diagramma | Stati | Scenari |
+| --- | --- | --- |
+| 2 · Presa in carico, ricerca e contatto | `Creata` → `Presa in carico` | Il Banco accede, vede la richiesta in coda, la prende in carico, consulta i candidati ordinati e contatta un erogatore. Contatto e avviso sono salvati nella stessa transazione. |
+| 3 · Risposta e assegnazione | `Presa in carico` → `In programmazione` | L'erogatore risponde. Il rifiuto lascia la richiesta in `Presa in carico`; la risposta positiva richiede l'assegnazione esplicita del Banco, che rilegge i dati sotto blocco. |
+| 4 · Conferma o rifiuto | `In programmazione` → `Confermata`, oppure `Presa in carico` o `In programmazione` → `Rifiutata` | Esiti alternativi. La conferma registra l'accordo completo; il rifiuto definitivo mostra alla OPT «Nessun erogatore disponibile». Il diagramma chiude con il `403` a una OPT estranea e con il logout. |
+
+L'annullamento ([#54](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/54)) non è rappresentato.
+
+Per rigenerare PNG e SVG dalla radice del progetto, sostituire
+`percorso/plantuml.jar` con il percorso del JAR di PlantUML.
+
+```powershell
+java -jar 'percorso/plantuml.jar' -charset UTF-8 -tpng 'docs/architecture/diagrams/PICUS-Walking-Skeleton*.puml'
+java -jar 'percorso/plantuml.jar' -charset UTF-8 -tsvg 'docs/architecture/diagrams/PICUS-Walking-Skeleton*.puml'
+```
+
+Controllare tutte le esportazioni dopo la rigenerazione: frecce orizzontali,
+testi leggibili, assenza di sovrapposizioni e corrispondenza con i sorgenti.
+
+## Stati della richiesta
+
+Il diagramma UML di protocollo mostra i comandi principali di
+[`RichiesteApi`](../../src/main/java/it/unina/picus/richieste/api/RichiesteApi.java)
+che fanno cambiare stato a una richiesta. Le frecce si leggono come
+`[precondizione] operazione() / [postcondizione]`. Nella precondizione il
+primo termine è l'attore che invoca l'operazione, per esempio `Banco` o `OPT`.
+Il ciclo a sei stati è definito in [ADR-002](../adr/ADR-002-ciclo-di-vita-richiesta.md).
+
+Un nuovo invio valido della OPT con `invia()` inizializza la richiesta a
+Creata. La risposta di un candidato mantiene la richiesta Presa in carico.
+Le condizioni complete di assegnazione, conferma e rifiuto sono nei
+[contratti di coordinamento](api-coordinamento-richieste.md).
+
+Il riquadro raggruppa i cinque stati da cui è consentito passare ad
+Annullata, compresi Confermata e Rifiutata. Il protocollo include
+l'annullamento previsto per un incremento successivo. Può richiederlo il
+Banco, la OPT titolare o l'erogatore assegnato secondo la
+[matrice di annullamento](../requirements/regole-funzionali.md#matrice-di-annullamento).
+Il motivo è facoltativo solo partendo da Creata.
+
+Il titolo accessibile dell'SVG è il nome del grafo nel sorgente DOT, «PICUS -
+Stati della richiesta». La tabella seguente è l'equivalente testuale del
+diagramma e va tenuta allineata alle sue transizioni.
+
+| Da | Operazione | Chi la esegue e condizioni | A |
+| --- | --- | --- | --- |
+| Avvio | `invia()` | OPT titolare, con invio valido | Creata |
+| Creata | `prendiInCarico()` | Banco | Presa in carico, ricerca aperta |
+| Presa in carico | `assegnaErogatore()` | Banco, con risposta positiva dell'erogatore | In programmazione |
+| In programmazione | `confermaAccordo()` | Banco, con accordo completo | Confermata, dettagli immutabili |
+| Presa in carico | `rifiutaRichiesta()` | Banco, con ogni opzione negativa, remoto compreso se compatibile, e nessun contatto in attesa | Rifiutata |
+| In programmazione | `rifiutaRichiesta()` | Banco, con accordo impraticabile e nessun contatto in attesa | Rifiutata |
+| Creata, Presa in carico, In programmazione, Confermata, Rifiutata | `annullaRichiesta()` | Banco, OPT titolare o erogatore assegnato, con motivo se non si parte da Creata | Annullata, dettagli conservati |
+
+Per rigenerare le esportazioni con Graphviz, eseguire dalla radice del
+progetto. Il sorgente fissa le posizioni dei nodi e usa il layout `neato`, come
+il CC-02.
+
+```powershell
+$stati = 'docs/architecture/diagrams/PICUS-Stati-Richiesta'
+dot -Tpng "$stati.dot" -o "$stati.png"
+dot -Tsvg -Gdpi=72 "$stati.dot" -o "$stati.svg"
+(Get-Content "$stati.svg" -Raw) -replace '<svg width="[\d.]+pt" height="[\d.]+pt"', '<svg width="100%"' | Set-Content "$stati.svg" -NoNewline
+```
+
+Con `-Gdpi=72` l'SVG mantiene la finestra di visualizzazione coerente con il
+disegno: con la risoluzione del PNG, Graphviz scala due volte e l'immagine
+risulta tagliata. L'ultimo comando toglie la dimensione fissa, così l'SVG si
+adatta alla larghezza disponibile, come nell'anteprima di GitHub.
 
 ## Persistenza iniziale
 

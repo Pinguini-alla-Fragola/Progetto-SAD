@@ -2,7 +2,6 @@ package it.unina.picus.utenze.web;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
@@ -27,10 +26,10 @@ import org.springframework.web.context.WebApplicationContext;
 import com.jayway.jsonpath.JsonPath;
 
 import it.unina.picus.shared.AccessiBlackBoxTest;
+import it.unina.picus.shared.Capacita;
 import it.unina.picus.shared.ClientHttp;
 import it.unina.picus.shared.ClientHttp.Csrf;
 import it.unina.picus.shared.ClientHttp.SessioneAnonima;
-import it.unina.picus.shared.ScenarioAccessi;
 import it.unina.picus.shared.ScenarioAccessi.Account;
 import it.unina.picus.shared.ScenarioAccessi.ContattoPreparato;
 
@@ -44,15 +43,18 @@ import it.unina.picus.shared.ScenarioAccessi.ContattoPreparato;
  *   <li>un solo test del <b>filtro di sicurezza generale</b>, su un percorso volutamente non mappato:
  *       dimostra che qualunque {@code /api/**} anonimo riceve {@code 401} senza redirect;</li>
  *   <li>i test sulle <b>risorse reali</b>: prima di attribuire l'esito a una risorsa verificano che
- *       metodo e percorso abbiano un handler. Se non lo hanno il caso si sospende come «endpoint non
- *       ancora esposto» e non viene contato come coperto.</li>
+ *       metodo e percorso abbiano un handler, e un diniego {@code 403} deve avere il corpo vuoto.</li>
  * </ul>
+ *
+ * <p>Ogni {@code 401} di CA-08 si verifica con {@link ClientHttp#assertNonAutenticatoSenzaDati}: niente
+ * {@code Location} e corpo vuoto, quindi nessun dato della risorsa, non solo nessun identificativo.</p>
  *
  * <p>Su {@code main} sono esposti i contatti di disponibilità ({@link #CONSULTA_CONTATTO},
  * {@link #RISPONDI_CONTATTO}, {@link #CONTATTI_RICHIESTA}) e il dettaglio della richiesta
  * ({@link #CONSULTA_RICHIESTA}): se manca un loro handler il caso fallisce. L'annullamento
- * ({@link #ANNULLA_RICHIESTA}) non è ancora esposto e i suoi casi si sospendono finché il controller non
- * gestisce la stessa richiesta JSON usata dal test.</p>
+ * ({@link #ANNULLA_RICHIESTA}) appartiene a {@link Capacita#RICHIESTE_COMPLETE}: finché la capacità non è
+ * consegnata i suoi casi si sospendono; quando sarà consegnata, l'assenza dell'handler per la stessa
+ * richiesta JSON usata dal test farà fallire il caso.</p>
  *
  * <p>Tecniche: test negativi di sicurezza su sessione assente, scaduta e revocata e su parametri
  * alterati, con un controllo positivo {@code 200} sulla stessa risorsa prima di ogni scadenza o revoca
@@ -113,10 +115,8 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
         MockHttpServletResponse esitoLettura = http.esegui(lettura);
         MockHttpServletResponse esitoScrittura = http.esegui(scrittura);
 
-        assertEquals(401, esitoLettura.getStatus());
-        assertNull(esitoLettura.getHeader("Location"), "una API non deve rimandare al login");
-        assertEquals(401, esitoScrittura.getStatus());
-        assertNull(esitoScrittura.getHeader("Location"), "una API non deve rimandare al login");
+        ClientHttp.assertNonAutenticatoSenzaDati(esitoLettura);
+        ClientHttp.assertNonAutenticatoSenzaDati(esitoScrittura);
     }
 
     // ------------------------------------------------------------------ risorse reali senza sessione
@@ -149,9 +149,7 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
 
         MockHttpServletResponse risposta = http.esegui(richiesta);
 
-        assertEquals(401, risposta.getStatus());
-        assertNull(risposta.getHeader("Location"), "una API non deve rimandare al login");
-        assertFalse(risposta.getContentAsString().contains(id.toString()), "nessun dato della risorsa");
+        ClientHttp.assertNonAutenticatoSenzaDati(risposta);
         assertEquals("IN_ATTESA", esitoPerIlBanco(contatto), "il contatto non deve cambiare");
     }
 
@@ -212,9 +210,7 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
         sessione.invalidate();
         MockHttpServletResponse risposta = http.esegui(leggiRichiesta(sessione, id));
 
-        assertEquals(401, risposta.getStatus());
-        assertNull(risposta.getHeader("Location"), "una API non deve rimandare al login");
-        assertFalse(risposta.getContentAsString().contains(id.toString()), "nessun dato della richiesta");
+        ClientHttp.assertNonAutenticatoSenzaDati(risposta);
         assertEquals(prima, scenario.istantanea(id));
     }
 
@@ -231,15 +227,14 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
         scenario.revoca(titolare);
         MockHttpServletResponse risposta = http.esegui(leggiRichiesta(sessione, id));
 
-        assertEquals(401, risposta.getStatus());
-        assertFalse(risposta.getContentAsString().contains(id.toString()), "nessun dato della richiesta");
+        ClientHttp.assertNonAutenticatoSenzaDati(risposta);
         assertEquals(prima, scenario.istantanea(id));
     }
 
     @Test
     @DisplayName("CA-08 · un annullamento senza sessione su una pratica reale riceve 401 e nulla cambia")
     void annullamentoSenzaSessioneNonModifica() throws Exception {
-        http.richiediEndpointEsposto(annulla(UUID.randomUUID(), MOTIVO));
+        http.richiediEndpointDellaCapacita(Capacita.RICHIESTE_COMPLETE, annulla(UUID.randomUUID(), MOTIVO));
         UUID id = scenario.richiestaCreata(scenario.optRichiedente());
         var prima = scenario.istantanea(id);
 
@@ -247,15 +242,14 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
         MockHttpServletResponse risposta = http.esegui(annulla(id, MOTIVO).session(anonima.sessione())
                 .header(anonima.csrf().header(), anonima.csrf().token()));
 
-        assertEquals(401, risposta.getStatus());
-        assertFalse(risposta.getContentAsString().contains(id.toString()), "nessun dato della richiesta");
+        ClientHttp.assertNonAutenticatoSenzaDati(risposta);
         assertEquals(prima, scenario.istantanea(id), "stato e dati invariati");
     }
 
     @Test
     @DisplayName("CA-08 · dopo la revoca un annullamento con la sessione aperta riceve 401 e nulla cambia")
     void annullamentoDopoRevocaNonModifica() throws Exception {
-        http.richiediEndpointEsposto(annulla(UUID.randomUUID(), MOTIVO));
+        http.richiediEndpointDellaCapacita(Capacita.RICHIESTE_COMPLETE, annulla(UUID.randomUUID(), MOTIVO));
         Account titolare = scenario.optRichiedente();
         UUID id = scenario.richiestaCreata(titolare);
         MockHttpSession sessione = http.accedi(titolare);
@@ -266,7 +260,7 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
         MockHttpServletResponse risposta = http.esegui(annulla(id, MOTIVO).session(sessione)
                 .header(csrf.header(), csrf.token()));
 
-        assertEquals(401, risposta.getStatus());
+        ClientHttp.assertNonAutenticatoSenzaDati(risposta);
         assertEquals(prima, scenario.istantanea(id), "stato e dati invariati");
     }
 
@@ -286,16 +280,13 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
                 .param("erogatoreId", estranea.id().toString()).param("assegnatarioId", estranea.id().toString())
                 .header("X-Ruolo", "BANCO"));
 
-        assertEquals(403, risposta.getStatus(), "a rotta esposta ogni esito diverso da 403 è un errore");
-        String corpo = risposta.getContentAsString();
-        assertFalse(corpo.contains(ScenarioAccessi.DESCRIZIONE), "nessun dato della richiesta altrui");
-        assertFalse(corpo.contains(titolare.id().toString()), "nessun dato della richiesta altrui");
+        ClientHttp.assertDiniegoSenzaCorpo(risposta);
     }
 
     @Test
     @DisplayName("CA-09 · organizzazione e assegnazione alterate non permettono di annullare la pratica altrui")
     void assegnazioneAlterataNonConcedeAnnullamento() throws Exception {
-        http.richiediEndpointEsposto(annulla(UUID.randomUUID(), MOTIVO));
+        http.richiediEndpointDellaCapacita(Capacita.RICHIESTE_COMPLETE, annulla(UUID.randomUUID(), MOTIVO));
         Account titolare = scenario.optRichiedente();
         Account estranea = scenario.optRichiedente();
         UUID id = scenario.richiestaCreata(titolare);
@@ -309,7 +300,7 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
                 .param("organizzazioneId", titolare.id().toString()).param("titolareId", estranea.id().toString())
                 .param("erogatoreId", estranea.id().toString()).param("assegnatarioId", estranea.id().toString()));
 
-        assertEquals(403, risposta.getStatus(), "a rotta esposta ogni esito diverso da 403 è un errore");
+        ClientHttp.assertDiniegoSenzaCorpo(risposta);
         assertEquals(prima, scenario.istantanea(id), "stato e dati invariati");
     }
 
@@ -344,9 +335,7 @@ class SessioneHttpAccessiTest extends AccessiBlackBoxTest {
                 .header(csrf.header(), csrf.token()));
 
         for (MockHttpServletResponse esito : List.of(lettura, risposta)) {
-            assertEquals(401, esito.getStatus());
-            assertNull(esito.getHeader("Location"), "una API non deve rimandare al login");
-            assertFalse(esito.getContentAsString().contains(contatto.contattoId().toString()), "nessun dato");
+            ClientHttp.assertNonAutenticatoSenzaDati(esito);
         }
         assertEquals("IN_ATTESA", esitoPerIlBanco(contatto), "il tentativo non deve registrare la risposta");
     }
