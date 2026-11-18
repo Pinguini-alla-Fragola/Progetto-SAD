@@ -1,147 +1,34 @@
-@startuml
-' Vista dinamica prevista dalla #76. Firme dalle API Java di main (e7a39aa).
-hide footbox
-skinparam shadowing false
-skinparam dpi 118
-skinparam defaultFontName Arial
-skinparam defaultFontColor #172B3A
+@startuml PICUS-Walking-Skeleton
+' Primo passo del percorso: la OPT accede e invia la richiesta, che nasce in CREATA.
+!include PICUS-Walking-Skeleton-style.iuml
 
-skinparam sequence {
-  ArrowColor #465D71
-  LifeLineBorderColor #9CB0C0
-  ParticipantBorderColor #60768A
-  ParticipantBackgroundColor #EAF3FC
-  ParticipantFontStyle bold
-  ActorBorderColor #60768A
-  ActorBackgroundColor #EAF3FC
-  GroupBorderColor #A8B8C5
-  GroupHeaderFontColor #172B3A
-  DividerBackgroundColor #E7EFF6
-  DividerBorderColor #A8B8C5
-}
+title <size:22><b>PICUS · Walking skeleton 1 di 4</b></size>\n<size:16>Dall'accesso all'invio della richiesta</size>
 
-skinparam note {
-  BackgroundColor #FFF2E3
-  BorderColor #BE966D
-}
+actor "OPT A\nTitolare" as Opt
+participant "Ingresso web\nSpring Security e MVC" as Web #E9F2FC
+participant "Utenze" as Utenze
+participant "Catalogo" as Catalogo
+participant "Richieste" as Richieste
+database "PostgreSQL" as Db #E9F7F5
 
-title <size:22><b>PICUS · Walking skeleton</b></size>\n<size:15>Sequenza prevista per lo Sprint 2</size>
+== Accesso ==
+Opt -> Web: Accede all'area OPT
+Web -> Utenze: Verifica le credenziali
+Utenze --> Web: Identità e ruolo
+Web --> Opt: Sessione e area OPT
 
-actor "Browser" as Browser
-participant "Spring\nSecurity" as Security
-participant "UtenzeApi" as Utenze #EAF5F0
-boundary "Controller MVC\ne viste Thymeleaf" as Web
-participant "RichiesteApi\ne caso d’uso" as Richieste #FFF2E3
-participant "CatalogoApi" as Catalogo
-database "PostgreSQL" as Db
-
-== Accesso e sessione ==
-
-note over Browser, Security
-  Ogni account usa una sessione distinta.
-  Il diagramma segue OPT titolare e Banco;
-  una seconda OPT prova il diniego sul dettaglio.
-end note
-
-Browser -> Security: POST email e password
-Security -> Security: Controlla il limite dei tentativi
-alt Blocco temporaneo dopo 5 errori in 5 minuti
-  Security --> Browser: Messaggio generico di attesa\nBlocco di 60 s dal quinto errore
-else Tentativo ammesso
-  Security -> Utenze: verificaCredenziali(email, password)
-  Utenze --> Security: IdentitaAutenticata oppure esito vuoto
-  alt Credenziali valide e account attivo
-    Security -> Security: Apre la sessione server
-    Security --> Browser: Apre l’area consentita al ruolo
-  else Credenziali errate o account inattivo
-    Security --> Browser: Messaggio generico di accesso negato
-  end
+== Invio ==
+Opt -> Web: Apre il modulo di invio
+Web -> Catalogo: Carica misure attive e comuni
+Catalogo --> Web: Valori selezionabili
+Web --> Opt: Modulo di invio
+Opt -> Web: Invia misura, persona o nucleo,\ncomune e descrizione facoltativa
+break Campi non ammessi
+  Web --> Opt: 400 · Nessuna richiesta creata
 end
-
-group Controllo comune a ogni richiesta protetta
-  Browser -> Security: Richiesta con riferimento alla sessione
-  opt Sessione presente e valida
-    Security -> Utenze: verificaAccountSessione(accountId)
-    Utenze --> Security: Identità corrente oppure esito vuoto
-  end
-  alt Sessione assente, scaduta o account non attivo
-    Security --> Browser: 401 · nessun dato o modifica
-  else Funzione vietata al ruolo
-    Security --> Browser: 403 · nessun dato o modifica
-  else Funzione consentita
-    Security -> Web: Inoltra con identità ricavata dal server
-  end
-end
-
-== Invio della richiesta · OPT ==
-
-Browser -> Security: GET modulo di invio
-Security -> Web: Identità OPT verificata
-Web -> Catalogo: elencoMisureAttive() ed elencoComuni()
-Catalogo --> Web: Misure attive e comuni
-Web --> Browser: Modulo Thymeleaf
-
-Browser -> Security: POST misura, persona/nucleo,\ncomune e description facoltativa
-Security -> Web: Invio con identità OPT verificata
-Web -> Web: Controlla le chiavi applicative prima del binding;\nvalida i campi obbligatori
-alt Campi extra o valori obbligatori mancanti
-  Web --> Browser: Invio rifiutato, nessuna scrittura\nValori respinti esclusi da risposta e log
-else Chiavi ammesse e campi obbligatori presenti
-  Web -> Richieste: invia(attore, DatiInvio, riferimentoInvio)
-  Richieste -> Richieste: Verifica ruolo OPT; ricava titolare\ndall’identità verificata
-  Richieste -> Catalogo: cercaMisura(misuraId) e cercaComune(comuneCodice)
-  Catalogo --> Richieste: Esito della ricerca e stato della misura
-  alt Misura indisponibile o comune sconosciuto
-    Richieste --> Web: Errore di validazione, nessuna scrittura
-    Web --> Browser: Modulo con indicazione del campo da correggere
-  else Riferimenti validi
-    Richieste -> Db: Tramite repository JPA, registra ID, data,\ntitolare e stato CREATA; erogatore assente
-    Db --> Richieste: Richiesta registrata
-    Richieste --> Web: RichiestaSintesi
-    Web --> Browser: Conferma Thymeleaf con ID e stato
-  end
-end
-== Consultazione della richiesta ==
-
-group Elenco OPT titolare
-  Browser -> Security: GET proprie richieste
-  Security -> Web: Identità OPT verificata
-  Web -> Richieste: elencoRichiesteOpt(attore)
-  Richieste -> Db: Legge per ID della OPT titolare via repository JPA
-  Db --> Richieste: Dati delle richieste proprie
-  Richieste --> Web: Elenco di RichiestaSintesi
-  Web --> Browser: Elenco Thymeleaf
-end
-
-group Coda del Banco
-  Browser -> Security: GET coda di coordinamento
-  Security -> Web: Identità Banco verificata
-  Web -> Richieste: codaBanco(attore)
-  Richieste -> Richieste: Verifica ruolo Banco
-  Richieste -> Db: Legge le richieste aperte in ordine di arrivo\nvia repository JPA
-  Db --> Richieste: Dati delle richieste in coda
-  Richieste --> Web: Elenco ordinato di RichiestaSintesi
-  Web --> Browser: Coda Thymeleaf, inclusa la nuova richiesta
-end
-
-group Dettaglio richiesto da OPT o Banco
-  Browser -> Security: GET dettaglio con ID scelto dal client
-  Security -> Web: Identità verificata
-  Web -> Richieste: consultaRichiesta(attore, richiestaId)
-  Richieste -> Db: Legge la richiesta via repository JPA
-  Db --> Richieste: Dati della pratica e titolare
-  Richieste -> Richieste: Confronta identità e titolare;\nverifica l’accesso del Banco
-  alt OPT titolare o Banco autorizzato
-    Richieste --> Web: RichiestaDettaglio filtrato per l’attore
-    Web --> Browser: Dettaglio Thymeleaf, description come testo se presente
-  else OPT estranea senza assegnazione
-    Richieste --> Web: Accesso negato
-    Web --> Browser: 403 · nessun dato della richiesta
-  end
-end
-
-Browser -> Security: POST Esci
-Security -> Security: Invalida la sessione
-Security --> Browser: Sessione terminata
-
+Web -> Richieste: Invia con l'identità della sessione
+Richieste -> Catalogo: Verifica misura e comune
+Richieste -> Db: Salva la richiesta in CREATA\ncon la OPT A come titolare
+Richieste --> Web: ID e sintesi della richiesta
+Web --> Opt: 201 · Conferma con ID e stato
 @enduml
