@@ -5,7 +5,10 @@
 - [PICUS - Flusso dell'architettura MVC](diagrams/PICUS-Architettura-MVC.mmd) · [Anteprima PNG](diagrams/PICUS-Architettura-MVC.png)
 - [PICUS - Module&Package View](diagrams/PICUS-Module-Package-View.mmd) · [Anteprima PNG](diagrams/PICUS-Module-Package-View.png)
 - [PICUS - Deployment & Container View](diagrams/PICUS-Deployment-Container-View.mmd) · [Anteprima PNG](diagrams/PICUS-Deployment-Container-View.png)
-- [Walking skeleton · Accesso, invio e consultazione](diagrams/PICUS-Walking-Skeleton.puml) · [PNG](diagrams/PICUS-Walking-Skeleton.png) · [SVG](diagrams/PICUS-Walking-Skeleton.svg)
+- [Walking skeleton 1 di 4 · Accesso e invio](diagrams/PICUS-Walking-Skeleton.puml) · [PNG](diagrams/PICUS-Walking-Skeleton.png) · [SVG](diagrams/PICUS-Walking-Skeleton.svg)
+- [Walking skeleton 2 di 4 · Presa in carico, ricerca e contatto](diagrams/PICUS-Walking-Skeleton-2-Presa-in-carico.puml) · [PNG](diagrams/PICUS-Walking-Skeleton-2-Presa-in-carico.png) · [SVG](diagrams/PICUS-Walking-Skeleton-2-Presa-in-carico.svg)
+- [Walking skeleton 3 di 4 · Risposta e assegnazione](diagrams/PICUS-Walking-Skeleton-3-Assegnazione.puml) · [PNG](diagrams/PICUS-Walking-Skeleton-3-Assegnazione.png) · [SVG](diagrams/PICUS-Walking-Skeleton-3-Assegnazione.svg)
+- [Walking skeleton 4 di 4 · Conferma o rifiuto](diagrams/PICUS-Walking-Skeleton-4-Esito.puml) · [PNG](diagrams/PICUS-Walking-Skeleton-4-Esito.png) · [SVG](diagrams/PICUS-Walking-Skeleton-4-Esito.svg)
 - [PICUS - Schema ER PostgreSQL](diagrams/PICUS-Schema-ER.puml) · [Anteprima PNG](diagrams/PICUS-Schema-ER.png)
 - [C&C · CC-01 Struttura runtime](diagrams/C%26C/Diagramma-C%26C.puml) · [PNG](diagrams/C%26C/Diagramma-C%26C.png) · [SVG](diagrams/C%26C/Diagramma-C%26C.svg)
 - [C&C · CC-02 Ingresso web e accesso ai dati](diagrams/C%26C/Monolite-C%26C.puml) · [PNG](diagrams/C%26C/Monolite-C%26C.png) · [SVG](diagrams/C%26C/Monolite-C%26C.svg)
@@ -195,12 +198,27 @@ L'ingresso web raggruppa Spring Security e i controller MVC e REST. Le frecce
 verso PostgreSQL riassumono gli accessi tramite i repository JPA. I valori
 respinti sono esclusi da risposte e log. [ADR-003](../adr/ADR-003-isolamento-e-validazione-richieste.md)
 
+### Dalla richiesta creata all'esito
+
+Il walking skeleton prosegue in tre diagrammi che coprono il ciclo di
+[ADR-002](../adr/ADR-002-ciclo-di-vita-richiesta.md) dopo `Creata`. Ogni
+diagramma riparte dallo stato in cui termina il precedente. Gli endpoint sono
+descritti nel [backend di coordinamento](api-coordinamento-richieste.md).
+
+| Diagramma | Stati | Scenari |
+| --- | --- | --- |
+| 2 · Presa in carico, ricerca e contatto | `Creata` → `Presa in carico` | Il Banco accede, vede la richiesta in coda, la prende in carico, consulta i candidati ordinati e contatta un erogatore. Contatto e avviso sono salvati nella stessa transazione. |
+| 3 · Risposta e assegnazione | `Presa in carico` → `In programmazione` | L'erogatore risponde. Il rifiuto lascia la richiesta in `Presa in carico`; la risposta positiva richiede l'assegnazione esplicita del Banco, che rilegge i dati sotto blocco. |
+| 4 · Conferma o rifiuto | `In programmazione` → `Confermata`, oppure `Presa in carico` o `In programmazione` → `Rifiutata` | Esiti alternativi. La conferma registra l'accordo completo; il rifiuto definitivo mostra alla OPT «Nessun erogatore disponibile». Il diagramma chiude con il `403` a una OPT estranea e con il logout. |
+
+L'annullamento ([#54](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/issues/54)) non è rappresentato.
+
 Per rigenerare PNG e SVG dalla radice del progetto, sostituire
 `percorso/plantuml.jar` con il percorso del JAR di PlantUML.
 
 ```powershell
-java -jar 'percorso/plantuml.jar' -charset UTF-8 -tpng 'docs/architecture/diagrams/PICUS-Walking-Skeleton.puml'
-java -jar 'percorso/plantuml.jar' -charset UTF-8 -tsvg 'docs/architecture/diagrams/PICUS-Walking-Skeleton.puml'
+java -jar 'percorso/plantuml.jar' -charset UTF-8 -tpng 'docs/architecture/diagrams/PICUS-Walking-Skeleton*.puml'
+java -jar 'percorso/plantuml.jar' -charset UTF-8 -tsvg 'docs/architecture/diagrams/PICUS-Walking-Skeleton*.puml'
 ```
 
 Controllare tutte le esportazioni dopo la rigenerazione: frecce orizzontali,

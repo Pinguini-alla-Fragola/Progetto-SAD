@@ -1,0 +1,55 @@
+@startuml PICUS-Walking-Skeleton-3-Assegnazione
+' Prosegue il diagramma 2: un contatto in attesa verso l'erogatore.
+!include PICUS-Walking-Skeleton-style.iuml
+
+title <size:22><b>PICUS · Walking skeleton 3 di 4</b></size>\n<size:16>Risposta dell'erogatore e assegnazione in programmazione</size>
+
+actor "OPT A\nTitolare" as Opt
+actor "Banco" as Banco
+actor "Erogatore\nOPT B o operatore" as Erogatore
+participant "Ingresso web\nSpring Security e MVC" as Web #E9F2FC
+participant "Catalogo" as Catalogo
+participant "Richieste" as Richieste
+database "PostgreSQL" as Db #E9F7F5
+
+== Risposta alla disponibilità ==
+Erogatore -> Web: Apre il contatto dall'avviso
+Web -> Richieste: Chiede i dati minimi del contatto
+Richieste -> Db: Legge il contatto del destinatario
+Richieste --> Web: Dati minimi, senza la descrizione
+Web --> Erogatore: Misura, comune e ambito
+Erogatore -> Web: Risponde alla richiesta di disponibilità
+Web -> Richieste: Registra la risposta
+Richieste -> Db: Salva la risposta sul contatto
+alt Non disponibile
+  Richieste --> Web: Contatto declinato
+  Web --> Banco: Risposta negativa nello storico
+  note over Banco, Richieste
+    La richiesta resta «Presa in carico».
+    Il Banco contatta l'opzione successiva (diagramma 2)
+    e valuta il remoto quando i candidati locali hanno declinato.
+  end note
+else Disponibile
+  Richieste --> Web: Risposta positiva registrata
+  Web --> Erogatore: Risposta inviata
+  Banco -> Web: Consulta lo storico dei contatti
+  Web -> Richieste: Legge i contatti della richiesta
+  Richieste --> Web: Contatti con le risposte
+  Web --> Banco: Risposta positiva dell'erogatore
+end
+
+== Assegnazione ==
+Banco -> Web: Assegna l'erogatore che ha risposto
+Web -> Richieste: Assegna con l'identità del Banco
+Richieste -> Db: Blocca la richiesta e verifica lo stato PRESA_IN_CARICO
+Richieste -> Catalogo: Rilegge sotto blocco profilo,\ncompetenza e offerta dell'erogatore
+Catalogo --> Richieste: Erogatore ancora attivo e compatibile
+break Risposta non positiva, altro contatto in attesa\no erogatore non più compatibile
+  Web --> Banco: 409 · Stato invariato
+end
+Richieste -> Db: Salva erogatore, ambito e stato IN_PROGRAMMAZIONE
+Richieste --> Web: Richiesta assegnata
+Web --> Banco: Richiesta «In programmazione»
+Opt -> Web: Apre il dettaglio della richiesta
+Web --> Opt: Stato «In programmazione»
+@enduml

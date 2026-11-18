@@ -1,34 +1,10 @@
 @startuml PICUS-Walking-Skeleton
-' Flusso della demo su main al commit f1242eb, limitato allo Sprint 2.
-hide footbox
-skinparam shadowing false
-skinparam defaultFontName Arial
-skinparam defaultFontColor #172B3A
-skinparam dpi 140
+' Primo passo del percorso: la OPT accede e invia la richiesta, che nasce in CREATA.
+!include PICUS-Walking-Skeleton-style.iuml
 
-skinparam sequence {
-  ArrowColor #465D71
-  LifeLineBorderColor #94A3B8
-  ActorBorderColor #60768A
-  ActorBackgroundColor #F1F5F9
-  ParticipantBorderColor #568573
-  ParticipantBackgroundColor #EDF5F0
-  ParticipantFontStyle bold
-  DividerBackgroundColor #E9F2FC
-  DividerBorderColor #5480B0
-  GroupBorderColor #7C9BB9
-}
-
-skinparam note {
-  BackgroundColor #FFF8EA
-  BorderColor #946728
-}
-
-title <size:22><b>PICUS · Walking skeleton</b></size>\n<size:16>Dall'accesso alla consultazione della richiesta</size>
+title <size:22><b>PICUS · Walking skeleton 1 di 4</b></size>\n<size:16>Dall'accesso all'invio della richiesta</size>
 
 actor "OPT A\nTitolare" as Opt
-actor "Banco" as Banco
-actor "OPT B\nEstranea alla richiesta" as Estranea
 participant "Ingresso web\nSpring Security e MVC" as Web #E9F2FC
 participant "Utenze" as Utenze
 participant "Catalogo" as Catalogo
@@ -55,32 +31,4 @@ Richieste -> Catalogo: Verifica misura e comune
 Richieste -> Db: Salva la richiesta in CREATA\ncon la OPT A come titolare
 Richieste --> Web: ID e sintesi della richiesta
 Web --> Opt: 201 · Conferma con ID e stato
-
-== Consultazione ==
-Opt -> Web: Apre l'elenco delle proprie richieste
-Web -> Richieste: Consulta le richieste della OPT A
-Richieste -> Db: Legge per titolare
-Richieste --> Web: Richieste della OPT A
-Web --> Opt: Elenco con l'ID appena creato
-
-Banco -> Web: Accede con il proprio account
-Web --> Banco: Sessione e area Banco
-Banco -> Web: Carica la coda
-Web -> Richieste: Consulta le richieste aperte
-Richieste -> Db: Legge in ordine di arrivo
-Richieste --> Web: Richieste aperte in ordine di arrivo
-Web --> Banco: Coda con lo stesso ID
-
-note over Opt, Banco
-  La titolare e il Banco possono aprire il dettaglio.
-end note
-Estranea -> Web: Chiede il dettaglio dello stesso ID\ncon la propria sessione
-Web -> Richieste: Consulta il dettaglio
-Richieste -> Db: Legge la richiesta per ID
-Richieste -> Richieste: Verifica il legame con la richiesta
-Richieste --> Web: Accesso negato
-Web --> Estranea: 403 · Nessun dato della richiesta
-
-Opt -> Web: Esce dall'area
-Web --> Opt: Sessione invalidata e ritorno al login
 @enduml
