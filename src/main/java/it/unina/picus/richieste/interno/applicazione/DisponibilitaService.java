@@ -11,6 +11,7 @@ import it.unina.picus.richieste.api.ConflittoRichiestaException;
 import it.unina.picus.richieste.api.RichiesteApi;
 import it.unina.picus.richieste.api.RichiesteApi.ContattoDisponibilita;
 import it.unina.picus.richieste.api.RichiesteApi.DettaglioContatto;
+import it.unina.picus.richieste.api.RichiesteApi.EsitoContatto;
 import it.unina.picus.richieste.api.RisorsaRichiesteNonTrovataException;
 import it.unina.picus.richieste.interno.dominio.ContattiRepository;
 import it.unina.picus.richieste.interno.dominio.RichiestaRepository;
@@ -88,7 +89,12 @@ public class DisponibilitaService {
         var richiesta = richieste.cercaPerAggiornamento(riferimento.richiestaId())
                 .orElseThrow(RisorsaRichiesteNonTrovataException::new);
         richiesta.verificaPresaInCarico();
-        return contatti.rispondi(contattoId, disponibile);
+        var contatto = contatti.cerca(contattoId).orElseThrow(RisorsaRichiesteNonTrovataException::new);
+        if (contatto.esito() != EsitoContatto.IN_ATTESA) {
+            throw new ConflittoRichiestaException("Il contatto non è in attesa di risposta");
+        }
+        var esito = disponibile ? EsitoContatto.DISPONIBILE : EsitoContatto.NON_DISPONIBILE;
+        return contatti.registraEsito(contattoId, esito);
     }
 
     /**

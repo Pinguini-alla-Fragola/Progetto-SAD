@@ -1,4 +1,4 @@
-package it.unina.picus;
+package it.unina.picus.shared;
 
 import java.util.UUID;
 
@@ -7,7 +7,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
 /**
- * Fa accedere gli account di {@link DatiDiProva} con il login reale dell'applicazione.
+ * Fa accedere gli account in {@link DatiSintetici} con il login reale dell'applicazione.
  *
  * La password è generata a ogni esecuzione e non compare nel codice. Il suo hash è calcolato
  * una sola volta con il {@link PasswordEncoder} dell'applicazione, perché BCrypt è lento di
@@ -30,11 +30,12 @@ public final class AccessoDiProva {
 
     /** Nuova sessione autenticata per l'account: ogni chiamata esegue un login distinto. */
     public SessioneDiProva accedi(UUID account) throws Exception {
-        jdbc.update("update utenze_account set password_hash = ? where id = ?", hash(), account);
-        return SessioneDiProva.accedi(mvc, DatiDiProva.emailDi(account), PASSWORD);
+        jdbc.update("update utenze_account set password_hash = ? where id = ?", hash(encoder), account);
+        String email = jdbc.queryForObject("select email from utenze_account where id = ?", String.class, account);
+        return SessioneDiProva.accedi(mvc, email, PASSWORD);
     }
 
-    private synchronized String hash() {
+    private static synchronized String hash(PasswordEncoder encoder) {
         if (hashCondiviso == null) {
             hashCondiviso = encoder.encode(PASSWORD);
         }

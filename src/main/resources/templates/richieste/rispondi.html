@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risposta Disponibilit&agrave; &mdash; PICUS</title>
+    <link rel="icon" href="/img/picus.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/css/picus.css">
+    <script src="/js/disponibilita.js" type="module"></script>
+    <link rel="stylesheet" href="/css/integrazione-ui.css">
+</head>
+<body class="flow-page">
+    <a th:replace="~{fragments/layout :: skip}" href="#contenuto">Vai al contenuto</a>
+    <header class="picus-navbar">
+        <div class="nav-inner">
+            <a th:replace="~{fragments/layout :: brand}" href="/">PICUS</a>
+            <a th:href="${dashboard}" class="nav-link"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#back"></use></svg> Area di lavoro</a>
+        </div>
+    </header>
+
+    <main id="contenuto" class="mobile-wrapper availability-response" th:attr="data-contatto-id=${contattoId},data-contatti-disponibili=${contattiDisponibili}" tabindex="-1">
+        <header class="mobile-header">
+            <div>
+                <h1>Richiesta di disponibilità</h1>
+            </div>
+            <span id="esito-contatto" class="badge-stato" hidden></span>
+        </header>
+
+        <div class="mobile-body">
+            <p id="caricamento" class="picus-meta" role="status" th:hidden="${!contattiDisponibili}">Caricamento del contatto…</p>
+            <p id="errore-contatto" class="alert alert-danger" role="alert" tabindex="-1" hidden></p>
+            <section id="dati-contatto" class="availability-summary" aria-labelledby="misura-titolo" hidden>
+                <h2 id="misura-titolo"></h2>
+                <dl class="availability-facts">
+                    <div>
+                        <dt>Comune di intervento</dt>
+                        <dd id="comune-intervento"></dd>
+                    </div>
+                    <div>
+                        <dt>Tipologia di destinatario</dt>
+                        <dd id="tipo-destinatario"></dd>
+                    </div>
+                </dl>
+                <p id="contatto-remoto" class="availability-remote" hidden><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#external"></use></svg>Disponibilità per un appuntamento a distanza.</p>
+                <details class="contact-reference availability-reference">
+                    <summary>Riferimenti della pratica</summary>
+                    <div class="detail-label">Identificativo</div>
+                    <code id="richiesta-id"></code>
+                </details>
+            </section>
+
+            <section id="sezione-azioni" class="availability-actions" aria-labelledby="titolo-risposta" th:hidden="${contattiDisponibili}">
+                <h2 id="titolo-risposta">La tua risposta</h2>
+                <p>
+                    Comunica al Banco la disponibilit&agrave; a prendere in carico questa misura di accompagnamento:
+                </p>
+                <div class="availability-buttons">
+                    <span class="azione-inattiva" th:attr="data-funzione-inattiva=${contattiDisponibili ? null : true}"><button type="button" th:disabled="${!contattiDisponibili}" class="btn btn-primary btn-block" id="btnDisponibile" data-disponibile="true">
+                        Conferma la disponibilità
+                    </button></span>
+                    <span class="azione-inattiva" th:attr="data-funzione-inattiva=${contattiDisponibili ? null : true}"><button type="button" th:disabled="${!contattiDisponibili}" class="btn btn-secondary btn-block" id="btnNonDisponibile" data-disponibile="false">
+                        Comunica indisponibilità
+                    </button></span>
+                </div>
+            </section>
+
+            <section id="messaggio-conferma" class="availability-result" aria-labelledby="titolo-esito" hidden>
+                <div class="availability-result-heading">
+                    <svg class="icon availability-result-icon" aria-hidden="true"><use href="/img/icons.svg#mail"></use></svg>
+                    <h2 id="titolo-esito" tabindex="-1"></h2>
+                </div>
+                <p id="testo-esito"></p>
+                <div id="attesa-assegnazione" class="availability-next" hidden>
+                    <h3>Disponibilità registrata</h3>
+                    <p id="testo-attesa">L’assegnazione è gestita dal Banco.</p>
+                    <a href="">Aggiorna stato</a>
+                </div>
+                <div id="assegnazione-contatto" class="availability-next" hidden>
+                    <h3>Il Banco ti ha assegnato questa richiesta.</h3>
+                    <a id="link-pratica-assegnata" class="btn btn-primary">Apri la pratica assegnata <svg class="icon" aria-hidden="true"><use href="/img/icons.svg#arrow"></use></svg></a>
+                </div>
+                <a th:href="${dashboard}" class="btn btn-secondary availability-return">Torna all’area di lavoro</a>
+            </section>
+        </div>
+    </main>
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

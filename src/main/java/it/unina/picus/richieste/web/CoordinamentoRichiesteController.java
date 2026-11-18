@@ -1,13 +1,13 @@
 package it.unina.picus.richieste.web;
 
 import it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione;
+import it.unina.picus.richieste.api.CoordinamentoRichiesteApi;
 import it.unina.picus.richieste.api.DatiRichiestaNonValidiException;
 import it.unina.picus.richieste.api.RichiesteApi;
 import it.unina.picus.richieste.api.RichiesteApi.Candidato;
 import it.unina.picus.richieste.api.RichiesteApi.ContattoDisponibilita;
 import it.unina.picus.richieste.api.RichiesteApi.RichiestaDettaglio;
 import it.unina.picus.richieste.api.RichiesteApi.RichiestaSintesi;
-import it.unina.picus.richieste.interno.applicazione.ServizioCoordinamentoRichieste;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,14 +27,14 @@ import java.util.UUID;
 @RestController
 @RequestMapping(value = "/api", produces = MediaType.APPLICATION_JSON_VALUE)
 public class CoordinamentoRichiesteController {
-    private final ServizioCoordinamentoRichieste coordinamento;
+    private final CoordinamentoRichiesteApi coordinamento;
 
     /**
      * Collega l’adattatore REST ai casi d’uso del Banco.
      *
      * @param coordinamento servizio di coordinamento e registrazione dell'esito
      */
-    public CoordinamentoRichiesteController(ServizioCoordinamentoRichieste coordinamento) {
+    public CoordinamentoRichiesteController(CoordinamentoRichiesteApi coordinamento) {
         this.coordinamento = coordinamento;
     }
 
@@ -126,7 +126,7 @@ public class CoordinamentoRichiesteController {
     }
 
     private static void verificaCorpoVuoto(CorpoJson corpo) {
-        if (corpo != null && corpo.campi() != null && !corpo.campi().isEmpty()) {
+        if (corpo != null && (corpo.campi() == null || !corpo.campi().isEmpty())) {
             throw nonValido("comando", "Questo comando non prevede campi aggiuntivi");
         }
     }

@@ -2,7 +2,6 @@ package it.unina.picus.richieste.interno.applicazione;
 
 import it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione;
 import it.unina.picus.catalogo.api.CatalogoApi.ErogatoreCompatibile;
-import it.unina.picus.catalogo.api.ConsultazioneCatalogoApi;
 import it.unina.picus.catalogo.api.RicercaErogatoriApi;
 import it.unina.picus.comunicazioni.api.AvvisiOperativiApi;
 import it.unina.picus.richieste.api.ConflittoRichiestaException;
@@ -41,7 +40,6 @@ public class ServizioCoordinamentoRichieste implements CoordinamentoRichiesteApi
     private final RichiestaRepository richieste;
     private final ContattiRepository contatti;
     private final RicercaErogatoriApi catalogo;
-    private final ConsultazioneCatalogoApi misure;
     private final InvioRichiesteApi consultazione;
     private final AvvisiOperativiApi avvisi;
     private final Clock clock;
@@ -52,18 +50,15 @@ public class ServizioCoordinamentoRichieste implements CoordinamentoRichiesteApi
      * @param richieste accesso alle pratiche e al loro lock
      * @param contatti accesso alle richieste di disponibilità
      * @param catalogo ricerca di erogatori compatibili
-     * @param misure consultazione delle modalità di erogazione
      * @param consultazione lettura del dettaglio secondo le regole di visibilità
      * @param avvisi registrazione degli avvisi operativi
      * @param clock orologio dei contatti
      */
     public ServizioCoordinamentoRichieste(RichiestaRepository richieste, ContattiRepository contatti,
-            RicercaErogatoriApi catalogo, ConsultazioneCatalogoApi misure, InvioRichiesteApi consultazione,
-            AvvisiOperativiApi avvisi, Clock clock) {
+            RicercaErogatoriApi catalogo, InvioRichiesteApi consultazione, AvvisiOperativiApi avvisi, Clock clock) {
         this.richieste = richieste;
         this.contatti = contatti;
         this.catalogo = catalogo;
-        this.misure = misure;
         this.consultazione = consultazione;
         this.avvisi = avvisi;
         this.clock = clock;
@@ -153,16 +148,18 @@ public class ServizioCoordinamentoRichieste implements CoordinamentoRichiesteApi
      * @throws RisorsaRichiesteNonTrovataException se la richiesta non esiste
      * @throws DatiRichiestaNonValidiException se i dettagli sono invalidi o la modalità è incompatibile
      * @throws ConflittoRichiestaException se stato o assegnazione impediscono la conferma
+     *         o la misura non consente più l'erogazione a distanza
      * @see RichiesteApi#confermaAccordo
      */
+    @Override
     @Transactional
     public RichiestaDettaglio confermaAccordo(IdentitaAutenticata attore, UUID richiestaId,
             DettagliAccordo accordo) {
         verificaBanco(attore);
         var confermata = blocca(richiestaId).conferma(accordo);
         if (confermata.accordo() instanceof AccordoADistanza
-                && misure.cercaMisura(confermata.misuraId()).filter(m -> m.dati().erogabileADistanza()).isEmpty()) {
-            throw new DatiRichiestaNonValidiException(Map.of("modalita", "La misura non è erogabile a distanza"));
+                && !catalogo.bloccaAbilitazioneADistanza(confermata.misuraId())) {
+            throw new ConflittoRichiestaException("L'abilitazione della misura impedisce la conferma a distanza");
         }
         richieste.aggiorna(confermata);
         return consultazione.consultaRichiesta(attore, richiestaId);
@@ -183,6 +180,7 @@ public class ServizioCoordinamentoRichieste implements CoordinamentoRichiesteApi
      *         o, durante la ricerca, resta un'opzione compatibile senza diniego
      * @see RichiesteApi#rifiutaRichiesta
      */
+    @Override
     @Transactional
     public RichiestaSintesi rifiutaRichiesta(IdentitaAutenticata attore, UUID richiestaId) {
         verificaBanco(attore);

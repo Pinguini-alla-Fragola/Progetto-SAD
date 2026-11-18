@@ -56,8 +56,8 @@ class BurndownScopeTests(unittest.TestCase):
         mine, base, rows = self.calculate(nodes)
         self.assertEqual([i["titolo"] for i in mine], ["Task conclusa", "Story aperta"])
         self.assertEqual(base, 8)
-        self.assertEqual(rows[-1][1:], (8, 3, 5))
-        self.assertEqual(rows[0][1:], (8, 0, 8))
+        self.assertEqual(rows[-1][1:], (8, 5.5, 2.5))     # 3 chiusi + metà di 5 (In progress)
+        self.assertEqual(rows[0][1:], (8, 2.5, 5.5))
 
     def test_native_type_controls_filter_instead_of_title(self):
         nodes = [node("Richieste e appuntamenti", issue_type=" ePiC ", points=8),
@@ -65,7 +65,7 @@ class BurndownScopeTests(unittest.TestCase):
         mine, base, rows = self.calculate(nodes)
         self.assertEqual(len(mine), 1)
         self.assertEqual(base, 2)
-        self.assertEqual(rows[-1][3], 2)
+        self.assertEqual(rows[-1][3], 1)     # In progress: resta il 50%
 
     def test_questions_untyped_issues_and_drafts_keep_existing_estimates(self):
         nodes = [node("Domanda", issue_type="Question", points=2),
@@ -81,7 +81,7 @@ class BurndownScopeTests(unittest.TestCase):
         mine, base, rows = self.calculate([unavailable, node("Task", points=2)])
         self.assertEqual(len(mine), 1)
         self.assertEqual(base, 2)
-        self.assertEqual(rows[-1][1:], (2, 0, 2))
+        self.assertEqual(rows[-1][1:], (2, 1, 1))
 
     def test_iteration_with_only_excluded_items_still_produces_zero_chart(self):
         dati = scarica([node("Epic", issue_type="Epic"), node("PR", kind="PullRequest", done=True)])
@@ -99,6 +99,21 @@ class BurndownScopeTests(unittest.TestCase):
         mine, base, _ = self.calculate([node("Zero", points=0), sized])
         self.assertEqual([i["punti"] for i in mine], [0, 5])
         self.assertEqual(base, 5)
+
+    def test_remaining_work_depends_on_status(self):
+        def task(stato, eventi=(), chiuso=None):
+            return {"punti": 8.0, "chiuso": chiuso, "stato_ora": stato, "eventi": list(eventi)}
+        t = datetime(2026, 10, 20, tzinfo=burndown.UTC)
+        for stato, resto in [("Backlog", 8), ("Ready", 6), ("In progress", 4), ("In review", 2), ("Done", 0)]:
+            self.assertEqual(burndown.residuo(task(stato, chiuso=t if stato == "Done" else None), NOW), resto, stato)
+
+    def test_status_history_is_replayed_over_time(self):
+        giorno = lambda g: datetime(2026, 10, g, 12, tzinfo=burndown.UTC)
+        t = {"punti": 4.0, "chiuso": giorno(22), "stato_ora": "Done",
+             "eventi": [(giorno(16), "Backlog", "Ready"), (giorno(18), "Ready", "In progress"),
+                        (giorno(20), "In progress", "In review"), (giorno(22), "In review", "Done")]}
+        attesi = [(15, 4), (17, 3), (19, 2), (21, 1), (23, 0)]
+        self.assertEqual([burndown.residuo(t, giorno(g)) for g, _ in attesi], [r for _, r in attesi])
 
     def test_sprint_choice(self):
         dati = {"S1": {"inizio": date(2026, 10, 15), "giorni": 21, "task": []},

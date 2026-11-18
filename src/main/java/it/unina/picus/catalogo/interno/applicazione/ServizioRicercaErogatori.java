@@ -74,6 +74,12 @@ public class ServizioRicercaErogatori implements RicercaErogatoriApi {
         };
     }
 
+    @Override
+    @Transactional(propagation = Propagation.MANDATORY)
+    public boolean bloccaAbilitazioneADistanza(long misuraId) {
+        return offerta.bloccaMisura(misuraId).filter(misura -> misura.dati().erogabileADistanza()).isPresent();
+    }
+
     private static void aggiungiLocale(List<ErogatoreCompatibile> risultato, ProfiloErogatore profilo,
             String comune, Set<String> limitrofi) {
         if (comune.equals(profilo.comuneCodice())) {

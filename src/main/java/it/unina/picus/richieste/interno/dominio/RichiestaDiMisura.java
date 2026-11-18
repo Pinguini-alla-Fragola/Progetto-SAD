@@ -36,7 +36,7 @@ public record RichiestaDiMisura(
         if (stato != StatoRichiesta.CREATA) {
             throw new ConflittoRichiestaException("La richiesta non è Creata");
         }
-        return conAssegnazione(StatoRichiesta.PRESA_IN_CARICO, erogatoreId, erogatoreAmbito);
+        return transita(StatoRichiesta.PRESA_IN_CARICO, erogatoreId, erogatoreAmbito, accordo);
     }
 
     /** Impone lo stato previsto per contatto e assegnazione. */
@@ -51,12 +51,47 @@ public record RichiestaDiMisura(
         verificaPresaInCarico();
         Objects.requireNonNull(accountId, "Assegnatario obbligatorio");
         Objects.requireNonNull(ambito, "Ambito obbligatorio");
-        return conAssegnazione(StatoRichiesta.IN_PROGRAMMAZIONE, accountId, ambito);
+        return transita(StatoRichiesta.IN_PROGRAMMAZIONE, accountId, ambito, accordo);
     }
 
-    private RichiestaDiMisura conAssegnazione(StatoRichiesta nuovoStato, UUID accountId, AmbitoErogazione ambito) {
+    /**
+     * Conferma la pratica in programmazione e vi associa l'accordo validato.
+     *
+     * @param dettagli accordo proposto per l’erogatore assegnato
+     * @return pratica Confermata con i dettagli definitivi
+     * @throws ConflittoRichiestaException se la pratica non è in programmazione o manca l’erogatore
+     * @throws DatiRichiestaNonValidiException se i dati sono incompleti o incompatibili
+     */
+    public RichiestaDiMisura conferma(DettagliAccordo dettagli) {
+        if (stato != StatoRichiesta.IN_PROGRAMMAZIONE || erogatoreId == null) {
+            throw new ConflittoRichiestaException("Serve una richiesta In programmazione con erogatore assegnato");
+        }
+        var accordoValidato = ValidazioneAccordo.valida(dettagli);
+        boolean assegnazioneADistanza = erogatoreAmbito == AmbitoErogazione.CENTRO_PICUS_A_DISTANZA;
+        if (assegnazioneADistanza != (accordoValidato instanceof AccordoADistanza)) {
+            throw new DatiRichiestaNonValidiException(Map.of("modalita",
+                    "La modalità dell'accordo deve corrispondere all'ambito dell'assegnazione"));
+        }
+        return transita(StatoRichiesta.CONFERMATA, erogatoreId, erogatoreAmbito, accordoValidato);
+    }
+
+    /**
+     * Chiude la pratica con un rifiuto definitivo deciso dal Banco.
+     *
+     * @return pratica Rifiutata con la storia dell’assegnazione conservata
+     * @throws ConflittoRichiestaException se la pratica non è in ricerca o in programmazione
+     */
+    public RichiestaDiMisura rifiuta() {
+        if (stato != StatoRichiesta.PRESA_IN_CARICO && stato != StatoRichiesta.IN_PROGRAMMAZIONE) {
+            throw new ConflittoRichiestaException("Serve una richiesta Presa in carico o In programmazione");
+        }
+        return transita(StatoRichiesta.RIFIUTATA, erogatoreId, erogatoreAmbito, null);
+    }
+
+    private RichiestaDiMisura transita(StatoRichiesta nuovoStato, UUID accountId,
+            AmbitoErogazione ambito, DettagliAccordo dettagli) {
         return new RichiestaDiMisura(id, titolareId, misuraId, tipoDestinatario, comuneCodice, description,
-                inviataIl, nuovoStato, accountId, accordo, riferimentoInvio, ambito);
+                inviataIl, nuovoStato, accountId, dettagli, riferimentoInvio, ambito);
     }
 
     /**
