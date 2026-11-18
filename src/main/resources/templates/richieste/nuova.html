@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuova richiesta · PICUS</title>
+    <link rel="icon" href="/img/picus.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/css/picus.css">
+    <script src="/js/nuova-richiesta.js" type="module"></script>
+    <link rel="stylesheet" href="/css/integrazione-ui.css">
+</head>
+<body class="flow-page request-create-page">
+    <a th:replace="~{fragments/layout :: skip}" href="#contenuto">Vai al contenuto</a>
+    <header class="picus-navbar">
+        <div class="nav-inner">
+            <a th:replace="~{fragments/layout :: brand}" href="/">PICUS</a>
+            <a href="/opt/dashboard" class="nav-link"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#back"></use></svg> Area OPT</a>
+        </div>
+    </header>
+
+    <main id="contenuto" class="request-create" tabindex="-1">
+        <header id="invio-intestazione" class="request-create-heading">
+            <h1>Nuova richiesta</h1>
+        </header>
+
+        <div class="request-create-surface">
+            <noscript><p class="alert alert-info">Per inviare la richiesta abilita JavaScript nel browser.</p></noscript>
+            <p id="avvio-invio" class="form-text" role="status">Caricamento del modulo. Se il pulsante resta disabilitato, ricarica la pagina.</p>
+            <form id="richiestaForm" method="post" th:action="@{/richieste/nuova}"
+                  th:attr="data-utente=${utenteId},data-csrf-header=${_csrf.headerName},data-csrf-parametro=${_csrf.parameterName}">
+                <fieldset id="campi-invio" class="campi-inattivi" disabled>
+                <legend class="sr-only">Dati della richiesta</legend>
+                <div class="form-group request-create-measure">
+                    <label class="form-label" for="misuraId">Misura di accompagnamento</label>
+                    <select id="misuraId" name="misuraId" class="form-control" required aria-describedby="errore-misuraId">
+                        <option value="">Seleziona una misura</option>
+                        <option th:each="m : ${misure}" th:value="${m.id}" th:text="${m.dati.nome}"></option>
+                    </select>
+                    <p id="errore-misuraId" class="form-text picus-errore"></p>
+                </div>
+
+                <fieldset class="form-group request-create-recipient" aria-describedby="errore-tipoDestinatario">
+                    <legend class="form-label">Destinatario</legend>
+                    <div class="radio-pill-group">
+                        <label class="radio-pill">
+                            <input type="radio" name="tipoDestinatario" value="PERSONA" checked>
+                            <span>Persona</span>
+                        </label>
+                        <label class="radio-pill">
+                            <input type="radio" name="tipoDestinatario" value="NUCLEO">
+                            <span>Nucleo familiare</span>
+                        </label>
+                    </div>
+                    <p id="errore-tipoDestinatario" class="form-text picus-errore"></p>
+                </fieldset>
+
+                <div class="form-group">
+                    <label class="form-label" for="comune">Comune di intervento</label>
+                    <select id="comune" name="comuneCodice" class="form-control" required aria-describedby="errore-comuneCodice">
+                        <option value="">Seleziona un comune</option>
+                        <option th:each="c : ${comuni}" th:value="${c.codice}" th:text="${c.nome}"></option>
+                    </select>
+                    <p id="errore-comuneCodice" class="form-text picus-errore"></p>
+                </div>
+
+                <div class="form-group request-create-description">
+                    <label class="form-label" for="description">Descrizione del bisogno <span class="field-optional">Facoltativa</span></label>
+                    <textarea id="description" name="description" class="form-control" rows="4" maxlength="1000" aria-describedby="privacy-invio errore-description" placeholder="Esigenze logistiche o linguistiche…"></textarea>
+                    <p id="privacy-invio" class="request-privacy">Non inserire dati personali degli assistiti.</p>
+                    <p id="errore-description" class="form-text picus-errore"></p>
+                </div>
+
+            </fieldset>
+                <div class="request-create-actions">
+                    <a href="/opt/dashboard" class="btn btn-secondary">Annulla</a>
+                    <button type="submit" class="btn btn-primary" id="btnInvia" disabled>Invia richiesta <svg class="icon" aria-hidden="true"><use href="/img/icons.svg#arrow"></use></svg></button>
+                </div>
+                <div id="invio-incerto" hidden>
+                    <p class="form-text" role="status">C’è un invio da verificare. Riprova con gli stessi dati oppure controlla <a href="/opt/dashboard">Le mie richieste</a>.</p>
+                    <button type="button" id="nuovo-invio" class="btn btn-secondary">Ho verificato, inizia una nuova richiesta</button>
+                </div>
+                <p id="invii-precedenti" class="form-text" role="status" hidden>Per riprovare un invio precedente, reinserisci gli stessi dati. Verrà usato il suo riferimento originale.</p>
+            </form>
+
+            <p id="errore-invio" class="picus-esito picus-errore" role="alert"></p>
+            <section id="conferma" role="status" tabindex="-1" class="request-created" aria-labelledby="conferma-titolo" hidden>
+                <svg class="request-created-mark" viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="24" r="23"/><path d="m14 24 7 7 14-14"/></svg>
+                <h1 id="conferma-titolo">Richiesta inviata</h1>
+                <p>Il Banco la prenderà in carico.</p>
+                <p class="request-created-summary"><strong id="conferma-misura"></strong><span id="conferma-comune"></span></p>
+                <div class="request-created-actions">
+                    <a id="linkDettaglio" href="#" class="btn btn-primary">Apri dettaglio <svg class="icon" aria-hidden="true"><use href="/img/icons.svg#arrow"></use></svg></a>
+                    <a href="/opt/dashboard" class="btn btn-secondary">Le mie richieste</a>
+                </div>
+            </section>
+        </div>
+    </main>
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

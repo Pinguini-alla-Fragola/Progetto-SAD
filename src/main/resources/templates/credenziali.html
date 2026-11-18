@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Credenziali · PICUS</title>
+    <link rel="icon" href="/img/picus.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/css/picus.css">
+    <script src="/js/credenziali.js" type="module"></script>
+    <link rel="stylesheet" href="/css/integrazione-ui.css">
+</head>
+<body class="flow-page">
+<a th:replace="~{fragments/layout :: skip}" href="#contenuto">Vai al contenuto</a>
+<header class="picus-navbar">
+    <div class="nav-inner">
+        <a th:replace="~{fragments/layout :: brand}" href="/">PICUS</a>
+        <a href="/login" class="nav-link"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#back"></use></svg> Accedi</a>
+    </div>
+</header>
+<main id="contenuto" class="mobile-wrapper credentials" tabindex="-1">
+    <header class="mobile-header">
+        <h1 th:text="${attivazione ? 'Attiva il tuo account' : 'Recupera la password'}"></h1>
+    </header>
+    <div class="mobile-body">
+        <p class="page-description" th:unless="${valido}">Per continuare richiedi un nuovo link usando l’email associata all’account.</p>
+        <form id="credenziali" th:data-endpoint="${endpoint}" data-form-anteprima><fieldset class="campi-inattivi" disabled>
+            <div th:if="${valido}" class="form-group">
+                <input type="hidden" name="token" th:value="${token}">
+                <label class="form-label" for="password">Nuova password</label>
+                <input id="password" class="form-control" name="nuovaPassword" type="password" required
+                       minlength="12" maxlength="256" autocomplete="new-password" aria-describedby="password-help">
+                <p class="form-text" id="password-help">Usa almeno 12 caratteri.</p>
+            </div>
+            <div th:unless="${valido}" class="form-group">
+                <label class="form-label" for="email">Email dell’account</label>
+                <input id="email" class="form-control" type="email" name="email" required autocomplete="email">
+            </div>
+            <span class="azione-inattiva" data-funzione-inattiva><button type="submit" class="btn btn-primary btn-block" th:text="${valido ? 'Salva password' : 'Richiedi un link'}"></button></span>
+            <p id="esito" class="picus-esito" role="status"></p>
+        </fieldset></form>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Area Operatore del Banco · PICUS</title>
+    <link rel="icon" href="/img/picus.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/css/picus.css">
+    <script src="/js/area.js" type="module"></script>
+    <link rel="stylesheet" href="/css/integrazione-ui.css">
+</head>
+<body data-area="operatore" th:attr="data-utente=${utente.id}">
+<a th:replace="~{fragments/layout :: skip}" href="#contenuto">Vai al contenuto</a>
+<header class="picus-navbar workspace-navbar">
+    <div class="nav-inner">
+        <div class="workspace-identity">
+            <button type="button" class="sidebar-toggle" id="sidebar-toggle" aria-controls="workspace-sidebar" aria-expanded="true" aria-label="Chiudi menu di navigazione"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#menu"></use></svg></button>
+            <a th:replace="~{fragments/layout :: brand}" href="/">PICUS</a>
+            <span class="workspace-role">Operatore del Banco</span>
+        </div>
+        <div class="workspace-account"><span class="workspace-user" th:text="${utente.nomeVisualizzato}">Utente</span><button type="button" class="btn btn-secondary btn-sm" id="logout"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#logout"></use></svg><span>Esci</span></button></div>
+    </div>
+</header>
+<button class="sidebar-backdrop" type="button" aria-label="Chiudi menu di navigazione" tabindex="-1" hidden></button>
+<main id="contenuto" class="picus-container area" tabindex="-1">
+    <nav class="area-nav" id="workspace-sidebar" aria-label="Sezioni dell’area di lavoro">
+<a href="#richieste"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#case"></use></svg><span>Disponibilità</span></a>
+<a href="#comunicazioni"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#mail"></use></svg><span>Comunicazioni</span></a>
+<a href="#schede"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#chart"></use></svg><span>Scheda trimestrale</span></a>
+    </nav>
+    <div class="area-content">
+        <header class="area-intro"><h1 id="workspace-title">Disponibilità</h1></header>
+        <p id="area-esito" class="picus-esito" role="status"></p>
+<section class="area-panel" id="richieste" tabindex="-1" aria-label="Disponibilità">
+<div class="panel-heading"><h2 class="picus-card-title">Richieste ricevute</h2><button class="btn btn-secondary btn-sm" type="button" data-aggiorna="avvisi">Aggiorna contatti</button></div><div class="picus-list" id="assegnazioni" aria-live="polite"></div>
+</section>
+<section class="area-panel" id="comunicazioni" tabindex="-1" aria-label="Comunicazioni">
+<h2 class="sr-only">Comunicazioni ricevute</h2><div class="picus-list" id="messaggi" aria-live="polite" data-funzione-inattiva></div>
+</section>
+<section class="area-panel" id="schede" tabindex="-1" aria-label="Scheda trimestrale">
+<div class="workspace-tabs" data-tabs><div class="tab-list" role="tablist" aria-label="Scheda trimestrale">
+<button type="button" role="tab" id="scheda-tab-compila" aria-controls="scheda-view-compila" aria-selected="true" tabindex="0">Compila scheda</button>
+<button type="button" role="tab" id="scheda-tab-inviate" aria-controls="scheda-view-inviate" aria-selected="false" tabindex="-1">Schede inviate</button>
+</div>
+<div role="tabpanel" id="scheda-view-compila" aria-labelledby="scheda-tab-compila" tabindex="0">
+<h2 class="sr-only">Scheda personale trimestrale</h2><form id="scheda" class="picus-form form-layout" data-form-anteprima><fieldset class="campi-inattivi" disabled>
+<fieldset class="form-section"><legend>Periodo</legend><div class="form-section-content"><div class="picus-fields fields-period">
+<label class="campo ">Anno<input class="form-control" name="anno" type="number" required min="2000" max="9999" data-anno></label>
+<label class="campo ">Trimestre<select class="form-control" name="trimestre" required ><option value="1">1º trimestre</option><option value="2">2º trimestre</option><option value="3">3º trimestre</option><option value="4">4º trimestre</option></select></label>
+</div></div></fieldset><fieldset class="form-section"><legend>Dati personali</legend><div class="form-section-content"><div class="picus-fields fields-three">
+<label class="campo ">Nome<input class="form-control" name="nome" type="text" required ></label>
+<label class="campo ">Cognome<input class="form-control" name="cognome" type="text" required ></label>
+<label class="campo ">Codice fiscale<input class="form-control" name="codiceFiscale" type="text" required ></label>
+<label class="campo ">Luogo di nascita<input class="form-control" name="luogoNascita" type="text" ></label>
+<label class="campo ">Data di nascita<input class="form-control" name="dataNascita" type="date" ></label>
+</div></div></fieldset><fieldset class="form-section"><legend>Inquadramento</legend><div class="form-section-content"><div class="picus-fields fields-three">
+<label class="campo ">Qualifica<input class="form-control" name="qualifica" type="text" required ></label>
+<label class="campo ">Contratto<input class="form-control" name="tipoContratto" type="text" required ></label>
+<label class="campo ">Area e livello<input class="form-control" name="areaLivello" type="text" ></label>
+</div></div></fieldset><fieldset class="form-section"><legend>Ore e costo</legend><div class="form-section-content"><div class="picus-fields fields-period">
+<label class="campo ">Ore lavorate<input class="form-control" name="ore" type="number" required min="0" step="0.01"></label>
+<label class="campo ">Costo orario lordo (€)<input class="form-control" name="costoOrario" type="number" required min="0" step="0.01"></label>
+</div></div></fieldset><fieldset class="form-section"><legend>Conteggi dichiarati</legend><div class="form-section-content"><div class="count-head" aria-hidden="true"><span>Voce</span><span>Conteggio</span></div><div id="voci-scheda" class="count-rows"></div><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-secondary btn-sm" type="button" id="altra-voce">Aggiungi voce</button></span></div></fieldset><fieldset class="form-section"><legend>Dichiarazione</legend><div class="form-section-content"><div class="picus-fields fields-one">
+<label class="campo ">Firma dichiarata (facoltativa)<input class="form-control" name="firma" type="text" ></label>
+</div></div></fieldset>
+<div class="form-submit"><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-primary" type="submit">Invia scheda</button></span><p class="picus-esito" role="status"></p></div>
+</fieldset></form>
+</div>
+<div role="tabpanel" id="scheda-view-inviate" aria-labelledby="scheda-tab-inviate" tabindex="0" hidden>
+<h2 class="sr-only">Schede inviate</h2><div class="picus-list" id="schede-mie" aria-live="polite" data-funzione-inattiva></div>
+</div>
+</div>
+</section>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

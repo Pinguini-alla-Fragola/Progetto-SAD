@@ -99,16 +99,17 @@ class SecurityConfig {
                 .sessionManagement(Customizer.withDefaults())
                 .with(new LoginJsonConfigurer(json), Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/api/auth/csrf").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/auth/csrf", "/recupera", "/attiva").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
-                        .requestMatchers("/login", "/error", "/css/**", "/js/**", "/img/**", "/favicon.ico").permitAll()
+                        .requestMatchers("/login", "/error", "/css/**", "/js/**", "/img/**", "/fonts/**", "/favicon.ico").permitAll()
                         // Autorizzazione prima del binding MVC, anche con corpo o UUID malformati.
                         .requestMatchers(HttpMethod.POST, "/api/richieste").hasRole("OPT")
                         .requestMatchers(HttpMethod.GET, "/api/richieste/mie").hasRole("OPT")
                         .requestMatchers(HttpMethod.GET, "/api/contatti-disponibilita/*").hasAnyRole("OPT", "OPERATORE")
                         .requestMatchers(HttpMethod.POST, "/api/contatti-disponibilita/*/risposta").hasAnyRole("OPT", "OPERATORE")
                         .requestMatchers(HttpMethod.POST, "/api/richieste/*/presa-in-carico",
-                                "/api/richieste/*/contatti", "/api/contatti-disponibilita/*/assegnazione").hasRole("BANCO")
+                                "/api/richieste/*/contatti", "/api/contatti-disponibilita/*/assegnazione",
+                                "/api/richieste/*/conferma", "/api/richieste/*/rifiuta").hasRole("BANCO")
                         .requestMatchers(HttpMethod.GET, "/api/richieste/coda", "/api/richieste/*/candidati",
                                 "/api/richieste/*/contatti", "/api/richieste/*/contatti/*").hasRole("BANCO")
                         // ogni ruolo vede solo la propria area

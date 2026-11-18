@@ -1,9 +1,9 @@
 package it.unina.picus.richieste.interno.dominio;
 
 import it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione;
-import it.unina.picus.richieste.api.ConflittoRichiestaException;
 import it.unina.picus.richieste.api.RichiesteApi.ContattoDisponibilita;
 import it.unina.picus.richieste.api.RichiesteApi.DettaglioContatto;
+import it.unina.picus.richieste.api.RichiesteApi.EsitoContatto;
 import it.unina.picus.richieste.api.RisorsaRichiesteNonTrovataException;
 import java.time.Instant;
 import java.util.List;
@@ -29,15 +29,14 @@ public interface ContattiRepository {
     Optional<DettaglioContatto> cercaDettaglio(UUID contattoId);
 
     /**
-     * Registra la risposta mentre il chiamante mantiene il lock sulla pratica.
+     * Persiste l'esito calcolato dal caso d'uso sotto il lock della pratica.
      *
-     * @param contattoId identificativo del contatto in attesa
-     * @param disponibile esito comunicato dal destinatario
+     * @param contattoId identificativo del contatto
+     * @param esito esito da salvare
      * @return contatto con l'esito registrato
      * @throws RisorsaRichiesteNonTrovataException se il contatto non esiste
-     * @throws ConflittoRichiestaException se il contatto ha già un esito definitivo
      */
-    ContattoDisponibilita rispondi(UUID contattoId, boolean disponibile);
+    ContattoDisponibilita registraEsito(UUID contattoId, EsitoContatto esito);
 
     /** Legge il contatto corrente. */
     Optional<ContattoDisponibilita> cerca(UUID contattoId);

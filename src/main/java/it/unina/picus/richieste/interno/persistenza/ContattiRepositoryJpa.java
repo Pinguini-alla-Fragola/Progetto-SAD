@@ -39,9 +39,9 @@ public class ContattiRepositoryJpa implements ContattiRepository {
     }
 
     @Override
-    public ContattoDisponibilita rispondi(UUID id, boolean disponibile) {
+    public ContattoDisponibilita registraEsito(UUID id, EsitoContatto esito) {
         var contatto = contatti.findById(id).orElseThrow(RisorsaRichiesteNonTrovataException::new);
-        contatto.registraRisposta(disponibile);
+        contatto.aggiornaEsito(esito);
         return aDto(contatto);
     }
 

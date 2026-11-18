@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.util.UUID;
 
 import it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione;
-import it.unina.picus.richieste.api.ConflittoRichiestaException;
 import it.unina.picus.richieste.api.RichiesteApi.EsitoContatto;
 
 import jakarta.persistence.Column;
@@ -99,17 +98,11 @@ public class ContattoDisponibilitaJpa {
     }
 
     /**
-     * Registra l'esito di un contatto ancora in attesa.
+     * Aggiorna la colonna che rappresenta l'esito del contatto.
      *
-     * <p>Il chiamante deve mantenere il lock sulla richiesta nella stessa transazione.
-     *
-     * @param disponibile {@code true} per confermare, {@code false} per rifiutare
-     * @throws ConflittoRichiestaException se il contatto ha già ricevuto una risposta
+     * @param nuovoEsito esito determinato dal caso d'uso
      */
-    public void registraRisposta(boolean disponibile) {
-        if (getEsito() != EsitoContatto.IN_ATTESA) {
-            throw new ConflittoRichiestaException("Il contatto non è in attesa di risposta");
-        }
-        esito = (disponibile ? EsitoContatto.DISPONIBILE : EsitoContatto.NON_DISPONIBILE).name();
+    void aggiornaEsito(EsitoContatto nuovoEsito) {
+        esito = nuovoEsito.name();
     }
 }

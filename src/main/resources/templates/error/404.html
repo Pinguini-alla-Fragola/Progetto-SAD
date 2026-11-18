@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Pagina non trovata (404) · PICUS</title>
+    <link rel="icon" href="/img/picus.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/css/picus.css">
+</head>
+<body class="error-page">
+<a th:replace="~{fragments/layout :: skip}" href="#contenuto">Vai al contenuto</a>
+<header class="picus-navbar">
+    <div class="nav-inner"><a th:replace="~{fragments/layout :: brand}" href="/">PICUS</a></div>
+</header>
+<main id="contenuto" class="error-shell" tabindex="-1">
+    <p class="error-code" aria-hidden="true">404</p>
+    <div class="error-content">
+        <h1>Pagina non trovata</h1>
+        <p>Il collegamento potrebbe essere cambiato oppure la pagina non è più disponibile.</p>
+        <p>Puoi tornare alla tua area di lavoro o ripartire dal login.</p>
+        <div class="picus-actions">
+            <a href="/dashboard" class="btn btn-primary">Torna all’area di lavoro</a>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="btn btn-secondary" title="Chiude la sessione attuale e apre il login">Vai al login</button>
+            </form>
+        </div>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
