@@ -4,31 +4,36 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.jayway.jsonpath.JsonPath;
 
-import it.unina.picus.AccessoDiProva;
-import it.unina.picus.DatiDiProva;
-import it.unina.picus.SessioneDiProva;
-import it.unina.picus.TestIntegrazionePostgres;
-
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+
+import javax.sql.DataSource;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -45,30 +50,44 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 
+import it.unina.picus.shared.AccessoDiProva;
+import it.unina.picus.shared.DatiSintetici;
+import it.unina.picus.shared.IntegrazionePostgresql;
+import it.unina.picus.shared.SessioneDiProva;
+
 /**
  * Test di integrazione della user story #51 «Risposta alla richiesta di disponibilità»,
  * richiesti dalla #92: endpoint HTTP reali, login reale e PostgreSQL.
  *
- * Ogni test riporta nel nome l'Acceptance Criteria della #51 che verifica (AC1..AC4).
+ * <p>Ogni test riporta nel nome l'Acceptance Criteria della #51 che verifica (AC1..AC4).
  * I test marcati «#92» coprono i criteri di completamento della task che la user story non
- * esprime: doppio invio, stato non consentito, sessione. La migrazione è in
- * {@code MigrazioneContattiDisponibilitaTest}.
+ * esprime: doppio invio, stato non consentito, sessione e percorso della UI. La migrazione è
+ * in {@code MigrazioneContattiDisponibilitaTest}.</p>
  *
- * Ogni {@code 409} viene verificato anche nel corpo: dalla #124 il modulo Richieste risponde
- * con l'errore JSON comune ({@code codice}, {@code messaggio}, {@code campi}) e senza dati
- * della pratica.
- *
- * Lo scenario nasce dal flusso dell'applicazione: la OPT titolare invia la richiesta, il
+ * <p>Lo scenario nasce dal flusso dell'applicazione: la OPT titolare invia la richiesta, il
  * Banco la prende in carico e interpella un candidato (#48, #49). Ogni attore accede con il
- * login reale (#25) e opera nella propria sessione. Si inseriscono nel database soltanto
- * account, profili, offerte e misure, che l'applicazione non permette ancora di creare.
+ * login reale (#25) e opera nella propria sessione. Nel database si inseriscono con
+ * {@link DatiSintetici} soltanto account, profili e offerte, che l'applicazione non permette
+ * ancora di creare.</p>
+ *
+ * <p>Visibilità e persistenza hanno verifiche distinte: l'esito mostrato al Banco si legge
+ * dalle sue API, quello registrato si legge dalla riga su PostgreSQL. Ogni {@code 409} viene
+ * verificato anche nel corpo: dalla #124 il modulo Richieste risponde con l'errore JSON comune
+ * ({@code codice}, {@code messaggio}, {@code campi}) e senza dati della pratica.</p>
  */
-@TestIntegrazionePostgres
+@IntegrazionePostgresql
 @DisplayName("#51 Risposta alla richiesta di disponibilità: integrazione su HTTP e PostgreSQL")
 @Tag("issue-51")
 class RispostaDisponibilitaIntegrazioneTest {
 
     private static final String DESCRIZIONE_RISERVATA = "Descrizione riservata a titolare e Banco";
+
+    /**
+     * Risposte inviate insieme nel test di concorrenza. Durante l'attesa del lock ognuna occupa
+     * una connessione: con quella del test e quella del controllo restano sotto il pool
+     * predefinito di Hikari (10).
+     */
+    private static final int INVII_CONCORRENTI = 6;
 
     /** Account diversi dal destinatario del contatto. */
     enum Estraneo {
@@ -86,9 +105,12 @@ class RispostaDisponibilitaIntegrazioneTest {
     private JdbcTemplate jdbc;
 
     @Autowired
+    private DataSource dataSource;
+
+    @Autowired
     private PasswordEncoder encoder;
 
-    private DatiDiProva dati;
+    private DatiSintetici dati;
     private AccessoDiProva accesso;
     private final Map<UUID, SessioneDiProva> sessioni = new HashMap<>();
 
@@ -101,6 +123,7 @@ class RispostaDisponibilitaIntegrazioneTest {
     private UUID operatoreEstraneo;
     private UUID richiestaId;
     private UUID contattoId;
+    private String nomeMisura;
 
     /**
      * Given comune: una richiesta inviata dalla OPT titolare, presa in carico dal Banco, con una
@@ -108,17 +131,19 @@ class RispostaDisponibilitaIntegrazioneTest {
      */
     @BeforeEach
     void preparaRichiestaDiDisponibilita() throws Exception {
-        dati = new DatiDiProva(jdbc);
+        dati = new DatiSintetici(jdbc);
+        dati.svuota();
         accesso = new AccessoDiProva(mvc, jdbc, encoder);
         sessioni.clear();
 
-        misuraId = dati.creaMisura();
-        banco = dati.creaAccount("BANCO", "Banco di prova");
-        titolare = dati.creaOptConProfilo("OPT titolare");
-        destinatario = dati.creaOptErogatrice("OPT destinataria", misuraId);
-        altraCandidata = dati.creaOptErogatrice("OPT candidata non interpellata", misuraId);
-        optEstranea = dati.creaOptConProfilo("OPT estranea");
-        operatoreEstraneo = dati.creaOperatore("Operatore estraneo");
+        misuraId = dati.misura("M01");
+        nomeMisura = jdbc.queryForObject("select nome from catalogo_misure where id = ?", String.class, misuraId);
+        banco = dati.banco("Banco di prova");
+        titolare = dati.opt("OPT titolare", "napoli");
+        destinatario = optErogatrice("OPT destinataria");
+        altraCandidata = optErogatrice("OPT candidata non interpellata");
+        optEstranea = dati.opt("OPT estranea", "napoli");
+        operatoreEstraneo = dati.operatore("Operatore estraneo", "INTERNO_BANCO", "napoli", false);
 
         richiestaId = inviaEPrendiInCarico();
         contattoId = interpella(richiestaId, destinatario);
@@ -129,46 +154,19 @@ class RispostaDisponibilitaIntegrazioneTest {
     @Test
     @DisplayName("AC1 - la OPT interpellata apre la notifica e consulta i soli dati necessari")
     void ac1_optApreLaNotificaEConsultaIDati() throws Exception {
-        come(destinatario).get("/api/avvisi")
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[?(@.contattoId == '" + contattoId + "')]", hasSize(1)))
-                .andExpect(jsonPath("$[?(@.contattoId == '" + contattoId + "')].tipo", hasItem("RICHIESTA_DISPONIBILITA")))
-                .andExpect(jsonPath("$[?(@.contattoId == '" + contattoId + "')].richiestaId",
-                        hasItem(richiestaId.toString())));
-
-        come(destinatario).get("/api/contatti-disponibilita/{id}", contattoId)
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.contatto.id").value(contattoId.toString()))
-                .andExpect(jsonPath("$.contatto.richiestaId").value(richiestaId.toString()))
-                .andExpect(jsonPath("$.contatto.erogatoreId").value(destinatario.toString()))
-                .andExpect(jsonPath("$.contatto.ambito").value("STESSO_COMUNE"))
-                .andExpect(jsonPath("$.contatto.esito").value("IN_ATTESA"))
-                .andExpect(jsonPath("$.misuraId").value(Math.toIntExact(misuraId)))
-                .andExpect(jsonPath("$.nomeMisura").value(DatiDiProva.NOME_MISURA_DI_PROVA))
-                .andExpect(jsonPath("$.tipoDestinatario").value("PERSONA"))
-                .andExpect(jsonPath("$.comuneCodice").value("napoli"))
-                // nient'altro: né descrizione riservata né riferimento alla OPT titolare
-                .andExpect(jsonPath("$.*", hasSize(5)))
-                .andExpect(jsonPath("$.contatto.*", hasSize(5)))
-                .andExpect(content().string(not(containsString(DESCRIZIONE_RISERVATA))))
-                .andExpect(content().string(not(containsString(titolare.toString()))));
+        assertNotificaRicevuta(come(destinatario), contattoId, richiestaId);
+        assertDettaglioEssenziale(come(destinatario), contattoId, richiestaId, destinatario);
     }
 
-    @Test
-    @DisplayName("AC1 - l'operatore del Banco interpellato apre la notifica dal proprio account personale")
-    void ac1_operatoreApreLaNotificaEConsultaIDati() throws Exception {
-        UUID operatore = dati.creaOperatoreErogatore("Operatore destinatario", misuraId);
+    @ParameterizedTest(name = "AC1 - l''operatore {0} interpellato apre la notifica e consulta i soli dati necessari")
+    @ValueSource(strings = {"INTERNO_BANCO", "ESTERNO_PAGATO_BANCO"})
+    void ac1_operatoreApreLaNotificaEConsultaIDati(String tipologia) throws Exception {
+        UUID operatore = dati.operatore("Operatore destinatario", tipologia, "napoli", false, misuraId);
         UUID altraRichiesta = inviaEPrendiInCarico();
         UUID contattoOperatore = interpella(altraRichiesta, operatore);
 
-        come(operatore).get("/api/avvisi")
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[?(@.contattoId == '" + contattoOperatore + "')]", hasSize(1)));
-        come(operatore).get("/api/contatti-disponibilita/{id}", contattoOperatore)
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.contatto.erogatoreId").value(operatore.toString()))
-                .andExpect(jsonPath("$.misuraId").value(Math.toIntExact(misuraId)))
-                .andExpect(jsonPath("$.comuneCodice").value("napoli"));
+        assertNotificaRicevuta(come(operatore), contattoOperatore, altraRichiesta);
+        assertDettaglioEssenziale(come(operatore), contattoOperatore, altraRichiesta, operatore);
     }
 
     @Test
@@ -206,15 +204,15 @@ class RispostaDisponibilitaIntegrazioneTest {
                 .andExpect(jsonPath("$[0].id").value(contattoId.toString()))
                 .andExpect(jsonPath("$[0].erogatoreId").value(destinatario.toString()))
                 .andExpect(jsonPath("$[0].esito").value("DISPONIBILE"));
-        assertEquals("DISPONIBILE", esitoVistoDalBanco(contattoId));
-        assertRichiestaPresaInCaricoSenzaErogatore();
+        assertEsitoVisibileEPersistito(richiestaId, contattoId, "DISPONIBILE");
+        assertRichiestaPresaInCaricoSenzaErogatore(richiestaId);
     }
 
     @Test
     @DisplayName("AC2 - la richiesta lascia Presa in carico solo con l'assegnazione del Banco (#49)")
     void ac2_soloLAssegnazioneFaAvanzareLaRichiesta() throws Exception {
         rispondi(come(destinatario), contattoId, true).andExpect(status().isOk());
-        assertRichiestaPresaInCaricoSenzaErogatore();
+        assertRichiestaPresaInCaricoSenzaErogatore(richiestaId);
 
         come(banco).post("/api/contatti-disponibilita/{id}/assegnazione", null, contattoId)
                 .andExpect(status().isOk())
@@ -223,12 +221,16 @@ class RispostaDisponibilitaIntegrazioneTest {
         come(banco).get("/api/richieste/{id}", richiestaId)
                 .andExpect(jsonPath("$.richiesta.stato").value("IN_PROGRAMMAZIONE"))
                 .andExpect(jsonPath("$.erogatoreAssegnatoId").value(destinatario.toString()));
+
+        assertAll("richiesta su PostgreSQL",
+                () -> assertEquals("IN_PROGRAMMAZIONE", dati.stato(richiestaId)),
+                () -> assertEquals(destinatario, dati.erogatoreAssegnato(richiestaId)));
     }
 
-    @Test
-    @DisplayName("AC2 - risponde anche l'operatore del Banco interpellato")
-    void ac2_disponibilitaDellOperatore() throws Exception {
-        UUID operatore = dati.creaOperatoreErogatore("Operatore destinatario", misuraId);
+    @ParameterizedTest(name = "AC2 - risponde anche l''operatore {0} interpellato")
+    @ValueSource(strings = {"INTERNO_BANCO", "ESTERNO_PAGATO_BANCO"})
+    void ac2_disponibilitaDellOperatore(String tipologia) throws Exception {
+        UUID operatore = dati.operatore("Operatore destinatario", tipologia, "napoli", false, misuraId);
         UUID altraRichiesta = inviaEPrendiInCarico();
         UUID contattoOperatore = interpella(altraRichiesta, operatore);
 
@@ -237,9 +239,10 @@ class RispostaDisponibilitaIntegrazioneTest {
                 .andExpect(jsonPath("$.esito").value("DISPONIBILE"));
 
         come(banco).get("/api/richieste/{id}/contatti", altraRichiesta)
-                .andExpect(jsonPath("$[0].esito").value("DISPONIBILE"));
-        come(banco).get("/api/richieste/{id}", altraRichiesta)
-                .andExpect(jsonPath("$.richiesta.stato").value("PRESA_IN_CARICO"));
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].erogatoreId").value(operatore.toString()));
+        assertEsitoVisibileEPersistito(altraRichiesta, contattoOperatore, "DISPONIBILE");
+        assertRichiestaPresaInCaricoSenzaErogatore(altraRichiesta);
     }
 
     // ------------------------------------------------------------------ AC3
@@ -255,7 +258,8 @@ class RispostaDisponibilitaIntegrazioneTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].esito").value("NON_DISPONIBILE"));
-        assertRichiestaPresaInCaricoSenzaErogatore();
+        assertEsitoVisibileEPersistito(richiestaId, contattoId, "NON_DISPONIBILE");
+        assertRichiestaPresaInCaricoSenzaErogatore(richiestaId);
         // la OPT richiedente continua a vedere la richiesta originaria in lavorazione
         come(titolare).get("/api/richieste/{id}", richiestaId)
                 .andExpect(jsonPath("$.richiesta.stato").value("PRESA_IN_CARICO"));
@@ -283,7 +287,9 @@ class RispostaDisponibilitaIntegrazioneTest {
                 .andExpect(jsonPath("$[0].esito").value("NON_DISPONIBILE"))
                 .andExpect(jsonPath("$[1].id").value(secondoContatto.toString()))
                 .andExpect(jsonPath("$[1].esito").value("DISPONIBILE"));
-        assertRichiestaPresaInCaricoSenzaErogatore();
+        assertEsitoVisibileEPersistito(richiestaId, contattoId, "NON_DISPONIBILE");
+        assertEsitoVisibileEPersistito(richiestaId, secondoContatto, "DISPONIBILE");
+        assertRichiestaPresaInCaricoSenzaErogatore(richiestaId);
     }
 
     // ------------------------------------------------------------------ AC4
@@ -310,6 +316,7 @@ class RispostaDisponibilitaIntegrazioneTest {
         assertContattoInAttesaERichiestaPresaInCarico();
         // il diniego non ha consumato il contatto: il destinatario può ancora rispondere
         rispondi(come(destinatario), contattoId, true).andExpect(status().isOk());
+        assertEsitoVisibileEPersistito(richiestaId, contattoId, "DISPONIBILE");
     }
 
     @Test
@@ -342,7 +349,7 @@ class RispostaDisponibilitaIntegrazioneTest {
         SessioneDiProva sessioneDelDestinatario = come(destinatario);
         sessioneDelDestinatario.get("/api/contatti-disponibilita/{id}", contattoId).andExpect(status().isOk());
 
-        dati.revoca(destinatario);
+        dati.impostaStatoAccount(destinatario, "REVOCATO");
 
         rispondi(sessioneDelDestinatario, contattoId, true).andExpect(status().isUnauthorized());
         sessioneDelDestinatario.get("/api/contatti-disponibilita/{id}", contattoId)
@@ -360,38 +367,49 @@ class RispostaDisponibilitaIntegrazioneTest {
         assertConflittoSenzaDatiDellaPratica(rispondi(come(destinatario), contattoId, true));
         assertConflittoSenzaDatiDellaPratica(rispondi(come(destinatario), contattoId, false));
 
-        assertEquals("NON_DISPONIBILE", esitoVistoDalBanco(contattoId));
+        assertEsitoVisibileEPersistito(richiestaId, contattoId, "NON_DISPONIBILE");
+        assertEquals(1, dati.contatti(richiestaId), "nessun contatto in più su PostgreSQL");
         come(banco).get("/api/richieste/{id}/contatti", richiestaId).andExpect(jsonPath("$", hasSize(1)));
     }
 
+    /**
+     * Il test tiene il lock della riga della richiesta, lo stesso che il servizio acquisisce
+     * prima di leggere l'esito del contatto. Le risposte partono e si fermano su quel lock: il
+     * test attende di osservarle tutte in attesa su PostgreSQL, quindi contemporaneamente in
+     * corso nel punto in cui si decide l'esito, e solo allora rilascia il lock.
+     */
     @Test
-    @DisplayName("#92 - risposte concorrenti: una sola riceve 200, le altre 409 con l'errore JSON, un solo esito persistito")
+    @DisplayName("#92 - risposte concorrenti ferme sul lock della richiesta: una sola riceve 200, le altre 409, un solo esito persistito")
     void doppioInvioConcorrente() throws Exception {
-        int invii = 8;
         // una sessione per invio, come lo stesso account aperto su più dispositivi
         List<SessioneDiProva> sessioniDelDestinatario = new ArrayList<>();
-        for (int i = 0; i < invii; i++) {
+        for (int i = 0; i < INVII_CONCORRENTI; i++) {
             sessioniDelDestinatario.add(accesso.accedi(destinatario));
         }
 
-        ExecutorService esecutore = Executors.newFixedThreadPool(invii);
-        CountDownLatch via = new CountDownLatch(1);
+        ExecutorService esecutore = Executors.newFixedThreadPool(INVII_CONCORRENTI);
         List<Future<MvcResult>> esiti = new ArrayList<>();
         try {
-            for (int i = 0; i < invii; i++) {
-                SessioneDiProva sessione = sessioniDelDestinatario.get(i);
-                boolean disponibile = i % 2 == 0;
-                esiti.add(esecutore.submit(() -> {
-                    via.await();
-                    return rispondi(sessione, contattoId, disponibile).andReturn();
-                }));
+            try (Connection blocco = dataSource.getConnection()) {
+                blocco.setAutoCommit(false);
+                int processoDelBlocco = bloccaRichiesta(blocco, richiestaId);
+                try {
+                    for (int i = 0; i < INVII_CONCORRENTI; i++) {
+                        SessioneDiProva sessione = sessioniDelDestinatario.get(i);
+                        boolean disponibile = i % 2 == 0;
+                        esiti.add(esecutore.submit(() -> rispondi(sessione, contattoId, disponibile).andReturn()));
+                    }
+                    attendiRisposteFermeSulLock(processoDelBlocco, INVII_CONCORRENTI);
+                    assertEquals("IN_ATTESA", dati.esitoContatto(contattoId),
+                            "nessuna risposta registrata prima del rilascio del lock");
+                } finally {
+                    blocco.rollback();
+                }
             }
-            via.countDown();
-
             int accettate = 0;
             int inConflitto = 0;
             boolean disponibileAccettato = false;
-            for (int i = 0; i < invii; i++) {
+            for (int i = 0; i < INVII_CONCORRENTI; i++) {
                 MvcResult esito = esiti.get(i).get(30, TimeUnit.SECONDS);
                 int stato = esito.getResponse().getStatus();
                 if (stato == 200) {
@@ -405,16 +423,15 @@ class RispostaDisponibilitaIntegrazioneTest {
             }
 
             assertEquals(1, accettate, "una sola risposta deve essere accettata");
-            assertEquals(invii - 1, inConflitto, "tutte le altre devono ricevere 409 Conflict");
-            assertEquals(
-                    disponibileAccettato ? "DISPONIBILE" : "NON_DISPONIBILE",
-                    esitoVistoDalBanco(contattoId),
-                    "l'esito persistito deve essere quello della risposta accettata");
+            assertEquals(INVII_CONCORRENTI - 1, inConflitto, "tutte le altre devono ricevere 409 Conflict");
+            assertEsitoVisibileEPersistito(richiestaId, contattoId,
+                    disponibileAccettato ? "DISPONIBILE" : "NON_DISPONIBILE");
         } finally {
             esecutore.shutdownNow();
         }
+        assertEquals(1, dati.contatti(richiestaId), "nessun contatto in più su PostgreSQL");
         come(banco).get("/api/richieste/{id}/contatti", richiestaId).andExpect(jsonPath("$", hasSize(1)));
-        assertRichiestaPresaInCaricoSenzaErogatore();
+        assertRichiestaPresaInCaricoSenzaErogatore(richiestaId);
     }
 
     @Test
@@ -426,7 +443,7 @@ class RispostaDisponibilitaIntegrazioneTest {
 
         assertConflittoSenzaDatiDellaPratica(rispondi(come(destinatario), contattoId, false));
 
-        assertEquals("DISPONIBILE", esitoVistoDalBanco(contattoId));
+        assertEsitoVisibileEPersistito(richiestaId, contattoId, "DISPONIBILE");
     }
 
     @ParameterizedTest(name = "#92 - con la richiesta in stato {0} la risposta riceve 409 e il contatto resta in attesa")
@@ -434,13 +451,57 @@ class RispostaDisponibilitaIntegrazioneTest {
     void rispostaFuoriDalloStatoConsentito(String stato) throws Exception {
         // Un contatto in attesa su una richiesta non Presa in carico non è raggiungibile dalle
         // operazioni disponibili: lo stato viene forzato nel database per provare la difesa del server.
-        dati.impostaStato(richiestaId, stato);
+        forzaStato(richiestaId, stato);
 
         assertConflittoSenzaDatiDellaPratica(rispondi(come(destinatario), contattoId, true));
 
-        assertAll(
+        assertAll("dati su PostgreSQL",
                 () -> assertEquals("IN_ATTESA", dati.esitoContatto(contattoId)),
-                () -> assertEquals(stato, dati.statoRichiesta(richiestaId)));
+                () -> assertEquals(stato, dati.stato(richiestaId)));
+    }
+
+    // ------------------------------------------------------------------ #92: percorso della UI
+
+    /**
+     * Criterio 5 della #92, lato server: le pagine e le chiamate che la UI della #91 esegue,
+     * nell'ordine del percorso, con login reale. Il riquadro dell'area di lavoro carica gli
+     * avvisi e il dettaglio di ciascun contatto; «Rispondi» apre la pagina del contatto; il
+     * Banco apre lo storico della richiesta. Resa grafica e uso da mobile si verificano a mano
+     * sulla demo.
+     */
+    @Test
+    @DisplayName("#92 - percorso della UI: dalla notifica nell'area di lavoro alla risposta, fino allo storico del Banco")
+    void percorsoDellaUiDallaNotificaAlloStoricoDelBanco() throws Exception {
+        SessioneDiProva opt = come(destinatario);
+        opt.get("/dashboard")
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/opt/dashboard"));
+        opt.get("/opt/dashboard")
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
+                .andExpect(content().string(containsString("id=\"assegnazioni\"")));
+        assertNotificaRicevuta(opt, contattoId, richiestaId);
+        opt.get("/api/contatti-disponibilita/{id}", contattoId)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.contatto.esito").value("IN_ATTESA"));
+
+        opt.get("/richieste/contatti/{id}", contattoId)
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
+                .andExpect(content().string(containsString("data-contatto-id=\"" + contattoId + "\"")))
+                .andExpect(content().string(containsString("data-contatti-disponibili=\"true\"")));
+        rispondi(opt, contattoId, false).andExpect(status().isOk());
+
+        come(banco).get("/banco/richieste/{id}/contatti", richiestaId)
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
+                .andExpect(content().string(containsString("data-richiesta-id=\"" + richiestaId + "\"")))
+                .andExpect(content().string(containsString("data-contatti-disponibili=\"true\"")));
+        come(banco).get("/api/richieste/{id}/contatti", richiestaId)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].esito").value("NON_DISPONIBILE"));
+        assertEsitoVisibileEPersistito(richiestaId, contattoId, "NON_DISPONIBILE");
     }
 
     // ------------------------------------------------------------------ passi del flusso
@@ -453,6 +514,13 @@ class RispostaDisponibilitaIntegrazioneTest {
             sessioni.put(account, sessione);
         }
         return sessione;
+    }
+
+    /** OPT di Napoli che offre la misura: compare fra i candidati dello stesso comune. */
+    private UUID optErogatrice(String nome) {
+        UUID opt = dati.opt(nome, "napoli");
+        dati.offerta(opt, misuraId);
+        return opt;
     }
 
     /** La OPT titolare invia una richiesta per la misura di prova e il Banco la prende in carico. */
@@ -497,14 +565,121 @@ class RispostaDisponibilitaIntegrazioneTest {
         };
     }
 
+    /**
+     * Forza lo stato della richiesta, per provare la difesa del server su stati che il flusso non
+     * permette di raggiungere. Per {@code CONFERMATA} completa anche erogatore e accordo, che i
+     * vincoli della V14 rendono obbligatori: come erogatore usa il destinatario del contatto.
+     */
+    private void forzaStato(UUID richiesta, String stato) {
+        if (!"CONFERMATA".equals(stato)) {
+            jdbc.update("update richieste set stato = ? where id = ?", stato, richiesta);
+            return;
+        }
+        jdbc.update("""
+                update richieste r set stato = 'CONFERMATA',
+                       erogatore_id = coalesce(r.erogatore_id, (select c.erogatore_id
+                                                                from richieste_contatti_disponibilita c
+                                                                where c.richiesta_id = r.id
+                                                                order by c.inviato_il desc limit 1)),
+                       erogatore_ambito = coalesce(r.erogatore_ambito, 'STESSO_COMUNE'),
+                       accordo_modalita = 'IN_PRESENZA', accordo_data_ora = now() + interval '30 days',
+                       accordo_luogo = 'Sede di esempio', accordo_nome_referente = 'Nome',
+                       accordo_cognome_referente = 'Cognome', accordo_telefono_referente = '+39 000 0000000',
+                       accordo_link = null
+                where r.id = ?
+                """, richiesta);
+    }
+
+    /**
+     * Blocca la riga della richiesta nella transazione della connessione indicata.
+     *
+     * @return identificativo del processo PostgreSQL che tiene il lock
+     */
+    private static int bloccaRichiesta(Connection connessione, UUID richiesta) throws SQLException {
+        try (PreparedStatement blocca = connessione.prepareStatement("select id from richieste where id = ? for update")) {
+            blocca.setObject(1, richiesta);
+            try (ResultSet riga = blocca.executeQuery()) {
+                assertTrue(riga.next(), "la richiesta da bloccare esiste");
+            }
+        }
+        try (Statement interrogazione = connessione.createStatement();
+             ResultSet processo = interrogazione.executeQuery("select pg_backend_pid()")) {
+            assertTrue(processo.next());
+            return processo.getInt(1);
+        }
+    }
+
+    /**
+     * Attende che le transazioni in attesa dietro il lock siano almeno quelle indicate. La
+     * prima aspetta direttamente il processo del blocco, le successive si accodano dietro la
+     * prima: per questo la catena delle attese si segue in modo ricorsivo.
+     */
+    private void attendiRisposteFermeSulLock(int processoDelBlocco, int attese) throws InterruptedException {
+        long scadenza = System.nanoTime() + TimeUnit.SECONDS.toNanos(30);
+        int inAttesa;
+        do {
+            inAttesa = jdbc.queryForObject("""
+                    with recursive in_attesa(pid) as (
+                        select a.pid from pg_stat_activity a where ? = any(pg_blocking_pids(a.pid))
+                        union
+                        select a.pid from pg_stat_activity a join in_attesa b on b.pid = any(pg_blocking_pids(a.pid))
+                    )
+                    select count(*) from in_attesa
+                    """, Integer.class, processoDelBlocco);
+            if (inAttesa >= attese) {
+                return;
+            }
+            Thread.sleep(20);
+        } while (System.nanoTime() < scadenza);
+        fail("dopo 30 secondi solo " + inAttesa + " risposte su " + attese + " attendono il lock della richiesta");
+    }
+
     // ------------------------------------------------------------------ verifiche ricorrenti
 
+    private void assertNotificaRicevuta(SessioneDiProva sessione, UUID contatto, UUID richiesta) throws Exception {
+        String filtro = "$[?(@.contattoId == '" + contatto + "')]";
+        sessione.get("/api/avvisi")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath(filtro, hasSize(1)))
+                .andExpect(jsonPath(filtro + ".tipo", hasItem("RICHIESTA_DISPONIBILITA")))
+                .andExpect(jsonPath(filtro + ".richiestaId", hasItem(richiesta.toString())));
+    }
+
+    /**
+     * Il destinatario riceve soltanto contatto, misura, tipo di destinatario e comune: né la
+     * descrizione riservata né il riferimento alla OPT titolare.
+     */
+    private void assertDettaglioEssenziale(SessioneDiProva sessione, UUID contatto, UUID richiesta, UUID erogatore)
+            throws Exception {
+        sessione.get("/api/contatti-disponibilita/{id}", contatto)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.contatto.id").value(contatto.toString()))
+                .andExpect(jsonPath("$.contatto.richiestaId").value(richiesta.toString()))
+                .andExpect(jsonPath("$.contatto.erogatoreId").value(erogatore.toString()))
+                .andExpect(jsonPath("$.contatto.ambito").value("STESSO_COMUNE"))
+                .andExpect(jsonPath("$.contatto.esito").value("IN_ATTESA"))
+                .andExpect(jsonPath("$.misuraId").value(Math.toIntExact(misuraId)))
+                .andExpect(jsonPath("$.nomeMisura").value(nomeMisura))
+                .andExpect(jsonPath("$.tipoDestinatario").value("PERSONA"))
+                .andExpect(jsonPath("$.comuneCodice").value("napoli"))
+                .andExpect(jsonPath("$.*", hasSize(5)))
+                .andExpect(jsonPath("$.contatto.*", hasSize(5)))
+                .andExpect(content().string(not(containsString(DESCRIZIONE_RISERVATA))))
+                .andExpect(content().string(not(containsString(titolare.toString()))));
+    }
+
     /** Esito del contatto come lo vede il Banco dall'applicazione. */
-    private String esitoVistoDalBanco(UUID contatto) throws Exception {
-        String corpo = come(banco).get("/api/richieste/{id}/contatti/{contatto}", richiestaId, contatto)
+    private String esitoVistoDalBanco(UUID richiesta, UUID contatto) throws Exception {
+        String corpo = come(banco).get("/api/richieste/{id}/contatti/{contatto}", richiesta, contatto)
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
         return JsonPath.read(corpo, "$.esito");
+    }
+
+    /** Due verifiche distinte: l'esito mostrato al Banco e quello registrato su PostgreSQL. */
+    private void assertEsitoVisibileEPersistito(UUID richiesta, UUID contatto, String esito) throws Exception {
+        assertEquals(esito, esitoVistoDalBanco(richiesta, contatto), "esito mostrato al Banco");
+        assertEquals(esito, dati.esitoContatto(contatto), "esito registrato su PostgreSQL");
     }
 
     /**
@@ -527,15 +702,18 @@ class RispostaDisponibilitaIntegrazioneTest {
         }
     }
 
-    private void assertRichiestaPresaInCaricoSenzaErogatore() throws Exception {
-        come(banco).get("/api/richieste/{id}", richiestaId)
+    private void assertRichiestaPresaInCaricoSenzaErogatore(UUID richiesta) throws Exception {
+        come(banco).get("/api/richieste/{id}", richiesta)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.richiesta.stato").value("PRESA_IN_CARICO"))
                 .andExpect(jsonPath("$.erogatoreAssegnatoId").doesNotExist());
+        assertAll("richiesta su PostgreSQL",
+                () -> assertEquals("PRESA_IN_CARICO", dati.stato(richiesta)),
+                () -> assertNull(dati.erogatoreAssegnato(richiesta)));
     }
 
     private void assertContattoInAttesaERichiestaPresaInCarico() throws Exception {
-        assertEquals("IN_ATTESA", esitoVistoDalBanco(contattoId));
-        assertRichiestaPresaInCaricoSenzaErogatore();
+        assertEsitoVisibileEPersistito(richiestaId, contattoId, "IN_ATTESA");
+        assertRichiestaPresaInCaricoSenzaErogatore(richiestaId);
     }
 }

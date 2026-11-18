@@ -1,4 +1,4 @@
-package it.unina.picus;
+package it.unina.picus.shared;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
