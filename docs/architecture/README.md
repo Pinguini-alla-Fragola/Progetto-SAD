@@ -11,7 +11,7 @@
 - [Walking skeleton 4 di 4 · Conferma o rifiuto](diagrams/PICUS-Walking-Skeleton-4-Esito.puml) · [PNG](diagrams/PICUS-Walking-Skeleton-4-Esito.png) · [SVG](diagrams/PICUS-Walking-Skeleton-4-Esito.svg)
 - [PICUS - Schema ER PostgreSQL](diagrams/PICUS-Schema-ER.puml) · [Anteprima PNG](diagrams/PICUS-Schema-ER.png)
 - [C&C · CC-01 Struttura runtime](diagrams/C%26C/Diagramma-C%26C.puml) · [PNG](diagrams/C%26C/Diagramma-C%26C.png) · [SVG](diagrams/C%26C/Diagramma-C%26C.svg)
-- [C&C · CC-02 Ingresso web e accesso ai dati](diagrams/C%26C/Monolite-C%26C.puml) · [PNG](diagrams/C%26C/Monolite-C%26C.png) · [SVG](diagrams/C%26C/Monolite-C%26C.svg)
+- [C&C · CC-02 Ingresso web e accesso ai dati](diagrams/C%26C/Monolite-C%26C.dot) · [PNG](diagrams/C%26C/Monolite-C%26C.png) · [SVG](diagrams/C%26C/Monolite-C%26C.svg)
 - [C&C · CC-03 Collaborazioni tra componenti applicativi](diagrams/C%26C/Collaborazioni-C%26C.puml) · [PNG](diagrams/C%26C/Collaborazioni-C%26C.png) · [SVG](diagrams/C%26C/Collaborazioni-C%26C.svg)
 
 La vista dei moduli riprende i package di `src/main/java` presenti in `main` al commit `f3c4e95`. Le dipendenze `«import»` corrispondono agli import Java delle API; le dipendenze `«use»` rappresentano le collaborazioni previste con `ComunicazioniApi` e `CatalogoApi`. I contratti pubblici sono presenti, mentre le relative implementazioni sono ancora da completare.
@@ -55,8 +55,9 @@ Le invocazioni sono sincrone e usano i contratti riportati sotto.
 - **Riquadro con simbolo UML del componente:** istanza o gruppo di istanze
   software in esecuzione. I nomi identificano responsabilità runtime.
 - **Quadratino sul bordo:** porta, cioè punto di interazione del componente.
-  In CC-02 i cinque connettori dei moduli condividono la porta di
-  PostgreSQL.
+  Nel CC-02 il numero accanto al quadratino indica la molteplicità della
+  porta per istanza del componente. I cinque percorsi JDBC condividono
+  la porta di PostgreSQL.
 - **Linea continua con freccia:** connettore orientato da chi avvia la
   chiamata verso chi la riceve. Il risultato o l'errore torna sullo stesso
   connettore; la freccia non indica una dipendenza tra package.
@@ -97,12 +98,12 @@ relative etichette.
 | Utenze → adattatore email | Invio dei link di attivazione e recupero. |
 
 Ciascuno dei cinque componenti funzionali accede alle proprie entità e
-tabelle tramite il proprio adattatore di persistenza. In CC-02 ogni
-adattatore ha un connettore verso l'unico endpoint PostgreSQL, sulla
-porta `5432` nell'ambiente Docker Compose. Il database conserva anche
-file e metadati degli allegati. Gli altri gestori usano le API del
-proprietario dei dati. Le entità JPA restano interne e i contratti
-scambiano DTO e identificativi.
+tabelle tramite il proprio adattatore di persistenza. In CC-02 i
+collegamenti dei moduli condividono l'ultimo tratto verso l'unica
+porta di PostgreSQL, corrispondente a `5432` nell'ambiente Docker Compose.
+Il database conserva anche file e metadati degli allegati. Gli altri
+gestori usano le API del proprietario dei dati. Le entità JPA restano
+interne e i contratti scambiano DTO e identificativi.
 
 Sicurezza e sessione sono verificate all'ingresso web. I servizi applicativi
 controllano ruolo, titolarità e assegnazione sulle singole risorse. La
@@ -111,16 +112,20 @@ locale. La casella degli avvisi si consulta tramite il Gestore web.
 
 ### Rigenerare le immagini C&C
 
-I sorgenti usano la notazione componenti e porte di PlantUML, con
-[stile condiviso](diagrams/C%26C/C%26C-style.iuml). La palette riprende le
-altre viste architetturali. Le esportazioni SVG consentono di ingrandire
-i dettagli mantenendo la leggibilità.
+CC-01 e CC-03 usano PlantUML con uno
+[stile condiviso](diagrams/C%26C/C%26C-style.iuml). CC-02 usa Graphviz DOT
+con posizioni fisse per i componenti, le porte e i percorsi dei connettori.
+Le tre viste usano la stessa palette.
 
-Con Java, PlantUML e Graphviz disponibili, dalla radice del progetto:
+Sostituire `percorso/plantuml.jar` con il percorso del JAR ed eseguire dalla
+radice del progetto con Graphviz disponibile nel PATH.
 
 ```powershell
-java -jar <percorso-plantuml.jar> -charset UTF-8 -tpng 'docs/architecture/diagrams/C&C/*.puml'
-java -jar <percorso-plantuml.jar> -charset UTF-8 -tsvg 'docs/architecture/diagrams/C&C/*.puml'
+java -jar 'percorso/plantuml.jar' -charset UTF-8 -tpng 'docs/architecture/diagrams/C&C/*.puml'
+java -jar 'percorso/plantuml.jar' -charset UTF-8 -tsvg 'docs/architecture/diagrams/C&C/*.puml'
+$cc02 = 'docs/architecture/diagrams/C&C/Monolite-C&C'
+dot -Tpng "$cc02.dot" -o "$cc02.png"
+dot -Tsvg "$cc02.dot" -o "$cc02.svg"
 ```
 
 Le esportazioni sono verificate con PlantUML 1.2026.10 e Graphviz 16.1.1.

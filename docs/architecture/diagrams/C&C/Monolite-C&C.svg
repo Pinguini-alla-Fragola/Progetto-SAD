@@ -1,1 +1,529 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" data-diagram-type="DESCRIPTION" style="width:1853px;height:2151px;background:#FFFFFF;" width="1853.542px" height="2151.042px" viewBox="0 0 1853 2151" zoomAndPan="magnify" preserveAspectRatio="none" contentStyleType="text/css"><?plantuml 1.2026.10?><defs/><g font-family="sans-serif" lengthAdjust="spacing"><g class="title" data-source-line="5"><text x="760.601" y="45.401" fill="#172B3A" font-size="20.417" textLength="322.131" font-weight="700" font-family="Arial">PICUS · Componenti e connettori</text><text x="733.874" y="68.878" fill="#172B3A" font-size="20.417" textLength="375.585" font-weight="700" font-family="Arial">CC-02 · Ingresso web e accesso ai dati</text></g><!--cluster B--><g class="cluster" data-qualified-name="B" id="ent0001" data-source-line="7"><rect x="739.375" y="111.121" width="326.667" height="210" fill="#F1F5F9" style="stroke:#94A3B8;stroke-width:1.458;"/><rect x="1036.875" y="118.413" width="21.875" height="14.583" fill="#F1F5F9" style="stroke:#94A3B8;stroke-width:1.458;"/><rect x="1033.958" y="121.329" width="5.833" height="2.917" fill="#F1F5F9" style="stroke:#94A3B8;stroke-width:1.458;"/><rect x="1033.958" y="127.163" width="5.833" height="2.917" fill="#F1F5F9" style="stroke:#94A3B8;stroke-width:1.458;"/><text x="839.17" y="160.897" fill="#142B46" font-size="20.417" textLength="127.076" font-weight="700" font-family="Arial">Browser web</text><text x="786.434" y="184.374" fill="#142B46" font-size="20.417" textLength="232.549" font-weight="700" font-family="Arial">OPT · Banco · Operatori</text><text x="849.942" y="207.851" fill="#142B46" font-size="20.417" textLength="105.533" font-weight="700" font-family="Arial">1..* istanze</text></g><!--cluster JVM--><g class="cluster" data-qualified-name="JVM" id="ent0003" data-source-line="10"><rect x="10.208" y="434.871" width="1822.917" height="1300.833" fill="#F7FAFE" style="stroke:#7C9BB9;stroke-width:1.458;"/><path d="M461.074,434.871 L461.074,471.473 L446.491,486.057 L10.208,486.057" style="stroke:#7C9BB9;stroke-width:1.458;" fill="none"/><text x="26.25" y="467.147" fill="#183957" font-size="20.417" textLength="412.949" font-weight="700" font-family="Arial">Applicazione PICUS · Unico processo JVM</text></g><!--cluster WEB--><g class="cluster" data-qualified-name="JVM.WEB" id="ent0004" data-source-line="11"><rect x="689.792" y="529.663" width="443.333" height="275.625" fill="#E9F2FC" style="stroke:#5480B0;stroke-width:1.458;"/><rect x="1103.958" y="536.954" width="21.875" height="14.583" fill="#E9F2FC" style="stroke:#5480B0;stroke-width:1.458;"/><rect x="1101.042" y="539.871" width="5.833" height="2.917" fill="#E9F2FC" style="stroke:#5480B0;stroke-width:1.458;"/><rect x="1101.042" y="545.704" width="5.833" height="2.917" fill="#E9F2FC" style="stroke:#5480B0;stroke-width:1.458;"/><text x="850.188" y="579.438" fill="#143C65" font-size="20.417" textLength="122.54" font-weight="700" font-family="Arial">Gestore web</text><text x="751.475" y="602.915" fill="#143C65" font-size="20.417" textLength="319.967" font-weight="700" font-family="Arial">Sicurezza e sessione · Controller</text><text x="779.886" y="626.393" fill="#143C65" font-size="20.417" textLength="263.144" font-weight="700" font-family="Arial">Spring MVC · HTML / JSON</text></g><!--cluster U--><g class="cluster" data-qualified-name="JVM.U" id="ent0011" data-source-line="19"><rect x="33.542" y="984.663" width="300.417" height="275.625" fill="#EDF5F0" style="stroke:#568573;stroke-width:1.458;"/><rect x="304.792" y="991.954" width="21.875" height="14.583" fill="#EDF5F0" style="stroke:#568573;stroke-width:1.458;"/><rect x="301.875" y="994.871" width="5.833" height="2.917" fill="#EDF5F0" style="stroke:#568573;stroke-width:1.458;"/><rect x="301.875" y="1000.704" width="5.833" height="2.917" fill="#EDF5F0" style="stroke:#568573;stroke-width:1.458;"/><text x="150.284" y="1034.438" fill="#1A4A3C" font-size="20.417" textLength="66.932" font-weight="700" font-family="Arial">Utenze</text><text x="103.215" y="1057.915" fill="#1A4A3C" font-size="20.417" textLength="161.07" font-weight="700" font-family="Arial">Account e profili</text><text x="83.317" y="1081.393" fill="#1A4A3C" font-size="20.417" textLength="200.867" font-weight="700" font-family="Arial">Servizi e persistenza</text></g><!--cluster R--><g class="cluster" data-qualified-name="JVM.R" id="ent0015" data-source-line="24"><rect x="360.208" y="984.663" width="300.417" height="275.625" fill="#EDF5F0" style="stroke:#568573;stroke-width:1.458;"/><rect x="631.458" y="991.954" width="21.875" height="14.583" fill="#EDF5F0" style="stroke:#568573;stroke-width:1.458;"/><rect x="628.542" y="994.871" width="5.833" height="2.917" fill="#EDF5F0" style="stroke:#568573;stroke-width:1.458;"/><rect x="628.542" y="1000.704" width="5.833" height="2.917" fill="#EDF5F0" style="stroke:#568573;stroke-width:1.458;"/><text x="465.027" y="1034.438" fill="#1A4A3C" font-size="20.417" textLength="90.778" font-weight="700" font-family="Arial">Richieste</text><text x="422.469" y="1057.915" fill="#1A4A3C" font-size="20.417" textLength="175.894" font-weight="700" font-family="Arial">Pratiche e accordi</text><text x="409.983" y="1081.393" fill="#1A4A3C" font-size="20.417" textLength="200.867" font-weight="700" font-family="Arial">Servizi e persistenza</text></g><!--cluster C--><g class="cluster" data-qualified-name="JVM.C" id="ent0018" data-source-line="28"><rect x="743.021" y="984.663" width="272.708" height="275.625" fill="#EDF5F0" style="stroke:#568573;stroke-width:1.458;"/><rect x="986.563" y="991.954" width="21.875" height="14.583" fill="#EDF5F0" style="stroke:#568573;stroke-width:1.458;"/><rect x="983.646" y="994.871" width="5.833" height="2.917" fill="#EDF5F0" style="stroke:#568573;stroke-width:1.458;"/><rect x="983.646" y="1000.704" width="5.833" height="2.917" fill="#EDF5F0" style="stroke:#568573;stroke-width:1.458;"/><text x="835.705" y="1034.438" fill="#1A4A3C" font-size="20.417" textLength="87.339" font-weight="700" font-family="Arial">Catalogo</text><text x="761.386" y="1057.915" fill="#1A4A3C" font-size="20.417" textLength="235.978" font-weight="700" font-family="Arial">Misure, territori e offerte</text><text x="778.942" y="1081.393" fill="#1A4A3C" font-size="20.417" textLength="200.867" font-weight="700" font-family="Arial">Servizi e persistenza</text></g><!--cluster A--><g class="cluster" data-qualified-name="JVM.A" id="ent0021" data-source-line="32"><rect x="1044.167" y="984.663" width="352.917" height="275.625" fill="#EDF5F0" style="stroke:#568573;stroke-width:1.458;"/><rect x="1367.917" y="991.954" width="21.875" height="14.583" fill="#EDF5F0" style="stroke:#568573;stroke-width:1.458;"/><rect x="1365" y="994.871" width="5.833" height="2.917" fill="#EDF5F0" style="stroke:#568573;stroke-width:1.458;"/><rect x="1365" y="1000.704" width="5.833" height="2.917" fill="#EDF5F0" style="stroke:#568573;stroke-width:1.458;"/><text x="1148.03" y="1034.438" fill="#1A4A3C" font-size="20.417" textLength="145.19" font-weight="700" font-family="Arial">Comunicazioni</text><text x="1093.524" y="1057.915" fill="#1A4A3C" font-size="20.417" textLength="254.201" font-weight="700" font-family="Arial">Messaggi, allegati e avvisi</text><text x="1120.192" y="1081.393" fill="#1A4A3C" font-size="20.417" textLength="200.867" font-weight="700" font-family="Arial">Servizi e persistenza</text></g><!--cluster M--><g class="cluster" data-qualified-name="JVM.M" id="ent0024" data-source-line="36"><rect x="1424.792" y="984.663" width="385" height="275.625" fill="#EDF5F0" style="stroke:#568573;stroke-width:1.458;"/><rect x="1780.625" y="991.954" width="21.875" height="14.583" fill="#EDF5F0" style="stroke:#568573;stroke-width:1.458;"/><rect x="1777.708" y="994.871" width="5.833" height="2.917" fill="#EDF5F0" style="stroke:#568573;stroke-width:1.458;"/><rect x="1777.708" y="1000.704" width="5.833" height="2.917" fill="#EDF5F0" style="stroke:#568573;stroke-width:1.458;"/><text x="1552.652" y="1034.438" fill="#1A4A3C" font-size="20.417" textLength="129.279" font-weight="700" font-family="Arial">Monitoraggio</text><text x="1474.923" y="1057.915" fill="#1A4A3C" font-size="20.417" textLength="284.737" font-weight="700" font-family="Arial">Conteggi, schede e riepiloghi</text><text x="1516.858" y="1081.393" fill="#1A4A3C" font-size="20.417" textLength="200.867" font-weight="700" font-family="Arial">Servizi e persistenza</text></g><!--cluster MAIL--><g class="cluster" data-qualified-name="JVM.MAIL" id="ent0027" data-source-line="40"><rect x="152.396" y="1439.663" width="256.667" height="252.292" fill="#EDF5F0" style="stroke:#568573;stroke-width:1.458;"/><rect x="379.896" y="1446.954" width="21.875" height="14.583" fill="#EDF5F0" style="stroke:#568573;stroke-width:1.458;"/><rect x="376.979" y="1449.871" width="5.833" height="2.917" fill="#EDF5F0" style="stroke:#568573;stroke-width:1.458;"/><rect x="376.979" y="1455.704" width="5.833" height="2.917" fill="#EDF5F0" style="stroke:#568573;stroke-width:1.458;"/><text x="200.742" y="1489.438" fill="#1A4A3C" font-size="20.417" textLength="159.974" font-weight="700" font-family="Arial">Adattatore email</text><text x="171.244" y="1512.915" fill="#1A4A3C" font-size="20.417" textLength="218.971" font-weight="700" font-family="Arial">Attivazione e recupero</text></g><!--cluster DB--><g class="cluster" data-qualified-name="DB" id="ent0030" data-source-line="45"><rect x="603.021" y="1789.663" width="290.208" height="210" fill="#E9F7F5" style="stroke:#3D867D;stroke-width:1.458;"/><rect x="864.063" y="1796.954" width="21.875" height="14.583" fill="#E9F7F5" style="stroke:#3D867D;stroke-width:1.458;"/><rect x="861.146" y="1799.871" width="5.833" height="2.917" fill="#E9F7F5" style="stroke:#3D867D;stroke-width:1.458;"/><rect x="861.146" y="1805.704" width="5.833" height="2.917" fill="#E9F7F5" style="stroke:#3D867D;stroke-width:1.458;"/><text x="689.133" y="1839.438" fill="#153D38" font-size="20.417" textLength="117.984" font-weight="700" font-family="Arial">PostgreSQL</text><text x="643.176" y="1862.915" fill="#153D38" font-size="20.417" textLength="209.899" font-weight="700" font-family="Arial">Database unico picus</text><text x="621.637" y="1886.393" fill="#153D38" font-size="20.417" textLength="252.975" font-weight="700" font-family="Arial">Endpoint condiviso · 5432</text></g><!--cluster EMAIL--><g class="cluster" data-qualified-name="EMAIL" id="ent0032" data-source-line="48"><rect x="166.25" y="1927.475" width="252.292" height="203.438" fill="#EDF5F0" style="stroke:#568573;stroke-width:1.458;"/><rect x="389.375" y="1934.767" width="21.875" height="14.583" fill="#EDF5F0" style="stroke:#568573;stroke-width:1.458;"/><rect x="386.458" y="1937.684" width="5.833" height="2.917" fill="#EDF5F0" style="stroke:#568573;stroke-width:1.458;"/><rect x="386.458" y="1943.517" width="5.833" height="2.917" fill="#EDF5F0" style="stroke:#568573;stroke-width:1.458;"/><text x="184.595" y="1977.251" fill="#1A4A3C" font-size="20.417" textLength="215.601" font-weight="700" font-family="Arial">Servizio email esterno</text></g><g class="entity" data-qualified-name="B.B_WEB" id="ent0002" data-source-line="8"><text x="899.872" y="360.688" fill="#172B3A" font-size="20.417" font-family="Arial"> </text><rect x="893.958" y="312.371" width="17.5" height="17.5" fill="#F1F1F1" style="stroke:#181818;stroke-width:2.188;"/></g><g class="entity" data-qualified-name="JVM.WEB.W_HTTP" id="ent0005" data-source-line="12"><text x="899.872" y="487.419" fill="#172B3A" font-size="20.417" font-family="Arial"> </text><rect x="893.958" y="520.913" width="17.5" height="17.5" fill="#F1F1F1" style="stroke:#181818;stroke-width:2.188;"/></g><g class="entity" data-qualified-name="JVM.WEB.W_C" id="ent0006" data-source-line="13"><text x="908.622" y="844.855" fill="#172B3A" font-size="20.417" font-family="Arial"> </text><rect x="902.708" y="796.538" width="17.5" height="17.5" fill="#F1F1F1" style="stroke:#181818;stroke-width:2.188;"/></g><g class="entity" data-qualified-name="JVM.WEB.W_A" id="ent0007" data-source-line="14"><text x="1006.33" y="844.855" fill="#172B3A" font-size="20.417" font-family="Arial"> </text><rect x="1000.417" y="796.538" width="17.5" height="17.5" fill="#F1F1F1" style="stroke:#181818;stroke-width:2.188;"/></g><g class="entity" data-qualified-name="JVM.WEB.W_R" id="ent0008" data-source-line="15"><text x="810.914" y="844.855" fill="#172B3A" font-size="20.417" font-family="Arial"> </text><rect x="805" y="796.538" width="17.5" height="17.5" fill="#F1F1F1" style="stroke:#181818;stroke-width:2.188;"/></g><g class="entity" data-qualified-name="JVM.WEB.W_M" id="ent0009" data-source-line="16"><text x="1104.039" y="844.855" fill="#172B3A" font-size="20.417" font-family="Arial"> </text><rect x="1098.125" y="796.538" width="17.5" height="17.5" fill="#F1F1F1" style="stroke:#181818;stroke-width:2.188;"/></g><g class="entity" data-qualified-name="JVM.WEB.W_U" id="ent0010" data-source-line="17"><text x="713.205" y="844.855" fill="#172B3A" font-size="20.417" font-family="Arial"> </text><rect x="707.292" y="796.538" width="17.5" height="17.5" fill="#F1F1F1" style="stroke:#181818;stroke-width:2.188;"/></g><g class="entity" data-qualified-name="JVM.U.U_WEB" id="ent0012" data-source-line="20"><text x="304.872" y="942.419" fill="#172B3A" font-size="20.417" font-family="Arial"> </text><rect x="298.958" y="975.913" width="17.5" height="17.5" fill="#F1F1F1" style="stroke:#181818;stroke-width:2.188;"/></g><g class="entity" data-qualified-name="JVM.U.U_SQL" id="ent0013" data-source-line="21"><text x="304.872" y="1299.855" fill="#172B3A" font-size="20.417" font-family="Arial"> </text><rect x="298.958" y="1251.538" width="17.5" height="17.5" fill="#F1F1F1" style="stroke:#181818;stroke-width:2.188;"/></g><g class="entity" data-qualified-name="JVM.U.U_MAIL" id="ent0014" data-source-line="22"><text x="207.164" y="1299.855" fill="#172B3A" font-size="20.417" font-family="Arial"> </text><rect x="201.25" y="1251.538" width="17.5" height="17.5" fill="#F1F1F1" style="stroke:#181818;stroke-width:2.188;"/></g><g class="entity" data-qualified-name="JVM.R.R_WEB" id="ent0016" data-source-line="25"><text x="631.539" y="942.419" fill="#172B3A" font-size="20.417" font-family="Arial"> </text><rect x="625.625" y="975.913" width="17.5" height="17.5" fill="#F1F1F1" style="stroke:#181818;stroke-width:2.188;"/></g><g class="entity" data-qualified-name="JVM.R.R_SQL" id="ent0017" data-source-line="26"><text x="577.58" y="1299.855" fill="#172B3A" font-size="20.417" font-family="Arial"> </text><rect x="571.667" y="1251.538" width="17.5" height="17.5" fill="#F1F1F1" style="stroke:#181818;stroke-width:2.188;"/></g><g class="entity" data-qualified-name="JVM.C.C_WEB" id="ent0019" data-source-line="29"><text x="908.622" y="942.419" fill="#172B3A" font-size="20.417" font-family="Arial"> </text><rect x="902.708" y="975.913" width="17.5" height="17.5" fill="#F1F1F1" style="stroke:#181818;stroke-width:2.188;"/></g><g class="entity" data-qualified-name="JVM.C.C_SQL" id="ent0020" data-source-line="30"><text x="844.455" y="1299.855" fill="#172B3A" font-size="20.417" font-family="Arial"> </text><rect x="838.542" y="1251.538" width="17.5" height="17.5" fill="#F1F1F1" style="stroke:#181818;stroke-width:2.188;"/></g><g class="entity" data-qualified-name="JVM.A.A_WEB" id="ent0022" data-source-line="33"><text x="1067.58" y="942.419" fill="#172B3A" font-size="20.417" font-family="Arial"> </text><rect x="1061.667" y="975.913" width="17.5" height="17.5" fill="#F1F1F1" style="stroke:#181818;stroke-width:2.188;"/></g><g class="entity" data-qualified-name="JVM.A.A_SQL" id="ent0023" data-source-line="34"><text x="1143.414" y="1299.855" fill="#172B3A" font-size="20.417" font-family="Arial"> </text><rect x="1137.5" y="1251.538" width="17.5" height="17.5" fill="#F1F1F1" style="stroke:#181818;stroke-width:2.188;"/></g><g class="entity" data-qualified-name="JVM.M.M_WEB" id="ent0025" data-source-line="37"><text x="1448.205" y="942.419" fill="#172B3A" font-size="20.417" font-family="Arial"> </text><rect x="1442.292" y="975.913" width="17.5" height="17.5" fill="#F1F1F1" style="stroke:#181818;stroke-width:2.188;"/></g><g class="entity" data-qualified-name="JVM.M.M_SQL" id="ent0026" data-source-line="38"><text x="1532.789" y="1299.855" fill="#172B3A" font-size="20.417" font-family="Arial"> </text><rect x="1526.875" y="1251.538" width="17.5" height="17.5" fill="#F1F1F1" style="stroke:#181818;stroke-width:2.188;"/></g><g class="entity" data-qualified-name="JVM.MAIL.MAIL_IN" id="ent0028" data-source-line="41"><text x="214.455" y="1397.419" fill="#172B3A" font-size="20.417" font-family="Arial"> </text><rect x="208.542" y="1430.913" width="17.5" height="17.5" fill="#F1F1F1" style="stroke:#181818;stroke-width:2.188;"/></g><g class="entity" data-qualified-name="JVM.MAIL.MAIL_OUT" id="ent0029" data-source-line="42"><text x="341.33" y="1731.522" fill="#172B3A" font-size="20.417" font-family="Arial"> </text><rect x="335.417" y="1683.204" width="17.5" height="17.5" fill="#F1F1F1" style="stroke:#181818;stroke-width:2.188;"/></g><g class="entity" data-qualified-name="DB.DB_SQL" id="ent0031" data-source-line="46"><text x="646.122" y="1747.419" fill="#172B3A" font-size="20.417" font-family="Arial"> </text><rect x="640.208" y="1780.913" width="17.5" height="17.5" fill="#F1F1F1" style="stroke:#181818;stroke-width:2.188;"/></g><g class="entity" data-qualified-name="EMAIL.EMAIL_IN" id="ent0033" data-source-line="49"><text x="341.33" y="1885.232" fill="#172B3A" font-size="20.417" font-family="Arial"> </text><rect x="335.417" y="1918.725" width="17.5" height="17.5" fill="#F1F1F1" style="stroke:#181818;stroke-width:2.188;"/></g><!--link C_WEB to A_WEB--><!--link A_WEB to R_WEB--><!--link R_WEB to M_WEB--><!--link M_WEB to U_WEB--><!--link MAIL_OUT to DB_SQL--><!--link DB_SQL to EMAIL_IN--><!--link B_WEB to W_HTTP--><g class="link" data-entity-1="ent0002" data-entity-2="ent0005" id="lnk40" data-source-line="60" data-link-type="dependency"><path d="M902.708,330.075 C902.708,364.229 902.708,478.723 902.708,513.213" style="stroke:#5480B0;stroke-width:1.896;" fill="none" id="B_WEB-to-W_HTTP"/><polygon points="902.708,520.504,908.542,507.379,902.708,513.213,896.875,507.379,902.708,520.504" fill="#5480B0" style="stroke:#5480B0;stroke-width:1.896;stroke-linejoin:miter;stroke-miterlimit:10;"/><text x="844.375" y="409.621" fill="#334155" font-size="17.5" textLength="45.69" font-family="Arial">HTTP</text></g><!--link W_C to C_WEB--><g class="link" data-entity-1="ent0006" data-entity-2="ent0019" id="lnk41" data-source-line="61" data-link-type="dependency"><path d="M911.458,814.431 C911.458,845.129 911.458,937.048 911.458,968.038" style="stroke:#64748B;stroke-width:1.896;" fill="none" id="W_C-to-C_WEB"/><polygon points="911.458,975.329,917.292,962.204,911.458,968.038,905.625,962.204,911.458,975.329" fill="#64748B" style="stroke:#64748B;stroke-width:1.896;stroke-linejoin:miter;stroke-miterlimit:10;"/></g><!--link W_A to A_WEB--><g class="link" data-entity-1="ent0007" data-entity-2="ent0022" id="lnk42" data-source-line="62" data-link-type="dependency"><path d="M1009.167,814.286 C1009.167,850.234 1009.167,981.746 1009.167,981.746 C1009.167,981.746 1037.05,981.746 1054.083,981.746" style="stroke:#64748B;stroke-width:1.896;" fill="none" id="W_A-to-A_WEB"/><polygon points="1061.375,981.746,1048.25,975.913,1054.083,981.746,1048.25,987.579,1061.375,981.746" fill="#64748B" style="stroke:#64748B;stroke-width:1.896;stroke-linejoin:miter;stroke-miterlimit:10;"/></g><!--link W_R to R_WEB--><g class="link" data-entity-1="ent0008" data-entity-2="ent0016" id="lnk43" data-source-line="63" data-link-type="dependency"><path d="M813.75,814.431 C813.75,850.977 813.75,984.663 813.75,984.663 C813.75,984.663 687.356,984.663 650.81,984.663" style="stroke:#64748B;stroke-width:1.896;" fill="none" id="W_R-to-R_WEB"/><polygon points="643.519,984.663,656.644,990.496,650.81,984.663,656.644,978.829,643.519,984.663" fill="#64748B" style="stroke:#64748B;stroke-width:1.896;stroke-linejoin:miter;stroke-miterlimit:10;"/></g><!--link W_M to M_WEB--><g class="link" data-entity-1="ent0009" data-entity-2="ent0025" id="lnk44" data-source-line="64" data-link-type="dependency"><path d="M1106.875,814.286 C1106.875,850.234 1106.875,981.746 1106.875,981.746 C1106.875,981.746 1379.817,981.746 1434.548,981.746" style="stroke:#64748B;stroke-width:1.896;" fill="none" id="W_M-to-M_WEB"/><polygon points="1441.84,981.746,1428.715,975.913,1434.548,981.746,1428.715,987.579,1441.84,981.746" fill="#64748B" style="stroke:#64748B;stroke-width:1.896;stroke-linejoin:miter;stroke-miterlimit:10;"/></g><!--link W_U to U_WEB--><g class="link" data-entity-1="ent0010" data-entity-2="ent0012" id="lnk45" data-source-line="65" data-link-type="dependency"><path d="M706.752,805.288 C645.969,805.288 307.708,805.288 307.708,805.288 C307.708,805.288 307.708,931.681 307.708,968.227" style="stroke:#64748B;stroke-width:1.896;" fill="none" id="W_U-to-U_WEB"/><polygon points="307.708,975.519,313.542,962.394,307.708,968.227,301.875,962.394,307.708,975.519" fill="#64748B" style="stroke:#64748B;stroke-width:1.896;stroke-linejoin:miter;stroke-miterlimit:10;"/></g><!--link C_SQL to DB_SQL--><g class="link" data-entity-1="ent0020" data-entity-2="ent0031" id="lnk46" data-source-line="66" data-link-type="dependency"><path d="M837.973,1257.371 C799.371,1257.371 654.063,1257.371 654.063,1257.371 C654.063,1257.371 654.063,1702.454 654.063,1773.125" style="stroke:#3D867D;stroke-width:1.896;" fill="none" id="C_SQL-to-DB_SQL"/><polygon points="654.063,1780.417,659.896,1767.292,654.063,1773.125,648.229,1767.292,654.063,1780.417" fill="#3D867D" style="stroke:#3D867D;stroke-width:1.896;stroke-linejoin:miter;stroke-miterlimit:10;"/></g><!--link A_SQL to DB_SQL--><g class="link" data-entity-1="ent0023" data-entity-2="ent0031" id="lnk47" data-source-line="67" data-link-type="dependency"><path d="M1146.25,1269.431 C1146.25,1339.329 1146.25,1786.746 1146.25,1786.746 C1146.25,1786.746 732.71,1786.746 665.306,1786.746" style="stroke:#3D867D;stroke-width:1.896;" fill="none" id="A_SQL-to-DB_SQL"/><polygon points="658.015,1786.746,671.14,1792.579,665.306,1786.746,671.14,1780.913,658.015,1786.746" fill="#3D867D" style="stroke:#3D867D;stroke-width:1.896;stroke-linejoin:miter;stroke-miterlimit:10;"/></g><!--link R_SQL to DB_SQL--><g class="link" data-entity-1="ent0017" data-entity-2="ent0031" id="lnk48" data-source-line="68" data-link-type="dependency"><path d="M589.575,1263.204 C608.548,1263.204 650.417,1263.204 650.417,1263.204 C650.417,1263.204 650.417,1703.329 650.417,1773.227" style="stroke:#3D867D;stroke-width:1.896;" fill="none" id="R_SQL-to-DB_SQL"/><polygon points="650.417,1780.519,656.25,1767.394,650.417,1773.227,644.583,1767.394,650.417,1780.519" fill="#3D867D" style="stroke:#3D867D;stroke-width:1.896;stroke-linejoin:miter;stroke-miterlimit:10;"/></g><!--link M_SQL to DB_SQL--><g class="link" data-entity-1="ent0026" data-entity-2="ent0031" id="lnk49" data-source-line="69" data-link-type="dependency"><path d="M1535.625,1269.534 C1535.625,1340.204 1535.625,1792.579 1535.625,1792.579 C1535.625,1792.579 760.375,1792.579 665.613,1792.579" style="stroke:#3D867D;stroke-width:1.896;" fill="none" id="M_SQL-to-DB_SQL"/><polygon points="658.321,1792.579,671.446,1798.413,665.613,1792.579,671.446,1786.746,658.321,1792.579" fill="#3D867D" style="stroke:#3D867D;stroke-width:1.896;stroke-linejoin:miter;stroke-miterlimit:10;"/></g><!--link U_SQL to DB_SQL--><g class="link" data-entity-1="ent0013" data-entity-2="ent0031" id="lnk50" data-source-line="70" data-link-type="dependency"><path d="M307.708,1269.14 C307.708,1291.642 307.708,1349.246 307.708,1349.246 C307.708,1349.246 646.771,1349.246 646.771,1349.246 C646.771,1349.246 646.771,1709.921 646.771,1773.169" style="stroke:#3D867D;stroke-width:1.896;" fill="none" id="U_SQL-to-DB_SQL"/><polygon points="646.771,1780.461,652.604,1767.336,646.771,1773.169,640.938,1767.336,646.771,1780.461" fill="#3D867D" style="stroke:#3D867D;stroke-width:1.896;stroke-linejoin:miter;stroke-miterlimit:10;"/></g><!--link U_MAIL to MAIL_IN--><g class="link" data-entity-1="ent0014" data-entity-2="ent0028" id="lnk51" data-source-line="71" data-link-type="dependency"><path d="M213.646,1269.431 C213.646,1300.129 213.646,1392.048 213.646,1423.038" style="stroke:#64748B;stroke-width:1.896;" fill="none" id="U_MAIL-to-MAIL_IN"/><polygon points="213.646,1430.329,219.479,1417.204,213.646,1423.038,207.813,1417.204,213.646,1430.329" fill="#64748B" style="stroke:#64748B;stroke-width:1.896;stroke-linejoin:miter;stroke-miterlimit:10;"/></g><!--link MAIL_OUT to EMAIL_IN--><g class="link" data-entity-1="ent0029" data-entity-2="ent0033" id="lnk52" data-source-line="72" data-link-type="dependency"><path d="M339.792,1700.894 C339.792,1738.038 339.792,1872.613 339.792,1910.719" style="stroke:#64748B;stroke-width:1.896;" fill="none" id="MAIL_OUT-to-EMAIL_IN"/><polygon points="339.792,1918.011,345.625,1904.886,339.792,1910.719,333.958,1904.886,339.792,1918.011" fill="#64748B" style="stroke:#64748B;stroke-width:1.896;stroke-linejoin:miter;stroke-miterlimit:10;"/><text x="243.542" y="1793.784" fill="#334155" font-size="17.5" textLength="83.646" font-family="Arial">Invio email</text></g><?plantuml-src VPNVRzis4CVVzLVSKc03XZhBscOhXYA0B0UhYwZnPAjvc0k3aIxEeJ8fa9I3USZVjVV-PJsISkAiL9uStb5td_l1RtuWMJLTZP3zc8sC_QV1O-esJM9L2rR1jR9MRQ0cZPKb9HFpXMGhjDY0L3KQRE7qzC2eXVpI6otP1c4spSevVFqFChLfbKHf2H0g9ILoP4rBcMMZarVknbIkDHgZu0wl-OweAdyI1BMmb2JLFW8SZRMwCwZTpQMyd2tSvsCXA-N-k6nHYn3xr-FZdu6C5NA7Ho0CZE7TkweX3d9s1lyc0AtILdKS4e9_TNK-JkwJ6ou6uIXjsuOgiUFA3qef9N6cLgi0-E5Jxh_bNn_oWFDFD0o2WNDELQTnjnDSdE4lVL3V6McrQXhKVAVL9DUGVygSv_qYlu1VuCFyygFFm6pCpy5w-81FSaz_jNg_MCmU70TrNQsok3cDcukuEO-RIpRVFwsyjCWzNygqgbJ71dJzkg66Xp97lQMTMmCUbE7fy4tX8vNHgae_aqZYSZN_woBkoDFfnVTG1LMtn2DXhXcl29ymB9hIzRDWHHIi608hUh3_fS-45OrQgwNCoV0gl0IBMfDRLSwfRcvGExHXZ2oAaGrXP0COQjF9VgkvwfnNKQpNz184x-1Q-0SgjbiopxOaZRAaGonfd2Ld1AxVvUUsk9U07iNmQ6et74tO4ZVjzbcOF0gJ3y7aSPYKTSOA_s1n8wZXxRMMjltpPnQiEiwiGWpUi7XMTgoc7wDvdUkoNFZKzuU2DbF6ilenrb9EU4skXK7eWiwmR9YbF9TrguZlidRMnDFnMdVwvlKh7thYbC7fv86kFJ9DnhxY9odxRgfGAxXdeMMexVoXkATXplUrtIV9Jv0s3KaKm2hlhY7KIB1HTTUGLpZt7m4uChUC7vZP9wh5cYy4TQUzkXydVejXzFSjrJNApvhMjtPqrYzK6dU61rZ4dM7wUTmPD6K_ZqT_hUuak_j-XP_lltxeGpBkmxyuVVFsP7poUSJUeCBm1tWnPkM5aJE7PygA6uvfVop2iUYFUJZc_R4Cnu2RzJGlNa_U_lRxn2VhITDXLp7ioeTTvNCklnw1is_4OoT71_tX7apbThzYtm00?></g></svg>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 16.1.1 (20261108.1752)
+ -->
+<!-- Title: CC02 Pages: 1 -->
+<svg width="1932pt" height="1505pt"
+ viewBox="0.00 0.00 1932.00 1505.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1.94444 1.94444) rotate(0) translate(14.4 759.4)">
+<title>CC02</title>
+<polygon fill="#ffffff" stroke="none" points="-14.4,14.4 -14.4,-759.4 979.2,-759.4 979.2,14.4 -14.4,14.4"/>
+<text xml:space="preserve" text-anchor="start" x="339.53" y="-724.9" font-family="Arial" font-weight="bold" font-size="18.00" fill="#172b3a">PICUS · Componenti e connettori</text>
+<text xml:space="preserve" text-anchor="start" x="364.65" y="-710.7" font-family="Arial" font-size="14.00" fill="#172b3a">CC&#45;02 · Ingresso web e accesso ai dati</text>
+<!-- JVM -->
+<g id="node1" class="node">
+<title>JVM</title>
+<polygon fill="#f7fafe" stroke="#7c9bb9" stroke-width="1.15" points="964.8,-600.68 0,-600.68 0,-105.32 964.8,-105.32 964.8,-600.68"/>
+</g>
+<!-- Browser -->
+<g id="node2" class="node">
+<title>Browser</title>
+<polygon fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.15" points="590.4,-705 374.4,-705 374.4,-701 370.4,-701 370.4,-697 374.4,-697 374.4,-641 370.4,-641 370.4,-637 374.4,-637 374.4,-633 590.4,-633 590.4,-705"/>
+<polyline fill="none" stroke="#94a3b8" stroke-width="1.15" points="374.4,-701 378.4,-701 378.4,-697 374.4,-697"/>
+<polyline fill="none" stroke="#94a3b8" stroke-width="1.15" points="374.4,-641 378.4,-641 378.4,-637 374.4,-637"/>
+<text xml:space="preserve" text-anchor="start" x="445.28" y="-676.6" font-family="Arial" font-weight="bold" font-size="12.00" fill="#142b46">Browser web</text>
+<text xml:space="preserve" text-anchor="start" x="418.65" y="-664.6" font-family="Arial" font-size="12.00" fill="#142b46">OPT · Banco · Operatori</text>
+<text xml:space="preserve" text-anchor="start" x="453.15" y="-652.6" font-family="Arial" font-size="12.00" fill="#142b46">1..* istanze</text>
+</g>
+<!-- Web -->
+<g id="node3" class="node">
+<title>Web</title>
+<polygon fill="#e9f2fc" stroke="#5480b0" stroke-width="1.15" points="662.4,-561 302.4,-561 302.4,-557 298.4,-557 298.4,-553 302.4,-553 302.4,-497 298.4,-497 298.4,-493 302.4,-493 302.4,-489 662.4,-489 662.4,-561"/>
+<polyline fill="none" stroke="#5480b0" stroke-width="1.15" points="302.4,-557 306.4,-557 306.4,-553 302.4,-553"/>
+<polyline fill="none" stroke="#5480b0" stroke-width="1.15" points="302.4,-497 306.4,-497 306.4,-493 302.4,-493"/>
+<text xml:space="preserve" text-anchor="start" x="446.78" y="-532.6" font-family="Arial" font-weight="bold" font-size="12.00" fill="#143c65">Gestore web</text>
+<text xml:space="preserve" text-anchor="start" x="394.28" y="-520.6" font-family="Arial" font-size="12.00" fill="#143c65">Sicurezza e sessione · Controller</text>
+<text xml:space="preserve" text-anchor="start" x="408.15" y="-508.6" font-family="Arial" font-size="12.00" fill="#143c65">Spring MVC · HTML / JSON</text>
+</g>
+<!-- Utenze -->
+<g id="node4" class="node">
+<title>Utenze</title>
+<polygon fill="#edf5f0" stroke="#568573" stroke-width="1.15" points="185.2,-416 19.6,-416 19.6,-412 15.6,-412 15.6,-408 19.6,-408 19.6,-334 15.6,-334 15.6,-330 19.6,-330 19.6,-326 185.2,-326 185.2,-416"/>
+<polyline fill="none" stroke="#568573" stroke-width="1.15" points="19.6,-412 23.6,-412 23.6,-408 19.6,-408"/>
+<polyline fill="none" stroke="#568573" stroke-width="1.15" points="19.6,-334 23.6,-334 23.6,-330 19.6,-330"/>
+<text xml:space="preserve" text-anchor="start" x="82.53" y="-378.6" font-family="Arial" font-weight="bold" font-size="12.00" fill="#1a4a3c">Utenze</text>
+<text xml:space="preserve" text-anchor="start" x="59.65" y="-366.6" font-family="Arial" font-size="12.00" fill="#1a4a3c">Account e profili</text>
+<text xml:space="preserve" text-anchor="start" x="46.9" y="-354.6" font-family="Arial" font-size="12.00" fill="#1a4a3c">Servizi e persistenza</text>
+</g>
+<!-- Richieste -->
+<g id="node5" class="node">
+<title>Richieste</title>
+<polygon fill="#edf5f0" stroke="#568573" stroke-width="1.15" points="375.2,-416 209.6,-416 209.6,-412 205.6,-412 205.6,-408 209.6,-408 209.6,-334 205.6,-334 205.6,-330 209.6,-330 209.6,-326 375.2,-326 375.2,-416"/>
+<polyline fill="none" stroke="#568573" stroke-width="1.15" points="209.6,-412 213.6,-412 213.6,-408 209.6,-408"/>
+<polyline fill="none" stroke="#568573" stroke-width="1.15" points="209.6,-334 213.6,-334 213.6,-330 209.6,-330"/>
+<text xml:space="preserve" text-anchor="start" x="265.77" y="-378.6" font-family="Arial" font-weight="bold" font-size="12.00" fill="#1a4a3c">Richieste</text>
+<text xml:space="preserve" text-anchor="start" x="244.4" y="-366.6" font-family="Arial" font-size="12.00" fill="#1a4a3c">Pratiche e accordi</text>
+<text xml:space="preserve" text-anchor="start" x="236.9" y="-354.6" font-family="Arial" font-size="12.00" fill="#1a4a3c">Servizi e persistenza</text>
+</g>
+<!-- Catalogo -->
+<g id="node6" class="node">
+<title>Catalogo</title>
+<polygon fill="#edf5f0" stroke="#568573" stroke-width="1.15" points="565.2,-416 399.6,-416 399.6,-412 395.6,-412 395.6,-408 399.6,-408 399.6,-334 395.6,-334 395.6,-330 399.6,-330 399.6,-326 565.2,-326 565.2,-416"/>
+<polyline fill="none" stroke="#568573" stroke-width="1.15" points="399.6,-412 403.6,-412 403.6,-408 399.6,-408"/>
+<polyline fill="none" stroke="#568573" stroke-width="1.15" points="399.6,-334 403.6,-334 403.6,-330 399.6,-330"/>
+<text xml:space="preserve" text-anchor="start" x="456.53" y="-378.6" font-family="Arial" font-weight="bold" font-size="12.00" fill="#1a4a3c">Catalogo</text>
+<text xml:space="preserve" text-anchor="start" x="420.15" y="-366.6" font-family="Arial" font-size="12.00" fill="#1a4a3c">Misure, territori e offerte</text>
+<text xml:space="preserve" text-anchor="start" x="426.9" y="-354.6" font-family="Arial" font-size="12.00" fill="#1a4a3c">Servizi e persistenza</text>
+</g>
+<!-- Comunicazioni -->
+<g id="node7" class="node">
+<title>Comunicazioni</title>
+<polygon fill="#edf5f0" stroke="#568573" stroke-width="1.15" points="755.2,-416 589.6,-416 589.6,-412 585.6,-412 585.6,-408 589.6,-408 589.6,-334 585.6,-334 585.6,-330 589.6,-330 589.6,-326 755.2,-326 755.2,-416"/>
+<polyline fill="none" stroke="#568573" stroke-width="1.15" points="589.6,-412 593.6,-412 593.6,-408 589.6,-408"/>
+<polyline fill="none" stroke="#568573" stroke-width="1.15" points="589.6,-334 593.6,-334 593.6,-330 589.6,-330"/>
+<text xml:space="preserve" text-anchor="start" x="629.65" y="-378.6" font-family="Arial" font-weight="bold" font-size="12.00" fill="#1a4a3c">Comunicazioni</text>
+<text xml:space="preserve" text-anchor="start" x="602.28" y="-366.6" font-family="Arial" font-size="12.00" fill="#1a4a3c">Messaggi, allegati e avvisi</text>
+<text xml:space="preserve" text-anchor="start" x="616.9" y="-354.6" font-family="Arial" font-size="12.00" fill="#1a4a3c">Servizi e persistenza</text>
+</g>
+<!-- Monitoraggio -->
+<g id="node8" class="node">
+<title>Monitoraggio</title>
+<polygon fill="#edf5f0" stroke="#568573" stroke-width="1.15" points="945.2,-416 779.6,-416 779.6,-412 775.6,-412 775.6,-408 779.6,-408 779.6,-334 775.6,-334 775.6,-330 779.6,-330 779.6,-326 945.2,-326 945.2,-416"/>
+<polyline fill="none" stroke="#568573" stroke-width="1.15" points="779.6,-412 783.6,-412 783.6,-408 779.6,-408"/>
+<polyline fill="none" stroke="#568573" stroke-width="1.15" points="779.6,-334 783.6,-334 783.6,-330 779.6,-330"/>
+<text xml:space="preserve" text-anchor="start" x="824.52" y="-378.6" font-family="Arial" font-weight="bold" font-size="12.00" fill="#1a4a3c">Monitoraggio</text>
+<text xml:space="preserve" text-anchor="start" x="784.4" y="-366.6" font-family="Arial" font-size="12.00" fill="#1a4a3c">Conteggi, schede e riepiloghi</text>
+<text xml:space="preserve" text-anchor="start" x="806.9" y="-354.6" font-family="Arial" font-size="12.00" fill="#1a4a3c">Servizi e persistenza</text>
+</g>
+<!-- Adattatore -->
+<g id="node9" class="node">
+<title>Adattatore</title>
+<polygon fill="#edf5f0" stroke="#568573" stroke-width="1.15" points="185.2,-211 19.6,-211 19.6,-207 15.6,-207 15.6,-203 19.6,-203 19.6,-147 15.6,-147 15.6,-143 19.6,-143 19.6,-139 185.2,-139 185.2,-211"/>
+<polyline fill="none" stroke="#568573" stroke-width="1.15" points="19.6,-207 23.6,-207 23.6,-203 19.6,-203"/>
+<polyline fill="none" stroke="#568573" stroke-width="1.15" points="19.6,-147 23.6,-147 23.6,-143 19.6,-143"/>
+<text xml:space="preserve" text-anchor="start" x="55.9" y="-176.6" font-family="Arial" font-weight="bold" font-size="12.00" fill="#1a4a3c">Adattatore email</text>
+<text xml:space="preserve" text-anchor="start" x="42.78" y="-164.6" font-family="Arial" font-size="12.00" fill="#1a4a3c">Attivazione e recupero</text>
+</g>
+<!-- Email -->
+<g id="node10" class="node">
+<title>Email</title>
+<polygon fill="#edf5f0" stroke="#568573" stroke-width="1.15" points="185.2,-90 19.6,-90 19.6,-86 15.6,-86 15.6,-82 19.6,-82 19.6,-8 15.6,-8 15.6,-4 19.6,-4 19.6,0 185.2,0 185.2,-90"/>
+<polyline fill="none" stroke="#568573" stroke-width="1.15" points="19.6,-86 23.6,-86 23.6,-82 19.6,-82"/>
+<polyline fill="none" stroke="#568573" stroke-width="1.15" points="19.6,-8 23.6,-8 23.6,-4 19.6,-4"/>
+<text xml:space="preserve" text-anchor="start" x="39.78" y="-41.73" font-family="Arial" font-weight="bold" font-size="12.00" fill="#1a4a3c">Servizio email esterno</text>
+</g>
+<!-- PostgreSQL -->
+<g id="node11" class="node">
+<title>PostgreSQL</title>
+<polygon fill="#e9f7f5" stroke="#3d867d" stroke-width="1.15" points="583.2,-90 381.6,-90 381.6,-86 377.6,-86 377.6,-82 381.6,-82 381.6,-8 377.6,-8 377.6,-4 381.6,-4 381.6,0 583.2,0 583.2,-90"/>
+<polyline fill="none" stroke="#3d867d" stroke-width="1.15" points="381.6,-86 385.6,-86 385.6,-82 381.6,-82"/>
+<polyline fill="none" stroke="#3d867d" stroke-width="1.15" points="381.6,-8 385.6,-8 385.6,-4 381.6,-4"/>
+<text xml:space="preserve" text-anchor="start" x="447.53" y="-52.6" font-family="Arial" font-weight="bold" font-size="12.00" fill="#153d38">PostgreSQL</text>
+<text xml:space="preserve" text-anchor="start" x="424.65" y="-40.6" font-family="Arial" font-size="12.00" fill="#153d38">Database unico picus</text>
+<text xml:space="preserve" text-anchor="start" x="413.03" y="-28.6" font-family="Arial" font-size="12.00" fill="#153d38">Endpoint condiviso · 5432</text>
+</g>
+<!-- TitoloJVM -->
+<g id="node12" class="node">
+<title>TitoloJVM</title>
+<text xml:space="preserve" text-anchor="start" x="17.28" y="-579.15" font-family="Arial" font-weight="bold" font-size="13.00" fill="#183957">Applicazione PICUS · Unico processo JVM</text>
+</g>
+<!-- EtichettaHTTP -->
+<g id="node13" class="node">
+<title>EtichettaHTTP</title>
+<text xml:space="preserve" text-anchor="middle" x="516.4" y="-607.73" font-family="Arial" font-size="12.00" fill="#334155">HTTP</text>
+</g>
+<!-- EtichettaJDBC -->
+<g id="node14" class="node">
+<title>EtichettaJDBC</title>
+<text xml:space="preserve" text-anchor="middle" x="510.4" y="-185.72" font-family="Arial" font-size="12.00" fill="#334155">JDBC</text>
+</g>
+<!-- EtichettaEmail -->
+<g id="node15" class="node">
+<title>EtichettaEmail</title>
+<text xml:space="preserve" text-anchor="middle" x="60.4" y="-112.72" font-family="Arial" font-size="12.00" fill="#334155">Invio email</text>
+</g>
+<!-- browser_http -->
+<g id="node16" class="node">
+<title>browser_http</title>
+<polygon fill="#ffffff" stroke="#334155" stroke-width="1.15" points="487.08,-637.68 477.72,-637.68 477.72,-628.32 487.08,-628.32 487.08,-637.68"/>
+</g>
+<!-- web_http -->
+<g id="node17" class="node">
+<title>web_http</title>
+<polygon fill="#ffffff" stroke="#334155" stroke-width="1.15" points="487.08,-565.68 477.72,-565.68 477.72,-556.32 487.08,-556.32 487.08,-565.68"/>
+</g>
+<!-- web_u -->
+<g id="node18" class="node">
+<title>web_u</title>
+<polygon fill="#ffffff" stroke="#334155" stroke-width="1.15" points="322.08,-493.68 312.72,-493.68 312.72,-484.32 322.08,-484.32 322.08,-493.68"/>
+</g>
+<!-- web_r -->
+<g id="node19" class="node">
+<title>web_r</title>
+<polygon fill="#ffffff" stroke="#334155" stroke-width="1.15" points="402.08,-493.68 392.72,-493.68 392.72,-484.32 402.08,-484.32 402.08,-493.68"/>
+</g>
+<!-- web_c -->
+<g id="node20" class="node">
+<title>web_c</title>
+<polygon fill="#ffffff" stroke="#334155" stroke-width="1.15" points="487.08,-493.68 477.72,-493.68 477.72,-484.32 487.08,-484.32 487.08,-493.68"/>
+</g>
+<!-- web_a -->
+<g id="node21" class="node">
+<title>web_a</title>
+<polygon fill="#ffffff" stroke="#334155" stroke-width="1.15" points="572.08,-493.68 562.72,-493.68 562.72,-484.32 572.08,-484.32 572.08,-493.68"/>
+</g>
+<!-- web_m -->
+<g id="node22" class="node">
+<title>web_m</title>
+<polygon fill="#ffffff" stroke="#334155" stroke-width="1.15" points="652.08,-493.68 642.72,-493.68 642.72,-484.32 652.08,-484.32 652.08,-493.68"/>
+</g>
+<!-- u_web -->
+<g id="node23" class="node">
+<title>u_web</title>
+<polygon fill="#ffffff" stroke="#334155" stroke-width="1.15" points="107.08,-420.68 97.72,-420.68 97.72,-411.32 107.08,-411.32 107.08,-420.68"/>
+</g>
+<!-- r_web -->
+<g id="node24" class="node">
+<title>r_web</title>
+<polygon fill="#ffffff" stroke="#334155" stroke-width="1.15" points="297.08,-420.68 287.72,-420.68 287.72,-411.32 297.08,-411.32 297.08,-420.68"/>
+</g>
+<!-- c_web -->
+<g id="node25" class="node">
+<title>c_web</title>
+<polygon fill="#ffffff" stroke="#334155" stroke-width="1.15" points="487.08,-420.68 477.72,-420.68 477.72,-411.32 487.08,-411.32 487.08,-420.68"/>
+</g>
+<!-- a_web -->
+<g id="node26" class="node">
+<title>a_web</title>
+<polygon fill="#ffffff" stroke="#334155" stroke-width="1.15" points="677.08,-420.68 667.72,-420.68 667.72,-411.32 677.08,-411.32 677.08,-420.68"/>
+</g>
+<!-- m_web -->
+<g id="node27" class="node">
+<title>m_web</title>
+<polygon fill="#ffffff" stroke="#334155" stroke-width="1.15" points="867.08,-420.68 857.72,-420.68 857.72,-411.32 867.08,-411.32 867.08,-420.68"/>
+</g>
+<!-- u_jdbc -->
+<g id="node28" class="node">
+<title>u_jdbc</title>
+<polygon fill="#ffffff" stroke="#334155" stroke-width="1.15" points="131.08,-330.68 121.72,-330.68 121.72,-321.32 131.08,-321.32 131.08,-330.68"/>
+</g>
+<!-- r_jdbc -->
+<g id="node29" class="node">
+<title>r_jdbc</title>
+<polygon fill="#ffffff" stroke="#334155" stroke-width="1.15" points="297.08,-330.68 287.72,-330.68 287.72,-321.32 297.08,-321.32 297.08,-330.68"/>
+</g>
+<!-- c_jdbc -->
+<g id="node30" class="node">
+<title>c_jdbc</title>
+<polygon fill="#ffffff" stroke="#334155" stroke-width="1.15" points="487.08,-330.68 477.72,-330.68 477.72,-321.32 487.08,-321.32 487.08,-330.68"/>
+</g>
+<!-- a_jdbc -->
+<g id="node31" class="node">
+<title>a_jdbc</title>
+<polygon fill="#ffffff" stroke="#334155" stroke-width="1.15" points="677.08,-330.68 667.72,-330.68 667.72,-321.32 677.08,-321.32 677.08,-330.68"/>
+</g>
+<!-- m_jdbc -->
+<g id="node32" class="node">
+<title>m_jdbc</title>
+<polygon fill="#ffffff" stroke="#334155" stroke-width="1.15" points="867.08,-330.68 857.72,-330.68 857.72,-321.32 867.08,-321.32 867.08,-330.68"/>
+</g>
+<!-- u_mail -->
+<g id="node33" class="node">
+<title>u_mail</title>
+<polygon fill="#ffffff" stroke="#334155" stroke-width="1.15" points="62.08,-330.68 52.72,-330.68 52.72,-321.32 62.08,-321.32 62.08,-330.68"/>
+</g>
+<!-- mail_in -->
+<g id="node34" class="node">
+<title>mail_in</title>
+<polygon fill="#ffffff" stroke="#334155" stroke-width="1.15" points="62.08,-215.68 52.72,-215.68 52.72,-206.32 62.08,-206.32 62.08,-215.68"/>
+</g>
+<!-- mail_out -->
+<g id="node35" class="node">
+<title>mail_out</title>
+<polygon fill="#ffffff" stroke="#334155" stroke-width="1.15" points="107.08,-143.68 97.72,-143.68 97.72,-134.32 107.08,-134.32 107.08,-143.68"/>
+</g>
+<!-- email_in -->
+<g id="node36" class="node">
+<title>email_in</title>
+<polygon fill="#ffffff" stroke="#334155" stroke-width="1.15" points="107.08,-94.68 97.72,-94.68 97.72,-85.32 107.08,-85.32 107.08,-94.68"/>
+</g>
+<!-- db_jdbc -->
+<g id="node37" class="node">
+<title>db_jdbc</title>
+<polygon fill="#ffffff" stroke="#334155" stroke-width="1.15" points="487.08,-94.68 477.72,-94.68 477.72,-85.32 487.08,-85.32 487.08,-94.68"/>
+</g>
+<!-- m_browser_http -->
+<g id="node38" class="node">
+<title>m_browser_http</title>
+<text xml:space="preserve" text-anchor="middle" x="496.4" y="-618.5" font-family="Arial" font-size="10.00" fill="#334155">1</text>
+</g>
+<!-- m_web_http -->
+<g id="node39" class="node">
+<title>m_web_http</title>
+<text xml:space="preserve" text-anchor="middle" x="496.4" y="-568.5" font-family="Arial" font-size="10.00" fill="#334155">1</text>
+</g>
+<!-- m_web_u -->
+<g id="node40" class="node">
+<title>m_web_u</title>
+<text xml:space="preserve" text-anchor="middle" x="331.4" y="-474.5" font-family="Arial" font-size="10.00" fill="#334155">1</text>
+</g>
+<!-- m_web_r -->
+<g id="node41" class="node">
+<title>m_web_r</title>
+<text xml:space="preserve" text-anchor="middle" x="411.4" y="-474.5" font-family="Arial" font-size="10.00" fill="#334155">1</text>
+</g>
+<!-- m_web_c -->
+<g id="node42" class="node">
+<title>m_web_c</title>
+<text xml:space="preserve" text-anchor="middle" x="496.4" y="-474.5" font-family="Arial" font-size="10.00" fill="#334155">1</text>
+</g>
+<!-- m_web_a -->
+<g id="node43" class="node">
+<title>m_web_a</title>
+<text xml:space="preserve" text-anchor="middle" x="581.4" y="-474.5" font-family="Arial" font-size="10.00" fill="#334155">1</text>
+</g>
+<!-- m_web_m -->
+<g id="node44" class="node">
+<title>m_web_m</title>
+<text xml:space="preserve" text-anchor="middle" x="661.4" y="-474.5" font-family="Arial" font-size="10.00" fill="#334155">1</text>
+</g>
+<!-- m_u_web -->
+<g id="node45" class="node">
+<title>m_u_web</title>
+<text xml:space="preserve" text-anchor="middle" x="116.4" y="-423.5" font-family="Arial" font-size="10.00" fill="#334155">1</text>
+</g>
+<!-- m_r_web -->
+<g id="node46" class="node">
+<title>m_r_web</title>
+<text xml:space="preserve" text-anchor="middle" x="306.4" y="-423.5" font-family="Arial" font-size="10.00" fill="#334155">1</text>
+</g>
+<!-- m_c_web -->
+<g id="node47" class="node">
+<title>m_c_web</title>
+<text xml:space="preserve" text-anchor="middle" x="496.4" y="-423.5" font-family="Arial" font-size="10.00" fill="#334155">1</text>
+</g>
+<!-- m_a_web -->
+<g id="node48" class="node">
+<title>m_a_web</title>
+<text xml:space="preserve" text-anchor="middle" x="686.4" y="-423.5" font-family="Arial" font-size="10.00" fill="#334155">1</text>
+</g>
+<!-- m_m_web -->
+<g id="node49" class="node">
+<title>m_m_web</title>
+<text xml:space="preserve" text-anchor="middle" x="876.4" y="-423.5" font-family="Arial" font-size="10.00" fill="#334155">1</text>
+</g>
+<!-- m_u_jdbc -->
+<g id="node50" class="node">
+<title>m_u_jdbc</title>
+<text xml:space="preserve" text-anchor="middle" x="140.4" y="-311.5" font-family="Arial" font-size="10.00" fill="#334155">1</text>
+</g>
+<!-- m_r_jdbc -->
+<g id="node51" class="node">
+<title>m_r_jdbc</title>
+<text xml:space="preserve" text-anchor="middle" x="306.4" y="-311.5" font-family="Arial" font-size="10.00" fill="#334155">1</text>
+</g>
+<!-- m_c_jdbc -->
+<g id="node52" class="node">
+<title>m_c_jdbc</title>
+<text xml:space="preserve" text-anchor="middle" x="496.4" y="-311.5" font-family="Arial" font-size="10.00" fill="#334155">1</text>
+</g>
+<!-- m_a_jdbc -->
+<g id="node53" class="node">
+<title>m_a_jdbc</title>
+<text xml:space="preserve" text-anchor="middle" x="686.4" y="-311.5" font-family="Arial" font-size="10.00" fill="#334155">1</text>
+</g>
+<!-- m_m_jdbc -->
+<g id="node54" class="node">
+<title>m_m_jdbc</title>
+<text xml:space="preserve" text-anchor="middle" x="876.4" y="-311.5" font-family="Arial" font-size="10.00" fill="#334155">1</text>
+</g>
+<!-- m_u_mail -->
+<g id="node55" class="node">
+<title>m_u_mail</title>
+<text xml:space="preserve" text-anchor="middle" x="71.4" y="-311.5" font-family="Arial" font-size="10.00" fill="#334155">1</text>
+</g>
+<!-- m_mail_in -->
+<g id="node56" class="node">
+<title>m_mail_in</title>
+<text xml:space="preserve" text-anchor="middle" x="71.4" y="-218.5" font-family="Arial" font-size="10.00" fill="#334155">1</text>
+</g>
+<!-- m_mail_out -->
+<g id="node57" class="node">
+<title>m_mail_out</title>
+<text xml:space="preserve" text-anchor="middle" x="116.4" y="-124.5" font-family="Arial" font-size="10.00" fill="#334155">1</text>
+</g>
+<!-- m_email_in -->
+<g id="node58" class="node">
+<title>m_email_in</title>
+<text xml:space="preserve" text-anchor="middle" x="116.4" y="-95.5" font-family="Arial" font-size="10.00" fill="#334155">1</text>
+</g>
+<!-- m_db_jdbc -->
+<g id="node59" class="node">
+<title>m_db_jdbc</title>
+<text xml:space="preserve" text-anchor="middle" x="496.4" y="-95.5" font-family="Arial" font-size="10.00" fill="#334155">1</text>
+</g>
+<!-- wu_1 -->
+<!-- wu_2 -->
+<!-- wr_1 -->
+<!-- wr_2 -->
+<!-- wa_1 -->
+<!-- wa_2 -->
+<!-- wm_1 -->
+<!-- wm_2 -->
+<!-- jdbc_u -->
+<g id="node68" class="node">
+<title>jdbc_u</title>
+<ellipse fill="#3d867d" stroke="#3d867d" stroke-width="1.15" cx="126.4" cy="-236" rx="1.98" ry="1.98"/>
+</g>
+<!-- jdbc_r -->
+<g id="node69" class="node">
+<title>jdbc_r</title>
+<ellipse fill="#3d867d" stroke="#3d867d" stroke-width="1.15" cx="292.4" cy="-236" rx="1.98" ry="1.98"/>
+</g>
+<!-- jdbc_c -->
+<g id="node70" class="node">
+<title>jdbc_c</title>
+<ellipse fill="#3d867d" stroke="#3d867d" stroke-width="1.15" cx="482.4" cy="-236" rx="1.98" ry="1.98"/>
+</g>
+<!-- jdbc_a -->
+<g id="node71" class="node">
+<title>jdbc_a</title>
+<ellipse fill="#3d867d" stroke="#3d867d" stroke-width="1.15" cx="672.4" cy="-236" rx="1.98" ry="1.98"/>
+</g>
+<!-- jdbc_m -->
+<g id="node72" class="node">
+<title>jdbc_m</title>
+<ellipse fill="#3d867d" stroke="#3d867d" stroke-width="1.15" cx="862.4" cy="-236" rx="1.98" ry="1.98"/>
+</g>
+<!-- browser_http&#45;&gt;web_http -->
+<g id="edge1" class="edge">
+<title>browser_http&#45;&gt;web_http</title>
+<path fill="none" stroke="#5480b0" stroke-width="1.25" d="M482.4,-627.82C482.4,-616.82 482.4,-590.81 482.4,-574.68"/>
+<polygon fill="#5480b0" stroke="#5480b0" stroke-width="1.25" points="484.85,-575.02 482.4,-568.02 479.95,-575.02 484.85,-575.02"/>
+</g>
+<!-- web_u&#45;&gt;wu_1 -->
+<g id="edge5" class="edge">
+<title>web_u&#45;&gt;wu_1</title>
+<path fill="none" stroke="#64748b" stroke-width="1.25" d="M317.4,-484C317.4,-475 317.4,-457 317.4,-457"/>
+</g>
+<!-- web_r&#45;&gt;wr_1 -->
+<g id="edge6" class="edge">
+<title>web_r&#45;&gt;wr_1</title>
+<path fill="none" stroke="#64748b" stroke-width="1.25" d="M397.4,-483.76C397.4,-471.12 397.4,-440 397.4,-440"/>
+</g>
+<!-- web_c&#45;&gt;c_web -->
+<g id="edge2" class="edge">
+<title>web_c&#45;&gt;c_web</title>
+<path fill="none" stroke="#64748b" stroke-width="1.25" d="M482.4,-483.75C482.4,-472.6 482.4,-446.22 482.4,-429.87"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.25" points="484.85,-430.09 482.4,-423.09 479.95,-430.09 484.85,-430.09"/>
+</g>
+<!-- web_a&#45;&gt;wa_1 -->
+<g id="edge7" class="edge">
+<title>web_a&#45;&gt;wa_1</title>
+<path fill="none" stroke="#64748b" stroke-width="1.25" d="M567.4,-483.76C567.4,-471.12 567.4,-440 567.4,-440"/>
+</g>
+<!-- web_m&#45;&gt;wm_1 -->
+<g id="edge8" class="edge">
+<title>web_m&#45;&gt;wm_1</title>
+<path fill="none" stroke="#64748b" stroke-width="1.25" d="M647.4,-484C647.4,-475 647.4,-457 647.4,-457"/>
+</g>
+<!-- u_jdbc&#45;&gt;jdbc_u -->
+<g id="edge17" class="edge">
+<title>u_jdbc&#45;&gt;jdbc_u</title>
+<path fill="none" stroke="#3d867d" stroke-width="1.25" d="M126.4,-320.9C126.4,-304.1 126.4,-250.79 126.4,-238.53"/>
+</g>
+<!-- r_jdbc&#45;&gt;jdbc_r -->
+<g id="edge18" class="edge">
+<title>r_jdbc&#45;&gt;jdbc_r</title>
+<path fill="none" stroke="#3d867d" stroke-width="1.25" d="M292.4,-320.9C292.4,-304.1 292.4,-250.79 292.4,-238.53"/>
+</g>
+<!-- c_jdbc&#45;&gt;jdbc_c -->
+<g id="edge19" class="edge">
+<title>c_jdbc&#45;&gt;jdbc_c</title>
+<path fill="none" stroke="#3d867d" stroke-width="1.25" d="M482.4,-320.9C482.4,-304.1 482.4,-250.79 482.4,-238.53"/>
+</g>
+<!-- a_jdbc&#45;&gt;jdbc_a -->
+<g id="edge20" class="edge">
+<title>a_jdbc&#45;&gt;jdbc_a</title>
+<path fill="none" stroke="#3d867d" stroke-width="1.25" d="M672.4,-320.9C672.4,-304.1 672.4,-250.79 672.4,-238.53"/>
+</g>
+<!-- m_jdbc&#45;&gt;jdbc_m -->
+<g id="edge21" class="edge">
+<title>m_jdbc&#45;&gt;jdbc_m</title>
+<path fill="none" stroke="#3d867d" stroke-width="1.25" d="M862.4,-320.9C862.4,-304.1 862.4,-250.79 862.4,-238.53"/>
+</g>
+<!-- u_mail&#45;&gt;mail_in -->
+<g id="edge3" class="edge">
+<title>u_mail&#45;&gt;mail_in</title>
+<path fill="none" stroke="#64748b" stroke-width="1.25" d="M57.4,-320.76C57.4,-303.84 57.4,-250.32 57.4,-224.79"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.25" points="59.85,-224.9 57.4,-217.9 54.95,-224.9 59.85,-224.9"/>
+</g>
+<!-- mail_out&#45;&gt;email_in -->
+<g id="edge4" class="edge">
+<title>mail_out&#45;&gt;email_in</title>
+<path fill="none" stroke="#64748b" stroke-width="1.25" d="M102.4,-133.76C102.4,-126.65 102.4,-113.69 102.4,-103.71"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.25" points="104.85,-103.95 102.4,-96.95 99.95,-103.95 104.85,-103.95"/>
+</g>
+<!-- wu_1&#45;&gt;wu_2 -->
+<g id="edge9" class="edge">
+<title>wu_1&#45;&gt;wu_2</title>
+<path fill="none" stroke="#64748b" stroke-width="1.25" d="M317.4,-457C317.4,-457 102.4,-457 102.4,-457"/>
+</g>
+<!-- wu_2&#45;&gt;u_web -->
+<g id="edge13" class="edge">
+<title>wu_2&#45;&gt;u_web</title>
+<path fill="none" stroke="#64748b" stroke-width="1.25" d="M102.4,-457C102.4,-457 102.4,-441.73 102.4,-429.82"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.25" points="104.85,-429.92 102.4,-422.92 99.95,-429.92 104.85,-429.92"/>
+</g>
+<!-- wr_1&#45;&gt;wr_2 -->
+<g id="edge10" class="edge">
+<title>wr_1&#45;&gt;wr_2</title>
+<path fill="none" stroke="#64748b" stroke-width="1.25" d="M397.4,-440C397.4,-440 292.4,-440 292.4,-440"/>
+</g>
+<!-- wr_2&#45;&gt;r_web -->
+<g id="edge14" class="edge">
+<title>wr_2&#45;&gt;r_web</title>
+<path fill="none" stroke="#64748b" stroke-width="1.25" d="M292.4,-440C292.4,-440 292.4,-435.13 292.4,-429.78"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.25" points="294.85,-429.98 292.4,-422.98 289.95,-429.98 294.85,-429.98"/>
+</g>
+<!-- wa_1&#45;&gt;wa_2 -->
+<g id="edge11" class="edge">
+<title>wa_1&#45;&gt;wa_2</title>
+<path fill="none" stroke="#64748b" stroke-width="1.25" d="M567.4,-440C567.4,-440 672.4,-440 672.4,-440"/>
+</g>
+<!-- wa_2&#45;&gt;a_web -->
+<g id="edge15" class="edge">
+<title>wa_2&#45;&gt;a_web</title>
+<path fill="none" stroke="#64748b" stroke-width="1.25" d="M672.4,-440C672.4,-440 672.4,-435.13 672.4,-429.78"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.25" points="674.85,-429.98 672.4,-422.98 669.95,-429.98 674.85,-429.98"/>
+</g>
+<!-- wm_1&#45;&gt;wm_2 -->
+<g id="edge12" class="edge">
+<title>wm_1&#45;&gt;wm_2</title>
+<path fill="none" stroke="#64748b" stroke-width="1.25" d="M647.4,-457C647.4,-457 862.4,-457 862.4,-457"/>
+</g>
+<!-- wm_2&#45;&gt;m_web -->
+<g id="edge16" class="edge">
+<title>wm_2&#45;&gt;m_web</title>
+<path fill="none" stroke="#64748b" stroke-width="1.25" d="M862.4,-457C862.4,-457 862.4,-441.73 862.4,-429.82"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.25" points="864.85,-429.92 862.4,-422.92 859.95,-429.92 864.85,-429.92"/>
+</g>
+<!-- jdbc_u&#45;&gt;jdbc_r -->
+<g id="edge22" class="edge">
+<title>jdbc_u&#45;&gt;jdbc_r</title>
+<path fill="none" stroke="#3d867d" stroke-width="1.25" d="M128.75,-236C147.35,-236 270.73,-236 289.9,-236"/>
+</g>
+<!-- jdbc_r&#45;&gt;jdbc_c -->
+<g id="edge23" class="edge">
+<title>jdbc_r&#45;&gt;jdbc_c</title>
+<path fill="none" stroke="#3d867d" stroke-width="1.25" d="M294.8,-236C315.25,-236 459.82,-236 480.05,-236"/>
+</g>
+<!-- jdbc_c&#45;&gt;db_jdbc -->
+<g id="edge26" class="edge">
+<title>jdbc_c&#45;&gt;db_jdbc</title>
+<path fill="none" stroke="#3d867d" stroke-width="1.25" d="M482.4,-233.47C482.4,-218.09 482.4,-136.87 482.4,-103.91"/>
+<polygon fill="#3d867d" stroke="#3d867d" stroke-width="1.25" points="484.85,-103.94 482.4,-96.94 479.95,-103.94 484.85,-103.94"/>
+</g>
+<!-- jdbc_a&#45;&gt;jdbc_c -->
+<g id="edge25" class="edge">
+<title>jdbc_a&#45;&gt;jdbc_c</title>
+<path fill="none" stroke="#3d867d" stroke-width="1.25" d="M670,-236C649.55,-236 504.98,-236 484.75,-236"/>
+</g>
+<!-- jdbc_m&#45;&gt;jdbc_a -->
+<g id="edge24" class="edge">
+<title>jdbc_m&#45;&gt;jdbc_a</title>
+<path fill="none" stroke="#3d867d" stroke-width="1.25" d="M860,-236C839.55,-236 694.98,-236 674.75,-236"/>
+</g>
+</g>
+</svg>
