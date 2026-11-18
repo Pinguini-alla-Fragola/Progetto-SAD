@@ -50,11 +50,14 @@
 
         .player { margin-top: 1.5rem; }
 
-        .toggle {
-            display: inline-flex;
-            align-items: center;
+        .versions {
+            display: flex;
+            flex-wrap: wrap;
             gap: 0.6rem;
             margin-top: 1rem;
+        }
+
+        .version {
             padding: 0.8rem 1.25rem;
             border: 1px solid var(--border-color);
             border-radius: 0.75rem;
@@ -64,9 +67,14 @@
             font-weight: 600;
             cursor: pointer;
         }
-        .toggle:hover, .toggle:focus-visible { border-color: var(--accent-color); outline: none; }
-        .toggle:disabled { opacity: 0.6; cursor: progress; }
-        .toggle svg { width: 1.2rem; height: 1.2rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .version:hover, .version:focus-visible { border-color: var(--accent-color); outline: none; }
+        .version[aria-checked="true"] {
+            border-color: var(--accent-color);
+            background-color: rgba(88, 166, 255, 0.14);
+            color: var(--accent-color);
+            cursor: default;
+        }
+        .version:disabled { opacity: 0.6; cursor: progress; }
 
         video {
             display: block;
@@ -78,7 +86,7 @@
         }
 
         @media (max-width: 560px) {
-            .toggle { width: 100%; justify-content: center; }
+            .versions { display: grid; grid-template-columns: 1fr 1fr; }
         }
     </style>
 </head>
@@ -90,10 +98,12 @@
 
         <section class="player">
             <video id="video" controls controlslist="nodownload" playsinline preload="metadata"></video>
-            <button type="button" class="toggle" id="toggle" aria-live="polite">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg>
-                <span id="toggle-label">Senza voce</span>
-            </button>
+            <div class="versions" role="radiogroup" aria-label="Versione del video">
+                <button type="button" class="version" role="radio" aria-checked="true" data-version="italiano" lang="it">Italiano</button>
+                <button type="button" class="version" role="radio" aria-checked="false" data-version="en" lang="en">English</button>
+                <button type="button" class="version" role="radio" aria-checked="false" data-version="napoletano" lang="nap">Napoletano</button>
+                <button type="button" class="version" role="radio" aria-checked="false" data-version="senza-voce">Senza voce</button>
+            </div>
         </section>
     </main>
 
@@ -102,31 +112,38 @@
             // i video stanno nel branch landing-video, per non appesantire il sito
             var BASE = 'https://raw.githubusercontent.com/Pinguini-alla-Fragola/Progetto-SAD/landing-video/';
             var files = {
-                'voce': BASE + 'picus-demo.mp4',
+                'italiano': BASE + 'picus-demo-voce-reale.mp4',
+                'en': BASE + 'picus-demo-en.mp4',
+                'napoletano': BASE + 'picus-demo-napoletano.mp4',
                 'senza-voce': BASE + 'picus-demo-senza-voce.mp4'
             };
+            // i vecchi indirizzi con #voce aprono la versione in italiano
+            var alias = { 'voce': 'italiano' };
             var video = document.getElementById('video');
-            var toggle = document.getElementById('toggle');
-            var label = document.getElementById('toggle-label');
-            var current = location.hash === '#senza-voce' ? 'senza-voce' : 'voce';
+            var buttons = Array.prototype.slice.call(document.querySelectorAll('.version'));
+            var hash = location.hash.replace('#', '');
+            var current = files[alias[hash] || hash] ? (alias[hash] || hash) : 'italiano';
 
-            // il pulsante propone l'altra versione
-            function renderButton() {
-                label.textContent = current === 'voce' ? 'Senza voce' : 'Con voce';
-                toggle.setAttribute('aria-label', current === 'voce'
-                    ? 'Passa alla versione senza voce' : 'Passa alla versione con voce');
+            function renderButtons() {
+                buttons.forEach(function (b) {
+                    b.setAttribute('aria-checked', String(b.getAttribute('data-version') === current));
+                });
             }
 
-            // le due versioni hanno la stessa durata: si riparte dallo stesso istante
-            function swap() {
-                var next = current === 'voce' ? 'senza-voce' : 'voce';
+            function setDisabled(value) {
+                buttons.forEach(function (b) { b.disabled = value; });
+            }
+
+            // tutte le versioni hanno la stessa durata: si riparte dallo stesso istante
+            function choose(next) {
+                if (next === current) return;
                 var time = video.currentTime || 0;
                 var wasPlaying = !video.paused && !video.ended;
-                toggle.disabled = true;
+                setDisabled(true);
                 video.addEventListener('loadedmetadata', function onReady() {
                     video.removeEventListener('loadedmetadata', onReady);
                     video.currentTime = time;
-                    toggle.disabled = false;
+                    setDisabled(false);
                     if (wasPlaying) {
                         var p = video.play();
                         if (p && p.catch) p.catch(function () {});
@@ -134,21 +151,23 @@
                 });
                 video.addEventListener('error', function onError() {
                     video.removeEventListener('error', onError);
-                    toggle.disabled = false;
+                    setDisabled(false);
                 });
                 current = next;
                 video.src = files[current];
                 video.load();
-                renderButton();
+                renderButtons();
                 try { history.replaceState(null, '', '#' + current); } catch (e) { /* ignorato */ }
             }
 
             // niente menu del tasto destro sul video (meno scorciatoie per scaricarlo)
             video.addEventListener('contextmenu', function (e) { e.preventDefault(); });
-            toggle.addEventListener('click', swap);
+            buttons.forEach(function (b) {
+                b.addEventListener('click', function () { choose(b.getAttribute('data-version')); });
+            });
 
             video.src = files[current];
-            renderButton();
+            renderButtons();
         })();
     </script>
 </body>
