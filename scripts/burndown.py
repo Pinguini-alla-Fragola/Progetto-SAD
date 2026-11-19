@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 """Burndown di uno sprint da un GitHub Project (v2): scrive un CSV e un grafico SVG.
 
-Punti di un task: campo Number, altrimenti la taglia (PUNTI_PER_TAGLIA), altrimenti 1.
+Conta solo le issue di tipo Task (TASK_TYPE): sono i task tecnici. Story, Epic, Bug, Question,
+Pull Request, bozze e contenuti non disponibili non entrano in scope, completati e rimanenti.
+Punti di un task: solo il campo Number Estimate; senza Estimate il task vale 0 (la taglia Size non si usa).
 Il lavoro rimasto dipende dallo stato (RESIDUO_PER_STATO): Ready 75%, In progress 50%, In review 25%,
 Done 0% del peso. Lo stato nel tempo viene dalla cronologia degli eventi di stato dell'issue.
-Esclude Pull Request, Epic e contenuti non disponibili. Solo libreria standard.
+Solo libreria standard.
 
 Variabili d'ambiente (le prime tre sono obbligatorie):
   PROJECT_TOKEN, PROJECT_OWNER, PROJECT_NUMBER
   OWNER_TYPE (user), ITERATION_TITLE (sprint in corso), OUT_DIR (docs/burndown)
   ITERATION_FIELD (Iteration), STATUS_FIELD (Status), DONE_VALUE (Done),
-  POINTS_FIELD (Estimate), SIZE_FIELD (Size)
+  POINTS_FIELD (Estimate), TASK_TYPE (Task)
 """
 import csv
 import html
@@ -21,7 +23,6 @@ import urllib.request
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
-PUNTI_PER_TAGLIA = {"XS": 1, "S": 2, "M": 3, "L": 5, "XL": 8}   # da concordare nel team
 # quota di punti ancora da fare per stato; Done vale 0 (task terminato, si sottrae l'intero peso)
 RESIDUO_PER_STATO = {"Backlog": 1.0, "Ready": 0.75, "In progress": 0.5, "In review": 0.25, "Done": 0.0}
 UTC = timezone.utc
@@ -89,16 +90,14 @@ def scarica_dati(cfg):
         it = campi.get(cfg["campo_sprint"], {})
         if "startDate" not in it:
             continue
-        # lo sprint esiste anche se il task è escluso
+        # lo sprint esiste anche se l'item è escluso
         s = sprint.setdefault(it["title"], {"task": []})
         s["inizio"], s["giorni"] = date.fromisoformat(it["startDate"]), int(it["duration"])
         contenuto = riga["content"] or {}
-        epic = (contenuto.get("issueType") or {}).get("name", "").strip().casefold() == "epic"
-        if not contenuto or contenuto.get("__typename") == "PullRequest" or (contenuto.get("__typename") == "Issue" and epic):
-            continue
-        punti = campi.get(cfg["campo_punti"], {}).get("number")
-        if punti is None:
-            punti = PUNTI_PER_TAGLIA.get(campi.get(cfg["campo_taglia"], {}).get("name"), 1)
+        tipo = (contenuto.get("issueType") or {}).get("name", "").strip().casefold()
+        if contenuto.get("__typename") != "Issue" or tipo != cfg["tipo_task"].strip().casefold():
+            continue        # contano solo i task tecnici: né Story, Epic, Bug, Question, PR o bozze
+        punti = campi.get(cfg["campo_punti"], {}).get("number") or 0       # solo Estimate, mai la taglia
         fatto = campi.get(cfg["campo_stato"], {}).get("name") == cfg["valore_fatto"]
         # completato: chiusura dell'issue se c'è, altrimenti ultimo aggiornamento
         chiuso = (data(contenuto.get("closedAt")) or data(riga["updatedAt"])) if fatto else None
@@ -293,7 +292,7 @@ def main():
            "proprietario": env["PROJECT_OWNER"], "numero": int(env["PROJECT_NUMBER"]),
            "campo_sprint": env.get("ITERATION_FIELD", "Iteration"), "campo_stato": env.get("STATUS_FIELD", "Status"),
            "valore_fatto": env.get("DONE_VALUE", "Done"), "campo_punti": env.get("POINTS_FIELD", "Estimate"),
-           "campo_taglia": env.get("SIZE_FIELD", "Size")}
+           "tipo_task": env.get("TASK_TYPE", "Task")}
     dati = scarica_dati(cfg)
     adesso = datetime.now(UTC)
     titolo = scegli_sprint(dati, env.get("ITERATION_TITLE", ""), adesso.date())
