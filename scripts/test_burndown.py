@@ -10,7 +10,7 @@ import burndown
 
 CFG = {"token": "x", "tipo": "organization", "proprietario": "Pinguini-alla-Fragola", "numero": 2,
        "campo_sprint": "Iteration", "campo_stato": "Status", "valore_fatto": "Done",
-       "campo_punti": "Estimate", "campo_taglia": "Size"}
+       "campo_punti": "Estimate", "tipo_task": "Task"}
 START = date(2026, 10, 15)
 NOW = datetime(2026, 10, 25, 12, tzinfo=burndown.UTC)
 ITERATION = {"__typename": "ProjectV2ItemFieldIterationValue", "title": "S1 - Preparazione",
@@ -46,34 +46,42 @@ class BurndownScopeTests(unittest.TestCase):
         base, rows = burndown.calcola_punti(sprint, NOW)
         return sprint["task"], base, rows
 
-    def test_epics_and_pull_requests_affect_neither_scope_nor_completed(self):
+    def test_only_technical_tasks_count(self):
         nodes = [node("Task conclusa", points=3, done=True),
+                 node("Task aperta", points=5),
+                 node("Story conclusa", issue_type="Story", points=3, done=True),
                  node("Story aperta", issue_type="Story", points=5),
                  node("Epic conclusa", issue_type="Epic", points=8, done=True),
                  node("Epic aperta", issue_type="Epic", points=13),
+                 node("Bug", issue_type="Bug", points=2),
+                 node("Domanda", issue_type="Question", points=2),
+                 node("Senza tipo", issue_type=None, points=3),
+                 node("Bozza", kind="DraftIssue", points=1),
                  node("PR conclusa", kind="PullRequest", points=5, done=True),
                  node("PR aperta", kind="PullRequest", points=8)]
         mine, base, rows = self.calculate(nodes)
-        self.assertEqual([i["titolo"] for i in mine], ["Task conclusa", "Story aperta"])
+        self.assertEqual([i["titolo"] for i in mine], ["Task conclusa", "Task aperta"])
         self.assertEqual(base, 8)
         self.assertEqual(rows[-1][1:], (8, 5.5, 2.5))     # 3 chiusi + metà di 5 (In progress)
-        self.assertEqual(rows[0][1:], (8, 2.5, 5.5))
+        self.assertEqual(rows[0][1:], (8, 2.5, 5.5))      # senza cronologia vale lo stato attuale (In progress)
 
     def test_native_type_controls_filter_instead_of_title(self):
         nodes = [node("Richieste e appuntamenti", issue_type=" ePiC ", points=8),
-                 node("[EPIC] è solo parte del titolo", issue_type="Task", points=2)]
+                 node("[TECHNICAL TASK] ma di tipo Story", issue_type="Story", points=3),
+                 node("[EPIC] è solo parte del titolo", issue_type=" tAsK ", points=2)]
         mine, base, rows = self.calculate(nodes)
-        self.assertEqual(len(mine), 1)
+        self.assertEqual([i["titolo"] for i in mine], ["[EPIC] è solo parte del titolo"])
         self.assertEqual(base, 2)
         self.assertEqual(rows[-1][3], 1)     # In progress: resta il 50%
 
-    def test_questions_untyped_issues_and_drafts_keep_existing_estimates(self):
-        nodes = [node("Domanda", issue_type="Question", points=2),
-                 node("Senza tipo", issue_type=None, points=3),
-                 node("Bozza", kind="DraftIssue", points=None)]
-        mine, base, _ = self.calculate(nodes)
-        self.assertEqual([i["punti"] for i in mine], [2, 3, 1])
-        self.assertEqual(base, 6)
+    def test_task_type_is_configurable(self):
+        risposta = {"data": {"organization": {"projectV2": {"items": {
+            "pageInfo": {"hasNextPage": False, "endCursor": None},
+            "nodes": [node("Bug", issue_type="Bug", points=2), node("Task", points=3)]}}}}}
+        with mock.patch.object(burndown.urllib.request, "urlopen",
+                               return_value=io.BytesIO(json.dumps(risposta).encode())):
+            dati = burndown.scarica_dati({**CFG, "tipo_task": "Bug"})
+        self.assertEqual([i["titolo"] for i in dati[ITERATION["title"]]["task"]], ["Bug"])
 
     def test_missing_content_creates_no_phantom_points(self):
         unavailable = node("Non accessibile", points=8, done=True)
@@ -84,7 +92,8 @@ class BurndownScopeTests(unittest.TestCase):
         self.assertEqual(rows[-1][1:], (2, 1, 1))
 
     def test_iteration_with_only_excluded_items_still_produces_zero_chart(self):
-        dati = scarica([node("Epic", issue_type="Epic"), node("PR", kind="PullRequest", done=True)])
+        dati = scarica([node("Epic", issue_type="Epic"), node("Story", issue_type="Story", done=True),
+                        node("PR", kind="PullRequest", done=True)])
         title = burndown.scegli_sprint(dati, "", NOW.date())
         base, rows = burndown.calcola_punti(dati[title], NOW)
         self.assertEqual(dati[title]["task"], [])
@@ -92,13 +101,18 @@ class BurndownScopeTests(unittest.TestCase):
         self.assertTrue(all(row[1:] == (0, 0, 0) for row in rows))
         self.assertIn("nessun task", burndown.disegna_grafico(title, dati[title], base, rows, NOW))
 
-    def test_estimate_zero_and_size_fallback_are_preserved(self):
-        sized = node("Con taglia", points=None)
-        sized["fieldValues"]["nodes"].append({"__typename": "ProjectV2ItemFieldSingleSelectValue",
-                                               "name": "L", "field": {"name": "Size"}})
-        mine, base, _ = self.calculate([node("Zero", points=0), sized])
-        self.assertEqual([i["punti"] for i in mine], [0, 5])
-        self.assertEqual(base, 5)
+    def test_points_come_only_from_estimate_never_from_size(self):
+        def con_taglia(titolo, taglia, points):
+            n = node(titolo, points=points)
+            n["fieldValues"]["nodes"].append({"__typename": "ProjectV2ItemFieldSingleSelectValue",
+                                              "name": taglia, "field": {"name": "Size"}})
+            return n
+        mine, base, _ = self.calculate([con_taglia("Taglia grande, stima 2", "XL", 2),
+                                        con_taglia("Solo taglia", "L", None),
+                                        node("Senza stima né taglia", points=None),
+                                        node("Stima zero", points=0)])
+        self.assertEqual([i["punti"] for i in mine], [2, 0, 0, 0])
+        self.assertEqual(base, 2)
 
     def test_remaining_work_depends_on_status(self):
         def task(stato, eventi=(), chiuso=None):
