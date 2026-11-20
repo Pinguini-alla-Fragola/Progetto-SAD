@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import it.unina.picus.comunicazioni.interno.dominio.RegolaCaratteri;
 import it.unina.picus.comunicazioni.interno.dominio.RegolaContenuto;
 import it.unina.picus.comunicazioni.interno.dominio.RegolaDestinatari;
 import it.unina.picus.comunicazioni.interno.dominio.ValidatoreComunicazione;
@@ -15,6 +16,7 @@ class ConfigurazioneRegoleComunicazione {
 
     @Bean
     ValidatoreComunicazione validatoreComunicazione() {
-        return new ValidatoreComunicazione(List.of(new RegolaContenuto(), new RegolaDestinatari()));
+        return new ValidatoreComunicazione(
+                List.of(new RegolaCaratteri(), new RegolaContenuto(), new RegolaDestinatari()));
     }
 }
