@@ -90,7 +90,7 @@
 </fieldset></form>
 </div>
 <div role="tabpanel" id="utenze-view-operatore" aria-labelledby="utenze-tab-operatore" tabindex="0" hidden>
-<h2 class="picus-card-title">Nuovo operatore del Banco</h2><form id="nuovo-operatore" class="picus-form form-layout" novalidate><fieldset class="campi-form">
+<h2 class="picus-card-title">Nuovo operatore del Banco</h2><form id="nuovo-operatore" class="picus-form form-layout" method="post" novalidate><fieldset class="campi-form" disabled>
 <fieldset class="form-section"><legend>Dati personali</legend><div class="form-section-content"><div class="picus-fields fields-two">
 <label class="campo ">Nome<input class="form-control" name="nome" type="text" required ></label>
 <label class="campo ">Cognome<input class="form-control" name="cognome" type="text" required ></label>
@@ -102,7 +102,7 @@
 <label class="campo ">Territorio (comune)<select class="form-control" name="comune" required ><option value="">Seleziona un comune</option></select></label>
 <label class="campo ">Tipologia<select class="form-control" name="tipo" required ><option value="INTERNO_BANCO">Interno del Banco</option><option value="ESTERNO_PAGATO_BANCO">Esterno pagato dal Banco</option></select></label>
 </div></div></fieldset><fieldset class="form-section"><legend>Attività</legend><div class="form-section-content"><fieldset class="campo-scelte" data-misure ><legend>Misure</legend><div class="picus-choices"></div></fieldset><label class="picus-check"><input name="centroPicus" type="checkbox" > Operatore interno del Centro PICUS</label></div></fieldset>
-<div class="form-submit"><button class="btn btn-primary" type="submit">Crea operatore</button><p class="picus-esito" role="status"></p></div>
+<div class="form-submit"><button class="btn btn-primary" type="submit">Crea operatore</button><p class="picus-esito" role="status">Il modulo si attiva dopo il caricamento del catalogo.</p></div>
 </fieldset></form>
 </div>
 <div role="tabpanel" id="utenze-view-csv" aria-labelledby="utenze-tab-csv" tabindex="0" hidden>

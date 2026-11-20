@@ -1,6 +1,12 @@
-import { api } from './area-client.js';
+import { api, ErroreHttp } from './area-client.js';
 
 const TIPOLOGIA_INTERNA = 'INTERNO_BANCO';
+const MESSAGGIO_RETE = 'Connessione non disponibile. Riprova tra poco.';
+
+/** Un errore del server ha già un messaggio leggibile; un errore di rete no. */
+function messaggioErrore(causa) {
+    return causa instanceof ErroreHttp ? causa.message : MESSAGGIO_RETE;
+}
 
 /** Il Centro PICUS riguarda solo gli operatori interni del Banco. */
 function aggiornaCentroPicus(form) {
@@ -74,30 +80,38 @@ async function invia(form, esito, bottone) {
         esito.textContent = 'Account creato per ' + creato.nomeVisualizzato + ' (' + creato.email
             + '). Stato: in attesa di attivazione.';
     } catch (causa) {
-        esito.textContent = causa.message;
-        mostraErrori(form, causa.campi);
+        esito.textContent = messaggioErrore(causa);
+        mostraErrori(form, causa.campi ?? {});
     } finally {
         bottone.disabled = false;
     }
 }
 
+/**
+ * Il form arriva disattivato dalla pagina. Il gestore di invio viene agganciato per primo, così il browser
+ * non usa mai l'invio predefinito; i campi si attivano solo quando il catalogo è caricato.
+ */
 async function avvia(form) {
+    const campi = form.querySelector('fieldset.campi-form');
     const esito = form.querySelector('.picus-esito');
     const bottone = form.querySelector('button[type="submit"]');
+    let pronto = false;
+    form.addEventListener('submit', event => {
+        event.preventDefault();
+        if (pronto) invia(form, esito, bottone);
+    });
     form.elements.tipo.addEventListener('change', () => aggiornaCentroPicus(form));
-    aggiornaCentroPicus(form);
     try {
         const [comuni, misure] = await Promise.all([api('/api/catalogo/comuni'), api('/api/catalogo/misure')]);
         popolaCatalogo(form, comuni, misure);
     } catch (causa) {
-        esito.textContent = causa.message;
-        bottone.disabled = true;
+        esito.textContent = 'Il catalogo non è disponibile, quindi il modulo resta disattivato. ' + messaggioErrore(causa);
         return;
     }
-    form.addEventListener('submit', event => {
-        event.preventDefault();
-        invia(form, esito, bottone);
-    });
+    aggiornaCentroPicus(form);
+    campi.disabled = false;
+    esito.textContent = '';
+    pronto = true;
 }
 
 const form = document.getElementById('nuovo-operatore');
