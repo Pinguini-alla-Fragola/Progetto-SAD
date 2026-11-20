@@ -29,8 +29,14 @@ function mostra(voce, numero) {
  */
 function avvia(voce) {
     let inCorso = false;
+    let daRipetere = false;
+    // Una sola lettura alla volta: una richiesta che arriva durante una lettura non va persa, ma ne accoda
+    // un'altra da fare subito dopo, perché la lettura in corso potrebbe essere partita prima della novità.
     async function aggiorna() {
-        if (inCorso) return;
+        if (inCorso) {
+            daRipetere = true;
+            return;
+        }
         inCorso = true;
         try {
             const { daConfermare } = await api('/api/comunicazioni/da-confermare');
@@ -40,6 +46,10 @@ function avvia(voce) {
             console.warn('Contatore delle comunicazioni non disponibile', causa);
         } finally {
             inCorso = false;
+            if (daRipetere) {
+                daRipetere = false;
+                aggiorna();
+            }
         }
     }
     voce.addEventListener('click', aggiorna);
