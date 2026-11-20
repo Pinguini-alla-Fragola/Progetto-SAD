@@ -45,7 +45,7 @@ class AttivazioneController {
     ResponseEntity<?> confermaAttivazione(@RequestBody RichiestaAttivazione body) {
         if (attivazioneService.isEmpty()) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                    .body(Map.of("errore", "Funzionalità non disponibile nel profilo skeleton"));
+                    .body(Map.of("messaggio", "Funzionalità non disponibile nel profilo skeleton"));
         }
 
         try {
@@ -55,7 +55,7 @@ class AttivazioneController {
             ));
         } catch (TokenAttivazioneNonValidoException | IllegalArgumentException ex) {
             return ResponseEntity.badRequest()
-                    .body(Map.of("errore", ex.getMessage()));
+                    .body(Map.of("messaggio", ex.getMessage()));
         }
     }
 }

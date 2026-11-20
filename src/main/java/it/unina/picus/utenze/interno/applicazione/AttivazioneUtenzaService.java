@@ -14,10 +14,13 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import it.unina.picus.shared.InvioEmail;
 import it.unina.picus.utenze.api.UtenzeApi.StatoUtenza;
@@ -43,6 +46,7 @@ public class AttivazioneUtenzaService {
     private final TokenAttivazioneRepository tokens;
     private final PasswordEncoder passwordEncoder;
     private final InvioEmail invioEmail;
+    private final ApplicationEventPublisher eventPublisher;
     private final Duration durataValidita;
     private final Clock clock;
 
@@ -52,8 +56,9 @@ public class AttivazioneUtenzaService {
             TokenAttivazioneRepository tokens,
             PasswordEncoder passwordEncoder,
             InvioEmail invioEmail,
+            ApplicationEventPublisher eventPublisher,
             @Value("${picus.utenze.attivazione.validita:PT48H}") Duration durataValidita) {
-        this(accounts, tokens, passwordEncoder, invioEmail, durataValidita, Clock.systemUTC());
+        this(accounts, tokens, passwordEncoder, invioEmail, eventPublisher, durataValidita, Clock.systemUTC());
     }
 
     AttivazioneUtenzaService(
@@ -61,19 +66,22 @@ public class AttivazioneUtenzaService {
             TokenAttivazioneRepository tokens,
             PasswordEncoder passwordEncoder,
             InvioEmail invioEmail,
+            ApplicationEventPublisher eventPublisher,
             Duration durataValidita,
             Clock clock) {
         this.accounts = Objects.requireNonNull(accounts);
         this.tokens = Objects.requireNonNull(tokens);
         this.passwordEncoder = Objects.requireNonNull(passwordEncoder);
         this.invioEmail = Objects.requireNonNull(invioEmail);
+        this.eventPublisher = Objects.requireNonNull(eventPublisher);
         this.durataValidita = Objects.requireNonNull(durataValidita);
         this.clock = Objects.requireNonNull(clock);
     }
 
     /**
      * Genera un nuovo token monouso per un account in attesa di attivazione,
-     * invalida eventuali token precedenti ancora attivi e invia il link via email.
+     * invalida eventuali token precedenti ancora attivi e pianifica l'invio dell'email
+     * dopo il commit della transazione.
      */
     public void generaEInviaAttivazione(AccountJpa account) {
         Objects.requireNonNull(account, "account obbligatorio");
@@ -96,12 +104,17 @@ public class AttivazioneUtenzaService {
         );
         tokens.save(nuovoToken);
 
-        invioEmail.inviaLinkAttivazione(account.getEmail(), account.getNome(), tokenInChiaro);
+        eventPublisher.publishEvent(
+                new LinkAttivazioneDaInviareEvent(account.getEmail(), account.getNome(), tokenInChiaro));
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
+    public void onLinkAttivazioneDaInviare(LinkAttivazioneDaInviareEvent evento) {
+        invioEmail.inviaLinkAttivazione(evento.emailDestinatario(), evento.nomeDestinatario(), evento.tokenInChiaro());
     }
 
     /**
-     * Verifica che un token esista, non sia scaduto e non sia già stato usato
-     * (utile prima di mostrare la pagina HTML di impostazione password).
+     * Verifica che un token esista, non sia scaduto e non sia già stato usato.
      */
     @Transactional(readOnly = true)
     public boolean isTokenValido(String tokenInChiaro) {
@@ -118,7 +131,8 @@ public class AttivazioneUtenzaService {
 
     /**
      * Consuma il token monouso in modo atomico (con lock pessimistico su token e account),
-     * imposta l'hash BCrypt della nuova password e attiva l'account.
+     * rilegge l'orologio dopo l'acquisizione dei lock, imposta l'hash BCrypt della nuova
+     * password e attiva l'account.
      */
     public void attivaAccount(String tokenInChiaro, String nuovaPassword) {
         validaPassword(nuovaPassword);
@@ -127,20 +141,22 @@ public class AttivazioneUtenzaService {
             throw new TokenAttivazioneNonValidoException("Link di attivazione non valido o mancante.");
         }
 
-        Instant ora = Instant.now(clock);
         String hash = calcolaSha256(tokenInChiaro.strip());
 
-        // Lock pessimistico: serializza le conferme concorrenti sullo stesso token
+        // 1. Acquisisce i lock pessimistici su token e account prima di verificare la scadenza
         TokenAttivazioneJpa token = tokens.findByTokenHashForUpdate(hash)
                 .orElseThrow(() -> new TokenAttivazioneNonValidoException("Link di attivazione non valido."));
 
+        AccountJpa account = accounts.findByIdForUpdate(token.getAccountId())
+                .orElseThrow(() -> new TokenAttivazioneNonValidoException("Account associato non trovato."));
+
+        // 2. Rilegge l'istante corrente dopo aver acquisito entrambi i lock
+        Instant ora = Instant.now(clock);
+
+        // 3. Verifica validità, scadenza e stato account sotto lock
         if (token.isUsato() || token.isScaduto(ora)) {
             throw new TokenAttivazioneNonValidoException("Il link di attivazione è scaduto o è già stato utilizzato.");
         }
-
-        // Lock pessimistico anche sull'account per serializzare eventuali operazioni concorrenti sullo stesso utente
-        AccountJpa account = accounts.findByIdForUpdate(token.getAccountId())
-                .orElseThrow(() -> new TokenAttivazioneNonValidoException("Account associato non trovato."));
 
         if (!StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(account.getStato())) {
             throw new TokenAttivazioneNonValidoException("L'account non è più attivabile.");
@@ -150,6 +166,9 @@ public class AttivazioneUtenzaService {
         account.attivaConPassword(passwordEncoder.encode(nuovaPassword));
         tokens.saveAndFlush(token);
         accounts.saveAndFlush(account);
+    }
+
+    record LinkAttivazioneDaInviareEvent(String emailDestinatario, String nomeDestinatario, String tokenInChiaro) {
     }
 
     private static void validaPassword(String password) {

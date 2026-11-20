@@ -25,9 +25,9 @@ import it.unina.picus.utenze.interno.persistenza.ProfiloOptRepository;
 @Transactional
 public class RegistrazioneOptService {
 
-    static final int LUNGHEZZA_MAX_CODICE_STRUTTURA = 32;
+    static final int LUNGHEZZA_MAX_CODICE_STRUTTURA = 30;
     static final int LUNGHEZZA_MAX_NOME = 200;
-    static final int LUNGHEZZA_MAX_COMUNE_CODICE = 64;
+    static final int LUNGHEZZA_MAX_COMUNE_CODICE = 50;
 
     // Accetta sia Codice Fiscale ordinario (16 caratteri alfanumerici) sia CF numerico di enti/organizzazioni (11 cifre)
     private static final Pattern PATTERN_CODICE_FISCALE =
@@ -69,21 +69,22 @@ public class RegistrazioneOptService {
                 comando.codiceStruttura(), "codiceStruttura",
                 "Il codice struttura è obbligatorio.",
                 LUNGHEZZA_MAX_CODICE_STRUTTURA,
-                "Il codice struttura non può superare " + LUNGHEZZA_MAX_CODICE_STRUTTURA + " caratteri.")
-                .toUpperCase(Locale.ROOT);
+                "Il codice struttura non può superare " + LUNGHEZZA_MAX_CODICE_STRUTTURA + " caratteri.",
+                Locale.ROOT, true);
 
         String nome = validaTestoObbligatorio(
                 comando.nome(), "nome",
                 "Il nome della OPT è obbligatorio.",
                 LUNGHEZZA_MAX_NOME,
-                "Il nome della OPT non può superare " + LUNGHEZZA_MAX_NOME + " caratteri.");
+                "Il nome della OPT non può superare " + LUNGHEZZA_MAX_NOME + " caratteri.",
+                null, false);
 
         String comuneCodice = validaTestoObbligatorio(
                 comando.comuneCodice(), "comuneCodice",
                 "Il comune è obbligatorio.",
                 LUNGHEZZA_MAX_COMUNE_CODICE,
-                "Il codice del comune non può superare " + LUNGHEZZA_MAX_COMUNE_CODICE + " caratteri.")
-                .toLowerCase(Locale.ROOT);
+                "Il codice del comune non può superare " + LUNGHEZZA_MAX_COMUNE_CODICE + " caratteri.",
+                Locale.ROOT, false);
 
         String codiceFiscale = validaCodiceFiscale(comando.codiceFiscale());
         String email = validaEmail(comando.email());
@@ -116,14 +117,18 @@ public class RegistrazioneOptService {
     }
 
     private static DatiOptNonValidiException classificaViolazioneVincolo(DataIntegrityViolationException ex) {
-        String nomeVincolo = estraiNomeVincolo(ex).toLowerCase(Locale.ROOT);
-        if (nomeVincolo.contains("email")) {
+        String nomeVincolo = estraiNomeVincolo(ex);
+        if (nomeVincolo == null || nomeVincolo.isBlank()) {
+            throw ex;
+        }
+        String vincoloLower = nomeVincolo.toLowerCase(Locale.ROOT);
+        if (vincoloLower.contains("email")) {
             return new DatiOptNonValidiException("email", "Esiste già un account associato a questa email.");
         }
-        if (nomeVincolo.contains("codice_struttura")) {
+        if (vincoloLower.contains("codice_struttura")) {
             return new DatiOptNonValidiException("codiceStruttura", "Esiste già una OPT registrata con questo codice struttura.");
         }
-        if (nomeVincolo.contains("comune")) {
+        if (vincoloLower.contains("comune")) {
             return new DatiOptNonValidiException("comuneCodice", "Il comune selezionato non è valido.");
         }
         throw ex;
@@ -132,35 +137,45 @@ public class RegistrazioneOptService {
     private static String estraiNomeVincolo(DataIntegrityViolationException ex) {
         Throwable corrente = ex;
         while (corrente != null) {
-            if (corrente instanceof ConstraintViolationException cve && cve.getConstraintName() != null) {
+            if (corrente instanceof ConstraintViolationException cve) {
                 return cve.getConstraintName();
             }
             corrente = corrente.getCause();
         }
-        String msg = ex.getMostSpecificCause().getMessage();
-        return msg != null ? msg : "";
+        return null;
     }
 
     private static String validaTestoObbligatorio(
-            String valore, String campo, String msgObbligatorio, int maxLunghezza, String msgLunghezza) {
+            String valore,
+            String campo,
+            String msgObbligatorio,
+            int maxLunghezza,
+            String msgLunghezza,
+            Locale localeNormalizzazione,
+            boolean maiuscolo) {
         if (valore == null || valore.isBlank()) {
             throw new DatiOptNonValidiException(campo, msgObbligatorio);
         }
-        String pulito = valore.strip();
-        if (pulito.length() > maxLunghezza) {
+        String normalizzato = valore.strip();
+        if (localeNormalizzazione != null) {
+            normalizzato = maiuscolo
+                    ? normalizzato.toUpperCase(localeNormalizzazione)
+                    : normalizzato.toLowerCase(localeNormalizzazione);
+        }
+        if (normalizzato.length() > maxLunghezza) {
             throw new DatiOptNonValidiException(campo, msgLunghezza);
         }
-        return pulito;
+        return normalizzato;
     }
 
     private static String validaEmail(String emailRaw) {
-        if (emailRaw != null && emailRaw.strip().length() > UtenzeService.LUNGHEZZA_MAX_EMAIL) {
-            throw new DatiOptNonValidiException("email",
-                    "L'indirizzo email non può superare " + UtenzeService.LUNGHEZZA_MAX_EMAIL + " caratteri.");
-        }
         String normalizzata = UtenzeService.normalizzaEmail(emailRaw);
         if (normalizzata == null || !PATTERN_EMAIL.matcher(normalizzata).matches()) {
             throw new DatiOptNonValidiException("email", "Inserisci un indirizzo email valido.");
+        }
+        if (normalizzata.length() > UtenzeService.LUNGHEZZA_MAX_EMAIL) {
+            throw new DatiOptNonValidiException("email",
+                    "L'indirizzo email non può superare " + UtenzeService.LUNGHEZZA_MAX_EMAIL + " caratteri.");
         }
         return normalizzata;
     }

@@ -25,11 +25,11 @@ services:
       PICUS_DB_URL: jdbc:postgresql://picus-db:5432/picus
       PICUS_DB_PASSWORD: "${PICUS_DB_PASSWORD:?Imposta PICUS_DB_PASSWORD nel file .env}"
       PICUS_DEMO_PASSWORD: "${PICUS_DEMO_PASSWORD:?Imposta PICUS_DEMO_PASSWORD nel file .env}"
-      # Nuove variabili per l'invio email
-      PICUS_MAIL_HOST: "${PICUS_MAIL_HOST:?Imposta PICUS_MAIL_HOST nel file .env}"
+      # Variabili email opzionali: se PICUS_MAIL_HOST è vuoto in demo rimane attivo InvioEmailLogAdapter
+      PICUS_MAIL_HOST: "${PICUS_MAIL_HOST:-}"
       PICUS_MAIL_PORT: "${PICUS_MAIL_PORT:-587}"
-      PICUS_MAIL_USERNAME: "${PICUS_MAIL_USERNAME:?Imposta PICUS_MAIL_USERNAME nel file .env}"
-      PICUS_MAIL_PASSWORD: "${PICUS_MAIL_PASSWORD:?Imposta PICUS_MAIL_PASSWORD nel file .env}"
+      PICUS_MAIL_USERNAME: "${PICUS_MAIL_USERNAME:-}"
+      PICUS_MAIL_PASSWORD: "${PICUS_MAIL_PASSWORD:-}"
       PICUS_MAIL_FROM: "${PICUS_MAIL_FROM:-noreply@strawberrypenguin.it}"
       PICUS_APP_BASE_URL: "${PICUS_APP_BASE_URL:-http://localhost:8080}"
 
