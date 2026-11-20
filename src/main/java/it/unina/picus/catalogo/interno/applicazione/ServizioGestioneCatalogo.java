@@ -10,13 +10,13 @@ import it.unina.picus.catalogo.interno.dominio.MisuraRepository;
 import it.unina.picus.catalogo.interno.dominio.RegoleAccessoCatalogo;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 /**
- * Servizio applicativo per la gestione amministrativa delle misure persistenti del catalogo (#163).
+ * Gestisce l'elenco amministrativo, la creazione, la modifica e la disattivazione delle misure (#163).
+ * Usa i DTO definiti da {@link CatalogoApi} per i dati e lo stato delle misure.
  *
  * <p>Applica il pattern <em>Service Layer</em> (GRASP <em>Controller</em> / GoF <em>Facade</em>):
  * delimita le transazioni, verifica il ruolo del Banco tramite {@link RegoleAccessoCatalogo}
@@ -43,7 +43,6 @@ public class ServizioGestioneCatalogo {
      * @param attore identità verificata del Banco di coordinamento
      * @return misure presenti in catalogo con il rispettivo stato di attivazione
      * @throws it.unina.picus.shared.AccessoNegatoException se l'attore non è il Banco
-     * @see CatalogoApi#elencoMisure(IdentitaAutenticata)
      */
     public List<Misura> elencoMisure(IdentitaAutenticata attore) {
         RegoleAccessoCatalogo.verificaBanco(attore);
@@ -59,9 +58,8 @@ public class ServizioGestioneCatalogo {
      * @throws it.unina.picus.shared.AccessoNegatoException se l'attore non è il Banco
      * @throws it.unina.picus.catalogo.interno.dominio.DatiMisuraNonValidiException se i dati sono incompleti o invalidi
      * @throws CodiceMisuraDuplicatoException se il codice è già utilizzato nel catalogo
-     * @see CatalogoApi#creaMisura(IdentitaAutenticata, DatiMisura)
      */
-    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Transactional
     public Misura creaMisura(IdentitaAutenticata attore, DatiMisura dati) {
         RegoleAccessoCatalogo.verificaBanco(attore);
         MisuraDiCatalogo nuova = MisuraDiCatalogo.nuova(dati);
@@ -85,9 +83,8 @@ public class ServizioGestioneCatalogo {
      * @throws MisuraNonTrovataException se la misura è inesistente
      * @throws it.unina.picus.catalogo.interno.dominio.DatiMisuraNonValidiException se i dati sono invalidi
      * @throws CodiceMisuraDuplicatoException se il codice entra in conflitto con un'altra misura
-     * @see CatalogoApi#aggiornaMisura(IdentitaAutenticata, long, DatiMisura, boolean)
      */
-    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Transactional
     public Misura aggiornaMisura(IdentitaAutenticata attore, long misuraId, DatiMisura dati, boolean attiva) {
         MisuraDiCatalogo esistente = misuraInScrittura(attore, misuraId);
         MisuraDiCatalogo aggiornata = esistente.aggiorna(dati, attiva);
@@ -110,15 +107,17 @@ public class ServizioGestioneCatalogo {
      * @return misura nello stato disattivato
      * @throws it.unina.picus.shared.AccessoNegatoException se l'attore non è il Banco
      * @throws MisuraNonTrovataException se la misura è inesistente
+     * @throws IllegalStateException se il salvataggio segnala un conflitto di unicità inatteso
      */
-    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Transactional
     public Misura disattivaMisura(IdentitaAutenticata attore, long misuraId) {
         MisuraDiCatalogo esistente = misuraInScrittura(attore, misuraId);
         if (!esistente.attiva()) {
             return esistente.aDto();
         }
         return misure.aggiorna(esistente.disattiva())
-                .orElseThrow(CodiceMisuraDuplicatoException::new)
+                .orElseThrow(() -> new IllegalStateException(
+                        "Conflitto di unicità inatteso durante la disattivazione della misura"))
                 .aDto();
     }
 

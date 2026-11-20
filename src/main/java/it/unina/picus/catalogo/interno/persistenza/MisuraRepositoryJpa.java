@@ -55,6 +55,7 @@ public class MisuraRepositoryJpa implements MisuraRepository {
         if (entita == null) {
             return Optional.empty();
         }
+        // Se l'entità era già gestita, il lock non ricarica necessariamente i suoi attributi.
         entityManager.refresh(entita, LockModeType.PESSIMISTIC_WRITE);
         return Optional.of(entita.aDominio());
     }

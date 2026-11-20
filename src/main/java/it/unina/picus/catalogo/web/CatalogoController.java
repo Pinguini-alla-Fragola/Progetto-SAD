@@ -81,6 +81,7 @@ public class CatalogoController {
 
     /**
      * Crea una nuova misura attiva nel catalogo persistente su comando del Banco.
+     * Il campo facoltativo {@code erogabileADistanza} assume il valore {@code false} se omesso.
      *
      * @param attore identità verificata del Banco di coordinamento
      * @param corpo proprietà JSON della nuova misura
@@ -94,7 +95,13 @@ public class CatalogoController {
     }
 
     /**
-     * Aggiorna i dati o lo stato di attivazione di una misura esistente conservandone l'identificativo.
+     * Sostituisce i dati aggiornabili di una misura conservandone l'identificativo.
+     *
+     * <p>Il corpo dichiara esplicitamente {@code erogabileADistanza} e {@code attiva}.
+     * Con {@code attiva} a {@code false} la sostituzione disattiva la misura.
+     * Impostare {@code attiva} a {@code true} riattiva una misura disattivata.
+     * Per la sola disattivazione usare
+     * {@code POST /api/catalogo/misure/{id}/disattivazione}.</p>
      *
      * @param attore identità verificata del Banco di coordinamento
      * @param id identificativo stabile della misura da aggiornare
@@ -109,7 +116,8 @@ public class CatalogoController {
     }
 
     /**
-     * Disattiva una misura esistente impedendone l'uso in nuove selezioni senza alterare lo storico.
+     * Disattiva una misura esistente per le nuove selezioni e conserva il riferimento storico.
+     * Se la misura è già disattivata, restituisce il suo stato corrente.
      *
      * @param attore identità verificata del Banco di coordinamento
      * @param id identificativo stabile della misura da disattivare

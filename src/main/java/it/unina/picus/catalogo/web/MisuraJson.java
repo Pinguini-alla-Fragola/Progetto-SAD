@@ -44,7 +44,7 @@ final class MisuraJson {
     static DatiMisura leggiCreazione(Map<String, Object> corpo) {
         verificaCampiAmmessi(corpo, CAMPI_CREAZIONE);
         Map<String, String> errori = new LinkedHashMap<>();
-        DatiMisura dati = estraiDatiComuni(corpo, errori);
+        DatiMisura dati = estraiDatiComuni(corpo, errori, false);
         if (!errori.isEmpty()) {
             throw new DatiMisuraNonValidiException(errori);
         }
@@ -52,16 +52,17 @@ final class MisuraJson {
     }
 
     /**
-     * Converte e verifica i tipi dei campi JSON per l'aggiornamento di una misura.
+     * Converte i campi JSON per la sostituzione dei dati e dello stato di una misura.
      *
      * @param corpo mappa delle proprietà JSON ricevute
      * @return dati tipizzati e stato di attivazione pronti per il dominio
-     * @throws DatiMisuraNonValidiException se il corpo è assente, contiene campi estranei o tipi errati
+     * @throws DatiMisuraNonValidiException se il corpo è assente, contiene campi estranei o tipi errati,
+     *                                     oppure omette uno dei due campi booleani
      */
     static RichiestaAggiornamento leggiAggiornamento(Map<String, Object> corpo) {
         verificaCampiAmmessi(corpo, CAMPI_AGGIORNAMENTO);
         Map<String, String> errori = new LinkedHashMap<>();
-        DatiMisura dati = estraiDatiComuni(corpo, errori);
+        DatiMisura dati = estraiDatiComuni(corpo, errori, true);
         boolean attiva = leggiBooleano(corpo, "attiva", true, "Indica se la misura è attiva", errori);
         if (!errori.isEmpty()) {
             throw new DatiMisuraNonValidiException(errori);
@@ -87,14 +88,15 @@ final class MisuraJson {
         }
     }
 
-    private static DatiMisura estraiDatiComuni(Map<String, Object> corpo, Map<String, String> errori) {
+    private static DatiMisura estraiDatiComuni(
+            Map<String, Object> corpo, Map<String, String> errori, boolean erogabileADistanzaObbligatorio) {
         String codice = testo(corpo, "codice", "Indica un codice misura testuale", errori);
         String nome = testo(corpo, "nome", "Indica il nome della misura in formato testuale", errori);
         String descrizione = testo(corpo, "descrizione", "Indica una descrizione in formato testuale", errori);
         boolean erogabileADistanza = leggiBooleano(
                 corpo,
                 "erogabileADistanza",
-                false,
+                erogabileADistanzaObbligatorio,
                 "Indica vero o falso per l'erogazione a distanza",
                 errori);
         return new DatiMisura(codice, nome, descrizione, erogabileADistanza);
