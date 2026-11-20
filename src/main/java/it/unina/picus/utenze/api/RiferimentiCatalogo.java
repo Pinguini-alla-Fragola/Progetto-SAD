@@ -7,14 +7,18 @@ package it.unina.picus.utenze.api;
 public interface RiferimentiCatalogo {
 
     /**
+     * Verifica che il comune scelto sia presente nel catalogo.
+     *
      * @param codice codice del comune scelto
      * @return vero se il comune esiste nel catalogo
      */
     boolean comuneEsiste(String codice);
 
     /**
+     * Verifica che la misura scelta esista e sia attiva. Una misura disattivata resta solo per lo storico.
+     *
      * @param misuraId identificativo della misura scelta
-     * @return vero se la misura esiste ed è attiva; una misura disattivata resta solo per lo storico
+     * @return vero se la misura esiste ed è attiva
      */
     boolean misuraAttiva(long misuraId);
 }
