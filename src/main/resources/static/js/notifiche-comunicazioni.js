@@ -6,19 +6,7 @@ function testoAccessibile(numero) {
     return numero === 1 ? '1 comunicazione da confermare' : numero + ' comunicazioni da confermare';
 }
 
-/**
- * Mostra accanto alla voce «Comunicazioni» quante comunicazioni ricevute aspettano la conferma di ricezione.
- * Aprire una comunicazione non la toglie dal conteggio: serve il pulsante «Confermo la ricezione».
- */
-async function aggiornaContatore(voce) {
-    let numero;
-    try {
-        ({ daConfermare: numero } = await api('/api/comunicazioni/da-confermare'));
-    } catch (causa) {
-        // Il contatore è solo un aiuto: se non si carica, la pagina resta usabile e il problema resta nel log.
-        console.warn('Contatore delle comunicazioni non disponibile', causa);
-        return;
-    }
+function mostra(voce, numero) {
     voce.querySelector('.contatore-notifiche')?.remove();
     if (!numero) return;
     const contatore = document.createElement('span');
@@ -33,5 +21,36 @@ async function aggiornaContatore(voce) {
     voce.append(contatore);
 }
 
+/**
+ * Mostra accanto alla voce «Comunicazioni» quante comunicazioni ricevute aspettano la conferma di ricezione.
+ * Aprire una comunicazione non la toglie dal conteggio: serve il pulsante «Confermo la ricezione».
+ * Il conteggio si aggiorna all'apertura della pagina, quando si entra nella sezione e quando la scheda del
+ * browser torna visibile, così una comunicazione arrivata nel frattempo compare senza ricaricare la pagina.
+ */
+function avvia(voce) {
+    let inCorso = false;
+    async function aggiorna() {
+        if (inCorso) return;
+        inCorso = true;
+        try {
+            const { daConfermare } = await api('/api/comunicazioni/da-confermare');
+            mostra(voce, daConfermare);
+        } catch (causa) {
+            // Il contatore è solo un aiuto: se non si carica, la pagina resta usabile e il problema resta nel log.
+            console.warn('Contatore delle comunicazioni non disponibile', causa);
+        } finally {
+            inCorso = false;
+        }
+    }
+    voce.addEventListener('click', aggiorna);
+    window.addEventListener('hashchange', () => {
+        if (location.hash === voce.hash) aggiorna();
+    });
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') aggiorna();
+    });
+    aggiorna();
+}
+
 const voce = document.querySelector('.area-nav a[href="#comunicazioni"]');
-if (voce) aggiornaContatore(voce);
+if (voce) avvia(voce);
