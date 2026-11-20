@@ -23,6 +23,14 @@ public class AccountJpa {
     protected AccountJpa() {
     }
 
+    public AccountJpa(String email, String passwordHash, String nome, String ruolo, String stato) {
+        this.email = email;
+        this.passwordHash = passwordHash;
+        this.nome = nome;
+        this.ruolo = ruolo;
+        this.stato = stato;
+    }
+
     public UUID getId() { return id; }
     public String getEmail() { return email; }
     public String getPasswordHash() { return passwordHash; }
