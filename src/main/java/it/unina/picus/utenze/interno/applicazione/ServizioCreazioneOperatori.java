@@ -9,12 +9,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
-import it.unina.picus.utenze.interno.dominio.CampoOperatore;
 import it.unina.picus.utenze.interno.dominio.DatiOperatore;
 import it.unina.picus.utenze.interno.dominio.Errori;
 import it.unina.picus.utenze.interno.dominio.RegistrazioneInConflittoException;
 import it.unina.picus.utenze.interno.dominio.RegistroOperatori;
 import it.unina.picus.utenze.interno.dominio.RegistroOperatori.OperatoreRegistrato;
+import it.unina.picus.utenze.interno.dominio.RegolaUnicita;
 import it.unina.picus.utenze.interno.dominio.RegoleAccessoUtenze;
 import it.unina.picus.utenze.interno.dominio.ValidatoreDatiOperatore;
 
@@ -47,8 +47,8 @@ class ServizioCreazioneOperatori implements CreazioneOperatori {
             OperatoreRegistrato registrato = registro.registra(dati, passwordInutilizzabile());
             return new OperatoreCreato(registrato.id(), registrato.nomeVisualizzato(), registrato.email());
         } catch (RegistrazioneInConflittoException e) {
-            throw new DatiOperatoreNonValidiException(
-                    Map.of(CampoOperatore.EMAIL, "Esiste già un account con questi dati"));
+            // Un'altra creazione, nello stesso momento, ha salvato la stessa email o lo stesso codice fiscale.
+            throw new DatiOperatoreNonValidiException(Map.of(e.campo(), RegolaUnicita.messaggioDuplicato(e.campo())));
         }
     }
 
