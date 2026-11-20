@@ -1,2 +1,2 @@
-/** Regole di accesso alle comunicazioni e ai relativi allegati. */
+/** Regole di accesso e di invio delle comunicazioni, con la scelta dei destinatari. */
 package it.unina.picus.comunicazioni.interno.dominio;
