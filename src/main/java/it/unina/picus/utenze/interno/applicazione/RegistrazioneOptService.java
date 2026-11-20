@@ -63,8 +63,8 @@ public class RegistrazioneOptService {
         String codiceStruttura = validaTestoObbligatorio(comando.codiceStruttura(), "codiceStruttura", "Il codice struttura è obbligatorio.")
                 .toUpperCase(Locale.ROOT);
         String nome = validaTestoObbligatorio(comando.nome(), "nome", "Il nome della OPT è obbligatorio.");
-        String comuneCodice = validaTestoObbligatorio(comando.comuneCodice(), "comuneCodice", "Il comune è obbligatorio.");
-        String codiceFiscale = validaCodiceFiscale(comando.codiceFiscale());
+        String comuneCodice = validaTestoObbligatorio(comando.comuneCodice(), "comuneCodice", "Il comune è obbligatorio.")
+                .toLowerCase(Locale.ROOT);        String codiceFiscale = validaCodiceFiscale(comando.codiceFiscale());
         String email = validaEmail(comando.email());
 
         if (accounts.existsByEmailIgnoreCase(email)) {

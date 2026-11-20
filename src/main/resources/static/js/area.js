@@ -1,4 +1,4 @@
-import { esci } from './area-client.js';
+import { esci, api } from './area-client.js';
 import { setupWorkspace } from './workspace.js';
 import { renderList } from './list-view.js';
 import { caricaRichieste, caricaAvvisi, caricaCatalogo } from './richieste-area.js';
@@ -76,6 +76,39 @@ for (const form of document.querySelectorAll('[data-form-anteprima]')) {
     form.addEventListener('submit', event => event.preventDefault());
 }
 segnalaFunzioniInattive();
+
+const formNuovaOpt = byId('nuova-opt');
+if (formNuovaOpt) {
+    formNuovaOpt.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const button = formNuovaOpt.querySelector('button[type="submit"]');
+        const esito = formNuovaOpt.querySelector('.picus-esito');
+        for (const input of formNuovaOpt.querySelectorAll('.form-control')) {
+            input.removeAttribute('aria-invalid');
+        }
+        const dati = Object.fromEntries(new FormData(formNuovaOpt));
+        button.disabled = true;
+        esito.textContent = '';
+        try {
+            const risultato = await api('/api/opt', { method: 'POST', body: dati });
+            esito.textContent = risultato.messaggio || 'Organizzazione partner registrata.';
+            formNuovaOpt.reset();
+        } catch (causa) {
+            esito.textContent = causa?.message || 'Connessione non disponibile. Riprova.';
+            const campiErrati = causa?.campi ? Object.keys(causa.campi) : [];
+            if (campiErrati.length > 0) {
+                const inputErrato = formNuovaOpt.querySelector(`[name="${campiErrati[0]}"]`);
+                if (inputErrato) {
+                    inputErrato.setAttribute('aria-invalid', 'true');
+                    inputErrato.focus();
+                }
+            }
+        } finally {
+            button.disabled = false;
+        }
+    });
+}
+
 const lavori = [];
 if (area === 'banco') lavori.push(caricaRichieste(area), caricaCatalogo());
 else {

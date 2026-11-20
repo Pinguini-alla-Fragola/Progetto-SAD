@@ -27,8 +27,8 @@ public class UtenzeDemo implements ApplicationRunner {
     @Transactional
     public void run(ApplicationArguments args) {
         creaAccount("banco@picus.test", "Banco Demo", "BANCO");
-        creaOpt("opt-a@picus.test", "OPT A", "OPT-01", "napoli");
-        creaOpt("opt-b@picus.test", "OPT B", "OPT-02", "pozzuoli");
+        creaOpt("opt-a@picus.test", "OPT A", "OPT-01", "napoli", "00000000001");
+        creaOpt("opt-b@picus.test", "OPT B", "OPT-02", "pozzuoli", "00000000002");
 
         String operatore = "operatore@picus.test";
         creaAccount(operatore, "Operatore Demo", "OPERATORE");
@@ -40,14 +40,14 @@ public class UtenzeDemo implements ApplicationRunner {
                 """, operatore);
     }
 
-    private void creaOpt(String email, String nome, String codiceStruttura, String comune) {
+    private void creaOpt(String email, String nome, String codiceStruttura, String comune, String codiceFiscale) {
         creaAccount(email, nome, "OPT");
         jdbc.update("""
-                insert into utenze_profili_opt (account_id, codice_struttura, comune_codice)
-                select id, ?, ?
+                insert into utenze_profili_opt (account_id, codice_struttura, comune_codice, codice_fiscale)
+                select id, ?, ?, ?
                 from utenze_account where email = ? and ruolo = 'OPT'
                 on conflict (account_id) do nothing
-                """, codiceStruttura, comune, email);
+                """, codiceStruttura, comune, codiceFiscale, email);
     }
 
     private void creaAccount(String email, String nome, String ruolo) {

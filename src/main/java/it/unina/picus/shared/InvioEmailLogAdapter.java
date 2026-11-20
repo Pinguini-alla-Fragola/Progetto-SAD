@@ -18,7 +18,7 @@ public class InvioEmailLogAdapter implements InvioEmail {
 
     @Override
     public void inviaLinkAttivazione(String emailDestinatario, String nomeDestinatario, String tokenInChiaro) {
-        String link = baseUrl + "/attivazione?token=" + tokenInChiaro;
+        String link = baseUrl + "/attiva?token=" + tokenInChiaro;
         LOG.info("Invio link di attivazione a {} <{}>: {}", nomeDestinatario, emailDestinatario, link);
     }
 }

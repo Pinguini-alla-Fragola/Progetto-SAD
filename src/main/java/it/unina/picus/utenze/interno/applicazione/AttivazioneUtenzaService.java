@@ -34,7 +34,7 @@ import it.unina.picus.utenze.interno.persistenza.TokenAttivazioneRepository;
 @Transactional
 public class AttivazioneUtenzaService {
 
-    static final int LUNGHEZZA_MIN_PASSWORD = 8;
+    static final int LUNGHEZZA_MIN_PASSWORD = 12;
     private static final int BYTE_TOKEN = 32; // 256 bit di entropia
     private static final SecureRandom RANDOM = new SecureRandom();
 
