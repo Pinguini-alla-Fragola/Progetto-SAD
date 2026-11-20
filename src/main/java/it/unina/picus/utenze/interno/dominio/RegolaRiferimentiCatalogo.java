@@ -1,5 +1,7 @@
 package it.unina.picus.utenze.interno.dominio;
 
+import it.unina.picus.utenze.api.RiferimentiCatalogo;
+
 /** Controlla che comune e misure scelti esistano nel Catalogo. */
 public final class RegolaRiferimentiCatalogo implements RegolaDatiOperatore {
 
