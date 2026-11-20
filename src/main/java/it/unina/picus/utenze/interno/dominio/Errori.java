@@ -16,6 +16,16 @@ public final class Errori {
         perCampo.putIfAbsent(campo, messaggio);
     }
 
+    /**
+     * Indica se un campo ha già un errore, così una regola può evitare controlli inutili su un valore già scartato.
+     *
+     * @param campo nome del campo
+     * @return vero se il campo ha già un errore
+     */
+    public boolean contiene(String campo) {
+        return perCampo.containsKey(campo);
+    }
+
     public boolean vuoto() {
         return perCampo.isEmpty();
     }

@@ -19,7 +19,9 @@ public final class RegolaRiferimentiCatalogo implements RegolaDatiOperatore {
 
     @Override
     public void verifica(DatiOperatore dati, Errori errori) {
-        if (dati.comuneCodice() == null || !catalogo.comuneEsiste(dati.comuneCodice())) {
+        // Un comune già scartato, per esempio per caratteri non ammessi, non va cercato nel catalogo.
+        if (!errori.contiene(CampoOperatore.COMUNE)
+                && (dati.comuneCodice() == null || !catalogo.comuneEsiste(dati.comuneCodice()))) {
             errori.aggiungi(CampoOperatore.COMUNE, "Seleziona un comune del catalogo");
         }
         if (dati.misure().size() > MASSIMO_MISURE) {
