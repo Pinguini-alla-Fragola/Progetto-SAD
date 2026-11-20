@@ -77,14 +77,14 @@
 </div>
     <div role="tabpanel" id="utenze-view-opt" aria-labelledby="utenze-tab-opt" tabindex="0" hidden>
         <h2 class="picus-card-title">Nuova organizzazione partner</h2>
-        <form id="nuova-opt" class="picus-form form-layout">
+        <form id="nuova-opt" method="post" action="/api/opt" class="picus-form form-layout">
             <fieldset class="form-section"><legend>Organizzazione</legend><div class="form-section-content"><div class="picus-fields fields-two">
-                <label class="campo ">Denominazione OPT<input class="form-control" name="nome" type="text" required ></label>
-                <label class="campo ">Codice struttura<input class="form-control" name="codiceStruttura" type="text" required ></label>
-                <label class="campo ">Comune<input class="form-control" name="comune" type="text" required ></label>
-                <label class="campo ">Codice fiscale<input class="form-control" name="codiceFiscale" type="text" required ></label>
+                <label class="campo ">Denominazione OPT<input class="form-control" name="nome" type="text" maxlength="200" required ></label>
+                <label class="campo ">Codice struttura<input class="form-control" name="codiceStruttura" type="text" maxlength="32" required ></label>
+                <label class="campo ">Comune<input class="form-control" name="comune" type="text" maxlength="64" required ></label>
+                <label class="campo ">Codice fiscale<input class="form-control" name="codiceFiscale" type="text" maxlength="16" required ></label>
             </div></div></fieldset><fieldset class="form-section"><legend>Contatto</legend><div class="form-section-content"><div class="picus-fields fields-one">
-            <label class="campo ">Email istituzionale<input class="form-control" name="email" type="email" required ></label>
+            <label class="campo ">Email istituzionale<input class="form-control" name="email" type="email" maxlength="254" required ></label>
         </div></div></fieldset>
             <div class="form-submit"><button class="btn btn-primary" type="submit">Crea utenza OPT</button><p class="picus-esito" role="status"></p></div>
         </form>

@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.context.annotation.Profile;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,10 @@ import it.unina.picus.utenze.interno.persistenza.ProfiloOptRepository;
 @Profile("!skeleton")
 @Transactional
 public class RegistrazioneOptService {
+
+    static final int LUNGHEZZA_MAX_CODICE_STRUTTURA = 32;
+    static final int LUNGHEZZA_MAX_NOME = 200;
+    static final int LUNGHEZZA_MAX_COMUNE_CODICE = 64;
 
     // Accetta sia Codice Fiscale ordinario (16 caratteri alfanumerici) sia CF numerico di enti/organizzazioni (11 cifre)
     private static final Pattern PATTERN_CODICE_FISCALE =
@@ -60,11 +65,27 @@ public class RegistrazioneOptService {
     public UUID registraOpt(ComandoRegistrazioneOpt comando) {
         Objects.requireNonNull(comando, "comando obbligatorio");
 
-        String codiceStruttura = validaTestoObbligatorio(comando.codiceStruttura(), "codiceStruttura", "Il codice struttura è obbligatorio.")
+        String codiceStruttura = validaTestoObbligatorio(
+                comando.codiceStruttura(), "codiceStruttura",
+                "Il codice struttura è obbligatorio.",
+                LUNGHEZZA_MAX_CODICE_STRUTTURA,
+                "Il codice struttura non può superare " + LUNGHEZZA_MAX_CODICE_STRUTTURA + " caratteri.")
                 .toUpperCase(Locale.ROOT);
-        String nome = validaTestoObbligatorio(comando.nome(), "nome", "Il nome della OPT è obbligatorio.");
-        String comuneCodice = validaTestoObbligatorio(comando.comuneCodice(), "comuneCodice", "Il comune è obbligatorio.")
-                .toLowerCase(Locale.ROOT);        String codiceFiscale = validaCodiceFiscale(comando.codiceFiscale());
+
+        String nome = validaTestoObbligatorio(
+                comando.nome(), "nome",
+                "Il nome della OPT è obbligatorio.",
+                LUNGHEZZA_MAX_NOME,
+                "Il nome della OPT non può superare " + LUNGHEZZA_MAX_NOME + " caratteri.");
+
+        String comuneCodice = validaTestoObbligatorio(
+                comando.comuneCodice(), "comuneCodice",
+                "Il comune è obbligatorio.",
+                LUNGHEZZA_MAX_COMUNE_CODICE,
+                "Il codice del comune non può superare " + LUNGHEZZA_MAX_COMUNE_CODICE + " caratteri.")
+                .toLowerCase(Locale.ROOT);
+
+        String codiceFiscale = validaCodiceFiscale(comando.codiceFiscale());
         String email = validaEmail(comando.email());
 
         if (accounts.existsByEmailIgnoreCase(email)) {
@@ -76,7 +97,7 @@ public class RegistrazioneOptService {
 
         try {
             AccountJpa account = AccountJpa.inAttesaDiAttivazione(email, nome, RuoloUtente.OPT);
-            account = accounts.save(account);
+            account = accounts.saveAndFlush(account);
 
             ProfiloOptJpa profilo = new ProfiloOptJpa(
                     account.getId(),
@@ -90,30 +111,53 @@ public class RegistrazioneOptService {
             return account.getId();
 
         } catch (DataIntegrityViolationException ex) {
-            // Gestisce eventuali race condition su vincoli UNIQUE (email / codice_struttura)
-            // o FK non valida su comune_codice (catalogo_comuni)
-            String msg = ex.getMostSpecificCause().getMessage().toLowerCase(Locale.ROOT);
-            if (msg.contains("email")) {
-                throw new DatiOptNonValidiException("email", "Esiste già un account associato a questa email.");
-            }
-            if (msg.contains("codice_struttura")) {
-                throw new DatiOptNonValidiException("codiceStruttura", "Esiste già una OPT registrata con questo codice struttura.");
-            }
-            if (msg.contains("comune_codice") || msg.contains("catalogo_comuni")) {
-                throw new DatiOptNonValidiException("comuneCodice", "Il comune selezionato non è valido.");
-            }
-            throw ex;
+            throw classificaViolazioneVincolo(ex);
         }
     }
 
-    private static String validaTestoObbligatorio(String valore, String campo, String messaggio) {
-        if (valore == null || valore.isBlank()) {
-            throw new DatiOptNonValidiException(campo, messaggio);
+    private static DatiOptNonValidiException classificaViolazioneVincolo(DataIntegrityViolationException ex) {
+        String nomeVincolo = estraiNomeVincolo(ex).toLowerCase(Locale.ROOT);
+        if (nomeVincolo.contains("email")) {
+            return new DatiOptNonValidiException("email", "Esiste già un account associato a questa email.");
         }
-        return valore.strip();
+        if (nomeVincolo.contains("codice_struttura")) {
+            return new DatiOptNonValidiException("codiceStruttura", "Esiste già una OPT registrata con questo codice struttura.");
+        }
+        if (nomeVincolo.contains("comune")) {
+            return new DatiOptNonValidiException("comuneCodice", "Il comune selezionato non è valido.");
+        }
+        throw ex;
+    }
+
+    private static String estraiNomeVincolo(DataIntegrityViolationException ex) {
+        Throwable corrente = ex;
+        while (corrente != null) {
+            if (corrente instanceof ConstraintViolationException cve && cve.getConstraintName() != null) {
+                return cve.getConstraintName();
+            }
+            corrente = corrente.getCause();
+        }
+        String msg = ex.getMostSpecificCause().getMessage();
+        return msg != null ? msg : "";
+    }
+
+    private static String validaTestoObbligatorio(
+            String valore, String campo, String msgObbligatorio, int maxLunghezza, String msgLunghezza) {
+        if (valore == null || valore.isBlank()) {
+            throw new DatiOptNonValidiException(campo, msgObbligatorio);
+        }
+        String pulito = valore.strip();
+        if (pulito.length() > maxLunghezza) {
+            throw new DatiOptNonValidiException(campo, msgLunghezza);
+        }
+        return pulito;
     }
 
     private static String validaEmail(String emailRaw) {
+        if (emailRaw != null && emailRaw.strip().length() > UtenzeService.LUNGHEZZA_MAX_EMAIL) {
+            throw new DatiOptNonValidiException("email",
+                    "L'indirizzo email non può superare " + UtenzeService.LUNGHEZZA_MAX_EMAIL + " caratteri.");
+        }
         String normalizzata = UtenzeService.normalizzaEmail(emailRaw);
         if (normalizzata == null || !PATTERN_EMAIL.matcher(normalizzata).matches()) {
             throw new DatiOptNonValidiException("email", "Inserisci un indirizzo email valido.");
@@ -126,8 +170,9 @@ public class RegistrazioneOptService {
             throw new DatiOptNonValidiException("codiceFiscale", "Il codice fiscale è obbligatorio.");
         }
         String cf = cfRaw.strip().toUpperCase(Locale.ROOT);
-        if (!PATTERN_CODICE_FISCALE.matcher(cf).matches()) {
-            throw new DatiOptNonValidiException("codiceFiscale", "Il codice fiscale non ha un formato valido (16 caratteri alfanumerici o 11 cifre).");
+        if ("00000000000".equals(cf) || !PATTERN_CODICE_FISCALE.matcher(cf).matches()) {
+            throw new DatiOptNonValidiException("codiceFiscale",
+                    "Il codice fiscale non ha un formato valido (16 caratteri alfanumerici o 11 cifre).");
         }
         return cf;
     }

@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import it.unina.picus.shared.InvioEmail;
 import it.unina.picus.utenze.api.UtenzeApi.StatoUtenza;
 import it.unina.picus.utenze.interno.persistenza.AccountJpa;
@@ -116,7 +117,8 @@ public class AttivazioneUtenzaService {
     }
 
     /**
-     * Consuma il token monouso, imposta l'hash BCrypt della nuova password e attiva l'account.
+     * Consuma il token monouso in modo atomico (con lock pessimistico su token e account),
+     * imposta l'hash BCrypt della nuova password e attiva l'account.
      */
     public void attivaAccount(String tokenInChiaro, String nuovaPassword) {
         validaPassword(nuovaPassword);
@@ -128,14 +130,16 @@ public class AttivazioneUtenzaService {
         Instant ora = Instant.now(clock);
         String hash = calcolaSha256(tokenInChiaro.strip());
 
-        TokenAttivazioneJpa token = tokens.findByTokenHash(hash)
+        // Lock pessimistico: serializza le conferme concorrenti sullo stesso token
+        TokenAttivazioneJpa token = tokens.findByTokenHashForUpdate(hash)
                 .orElseThrow(() -> new TokenAttivazioneNonValidoException("Link di attivazione non valido."));
 
         if (token.isUsato() || token.isScaduto(ora)) {
             throw new TokenAttivazioneNonValidoException("Il link di attivazione è scaduto o è già stato utilizzato.");
         }
 
-        AccountJpa account = accounts.findById(token.getAccountId())
+        // Lock pessimistico anche sull'account per serializzare eventuali operazioni concorrenti sullo stesso utente
+        AccountJpa account = accounts.findByIdForUpdate(token.getAccountId())
                 .orElseThrow(() -> new TokenAttivazioneNonValidoException("Account associato non trovato."));
 
         if (!StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(account.getStato())) {
@@ -144,6 +148,8 @@ public class AttivazioneUtenzaService {
 
         token.segnaComeUsato(ora);
         account.attivaConPassword(passwordEncoder.encode(nuovaPassword));
+        tokens.saveAndFlush(token);
+        accounts.saveAndFlush(account);
     }
 
     private static void validaPassword(String password) {

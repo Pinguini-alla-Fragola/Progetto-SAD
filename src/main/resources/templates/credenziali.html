@@ -22,8 +22,17 @@
         <h1 th:text="${attivazione ? 'Attiva il tuo account' : 'Recupera la password'}"></h1>
     </header>
     <div class="mobile-body">
-        <p class="page-description" th:unless="${valido}">Per continuare richiedi un nuovo link usando l’email associata all’account.</p>
+        <p class="page-description" th:if="${attivazione and !valido}">
+            Il link di attivazione non è valido, è scaduto oppure è già stato utilizzato.
+            Contatta l’amministratore del Banco per richiedere un nuovo invito, oppure <a href="/login">torna all’accesso</a>.
+        </p>
+        <p class="page-description" th:if="${!attivazione and !valido}">
+            Per continuare richiedi un nuovo link usando l’email associata all’account.
+        </p>
         <form id="credenziali"
+              method="post"
+              action="/attiva"
+              th:if="${valido or !attivazione}"
               th:data-endpoint="${endpoint}"
               th:attr="data-form-anteprima=${!attivazione ? '' : null}">
             <fieldset th:classappend="${!attivazione} ? 'campi-inattivi'" th:disabled="${!attivazione}">

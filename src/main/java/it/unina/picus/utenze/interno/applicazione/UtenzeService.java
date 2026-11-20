@@ -50,7 +50,7 @@ class UtenzeService implements UtenzeApi {
     private final String hashFittizio;
 
     UtenzeService(AccountRepository accounts, ProfiloOptRepository profiliOpt,
-            ProfiloOperatoreRepository profiliOperatore, PasswordEncoder encoder, EntityManager em) {
+                  ProfiloOperatoreRepository profiliOperatore, PasswordEncoder encoder, EntityManager em) {
         this.accounts = accounts;
         this.profiliOpt = profiliOpt;
         this.profiliOperatore = profiliOperatore;
@@ -75,12 +75,18 @@ class UtenzeService implements UtenzeApi {
         }
 
         AccountJpa account = trovato.get();
-        if (!encoder.matches(password, account.getPasswordHash())
+        String passwordHash = account.getPasswordHash();
+        if (passwordHash == null) {
+            confrontoFittizio();
+            return Optional.empty();
+        }
+
+        if (!encoder.matches(password, passwordHash)
                 || !StatoUtenza.ATTIVO.name().equals(account.getStato())) {
             return Optional.empty();
         }
 
-        if (encoder.upgradeEncoding(account.getPasswordHash())) {
+        if (encoder.upgradeEncoding(passwordHash)) {
             accounts.aggiornaHash(account.getId(), encoder.encode(password));
         }
         return Optional.of(identita(account));
@@ -168,7 +174,7 @@ class UtenzeService implements UtenzeApi {
                 var competenza = blocca(OperatoreMisuraJpa.class, new OperatoreMisuraJpa.Chiave(accountId, misuraId));
                 yield profilo == null || competenza == null ? Optional.empty()
                         : Optional.of(new ProfiloErogatore(accountId, account.getNome(),
-                                TipoErogatore.valueOf(profilo.getTipologia()), profilo.getComuneCodice(), profilo.isCentroPicus()));
+                        TipoErogatore.valueOf(profilo.getTipologia()), profilo.getComuneCodice(), profilo.isCentroPicus()));
             }
             case BANCO -> Optional.empty();
         };
