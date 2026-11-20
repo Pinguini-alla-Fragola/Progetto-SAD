@@ -72,14 +72,3 @@ docker compose up --build
 
 Apri <http://localhost:8080> e accedi con `banco@picus.test` e la password
 che hai impostato in `PICUS_DEMO_PASSWORD`.
-
-## Visibilità del repository e licenza
-
-Il modello del corso prevede che il repository sia privato fino alla conclusione
-dell’esame. Il progetto è privo di una licenza open source. Per copiare,
-redistribuire o riutilizzare codice e documentazione fuori dal gruppo serve
-il consenso di tutti i contributori.
-
-Dopo l’esame, il gruppo decide insieme se tenerlo privato o renderlo pubblico,
-con o senza una licenza open source come la MIT. Il gruppo verifica le licenze
-dei materiali e delle dipendenze che usa.

@@ -35,7 +35,7 @@ jobs:
           python-version: "3.12"
 
       # lancia i test dello script
-      - name: Verifica esclusione di Epic e Pull Request
+      - name: Verifica che il burndown conti solo i task tecnici
         run: python -m unittest discover -s scripts -p 'test_burndown.py'
 
       # legge il project e scrive csv e svg in OUT_DIR
@@ -50,8 +50,8 @@ jobs:
           ITERATION_FIELD: Iteration   # campo del project con lo sprint
           STATUS_FIELD: Status         # campo del project con lo stato
           DONE_VALUE: Done             # valore di Status dei task chiusi
-          POINTS_FIELD: Estimate       # campo Number con i punti; se manca si usa Size, poi 1
-          SIZE_FIELD: Size             # taglia XS S M L XL = 1 2 3 5 8 punti
+          POINTS_FIELD: Estimate       # campo Number con i punti; senza Estimate il task vale 0 (Size non si usa)
+          TASK_TYPE: Task              # tipo nativo delle issue conteggiate: i task tecnici
           OUT_DIR: ${{ runner.temp }}/out   # cartella temporanea del runner
         run: python scripts/burndown.py
 

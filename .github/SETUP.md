@@ -155,12 +155,16 @@ Credenziali CI eventuali vanno in GitHub Secrets; non in file, template o issue.
 
 Riferimento: [impostazioni di sicurezza](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-security-and-analysis-settings-for-your-repository).
 
-## Burndown: esclusioni e aggiornamento
+## Burndown: perimetro e aggiornamento
 
-Il [calcolo](../scripts/burndown.py) esclude le Pull Request e le issue di tipo
-nativo `Epic` da scope, completati e rimanenti. Gli item restano nel Project
-e possono mantenere l'iterazione; non occorre spostarli per correggere il grafico.
-Gli altri tipi e le bozze mantengono il criterio di stima già previsto.
+Il [calcolo](../scripts/burndown.py) conta soltanto le issue di tipo nativo `Task`,
+cioè i task tecnici. Story, Epic, Bug, Question, Pull Request e bozze non entrano
+in scope, completati e rimanenti. Gli item restano nel Project e possono mantenere
+l'iterazione; non occorre spostarli per correggere il grafico.
+
+I punti di un task sono solo il valore del campo `Estimate`: la taglia `Size`
+non viene usata. Un task senza `Estimate` vale 0 punti, quindi va stimato per
+comparire nel grafico.
 
 Dopo aver integrato i file in `main`, aprire **Actions → burndown → Run workflow**,
 selezionare `main` e lasciare vuoto il titolo per aggiornare l'iterazione corrente.
