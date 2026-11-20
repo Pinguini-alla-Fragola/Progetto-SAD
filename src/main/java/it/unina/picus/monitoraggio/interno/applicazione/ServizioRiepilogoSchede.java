@@ -11,9 +11,11 @@ import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.BinaryOperator;
 
@@ -44,9 +46,11 @@ public final class ServizioRiepilogoSchede {
      *
      * @param attore identità verificata del Banco
      * @param trimestre singolo periodo da riepilogare
-     * @return sintesi degli invii in ordine cronologico e totali per categoria
+     * @return sintesi ordinate per istante di invio della versione usata e totali per categoria
      * @throws SecurityException se l'attore non è autorizzato
      * @throws NullPointerException se manca il trimestre
+     * @throws IllegalStateException se l'archivio restituisce un progressivo duplicato per
+     *                               lo stesso operatore nel trimestre richiesto
      * @throws ArithmeticException se un totale supera la capacità del tipo {@code long}
      * @see MonitoraggioApi#riepilogaSchede
      */
@@ -55,20 +59,25 @@ public final class ServizioRiepilogoSchede {
         Objects.requireNonNull(trimestre, "trimestre");
 
         Map<UUID, VersioneInviata> ultimeVersioni = new HashMap<>();
+        Map<UUID, Set<Long>> progressiviPerOperatore = new HashMap<>();
         for (VersioneInviata versione : archivio.elencaVersioniInviate(trimestre)) {
             SchedaSintesi sintesi = versione.sintesi();
-            if (trimestre.equals(sintesi.trimestre())) {
-                ultimeVersioni.merge(sintesi.operatoreId(), versione, VERSIONE_PIU_RECENTE);
+            // Limita il riepilogo al periodo richiesto anche se l'archivio restituisce altri invii.
+            if (!trimestre.equals(sintesi.trimestre())) {
+                continue;
             }
+            UUID operatoreId = sintesi.operatoreId();
+            Set<Long> progressivi = progressiviPerOperatore.computeIfAbsent(operatoreId, id -> new HashSet<>());
+            if (!progressivi.add(versione.numeroVersione())) {
+                throw new IllegalStateException("Progressivo duplicato per lo stesso operatore nel trimestre richiesto");
+            }
+            ultimeVersioni.merge(operatoreId, versione, VERSIONE_PIU_RECENTE);
         }
 
         Map<String, Long> totali = new HashMap<>();
         for (VersioneInviata versione : ultimeVersioni.values()) {
-            versione.conteggiDichiarati().forEach((categoria, valore) -> {
-                if (versione.categorieTracciato().contains(categoria)) {
-                    totali.merge(categoria, valore, Math::addExact);
-                }
-            });
+            versione.conteggiDichiarati().forEach((categoria, valore) ->
+                    totali.merge(categoria, valore, Math::addExact));
         }
 
         List<SchedaSintesi> schede = ultimeVersioni.values().stream()
