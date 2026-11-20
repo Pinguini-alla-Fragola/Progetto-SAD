@@ -1,6 +1,5 @@
 package it.unina.picus.catalogo.interno.persistenza;
 
-import it.unina.picus.catalogo.interno.dominio.CodiceMisuraDuplicatoException;
 import it.unina.picus.catalogo.interno.dominio.MisuraDiCatalogo;
 import it.unina.picus.catalogo.interno.dominio.MisuraRepository;
 import jakarta.persistence.EntityManager;
@@ -18,8 +17,8 @@ import java.util.Optional;
  * Adattatore JPA/PostgreSQL della porta {@link MisuraRepository}.
  *
  * <p>Applica il pattern GoF <em>Adapter</em> per tradurre le operazioni del dominio su
- * {@link MisuraJpa} mantenendo lock pessimistici in aggiornamento e traducendo le violazioni
- * di unicità del database in {@link CodiceMisuraDuplicatoException}.</p>
+ * {@link MisuraJpa} mantenendo lock pessimistici in aggiornamento e segnalando le violazioni
+ * concorrenti di unicità del database tramite risultato vuoto.</p>
  */
 @Repository
 public class MisuraRepositoryJpa implements MisuraRepository {
@@ -71,18 +70,23 @@ public class MisuraRepositoryJpa implements MisuraRepository {
     }
 
     @Override
-    public MisuraDiCatalogo salvaNuova(MisuraDiCatalogo misura) {
+    public Optional<MisuraDiCatalogo> salvaNuova(MisuraDiCatalogo misura) {
         Objects.requireNonNull(misura, "misura");
         if (misura.id() != null) {
             throw new IllegalArgumentException("Una nuova misura non deve avere un identificativo preesistente");
         }
         MisuraJpa entita = MisuraJpa.nuova(misura);
-        entityManager.persist(entita);
-        return flushEDetach(entita);
+        if (!eseguiConControlloUnicita(() -> {
+            entityManager.persist(entita);
+            entityManager.flush();
+        })) {
+            return Optional.empty();
+        }
+        return Optional.of(staccaEConverti(entita));
     }
 
     @Override
-    public MisuraDiCatalogo aggiorna(MisuraDiCatalogo misura) {
+    public Optional<MisuraDiCatalogo> aggiorna(MisuraDiCatalogo misura) {
         Objects.requireNonNull(misura, "misura");
         if (misura.id() == null) {
             throw new IllegalArgumentException("L'aggiornamento richiede una misura già persistita");
@@ -92,11 +96,13 @@ public class MisuraRepositoryJpa implements MisuraRepository {
             throw new IllegalStateException("Aggiornamento senza lock della misura");
         }
         entita.aggiorna(misura);
-        return flushEDetach(entita);
+        if (!eseguiConControlloUnicita(entityManager::flush)) {
+            return Optional.empty();
+        }
+        return Optional.of(staccaEConverti(entita));
     }
 
-    private MisuraDiCatalogo flushEDetach(MisuraJpa entita) {
-        eseguiFlushConControlloUnicita();
+    private MisuraDiCatalogo staccaEConverti(MisuraJpa entita) {
         MisuraDiCatalogo salvata = entita.aDominio();
         // Rimuove l'istanza gestita dalla cache L1 così un successivo caricamento in lock
         // nella stessa transazione acquisisce sempre esplicitamente PESSIMISTIC_WRITE.
@@ -120,12 +126,13 @@ public class MisuraRepositoryJpa implements MisuraRepository {
         return !query.getResultList().isEmpty();
     }
 
-    private void eseguiFlushConControlloUnicita() {
+    private boolean eseguiConControlloUnicita(Runnable operazione) {
         try {
-            entityManager.flush();
+            operazione.run();
+            return true;
         } catch (PersistenceException | DataIntegrityViolationException ex) {
             if (contieneViolazioneUnicita(ex)) {
-                throw new CodiceMisuraDuplicatoException();
+                return false;
             }
             throw ex;
         }

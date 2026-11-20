@@ -44,20 +44,20 @@ public interface MisuraRepository {
     boolean esisteCodiceSuAltraMisura(String codice, long misuraIdEsclusa);
 
     /**
-     * Persiste una nuova misura e restituisce l'istanza completa dell'identificativo generato.
+     * Persiste una nuova misura e restituisce l'istanza completa dell'identificativo generato,
+     * oppure vuoto se il database rileva un conflitto concorrente di unicità sul codice.
      *
      * @param misura nuova misura valida con {@code id == null}
-     * @return misura persistita con identificativo assegnato
-     * @throws CodiceMisuraDuplicatoException se il codice entra in conflitto con un'altra misura
+     * @return misura persistita con identificativo assegnato, oppure vuoto in caso di codice duplicato
      */
-    MisuraDiCatalogo salvaNuova(MisuraDiCatalogo misura);
+    Optional<MisuraDiCatalogo> salvaNuova(MisuraDiCatalogo misura);
 
     /**
-     * Persiste l'aggiornamento di una misura precedentemente caricata in scrittura.
+     * Persiste l'aggiornamento di una misura precedentemente caricata in scrittura,
+     * oppure restituisce vuoto se il database rileva un conflitto concorrente di unicità sul codice.
      *
      * @param misura misura aggiornata con identificativo persistito
-     * @return stato salvato della misura
-     * @throws CodiceMisuraDuplicatoException se il codice modificato entra in conflitto con un'altra misura
+     * @return stato salvato della misura, oppure vuoto in caso di codice duplicato
      */
-    MisuraDiCatalogo aggiorna(MisuraDiCatalogo misura);
+    Optional<MisuraDiCatalogo> aggiorna(MisuraDiCatalogo misura);
 }

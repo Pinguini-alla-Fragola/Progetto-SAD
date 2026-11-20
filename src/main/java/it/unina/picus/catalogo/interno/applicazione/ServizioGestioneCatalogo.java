@@ -68,7 +68,9 @@ public class ServizioGestioneCatalogo {
         if (misure.esisteCodice(nuova.codice())) {
             throw new CodiceMisuraDuplicatoException();
         }
-        return misure.salvaNuova(nuova).aDto();
+        return misure.salvaNuova(nuova)
+                .orElseThrow(CodiceMisuraDuplicatoException::new)
+                .aDto();
     }
 
     /**
@@ -92,7 +94,9 @@ public class ServizioGestioneCatalogo {
         if (misure.esisteCodiceSuAltraMisura(aggiornata.codice(), misuraId)) {
             throw new CodiceMisuraDuplicatoException();
         }
-        return misure.aggiorna(aggiornata).aDto();
+        return misure.aggiorna(aggiornata)
+                .orElseThrow(CodiceMisuraDuplicatoException::new)
+                .aDto();
     }
 
     /**
@@ -113,7 +117,9 @@ public class ServizioGestioneCatalogo {
         if (!esistente.attiva()) {
             return esistente.aDto();
         }
-        return misure.aggiorna(esistente.disattiva()).aDto();
+        return misure.aggiorna(esistente.disattiva())
+                .orElseThrow(CodiceMisuraDuplicatoException::new)
+                .aDto();
     }
 
     private MisuraDiCatalogo misuraInScrittura(IdentitaAutenticata attore, long misuraId) {
