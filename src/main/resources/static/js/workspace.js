@@ -73,7 +73,9 @@ export function setupWorkspace() {
         const current = sidebar?.querySelector('[aria-current]');
         const title = document.getElementById('workspace-title');
         if (current && title) {
-            title.textContent = current.textContent.trim();
+            // Il nome della sezione è nella prima etichetta della voce: elementi aggiunti dopo, come il contatore
+            // delle comunicazioni, non devono finire nel titolo.
+            title.textContent = (current.querySelector(':scope > span') ?? current).textContent.trim();
             document.title = title.textContent + ' · PICUS';
         }
     }
