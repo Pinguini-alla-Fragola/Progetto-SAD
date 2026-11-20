@@ -9,7 +9,7 @@ import org.testcontainers.DockerClientFactory;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
 /*
-Base di <b>tutti</b> i test di integrazione: un solo PostgreSQL reale (Testcontainers) condiviso
+Base di tutti i test di integrazione: un solo PostgreSQL reale (Testcontainers) condiviso
 dalle classi della suite e avviato una volta sola. Lo schema è creato da Flyway come in
 produzione; nessun database H2.
 Il container non usa {@code @Container}, che lo fermerebbe e riavvierebbe a ogni classe

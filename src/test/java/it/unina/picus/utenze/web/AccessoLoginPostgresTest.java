@@ -486,7 +486,7 @@ class AccessoLoginPostgresTest extends IntegrazionePostgresBase {
         return sessione(esito);
     }
 
-    /** Imposta l'ID di sessione dichiarato dal client, come il cookie JSESSIONID. */
+    /* Imposta l'ID di sessione dichiarato dal client, come il cookie JSESSIONID. */
     private static RequestPostProcessor idSessioneInviato(String id) {
         return richiesta -> {
             richiesta.setRequestedSessionId(id);
