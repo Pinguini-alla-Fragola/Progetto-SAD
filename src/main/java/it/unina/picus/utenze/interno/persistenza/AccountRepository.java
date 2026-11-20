@@ -13,6 +13,8 @@ public interface AccountRepository extends JpaRepository<AccountJpa, UUID> {
 
     Optional<AccountJpa> findByEmailIgnoreCase(String email);
 
+    boolean existsByEmailIgnoreCase(String email);
+
     List<AccountJpa> findByRuoloAndStato(String ruolo, String stato);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
