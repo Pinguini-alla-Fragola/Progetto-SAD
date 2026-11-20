@@ -16,6 +16,10 @@ public class OperatoreMisuraJpa {
 
     protected OperatoreMisuraJpa() {}
 
+    public OperatoreMisuraJpa(UUID accountId, long misuraId) {
+        this.id = new Chiave(accountId, misuraId);
+    }
+
     /** Chiave della misura associata al profilo. */
     @Embeddable
     public record Chiave(UUID accountId, long misuraId) implements Serializable {}
