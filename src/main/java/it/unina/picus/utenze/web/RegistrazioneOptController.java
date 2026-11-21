@@ -112,7 +112,8 @@ class RegistrazioneOptController {
                     .body(Map.of("messaggio", "Funzionalità non disponibile nel profilo skeleton"));
         }
         try {
-            DatiInvioAttivazione datiInvio = attivazioneService.get().rigeneraTokenPerAccount(id);
+            DatiInvioAttivazione datiInvio = attivazioneService.get()
+                    .rigeneraTokenPerAccount(id, UtenzeApi.RuoloUtente.OPT);
             EsitoInvio esitoInvio = tentaInvioAttivazione(datiInvio);
             if (esitoInvio.errore()) {
                 return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(Map.of(

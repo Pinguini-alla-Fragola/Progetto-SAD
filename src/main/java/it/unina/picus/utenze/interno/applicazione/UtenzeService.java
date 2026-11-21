@@ -91,8 +91,8 @@ class UtenzeService implements UtenzeApi {
             throw new UtenzaNonTrovataException("Identificativo account obbligatorio.");
         }
 
-        // 1. Stesso ordine di lock di AttivazioneUtenzaService.attivaAccount: prima TokenAttivazioneJpa, poi AccountJpa
-        List<TokenAttivazioneJpa> tokenAttivi = tokensAttivazione.findAttiviByAccountIdForUpdate(accountId);
+        // 1. Stesso ordine di lock di attivaAccount e rigeneraTokenPerAccount: prima TokenAttivazioneJpa, poi AccountJpa
+        tokensAttivazione.findAttiviByAccountIdForUpdate(accountId);
 
         AccountJpa account = accounts.findByIdForUpdate(accountId)
                 .orElseThrow(() -> new UtenzaNonTrovataException("Account non trovato."));
@@ -106,7 +106,8 @@ class UtenzeService implements UtenzeApi {
             throw new OperazioneUtenzaNonConsentitaException("L'account è già stato revocato.");
         }
 
-        // 3. Rilegge l'istante corrente dopo aver acquisito tutti i lock
+        // 3. Rilegge i token attivi sotto lock sull'account (inclusi eventuali token committati da un reinvio concorrente)
+        List<TokenAttivazioneJpa> tokenAttivi = tokensAttivazione.findAttiviByAccountIdForUpdate(accountId);
         Instant ora = Instant.now(clock);
         account.revoca();
         accounts.saveAndFlush(account);

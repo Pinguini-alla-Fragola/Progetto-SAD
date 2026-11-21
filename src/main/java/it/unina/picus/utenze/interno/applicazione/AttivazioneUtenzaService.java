@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import it.unina.picus.utenze.api.OperazioneUtenzaNonConsentitaException;
 import it.unina.picus.utenze.api.UtenzaNonTrovataException;
+import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
 import it.unina.picus.utenze.api.UtenzeApi.StatoUtenza;
 import it.unina.picus.utenze.interno.persistenza.AccountJpa;
 import it.unina.picus.utenze.interno.persistenza.AccountRepository;
@@ -116,24 +117,39 @@ public class AttivazioneUtenzaService {
     }
 
     /**
-     * Rigenera un token monouso per un account ancora in attesa di attivazione
-     * (recupero in seguito ad errore di invio o scadenza).
+     * Rigenera un token monouso per un account del ruolo atteso ancora in attesa di attivazione.
+     *
+     * <p>Mantiene lo stesso ordine dei lock di {@link #attivaAccount} e {@code UtenzeService.revocaAccount}
+     * (prima i token pendenti, poi l'account) e rilegge i token attivi dopo l'acquisizione del lock
+     * sull'account per serializzare eventuali reinvii concorrenti ed evitare doppi token attivi.</p>
      */
-    public DatiInvioAttivazione rigeneraTokenPerAccount(UUID accountId) {
+    public DatiInvioAttivazione rigeneraTokenPerAccount(UUID accountId, RuoloUtente ruoloAtteso) {
         if (accountId == null) {
             throw new UtenzaNonTrovataException("Identificativo account obbligatorio.");
         }
-        List<TokenAttivazioneJpa> precedenti = tokens.findAttiviByAccountIdForUpdate(accountId);
+        Objects.requireNonNull(ruoloAtteso, "ruoloAtteso obbligatorio");
+
+        // 1. Ordine dei lock coerente con attivaAccount e revocaAccount: prima token, poi account
+        tokens.findAttiviByAccountIdForUpdate(accountId);
         AccountJpa account = accounts.findByIdForUpdate(accountId)
                 .orElseThrow(() -> new UtenzaNonTrovataException("Account non trovato."));
 
+        // 2. Verifica ruolo e stato sotto lock esclusivo dell'account
+        if (!ruoloAtteso.name().equals(account.getRuolo())) {
+            throw new OperazioneUtenzaNonConsentitaException(
+                    "Il reinvio dell'invito è consentito solo per account con ruolo " + ruoloAtteso.name() + ".");
+        }
         if (!StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(account.getStato())) {
             throw new OperazioneUtenzaNonConsentitaException("L'account non è in attesa di attivazione.");
         }
 
+        // 3. Rilegge sotto lock sull'account tutti i token attivi (inclusi quelli appena committati da reinvii concorrenti)
+        List<TokenAttivazioneJpa> precedenti = tokens.findAttiviByAccountIdForUpdate(accountId);
         Instant ora = Instant.now(clock);
         for (TokenAttivazioneJpa vecchio : precedenti) {
-            vecchio.segnaComeUsato(ora);
+            if (!vecchio.isUsato()) {
+                vecchio.segnaComeUsato(ora);
+            }
         }
         if (!precedenti.isEmpty()) {
             tokens.saveAllAndFlush(precedenti);
