@@ -23,11 +23,12 @@ function size(bytes) {
 }
 
 /**
- * Disegna le comunicazioni. I pulsanti dei riscontri (Banco) e della conferma di ricezione (destinatari) si
- * attivano con le opzioni conRiscontri e conConferma, quando esistono i rispettivi endpoint (#143, #144).
+ * Crea le schede delle comunicazioni di una pagina; ricerca, filtri e pagine li gestisce il server. I pulsanti dei
+ * riscontri (Banco) e della conferma di ricezione (destinatari) si attivano con le opzioni conRiscontri e
+ * conConferma, quando esistono i rispettivi endpoint (#143, #144).
  */
-export function communications(host, messages, { banco, formatDate, onConfirm, conRiscontri = false, conConferma = false }) {
-    const rows = messages.map(message => {
+export function communicationCards(messages, { banco, formatDate, onConfirm, conRiscontri = false, conConferma = false }) {
+    return messages.map(message => {
         const card = el('article', null, 'message-entry');
         const header = el('header', null, 'message-heading');
         const title = el('h3', message.titolo || 'Comunicazione senza oggetto');
@@ -130,9 +131,7 @@ export function communications(host, messages, { banco, formatDate, onConfirm, c
             footer.append(confirm, status);
             card.append(footer);
         }
-        return listRow(card, { text: [message.titolo || '', message.contenuto, formatDate(message.inviataIl), ...[...metadata.values()].map(f => f.nomeFile)].join(' '),
-            filters: { destinatari: audience, allegati: message.allegati.length ? 'Con allegati' : 'Senza allegati', ricezione: message.confermataIl ? 'Confermata' : 'Da confermare' } });
+        card.setAttribute('role', 'listitem');
+        return card;
     });
-    renderList(host, rows, { searchLabel: 'Cerca comunicazioni', placeholder: 'Oggetto, testo o nome allegato',
-        filters: [{ key: 'destinatari', label: 'Destinatari' }, { key: 'allegati', label: 'Allegati' }, ...(banco ? [] : [{ key: 'ricezione', label: 'Ricezione' }])], empty: 'Nessuna comunicazione.' });
 }

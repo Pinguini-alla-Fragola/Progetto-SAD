@@ -1,5 +1,5 @@
 import { api, ErroreHttp } from './area-client.js';
-import { communications } from './communication-view.js';
+import { ElencoComunicazioni, ultimaRichiesta } from './elenco-comunicazioni.js';
 
 const MESSAGGIO_RETE = 'Connessione non disponibile. Riprova tra poco.';
 const MASSIMO_ALLEGATI = 5;
@@ -13,9 +13,6 @@ const MODELLO_SCADENZA = {
     destinatariTipo: 'TUTTI_GLI_OPERATORI'
 };
 
-const formatoData = valore => new Date(valore).toLocaleString('it-IT',
-    { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Rome' });
-
 function messaggioErrore(causa) {
     return causa instanceof ErroreHttp ? causa.message : MESSAGGIO_RETE;
 }
@@ -25,18 +22,6 @@ function mostraProblema(contenitore, testo) {
     paragrafo.className = 'picus-esito picus-errore';
     paragrafo.textContent = testo;
     contenitore.replaceChildren(paragrafo);
-}
-
-/** Carica e disegna l'elenco: inviate per il Banco, ricevute per OPT e Operatori. */
-async function caricaElenco(contenitore, banco) {
-    try {
-        const elenco = await api(banco ? '/api/comunicazioni/inviate' : '/api/comunicazioni/ricevute');
-        communications(contenitore, elenco, {
-            banco, formatDate: formatoData, onConfirm: () => caricaElenco(contenitore, banco)
-        });
-    } catch (causa) {
-        mostraProblema(contenitore, messaggioErrore(causa));
-    }
 }
 
 /* ---------------------------------------------------------------- modulo di invio del Banco */
@@ -71,66 +56,85 @@ function problemaAllegati(files) {
     return null;
 }
 
-async function aggiornaGruppo(form) {
+/**
+ * Mostra gli account da scegliere per il gruppo selezionato. Se il Banco cambia gruppo mentre una lettura è in
+ * corso, conta solo l'ultima: le risposte precedenti, anche di errore, vengono scartate e non toccano le scelte.
+ */
+function creaScelteGruppo(form) {
     const gruppo = form.querySelector('[data-destinatari]');
     const scelte = gruppo.querySelector('.picus-choices');
-    const tipo = form.elements.destinatariTipo.value;
-    scelte.replaceChildren();
-    const perGruppo = TIPI_GRUPPO.has(tipo);
-    gruppo.hidden = !perGruppo;
-    gruppo.disabled = !perGruppo;
-    if (!perGruppo) return;
-    try {
-        const account = await api('/api/comunicazioni/destinatari?tipo=' + encodeURIComponent(tipo));
-        if (form.elements.destinatariTipo.value !== tipo) return;
-        for (const voce of account) {
-            const etichetta = document.createElement('label');
-            etichetta.className = 'picus-check';
-            const scelta = document.createElement('input');
-            scelta.type = 'checkbox';
-            scelta.name = 'gruppo';
-            scelta.value = voce.id;
-            etichetta.append(scelta, ' ' + voce.nome);
-            scelte.append(etichetta);
+    const nuovaRichiesta = ultimaRichiesta();
+
+    return async function aggiorna() {
+        const attuale = nuovaRichiesta();
+        const tipo = form.elements.destinatariTipo.value;
+        scelte.replaceChildren();
+        const perGruppo = TIPI_GRUPPO.has(tipo);
+        gruppo.hidden = !perGruppo;
+        gruppo.disabled = !perGruppo;
+        if (!perGruppo) return;
+        try {
+            const account = await api('/api/comunicazioni/destinatari?tipo=' + encodeURIComponent(tipo));
+            if (!attuale()) return;
+            scelte.replaceChildren(...account.map(voce => {
+                const etichetta = document.createElement('label');
+                etichetta.className = 'picus-check';
+                const scelta = document.createElement('input');
+                scelta.type = 'checkbox';
+                scelta.name = 'gruppo';
+                scelta.value = voce.id;
+                etichetta.append(scelta, ' ' + voce.nome);
+                return etichetta;
+            }));
+            if (!account.length) mostraProblema(scelte, 'Non ci sono account attivi da scegliere.');
+        } catch (causa) {
+            if (attuale()) mostraProblema(scelte, messaggioErrore(causa));
         }
-        if (!account.length) mostraProblema(scelte, 'Non ci sono account attivi da scegliere.');
-    } catch (causa) {
-        mostraProblema(scelte, messaggioErrore(causa));
-    }
+    };
 }
 
-function applicaModelloScadenza(form) {
-    form.elements.titolo.value = MODELLO_SCADENZA.titolo;
-    form.elements.contenuto.value = MODELLO_SCADENZA.contenuto;
-    form.elements.destinatariTipo.value = MODELLO_SCADENZA.destinatariTipo;
-    aggiornaGruppo(form);
-    form.elements.contenuto.focus();
+/**
+ * Tutti i campi viaggiano in una sola parte JSON, «dati», con la stessa forma dell'invio senza allegati: anche un
+ * gruppo di 1000 account resta una parte sola. Ogni file è una parte «files».
+ */
+function datiModulo(form) {
+    const gruppo = form.querySelector('[data-destinatari]');
+    const dati = {
+        titolo: form.elements.titolo.value,
+        contenuto: form.elements.contenuto.value,
+        destinatariTipo: form.elements.destinatariTipo.value,
+        gruppo: gruppo.disabled ? null
+            : [...gruppo.querySelectorAll('input[name="gruppo"]:checked')].map(scelta => scelta.value)
+    };
+    const corpo = new FormData();
+    corpo.append('dati', new Blob([JSON.stringify(dati)], { type: 'application/json' }));
+    for (const file of form.elements.files.files) corpo.append('files', file, file.name);
+    return corpo;
 }
 
-/** Invio con FormData: il browser imposta da solo il formato multipart con i file. */
-async function inviaComunicazione(form, esito, bottone, elenco) {
+async function inviaComunicazione(form, { esito, bottone, aggiornaGruppo, elenco }) {
     pulisciErrori(form);
     const problema = problemaAllegati(form.elements.files.files);
     if (problema) {
         mostraErrori(form, { files: problema });
         return;
     }
-    const dati = new FormData(form);
+    const corpo = datiModulo(form);
     bottone.disabled = true;
     esito.textContent = 'Invio in corso…';
     try {
         const { headerName, token } = await api('/api/auth/csrf');
         const risposta = await fetch('/api/comunicazioni', {
-            method: 'POST', headers: { Accept: 'application/json', [headerName]: token }, body: dati
+            method: 'POST', headers: { Accept: 'application/json', [headerName]: token }, body: corpo
         });
-        const corpo = await risposta.json().catch(() => null);
-        if (!risposta.ok) throw new ErroreHttp(risposta.status, corpo);
+        const dati = await risposta.json().catch(() => null);
+        if (!risposta.ok) throw new ErroreHttp(risposta.status, dati);
         form.reset();
-        await aggiornaGruppo(form);
-        esito.textContent = corpo.destinatari === 1
+        await aggiornaGruppo();
+        esito.textContent = dati.destinatari === 1
             ? 'Comunicazione inviata a 1 destinatario.'
-            : 'Comunicazione inviata a ' + corpo.destinatari + ' destinatari.';
-        caricaElenco(elenco, true);
+            : 'Comunicazione inviata a ' + dati.destinatari + ' destinatari.';
+        elenco.vaiA(0);
     } catch (causa) {
         esito.textContent = messaggioErrore(causa);
         mostraErrori(form, causa.campi ?? {});
@@ -145,28 +149,38 @@ async function inviaComunicazione(form, esito, bottone, elenco) {
  */
 function avviaModulo(form, elenco) {
     const campi = form.querySelector('fieldset.campi-form');
-    const esito = form.querySelector('.picus-esito');
-    const bottone = form.querySelector('button[type="submit"]');
-    form.addEventListener('submit', event => {
-        event.preventDefault();
-        inviaComunicazione(form, esito, bottone, elenco);
+    const parti = {
+        esito: form.querySelector('.picus-esito'),
+        bottone: form.querySelector('button[type="submit"]'),
+        aggiornaGruppo: creaScelteGruppo(form),
+        elenco
+    };
+    form.addEventListener('submit', evento => {
+        evento.preventDefault();
+        inviaComunicazione(form, parti);
     });
-    form.elements.destinatariTipo.addEventListener('change', () => aggiornaGruppo(form));
-    form.querySelector('[data-modello-scadenza]')?.addEventListener('click', () => applicaModelloScadenza(form));
-    aggiornaGruppo(form);
+    form.elements.destinatariTipo.addEventListener('change', parti.aggiornaGruppo);
+    form.querySelector('[data-modello-scadenza]')?.addEventListener('click', () => {
+        form.elements.titolo.value = MODELLO_SCADENZA.titolo;
+        form.elements.contenuto.value = MODELLO_SCADENZA.contenuto;
+        form.elements.destinatariTipo.value = MODELLO_SCADENZA.destinatariTipo;
+        parti.aggiornaGruppo();
+        form.elements.contenuto.focus();
+    });
+    parti.aggiornaGruppo();
     campi.disabled = false;
-    esito.textContent = '';
+    parti.esito.textContent = '';
 }
 
 /* ---------------------------------------------------------------- avvio */
 
-const elenco = document.getElementById('messaggi');
-if (elenco) {
+const contenitore = document.getElementById('messaggi');
+if (contenitore) {
     const banco = document.body.dataset.area === 'banco';
-    caricaElenco(elenco, banco);
+    const elenco = new ElencoComunicazioni(contenitore, { banco });
+    elenco.carica();
     // Chi apre la sezione vede subito anche le comunicazioni arrivate dopo il caricamento della pagina.
-    document.querySelector('.area-nav a[href="#comunicazioni"]')
-        ?.addEventListener('click', () => caricaElenco(elenco, banco));
+    document.querySelector('.area-nav a[href="#comunicazioni"]')?.addEventListener('click', () => elenco.carica());
     const form = document.getElementById('comunicazione');
     if (banco && form) avviaModulo(form, elenco);
 }
