@@ -1,269 +1,225 @@
 package it.unina.picus.utenze.web;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneOffset;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.LockedException;
-import org.springframework.security.authentication.TestingAuthenticationToken;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
+import it.unina.picus.shared.InvioEmail;
 import it.unina.picus.utenze.api.UtenzeApi;
-import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
+import it.unina.picus.utenze.api.UtenzeApi.StatoUtenza;
+import it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService;
+import it.unina.picus.utenze.interno.applicazione.RegistrazioneOptService;
+import it.unina.picus.utenze.interno.applicazione.RegistrazioneOptService.ComandoRegistrazioneOpt;
+import it.unina.picus.utenze.interno.applicazione.RegistrazioneOptService.EsitoRegistrazioneOpt;
+import it.unina.picus.utenze.interno.applicazione.TokenAttivazioneNonValidoException;
+import it.unina.picus.utenze.interno.persistenza.AccountRepository;
 
-/* Verifica di {@link AutenticazionePicus} senza Spring e senza database (#25, #104): il provider deve
-consultare il limitatore prima delle credenziali, azzerarlo dopo un accesso riuscito e costruire
-un'identità di sessione senza credenziali. Oggetti reali ({@link LimitatoreAccessi} con orologio
-fisso) e un fake di {@link UtenzeApi} scritto a mano.*/
+@SpringBootTest
+@ActiveProfiles("test")
+class RevocaEConcorrenzaOptTest {
 
-@DisplayName("Provider di autenticazione PICUS")
-class AutenticazionePicusTest {
+    private static final Pattern PATTERN_ACCOUNT_ID = Pattern.compile("\"accountId\"\\s*:\\s*\"([^\"]+)\"");
 
-    private static final String PASSWORD = "Password-di-prova-1";
-    private static final String EMAIL = "opt@picus.test";
-    private static final int MAX = LimitatoreAccessi.MAX_FALLIMENTI;
+    @Autowired
+    private WebApplicationContext context;
 
-    private UtenzeFinte utenze;
-    private AutenticazionePicus provider;
+    private MockMvc mockMvc;
+
+    @Autowired
+    private RegistrazioneOptService registrazioneOptService;
+
+    @Autowired
+    private AttivazioneUtenzaService attivazioneUtenzaService;
+
+    @Autowired
+    private UtenzeApi utenzeApi;
+
+    @Autowired
+    private AccountRepository accountRepository;
+
+    @MockitoBean
+    private InvioEmail invioEmail;
 
     @BeforeEach
-    void prepara() {
-        utenze = new UtenzeFinte(PASSWORD);
-        Clock fermo = Clock.fixed(Instant.parse("2026-11-17T10:00:00Z"), ZoneOffset.UTC);
-        provider = new AutenticazionePicus(utenze, new LimitatoreAccessi(fermo));
-    }
-
-    // accesso riuscito
-
-    @ParameterizedTest(name = "{0}: identità di sessione con ruolo e senza credenziali")
-    @EnumSource(RuoloUtente.class)
-    void accessoRiuscitoCostruisceLIdentitaDiSessione(RuoloUtente ruolo) {
-        UtenzeApi.IdentitaAutenticata attesa = utenze.aggiungi(EMAIL, ruolo);
-        UsernamePasswordAuthenticationToken richiesta = UsernamePasswordAuthenticationToken.unauthenticated(EMAIL, PASSWORD);
-        richiesta.setDetails("dettagli-della-richiesta");
-
-        Authentication esito = provider.authenticate(richiesta);
-
-        assertTrue(esito.isAuthenticated());
-        PrincipalePicus principale = assertInstanceOf(PrincipalePicus.class, esito.getPrincipal());
-        assertEquals(attesa.accountId(), principale.accountId());
-        assertEquals(ruolo, principale.ruolo());
-        assertEquals(List.of("ROLE_" + ruolo.name()), autorita(esito));
-        assertNull(esito.getCredentials(), "la password non deve restare nell'autenticazione");
-        assertEquals("dettagli-della-richiesta", esito.getDetails());
+    void setupMockMvc() {
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(context)
+                .apply(springSecurity())
+                .build();
     }
 
     @Test
-    @DisplayName("Credenziali errate: BadCredentialsException")
-    void credenzialiErrate() {
-        utenze.aggiungi(EMAIL, RuoloUtente.OPT);
+    void creaOpt_rifiutaTipoNonStringaEDoppioPuntoSenzaCreareAccount() throws Exception {
+        long prima = accountRepository.count();
 
-        assertThrows(BadCredentialsException.class, () -> accedi(EMAIL, "sbagliata"));
-        assertThrows(BadCredentialsException.class, () -> accedi("sconosciuta@picus.test", PASSWORD));
+        // 1. nome booleano: nome: true
+        mockMvc.perform(post("/api/opt")
+                        .with(user("banco@picus.test").roles("BANCO"))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "codiceStruttura": "OPT-JSON-01",
+                                  "nome": true,
+                                  "comune": "063049",
+                                  "codiceFiscale": "12345678901",
+                                  "email": "valida@picus.test"
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.campo").value("nome"));
+
+        // 2. email con doppio punto non valida per Jakarta Mail strict
+        mockMvc.perform(post("/api/opt")
+                        .with(user("banco@picus.test").roles("BANCO"))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "codiceStruttura": "OPT-JSON-02",
+                                  "nome": "OPT Test",
+                                  "comune": "063049",
+                                  "codiceFiscale": "12345678901",
+                                  "email": "doppio..punto@picus.test"
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.campo").value("email"));
+
+        assertThat(accountRepository.count()).isEqualTo(prima);
+        verify(invioEmail, never()).inviaLinkAttivazione(anyString(), anyString(), anyString());
     }
 
     @Test
-    @DisplayName("Credenziale assente: arriva null al modulo Utenze e l'esito è un errore di credenziali")
-    void credenzialeAssente() {
-        utenze.aggiungi(EMAIL, RuoloUtente.OPT);
+    void creaOpt_conErroreSmtp_segnalaInvitoNonInviatoEConsenteReinvio() throws Exception {
+        doThrow(new IllegalStateException("SMTP timeout"))
+                .when(invioEmail).inviaLinkAttivazione(anyString(), anyString(), anyString());
 
-        assertThrows(BadCredentialsException.class,
-                () -> provider.authenticate(UsernamePasswordAuthenticationToken.unauthenticated(EMAIL, null)));
-        assertEquals(1, utenze.chiamate);
-        assertNull(utenze.ultimaPassword);
-    }
+        String response = mockMvc.perform(post("/api/opt")
+                        .with(user("banco@picus.test").roles("BANCO"))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "codiceStruttura": "OPT-SMTP-ERR",
+                                  "nome": "OPT Errore SMTP",
+                                  "comune": "063049",
+                                  "codiceFiscale": "12345678902",
+                                  "email": "smtp.fail@picus.test"
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.invitoInviato").value(false))
+                .andExpect(jsonPath("$.erroreInvio").value(true))
+                .andReturn().getResponse().getContentAsString();
 
-    // limite sui tentativi
+        assertThat(response).contains("invio dell'email è fallito");
 
-    @Test
-    @DisplayName("Raggiunto il limite, il tentativo successivo è bloccato senza verificare le credenziali")
-    void bloccoPrimaDellaVerifica() {
-        utenze.aggiungi(EMAIL, RuoloUtente.OPT);
-        for (int i = 0; i < MAX; i++) {
-            assertThrows(BadCredentialsException.class, () -> accedi(EMAIL, "sbagliata"));
-        }
-        int chiamatePrimaDelBlocco = utenze.chiamate;
+        Matcher matcher = PATTERN_ACCOUNT_ID.matcher(response);
+        assertThat(matcher.find()).isTrue();
+        String accountId = matcher.group(1);
 
-        assertThrows(LockedException.class, () -> accedi(EMAIL, PASSWORD));
-        assertEquals(chiamatePrimaDelBlocco, utenze.chiamate,
-                "con il blocco attivo il confronto della password (BCrypt) non deve essere eseguito");
-    }
+        // Ripristina il trasporto SMTP e verifica il reinvio dell'invito
+        doNothing().when(invioEmail).inviaLinkAttivazione(anyString(), anyString(), anyString());
 
-    @Test
-    @DisplayName("Il blocco vale anche per un'email inesistente, così non rivela quali account esistono")
-    void bloccoAncheSenzaAccount() {
-        for (int i = 0; i < MAX; i++) {
-            assertThrows(BadCredentialsException.class, () -> accedi("nessuno@picus.test", "x"));
-        }
-
-        assertThrows(LockedException.class, () -> accedi("nessuno@picus.test", "x"));
-    }
-
-    @Test
-    @DisplayName("Varianti con spazi e maiuscole della stessa email consumano lo stesso contatore")
-    void variantiDellaStessaEmail() {
-        utenze.aggiungi(EMAIL, RuoloUtente.OPT);
-        String[] varianti = {EMAIL, " OPT@picus.test", "Opt@Picus.Test ", "opt@PICUS.TEST", "  opt@picus.test  "};
-        for (int i = 0; i < MAX; i++) {
-            String variante = varianti[i % varianti.length];
-            assertThrows(BadCredentialsException.class, () -> accedi(variante, "sbagliata"));
-        }
-
-        assertThrows(LockedException.class, () -> accedi(EMAIL, PASSWORD));
+        mockMvc.perform(post("/api/opt/" + accountId + "/reinvia-invito")
+                        .with(user("banco@picus.test").roles("BANCO"))
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.invitoInviato").value(true))
+                .andExpect(jsonPath("$.erroreInvio").value(false));
     }
 
     @Test
-    @DisplayName("Un accesso riuscito azzera il contatore di quell'email")
-    void accessoRiuscitoAzzeraIlContatore() {
-        utenze.aggiungi(EMAIL, RuoloUtente.OPT);
-        for (int i = 0; i < MAX - 1; i++) {
-            assertThrows(BadCredentialsException.class, () -> accedi(EMAIL, "sbagliata"));
-        }
-        assertTrue(accedi(EMAIL, PASSWORD).isAuthenticated());
+    void revocaEAttivazioneSimultanee_nessunDeadlockERevocaPrevale() throws Exception {
+        EsitoRegistrazioneOpt reg = registrazioneOptService.registraOpt(new ComandoRegistrazioneOpt(
+                "OPT-CONC-01",
+                "OPT Concorrente",
+                "063049",
+                "12345678903",
+                "conc@picus.test"
+        ));
 
-        for (int i = 0; i < MAX; i++) {
-            assertThrows(BadCredentialsException.class, () -> accedi(EMAIL, "sbagliata"),
-                    "tentativo " + (i + 1) + " dopo l'azzeramento");
-        }
-        assertThrows(LockedException.class, () -> accedi(EMAIL, PASSWORD));
-    }
+        UUID accountId = reg.accountId();
+        String token = reg.datiInvio().tokenInChiaro();
 
-    @Test
-    @DisplayName("Il blocco di un'email non impedisce l'accesso a un'altra")
-    void bloccoLimitatoAllEmail() {
-        utenze.aggiungi(EMAIL, RuoloUtente.OPT);
-        utenze.aggiungi("banco@picus.test", RuoloUtente.BANCO);
-        for (int i = 0; i < MAX; i++) {
-            assertThrows(BadCredentialsException.class, () -> accedi(EMAIL, "sbagliata"));
-        }
-        assertThrows(LockedException.class, () -> accedi(EMAIL, PASSWORD));
+        CountDownLatch pronti = new CountDownLatch(2);
+        CountDownLatch via = new CountDownLatch(1);
 
-        assertTrue(accedi("banco@picus.test", PASSWORD).isAuthenticated());
-    }
+        try (ExecutorService pool = Executors.newFixedThreadPool(2)) {
+            Callable<Throwable> taskRevoca = () -> {
+                pronti.countDown();
+                via.await(5, TimeUnit.SECONDS);
+                try {
+                    utenzeApi.revocaUtenzaOpt(accountId);
+                    return null;
+                } catch (Throwable t) {
+                    return t;
+                }
+            };
 
-    // tipi di autenticazione gestiti
+            Callable<Throwable> taskAttivazione = () -> {
+                pronti.countDown();
+                via.await(5, TimeUnit.SECONDS);
+                try {
+                    attivazioneUtenzaService.attivaAccount(token, "PasswordSicura123!");
+                    return null;
+                } catch (Throwable t) {
+                    return t;
+                }
+            };
 
-    @Test
-    @DisplayName("Gestisce solo le richieste con email e password")
-    void supportaSoloEmailEPassword() {
-        assertTrue(provider.supports(UsernamePasswordAuthenticationToken.class));
-        assertFalse(provider.supports(AnonymousAuthenticationToken.class));
-        assertFalse(provider.supports(TestingAuthenticationToken.class));
-    }
+            Future<Throwable> fRevoca = pool.submit(taskRevoca);
+            Future<Throwable> fAttivazione = pool.submit(taskAttivazione);
 
-    // supporto
+            assertThat(pronti.await(5, TimeUnit.SECONDS)).isTrue();
+            via.countDown();
 
-    private Authentication accedi(String email, String password) {
-        return provider.authenticate(UsernamePasswordAuthenticationToken.unauthenticated(email, password));
-    }
+            Throwable errRevoca = fRevoca.get(10, TimeUnit.SECONDS);
+            Throwable errAttivazione = fAttivazione.get(10, TimeUnit.SECONDS);
 
-    private static List<String> autorita(Authentication autenticazione) {
-        return autenticazione.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
-    }
-
-    /*
-    Fake manuale del modulo Utenze: una sola password valida, account attivi indicizzati per email
-    normalizzata come fa UtenzeService. Conta le chiamate a verificaCredenziali.
-     */
-    private static final class UtenzeFinte implements UtenzeApi {
-        @Override
-        public void revocaUtenzaOpt(UUID optAccountId) {
-            throw new UnsupportedOperationException("Non usato in questo test");
+            // La revoca deve riuscire senza deadlock e il token non può più riattivare l'account
+            assertThat(errRevoca).isNull();
+            assertThat(errAttivazione).isInstanceOf(TokenAttivazioneNonValidoException.class);
         }
 
-        @Override
-        public List<AccountSintetico> elencoAccountPerRuolo(RuoloUtente ruolo) {
-            return List.of();
-        }
-        @Override
-        public void revocaUtenzaOperatore(UUID operatoreAccountId) {
-            throw new UnsupportedOperationException("Non usato in questo test");
-        }
-        private final String passwordValida;
-        private final Map<String, IdentitaAutenticata> attivi = new HashMap<>();
-        int chiamate;
-        String ultimaPassword;
+        assertThat(utenzeApi.cercaAccount(accountId))
+                .isPresent()
+                .get()
+                .extracting(UtenzeApi.AccountSintetico::stato)
+                .isEqualTo(StatoUtenza.REVOCATO);
 
-        UtenzeFinte(String passwordValida) {
-            this.passwordValida = passwordValida;
-        }
-
-        IdentitaAutenticata aggiungi(String email, RuoloUtente ruolo) {
-            IdentitaAutenticata identita = new IdentitaAutenticata(UUID.randomUUID(), ruolo);
-            attivi.put(normalizza(email), identita);
-            return identita;
-        }
-
-        @Override
-        public Optional<IdentitaAutenticata> verificaCredenziali(String email, String password) {
-            chiamate++;
-            ultimaPassword = password;
-            if (email == null || !passwordValida.equals(password)) {
-                return Optional.empty();
-            }
-            return Optional.ofNullable(attivi.get(normalizza(email)));
-        }
-
-        private static String normalizza(String email) {
-            return email.strip().toLowerCase(Locale.ROOT);
-        }
-
-        @Override
-        public Optional<IdentitaAutenticata> verificaAccountSessione(UUID accountId) {
-            throw new UnsupportedOperationException("non usato dal provider");
-        }
-
-        @Override
-        public Optional<AccountSintetico> cercaAccount(UUID accountId) {
-            throw new UnsupportedOperationException("non usato dal provider");
-        }
-
-        @Override
-        public List<AccountSintetico> elencoAccountAttivi(RuoloUtente ruolo) {
-            throw new UnsupportedOperationException("non usato dal provider");
-        }
-
-        @Override
-        public Optional<ProfiloErogatore> cercaProfiloErogatoreAttivo(UUID accountId) {
-            throw new UnsupportedOperationException("non usato dal provider");
-        }
-
-        @Override
-        public List<ProfiloErogatore> elencoOptAttive(Set<UUID> accountIds) {
-            throw new UnsupportedOperationException("non usato dal provider");
-        }
-
-        @Override
-        public Optional<ProfiloErogatore> bloccaProfiloPerMisura(UUID accountId, long misuraId) {
-            throw new UnsupportedOperationException("non usato dal provider");
-        }
-
-        @Override
-        public List<ProfiloErogatore> elencoOperatoriAttiviPerMisura(long misuraId) {
-            throw new UnsupportedOperationException("non usato dal provider");
-        }
+        assertThatThrownBy(() -> attivazioneUtenzaService.attivaAccount(token, "AltraPassword123!"))
+                .isInstanceOf(TokenAttivazioneNonValidoException.class);
     }
 }

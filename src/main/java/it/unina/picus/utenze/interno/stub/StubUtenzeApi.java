@@ -121,10 +121,15 @@ public class StubUtenzeApi implements UtenzeApi {
     }
 
     @Override
-    public List<AccountSintetico> elencoAccountPerRuolo(RuoloUtente ruolo) {
-        return perEmail.values().stream()
-                .filter(a -> a.ruolo() == ruolo)
-                .map(StubUtenzeApi::sintetico)
+    public List<AccountAmministrativo> elencoAccountPerRuolo(RuoloUtente ruolo) {
+        return perEmail.entrySet().stream()
+                .filter(e -> e.getValue().ruolo() == ruolo)
+                .map(e -> {
+                    Account a = e.getValue();
+                    return new AccountAmministrativo(
+                            a.id(), a.nome(), e.getKey(), a.id().toString().substring(0, 8).toUpperCase(),
+                            null, a.ruolo(), a.stato());
+                })
                 .toList();
     }
     @Override

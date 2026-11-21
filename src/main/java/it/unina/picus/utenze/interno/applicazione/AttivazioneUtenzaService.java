@@ -9,6 +9,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.HexFormat;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -20,6 +21,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import it.unina.picus.utenze.api.OperazioneUtenzaNonConsentitaException;
+import it.unina.picus.utenze.api.UtenzaNonTrovataException;
 import it.unina.picus.utenze.api.UtenzeApi.StatoUtenza;
 import it.unina.picus.utenze.interno.persistenza.AccountJpa;
 import it.unina.picus.utenze.interno.persistenza.AccountRepository;
@@ -71,19 +74,31 @@ public class AttivazioneUtenzaService {
         this.clock = Objects.requireNonNull(clock);
     }
 
+    public record DatiInvioAttivazione(String emailDestinatario, String nomeDestinatario, String tokenInChiaro) {
+    }
+
+    public record LinkAttivazioneDaInviareEvent(String emailDestinatario, String nomeDestinatario, String tokenInChiaro) {
+    }
+
     /**
      * Genera un nuovo token monouso per un account in attesa di attivazione,
-     * invalida eventuali token precedenti ancora attivi e pianifica l'invio dell'email
-     * dopo il commit della transazione.
+     * invalida eventuali token precedenti ancora attivi sotto lock e restituisce
+     * i dati per la consegna post-commit.
      */
-    public void generaEInviaAttivazione(AccountJpa account) {
+    public DatiInvioAttivazione preparaTokenAttivazione(AccountJpa account) {
         Objects.requireNonNull(account, "account obbligatorio");
         if (!StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(account.getStato())) {
             throw new IllegalStateException("L'account non è in stato IN_ATTESA_DI_ATTIVAZIONE");
         }
 
+        List<TokenAttivazioneJpa> precedenti = tokens.findAttiviByAccountIdForUpdate(account.getId());
         Instant ora = Instant.now(clock);
-        tokens.invalidaTokenAttiviPerAccount(account.getId(), ora);
+        for (TokenAttivazioneJpa vecchio : precedenti) {
+            vecchio.segnaComeUsato(ora);
+        }
+        if (!precedenti.isEmpty()) {
+            tokens.saveAllAndFlush(precedenti);
+        }
 
         String tokenInChiaro = generaTokenCasuale();
         String tokenHash = calcolaSha256(tokenInChiaro);
@@ -95,10 +110,56 @@ public class AttivazioneUtenzaService {
                 ora.plus(durataValidita),
                 ora
         );
-        tokens.save(nuovoToken);
+        tokens.saveAndFlush(nuovoToken);
 
+        return new DatiInvioAttivazione(account.getEmail(), account.getNome(), tokenInChiaro);
+    }
+
+    /**
+     * Rigenera un token monouso per un account ancora in attesa di attivazione
+     * (recupero in seguito ad errore di invio o scadenza).
+     */
+    public DatiInvioAttivazione rigeneraTokenPerAccount(UUID accountId) {
+        if (accountId == null) {
+            throw new UtenzaNonTrovataException("Identificativo account obbligatorio.");
+        }
+        List<TokenAttivazioneJpa> precedenti = tokens.findAttiviByAccountIdForUpdate(accountId);
+        AccountJpa account = accounts.findByIdForUpdate(accountId)
+                .orElseThrow(() -> new UtenzaNonTrovataException("Account non trovato."));
+
+        if (!StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(account.getStato())) {
+            throw new OperazioneUtenzaNonConsentitaException("L'account non è in attesa di attivazione.");
+        }
+
+        Instant ora = Instant.now(clock);
+        for (TokenAttivazioneJpa vecchio : precedenti) {
+            vecchio.segnaComeUsato(ora);
+        }
+        if (!precedenti.isEmpty()) {
+            tokens.saveAllAndFlush(precedenti);
+        }
+
+        String tokenInChiaro = generaTokenCasuale();
+        String tokenHash = calcolaSha256(tokenInChiaro);
+        TokenAttivazioneJpa nuovoToken = new TokenAttivazioneJpa(
+                UUID.randomUUID(),
+                account.getId(),
+                tokenHash,
+                ora.plus(durataValidita),
+                ora
+        );
+        tokens.saveAndFlush(nuovoToken);
+
+        return new DatiInvioAttivazione(account.getEmail(), account.getNome(), tokenInChiaro);
+    }
+
+    /**
+     * Mantiene la compatibilità per i chiamanti interni che usano l'evento AFTER_COMMIT.
+     */
+    public void generaEInviaAttivazione(AccountJpa account) {
+        DatiInvioAttivazione dati = preparaTokenAttivazione(account);
         eventPublisher.publishEvent(
-                new LinkAttivazioneDaInviareEvent(account.getEmail(), account.getNome(), tokenInChiaro));
+                new LinkAttivazioneDaInviareEvent(dati.emailDestinatario(), dati.nomeDestinatario(), dati.tokenInChiaro()));
     }
 
     /**
@@ -118,9 +179,9 @@ public class AttivazioneUtenzaService {
     }
 
     /**
-     * Consuma il token monouso in modo atomico (con lock pessimistico su token e account),
-     * rilegge l'orologio dopo l'acquisizione dei lock, imposta l'hash BCrypt della nuova
-     * password e attiva l'account.
+     * Consuma il token monouso in modo atomico (ordine lock: prima token, poi account),
+     * rilegge stato e scadenza sotto lock, imposta l'hash BCrypt della nuova password
+     * e attiva l'account.
      */
     public void attivaAccount(String tokenInChiaro, String nuovaPassword) {
         validaPassword(nuovaPassword);
@@ -131,7 +192,7 @@ public class AttivazioneUtenzaService {
 
         String hash = calcolaSha256(tokenInChiaro.strip());
 
-        // 1. Acquisisce i lock pessimistici su token e account prima di verificare la scadenza
+        // 1. Ordine dei lock: prima TokenAttivazioneJpa, poi AccountJpa
         TokenAttivazioneJpa token = tokens.findByTokenHashForUpdate(hash)
                 .orElseThrow(() -> new TokenAttivazioneNonValidoException("Link di attivazione non valido."));
 
@@ -154,9 +215,6 @@ public class AttivazioneUtenzaService {
         account.attivaConPassword(passwordEncoder.encode(nuovaPassword));
         tokens.saveAndFlush(token);
         accounts.saveAndFlush(account);
-    }
-
-    public record LinkAttivazioneDaInviareEvent(String emailDestinatario, String nomeDestinatario, String tokenInChiaro) {
     }
 
     private static void validaPassword(String password) {
