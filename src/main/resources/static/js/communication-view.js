@@ -22,11 +22,15 @@ function size(bytes) {
     return new Intl.NumberFormat('it-IT', { maximumFractionDigits: 1 }).format(bytes / (bytes < 1048576 ? 1024 : 1048576)) + (bytes < 1048576 ? ' KB' : ' MB');
 }
 
-export function communications(host, messages, { banco, formatDate, onConfirm }) {
+/**
+ * Disegna le comunicazioni. I pulsanti dei riscontri (Banco) e della conferma di ricezione (destinatari) si
+ * attivano con le opzioni conRiscontri e conConferma, quando esistono i rispettivi endpoint (#143, #144).
+ */
+export function communications(host, messages, { banco, formatDate, onConfirm, conRiscontri = false, conConferma = false }) {
     const rows = messages.map(message => {
         const card = el('article', null, 'message-entry');
         const header = el('header', null, 'message-heading');
-        const title = el('h3', message.titolo);
+        const title = el('h3', message.titolo || 'Comunicazione senza oggetto');
         const time = el('time', formatDate(message.inviataIl), 'message-date');
         time.dateTime = message.inviataIl;
         header.append(title, time);
@@ -71,7 +75,7 @@ export function communications(host, messages, { banco, formatDate, onConfirm })
             card.append(files);
         }
         const footer = el('div', null, 'message-actions');
-        if (banco) {
+        if (banco && conRiscontri) {
             const toggle = button('Mostra riscontri');
             const panel = el('section', null, 'receipt-panel');
             panel.id = 'receipts-' + message.id;
@@ -113,7 +117,7 @@ export function communications(host, messages, { banco, formatDate, onConfirm })
             });
             footer.append(toggle);
             card.append(footer, panel);
-        } else if (!message.confermataIl) {
+        } else if (!banco && conConferma && !message.confermataIl) {
             const confirm = button('Confermo la ricezione');
             confirm.classList.replace('btn-secondary', 'btn-primary');
             const status = el('p', null, 'picus-esito');
@@ -126,7 +130,7 @@ export function communications(host, messages, { banco, formatDate, onConfirm })
             footer.append(confirm, status);
             card.append(footer);
         }
-        return listRow(card, { text: [message.titolo, message.contenuto, formatDate(message.inviataIl), ...[...metadata.values()].map(f => f.nomeFile)].join(' '),
+        return listRow(card, { text: [message.titolo || '', message.contenuto, formatDate(message.inviataIl), ...[...metadata.values()].map(f => f.nomeFile)].join(' '),
             filters: { destinatari: audience, allegati: message.allegati.length ? 'Con allegati' : 'Senza allegati', ricezione: message.confermataIl ? 'Confermata' : 'Da confermare' } });
     });
     renderList(host, rows, { searchLabel: 'Cerca comunicazioni', placeholder: 'Oggetto, testo o nome allegato',
