@@ -1,6 +1,5 @@
 package it.unina.picus.comunicazioni.interno.dominio;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -27,19 +26,23 @@ public interface ArchivioComunicazioni {
     long contaDaConfermare(UUID destinatarioId);
 
     /**
-     * Elenca tutte le comunicazioni inviate, dalla più recente.
+     * Restituisce una pagina delle comunicazioni inviate che rispettano il filtro, dalla più recente. Il filtro
+     * sulla conferma di ricezione non vale per le inviate e viene ignorato.
      *
-     * @return le comunicazioni, senza il contenuto degli allegati
+     * @param filtro ricerca e pagina
+     * @return la pagina, senza il contenuto degli allegati
      */
-    List<ComunicazioneSalvata> elencoInviate();
+    PaginaComunicazioni elencoInviate(FiltroComunicazioni filtro);
 
     /**
-     * Elenca le comunicazioni ricevute da un account, dalla più recente, con la sua eventuale conferma.
+     * Restituisce una pagina delle comunicazioni ricevute da un account che rispettano il filtro, dalla più
+     * recente, ciascuna con la conferma di quell'account.
      *
      * @param destinatarioId account destinatario
-     * @return le comunicazioni ricevute
+     * @param filtro ricerca e pagina
+     * @return la pagina, senza il contenuto degli allegati
      */
-    List<ComunicazioneSalvata> elencoRicevute(UUID destinatarioId);
+    PaginaComunicazioni elencoRicevute(UUID destinatarioId, FiltroComunicazioni filtro);
 
     /**
      * Cerca una comunicazione.

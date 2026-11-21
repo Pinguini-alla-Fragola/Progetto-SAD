@@ -1,6 +1,5 @@
 package it.unina.picus.comunicazioni.interno.applicazione;
 
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -10,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import it.unina.picus.comunicazioni.interno.dominio.ArchivioComunicazioni;
 import it.unina.picus.comunicazioni.interno.dominio.ComunicazioneSalvata;
 import it.unina.picus.comunicazioni.interno.dominio.FileSalvato;
+import it.unina.picus.comunicazioni.interno.dominio.PaginaComunicazioni;
 import it.unina.picus.comunicazioni.interno.dominio.RegoleAccessoComunicazione;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 
@@ -28,15 +28,15 @@ class ServizioConsultazioneComunicazioni implements ConsultazioneComunicazioni {
     }
 
     @Override
-    public List<ComunicazioneSalvata> inviate(IdentitaAutenticata attore) {
+    public PaginaComunicazioni inviate(IdentitaAutenticata attore, RichiestaElenco richiesta) {
         RegoleAccessoComunicazione.verificaBanco(attore);
-        return archivio.elencoInviate();
+        return archivio.elencoInviate(NormalizzatoreFiltro.normalizza(richiesta));
     }
 
     @Override
-    public List<ComunicazioneSalvata> ricevute(IdentitaAutenticata attore) {
+    public PaginaComunicazioni ricevute(IdentitaAutenticata attore, RichiestaElenco richiesta) {
         RegoleAccessoComunicazione.verificaPossibileDestinatario(attore);
-        return archivio.elencoRicevute(attore.accountId());
+        return archivio.elencoRicevute(attore.accountId(), NormalizzatoreFiltro.normalizza(richiesta));
     }
 
     @Override

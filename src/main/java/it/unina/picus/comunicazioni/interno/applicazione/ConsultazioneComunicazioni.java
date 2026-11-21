@@ -1,10 +1,10 @@
 package it.unina.picus.comunicazioni.interno.applicazione;
 
-import java.util.List;
 import java.util.UUID;
 
 import it.unina.picus.comunicazioni.interno.dominio.ComunicazioneSalvata;
 import it.unina.picus.comunicazioni.interno.dominio.FileSalvato;
+import it.unina.picus.comunicazioni.interno.dominio.PaginaComunicazioni;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 
 /**
@@ -14,22 +14,27 @@ import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 public interface ConsultazioneComunicazioni {
 
     /**
-     * Elenca le comunicazioni inviate.
+     * Restituisce una pagina delle comunicazioni inviate, con ricerca e filtri su tutto lo storico.
      *
      * @param attore l'utente che fa la richiesta
-     * @return le comunicazioni, dalla più recente
+     * @param richiesta ricerca e pagina chieste
+     * @return la pagina, dalla più recente
      * @throws SecurityException se chi fa la richiesta non è il Banco
+     * @throws DatiComunicazioneNonValidiException se un valore della ricerca non è ammesso
      */
-    List<ComunicazioneSalvata> inviate(IdentitaAutenticata attore);
+    PaginaComunicazioni inviate(IdentitaAutenticata attore, RichiestaElenco richiesta);
 
     /**
-     * Elenca le comunicazioni ricevute dall'account della sessione.
+     * Restituisce una pagina delle comunicazioni ricevute dall'account della sessione, con ricerca e filtri su
+     * tutto lo storico.
      *
      * @param attore l'utente che fa la richiesta
-     * @return le comunicazioni ricevute, dalla più recente
+     * @param richiesta ricerca e pagina chieste
+     * @return la pagina, dalla più recente
      * @throws SecurityException se chi fa la richiesta non può ricevere comunicazioni
+     * @throws DatiComunicazioneNonValidiException se un valore della ricerca non è ammesso
      */
-    List<ComunicazioneSalvata> ricevute(IdentitaAutenticata attore);
+    PaginaComunicazioni ricevute(IdentitaAutenticata attore, RichiestaElenco richiesta);
 
     /**
      * Apre una comunicazione.

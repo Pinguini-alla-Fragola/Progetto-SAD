@@ -17,19 +17,25 @@ import org.springframework.transaction.annotation.Transactional;
 import it.unina.picus.comunicazioni.interno.dominio.ArchivioComunicazioni;
 import it.unina.picus.comunicazioni.interno.dominio.ComunicazioneSalvata;
 import it.unina.picus.comunicazioni.interno.dominio.FileSalvato;
+import it.unina.picus.comunicazioni.interno.dominio.FiltroComunicazioni;
 import it.unina.picus.comunicazioni.interno.dominio.InfoAllegato;
 import it.unina.picus.comunicazioni.interno.dominio.NuovaComunicazione;
 import it.unina.picus.comunicazioni.interno.dominio.NuovoAllegato;
+import it.unina.picus.comunicazioni.interno.dominio.PaginaComunicazioni;
 import it.unina.picus.comunicazioni.interno.dominio.TipoAllegato;
 import jakarta.persistence.EntityManager;
 
 /**
  * Salva e legge le comunicazioni, i destinatari e gli allegati nel database condiviso del monolite. Gli elenchi
- * leggono gli allegati senza il loro contenuto e con poche query per tutte le comunicazioni insieme.
+ * leggono una pagina alla volta, già filtrata dal database, e gli allegati senza il loro contenuto, con poche query
+ * per tutte le comunicazioni della pagina.
  */
 @Repository
 @Transactional
 class ArchivioComunicazioniJpa implements ArchivioComunicazioni {
+
+    /** Ordine stabile: a parità di istante decide l'identificativo, così una pagina non ripete né salta righe. */
+    private static final String ORDINE = " order by c.inviataIl desc, c.id";
 
     private final EntityManager entityManager;
 
@@ -61,21 +67,23 @@ class ArchivioComunicazioniJpa implements ArchivioComunicazioni {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ComunicazioneSalvata> elencoInviate() {
-        List<ComunicazioneJpa> comunicazioni = entityManager.createQuery(
-                "select c from ComunicazioneJpa c order by c.inviataIl desc, c.id", ComunicazioneJpa.class)
+    public PaginaComunicazioni elencoInviate(FiltroComunicazioni filtro) {
+        CondizioniElenco condizioni = CondizioniElenco.perInviate(filtro);
+        List<ComunicazioneJpa> comunicazioni = condizioni.parametri(entityManager.createQuery(
+                "select c " + condizioni.daDove() + ORDINE, ComunicazioneJpa.class))
+                .setFirstResult(filtro.primo()).setMaxResults(FiltroComunicazioni.DIMENSIONE_PAGINA)
                 .getResultList();
-        return componi(comunicazioni, Map.of());
+        return pagina(filtro, componi(comunicazioni, Map.of()), condizioni);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<ComunicazioneSalvata> elencoRicevute(UUID destinatarioId) {
-        List<Object[]> righe = entityManager.createQuery("""
-                select c, d.confermataIl from ComunicazioneJpa c, DestinatarioComunicazioneJpa d
-                where d.id.comunicazioneId = c.id and d.id.destinatarioId = :account
-                order by c.inviataIl desc, c.id
-                """, Object[].class).setParameter("account", destinatarioId).getResultList();
+    public PaginaComunicazioni elencoRicevute(UUID destinatarioId, FiltroComunicazioni filtro) {
+        CondizioniElenco condizioni = CondizioniElenco.perRicevute(destinatarioId, filtro);
+        List<Object[]> righe = condizioni.parametri(entityManager.createQuery(
+                "select c, d.confermataIl " + condizioni.daDove() + ORDINE, Object[].class))
+                .setFirstResult(filtro.primo()).setMaxResults(FiltroComunicazioni.DIMENSIONE_PAGINA)
+                .getResultList();
         List<ComunicazioneJpa> comunicazioni = new ArrayList<>();
         Map<UUID, Instant> conferme = new HashMap<>();
         for (Object[] riga : righe) {
@@ -83,7 +91,15 @@ class ArchivioComunicazioniJpa implements ArchivioComunicazioni {
             comunicazioni.add(comunicazione);
             conferme.put(comunicazione.getId(), (Instant) riga[1]);
         }
-        return componi(comunicazioni, conferme);
+        return pagina(filtro, componi(comunicazioni, conferme), condizioni);
+    }
+
+    /** Il totale serve alla pagina per sapere se ci sono altre comunicazioni oltre quelle mostrate. */
+    private PaginaComunicazioni pagina(FiltroComunicazioni filtro, List<ComunicazioneSalvata> elementi,
+            CondizioniElenco condizioni) {
+        long totale = condizioni.parametri(entityManager.createQuery(
+                "select count(c) " + condizioni.daDove(), Long.class)).getSingleResult();
+        return new PaginaComunicazioni(elementi, filtro.pagina(), FiltroComunicazioni.DIMENSIONE_PAGINA, totale);
     }
 
     @Override

@@ -13,12 +13,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.unina.picus.comunicazioni.interno.applicazione.ConsultazioneComunicazioni;
+import it.unina.picus.comunicazioni.interno.applicazione.RichiestaElenco;
 import it.unina.picus.comunicazioni.interno.dominio.ComunicazioneSalvata;
 import it.unina.picus.comunicazioni.interno.dominio.FileSalvato;
 import it.unina.picus.comunicazioni.interno.dominio.InfoAllegato;
+import it.unina.picus.comunicazioni.interno.dominio.PaginaComunicazioni;
 import it.unina.picus.comunicazioni.interno.dominio.TipoAllegato;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 
@@ -73,20 +76,47 @@ public class ConsultazioneComunicazioniController {
         }
     }
 
+    /**
+     * Una pagina di un elenco.
+     *
+     * @param elementi comunicazioni della pagina
+     * @param pagina numero della pagina, da zero
+     * @param dimensione numero massimo di comunicazioni per pagina
+     * @param totale comunicazioni trovate in tutto lo storico
+     */
+    public record PaginaJson(List<ComunicazioneJson> elementi, int pagina, int dimensione, long totale) {
+
+        static PaginaJson da(PaginaComunicazioni pagina) {
+            return new PaginaJson(pagina.elementi().stream().map(ComunicazioneJson::da).toList(), pagina.pagina(),
+                    pagina.dimensione(), pagina.totale());
+        }
+    }
+
     private final ConsultazioneComunicazioni consultazione;
 
     public ConsultazioneComunicazioniController(ConsultazioneComunicazioni consultazione) {
         this.consultazione = consultazione;
     }
 
+    /**
+     * Pagina delle comunicazioni inviate. Ricerca e filtri valgono su tutto lo storico: ogni parametro è
+     * facoltativo e un valore non ammesso riceve {@code 400} sul suo campo.
+     */
     @GetMapping("/inviate")
-    public List<ComunicazioneJson> inviate(IdentitaAutenticata attore) {
-        return consultazione.inviate(attore).stream().map(ComunicazioneJson::da).toList();
+    public PaginaJson inviate(IdentitaAutenticata attore, @RequestParam(required = false) String testo,
+            @RequestParam(required = false) String destinatari, @RequestParam(required = false) String allegati,
+            @RequestParam(required = false) String pagina) {
+        return PaginaJson.da(consultazione.inviate(attore,
+                new RichiestaElenco(testo, destinatari, allegati, null, pagina)));
     }
 
+    /** Pagina delle comunicazioni ricevute, con gli stessi parametri delle inviate più lo stato di ricezione. */
     @GetMapping("/ricevute")
-    public List<ComunicazioneJson> ricevute(IdentitaAutenticata attore) {
-        return consultazione.ricevute(attore).stream().map(ComunicazioneJson::da).toList();
+    public PaginaJson ricevute(IdentitaAutenticata attore, @RequestParam(required = false) String testo,
+            @RequestParam(required = false) String destinatari, @RequestParam(required = false) String allegati,
+            @RequestParam(required = false) String ricezione, @RequestParam(required = false) String pagina) {
+        return PaginaJson.da(consultazione.ricevute(attore,
+                new RichiestaElenco(testo, destinatari, allegati, ricezione, pagina)));
     }
 
     @GetMapping("/{comunicazioneId}")

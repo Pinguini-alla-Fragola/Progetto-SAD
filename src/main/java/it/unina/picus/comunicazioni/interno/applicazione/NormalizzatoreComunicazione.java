@@ -29,7 +29,7 @@ final class NormalizzatoreComunicazione {
     }
 
     /** Toglie gli spazi ai bordi, lasciando com'è il testo interno; un testo vuoto diventa {@code null}. */
-    private static String testo(String valore) {
+    static String testo(String valore) {
         if (valore == null) {
             return null;
         }
