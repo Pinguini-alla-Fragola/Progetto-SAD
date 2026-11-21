@@ -13,7 +13,7 @@ import java.util.function.Predicate;
  * file sia completo e si possa aprire (vedi {@link StrutturaAllegato}).
  */
 public enum TipoAllegato {
-    PDF("application/pdf", Set.of("pdf"), Firme.PDF, StrutturaAllegato::pdfCompleto),
+    PDF("application/pdf", Set.of("pdf"), Firme.PDF, StrutturaAllegato::pdfApribile),
     PNG("image/png", Set.of("png"), Firme.PNG, contenuto -> StrutturaAllegato.immagineLeggibile(contenuto, "png")),
     JPEG("image/jpeg", Set.of("jpg", "jpeg"), Firme.JPEG,
             contenuto -> StrutturaAllegato.immagineLeggibile(contenuto, "jpeg")),

@@ -8,6 +8,7 @@ import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
@@ -16,13 +17,20 @@ import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.MemoryCacheImageInputStream;
 
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.io.MemoryUsageSetting;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+
 /**
  * Controlla che un allegato sia completo e si possa aprire, non solo che inizi con i byte del suo formato. Un file
  * troncato o rovinato viene rifiutato all'invio invece di arrivare ai destinatari.
  *
  * <p>I controlli restano leggeri anche con un file costruito apposta: le immagini vengono lette fino in fondo ma
  * ridotte, così la memoria usata non dipende dalle dimensioni dichiarate, e oltre {@value #MASSIMO_PIXEL} pixel
- * vengono rifiutate senza leggerle. Si legge tutto in memoria, mai su file temporanei.
+ * vengono rifiutate senza leggerle. I PDF li apre Apache PDFBox con un limite di memoria. Si legge tutto in
+ * memoria, mai su file temporanei.
  */
 final class StrutturaAllegato {
 
@@ -32,21 +40,66 @@ final class StrutturaAllegato {
     private static final long PIXEL_LETTI = 1_000_000L;
     /** Un PDF finisce con «startxref», la posizione dell'indice e «%%EOF», più al massimo qualche byte vuoto. */
     private static final int CODA_PDF = 1024;
-    private static final Pattern FINE_PDF = Pattern.compile("startxref\\s+\\d+\\s+%%EOF\\s*$");
+    private static final Pattern FINE_PDF = Pattern.compile("startxref\\s+(\\d{1,10})\\s+%%EOF\\s*$");
+    /** All'inizio dell'indice c'è la parola «xref», oppure un oggetto («12 0 obj») se l'indice è compresso. */
+    private static final Pattern INIZIO_INDICE = Pattern.compile("\\A\\s*(xref|\\d+\\s+\\d+\\s+obj)");
+    private static final int INIZIO_INDICE_BYTE = 64;
+    /** Memoria massima che PDFBox può usare per un allegato; i file restano sempre in memoria, mai su disco. */
+    private static final long MEMORIA_PDF_BYTE = 32L * 1024 * 1024;
 
     private StrutturaAllegato() {
     }
 
     /**
-     * Un PDF completo termina con il rimando al suo indice e con {@code %%EOF}: un file troncato no.
+     * Un PDF è valido se supera tre controlli, dal più economico al più costoso:
+     * <ol>
+     * <li>finisce con {@code startxref}, la posizione dell'indice e {@code %%EOF}: un file troncato no;</li>
+     * <li>quella posizione è dentro il file e lì inizia davvero l'indice, come la cerca un lettore PDF;</li>
+     * <li>PDFBox lo apre e trova almeno una pagina, con le sue dimensioni.</li>
+     * </ol>
+     * Del documento si leggono solo la struttura e l'elenco delle pagine, mai il contenuto: niente testo, immagini,
+     * caratteri o codice.
      *
      * @param contenuto file che inizia con la firma PDF
-     * @return vero se il file ha la parte finale prevista dal formato
+     * @return vero se il PDF si apre e ha almeno una pagina
      */
-    static boolean pdfCompleto(byte[] contenuto) {
+    static boolean pdfApribile(byte[] contenuto) {
+        return indiceTrovato(contenuto) && pagineLeggibili(contenuto);
+    }
+
+    private static boolean indiceTrovato(byte[] contenuto) {
         int inizio = Math.max(0, contenuto.length - CODA_PDF);
         String coda = new String(contenuto, inizio, contenuto.length - inizio, StandardCharsets.ISO_8859_1);
-        return FINE_PDF.matcher(coda).find();
+        Matcher fine = FINE_PDF.matcher(coda);
+        if (!fine.find()) {
+            return false;
+        }
+        long posizione = Long.parseLong(fine.group(1));
+        if (posizione >= contenuto.length) {
+            return false;
+        }
+        int lunghezza = (int) Math.min(INIZIO_INDICE_BYTE, contenuto.length - posizione);
+        String indice = new String(contenuto, (int) posizione, lunghezza, StandardCharsets.ISO_8859_1);
+        return INIZIO_INDICE.matcher(indice).lookingAt();
+    }
+
+    private static boolean pagineLeggibili(byte[] contenuto) {
+        try (PDDocument documento = Loader.loadPDF(contenuto, "", null, null,
+                MemoryUsageSetting.setupMainMemoryOnly(MEMORIA_PDF_BYTE).streamCache)) {
+            if (documento.getNumberOfPages() == 0) {
+                return false;
+            }
+            for (PDPage pagina : documento.getPages()) {
+                PDRectangle dimensioni = pagina.getMediaBox();
+                if (dimensioni.getWidth() <= 0 || dimensioni.getHeight() <= 0) {
+                    return false;
+                }
+            }
+            return true;
+        } catch (IOException | RuntimeException e) {
+            // PDF illeggibile, protetto da password o fuori dal limite di memoria: per l'invio conta che non si apre.
+            return false;
+        }
     }
 
     /**
