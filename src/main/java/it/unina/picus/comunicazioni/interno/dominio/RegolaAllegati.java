@@ -4,7 +4,8 @@ import java.util.Optional;
 
 /**
  * Controlla gli allegati: al massimo {@value #MASSIMO_ALLEGATI} file, ciascuno non vuoto e non più grande di
- * 5 MB, con un nome valido e di un tipo ammesso, riconosciuto dal contenuto e coerente con l'estensione.
+ * 5 MB, con un nome valido e di un tipo ammesso, riconosciuto dal contenuto e coerente con l'estensione, e integro:
+ * un file troncato o rovinato non si può aprire e viene rifiutato.
  */
 public final class RegolaAllegati implements RegolaComunicazione {
 
@@ -33,10 +34,14 @@ public final class RegolaAllegati implements RegolaComunicazione {
         if (allegato.dimensione() > DIMENSIONE_MASSIMA_BYTE) {
             return Optional.of("Ogni allegato può pesare al massimo 5 MB");
         }
-        boolean ammesso = TipoAllegato.riconosci(allegato.contenuto())
-                .filter(tipo -> tipo.ammette(allegato.nomeFile())).isPresent();
-        return ammesso ? Optional.empty()
-                : Optional.of("Si possono allegare solo PDF, immagini PNG o JPEG e file di testo");
+        Optional<TipoAllegato> tipo = TipoAllegato.riconosci(allegato.contenuto())
+                .filter(riconosciuto -> riconosciuto.ammette(allegato.nomeFile()));
+        if (tipo.isEmpty()) {
+            return Optional.of("Si possono allegare solo PDF, immagini PNG o JPEG e file di testo");
+        }
+        // Il controllo più costoso per ultimo, solo su un file già riconosciuto e della dimensione giusta.
+        return tipo.get().integro(allegato.contenuto()) ? Optional.empty()
+                : Optional.of("Un allegato è danneggiato o incompleto e non si può aprire");
     }
 
     private static boolean nomeValido(String nome) {
