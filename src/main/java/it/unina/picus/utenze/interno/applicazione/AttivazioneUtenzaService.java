@@ -19,10 +19,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 
-import it.unina.picus.shared.InvioEmail;
 import it.unina.picus.utenze.api.UtenzeApi.StatoUtenza;
 import it.unina.picus.utenze.interno.persistenza.AccountJpa;
 import it.unina.picus.utenze.interno.persistenza.AccountRepository;
@@ -45,7 +42,6 @@ public class AttivazioneUtenzaService {
     private final AccountRepository accounts;
     private final TokenAttivazioneRepository tokens;
     private final PasswordEncoder passwordEncoder;
-    private final InvioEmail invioEmail;
     private final ApplicationEventPublisher eventPublisher;
     private final Duration durataValidita;
     private final Clock clock;
@@ -55,24 +51,21 @@ public class AttivazioneUtenzaService {
             AccountRepository accounts,
             TokenAttivazioneRepository tokens,
             PasswordEncoder passwordEncoder,
-            InvioEmail invioEmail,
             ApplicationEventPublisher eventPublisher,
             @Value("${picus.utenze.attivazione.validita:PT48H}") Duration durataValidita) {
-        this(accounts, tokens, passwordEncoder, invioEmail, eventPublisher, durataValidita, Clock.systemUTC());
+        this(accounts, tokens, passwordEncoder, eventPublisher, durataValidita, Clock.systemUTC());
     }
 
     AttivazioneUtenzaService(
             AccountRepository accounts,
             TokenAttivazioneRepository tokens,
             PasswordEncoder passwordEncoder,
-            InvioEmail invioEmail,
             ApplicationEventPublisher eventPublisher,
             Duration durataValidita,
             Clock clock) {
         this.accounts = Objects.requireNonNull(accounts);
         this.tokens = Objects.requireNonNull(tokens);
         this.passwordEncoder = Objects.requireNonNull(passwordEncoder);
-        this.invioEmail = Objects.requireNonNull(invioEmail);
         this.eventPublisher = Objects.requireNonNull(eventPublisher);
         this.durataValidita = Objects.requireNonNull(durataValidita);
         this.clock = Objects.requireNonNull(clock);
@@ -106,11 +99,6 @@ public class AttivazioneUtenzaService {
 
         eventPublisher.publishEvent(
                 new LinkAttivazioneDaInviareEvent(account.getEmail(), account.getNome(), tokenInChiaro));
-    }
-
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
-    public void onLinkAttivazioneDaInviare(LinkAttivazioneDaInviareEvent evento) {
-        invioEmail.inviaLinkAttivazione(evento.emailDestinatario(), evento.nomeDestinatario(), evento.tokenInChiaro());
     }
 
     /**
@@ -168,7 +156,7 @@ public class AttivazioneUtenzaService {
         accounts.saveAndFlush(account);
     }
 
-    record LinkAttivazioneDaInviareEvent(String emailDestinatario, String nomeDestinatario, String tokenInChiaro) {
+    public record LinkAttivazioneDaInviareEvent(String emailDestinatario, String nomeDestinatario, String tokenInChiaro) {
     }
 
     private static void validaPassword(String password) {

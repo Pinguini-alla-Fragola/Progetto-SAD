@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import it.unina.picus.shared.InvioEmail;
 import it.unina.picus.utenze.interno.applicazione.DatiOptNonValidiException;
 import it.unina.picus.utenze.interno.applicazione.RegistrazioneOptService;
 import it.unina.picus.utenze.interno.applicazione.RegistrazioneOptService.ComandoRegistrazioneOpt;
@@ -21,9 +22,13 @@ import it.unina.picus.utenze.interno.applicazione.RegistrazioneOptService.Comand
 class RegistrazioneOptController {
 
     private final Optional<RegistrazioneOptService> registrazioneService;
+    private final Optional<InvioEmail> invioEmail;
 
-    RegistrazioneOptController(Optional<RegistrazioneOptService> registrazioneService) {
+    RegistrazioneOptController(
+            Optional<RegistrazioneOptService> registrazioneService,
+            Optional<InvioEmail> invioEmail) {
         this.registrazioneService = registrazioneService;
+        this.invioEmail = invioEmail;
     }
 
     record RichiestaCreazioneOpt(
@@ -54,10 +59,16 @@ class RegistrazioneOptController {
                     body.codiceFiscale(),
                     body.email()
             ));
+
+            boolean simulato = invioEmail.map(InvioEmail::isSimulato).orElse(true);
+            String messaggio = simulato
+                    ? "Organizzazione partner registrata (modalità demo/simulata: nessun server SMTP configurato, email non inviata)."
+                    : "Organizzazione partner registrata. Email di attivazione inviata.";
+
             return ResponseEntity.created(URI.create("/api/opt/" + id))
                     .body(Map.of(
                             "accountId", id,
-                            "messaggio", "Organizzazione partner registrata. Email di attivazione inviata."
+                            "messaggio", messaggio
                     ));
 
         } catch (DatiOptNonValidiException ex) {

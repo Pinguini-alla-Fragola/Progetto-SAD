@@ -19,7 +19,7 @@ import java.nio.charset.StandardCharsets;
 
 @Component
 @Profile("!dev & !test")
-@ConditionalOnExpression("!'${spring.mail.host:}'.isBlank()")
+@ConditionalOnExpression("!'${spring.mail.host:}'.trim().isEmpty()")
 public class InvioEmailSmtpAdapter implements InvioEmail {
 
     private static final Logger LOG = LoggerFactory.getLogger(InvioEmailSmtpAdapter.class);
