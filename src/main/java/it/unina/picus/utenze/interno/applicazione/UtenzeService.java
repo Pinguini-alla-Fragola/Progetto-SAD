@@ -1,31 +1,38 @@
 package it.unina.picus.utenze.interno.applicazione;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.Set;
+import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.annotation.Propagation;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.LockModeType;
-import it.unina.picus.utenze.interno.persistenza.ProfiloOptJpa;
-import it.unina.picus.utenze.interno.persistenza.ProfiloOperatoreJpa;
-import it.unina.picus.utenze.interno.persistenza.OperatoreMisuraJpa;
+import org.springframework.transaction.annotation.Transactional;
 
+import it.unina.picus.utenze.api.OperazioneUtenzaNonConsentitaException;
+import it.unina.picus.utenze.api.UtenzaNonTrovataException;
 import it.unina.picus.utenze.api.UtenzeApi;
 import it.unina.picus.utenze.interno.persistenza.AccountJpa;
 import it.unina.picus.utenze.interno.persistenza.AccountRepository;
+import it.unina.picus.utenze.interno.persistenza.OperatoreMisuraJpa;
+import it.unina.picus.utenze.interno.persistenza.ProfiloOperatoreJpa;
 import it.unina.picus.utenze.interno.persistenza.ProfiloOperatoreRepository;
+import it.unina.picus.utenze.interno.persistenza.ProfiloOptJpa;
 import it.unina.picus.utenze.interno.persistenza.ProfiloOptRepository;
+import it.unina.picus.utenze.interno.persistenza.TokenAttivazioneRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 
 /**
- * Verifica delle credenziali e delle sessioni.
+ * Verifica delle credenziali, delle sessioni e gestione dello stato delle utenze.
  *
  * <p>Esito unico per l'esterno: credenziali errate, email sconosciuta e account non attivo sono
  * indistinguibili (nessuna enumerazione degli account). Il limite sui tentativi è applicato a monte,
@@ -44,21 +51,74 @@ class UtenzeService implements UtenzeApi {
     private final AccountRepository accounts;
     private final ProfiloOptRepository profiliOpt;
     private final ProfiloOperatoreRepository profiliOperatore;
+    private final TokenAttivazioneRepository tokensAttivazione;
     private final PasswordEncoder encoder;
     private final EntityManager em;
+    private final Clock clock;
     /** Hash fittizio contro cui confrontare quando l'account non può essere verificato. */
     private final String hashFittizio;
 
+    @Autowired
     UtenzeService(AccountRepository accounts, ProfiloOptRepository profiliOpt,
-                  ProfiloOperatoreRepository profiliOperatore, PasswordEncoder encoder, EntityManager em) {
+                  ProfiloOperatoreRepository profiliOperatore,
+                  TokenAttivazioneRepository tokensAttivazione,
+                  PasswordEncoder encoder, EntityManager em) {
+        this(accounts, profiliOpt, profiliOperatore, tokensAttivazione, encoder, em, Clock.systemUTC());
+    }
+
+    UtenzeService(AccountRepository accounts, ProfiloOptRepository profiliOpt,
+                  ProfiloOperatoreRepository profiliOperatore,
+                  TokenAttivazioneRepository tokensAttivazione,
+                  PasswordEncoder encoder, EntityManager em, Clock clock) {
         this.accounts = accounts;
         this.profiliOpt = profiliOpt;
         this.profiliOperatore = profiliOperatore;
+        this.tokensAttivazione = tokensAttivazione;
         this.encoder = encoder;
         this.em = em;
+        this.clock = Objects.requireNonNull(clock);
         this.hashFittizio = encoder.encode(UUID.randomUUID().toString());
     }
 
+    @Override
+    public void revocaUtenzaOpt(UUID optAccountId) {
+        revocaAccount(optAccountId, RuoloUtente.OPT,
+                "La revoca manuale è consentita solo per account con ruolo OPT.");
+    }
+
+    @Override
+    public void revocaUtenzaOperatore(UUID operatoreAccountId) {
+        revocaAccount(operatoreAccountId, RuoloUtente.OPERATORE,
+                "La revoca manuale è consentita solo per account con ruolo OPERATORE.");
+    }
+
+    private void revocaAccount(UUID accountId, RuoloUtente ruoloAtteso, String messaggioErroreRuolo) {
+        if (accountId == null) {
+            throw new UtenzaNonTrovataException("Identificativo account obbligatorio.");
+        }
+
+        AccountJpa account = accounts.findByIdForUpdate(accountId)
+                .orElseThrow(() -> new UtenzaNonTrovataException("Account non trovato."));
+
+        if (!ruoloAtteso.name().equals(account.getRuolo())) {
+            throw new OperazioneUtenzaNonConsentitaException(messaggioErroreRuolo);
+        }
+
+        if (StatoUtenza.REVOCATO.name().equals(account.getStato())) {
+            throw new OperazioneUtenzaNonConsentitaException("L'account è già stato revocato.");
+        }
+
+        account.revoca();
+        accounts.saveAndFlush(account);
+
+        tokensAttivazione.invalidaTokenAttiviPerAccount(account.getId(), Instant.now(clock));
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public List<AccountSintetico> elencoAccountPerRuolo(RuoloUtente ruolo) {
+        return accounts.findByRuolo(ruolo.name()).stream()
+                .map(UtenzeService::sintetico).toList();
+    }
     @Override
     public Optional<IdentitaAutenticata> verificaCredenziali(String email, String password) {
         String chiave = normalizzaEmail(email);

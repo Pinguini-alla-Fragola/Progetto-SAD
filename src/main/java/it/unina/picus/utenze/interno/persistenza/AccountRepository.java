@@ -22,7 +22,7 @@ public interface AccountRepository extends JpaRepository<AccountJpa, UUID> {
     boolean existsByEmailIgnoreCase(String email);
 
     List<AccountJpa> findByRuoloAndStato(String ruolo, String stato);
-
+    List<AccountJpa> findByRuolo(String ruolo);
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("update AccountJpa a set a.passwordHash = :hash where a.id = :id")
     int aggiornaHash(@Param("id") UUID id, @Param("hash") String hash);

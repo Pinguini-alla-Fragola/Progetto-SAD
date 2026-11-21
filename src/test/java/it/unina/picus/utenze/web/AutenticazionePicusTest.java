@@ -189,7 +189,19 @@ class AutenticazionePicusTest {
     normalizzata come fa UtenzeService. Conta le chiamate a verificaCredenziali.
      */
     private static final class UtenzeFinte implements UtenzeApi {
+        @Override
+        public void revocaUtenzaOpt(UUID optAccountId) {
+            throw new UnsupportedOperationException("Non usato in questo test");
+        }
 
+        @Override
+        public List<AccountSintetico> elencoAccountPerRuolo(RuoloUtente ruolo) {
+            return List.of();
+        }
+        @Override
+        public void revocaUtenzaOperatore(UUID operatoreAccountId) {
+            throw new UnsupportedOperationException("Non usato in questo test");
+        }
         private final String passwordValida;
         private final Map<String, IdentitaAutenticata> attivi = new HashMap<>();
         int chiamate;

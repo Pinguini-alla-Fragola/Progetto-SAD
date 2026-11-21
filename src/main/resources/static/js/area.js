@@ -48,12 +48,57 @@ for (const lista of document.querySelectorAll('.picus-list[data-funzione-inattiv
     renderList(lista, [], { empty: '' });
     for (const controllo of lista.querySelectorAll('input, select, button')) controllo.disabled = true;
 }
+
 const utenti = byId('account');
-if (utenti) renderList(utenti, Array.from(utenti.children), {
-    searchLabel: 'Cerca account', placeholder: 'Nome visualizzato',
-    filters: [{ key: 'ruolo', label: 'Ruolo' }, { key: 'stato', label: 'Stato' }],
-    columns: ['Account', 'Email', 'Comune', 'Stato', 'Azioni'], empty: 'Nessun account attivo.'
-});
+if (utenti) {
+    const righeUtenti = Array.from(utenti.children);
+    const opzioniUtenti = {
+        searchLabel: 'Cerca account', placeholder: 'Nome visualizzato',
+        filters: [{ key: 'ruolo', label: 'Ruolo' }, { key: 'stato', label: 'Stato' }],
+        columns: ['Account', 'Email', 'Comune', 'Stato', 'Azioni'], empty: 'Nessun account registrato.'
+    };
+
+    utenti.addEventListener('click', async (event) => {
+        const button = event.target.closest('button[data-revoca-opt], button[data-revoca-operatore]');
+        if (!button || button.disabled) return;
+        const isOperatore = button.hasAttribute('data-revoca-operatore');
+        const riga = button.closest('.account-row');
+        const id = riga?.dataset.id;
+        const nome = riga?.dataset.nome || (isOperatore ? 'questo operatore' : 'questa organizzazione');
+        if (!id) return;
+
+        const messaggioConferma = isOperatore
+            ? `Confermi la revoca dell'accesso per l'operatore "${nome}"?\nL'operatore non potrà più accedere, ma le schede già inviate resteranno consultabili.`
+            : `Confermi la revoca dell'accesso per "${nome}"?\nL'organizzazione non potrà più accedere, ma i dati già registrati resteranno consultabili.`;
+
+        if (!window.confirm(messaggioConferma)) {
+            return;
+        }
+
+        const endpoint = isOperatore
+            ? `/api/operatori/${encodeURIComponent(id)}/revoca`
+            : `/api/opt/${encodeURIComponent(id)}/revoca`;
+
+        const esito = byId('area-esito');
+        button.disabled = true;
+        esito.textContent = '';
+        try {
+            const risultato = await api(endpoint, { method: 'POST' });
+            riga.dataset.stato = 'REVOCATO';
+            const statoLabel = riga.querySelector('.status-label');
+            if (statoLabel) statoLabel.textContent = 'Revocato';
+            button.textContent = 'Revocato';
+            renderList(utenti, righeUtenti, opzioniUtenti);
+            esito.textContent = risultato?.messaggio || `Accesso revocato per ${nome}.`;
+        } catch (causa) {
+            button.disabled = false;
+            esito.textContent = causa?.message || 'Impossibile completare la revoca. Riprova.';
+        }
+    });
+
+    renderList(utenti, righeUtenti, opzioniUtenti);
+}
+
 for (const contenitore of document.querySelectorAll('#voci-conteggi, #voci-scheda')) {
     const riga = document.createElement('div');
     riga.className = 'count-row';

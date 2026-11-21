@@ -60,6 +60,35 @@ public interface UtenzeApi {
     List<ProfiloErogatore> elencoOptAttive(Set<UUID> accountIds);
 
     /**
+     * Elenca tutti gli account di un ruolo in qualsiasi stato (attivo, in attesa, revocato),
+     * utile per le viste amministrative e la consultazione storica.
+     *
+     * @param ruolo categoria degli account da cercare
+     * @return account della categoria, eventualmente nessuno
+     */
+    List<AccountSintetico> elencoAccountPerRuolo(RuoloUtente ruolo);
+
+    /**
+     * Revoca manualmente l'account organizzativo di una OPT, impedendone futuri accessi e
+     * invalidando eventuali link di attivazione ancora pendenti senza eliminare i dati storici.
+     *
+     * @param optAccountId identificativo dell'account OPT da revocare
+     * @throws UtenzaNonTrovataException se l'account non esiste
+     * @throws OperazioneUtenzaNonConsentitaException se l'account non è una OPT o è già revocato
+     */
+    void revocaUtenzaOpt(UUID optAccountId);
+
+    /**
+     * Revoca manualmente l'account personale di un operatore interno o esterno pagato dal Banco,
+     * impedendone futuri accessi e invalidando eventuali link di attivazione o recupero pendenti
+     * senza eliminare le schede già inviate.
+     *
+     * @param operatoreAccountId identificativo dell'account Operatore da revocare
+     * @throws UtenzaNonTrovataException se l'account non esiste
+     * @throws OperazioneUtenzaNonConsentitaException se l'account non è un Operatore o è già revocato
+     */
+    void revocaUtenzaOperatore(UUID operatoreAccountId);
+    /**
      * Rilegge il profilo attivo e la competenza personale, bloccandoli fino al commit chiamante.
      * Richiede una transazione di scrittura già aperta. L'ordine è account, profilo, competenza;
      * la revoca o la modifica concorrente non può superare questa verifica prima del commit.

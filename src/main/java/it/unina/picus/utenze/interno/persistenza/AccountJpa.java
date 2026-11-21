@@ -35,7 +35,16 @@ public class AccountJpa {
         account.passwordHash = null;
         return account;
     }
-
+    public void revoca() {
+        if (StatoUtenza.REVOCATO.name().equals(this.stato)) {
+            throw new IllegalStateException("L'account è già stato revocato");
+        }
+        if (!StatoUtenza.ATTIVO.name().equals(this.stato)
+                && !StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(this.stato)) {
+            throw new IllegalStateException("Stato utenza non revocabile: " + this.stato);
+        }
+        this.stato = StatoUtenza.REVOCATO.name();
+    }
     public void attivaConPassword(String nuovoPasswordHash) {
         if (!StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(this.stato)) {
             throw new IllegalStateException("Solo un account in attesa di attivazione può essere attivato");
