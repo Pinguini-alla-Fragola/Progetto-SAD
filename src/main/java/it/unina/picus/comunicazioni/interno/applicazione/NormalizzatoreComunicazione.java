@@ -2,10 +2,12 @@ package it.unina.picus.comunicazioni.interno.applicazione;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
 import it.unina.picus.comunicazioni.api.ComunicazioniApi.TipoDestinatari;
+import it.unina.picus.comunicazioni.interno.dominio.AllegatoRicevuto;
 import it.unina.picus.comunicazioni.interno.dominio.BozzaComunicazione;
 import it.unina.picus.comunicazioni.interno.dominio.LetturaGruppo;
 import it.unina.picus.comunicazioni.interno.dominio.RegolaDestinatari;
@@ -18,12 +20,12 @@ final class NormalizzatoreComunicazione {
 
     static BozzaComunicazione normalizza(ComandoInvioComunicazione comando) {
         if (comando == null) {
-            return new BozzaComunicazione(null, null, null, Set.of(), LetturaGruppo.LEGGIBILE);
+            return new BozzaComunicazione(null, null, null, Set.of(), LetturaGruppo.LEGGIBILE, List.of());
         }
         Set<UUID> gruppo = new HashSet<>();
         LetturaGruppo lettura = leggiGruppo(comando.gruppo(), gruppo);
         return new BozzaComunicazione(testo(comando.titolo()), testo(comando.contenuto()),
-                tipo(comando.destinatariTipo()), gruppo, lettura);
+                tipo(comando.destinatariTipo()), gruppo, lettura, allegati(comando.allegati()));
     }
 
     /** Toglie gli spazi ai bordi, lasciando com'è il testo interno; un testo vuoto diventa {@code null}. */
@@ -35,7 +37,12 @@ final class NormalizzatoreComunicazione {
         return ripulito.isEmpty() ? null : ripulito;
     }
 
-    private static TipoDestinatari tipo(String valore) {
+    /**
+     * Converte il nome del tipo di destinatari.
+     *
+     * @return il tipo, oppure {@code null} se manca o non esiste
+     */
+    static TipoDestinatari tipo(String valore) {
         String nome = testo(valore);
         if (nome == null) {
             return null;
@@ -66,5 +73,23 @@ final class NormalizzatoreComunicazione {
             }
         }
         return LetturaGruppo.LEGGIBILE;
+    }
+
+    /** Tiene del nome del file solo l'ultima parte: un nome come {@code ../../segreto.txt} diventa {@code segreto.txt}. */
+    private static List<AllegatoRicevuto> allegati(List<AllegatoRicevuto> allegati) {
+        if (allegati == null) {
+            return List.of();
+        }
+        return allegati.stream().filter(Objects::nonNull)
+                .map(allegato -> new AllegatoRicevuto(nomeFile(allegato.nomeFile()), allegato.contenuto()))
+                .toList();
+    }
+
+    private static String nomeFile(String nome) {
+        if (nome == null) {
+            return null;
+        }
+        int separatore = Math.max(nome.lastIndexOf('/'), nome.lastIndexOf('\\'));
+        return testo(nome.substring(separatore + 1));
     }
 }
