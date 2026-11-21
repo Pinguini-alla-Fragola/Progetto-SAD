@@ -1,5 +1,7 @@
 package it.unina.picus.comunicazioni.interno.applicazione;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -28,6 +30,18 @@ class DestinatariComunicazione {
     }
 
     /**
+     * Restituisce gli account attivi della platea, in ordine di nome, per permettere al Banco di scegliere il gruppo.
+     *
+     * @param platea ruolo degli account cercati
+     * @return gli account attivi
+     */
+    List<AccountSintetico> attivi(PlateaDestinatari platea) {
+        return utenze.elencoAccountAttivi(platea.ruolo()).stream()
+                .sorted(Comparator.comparing(AccountSintetico::nomeVisualizzato, String.CASE_INSENSITIVE_ORDER))
+                .toList();
+    }
+
+    /**
      * Restituisce i destinatari della bozza, già controllata dalle regole.
      *
      * @param bozza comunicazione con un tipo di destinatari valido
@@ -36,8 +50,7 @@ class DestinatariComunicazione {
      */
     Set<UUID> risolvi(BozzaComunicazione bozza, Errori errori) {
         PlateaDestinatari platea = PlateaDestinatari.di(bozza.tipo());
-        Set<UUID> attivi = utenze.elencoAccountAttivi(platea.ruolo()).stream()
-                .map(AccountSintetico::id).collect(Collectors.toUnmodifiableSet());
+        Set<UUID> attivi = attivi(platea).stream().map(AccountSintetico::id).collect(Collectors.toUnmodifiableSet());
         if (!platea.gruppo()) {
             if (attivi.isEmpty()) {
                 errori.aggiungi(CampoComunicazione.DESTINATARI_TIPO,
