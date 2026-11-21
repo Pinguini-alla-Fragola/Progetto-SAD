@@ -19,6 +19,10 @@ spring:
     hibernate:
       ddl-auto: validate
 server:
+  tomcat:
+    # Il modulo delle comunicazioni (#141) ha una parte con i campi più una per file (al massimo 5): con 10 un file
+    # in più riceve ancora il messaggio sul numero di allegati, e nessuna richiesta può arrivare con centinaia di parti.
+    max-part-count: 10
   servlet:
     session:
       timeout: 30m

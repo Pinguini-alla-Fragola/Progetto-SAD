@@ -14,4 +14,15 @@ import it.unina.picus.comunicazioni.interno.dominio.AllegatoRicevuto;
  * @param allegati file allegati; vuoto se non ce ne sono
  */
 public record ComandoInvioComunicazione(String titolo, String contenuto, String destinatariTipo, List<String> gruppo,
-        List<AllegatoRicevuto> allegati) {}
+        List<AllegatoRicevuto> allegati) {
+
+    /**
+     * Stessa richiesta, con i file allegati.
+     *
+     * @param file allegati ricevuti
+     * @return un nuovo comando con gli stessi campi e questi allegati
+     */
+    public ComandoInvioComunicazione conAllegati(List<AllegatoRicevuto> file) {
+        return new ComandoInvioComunicazione(titolo, contenuto, destinatariTipo, gruppo, file);
+    }
+}

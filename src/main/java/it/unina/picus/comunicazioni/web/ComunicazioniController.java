@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -102,6 +103,9 @@ public class ComunicazioniController {
      */
     public record DaConfermareJson(long daConfermare) {}
 
+    /** Nome della parte JSON che porta i campi del modulo nell'invio con allegati. */
+    static final String PARTE_DATI = "dati";
+
     private final InvioComunicazioni invio;
     private final NotificheComunicazioni notifiche;
 
@@ -119,18 +123,16 @@ public class ComunicazioniController {
     }
 
     /**
-     * Invio dal modulo della pagina, con eventuali allegati. Il numero di file si controlla prima di leggerne il
-     * contenuto. Risponde {@code 201}.
+     * Invio dal modulo della pagina, con eventuali allegati. I campi arrivano tutti insieme nella parte JSON
+     * {@code dati}, con la stessa forma e gli stessi controlli dell'invio senza allegati: così anche un gruppo di
+     * 1000 account occupa una sola parte della richiesta, e le parti restano al massimo una più i file. Il numero
+     * di file si controlla prima di leggerne il contenuto. Risponde {@code 201}.
      */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ComunicazioneInviataJson> inviaConAllegati(IdentitaAutenticata attore,
-            @RequestParam(required = false) String titolo,
-            @RequestParam(required = false) String contenuto,
-            @RequestParam(required = false) String destinatariTipo,
-            @RequestParam(required = false) List<String> gruppo,
-            @RequestParam(name = CampoComunicazione.ALLEGATI, required = false) List<MultipartFile> files) {
-        ComandoInvioComunicazione comando = new ComandoInvioComunicazione(titolo, contenuto, destinatariTipo,
-                gruppo, allegati(files));
+            @RequestPart(PARTE_DATI) NuovaComunicazioneJson dati,
+            @RequestPart(name = CampoComunicazione.ALLEGATI, required = false) List<MultipartFile> files) {
+        ComandoInvioComunicazione comando = dati.comando().conAllegati(allegati(files));
         ComunicazioneInviata inviata = invio.invia(attore, comando);
         return ResponseEntity.status(HttpStatus.CREATED).body(ComunicazioneInviataJson.da(inviata));
     }
