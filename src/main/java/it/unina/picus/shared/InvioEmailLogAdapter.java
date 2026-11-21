@@ -6,8 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
-@Component
-@ConditionalOnExpression("'${spring.mail.host:}'.trim().isEmpty() or '${spring.profiles.active:}'.contains('dev') or '${spring.profiles.active:}'.contains('test')")
+
 public class InvioEmailLogAdapter implements InvioEmail {
 
     private static final Logger LOG = LoggerFactory.getLogger(InvioEmailLogAdapter.class);
