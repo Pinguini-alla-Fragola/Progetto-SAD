@@ -58,8 +58,8 @@ class AreaController {
         modello.addAttribute("utente", account);
 
         if (identita.ruolo() == RuoloUtente.BANCO) {
-            modello.addAttribute("optAttive", utenze.elencoAccountAttivi(RuoloUtente.OPT));
-            modello.addAttribute("operatoriAttivi", utenze.elencoAccountAttivi(RuoloUtente.OPERATORE));
+            modello.addAttribute("optElenco", utenze.elencoAccountPerRuolo(RuoloUtente.OPT));
+            modello.addAttribute("operatoriElenco", utenze.elencoAccountPerRuolo(RuoloUtente.OPERATORE));
         }
         return vistaArea(identita.ruolo());
     }

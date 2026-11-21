@@ -7,12 +7,16 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.unina.picus.shared.InvioEmail;
+import it.unina.picus.utenze.api.OperazioneUtenzaNonConsentitaException;
+import it.unina.picus.utenze.api.UtenzaNonTrovataException;
+import it.unina.picus.utenze.api.UtenzeApi;
 import it.unina.picus.utenze.interno.applicazione.DatiOptNonValidiException;
 import it.unina.picus.utenze.interno.applicazione.RegistrazioneOptService;
 import it.unina.picus.utenze.interno.applicazione.RegistrazioneOptService.ComandoRegistrazioneOpt;
@@ -23,12 +27,15 @@ class RegistrazioneOptController {
 
     private final Optional<RegistrazioneOptService> registrazioneService;
     private final Optional<InvioEmail> invioEmail;
+    private final UtenzeApi utenze;
 
     RegistrazioneOptController(
             Optional<RegistrazioneOptService> registrazioneService,
-            Optional<InvioEmail> invioEmail) {
+            Optional<InvioEmail> invioEmail,
+            UtenzeApi utenze) {
         this.registrazioneService = registrazioneService;
         this.invioEmail = invioEmail;
+        this.utenze = utenze;
     }
 
     record RichiestaCreazioneOpt(
@@ -79,6 +86,24 @@ class RegistrazioneOptController {
                     "errore", ex.getMessage(),
                     "campi", Map.of(campoForm, ex.getMessage())
             ));
+        }
+    }
+
+    @PostMapping("/{id}/revoca")
+    ResponseEntity<?> revocaOpt(@PathVariable UUID id) {
+        try {
+            utenze.revocaUtenzaOpt(id);
+            return ResponseEntity.ok(Map.of(
+                    "accountId", id,
+                    "stato", UtenzeApi.StatoUtenza.REVOCATO.name(),
+                    "messaggio", "Accesso dell'organizzazione partner revocato."
+            ));
+        } catch (UtenzaNonTrovataException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("messaggio", ex.getMessage()));
+        } catch (OperazioneUtenzaNonConsentitaException ex) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("messaggio", ex.getMessage()));
         }
     }
 }
