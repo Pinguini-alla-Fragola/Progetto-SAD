@@ -53,23 +53,49 @@ const utenti = byId('account');
 if (utenti) {
     const righeUtenti = Array.from(utenti.children);
     const opzioniUtenti = {
-        searchLabel: 'Cerca account', placeholder: 'Nome visualizzato',
+        searchLabel: 'Cerca account', placeholder: 'Nome, codice o email',
         filters: [{ key: 'ruolo', label: 'Ruolo' }, { key: 'stato', label: 'Stato' }],
         columns: ['Account', 'Email', 'Comune', 'Stato', 'Azioni'], empty: 'Nessun account registrato.'
     };
 
     utenti.addEventListener('click', async (event) => {
+        const btnReinvia = event.target.closest('button[data-reinvia-invito]');
+        if (btnReinvia && !btnReinvia.disabled) {
+            const riga = btnReinvia.closest('.account-row');
+            const id = riga?.dataset.id;
+            const nome = riga?.dataset.nome || 'questa organizzazione';
+            const email = riga?.dataset.email || '';
+            if (!id) return;
+
+            const esito = byId('area-esito');
+            btnReinvia.disabled = true;
+            esito.textContent = '';
+            try {
+                const risultato = await api(`/api/opt/${encodeURIComponent(id)}/reinvia-invito`, { method: 'POST' });
+                esito.textContent = risultato?.messaggio || `Invito reinviato a ${email || nome}.`;
+            } catch (causa) {
+                esito.textContent = causa?.message || 'Impossibile reinviare l\'invito. Riprova.';
+            } finally {
+                btnReinvia.disabled = false;
+            }
+            return;
+        }
+
         const button = event.target.closest('button[data-revoca-opt], button[data-revoca-operatore]');
         if (!button || button.disabled) return;
         const isOperatore = button.hasAttribute('data-revoca-operatore');
         const riga = button.closest('.account-row');
         const id = riga?.dataset.id;
         const nome = riga?.dataset.nome || (isOperatore ? 'questo operatore' : 'questa organizzazione');
+        const riferimento = riga?.dataset.riferimento;
+        const email = riga?.dataset.email;
+        const dettagli = [riferimento, email].filter(Boolean).join(' · ');
+        const etichettaUnivoca = dettagli ? `${nome} (${dettagli})` : nome;
         if (!id) return;
 
         const messaggioConferma = isOperatore
-            ? `Confermi la revoca dell'accesso per l'operatore "${nome}"?\nL'operatore non potrà più accedere, ma le schede già inviate resteranno consultabili.`
-            : `Confermi la revoca dell'accesso per "${nome}"?\nL'organizzazione non potrà più accedere, ma i dati già registrati resteranno consultabili.`;
+            ? `Confermi la revoca dell'accesso per l'operatore "${etichettaUnivoca}"?\nL'operatore non potrà più accedere, ma le schede già inviate resteranno consultabili.`
+            : `Confermi la revoca dell'accesso per "${etichettaUnivoca}"?\nL'organizzazione non potrà più accedere, ma i dati già registrati resteranno consultabili.`;
 
         if (!window.confirm(messaggioConferma)) {
             return;
@@ -87,9 +113,11 @@ if (utenti) {
             riga.dataset.stato = 'REVOCATO';
             const statoLabel = riga.querySelector('.status-label');
             if (statoLabel) statoLabel.textContent = 'Revocato';
+            const btnInvito = riga.querySelector('button[data-reinvia-invito]');
+            if (btnInvito) btnInvito.remove();
             button.textContent = 'Revocato';
             renderList(utenti, righeUtenti, opzioniUtenti);
-            esito.textContent = risultato?.messaggio || `Accesso revocato per ${nome}.`;
+            esito.textContent = risultato?.messaggio || `Accesso revocato per ${etichettaUnivoca}.`;
         } catch (causa) {
             button.disabled = false;
             esito.textContent = causa?.message || 'Impossibile completare la revoca. Riprova.';
@@ -137,7 +165,9 @@ if (formNuovaOpt) {
         try {
             const risultato = await api('/api/opt', { method: 'POST', body: dati });
             esito.textContent = risultato.messaggio || 'Organizzazione partner registrata.';
-            formNuovaOpt.reset();
+            if (!risultato.erroreInvio) {
+                formNuovaOpt.reset();
+            }
         } catch (causa) {
             esito.textContent = causa?.message || 'Connessione non disponibile. Riprova.';
             const campiErrati = causa?.campi ? Object.keys(causa.campi) : [];

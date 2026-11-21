@@ -53,44 +53,47 @@
 <button type="button" role="tab" id="utenze-tab-operatore" aria-controls="utenze-view-operatore" aria-selected="false" tabindex="-1">Nuovo operatore</button>
 <button type="button" role="tab" id="utenze-tab-csv" aria-controls="utenze-view-csv" aria-selected="false" tabindex="-1">Importa CSV</button>
 </div>
-<div role="tabpanel" id="utenze-view-account" aria-labelledby="utenze-tab-account" tabindex="0">
-<h2 class="picus-card-title">Account registrati</h2><div class="picus-list" id="account" aria-live="polite">
-    <article class="account-row" th:each="account : ${optElenco}"
-             th:attr="data-id=${account.id},data-nome=${account.nomeVisualizzato},data-ruolo=${account.ruolo.name()},data-stato=${account.stato.name()}">
-        <div class="account-identity"><strong th:text="${account.nomeVisualizzato}"></strong>
-            <p class="picus-meta">OPT</p></div>
-        <div class="account-cell"><span class="cell-label">Email</span><span>—</span></div>
-        <div class="account-cell"><span class="cell-label">Comune</span><span>—</span></div>
-        <div class="account-cell"><span class="cell-label">Stato</span>
-            <span class="status-label"
-                  th:text="${account.stato.name() == 'ATTIVO' ? 'Attivo' : (account.stato.name() == 'IN_ATTESA_DI_ATTIVAZIONE' ? 'In attesa di attivazione' : 'Revocato')}">Attivo</span>
-        </div>
-        <div class="picus-actions">
-            <button type="button" class="btn btn-danger btn-sm"
-                    data-revoca-opt
-                    th:disabled="${account.stato.name() == 'REVOCATO'}"
-                    th:text="${account.stato.name() == 'REVOCATO' ? 'Revocato' : 'Revoca'}">Revoca</button>
-        </div>
-    </article>
-    <article class="account-row" th:each="account : ${operatoriElenco}"
-             th:attr="data-id=${account.id},data-nome=${account.nomeVisualizzato},data-ruolo=${account.ruolo.name()},data-stato=${account.stato.name()}">
-        <div class="account-identity"><strong th:text="${account.nomeVisualizzato}"></strong>
-            <p class="picus-meta">Operatore</p></div>
-        <div class="account-cell"><span class="cell-label">Email</span><span>—</span></div>
-        <div class="account-cell"><span class="cell-label">Comune</span><span>—</span></div>
-        <div class="account-cell"><span class="cell-label">Stato</span>
-            <span class="status-label"
-                  th:text="${account.stato.name() == 'ATTIVO' ? 'Attivo' : (account.stato.name() == 'IN_ATTESA_DI_ATTIVAZIONE' ? 'In attesa di attivazione' : 'Revocato')}">Attivo</span>
-        </div>
-        <div class="picus-actions">
-            <button type="button" class="btn btn-danger btn-sm"
-                    data-revoca-operatore
-                    th:disabled="${account.stato.name() == 'REVOCATO'}"
-                    th:text="${account.stato.name() == 'REVOCATO' ? 'Revocato' : 'Revoca'}">Revoca</button>
-        </div>
-    </article>
-</div>
-</div>
+    <div role="tabpanel" id="utenze-view-account" aria-labelledby="utenze-tab-account" tabindex="0">
+        <h2 class="picus-card-title">Account registrati</h2><div class="picus-list" id="account" aria-live="polite">
+        <article class="account-row" th:each="account : ${optElenco}"
+                 th:attr="data-id=${account.id},data-nome=${account.nomeVisualizzato},data-email=${account.email},data-riferimento=${account.riferimento},data-ruolo=${account.ruolo.name()},data-stato=${account.stato.name()}">
+            <div class="account-identity"><strong th:text="${account.nomeVisualizzato}"></strong>
+                <p class="picus-meta" th:text="${account.riferimento != null ? 'OPT · ' + account.riferimento : 'OPT'}">OPT</p></div>
+            <div class="account-cell"><span class="cell-label">Email</span><span th:text="${account.email ?: '—'}">—</span></div>
+            <div class="account-cell"><span class="cell-label">Comune</span><span th:text="${account.comuneCodice ?: '—'}">—</span></div>
+            <div class="account-cell"><span class="cell-label">Stato</span>
+                <span class="status-label"
+                      th:text="${account.stato.name() == 'ATTIVO' ? 'Attivo' : (account.stato.name() == 'IN_ATTESA_DI_ATTIVAZIONE' ? 'In attesa di attivazione' : 'Revocato')}">Attivo</span>
+            </div>
+            <div class="picus-actions">
+                <button type="button" class="btn btn-secondary btn-sm"
+                        data-reinvia-invito
+                        th:if="${account.stato.name() == 'IN_ATTESA_DI_ATTIVAZIONE'}">Reinvia invito</button>
+                <button type="button" class="btn btn-danger btn-sm"
+                        data-revoca-opt
+                        th:disabled="${account.stato.name() == 'REVOCATO'}"
+                        th:text="${account.stato.name() == 'REVOCATO' ? 'Revocato' : 'Revoca'}">Revoca</button>
+            </div>
+        </article>
+        <article class="account-row" th:each="account : ${operatoriElenco}"
+                 th:attr="data-id=${account.id},data-nome=${account.nomeVisualizzato},data-email=${account.email},data-riferimento=${account.riferimento},data-ruolo=${account.ruolo.name()},data-stato=${account.stato.name()}">
+            <div class="account-identity"><strong th:text="${account.nomeVisualizzato}"></strong>
+                <p class="picus-meta" th:text="${account.riferimento != null ? 'Operatore · ' + account.riferimento : 'Operatore'}">Operatore</p></div>
+            <div class="account-cell"><span class="cell-label">Email</span><span th:text="${account.email ?: '—'}">—</span></div>
+            <div class="account-cell"><span class="cell-label">Comune</span><span th:text="${account.comuneCodice ?: '—'}">—</span></div>
+            <div class="account-cell"><span class="cell-label">Stato</span>
+                <span class="status-label"
+                      th:text="${account.stato.name() == 'ATTIVO' ? 'Attivo' : (account.stato.name() == 'IN_ATTESA_DI_ATTIVAZIONE' ? 'In attesa di attivazione' : 'Revocato')}">Attivo</span>
+            </div>
+            <div class="picus-actions">
+                <button type="button" class="btn btn-danger btn-sm"
+                        data-revoca-operatore
+                        th:disabled="${account.stato.name() == 'REVOCATO'}"
+                        th:text="${account.stato.name() == 'REVOCATO' ? 'Revocato' : 'Revoca'}">Revoca</button>
+            </div>
+        </article>
+    </div>
+    </div>
     <div role="tabpanel" id="utenze-view-opt" aria-labelledby="utenze-tab-opt" tabindex="0" hidden>
         <h2 class="picus-card-title">Nuova organizzazione partner</h2>
         <form id="nuova-opt" method="post" action="/api/opt" class="picus-form form-layout">

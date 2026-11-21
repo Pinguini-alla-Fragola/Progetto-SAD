@@ -5,10 +5,13 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
@@ -27,25 +30,17 @@ import it.unina.picus.utenze.interno.persistenza.ProfiloOperatoreJpa;
 import it.unina.picus.utenze.interno.persistenza.ProfiloOperatoreRepository;
 import it.unina.picus.utenze.interno.persistenza.ProfiloOptJpa;
 import it.unina.picus.utenze.interno.persistenza.ProfiloOptRepository;
+import it.unina.picus.utenze.interno.persistenza.TokenAttivazioneJpa;
 import it.unina.picus.utenze.interno.persistenza.TokenAttivazioneRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 
-/**
- * Verifica delle credenziali, delle sessioni e gestione dello stato delle utenze.
- *
- * <p>Esito unico per l'esterno: credenziali errate, email sconosciuta e account non attivo sono
- * indistinguibili (nessuna enumerazione degli account). Il limite sui tentativi è applicato a monte,
- * dal livello web (vedi LimitatoreAccessi). In ogni caso
- * viene eseguito un confronto BCrypt, per non rivelare l'esistenza dell'account dai tempi di risposta.</p>
- */
 @Service
 @Profile("!skeleton")
 @Transactional
 class UtenzeService implements UtenzeApi {
 
     static final int LUNGHEZZA_MAX_EMAIL = 254;
-    /** BCrypt considera solo i primi 72 byte: il limite è in byte UTF-8, non in caratteri. */
     static final int LUNGHEZZA_MAX_PASSWORD_BYTE = 72;
 
     private final AccountRepository accounts;
@@ -55,7 +50,6 @@ class UtenzeService implements UtenzeApi {
     private final PasswordEncoder encoder;
     private final EntityManager em;
     private final Clock clock;
-    /** Hash fittizio contro cui confrontare quando l'account non può essere verificato. */
     private final String hashFittizio;
 
     @Autowired
@@ -97,9 +91,13 @@ class UtenzeService implements UtenzeApi {
             throw new UtenzaNonTrovataException("Identificativo account obbligatorio.");
         }
 
+        // 1. Stesso ordine di lock di AttivazioneUtenzaService.attivaAccount: prima TokenAttivazioneJpa, poi AccountJpa
+        List<TokenAttivazioneJpa> tokenAttivi = tokensAttivazione.findAttiviByAccountIdForUpdate(accountId);
+
         AccountJpa account = accounts.findByIdForUpdate(accountId)
                 .orElseThrow(() -> new UtenzaNonTrovataException("Account non trovato."));
 
+        // 2. Verifica stato e ruolo sotto lock
         if (!ruoloAtteso.name().equals(account.getRuolo())) {
             throw new OperazioneUtenzaNonConsentitaException(messaggioErroreRuolo);
         }
@@ -108,17 +106,59 @@ class UtenzeService implements UtenzeApi {
             throw new OperazioneUtenzaNonConsentitaException("L'account è già stato revocato.");
         }
 
+        // 3. Rilegge l'istante corrente dopo aver acquisito tutti i lock
+        Instant ora = Instant.now(clock);
         account.revoca();
         accounts.saveAndFlush(account);
 
-        tokensAttivazione.invalidaTokenAttiviPerAccount(account.getId(), Instant.now(clock));
+        for (TokenAttivazioneJpa token : tokenAttivi) {
+            if (!token.isUsato()) {
+                token.segnaComeUsato(ora);
+            }
+        }
+        if (!tokenAttivi.isEmpty()) {
+            tokensAttivazione.saveAllAndFlush(tokenAttivi);
+        }
     }
+
     @Override
     @Transactional(readOnly = true)
-    public List<AccountSintetico> elencoAccountPerRuolo(RuoloUtente ruolo) {
-        return accounts.findByRuolo(ruolo.name()).stream()
-                .map(UtenzeService::sintetico).toList();
+    public List<AccountAmministrativo> elencoAccountPerRuolo(RuoloUtente ruolo) {
+        List<AccountJpa> lista = accounts.findByRuolo(ruolo.name());
+        if (lista.isEmpty()) {
+            return List.of();
+        }
+        if (ruolo == RuoloUtente.OPT) {
+            Map<UUID, ProfiloOptJpa> profili = profiliOpt.findAllById(
+                    lista.stream().map(AccountJpa::getId).toList()
+            ).stream().collect(Collectors.toMap(ProfiloOptJpa::getAccountId, Function.identity()));
+            return lista.stream().map(a -> {
+                ProfiloOptJpa p = profili.get(a.getId());
+                String codiceStruttura = p != null ? p.getCodiceStruttura() : null;
+                String comune = p != null ? p.getComuneCodice() : null;
+                return new AccountAmministrativo(
+                        a.getId(), a.getNome(), a.getEmail(), codiceStruttura, comune,
+                        RuoloUtente.OPT, StatoUtenza.valueOf(a.getStato()));
+            }).toList();
+        }
+        if (ruolo == RuoloUtente.OPERATORE) {
+            Map<UUID, ProfiloOperatoreJpa> profili = profiliOperatore.findAllById(
+                    lista.stream().map(AccountJpa::getId).toList()
+            ).stream().collect(Collectors.toMap(ProfiloOperatoreJpa::getAccountId, Function.identity()));
+            return lista.stream().map(a -> {
+                ProfiloOperatoreJpa p = profili.get(a.getId());
+                String comune = p != null ? p.getComuneCodice() : null;
+                String ref = p != null ? p.getTipologia() : null;
+                return new AccountAmministrativo(
+                        a.getId(), a.getNome(), a.getEmail(), ref, comune,
+                        RuoloUtente.OPERATORE, StatoUtenza.valueOf(a.getStato()));
+            }).toList();
+        }
+        return lista.stream().map(a -> new AccountAmministrativo(
+                a.getId(), a.getNome(), a.getEmail(), null, null,
+                RuoloUtente.valueOf(a.getRuolo()), StatoUtenza.valueOf(a.getStato()))).toList();
     }
+
     @Override
     public Optional<IdentitaAutenticata> verificaCredenziali(String email, String password) {
         String chiave = normalizzaEmail(email);
@@ -243,7 +283,6 @@ class UtenzeService implements UtenzeApi {
     private <T> T blocca(Class<T> tipo, Object id) {
         var entita = em.find(tipo, id, LockModeType.PESSIMISTIC_READ);
         if (entita != null) {
-            // La sessione o una consultazione precedente può avere popolato la cache di primo livello.
             em.refresh(entita, LockModeType.PESSIMISTIC_READ);
         }
         return entita;

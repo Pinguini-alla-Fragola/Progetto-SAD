@@ -1,6 +1,7 @@
 package it.unina.picus.utenze.interno.persistenza;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -18,6 +19,15 @@ public interface TokenAttivazioneRepository extends JpaRepository<TokenAttivazio
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select t from TokenAttivazioneJpa t where t.tokenHash = :hash")
     Optional<TokenAttivazioneJpa> findByTokenHashForUpdate(@Param("hash") String hash);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            select t from TokenAttivazioneJpa t
+             where t.accountId = :accountId
+               and t.usatoIl is null
+             order by t.id
+            """)
+    List<TokenAttivazioneJpa> findAttiviByAccountIdForUpdate(@Param("accountId") UUID accountId);
 
     @Modifying
     @Query("""
