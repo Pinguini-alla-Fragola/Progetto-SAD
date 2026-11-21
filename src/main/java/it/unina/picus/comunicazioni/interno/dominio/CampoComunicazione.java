@@ -7,6 +7,7 @@ public final class CampoComunicazione {
     public static final String CONTENUTO = "contenuto";
     public static final String DESTINATARI_TIPO = "destinatariTipo";
     public static final String GRUPPO = "gruppo";
+    public static final String ALLEGATI = "files";
 
     private CampoComunicazione() {
     }
