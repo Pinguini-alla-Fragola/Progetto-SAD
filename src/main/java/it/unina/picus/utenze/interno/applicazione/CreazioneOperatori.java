@@ -6,8 +6,9 @@ import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 public interface CreazioneOperatori {
 
     /**
-     * Crea l'account e il profilo dell'Operatore, in attesa di attivazione. L'account non ha ancora una
-     * password che si possa usare: la sceglierà l'Operatore dal link di attivazione.
+     * Crea l'account e il profilo dell'Operatore, in attesa di attivazione, e prepara il link monouso di
+     * attivazione. L'account non ha ancora una password che si possa usare: la sceglierà l'Operatore dal link.
+     * La spedizione dell'email spetta al chiamante, dopo il commit ({@link ConsegnaLinkAttivazione}).
      *
      * @param attore l'utente che fa la richiesta, ricavato dal server dalla sessione
      * @param comando i campi compilati dal Banco
