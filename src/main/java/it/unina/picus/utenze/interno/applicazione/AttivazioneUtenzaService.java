@@ -32,7 +32,8 @@ import it.unina.picus.utenze.interno.persistenza.TokenAttivazioneRepository;
 
 /**
  * Servizio comune per la generazione dei token monouso di attivazione utenza e
- * l'impostazione iniziale della password (Task #147).
+ * l'impostazione iniziale della password (Task #147). Vale per OPT e Operatori: un nuovo link
+ * rende inutilizzabile il precedente.
  */
 @Service
 @Profile("!skeleton")
@@ -75,10 +76,19 @@ public class AttivazioneUtenzaService {
         this.clock = Objects.requireNonNull(clock);
     }
 
+    /** Dati per consegnare il link. Il token in chiaro non compare mai nel testo del record, così non finisce nei log. */
     public record DatiInvioAttivazione(String emailDestinatario, String nomeDestinatario, String tokenInChiaro) {
+        @Override
+        public String toString() {
+            return "DatiInvioAttivazione[emailDestinatario=" + emailDestinatario + ", token=***]";
+        }
     }
 
     public record LinkAttivazioneDaInviareEvent(String emailDestinatario, String nomeDestinatario, String tokenInChiaro) {
+        @Override
+        public String toString() {
+            return "LinkAttivazioneDaInviareEvent[emailDestinatario=" + emailDestinatario + ", token=***]";
+        }
     }
 
     /**
@@ -91,37 +101,16 @@ public class AttivazioneUtenzaService {
         if (!StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(account.getStato())) {
             throw new IllegalStateException("L'account non è in stato IN_ATTESA_DI_ATTIVAZIONE");
         }
-
-        List<TokenAttivazioneJpa> precedenti = tokens.findAttiviByAccountIdForUpdate(account.getId());
-        Instant ora = Instant.now(clock);
-        for (TokenAttivazioneJpa vecchio : precedenti) {
-            vecchio.segnaComeUsato(ora);
-        }
-        if (!precedenti.isEmpty()) {
-            tokens.saveAllAndFlush(precedenti);
-        }
-
-        String tokenInChiaro = generaTokenCasuale();
-        String tokenHash = calcolaSha256(tokenInChiaro);
-
-        TokenAttivazioneJpa nuovoToken = new TokenAttivazioneJpa(
-                UUID.randomUUID(),
-                account.getId(),
-                tokenHash,
-                ora.plus(durataValidita),
-                ora
-        );
-        tokens.saveAndFlush(nuovoToken);
-
-        return new DatiInvioAttivazione(account.getEmail(), account.getNome(), tokenInChiaro);
+        return emettiNuovoToken(account);
     }
 
     /**
-     * Rigenera un token monouso per un account del ruolo atteso ancora in attesa di attivazione.
+     * Emette un token monouso per un account del ruolo atteso ancora in attesa di attivazione: vale sia per il
+     * primo link, alla creazione, sia per i reinvii, che sostituiscono il link precedente.
      *
      * <p>Mantiene lo stesso ordine dei lock di {@link #attivaAccount} e {@code UtenzeService.revocaAccount}
-     * (prima i token pendenti, poi l'account) e rilegge i token attivi dopo l'acquisizione del lock
-     * sull'account per serializzare eventuali reinvii concorrenti ed evitare doppi token attivi.</p>
+     * (prima l'account, poi i suoi token) e rilegge i token attivi dopo aver preso il lock sull'account,
+     * per serializzare i reinvii concorrenti ed evitare più token attivi insieme.</p>
      */
     public DatiInvioAttivazione rigeneraTokenPerAccount(UUID accountId, RuoloUtente ruoloAtteso) {
         if (accountId == null) {
@@ -142,28 +131,31 @@ public class AttivazioneUtenzaService {
             throw new OperazioneUtenzaNonConsentitaException("L'account non è in attesa di attivazione.");
         }
 
-        // 3. Blocca e invalida tutti i token ancora attivi (ordine: account -> token)
-        List<TokenAttivazioneJpa> precedenti = tokens.findAttiviByAccountIdForUpdate(accountId);
+        // 3. Invalida i token ancora attivi ed emette quello nuovo (ordine: account -> token)
+        return emettiNuovoToken(account);
+    }
+
+    /**
+     * Invalida i token ancora attivi dell'account e ne crea uno nuovo. Il chiamante tiene già il lock
+     * sull'account (o l'account è appena nato) e ha controllato che sia in attesa di attivazione.
+     */
+    private DatiInvioAttivazione emettiNuovoToken(AccountJpa account) {
+        List<TokenAttivazioneJpa> precedenti = tokens.findAttiviByAccountIdForUpdate(account.getId());
         Instant ora = Instant.now(clock);
         for (TokenAttivazioneJpa vecchio : precedenti) {
-            if (!vecchio.isUsato()) {
-                vecchio.segnaComeUsato(ora);
-            }
+            vecchio.segnaComeUsato(ora);
         }
         if (!precedenti.isEmpty()) {
             tokens.saveAllAndFlush(precedenti);
         }
 
         String tokenInChiaro = generaTokenCasuale();
-        String tokenHash = calcolaSha256(tokenInChiaro);
-        TokenAttivazioneJpa nuovoToken = new TokenAttivazioneJpa(
+        tokens.saveAndFlush(new TokenAttivazioneJpa(
                 UUID.randomUUID(),
                 account.getId(),
-                tokenHash,
+                calcolaSha256(tokenInChiaro),
                 ora.plus(durataValidita),
-                ora
-        );
-        tokens.saveAndFlush(nuovoToken);
+                ora));
 
         return new DatiInvioAttivazione(account.getEmail(), account.getNome(), tokenInChiaro);
     }

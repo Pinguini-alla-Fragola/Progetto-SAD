@@ -13,12 +13,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import it.unina.picus.shared.InvioEmail;
 import it.unina.picus.utenze.api.OperazioneUtenzaNonConsentitaException;
 import it.unina.picus.utenze.api.UtenzaNonTrovataException;
 import it.unina.picus.utenze.api.UtenzeApi;
 import it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService;
 import it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService.DatiInvioAttivazione;
+import it.unina.picus.utenze.interno.applicazione.ConsegnaLinkAttivazione;
+import it.unina.picus.utenze.interno.applicazione.ConsegnaLinkAttivazione.Esito;
 import it.unina.picus.utenze.interno.applicazione.DatiOptNonValidiException;
 import it.unina.picus.utenze.interno.applicazione.RegistrazioneOptService;
 import it.unina.picus.utenze.interno.applicazione.RegistrazioneOptService.ComandoRegistrazioneOpt;
@@ -30,17 +31,17 @@ class RegistrazioneOptController {
 
     private final Optional<RegistrazioneOptService> registrazioneService;
     private final Optional<AttivazioneUtenzaService> attivazioneService;
-    private final Optional<InvioEmail> invioEmail;
+    private final Optional<ConsegnaLinkAttivazione> consegna;
     private final UtenzeApi utenze;
 
     RegistrazioneOptController(
             Optional<RegistrazioneOptService> registrazioneService,
             Optional<AttivazioneUtenzaService> attivazioneService,
-            Optional<InvioEmail> invioEmail,
+            Optional<ConsegnaLinkAttivazione> consegna,
             UtenzeApi utenze) {
         this.registrazioneService = registrazioneService;
         this.attivazioneService = attivazioneService;
-        this.invioEmail = invioEmail;
+        this.consegna = consegna;
         this.utenze = utenze;
     }
 
@@ -84,14 +85,14 @@ class RegistrazioneOptController {
                     RichiestaCreazioneOpt.soloStringa(body.email(), "email")
             ));
 
-            EsitoInvio esitoInvio = tentaInvioAttivazione(esitoReg.datiInvio());
+            Esito esito = consegnaLink(esitoReg.datiInvio());
 
             return ResponseEntity.created(URI.create("/api/opt/" + esitoReg.accountId()))
                     .body(Map.of(
                             "accountId", esitoReg.accountId(),
-                            "invitoInviato", esitoInvio.inviato(),
-                            "erroreInvio", esitoInvio.errore(),
-                            "messaggio", esitoInvio.messaggioCreazione()
+                            "invitoInviato", esito == Esito.INVIATO,
+                            "erroreInvio", esito == Esito.NON_RIUSCITO,
+                            "messaggio", MessaggiInvito.allaCreazione(esito, "Organizzazione partner registrata")
                     ));
 
         } catch (DatiOptNonValidiException ex) {
@@ -114,22 +115,20 @@ class RegistrazioneOptController {
         try {
             DatiInvioAttivazione datiInvio = attivazioneService.get()
                     .rigeneraTokenPerAccount(id, UtenzeApi.RuoloUtente.OPT);
-            EsitoInvio esitoInvio = tentaInvioAttivazione(datiInvio);
-            if (esitoInvio.errore()) {
+            Esito esito = consegnaLink(datiInvio);
+            if (esito == Esito.NON_RIUSCITO) {
                 return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(Map.of(
                         "accountId", id,
                         "invitoInviato", false,
                         "erroreInvio", true,
-                        "messaggio", "Invio email di attivazione non riuscito. Verifica la configurazione SMTP e riprova."
+                        "messaggio", MessaggiInvito.REINVIO_NON_RIUSCITO
                 ));
             }
             return ResponseEntity.ok(Map.of(
                     "accountId", id,
-                    "invitoInviato", esitoInvio.inviato(),
+                    "invitoInviato", esito == Esito.INVIATO,
                     "erroreInvio", false,
-                    "messaggio", esitoInvio.inviato()
-                            ? "Nuovo link di attivazione inviato via email."
-                            : "Nuovo link di attivazione generato in modalità simulata."
+                    "messaggio", MessaggiInvito.alReinvio(esito)
             ));
         } catch (UtenzaNonTrovataException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -158,29 +157,8 @@ class RegistrazioneOptController {
         }
     }
 
-    private record EsitoInvio(boolean inviato, boolean errore, String messaggioCreazione) {}
-
-    private EsitoInvio tentaInvioAttivazione(DatiInvioAttivazione datiInvio) {
-        if (invioEmail.isEmpty()) {
-            return new EsitoInvio(false, false,
-                    "Organizzazione partner registrata (nessun servizio email configurato).");
-        }
-        InvioEmail servizio = invioEmail.get();
-        try {
-            servizio.inviaLinkAttivazione(
-                    datiInvio.emailDestinatario(),
-                    datiInvio.nomeDestinatario(),
-                    datiInvio.tokenInChiaro()
-            );
-            if (servizio.isSimulato()) {
-                return new EsitoInvio(false, false,
-                        "Organizzazione partner registrata (modalità demo/simulata: nessun server SMTP configurato, email non inviata).");
-            }
-            return new EsitoInvio(true, false,
-                    "Organizzazione partner registrata. Email di attivazione inviata.");
-        } catch (RuntimeException ex) {
-            return new EsitoInvio(false, true,
-                    "Organizzazione partner registrata in attesa di attivazione, ma l'invio dell'email è fallito. Puoi reinviare l'invito dall'elenco Account.");
-        }
+    /** Spedisce il link; senza servizio di consegna (profilo skeleton) l'invito resta solo generato. */
+    private Esito consegnaLink(DatiInvioAttivazione datiInvio) {
+        return consegna.map(c -> c.consegna(datiInvio)).orElse(Esito.SIMULATO);
     }
 }
