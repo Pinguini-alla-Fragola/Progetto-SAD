@@ -195,6 +195,22 @@ class AutenticazionePicusTest {
         int chiamate;
         String ultimaPassword;
 
+
+        @Override
+        public void revocaUtenzaOpt(UUID accountId) {
+            throw new UnsupportedOperationException("non usato dal provider");
+        }
+
+        @Override
+        public void revocaUtenzaOperatore(UUID accountId) {
+            throw new UnsupportedOperationException("non usato dal provider");
+        }
+
+        @Override
+        public List<AccountAmministrativo> elencoAccountPerRuolo(RuoloUtente ruolo) {
+            throw new UnsupportedOperationException("non usato dal provider");
+        }
+
         UtenzeFinte(String passwordValida) {
             this.passwordValida = passwordValida;
         }
