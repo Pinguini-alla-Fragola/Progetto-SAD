@@ -117,6 +117,8 @@ class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/catalogo/misure",
                                 "/api/catalogo/misure/*/disattivazione").hasRole("BANCO")
                         .requestMatchers(HttpMethod.PUT, "/api/catalogo/misure/*").hasRole("BANCO")
+                        // Comunicazioni: il ruolo si controlla prima di leggere il modulo, allegati compresi.
+                        .requestMatchers(HttpMethod.POST, "/api/comunicazioni").hasRole("BANCO")
                         // ogni ruolo vede solo la propria area
                         .requestMatchers("/banco/**").hasRole("BANCO")
                         .requestMatchers("/opt/**").hasRole("OPT")

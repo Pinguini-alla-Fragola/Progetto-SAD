@@ -104,3 +104,5 @@
     opacity: 1;
 }
 [data-funzione-inattiva]:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 4px; border-radius: var(--radius-sm); }
+/* Contatore delle comunicazioni da confermare accanto alla voce del menu (#140). */
+.contatore-notifiche { margin-left: auto; min-width: 1.5rem; padding: .1rem .45rem; border-radius: 999px; background: var(--color-danger); color: var(--color-white); font-size: .75rem; font-weight: 700; line-height: 1.4; text-align: center; }
