@@ -25,6 +25,8 @@ public class DestinatarioComunicazioneJpa {
         this.id = new Chiave(comunicazioneId, destinatarioId);
     }
 
+    public Instant getConfermataIl() { return confermataIl; }
+
     /** Coppia comunicazione e account destinatario. */
     @Embeddable
     public record Chiave(UUID comunicazioneId, UUID destinatarioId) implements Serializable {}

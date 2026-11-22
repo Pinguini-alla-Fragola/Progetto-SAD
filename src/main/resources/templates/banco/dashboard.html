@@ -9,6 +9,7 @@
     <script src="/js/area.js" type="module"></script>
     <script src="/js/operatori.js" type="module"></script>
     <link rel="stylesheet" href="/css/integrazione-ui.css">
+    <script src="/js/comunicazioni.js" type="module"></script>
 </head>
 <body data-area="banco" th:attr="data-utente=${utente.id}">
 <a th:replace="~{fragments/layout :: skip}" href="#contenuto">Vai al contenuto</a>
@@ -171,19 +172,20 @@
 <button type="button" role="tab" id="comunicazioni-tab-scrivi" aria-controls="comunicazioni-view-scrivi" aria-selected="false" tabindex="-1">Scrivi</button>
 </div>
 <div role="tabpanel" id="comunicazioni-view-inviate" aria-labelledby="comunicazioni-tab-inviate" tabindex="0">
-<h2 class="sr-only">Comunicazioni inviate</h2><div class="picus-list" id="messaggi" aria-live="polite" data-funzione-inattiva></div>
+<h2 class="sr-only">Comunicazioni inviate</h2><div class="picus-list" id="messaggi" aria-live="polite"></div>
 </div>
 <div role="tabpanel" id="comunicazioni-view-scrivi" aria-labelledby="comunicazioni-tab-scrivi" tabindex="0" hidden>
-<h2 class="sr-only">Nuova comunicazione</h2><form id="comunicazione" class="picus-form form-layout" data-form-anteprima><fieldset class="campi-inattivi" disabled>
+<h2 class="sr-only">Nuova comunicazione</h2><form id="comunicazione" class="picus-form form-layout" method="post" novalidate><fieldset class="campi-form" disabled>
 <fieldset class="form-section"><legend>Messaggio</legend><div class="form-section-content"><div class="picus-fields fields-two">
 <label class="campo campo-esteso">Oggetto (facoltativo)<input class="form-control" name="titolo" type="text" ></label>
 <label class="campo campo-esteso">Testo<textarea class="form-control" name="contenuto" rows="6" required ></textarea></label>
+<div class="campo campo-esteso"><button class="btn btn-secondary btn-sm" type="button" data-modello-scadenza>Usa il modello «Scadenza della scheda trimestrale»</button></div>
 </div></div></fieldset><fieldset class="form-section"><legend>Destinatari</legend><div class="form-section-content"><div class="picus-fields fields-one">
 <label class="campo ">Invia a<select class="form-control" name="destinatariTipo" required ><option value="TUTTE_LE_OPT">Tutte le OPT</option><option value="GRUPPO_OPT">Un gruppo di OPT</option><option value="TUTTI_GLI_OPERATORI">Tutti gli operatori del Banco</option><option value="GRUPPO_OPERATORI">Un gruppo di operatori</option></select></label>
-</div><fieldset class="campo-scelte" data-destinatari hidden disabled><legend>Account del gruppo</legend><div class="picus-choices"></div></fieldset></div></fieldset><fieldset class="form-section"><legend>Allegati</legend><div class="form-section-content"><div class="picus-fields fields-one">
+</div><fieldset class="campo-scelte" data-destinatari data-gruppo hidden disabled><legend>Account del gruppo</legend><div class="picus-choices"></div></fieldset></div></fieldset><fieldset class="form-section"><legend>Allegati</legend><div class="form-section-content"><div class="picus-fields fields-one">
 <label class="campo ">PDF, PNG, JPEG o testo<input class="form-control" name="files" type="file" multiple accept=".pdf,.png,.jpg,.jpeg,.txt"></label>
 </div></div></fieldset>
-<div class="form-submit"><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-primary" type="submit">Invia comunicazione</button></span><p class="picus-esito" role="status"></p></div>
+<div class="form-submit"><button class="btn btn-primary" type="submit">Invia comunicazione</button><p class="picus-esito" role="status">Il modulo si attiva dopo il caricamento della pagina.</p></div>
 </fieldset></form>
 </div>
 </div>
