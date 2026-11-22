@@ -29,8 +29,8 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle;
  *
  * <p>I controlli restano leggeri anche con un file costruito apposta: le immagini vengono lette fino in fondo ma
  * ridotte, così la memoria usata non dipende dalle dimensioni dichiarate, e oltre {@value #MASSIMO_PIXEL} pixel
- * vengono rifiutate senza leggerle. I PDF li apre Apache PDFBox con un limite di memoria. Si legge tutto in
- * memoria, mai su file temporanei.
+ * vengono rifiutate senza leggerle. I PDF li apre Apache PDFBox, limitando la cache dei suoi flussi e le pagine esaminate; la dimensione
+ * dell'allegato è già limitata prima di questi controlli. Si legge tutto in memoria, mai su file temporanei.
  */
 final class StrutturaAllegato {
 
@@ -44,8 +44,15 @@ final class StrutturaAllegato {
     /** All'inizio dell'indice c'è la parola «xref», oppure un oggetto («12 0 obj») se l'indice è compresso. */
     private static final Pattern INIZIO_INDICE = Pattern.compile("\\A\\s*(xref|\\d+\\s+\\d+\\s+obj)");
     private static final int INIZIO_INDICE_BYTE = 64;
-    /** Memoria massima che PDFBox può usare per un allegato; i file restano sempre in memoria, mai su disco. */
-    private static final long MEMORIA_PDF_BYTE = 32L * 1024 * 1024;
+    /**
+     * Limite della sola cache dei flussi di PDFBox (il contenuto compresso delle pagine, delle immagini e dei
+     * caratteri). Non limita le altre strutture che il parser tiene in memoria per leggere il documento: a
+     * contenerle sono la dimensione massima dell'allegato, già controllata prima di questo passo, e il numero di
+     * pagine esaminate. I file restano sempre in memoria, mai su disco.
+     */
+    private static final long CACHE_FLUSSI_PDF_BYTE = 32L * 1024 * 1024;
+    /** Pagine di cui si controllano le dimensioni: bastano a capire che il documento si apre e ha pagine vere. */
+    private static final int PAGINE_CONTROLLATE = 100;
 
     private StrutturaAllegato() {
     }
@@ -55,7 +62,7 @@ final class StrutturaAllegato {
      * <ol>
      * <li>finisce con {@code startxref}, la posizione dell'indice e {@code %%EOF}: un file troncato no;</li>
      * <li>quella posizione è dentro il file e lì inizia davvero l'indice, come la cerca un lettore PDF;</li>
-     * <li>PDFBox lo apre e trova almeno una pagina, con le sue dimensioni.</li>
+     * <li>PDFBox lo apre e percorre l'albero delle pagine: ne serve almeno una vera, con dimensioni valide.</li>
      * </ol>
      * Del documento si leggono solo la struttura e l'elenco delle pagine, mai il contenuto: niente testo, immagini,
      * caratteri o codice.
@@ -83,21 +90,27 @@ final class StrutturaAllegato {
         return INIZIO_INDICE.matcher(indice).lookingAt();
     }
 
+    /**
+     * Percorre l'albero delle pagine e conta quelle che trova davvero: il numero dichiarato dal documento non basta,
+     * perché un file può dichiarare una pagina e avere l'albero vuoto. Serve almeno una pagina percorsa, e ogni
+     * pagina controllata deve avere dimensioni valide.
+     */
     private static boolean pagineLeggibili(byte[] contenuto) {
         try (PDDocument documento = Loader.loadPDF(contenuto, "", null, null,
-                MemoryUsageSetting.setupMainMemoryOnly(MEMORIA_PDF_BYTE).streamCache)) {
-            if (documento.getNumberOfPages() == 0) {
-                return false;
-            }
+                MemoryUsageSetting.setupMainMemoryOnly(CACHE_FLUSSI_PDF_BYTE).streamCache)) {
+            int percorse = 0;
             for (PDPage pagina : documento.getPages()) {
                 PDRectangle dimensioni = pagina.getMediaBox();
                 if (dimensioni.getWidth() <= 0 || dimensioni.getHeight() <= 0) {
                     return false;
                 }
+                if (++percorse == PAGINE_CONTROLLATE) {
+                    break;
+                }
             }
-            return true;
+            return percorse > 0;
         } catch (IOException | RuntimeException e) {
-            // PDF illeggibile, protetto da password o fuori dal limite di memoria: per l'invio conta che non si apre.
+            // PDF illeggibile, protetto da password o oltre il limite della cache: per l'invio conta che non si apre.
             return false;
         }
     }
