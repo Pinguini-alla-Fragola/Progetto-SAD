@@ -56,7 +56,7 @@ public class AttivazioneUtenzaService {
             TokenAttivazioneRepository tokens,
             PasswordEncoder passwordEncoder,
             ApplicationEventPublisher eventPublisher,
-            @Value("${picus.utenze.attivazione.validita:PT48H}") Duration durataValidita) {
+            @Value("${picus.utenze.attivazione.validita:PT72H}") Duration durataValidita) {
         this(accounts, tokens, passwordEncoder, eventPublisher, durataValidita, Clock.systemUTC());
     }
 

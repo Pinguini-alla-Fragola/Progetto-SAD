@@ -53,6 +53,15 @@ public class AccountJpa {
         this.stato = StatoUtenza.ATTIVO.name();
     }
 
+    /**
+     * Cambia il nome visualizzato dell'account.
+     *
+     * @param nuovoNome nome già validato
+     */
+    public void rinomina(String nuovoNome) {
+        this.nome = Objects.requireNonNull(nuovoNome, "nome obbligatorio");
+    }
+
     public UUID getId() { return id; }
     public String getEmail() { return email; }
     public String getPasswordHash() { return passwordHash; }

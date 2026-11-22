@@ -61,7 +61,24 @@ public class RegistrazioneOptService {
             DatiInvioAttivazione datiInvio
     ) {}
 
+    /**
+     * Registra una nuova OPT in attesa di attivazione e prepara il link monouso.
+     *
+     * @param comando dati inseriti dal Banco
+     * @return identificativo dell'account e dati per l'invio dopo il commit
+     */
     public EsitoRegistrazioneOpt registraOpt(ComandoRegistrazioneOpt comando) {
+        return registra(valida(comando));
+    }
+
+    /**
+     * Applica le regole condivise della registrazione manuale e dell'importazione.
+     *
+     * @param comando anagrafica di ingresso
+     * @return anagrafica normalizzata
+     * @throws DatiOptNonValidiException se un campo è invalido
+     */
+    static DatiOpt valida(ComandoRegistrazioneOpt comando) {
         Objects.requireNonNull(comando, "comando obbligatorio");
 
         String codiceStruttura = validaTestoObbligatorio(
@@ -87,23 +104,32 @@ public class RegistrazioneOptService {
 
         String codiceFiscale = validaCodiceFiscale(comando.codiceFiscale());
         String email = validaEmail(comando.email());
+        return new DatiOpt(codiceStruttura, nome, comuneCodice, codiceFiscale, email);
+    }
 
-        if (accounts.existsByEmailIgnoreCase(email)) {
+    /**
+     * Crea account, profilo e token nella transazione del caso d'uso chiamante.
+     *
+     * @param dati anagrafica già validata
+     * @return identificativo dell'account e dati per l'invio dopo il commit
+     */
+    EsitoRegistrazioneOpt registra(DatiOpt dati) {
+        if (accounts.existsByEmailIgnoreCase(dati.email())) {
             throw new DatiOptNonValidiException("email", "Esiste già un account associato a questa email.");
         }
-        if (profiliOpt.existsByCodiceStrutturaIgnoreCase(codiceStruttura)) {
+        if (profiliOpt.existsByCodiceStrutturaIgnoreCase(dati.codiceStruttura())) {
             throw new DatiOptNonValidiException("codiceStruttura", "Esiste già una OPT registrata con questo codice struttura.");
         }
 
         try {
-            AccountJpa account = AccountJpa.inAttesaDiAttivazione(email, nome, RuoloUtente.OPT);
+            AccountJpa account = AccountJpa.inAttesaDiAttivazione(dati.email(), dati.nome(), RuoloUtente.OPT);
             account = accounts.saveAndFlush(account);
 
             ProfiloOptJpa profilo = new ProfiloOptJpa(
                     account.getId(),
-                    codiceStruttura,
-                    comuneCodice,
-                    codiceFiscale
+                    dati.codiceStruttura(),
+                    dati.comuneCodice(),
+                    dati.codiceFiscale()
             );
             profiliOpt.saveAndFlush(profilo);
 
@@ -115,7 +141,8 @@ public class RegistrazioneOptService {
         }
     }
 
-    private static DatiOptNonValidiException classificaViolazioneVincolo(DataIntegrityViolationException ex) {
+    /** Converte i conflitti anagrafici prevedibili in scarti e propaga gli altri errori tecnici. */
+    static DatiOptNonValidiException classificaViolazioneVincolo(DataIntegrityViolationException ex) {
         String nomeVincolo = estraiNomeVincolo(ex);
         if (nomeVincolo == null || nomeVincolo.isBlank()) {
             throw ex;
@@ -198,5 +225,9 @@ public class RegistrazioneOptService {
                     "Il codice fiscale non ha un formato valido (16 caratteri alfanumerici o 11 cifre).");
         }
         return cf;
+    }
+
+    /** Anagrafica normalizzata secondo le regole condivise delle OPT. */
+    record DatiOpt(String codiceStruttura, String nome, String comuneCodice, String codiceFiscale, String email) {
     }
 }
