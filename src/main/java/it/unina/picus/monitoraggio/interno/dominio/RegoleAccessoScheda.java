@@ -33,6 +33,7 @@ public final class RegoleAccessoScheda {
 
     private static final Set<RuoloUtente> SOLO_BANCO = Set.of(RuoloUtente.BANCO);
     private static final Set<RuoloUtente> SOLO_OPERATORE = Set.of(RuoloUtente.OPERATORE);
+    private static final Set<RuoloUtente> LETTORI = Set.of(RuoloUtente.BANCO, RuoloUtente.OPERATORE);
 
     // Relazioni con la scheda. Il secondo argomento è l'account dell'operatore titolare.
     private static final BiPredicate<IdentitaAutenticata, UUID> E_BANCO =
@@ -59,6 +60,17 @@ public final class RegoleAccessoScheda {
      */
     public static void verificaOperatore(IdentitaAutenticata attore) {
         richiediRuolo(attore, SOLO_OPERATORE, "Operazione riservata agli operatori");
+    }
+
+    /**
+     * Esclude i ruoli non ammessi prima di cercare la scheda. Dopo la ricerca
+     * {@link #verificaConsultazione} controlla anche la titolarità.
+     *
+     * @param attore identità verificata della sessione
+     * @throws SecurityException se l'identità è incompleta o il ruolo non è ammesso
+     */
+    public static void verificaRuoloConsultazione(IdentitaAutenticata attore) {
+        richiediRuolo(attore, LETTORI, "Accesso negato alla scheda");
     }
 
     /**
