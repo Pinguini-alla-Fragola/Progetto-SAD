@@ -54,41 +54,61 @@
 <button type="button" role="tab" id="utenze-tab-operatore" aria-controls="utenze-view-operatore" aria-selected="false" tabindex="-1">Nuovo operatore</button>
 <button type="button" role="tab" id="utenze-tab-csv" aria-controls="utenze-view-csv" aria-selected="false" tabindex="-1">Importa CSV</button>
 </div>
-<div role="tabpanel" id="utenze-view-account" aria-labelledby="utenze-tab-account" tabindex="0">
-<h2 class="picus-card-title">Account registrati</h2><div class="picus-list" id="account" aria-live="polite">
-    <article class="account-row" th:each="account : ${optAttive}"
-             th:attr="data-ruolo=${account.ruolo.name()},data-stato=${account.stato.name()}">
-        <div class="account-identity"><strong th:text="${account.nomeVisualizzato}"></strong>
-            <p class="picus-meta" th:text="${account.ruolo.name() == 'OPT' ? 'OPT' : 'Operatore'}"></p></div>
-        <div class="account-cell"><span class="cell-label">Email</span><span>—</span></div>
-        <div class="account-cell"><span class="cell-label">Comune</span><span>—</span></div>
-        <div class="account-cell"><span class="cell-label">Stato</span><span class="status-label">Attivo</span></div>
-        <div class="picus-actions"><span class="azione-inattiva" data-funzione-inattiva><button type="button" class="btn btn-danger btn-sm" disabled>Revoca</button></span></div>
-    </article>
-    <article class="account-row" th:each="account : ${operatoriAttivi}"
-             th:attr="data-ruolo=${account.ruolo.name()},data-stato=${account.stato.name()}">
-        <div class="account-identity"><strong th:text="${account.nomeVisualizzato}"></strong>
-            <p class="picus-meta" th:text="${account.ruolo.name() == 'OPT' ? 'OPT' : 'Operatore'}"></p></div>
-        <div class="account-cell"><span class="cell-label">Email</span><span>—</span></div>
-        <div class="account-cell"><span class="cell-label">Comune</span><span>—</span></div>
-        <div class="account-cell"><span class="cell-label">Stato</span><span class="status-label">Attivo</span></div>
-        <div class="picus-actions"><span class="azione-inattiva" data-funzione-inattiva><button type="button" class="btn btn-danger btn-sm" disabled>Revoca</button></span></div>
-    </article>
-</div>
-</div>
-<div role="tabpanel" id="utenze-view-opt" aria-labelledby="utenze-tab-opt" tabindex="0" hidden>
-<h2 class="picus-card-title">Nuova organizzazione partner</h2><form id="nuova-opt" class="picus-form form-layout" data-form-anteprima><fieldset class="campi-inattivi" disabled>
-<fieldset class="form-section"><legend>Organizzazione</legend><div class="form-section-content"><div class="picus-fields fields-two">
-<label class="campo ">Denominazione OPT<input class="form-control" name="nome" type="text" required ></label>
-<label class="campo ">Codice struttura<input class="form-control" name="codiceStruttura" type="text" required ></label>
-<label class="campo ">Comune<input class="form-control" name="comune" type="text" required ></label>
-<label class="campo ">Codice fiscale<input class="form-control" name="codiceFiscale" type="text" required ></label>
-</div></div></fieldset><fieldset class="form-section"><legend>Contatto</legend><div class="form-section-content"><div class="picus-fields fields-one">
-<label class="campo ">Email istituzionale<input class="form-control" name="email" type="email" required ></label>
-</div></div></fieldset>
-<div class="form-submit"><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-primary" type="submit">Crea utenza OPT</button></span><p class="picus-esito" role="status"></p></div>
-</fieldset></form>
-</div>
+    <div role="tabpanel" id="utenze-view-account" aria-labelledby="utenze-tab-account" tabindex="0">
+        <h2 class="picus-card-title">Account registrati</h2><div class="picus-list" id="account" aria-live="polite">
+        <article class="account-row" th:each="account : ${optElenco}"
+                 th:attr="data-id=${account.id},data-nome=${account.nomeVisualizzato},data-email=${account.email},data-riferimento=${account.riferimento},data-ruolo=${account.ruolo.name()},data-stato=${account.stato.name()}">
+            <div class="account-identity"><strong th:text="${account.nomeVisualizzato}"></strong>
+                <p class="picus-meta" th:text="${account.riferimento != null ? 'OPT · ' + account.riferimento : 'OPT'}">OPT</p></div>
+            <div class="account-cell"><span class="cell-label">Email</span><span th:text="${account.email ?: '—'}">—</span></div>
+            <div class="account-cell"><span class="cell-label">Comune</span><span th:text="${account.comuneCodice ?: '—'}">—</span></div>
+            <div class="account-cell"><span class="cell-label">Stato</span>
+                <span class="status-label"
+                      th:text="${account.stato.name() == 'ATTIVO' ? 'Attivo' : (account.stato.name() == 'IN_ATTESA_DI_ATTIVAZIONE' ? 'In attesa di attivazione' : 'Revocato')}">Attivo</span>
+            </div>
+            <div class="picus-actions">
+                <button type="button" class="btn btn-secondary btn-sm"
+                        data-reinvia-invito
+                        th:if="${account.stato.name() == 'IN_ATTESA_DI_ATTIVAZIONE'}">Reinvia invito</button>
+                <button type="button" class="btn btn-danger btn-sm"
+                        data-revoca-opt
+                        th:disabled="${account.stato.name() == 'REVOCATO'}"
+                        th:text="${account.stato.name() == 'REVOCATO' ? 'Revocato' : 'Revoca'}">Revoca</button>
+            </div>
+        </article>
+        <article class="account-row" th:each="account : ${operatoriElenco}"
+                 th:attr="data-id=${account.id},data-nome=${account.nomeVisualizzato},data-email=${account.email},data-riferimento=${account.riferimento},data-ruolo=${account.ruolo.name()},data-stato=${account.stato.name()}">
+            <div class="account-identity"><strong th:text="${account.nomeVisualizzato}"></strong>
+                <p class="picus-meta" th:text="${account.riferimento != null ? 'Operatore · ' + account.riferimento : 'Operatore'}">Operatore</p></div>
+            <div class="account-cell"><span class="cell-label">Email</span><span th:text="${account.email ?: '—'}">—</span></div>
+            <div class="account-cell"><span class="cell-label">Comune</span><span th:text="${account.comuneCodice ?: '—'}">—</span></div>
+            <div class="account-cell"><span class="cell-label">Stato</span>
+                <span class="status-label"
+                      th:text="${account.stato.name() == 'ATTIVO' ? 'Attivo' : (account.stato.name() == 'IN_ATTESA_DI_ATTIVAZIONE' ? 'In attesa di attivazione' : 'Revocato')}">Attivo</span>
+            </div>
+            <div class="picus-actions">
+                <button type="button" class="btn btn-danger btn-sm"
+                        data-revoca-operatore
+                        th:disabled="${account.stato.name() == 'REVOCATO'}"
+                        th:text="${account.stato.name() == 'REVOCATO' ? 'Revocato' : 'Revoca'}">Revoca</button>
+            </div>
+        </article>
+    </div>
+    </div>
+    <div role="tabpanel" id="utenze-view-opt" aria-labelledby="utenze-tab-opt" tabindex="0" hidden>
+        <h2 class="picus-card-title">Nuova organizzazione partner</h2>
+        <form id="nuova-opt" method="post" action="/api/opt" class="picus-form form-layout">
+            <fieldset class="form-section"><legend>Organizzazione</legend><div class="form-section-content"><div class="picus-fields fields-two">
+                <label class="campo ">Denominazione OPT<input class="form-control" name="nome" type="text" maxlength="200" required ></label>
+                <label class="campo ">Codice struttura<input class="form-control" name="codiceStruttura" type="text" maxlength="32" required ></label>
+                <label class="campo ">Comune<input class="form-control" name="comune" type="text" maxlength="64" required ></label>
+                <label class="campo ">Codice fiscale<input class="form-control" name="codiceFiscale" type="text" maxlength="16" required ></label>
+            </div></div></fieldset><fieldset class="form-section"><legend>Contatto</legend><div class="form-section-content"><div class="picus-fields fields-one">
+            <label class="campo ">Email istituzionale<input class="form-control" name="email" type="email" maxlength="254" required ></label>
+        </div></div></fieldset>
+            <div class="form-submit"><button class="btn btn-primary" type="submit">Crea utenza OPT</button><p class="picus-esito" role="status"></p></div>
+        </form>
+    </div>
 <div role="tabpanel" id="utenze-view-operatore" aria-labelledby="utenze-tab-operatore" tabindex="0" hidden>
 <h2 class="picus-card-title">Nuovo operatore del Banco</h2><form id="nuovo-operatore" class="picus-form form-layout" method="post" novalidate><fieldset class="campi-form" disabled>
 <fieldset class="form-section"><legend>Dati personali</legend><div class="form-section-content"><div class="picus-fields fields-two">
