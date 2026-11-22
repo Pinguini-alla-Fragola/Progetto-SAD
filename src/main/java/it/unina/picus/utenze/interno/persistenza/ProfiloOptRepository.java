@@ -5,10 +5,12 @@ import java.util.List;
 import java.util.Set;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ProfiloOptRepository extends JpaRepository<ProfiloOptJpa, UUID> {
+
+    boolean existsByCodiceStrutturaIgnoreCase(String codiceStruttura);
+
     @Query("""
             select p.accountId as accountId, a.nome as nome, p.comuneCodice as comuneCodice
             from ProfiloOptJpa p, AccountJpa a

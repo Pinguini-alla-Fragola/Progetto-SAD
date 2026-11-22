@@ -9,6 +9,8 @@ import java.util.UUID;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import it.unina.picus.utenze.api.OperazioneUtenzaNonConsentitaException;
+import it.unina.picus.utenze.api.UtenzaNonTrovataException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,6 +58,36 @@ public class StubUtenzeApi implements UtenzeApi {
         LOG.warn("Profilo 'skeleton': utenze in memoria (banco/opt/operatore@picus.test). Solo sviluppo e test.");
     }
 
+    @Override
+    public void revocaUtenzaOpt(UUID optAccountId) {
+        revocaAccountConRuolo(optAccountId, RuoloUtente.OPT,
+                "La revoca manuale è consentita solo per account con ruolo OPT.");
+    }
+
+    @Override
+    public void revocaUtenzaOperatore(UUID operatoreAccountId) {
+        revocaAccountConRuolo(operatoreAccountId, RuoloUtente.OPERATORE,
+                "La revoca manuale è consentita solo per account con ruolo OPERATORE.");
+    }
+
+    private void revocaAccountConRuolo(UUID accountId, RuoloUtente ruoloAtteso, String messaggioErroreRuolo) {
+        if (accountId == null) {
+            throw new UtenzaNonTrovataException("Identificativo account obbligatorio.");
+        }
+        Account trovato = trova(accountId)
+                .orElseThrow(() -> new UtenzaNonTrovataException("Account non trovato."));
+        if (trovato.ruolo() != ruoloAtteso) {
+            throw new OperazioneUtenzaNonConsentitaException(messaggioErroreRuolo);
+        }
+        if (trovato.stato() == StatoUtenza.REVOCATO) {
+            throw new OperazioneUtenzaNonConsentitaException("L'account è già stato revocato.");
+        }
+        perEmail.entrySet().stream()
+                .filter(e -> e.getValue().id().equals(accountId))
+                .findFirst()
+                .ifPresent(e -> perEmail.put(e.getKey(),
+                        new Account(trovato.id(), trovato.nome(), trovato.ruolo(), StatoUtenza.REVOCATO)));
+    }
     private void aggiungi(String email, String nome, RuoloUtente ruolo, StatoUtenza stato) {
         perEmail.put(email, new Account(UUID.nameUUIDFromBytes(email.getBytes()), nome, ruolo, stato));
     }
@@ -88,6 +120,18 @@ public class StubUtenzeApi implements UtenzeApi {
         return trova(accountId).map(StubUtenzeApi::sintetico);
     }
 
+    @Override
+    public List<AccountAmministrativo> elencoAccountPerRuolo(RuoloUtente ruolo) {
+        return perEmail.entrySet().stream()
+                .filter(e -> e.getValue().ruolo() == ruolo)
+                .map(e -> {
+                    Account a = e.getValue();
+                    return new AccountAmministrativo(
+                            a.id(), a.nome(), e.getKey(), a.id().toString().substring(0, 8).toUpperCase(),
+                            null, a.ruolo(), a.stato());
+                })
+                .toList();
+    }
     @Override
     public List<AccountSintetico> elencoAccountAttivi(RuoloUtente ruolo) {
         return perEmail.values().stream()

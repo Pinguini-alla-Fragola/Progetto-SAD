@@ -9,7 +9,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import it.unina.picus.utenze.api.UtenzeApi;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
@@ -39,10 +38,10 @@ class AreaController {
         return "login";
     }
 
-    /** Espone la vista delle credenziali mentre le azioni attendono il servizio dedicato. */
-    @GetMapping("/{operazione:recupera|attiva}")
-    String credenziali(@PathVariable String operazione, Model modello) {
-        modello.addAttribute("attivazione", "attiva".equals(operazione));
+    /** Espone la vista delle credenziali mentre il recupero password attende il servizio dedicato. */
+    @GetMapping("/recupera")
+    String recupera(Model modello) {
+        modello.addAttribute("attivazione", false);
         modello.addAttribute("valido", false);
         return "credenziali";
     }
@@ -59,8 +58,8 @@ class AreaController {
         modello.addAttribute("utente", account);
 
         if (identita.ruolo() == RuoloUtente.BANCO) {
-            modello.addAttribute("optAttive", utenze.elencoAccountAttivi(RuoloUtente.OPT));
-            modello.addAttribute("operatoriAttivi", utenze.elencoAccountAttivi(RuoloUtente.OPERATORE));
+            modello.addAttribute("optElenco", utenze.elencoAccountPerRuolo(RuoloUtente.OPT));
+            modello.addAttribute("operatoriElenco", utenze.elencoAccountPerRuolo(RuoloUtente.OPERATORE));
         }
         return vistaArea(identita.ruolo());
     }
