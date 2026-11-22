@@ -11,6 +11,21 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: validate
+  mail:
+    host: "${PICUS_MAIL_HOST:}"
+    port: "${PICUS_MAIL_PORT:587}"
+    username: "${PICUS_MAIL_USERNAME:}"
+    password: "${PICUS_MAIL_PASSWORD:}"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+          starttls:
+            enable: true
+
 server:
   servlet:
     session:
@@ -20,3 +35,9 @@ server:
         # false solo per sviluppo locale in http (PICUS_COOKIE_SECURE=false)
         secure: "${PICUS_COOKIE_SECURE:true}"
         same-site: lax
+
+picus:
+  app:
+    base-url: "${PICUS_APP_BASE_URL:http://localhost:8080}"
+  mail:
+    from: "${PICUS_MAIL_FROM:noreply@strawberrypenguin.it}"
