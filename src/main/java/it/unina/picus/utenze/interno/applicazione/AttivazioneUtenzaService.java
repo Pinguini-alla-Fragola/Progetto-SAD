@@ -32,8 +32,8 @@ import it.unina.picus.utenze.interno.persistenza.TokenAttivazioneRepository;
 
 /**
  * Servizio comune per la generazione dei token monouso di attivazione utenza e
- * l'impostazione iniziale della password (Task #147). Vale per OPT e Operatori: un nuovo link
- * rende inutilizzabile il precedente.
+ * l'impostazione iniziale della password (Task #147). Vale per OPT e Operatori: il link dura 72 ore
+ * (regole degli accessi) e un nuovo link rende inutilizzabile il precedente.
  */
 @Service
 @Profile("!skeleton")
@@ -57,7 +57,7 @@ public class AttivazioneUtenzaService {
             TokenAttivazioneRepository tokens,
             PasswordEncoder passwordEncoder,
             ApplicationEventPublisher eventPublisher,
-            @Value("${picus.utenze.attivazione.validita:PT48H}") Duration durataValidita) {
+            @Value("${picus.utenze.attivazione.validita:PT72H}") Duration durataValidita) {
         this(accounts, tokens, passwordEncoder, eventPublisher, durataValidita, Clock.systemUTC());
     }
 
