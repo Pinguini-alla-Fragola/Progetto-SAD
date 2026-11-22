@@ -62,6 +62,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#verificaBanco(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" tabindex="0">verificaBanco(UtenzeApi.IdentitaAutenticata)</a></li>
 <li><a href="#verificaConsultazione(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.Set)" tabindex="0">verificaConsultazione(UtenzeApi.IdentitaAutenticata, Set)</a></li>
 <li><a href="#verificaConfermaRicezione(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.Set)" tabindex="0">verificaConfermaRicezione(UtenzeApi.IdentitaAutenticata, Set)</a></li>
+<li><a href="#verificaPossibileDestinatario(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" tabindex="0">verificaPossibileDestinatario(UtenzeApi.IdentitaAutenticata)</a></li>
 </ol>
 </li>
 </ol>
@@ -133,6 +134,11 @@ filtro obbligatorio. Una query senza destinatario non è valida: le implementazi
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Consultazione di una comunicazione e download dei suoi allegati: il Banco oppure un
 destinatario.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#verificaPossibileDestinatario(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">verificaPossibileDestinatario</a><wbr>(<a href="../../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Ammette soltanto i ruoli che possono ricevere comunicazioni: le OPT e gli operatori, non il Banco.</div>
 </div>
 </div>
 </div>
@@ -221,6 +227,21 @@ Chi chiama registra il riscontro per <code>attore.accountId()</code>.</div>
 <li><a href="../../api/ComunicazioniApi.html#confermaRicezione(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)"><code>ComunicazioniApi.confermaRicezione(UtenzeApi.IdentitaAutenticata, UUID)</code></a></li>
 </ul>
 </dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="verificaPossibileDestinatario(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)">
+<h3>verificaPossibileDestinatario</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">verificaPossibileDestinatario</span><wbr><span class="parameters">(<a href="../../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore)</span></div>
+<div class="block">Ammette soltanto i ruoli che possono ricevere comunicazioni: le OPT e gli operatori, non il Banco.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>attore</code> - identità verificata della sessione</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/SecurityException.html" title="class or interface in java.lang" class="external-link">SecurityException</a></code> - se l'identità è incompleta o il ruolo non può ricevere comunicazioni</dd>
 </dl>
 </div>
 </section>

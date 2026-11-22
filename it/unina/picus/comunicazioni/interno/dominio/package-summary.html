@@ -67,7 +67,7 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="package-signature">package <span class="element-name">it.unina.picus.comunicazioni.interno.dominio</span></div>
 <section class="package-description" id="package-description">
-<div class="block">Regole di accesso alle comunicazioni e ai relativi allegati.</div>
+<div class="block">Regole di accesso e di invio delle comunicazioni, con la scelta dei destinatari.</div>
 </section>
 </div>
 <section class="summary">
@@ -82,22 +82,79 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color">
 <div class="block">Componenti interni del modulo Comunicazioni.</div>
 </div>
-<div class="col-first odd-row-color"><a href="../persistenza/package-summary.html">it.unina.picus.comunicazioni.interno.persistenza</a></div>
+<div class="col-first odd-row-color"><a href="../applicazione/package-summary.html">it.unina.picus.comunicazioni.interno.applicazione</a></div>
 <div class="col-last odd-row-color">
-<div class="block">Registrazione e consultazione degli avvisi operativi.</div>
+<div class="block">Casi d'uso del modulo Comunicazioni: invio del Banco e avviso delle comunicazioni da confermare.</div>
+</div>
+<div class="col-first even-row-color"><a href="../persistenza/package-summary.html">it.unina.picus.comunicazioni.interno.persistenza</a></div>
+<div class="col-last even-row-color">
+<div class="block">Registrazione e consultazione degli avvisi operativi e delle comunicazioni del Banco.</div>
 </div>
 </div>
 </div>
 </li>
 <li>
 <div id="class-summary">
-<div class="caption"><span>Classes</span></div>
+<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="class-summary-tab0" role="tab" aria-selected="true" aria-controls="class-summary.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary', 2)" class="active-table-tab">All Classes and Interfaces</button><button id="class-summary-tab1" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab1', 2)" class="table-tab">Interfaces</button><button id="class-summary-tab2" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab2', 2)" class="table-tab">Classes</button><button id="class-summary-tab3" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab3', 2)" class="table-tab">Enum Classes</button><button id="class-summary-tab4" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab4', 2)" class="table-tab">Record Classes</button></div>
+<div id="class-summary.tabpanel" role="tabpanel" aria-labelledby="class-summary-tab0">
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Class</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color class-summary class-summary-tab2"><a href="RegoleAccessoComunicazione.html" title="class in it.unina.picus.comunicazioni.interno.dominio">RegoleAccessoComunicazione</a></div>
+<div class="col-first even-row-color class-summary class-summary-tab1"><a href="ArchivioComunicazioni.html" title="interface in it.unina.picus.comunicazioni.interno.dominio">ArchivioComunicazioni</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab1">
+<div class="block">Dove si registrano le comunicazioni.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab4"><a href="BozzaComunicazione.html" title="class in it.unina.picus.comunicazioni.interno.dominio">BozzaComunicazione</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab4">
+<div class="block">Comunicazione che il Banco vuole inviare, con i campi già ripuliti.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="CampoComunicazione.html" title="class in it.unina.picus.comunicazioni.interno.dominio">CampoComunicazione</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="block">Nomi dei campi del modulo di invio, usati per indicare quale campo correggere.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="Errori.html" title="class in it.unina.picus.comunicazioni.interno.dominio">Errori</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
+<div class="block">Raccoglie gli errori trovati su un modulo, uno per campo, così chi invia vede subito tutto
+quello che deve correggere.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab3"><a href="LetturaGruppo.html" title="enum class in it.unina.picus.comunicazioni.interno.dominio">LetturaGruppo</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab3">
+<div class="block">Esito della lettura degli account del gruppo ricevuti dal modulo.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab4"><a href="NuovaComunicazione.html" title="class in it.unina.picus.comunicazioni.interno.dominio">NuovaComunicazione</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab4">
+<div class="block">Comunicazione pronta da registrare, con gli account che la ricevono.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab4"><a href="PlateaDestinatari.html" title="class in it.unina.picus.comunicazioni.interno.dominio">PlateaDestinatari</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab4">
+<div class="block">A quale ruolo si rivolge un tipo di destinatari e se il Banco sceglie un gruppo di account.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="RegolaCaratteri.html" title="class in it.unina.picus.comunicazioni.interno.dominio">RegolaCaratteri</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
+<div class="block">Rifiuta i caratteri di controllo, come il carattere nullo: il database non li accetta e senza questa regola
+l'invio fallirebbe con un errore generico invece di indicare il campo da correggere.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab1"><a href="RegolaComunicazione.html" title="interface in it.unina.picus.comunicazioni.interno.dominio">RegolaComunicazione</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab1">
+<div class="block">Una singola regola di validazione su una comunicazione da inviare.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="RegolaContenuto.html" title="class in it.unina.picus.comunicazioni.interno.dominio">RegolaContenuto</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
+<div class="block">Controlla oggetto e testo: l'oggetto è facoltativo, il testo è obbligatorio.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="RegolaDestinatari.html" title="class in it.unina.picus.comunicazioni.interno.dominio">RegolaDestinatari</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="block">Controlla la scelta dei destinatari: il tipo è obbligatorio, un invio a un gruppo richiede almeno un account
+e un invio a tutti non accetta un gruppo, per non lasciare dubbi su chi riceverà la comunicazione.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="RegoleAccessoComunicazione.html" title="class in it.unina.picus.comunicazioni.interno.dominio">RegoleAccessoComunicazione</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
 <div class="block">Regole di accesso alle comunicazioni del Banco (#28, criterio 7).</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="ValidatoreComunicazione.html" title="class in it.unina.picus.comunicazioni.interno.dominio">ValidatoreComunicazione</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="block">Applica in ordine tutte le regole e restituisce gli errori trovati.</div>
+</div>
 </div>
 </div>
 </div>

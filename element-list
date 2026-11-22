@@ -6,6 +6,7 @@ it.unina.picus.catalogo.interno.persistenza
 it.unina.picus.catalogo.web
 it.unina.picus.comunicazioni.api
 it.unina.picus.comunicazioni.interno
+it.unina.picus.comunicazioni.interno.applicazione
 it.unina.picus.comunicazioni.interno.dominio
 it.unina.picus.comunicazioni.interno.persistenza
 it.unina.picus.comunicazioni.web

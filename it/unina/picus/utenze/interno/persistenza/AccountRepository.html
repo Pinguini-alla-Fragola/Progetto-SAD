@@ -59,8 +59,11 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-summary" tabindex="0">Method Summary</a></li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
+<li><a href="#findByIdForUpdate(java.util.UUID)" tabindex="0">findByIdForUpdate(UUID)</a></li>
 <li><a href="#findByEmailIgnoreCase(java.lang.String)" tabindex="0">findByEmailIgnoreCase(String)</a></li>
+<li><a href="#existsByEmailIgnoreCase(java.lang.String)" tabindex="0">existsByEmailIgnoreCase(String)</a></li>
 <li><a href="#findByRuoloAndStato(java.lang.String,java.lang.String)" tabindex="0">findByRuoloAndStato(String, String)</a></li>
+<li><a href="#findByRuolo(java.lang.String)" tabindex="0">findByRuolo(String)</a></li>
 <li><a href="#aggiornaHash(java.util.UUID,java.lang.String)" tabindex="0">aggiornaHash(UUID, String)</a></li>
 </ol>
 </li>
@@ -99,13 +102,22 @@ extends org.springframework.data.jpa.repository.JpaRepository&lt;<a href="Accoun
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#aggiornaHash(java.util.UUID,java.lang.String)" class="member-name-link">aggiornaHash</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;id,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;hash)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#existsByEmailIgnoreCase(java.lang.String)" class="member-name-link">existsByEmailIgnoreCase</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;email)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="AccountJpa.html" title="class in it.unina.picus.utenze.interno.persistenza">AccountJpa</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#findByEmailIgnoreCase(java.lang.String)" class="member-name-link">findByEmailIgnoreCase</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;email)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="AccountJpa.html" title="class in it.unina.picus.utenze.interno.persistenza">AccountJpa</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#findByEmailIgnoreCase(java.lang.String)" class="member-name-link">findByEmailIgnoreCase</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;email)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#findByIdForUpdate(java.util.UUID)" class="member-name-link">findByIdForUpdate</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;id)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="AccountJpa.html" title="class in it.unina.picus.utenze.interno.persistenza">AccountJpa</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#findByRuoloAndStato(java.lang.String,java.lang.String)" class="member-name-link">findByRuoloAndStato</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;ruolo,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;stato)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#findByRuolo(java.lang.String)" class="member-name-link">findByRuolo</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;ruolo)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="AccountJpa.html" title="class in it.unina.picus.utenze.interno.persistenza">AccountJpa</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#findByRuoloAndStato(java.lang.String,java.lang.String)" class="member-name-link">findByRuoloAndStato</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;ruolo,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;stato)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">&nbsp;</div>
 </div>
 </div>
 </div>
@@ -139,10 +151,29 @@ extends org.springframework.data.jpa.repository.JpaRepository&lt;<a href="Accoun
 <h2>Method Details</h2>
 <ul class="member-list">
 <li>
+<section class="detail" id="findByIdForUpdate(java.util.UUID)">
+<h3>findByIdForUpdate</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="annotations">@Lock(PESSIMISTIC_WRITE)
+@Query("select a from AccountJpa a where a.id = :id")
+</span><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="AccountJpa.html" title="class in it.unina.picus.utenze.interno.persistenza">AccountJpa</a>&gt;</span>&nbsp;<span class="element-name">findByIdForUpdate</span><wbr><span class="parameters">(@Param("id")
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;id)</span></div>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="findByEmailIgnoreCase(java.lang.String)">
 <h3>findByEmailIgnoreCase</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="AccountJpa.html" title="class in it.unina.picus.utenze.interno.persistenza">AccountJpa</a>&gt;</span>&nbsp;<span class="element-name">findByEmailIgnoreCase</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;email)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="existsByEmailIgnoreCase(java.lang.String)">
+<h3>existsByEmailIgnoreCase</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="return-type">boolean</span>&nbsp;<span class="element-name">existsByEmailIgnoreCase</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;email)</span></div>
 </div>
 </section>
 </li>
@@ -152,6 +183,14 @@ extends org.springframework.data.jpa.repository.JpaRepository&lt;<a href="Accoun
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="AccountJpa.html" title="class in it.unina.picus.utenze.interno.persistenza">AccountJpa</a>&gt;</span>&nbsp;<span class="element-name">findByRuoloAndStato</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;ruolo,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;stato)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="findByRuolo(java.lang.String)">
+<h3>findByRuolo</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="AccountJpa.html" title="class in it.unina.picus.utenze.interno.persistenza">AccountJpa</a>&gt;</span>&nbsp;<span class="element-name">findByRuolo</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;ruolo)</span></div>
 </div>
 </section>
 </li>

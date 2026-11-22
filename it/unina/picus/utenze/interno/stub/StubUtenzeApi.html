@@ -77,10 +77,13 @@ loadScripts(document, 'script');</script>
 </li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
+<li><a href="#revocaUtenzaOpt(java.util.UUID)" tabindex="0">revocaUtenzaOpt(UUID)</a></li>
+<li><a href="#revocaUtenzaOperatore(java.util.UUID)" tabindex="0">revocaUtenzaOperatore(UUID)</a></li>
 <li><a href="#revoca(java.lang.String)" tabindex="0">revoca(String)</a></li>
 <li><a href="#verificaCredenziali(java.lang.String,java.lang.String)" tabindex="0">verificaCredenziali(String, String)</a></li>
 <li><a href="#verificaAccountSessione(java.util.UUID)" tabindex="0">verificaAccountSessione(UUID)</a></li>
 <li><a href="#cercaAccount(java.util.UUID)" tabindex="0">cercaAccount(UUID)</a></li>
+<li><a href="#elencoAccountPerRuolo(it.unina.picus.utenze.api.UtenzeApi.RuoloUtente)" tabindex="0">elencoAccountPerRuolo(UtenzeApi.RuoloUtente)</a></li>
 <li><a href="#elencoAccountAttivi(it.unina.picus.utenze.api.UtenzeApi.RuoloUtente)" tabindex="0">elencoAccountAttivi(UtenzeApi.RuoloUtente)</a></li>
 <li><a href="#cercaProfiloErogatoreAttivo(java.util.UUID)" tabindex="0">cercaProfiloErogatoreAttivo(UUID)</a></li>
 <li><a href="#elencoOperatoriAttiviPerMisura(long)" tabindex="0">elencoOperatoriAttiviPerMisura(long)</a></li>
@@ -123,7 +126,7 @@ capo a coda (login, area per ruolo, logout) senza database. Attivo solo con il p
 <h2>Nested Class Summary</h2>
 <div class="inherited-list">
 <h3 id="nested-classes-inherited-from-class-it.unina.picus.utenze.api.UtenzeApi">Nested classes/interfaces inherited from interface&nbsp;<a href="../../api/UtenzeApi.html#nested-class-summary" title="interface in it.unina.picus.utenze.api">UtenzeApi</a></h3>
-<code><a href="../../api/UtenzeApi.AccountSintetico.html" title="class in it.unina.picus.utenze.api">UtenzeApi.AccountSintetico</a>, <a href="../../api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>, <a href="../../api/UtenzeApi.ProfiloErogatore.html" title="class in it.unina.picus.utenze.api">UtenzeApi.ProfiloErogatore</a>, <a href="../../api/UtenzeApi.RuoloUtente.html" title="enum class in it.unina.picus.utenze.api">UtenzeApi.RuoloUtente</a>, <a href="../../api/UtenzeApi.StatoUtenza.html" title="enum class in it.unina.picus.utenze.api">UtenzeApi.StatoUtenza</a>, <a href="../../api/UtenzeApi.TipoErogatore.html" title="enum class in it.unina.picus.utenze.api">UtenzeApi.TipoErogatore</a></code></div>
+<code><a href="../../api/UtenzeApi.AccountAmministrativo.html" title="class in it.unina.picus.utenze.api">UtenzeApi.AccountAmministrativo</a>, <a href="../../api/UtenzeApi.AccountSintetico.html" title="class in it.unina.picus.utenze.api">UtenzeApi.AccountSintetico</a>, <a href="../../api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>, <a href="../../api/UtenzeApi.ProfiloErogatore.html" title="class in it.unina.picus.utenze.api">UtenzeApi.ProfiloErogatore</a>, <a href="../../api/UtenzeApi.RuoloUtente.html" title="enum class in it.unina.picus.utenze.api">UtenzeApi.RuoloUtente</a>, <a href="../../api/UtenzeApi.StatoUtenza.html" title="enum class in it.unina.picus.utenze.api">UtenzeApi.StatoUtenza</a>, <a href="../../api/UtenzeApi.TipoErogatore.html" title="enum class in it.unina.picus.utenze.api">UtenzeApi.TipoErogatore</a></code></div>
 </section>
 </li>
 <!-- =========== FIELD SUMMARY =========== -->
@@ -206,30 +209,45 @@ capo a coda (login, area per ruolo, logout) senza database. Attivo solo con il p
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Elenca gli account attivi di un ruolo per risolvere una selezione di destinatari.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../../api/UtenzeApi.ProfiloErogatore.html" title="class in it.unina.picus.utenze.api">UtenzeApi.ProfiloErogatore</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#elencoOperatoriAttiviPerMisura(long)" class="member-name-link">elencoOperatoriAttiviPerMisura</a><wbr>(long&nbsp;misuraId)</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../../api/UtenzeApi.AccountAmministrativo.html" title="class in it.unina.picus.utenze.api">UtenzeApi.AccountAmministrativo</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#elencoAccountPerRuolo(it.unina.picus.utenze.api.UtenzeApi.RuoloUtente)" class="member-name-link">elencoAccountPerRuolo</a><wbr>(<a href="../../api/UtenzeApi.RuoloUtente.html" title="enum class in it.unina.picus.utenze.api">UtenzeApi.RuoloUtente</a>&nbsp;ruolo)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Elenca gli operatori attivi del Banco il cui profilo comprende la misura indicata.</div>
+<div class="block">Elenca gli account di un ruolo per la gestione amministrativa del Banco, in qualsiasi stato.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../../api/UtenzeApi.ProfiloErogatore.html" title="class in it.unina.picus.utenze.api">UtenzeApi.ProfiloErogatore</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#elencoOptAttive(java.util.Set)" class="member-name-link">elencoOptAttive</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html" title="class or interface in java.util" class="external-link">Set</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&gt;&nbsp;ids)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#elencoOperatoriAttiviPerMisura(long)" class="member-name-link">elencoOperatoriAttiviPerMisura</a><wbr>(long&nbsp;misuraId)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Elenca gli operatori attivi del Banco il cui profilo comprende la misura indicata.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../../api/UtenzeApi.ProfiloErogatore.html" title="class in it.unina.picus.utenze.api">UtenzeApi.ProfiloErogatore</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#elencoOptAttive(java.util.Set)" class="member-name-link">elencoOptAttive</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html" title="class or interface in java.util" class="external-link">Set</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&gt;&nbsp;ids)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Legge in blocco i profili delle OPT attive appartenenti alla selezione.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#revoca(java.lang.String)" class="member-name-link">revoca</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;email)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#revoca(java.lang.String)" class="member-name-link">revoca</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;email)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Simula la revoca di un account mentre ha una sessione aperta.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="../../api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#verificaAccountSessione(java.util.UUID)" class="member-name-link">verificaAccountSessione</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;accountId)</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#revocaUtenzaOperatore(java.util.UUID)" class="member-name-link">revocaUtenzaOperatore</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;operatoreAccountId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Revoca l'accesso di un operatore attivo o in attesa di attivazione e invalida gli inviti pendenti.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#revocaUtenzaOpt(java.util.UUID)" class="member-name-link">revocaUtenzaOpt</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;optAccountId)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Conferma l'identità associata a una sessione valida, verificando lo stato corrente dell'account.</div>
+<div class="block">Revoca l'accesso di una OPT attiva o in attesa di attivazione e invalida gli inviti pendenti.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="../../api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#verificaCredenziali(java.lang.String,java.lang.String)" class="member-name-link">verificaCredenziali</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;email,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;password)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#verificaAccountSessione(java.util.UUID)" class="member-name-link">verificaAccountSessione</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;accountId)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Conferma l'identità associata a una sessione valida, verificando lo stato corrente dell'account.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="../../api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#verificaCredenziali(java.lang.String,java.lang.String)" class="member-name-link">verificaCredenziali</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;email,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;password)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Verifica le credenziali per l'apertura di una sessione di un account attivo.</div>
 </div>
 </div>
@@ -374,6 +392,38 @@ capo a coda (login, area per ruolo, logout) senza database. Attivo solo con il p
 <h2>Method Details</h2>
 <ul class="member-list">
 <li>
+<section class="detail" id="revocaUtenzaOpt(java.util.UUID)">
+<h3>revocaUtenzaOpt</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">revocaUtenzaOpt</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;optAccountId)</span></div>
+<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../../api/UtenzeApi.html#revocaUtenzaOpt(java.util.UUID)">UtenzeApi</a></code></span></div>
+<div class="block">Revoca l'accesso di una OPT attiva o in attesa di attivazione e invalida gli inviti pendenti.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="../../api/UtenzeApi.html#revocaUtenzaOpt(java.util.UUID)">revocaUtenzaOpt</a></code>&nbsp;in interface&nbsp;<code><a href="../../api/UtenzeApi.html" title="interface in it.unina.picus.utenze.api">UtenzeApi</a></code></dd>
+<dt>Parameters:</dt>
+<dd><code>optAccountId</code> - identificativo dell'account OPT da revocare</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="revocaUtenzaOperatore(java.util.UUID)">
+<h3>revocaUtenzaOperatore</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">revocaUtenzaOperatore</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;operatoreAccountId)</span></div>
+<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../../api/UtenzeApi.html#revocaUtenzaOperatore(java.util.UUID)">UtenzeApi</a></code></span></div>
+<div class="block">Revoca l'accesso di un operatore attivo o in attesa di attivazione e invalida gli inviti pendenti.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="../../api/UtenzeApi.html#revocaUtenzaOperatore(java.util.UUID)">revocaUtenzaOperatore</a></code>&nbsp;in interface&nbsp;<code><a href="../../api/UtenzeApi.html" title="interface in it.unina.picus.utenze.api">UtenzeApi</a></code></dd>
+<dt>Parameters:</dt>
+<dd><code>operatoreAccountId</code> - identificativo dell'account operatore da revocare</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="revoca(java.lang.String)">
 <h3>revoca</h3>
 <div class="horizontal-scroll">
@@ -434,6 +484,24 @@ capo a coda (login, area per ruolo, logout) senza database. Attivo solo con il p
 <dd><code>accountId</code> - identificativo dell'account da consultare</dd>
 <dt>Returns:</dt>
 <dd>account sintetico, oppure vuoto se l'identificativo è sconosciuto</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="elencoAccountPerRuolo(it.unina.picus.utenze.api.UtenzeApi.RuoloUtente)">
+<h3>elencoAccountPerRuolo</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../../api/UtenzeApi.AccountAmministrativo.html" title="class in it.unina.picus.utenze.api">UtenzeApi.AccountAmministrativo</a>&gt;</span>&nbsp;<span class="element-name">elencoAccountPerRuolo</span><wbr><span class="parameters">(<a href="../../api/UtenzeApi.RuoloUtente.html" title="enum class in it.unina.picus.utenze.api">UtenzeApi.RuoloUtente</a>&nbsp;ruolo)</span></div>
+<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../../api/UtenzeApi.html#elencoAccountPerRuolo(it.unina.picus.utenze.api.UtenzeApi.RuoloUtente)">UtenzeApi</a></code></span></div>
+<div class="block">Elenca gli account di un ruolo per la gestione amministrativa del Banco, in qualsiasi stato.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="../../api/UtenzeApi.html#elencoAccountPerRuolo(it.unina.picus.utenze.api.UtenzeApi.RuoloUtente)">elencoAccountPerRuolo</a></code>&nbsp;in interface&nbsp;<code><a href="../../api/UtenzeApi.html" title="interface in it.unina.picus.utenze.api">UtenzeApi</a></code></dd>
+<dt>Parameters:</dt>
+<dd><code>ruolo</code> - ruolo degli account da elencare</dd>
+<dt>Returns:</dt>
+<dd>account amministrativi del ruolo richiesto, eventualmente nessuno</dd>
 </dl>
 </div>
 </section>
