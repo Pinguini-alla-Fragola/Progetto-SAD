@@ -24,177 +24,177 @@
 <button class="sidebar-backdrop" type="button" aria-label="Chiudi menu di navigazione" tabindex="-1" hidden></button>
 <main id="contenuto" class="picus-container area" tabindex="-1">
     <nav class="area-nav" id="workspace-sidebar" aria-label="Sezioni dell’area di lavoro">
-<a href="#richieste"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#requests"></use></svg><span>Richieste</span></a>
-<a href="#utenze"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#people"></use></svg><span>Utenze</span></a>
-<a href="#catalogo"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#book"></use></svg><span>Catalogo</span></a>
-<a href="#comunicazioni"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#mail"></use></svg><span>Comunicazioni</span></a>
-<a href="#rendicontazione"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#chart"></use></svg><span>Monitoraggio</span></a>
+        <a href="#richieste"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#requests"></use></svg><span>Richieste</span></a>
+        <a href="#utenze"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#people"></use></svg><span>Utenze</span></a>
+        <a href="#catalogo"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#book"></use></svg><span>Catalogo</span></a>
+        <a href="#comunicazioni"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#mail"></use></svg><span>Comunicazioni</span></a>
+        <a href="#rendicontazione"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#chart"></use></svg><span>Monitoraggio</span></a>
     </nav>
     <div class="area-content">
         <header class="area-intro"><h1 id="workspace-title">Richieste</h1></header>
         <p id="area-esito" class="picus-esito" role="status"></p>
-<section class="area-panel" id="richieste" tabindex="-1" aria-label="Richieste">
-<div class="workspace-tabs" data-tabs><div class="tab-list" role="tablist" aria-label="Richieste">
-<button type="button" role="tab" id="richieste-tab-coda" aria-controls="richieste-view-coda" aria-selected="true" tabindex="0">Coda</button>
-<button type="button" role="tab" id="richieste-tab-archivio" aria-controls="richieste-view-archivio" aria-selected="false" tabindex="-1">Archivio</button>
-</div>
-<div role="tabpanel" id="richieste-view-coda" aria-labelledby="richieste-tab-coda" tabindex="0">
-<div class="panel-heading"><h2 class="picus-card-title">Coda delle richieste</h2><button class="btn btn-secondary btn-sm" type="button" data-aggiorna="richieste">Aggiorna coda</button></div><div class="picus-list" id="coda" aria-live="polite"></div>
-</div>
-<div role="tabpanel" id="richieste-view-archivio" aria-labelledby="richieste-tab-archivio" tabindex="0" hidden>
-<h2 class="picus-card-title">Archivio degli esiti</h2><div class="picus-list" id="archivio" aria-live="polite" data-funzione-inattiva></div>
-</div>
-</div>
-</section>
-<section class="area-panel" id="utenze" tabindex="-1" aria-label="Utenze">
-<div class="workspace-tabs" data-tabs><div class="tab-list" role="tablist" aria-label="Gestione utenze">
-<button type="button" role="tab" id="utenze-tab-account" aria-controls="utenze-view-account" aria-selected="true" tabindex="0">Account</button>
-<button type="button" role="tab" id="utenze-tab-opt" aria-controls="utenze-view-opt" aria-selected="false" tabindex="-1">Nuova OPT</button>
-<button type="button" role="tab" id="utenze-tab-operatore" aria-controls="utenze-view-operatore" aria-selected="false" tabindex="-1">Nuovo operatore</button>
-<button type="button" role="tab" id="utenze-tab-csv" aria-controls="utenze-view-csv" aria-selected="false" tabindex="-1">Importa CSV</button>
-</div>
-<div role="tabpanel" id="utenze-view-account" aria-labelledby="utenze-tab-account" tabindex="0">
-<h2 class="picus-card-title">Account registrati</h2><div class="picus-list" id="account" aria-live="polite">
-    <article class="account-row" th:each="account : ${optAttive}"
-             th:attr="data-ruolo=${account.ruolo.name()},data-stato=${account.stato.name()}">
-        <div class="account-identity"><strong th:text="${account.nomeVisualizzato}"></strong>
-            <p class="picus-meta" th:text="${account.ruolo.name() == 'OPT' ? 'OPT' : 'Operatore'}"></p></div>
-        <div class="account-cell"><span class="cell-label">Email</span><span>—</span></div>
-        <div class="account-cell"><span class="cell-label">Comune</span><span>—</span></div>
-        <div class="account-cell"><span class="cell-label">Stato</span><span class="status-label">Attivo</span></div>
-        <div class="picus-actions"><span class="azione-inattiva" data-funzione-inattiva><button type="button" class="btn btn-danger btn-sm" disabled>Revoca</button></span></div>
-    </article>
-    <article class="account-row" th:each="account : ${operatoriAttivi}"
-             th:attr="data-ruolo=${account.ruolo.name()},data-stato=${account.stato.name()}">
-        <div class="account-identity"><strong th:text="${account.nomeVisualizzato}"></strong>
-            <p class="picus-meta" th:text="${account.ruolo.name() == 'OPT' ? 'OPT' : 'Operatore'}"></p></div>
-        <div class="account-cell"><span class="cell-label">Email</span><span>—</span></div>
-        <div class="account-cell"><span class="cell-label">Comune</span><span>—</span></div>
-        <div class="account-cell"><span class="cell-label">Stato</span><span class="status-label">Attivo</span></div>
-        <div class="picus-actions"><span class="azione-inattiva" data-funzione-inattiva><button type="button" class="btn btn-danger btn-sm" disabled>Revoca</button></span></div>
-    </article>
-</div>
-</div>
-<div role="tabpanel" id="utenze-view-opt" aria-labelledby="utenze-tab-opt" tabindex="0" hidden>
-<h2 class="picus-card-title">Nuova organizzazione partner</h2><form id="nuova-opt" class="picus-form form-layout" data-form-anteprima><fieldset class="campi-inattivi" disabled>
-<fieldset class="form-section"><legend>Organizzazione</legend><div class="form-section-content"><div class="picus-fields fields-two">
-<label class="campo ">Denominazione OPT<input class="form-control" name="nome" type="text" required ></label>
-<label class="campo ">Codice struttura<input class="form-control" name="codiceStruttura" type="text" required ></label>
-<label class="campo ">Comune<input class="form-control" name="comune" type="text" required ></label>
-<label class="campo ">Codice fiscale<input class="form-control" name="codiceFiscale" type="text" required ></label>
-</div></div></fieldset><fieldset class="form-section"><legend>Contatto</legend><div class="form-section-content"><div class="picus-fields fields-one">
-<label class="campo ">Email istituzionale<input class="form-control" name="email" type="email" required ></label>
-</div></div></fieldset>
-<div class="form-submit"><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-primary" type="submit">Crea utenza OPT</button></span><p class="picus-esito" role="status"></p></div>
-</fieldset></form>
-</div>
-<div role="tabpanel" id="utenze-view-operatore" aria-labelledby="utenze-tab-operatore" tabindex="0" hidden>
-<h2 class="picus-card-title">Nuovo operatore del Banco</h2><form id="nuovo-operatore" class="picus-form form-layout" data-form-anteprima><fieldset class="campi-inattivi" disabled>
-<fieldset class="form-section"><legend>Dati personali</legend><div class="form-section-content"><div class="picus-fields fields-two">
-<label class="campo ">Nome<input class="form-control" name="nome" type="text" required ></label>
-<label class="campo ">Cognome<input class="form-control" name="cognome" type="text" required ></label>
-<label class="campo ">Codice fiscale<input class="form-control" name="codiceFiscale" type="text" required ></label>
-</div></div></fieldset><fieldset class="form-section"><legend>Contatti</legend><div class="form-section-content"><div class="picus-fields fields-two">
-<label class="campo ">Email<input class="form-control" name="email" type="email" required ></label>
-<label class="campo ">Telefono<input class="form-control" name="telefono" type="tel" required ></label>
-</div></div></fieldset><fieldset class="form-section"><legend>Inquadramento</legend><div class="form-section-content"><div class="picus-fields fields-two">
-<label class="campo ">Territorio (comune)<input class="form-control" name="comune" type="text" required ></label>
-<label class="campo ">Tipologia<select class="form-control" name="tipo" required ><option value="INTERNO_BANCO">Interno del Banco</option><option value="ESTERNO_PAGATO_BANCO">Esterno pagato dal Banco</option></select></label>
-</div></div></fieldset><fieldset class="form-section"><legend>Attività</legend><div class="form-section-content"><fieldset class="campo-scelte" data-misure ><legend>Misure</legend><div class="picus-choices"></div></fieldset><label class="picus-check"><input name="centroPicus" type="checkbox" > Operatore interno del Centro PICUS</label></div></fieldset>
-<div class="form-submit"><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-primary" type="submit">Crea operatore</button></span><p class="picus-esito" role="status"></p></div>
-</fieldset></form>
-</div>
-<div role="tabpanel" id="utenze-view-csv" aria-labelledby="utenze-tab-csv" tabindex="0" hidden>
-<h2 class="picus-card-title">Importa organizzazioni da CSV</h2><form id="csv" class="picus-form form-layout" data-form-anteprima><fieldset class="campi-inattivi" disabled>
-<div class="picus-fields fields-one">
-<label class="campo ">File CSV UTF-8<input class="form-control" name="csv" type="file" required accept=".csv,text/csv"></label>
-</div>
-<div class="form-submit"><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-primary" type="submit">Importa OPT</button></span><p class="picus-esito" role="status"></p></div>
-</fieldset></form><div class="picus-list" id="rapporto-csv" aria-live="polite" data-funzione-inattiva></div>
-</div>
-</div>
-</section>
-<section class="area-panel" id="catalogo" tabindex="-1" aria-label="Catalogo">
-<div class="workspace-tabs" data-tabs><div class="tab-list" role="tablist" aria-label="Gestione catalogo">
-<button type="button" role="tab" id="catalogo-tab-misure" aria-controls="catalogo-view-misure" aria-selected="true" tabindex="0">Misure</button>
-<button type="button" role="tab" id="catalogo-tab-nuova" aria-controls="catalogo-view-nuova" aria-selected="false" tabindex="-1">Nuova misura</button>
-<button type="button" role="tab" id="catalogo-tab-offerte" aria-controls="catalogo-view-offerte" aria-selected="false" tabindex="-1">Offerte OPT</button>
-</div>
-<div role="tabpanel" id="catalogo-view-misure" aria-labelledby="catalogo-tab-misure" tabindex="0">
-<h2 class="picus-card-title">Misure attive</h2><div class="picus-list" id="catalogo-lista" aria-live="polite"></div>
-</div>
-<div role="tabpanel" id="catalogo-view-nuova" aria-labelledby="catalogo-tab-nuova" tabindex="0" hidden>
-<h2 class="sr-only">Aggiungi una misura</h2><form id="nuova-misura" class="picus-form form-layout" data-form-anteprima><fieldset class="campi-inattivi" disabled>
-<fieldset class="form-section"><legend>Misura</legend><div class="form-section-content"><div class="picus-fields fields-two">
-<label class="campo ">Codice misura<input class="form-control" name="codice" type="text" required ></label>
-<label class="campo ">Titolo<input class="form-control" name="titolo" type="text" required ></label>
-<label class="campo campo-esteso">Descrizione<textarea class="form-control" name="descrizione" rows="6" ></textarea></label>
-<label class="picus-check"><input name="remoto" type="checkbox" > Compatibile con il remoto</label>
-</div></div></fieldset>
-<div class="form-submit"><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-primary" type="submit">Salva misura</button></span><p class="picus-esito" role="status"></p></div>
-</fieldset></form>
-</div>
-<div role="tabpanel" id="catalogo-view-offerte" aria-labelledby="catalogo-tab-offerte" tabindex="0" hidden>
-<h2 class="sr-only">Offerte delle organizzazioni</h2><form id="consulta-offerta" class="picus-form form-layout" data-form-anteprima><fieldset class="campi-inattivi" disabled>
-<div class="picus-fields fields-one">
-<label class="campo ">Organizzazione<select class="form-control" name="optId" required ></select></label>
-</div>
-<div class="form-submit"><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-primary" type="submit">Consulta offerta</button></span><p class="picus-esito" role="status"></p></div>
-</fieldset></form><div class="picus-list" id="offerta-banco" aria-live="polite" data-funzione-inattiva></div>
-</div>
-</div>
-</section>
-<section class="area-panel" id="comunicazioni" tabindex="-1" aria-label="Comunicazioni">
-<div class="workspace-tabs" data-tabs><div class="tab-list" role="tablist" aria-label="Comunicazioni">
-<button type="button" role="tab" id="comunicazioni-tab-inviate" aria-controls="comunicazioni-view-inviate" aria-selected="true" tabindex="0">Inviate</button>
-<button type="button" role="tab" id="comunicazioni-tab-scrivi" aria-controls="comunicazioni-view-scrivi" aria-selected="false" tabindex="-1">Scrivi</button>
-</div>
-<div role="tabpanel" id="comunicazioni-view-inviate" aria-labelledby="comunicazioni-tab-inviate" tabindex="0">
-<h2 class="sr-only">Comunicazioni inviate</h2><div class="picus-list" id="messaggi" aria-live="polite" data-funzione-inattiva></div>
-</div>
-<div role="tabpanel" id="comunicazioni-view-scrivi" aria-labelledby="comunicazioni-tab-scrivi" tabindex="0" hidden>
-<h2 class="sr-only">Nuova comunicazione</h2><form id="comunicazione" class="picus-form form-layout" data-form-anteprima><fieldset class="campi-inattivi" disabled>
-<fieldset class="form-section"><legend>Messaggio</legend><div class="form-section-content"><div class="picus-fields fields-two">
-<label class="campo campo-esteso">Oggetto (facoltativo)<input class="form-control" name="titolo" type="text" ></label>
-<label class="campo campo-esteso">Testo<textarea class="form-control" name="contenuto" rows="6" required ></textarea></label>
-</div></div></fieldset><fieldset class="form-section"><legend>Destinatari</legend><div class="form-section-content"><div class="picus-fields fields-one">
-<label class="campo ">Invia a<select class="form-control" name="destinatariTipo" required ><option value="TUTTE_LE_OPT">Tutte le OPT</option><option value="GRUPPO_OPT">Un gruppo di OPT</option><option value="TUTTI_GLI_OPERATORI">Tutti gli operatori del Banco</option><option value="GRUPPO_OPERATORI">Un gruppo di operatori</option></select></label>
-</div><fieldset class="campo-scelte" data-destinatari hidden disabled><legend>Account del gruppo</legend><div class="picus-choices"></div></fieldset></div></fieldset><fieldset class="form-section"><legend>Allegati</legend><div class="form-section-content"><div class="picus-fields fields-one">
-<label class="campo ">PDF, PNG, JPEG o testo<input class="form-control" name="files" type="file" multiple accept=".pdf,.png,.jpg,.jpeg,.txt"></label>
-</div></div></fieldset>
-<div class="form-submit"><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-primary" type="submit">Invia comunicazione</button></span><p class="picus-esito" role="status"></p></div>
-</fieldset></form>
-</div>
-</div>
-</section>
-<section class="area-panel" id="rendicontazione" tabindex="-1" aria-label="Monitoraggio">
-<div class="workspace-tabs" data-tabs><div class="tab-list" role="tablist" aria-label="Monitoraggio">
-<button type="button" role="tab" id="monitoraggio-tab-schede" aria-controls="monitoraggio-view-schede" aria-selected="true" tabindex="0">Schede operatori</button>
-<button type="button" role="tab" id="monitoraggio-tab-opt" aria-controls="monitoraggio-view-opt" aria-selected="false" tabindex="-1">Conteggi OPT</button>
-</div>
-<div role="tabpanel" id="monitoraggio-view-schede" aria-labelledby="monitoraggio-tab-schede" tabindex="0">
-<h2 class="picus-card-title">Schede trimestrali degli operatori</h2><form id="riepilogo-schede" class="picus-form form-layout" data-form-anteprima><fieldset class="campi-inattivi" disabled>
-<div class="picus-fields fields-period">
-<label class="campo ">Anno<input class="form-control" name="anno" type="number" required min="2000" max="9999" data-anno></label>
-<label class="campo ">Trimestre<select class="form-control" name="trimestre" required ><option value="1">1º trimestre</option><option value="2">2º trimestre</option><option value="3">3º trimestre</option><option value="4">4º trimestre</option></select></label>
-</div>
-<div class="form-submit"><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-primary" type="submit">Consulta le schede</button></span><p class="picus-esito" role="status"></p></div>
-</fieldset></form><div class="picus-list" id="riepilogo-schede-lista" aria-live="polite" data-funzione-inattiva></div>
-</div>
-<div role="tabpanel" id="monitoraggio-view-opt" aria-labelledby="monitoraggio-tab-opt" tabindex="0" hidden>
-<h2 class="picus-card-title">Conteggi delle organizzazioni</h2><form id="riepilogo-opt" class="picus-form form-layout" data-form-anteprima><fieldset class="campi-inattivi" disabled>
-<fieldset class="form-section"><legend>Periodo iniziale</legend><div class="form-section-content"><div class="picus-fields fields-period">
-<label class="campo ">Anno<input class="form-control" name="anno" type="number" required min="2000" max="9999" data-anno></label>
-<label class="campo ">Trimestre<select class="form-control" name="trimestre" required ><option value="1">1º trimestre</option><option value="2">2º trimestre</option><option value="3">3º trimestre</option><option value="4">4º trimestre</option></select></label>
-</div></div></fieldset><fieldset class="form-section"><legend>Periodo finale</legend><div class="form-section-content"><div class="picus-fields fields-period">
-<label class="campo ">Anno (facoltativo)<input class="form-control" name="annoFine" type="number" min="2000" max="9999"></label>
-<label class="campo ">Trimestre<select class="form-control" name="trimestreFine" ><option value="">Stesso trimestre</option><option value="1">1º trimestre</option><option value="2">2º trimestre</option><option value="3">3º trimestre</option><option value="4">4º trimestre</option></select></label>
-</div></div></fieldset><p class="form-text">Per consultare un solo trimestre lascia vuoto l’anno finale.</p>
-<div class="form-submit"><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-primary" type="submit">Consulta il monitoraggio</button></span><p class="picus-esito" role="status"></p></div>
-</fieldset></form><div class="picus-list" id="riepilogo-opt-lista" aria-live="polite" data-funzione-inattiva></div>
-</div>
-</div>
-</section>
+        <section class="area-panel" id="richieste" tabindex="-1" aria-label="Richieste">
+            <div class="workspace-tabs" data-tabs><div class="tab-list" role="tablist" aria-label="Richieste">
+                <button type="button" role="tab" id="richieste-tab-coda" aria-controls="richieste-view-coda" aria-selected="true" tabindex="0">Coda</button>
+                <button type="button" role="tab" id="richieste-tab-archivio" aria-controls="richieste-view-archivio" aria-selected="false" tabindex="-1">Archivio</button>
+            </div>
+                <div role="tabpanel" id="richieste-view-coda" aria-labelledby="richieste-tab-coda" tabindex="0">
+                    <div class="panel-heading"><h2 class="picus-card-title">Coda delle richieste</h2><button class="btn btn-secondary btn-sm" type="button" data-aggiorna="richieste">Aggiorna coda</button></div><div class="picus-list" id="coda" aria-live="polite"></div>
+                </div>
+                <div role="tabpanel" id="richieste-view-archivio" aria-labelledby="richieste-tab-archivio" tabindex="0" hidden>
+                    <h2 class="picus-card-title">Archivio degli esiti</h2><div class="picus-list" id="archivio" aria-live="polite" data-funzione-inattiva></div>
+                </div>
+            </div>
+        </section>
+        <section class="area-panel" id="utenze" tabindex="-1" aria-label="Utenze">
+            <div class="workspace-tabs" data-tabs><div class="tab-list" role="tablist" aria-label="Gestione utenze">
+                <button type="button" role="tab" id="utenze-tab-account" aria-controls="utenze-view-account" aria-selected="true" tabindex="0">Account</button>
+                <button type="button" role="tab" id="utenze-tab-opt" aria-controls="utenze-view-opt" aria-selected="false" tabindex="-1">Nuova OPT</button>
+                <button type="button" role="tab" id="utenze-tab-operatore" aria-controls="utenze-view-operatore" aria-selected="false" tabindex="-1">Nuovo operatore</button>
+                <button type="button" role="tab" id="utenze-tab-csv" aria-controls="utenze-view-csv" aria-selected="false" tabindex="-1">Importa CSV</button>
+            </div>
+                <div role="tabpanel" id="utenze-view-account" aria-labelledby="utenze-tab-account" tabindex="0">
+                    <h2 class="picus-card-title">Account registrati</h2><div class="picus-list" id="account" aria-live="polite">
+                    <article class="account-row" th:each="account : ${optAttive}"
+                             th:attr="data-ruolo=${account.ruolo.name()},data-stato=${account.stato.name()}">
+                        <div class="account-identity"><strong th:text="${account.nomeVisualizzato}"></strong>
+                            <p class="picus-meta" th:text="${account.ruolo.name() == 'OPT' ? 'OPT' : 'Operatore'}"></p></div>
+                        <div class="account-cell"><span class="cell-label">Email</span><span>—</span></div>
+                        <div class="account-cell"><span class="cell-label">Comune</span><span>—</span></div>
+                        <div class="account-cell"><span class="cell-label">Stato</span><span class="status-label">Attivo</span></div>
+                        <div class="picus-actions"><span class="azione-inattiva" data-funzione-inattiva><button type="button" class="btn btn-danger btn-sm" disabled>Revoca</button></span></div>
+                    </article>
+                    <article class="account-row" th:each="account : ${operatoriAttivi}"
+                             th:attr="data-ruolo=${account.ruolo.name()},data-stato=${account.stato.name()}">
+                        <div class="account-identity"><strong th:text="${account.nomeVisualizzato}"></strong>
+                            <p class="picus-meta" th:text="${account.ruolo.name() == 'OPT' ? 'OPT' : 'Operatore'}"></p></div>
+                        <div class="account-cell"><span class="cell-label">Email</span><span>—</span></div>
+                        <div class="account-cell"><span class="cell-label">Comune</span><span>—</span></div>
+                        <div class="account-cell"><span class="cell-label">Stato</span><span class="status-label">Attivo</span></div>
+                        <div class="picus-actions"><span class="azione-inattiva" data-funzione-inattiva><button type="button" class="btn btn-danger btn-sm" disabled>Revoca</button></span></div>
+                    </article>
+                </div>
+                </div>
+                <div role="tabpanel" id="utenze-view-opt" aria-labelledby="utenze-tab-opt" tabindex="0" hidden>
+                    <h2 class="picus-card-title">Nuova organizzazione partner</h2><form id="nuova-opt" class="picus-form form-layout" data-form-anteprima><fieldset class="campi-inattivi" disabled>
+                    <fieldset class="form-section"><legend>Organizzazione</legend><div class="form-section-content"><div class="picus-fields fields-two">
+                        <label class="campo ">Denominazione OPT<input class="form-control" name="nome" type="text" required ></label>
+                        <label class="campo ">Codice struttura<input class="form-control" name="codiceStruttura" type="text" required ></label>
+                        <label class="campo ">Comune<input class="form-control" name="comune" type="text" required ></label>
+                        <label class="campo ">Codice fiscale<input class="form-control" name="codiceFiscale" type="text" required ></label>
+                    </div></div></fieldset><fieldset class="form-section"><legend>Contatto</legend><div class="form-section-content"><div class="picus-fields fields-one">
+                    <label class="campo ">Email istituzionale<input class="form-control" name="email" type="email" required ></label>
+                </div></div></fieldset>
+                    <div class="form-submit"><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-primary" type="submit">Crea utenza OPT</button></span><p class="picus-esito" role="status"></p></div>
+                </fieldset></form>
+                </div>
+                <div role="tabpanel" id="utenze-view-operatore" aria-labelledby="utenze-tab-operatore" tabindex="0" hidden>
+                    <h2 class="picus-card-title">Nuovo operatore del Banco</h2><form id="nuovo-operatore" class="picus-form form-layout" data-form-anteprima><fieldset class="campi-inattivi" disabled>
+                    <fieldset class="form-section"><legend>Dati personali</legend><div class="form-section-content"><div class="picus-fields fields-two">
+                        <label class="campo ">Nome<input class="form-control" name="nome" type="text" required ></label>
+                        <label class="campo ">Cognome<input class="form-control" name="cognome" type="text" required ></label>
+                        <label class="campo ">Codice fiscale<input class="form-control" name="codiceFiscale" type="text" required ></label>
+                    </div></div></fieldset><fieldset class="form-section"><legend>Contatti</legend><div class="form-section-content"><div class="picus-fields fields-two">
+                    <label class="campo ">Email<input class="form-control" name="email" type="email" required ></label>
+                    <label class="campo ">Telefono<input class="form-control" name="telefono" type="tel" required ></label>
+                </div></div></fieldset><fieldset class="form-section"><legend>Inquadramento</legend><div class="form-section-content"><div class="picus-fields fields-two">
+                    <label class="campo ">Territorio (comune)<input class="form-control" name="comune" type="text" required ></label>
+                    <label class="campo ">Tipologia<select class="form-control" name="tipo" required ><option value="INTERNO_BANCO">Interno del Banco</option><option value="ESTERNO_PAGATO_BANCO">Esterno pagato dal Banco</option></select></label>
+                </div></div></fieldset><fieldset class="form-section"><legend>Attività</legend><div class="form-section-content"><fieldset class="campo-scelte" data-misure ><legend>Misure</legend><div class="picus-choices"></div></fieldset><label class="picus-check"><input name="centroPicus" type="checkbox" > Operatore interno del Centro PICUS</label></div></fieldset>
+                    <div class="form-submit"><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-primary" type="submit">Crea operatore</button></span><p class="picus-esito" role="status"></p></div>
+                </fieldset></form>
+                </div>
+                <div role="tabpanel" id="utenze-view-csv" aria-labelledby="utenze-tab-csv" tabindex="0" hidden>
+                    <h2 class="picus-card-title">Importa organizzazioni da CSV</h2><form id="csv" class="picus-form form-layout" data-form-anteprima><fieldset class="campi-inattivi" disabled>
+                    <div class="picus-fields fields-one">
+                        <label class="campo ">File CSV UTF-8<input class="form-control" name="csv" type="file" required accept=".csv,text/csv"></label>
+                    </div>
+                    <div class="form-submit"><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-primary" type="submit">Importa OPT</button></span><p class="picus-esito" role="status"></p></div>
+                </fieldset></form><div class="picus-list" id="rapporto-csv" aria-live="polite" data-funzione-inattiva></div>
+                </div>
+            </div>
+        </section>
+        <section class="area-panel" id="catalogo" tabindex="-1" aria-label="Catalogo">
+            <div class="workspace-tabs" data-tabs><div class="tab-list" role="tablist" aria-label="Gestione catalogo">
+                <button type="button" role="tab" id="catalogo-tab-misure" aria-controls="catalogo-view-misure" aria-selected="true" tabindex="0">Misure</button>
+                <button type="button" role="tab" id="catalogo-tab-nuova" aria-controls="catalogo-view-nuova" aria-selected="false" tabindex="-1">Nuova misura</button>
+                <button type="button" role="tab" id="catalogo-tab-offerte" aria-controls="catalogo-view-offerte" aria-selected="false" tabindex="-1">Offerte OPT</button>
+            </div>
+                <div role="tabpanel" id="catalogo-view-misure" aria-labelledby="catalogo-tab-misure" tabindex="0">
+                    <h2 class="picus-card-title">Misure attive</h2><div class="picus-list" id="catalogo-lista" aria-live="polite"></div>
+                </div>
+                <div role="tabpanel" id="catalogo-view-nuova" aria-labelledby="catalogo-tab-nuova" tabindex="0" hidden>
+                    <h2 class="sr-only">Aggiungi una misura</h2><form id="nuova-misura" class="picus-form form-layout" data-form-anteprima><fieldset class="campi-inattivi" disabled>
+                    <fieldset class="form-section"><legend>Misura</legend><div class="form-section-content"><div class="picus-fields fields-two">
+                        <label class="campo ">Codice misura<input class="form-control" name="codice" type="text" required ></label>
+                        <label class="campo ">Titolo<input class="form-control" name="titolo" type="text" required ></label>
+                        <label class="campo campo-esteso">Descrizione<textarea class="form-control" name="descrizione" rows="6" ></textarea></label>
+                        <label class="picus-check"><input name="remoto" type="checkbox" > Compatibile con il remoto</label>
+                    </div></div></fieldset>
+                    <div class="form-submit"><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-primary" type="submit">Salva misura</button></span><p class="picus-esito" role="status"></p></div>
+                </fieldset></form>
+                </div>
+                <div role="tabpanel" id="catalogo-view-offerte" aria-labelledby="catalogo-tab-offerte" tabindex="0" hidden>
+                    <h2 class="sr-only">Offerte delle organizzazioni</h2><form id="consulta-offerta" class="picus-form form-layout" data-form-anteprima><fieldset class="campi-inattivi" disabled>
+                    <div class="picus-fields fields-one">
+                        <label class="campo ">Organizzazione<select class="form-control" name="optId" required ></select></label>
+                    </div>
+                    <div class="form-submit"><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-primary" type="submit">Consulta offerta</button></span><p class="picus-esito" role="status"></p></div>
+                </fieldset></form><div class="picus-list" id="offerta-banco" aria-live="polite" data-funzione-inattiva></div>
+                </div>
+            </div>
+        </section>
+        <section class="area-panel" id="comunicazioni" tabindex="-1" aria-label="Comunicazioni">
+            <div class="workspace-tabs" data-tabs><div class="tab-list" role="tablist" aria-label="Comunicazioni">
+                <button type="button" role="tab" id="comunicazioni-tab-inviate" aria-controls="comunicazioni-view-inviate" aria-selected="true" tabindex="0">Inviate</button>
+                <button type="button" role="tab" id="comunicazioni-tab-scrivi" aria-controls="comunicazioni-view-scrivi" aria-selected="false" tabindex="-1">Scrivi</button>
+            </div>
+                <div role="tabpanel" id="comunicazioni-view-inviate" aria-labelledby="comunicazioni-tab-inviate" tabindex="0">
+                    <h2 class="sr-only">Comunicazioni inviate</h2><div class="picus-list" id="messaggi" aria-live="polite" data-funzione-inattiva></div>
+                </div>
+                <div role="tabpanel" id="comunicazioni-view-scrivi" aria-labelledby="comunicazioni-tab-scrivi" tabindex="0" hidden>
+                    <h2 class="sr-only">Nuova comunicazione</h2><form id="comunicazione" class="picus-form form-layout" data-form-anteprima><fieldset class="campi-inattivi" disabled>
+                    <fieldset class="form-section"><legend>Messaggio</legend><div class="form-section-content"><div class="picus-fields fields-two">
+                        <label class="campo campo-esteso">Oggetto (facoltativo)<input class="form-control" name="titolo" type="text" ></label>
+                        <label class="campo campo-esteso">Testo<textarea class="form-control" name="contenuto" rows="6" required ></textarea></label>
+                    </div></div></fieldset><fieldset class="form-section"><legend>Destinatari</legend><div class="form-section-content"><div class="picus-fields fields-one">
+                    <label class="campo ">Invia a<select class="form-control" name="destinatariTipo" required ><option value="TUTTE_LE_OPT">Tutte le OPT</option><option value="GRUPPO_OPT">Un gruppo di OPT</option><option value="TUTTI_GLI_OPERATORI">Tutti gli operatori del Banco</option><option value="GRUPPO_OPERATORI">Un gruppo di operatori</option></select></label>
+                </div><fieldset class="campo-scelte" data-destinatari hidden disabled><legend>Account del gruppo</legend><div class="picus-choices"></div></fieldset></div></fieldset><fieldset class="form-section"><legend>Allegati</legend><div class="form-section-content"><div class="picus-fields fields-one">
+                    <label class="campo ">PDF, PNG, JPEG o testo<input class="form-control" name="files" type="file" multiple accept=".pdf,.png,.jpg,.jpeg,.txt"></label>
+                </div></div></fieldset>
+                    <div class="form-submit"><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-primary" type="submit">Invia comunicazione</button></span><p class="picus-esito" role="status"></p></div>
+                </fieldset></form>
+                </div>
+            </div>
+        </section>
+        <section class="area-panel" id="rendicontazione" tabindex="-1" aria-label="Monitoraggio">
+            <div class="workspace-tabs" data-tabs><div class="tab-list" role="tablist" aria-label="Monitoraggio">
+                <button type="button" role="tab" id="monitoraggio-tab-schede" aria-controls="monitoraggio-view-schede" aria-selected="true" tabindex="0">Schede operatori</button>
+                <button type="button" role="tab" id="monitoraggio-tab-opt" aria-controls="monitoraggio-view-opt" aria-selected="false" tabindex="-1">Conteggi OPT</button>
+            </div>
+                <div role="tabpanel" id="monitoraggio-view-schede" aria-labelledby="monitoraggio-tab-schede" tabindex="0">
+                    <h2 class="picus-card-title">Schede trimestrali degli operatori</h2><form id="riepilogo-schede" class="picus-form form-layout" data-form-anteprima><fieldset class="campi-inattivi" disabled>
+                    <div class="picus-fields fields-period">
+                        <label class="campo ">Anno<input class="form-control" name="anno" type="number" required min="2000" max="9999" data-anno></label>
+                        <label class="campo ">Trimestre<select class="form-control" name="trimestre" required ><option value="1">1º trimestre</option><option value="2">2º trimestre</option><option value="3">3º trimestre</option><option value="4">4º trimestre</option></select></label>
+                    </div>
+                    <div class="form-submit"><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-primary" type="submit">Consulta le schede</button></span><p class="picus-esito" role="status"></p></div>
+                </fieldset></form><div class="picus-list" id="riepilogo-schede-lista" aria-live="polite" data-funzione-inattiva></div>
+                </div>
+                <div role="tabpanel" id="monitoraggio-view-opt" aria-labelledby="monitoraggio-tab-opt" tabindex="0" hidden>
+                    <h2 class="picus-card-title">Conteggi delle organizzazioni</h2><form id="riepilogo-opt" class="picus-form form-layout">
+                    <fieldset class="form-section"><legend>Periodo iniziale</legend><div class="form-section-content"><div class="picus-fields fields-period">
+                        <label class="campo ">Anno<input class="form-control" name="anno" type="number" required min="2000" max="9999" data-anno></label>
+                        <label class="campo ">Trimestre<select class="form-control" name="trimestre" required ><option value="1">1º trimestre</option><option value="2">2º trimestre</option><option value="3">3º trimestre</option><option value="4">4º trimestre</option></select></label>
+                    </div></div></fieldset><fieldset class="form-section"><legend>Periodo finale</legend><div class="form-section-content"><div class="picus-fields fields-period">
+                    <label class="campo ">Anno (facoltativo)<input class="form-control" name="annoFine" type="number" min="2000" max="9999"></label>
+                    <label class="campo ">Trimestre<select class="form-control" name="trimestreFine" ><option value="">Stesso trimestre</option><option value="1">1º trimestre</option><option value="2">2º trimestre</option><option value="3">3º trimestre</option><option value="4">4º trimestre</option></select></label>
+                </div></div></fieldset><p class="form-text">Per consultare un solo trimestre lascia vuoto l’anno finale.</p>
+                    <div class="form-submit"><button class="btn btn-primary" type="submit">Consulta il monitoraggio</button><p class="picus-esito" role="status"></p></div>
+                </form><div class="picus-list" id="riepilogo-opt-lista" aria-live="polite"></div>
+                </div>
+            </div>
+        </section>
     </div>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
