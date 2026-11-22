@@ -112,6 +112,8 @@ class SecurityConfig {
                                 "/api/richieste/*/conferma", "/api/richieste/*/rifiuta").hasRole("BANCO")
                         .requestMatchers(HttpMethod.GET, "/api/richieste/coda", "/api/richieste/*/candidati",
                                 "/api/richieste/*/contatti", "/api/richieste/*/contatti/*").hasRole("BANCO")
+                        // Comunicazioni: il ruolo si controlla prima di leggere il modulo, allegati compresi.
+                        .requestMatchers(HttpMethod.POST, "/api/comunicazioni").hasRole("BANCO")
                         // ogni ruolo vede solo la propria area
                         .requestMatchers("/banco/**").hasRole("BANCO")
                         .requestMatchers("/opt/**").hasRole("OPT")
