@@ -21,6 +21,7 @@ it.unina.picus.richieste.web
 it.unina.picus.shared
 it.unina.picus.utenze.api
 it.unina.picus.utenze.interno.applicazione
+it.unina.picus.utenze.interno.dominio
 it.unina.picus.utenze.interno.persistenza
 it.unina.picus.utenze.interno.stub
 it.unina.picus.utenze.web
