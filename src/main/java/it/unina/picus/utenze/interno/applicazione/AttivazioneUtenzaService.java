@@ -129,8 +129,7 @@ public class AttivazioneUtenzaService {
         }
         Objects.requireNonNull(ruoloAtteso, "ruoloAtteso obbligatorio");
 
-        // 1. Ordine dei lock coerente con attivaAccount e revocaAccount: prima token, poi account
-        tokens.findAttiviByAccountIdForUpdate(accountId);
+        // 1. Punto unico di serializzazione: prima AccountJpa, poi TokenAttivazioneJpa
         AccountJpa account = accounts.findByIdForUpdate(accountId)
                 .orElseThrow(() -> new UtenzaNonTrovataException("Account non trovato."));
 
@@ -143,7 +142,7 @@ public class AttivazioneUtenzaService {
             throw new OperazioneUtenzaNonConsentitaException("L'account non è in attesa di attivazione.");
         }
 
-        // 3. Rilegge sotto lock sull'account tutti i token attivi (inclusi quelli appena committati da reinvii concorrenti)
+        // 3. Blocca e invalida tutti i token ancora attivi (ordine: account -> token)
         List<TokenAttivazioneJpa> precedenti = tokens.findAttiviByAccountIdForUpdate(accountId);
         Instant ora = Instant.now(clock);
         for (TokenAttivazioneJpa vecchio : precedenti) {
@@ -208,23 +207,28 @@ public class AttivazioneUtenzaService {
 
         String hash = calcolaSha256(tokenInChiaro.strip());
 
-        // 1. Ordine dei lock: prima TokenAttivazioneJpa, poi AccountJpa
+        // 1. Risoluzione senza lock per individuare l'account da serializzare
+        UUID accountId = tokens.findByTokenHash(hash)
+                .map(TokenAttivazioneJpa::getAccountId)
+                .orElseThrow(() -> new TokenAttivazioneNonValidoException("Link di attivazione non valido."));
+
+        // 2. Ordine unico di lock: prima AccountJpa, poi TokenAttivazioneJpa
+        AccountJpa account = accounts.findByIdForUpdate(accountId)
+                .orElseThrow(() -> new TokenAttivazioneNonValidoException("Account associato non trovato."));
+
         TokenAttivazioneJpa token = tokens.findByTokenHashForUpdate(hash)
                 .orElseThrow(() -> new TokenAttivazioneNonValidoException("Link di attivazione non valido."));
 
-        AccountJpa account = accounts.findByIdForUpdate(token.getAccountId())
-                .orElseThrow(() -> new TokenAttivazioneNonValidoException("Account associato non trovato."));
-
-        // 2. Rilegge l'istante corrente dopo aver acquisito entrambi i lock
+        // 3. Rilegge l'istante corrente dopo aver acquisito entrambi i lock
         Instant ora = Instant.now(clock);
 
-        // 3. Verifica validità, scadenza e stato account sotto lock
-        if (token.isUsato() || token.isScaduto(ora)) {
-            throw new TokenAttivazioneNonValidoException("Il link di attivazione è scaduto o è già stato utilizzato.");
-        }
-
+        // 4. Verifica stato account, validità, scadenza e uso sotto lock
         if (!StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(account.getStato())) {
             throw new TokenAttivazioneNonValidoException("L'account non è più attivabile.");
+        }
+
+        if (token.isUsato() || token.isScaduto(ora)) {
+            throw new TokenAttivazioneNonValidoException("Il link di attivazione è scaduto o è già stato utilizzato.");
         }
 
         token.segnaComeUsato(ora);
