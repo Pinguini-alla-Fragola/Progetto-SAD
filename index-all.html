@@ -131,18 +131,44 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/catalogo/interno/persistenza/AdiacenzaJpa.html#%3Cinit%3E()" class="member-name-link">AdiacenzaJpa()</a> - Constructor for class it.unina.picus.catalogo.interno.persistenza.<a href="it/unina/picus/catalogo/interno/persistenza/AdiacenzaJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">AdiacenzaJpa</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/catalogo/interno/persistenza/MisuraJpa.html#aDominio()" class="member-name-link">aDominio()</a> - Method in class it.unina.picus.catalogo.interno.persistenza.<a href="it/unina/picus/catalogo/interno/persistenza/MisuraJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">MisuraJpa</a></dt>
+<dd>
+<div class="block">Converte l'entità persistita nell'oggetto di dominio corrispondente.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/interno/persistenza/RichiestaJpa.html#aDominio()" class="member-name-link">aDominio()</a> - Method in class it.unina.picus.richieste.interno.persistenza.<a href="it/unina/picus/richieste/interno/persistenza/RichiestaJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">RichiestaJpa</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html#aDto()" class="member-name-link">aDto()</a> - Method in record class it.unina.picus.catalogo.interno.dominio.<a href="it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html" title="class in it.unina.picus.catalogo.interno.dominio">MisuraDiCatalogo</a></dt>
+<dd>
+<div class="block">Converte l'entità di dominio nel DTO pubblico definito dall'API del modulo Catalogo.</div>
+</dd>
 <dt><a href="it/unina/picus/catalogo/interno/persistenza/ComuneJpa.html#aDto()" class="member-name-link">aDto()</a> - Method in class it.unina.picus.catalogo.interno.persistenza.<a href="it/unina/picus/catalogo/interno/persistenza/ComuneJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">ComuneJpa</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/catalogo/interno/persistenza/MisuraJpa.html#aDto()" class="member-name-link">aDto()</a> - Method in class it.unina.picus.catalogo.interno.persistenza.<a href="it/unina/picus/catalogo/interno/persistenza/MisuraJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">MisuraJpa</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Proietta l'entità persistita nel DTO pubblico del modulo Catalogo.</div>
+</dd>
 <dt><a href="it/unina/picus/comunicazioni/interno/persistenza/AvvisoOperativoJpa.html#aDto()" class="member-name-link">aDto()</a> - Method in class it.unina.picus.comunicazioni.interno.persistenza.<a href="it/unina/picus/comunicazioni/interno/persistenza/AvvisoOperativoJpa.html" title="class in it.unina.picus.comunicazioni.interno.persistenza">AvvisoOperativoJpa</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/richieste/interno/persistenza/AccordoJpa.html#aDto()" class="member-name-link">aDto()</a> - Method in class it.unina.picus.richieste.interno.persistenza.<a href="it/unina/picus/richieste/interno/persistenza/AccordoJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">AccordoJpa</a></dt>
 <dd>
 <div class="block">Returns dettagli di dominio ricostruiti dalle colonne, oppure <code>null</code> se assenti.</div>
 </dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html#aggiorna(it.unina.picus.catalogo.api.CatalogoApi.DatiMisura,boolean)" class="member-name-link">aggiorna(CatalogoApi.DatiMisura, boolean)</a> - Method in record class it.unina.picus.catalogo.interno.dominio.<a href="it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html" title="class in it.unina.picus.catalogo.interno.dominio">MisuraDiCatalogo</a></dt>
+<dd>
+<div class="block">Produce una nuova istanza aggiornata con i dati validati e il nuovo stato di attivazione,
+conservando invariato l'identificativo storico della misura.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/MisuraRepository.html#aggiorna(it.unina.picus.catalogo.interno.dominio.MisuraDiCatalogo)" class="member-name-link">aggiorna(MisuraDiCatalogo)</a> - Method in interface it.unina.picus.catalogo.interno.dominio.<a href="it/unina/picus/catalogo/interno/dominio/MisuraRepository.html" title="interface in it.unina.picus.catalogo.interno.dominio">MisuraRepository</a></dt>
+<dd>
+<div class="block">Persiste l'aggiornamento di una misura precedentemente caricata in scrittura,
+oppure restituisce vuoto se il database rileva un conflitto concorrente di unicità sul codice.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/persistenza/MisuraJpa.html#aggiorna(it.unina.picus.catalogo.interno.dominio.MisuraDiCatalogo)" class="member-name-link">aggiorna(MisuraDiCatalogo)</a> - Method in class it.unina.picus.catalogo.interno.persistenza.<a href="it/unina/picus/catalogo/interno/persistenza/MisuraJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">MisuraJpa</a></dt>
+<dd>
+<div class="block">Applica i nuovi attributi dal dominio senza alterare l'identificativo persistito.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/persistenza/MisuraRepositoryJpa.html#aggiorna(it.unina.picus.catalogo.interno.dominio.MisuraDiCatalogo)" class="member-name-link">aggiorna(MisuraDiCatalogo)</a> - Method in class it.unina.picus.catalogo.interno.persistenza.<a href="it/unina/picus/catalogo/interno/persistenza/MisuraRepositoryJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">MisuraRepositoryJpa</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/richieste/interno/dominio/RichiestaRepository.html#aggiorna(it.unina.picus.richieste.interno.dominio.RichiestaDiMisura)" class="member-name-link">aggiorna(RichiestaDiMisura)</a> - Method in interface it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/RichiestaRepository.html" title="interface in it.unina.picus.richieste.interno.dominio">RichiestaRepository</a></dt>
 <dd>
 <div class="block">Salva la transizione della pratica già bloccata nella stessa transazione.</div>
@@ -160,6 +186,14 @@ loadScripts(document, 'script');</script>
 <dt><a href="it/unina/picus/catalogo/api/CatalogoApi.html#aggiornaMisura(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,long,it.unina.picus.catalogo.api.CatalogoApi.DatiMisura,boolean)" class="member-name-link">aggiornaMisura(UtenzeApi.IdentitaAutenticata, long, CatalogoApi.DatiMisura, boolean)</a> - Method in interface it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/CatalogoApi.html" title="interface in it.unina.picus.catalogo.api">CatalogoApi</a></dt>
 <dd>
 <div class="block">Aggiorna i dati o lo stato di una misura mantenendo il riferimento usato nello storico.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/applicazione/ServizioGestioneCatalogo.html#aggiornaMisura(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,long,it.unina.picus.catalogo.api.CatalogoApi.DatiMisura,boolean)" class="member-name-link">aggiornaMisura(UtenzeApi.IdentitaAutenticata, long, CatalogoApi.DatiMisura, boolean)</a> - Method in class it.unina.picus.catalogo.interno.applicazione.<a href="it/unina/picus/catalogo/interno/applicazione/ServizioGestioneCatalogo.html" title="class in it.unina.picus.catalogo.interno.applicazione">ServizioGestioneCatalogo</a></dt>
+<dd>
+<div class="block">Aggiorna i dati o lo stato di attivazione di una misura mantenendone l'identificativo storico.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/web/CatalogoController.html#aggiornaMisura(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,long,it.unina.picus.catalogo.web.CorpoJsonCatalogo)" class="member-name-link">aggiornaMisura(UtenzeApi.IdentitaAutenticata, long, CorpoJsonCatalogo)</a> - Method in class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/CatalogoController.html" title="class in it.unina.picus.catalogo.web">CatalogoController</a></dt>
+<dd>
+<div class="block">Sostituisce i dati aggiornabili di una misura conservandone l'identificativo.</div>
 </dd>
 <dt><a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.Comunicazione.html#allegati()" class="member-name-link">allegati()</a> - Method in record class it.unina.picus.comunicazioni.api.<a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.Comunicazione.html" title="class in it.unina.picus.comunicazioni.api">ComunicazioniApi.Comunicazione</a></dt>
 <dd>
@@ -236,8 +270,16 @@ al contatto.</div>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/catalogo/api/CatalogoApi.Misura.html#param-attiva"><code>attiva</code></a> record component.</div>
 </dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html#attiva()" class="member-name-link">attiva()</a> - Method in record class it.unina.picus.catalogo.interno.dominio.<a href="it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html" title="class in it.unina.picus.catalogo.interno.dominio">MisuraDiCatalogo</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html#param-attiva"><code>attiva</code></a> record component.</div>
+</dd>
 <dt><a href="it/unina/picus/catalogo/interno/persistenza/OffertaOptJpa.html#attiva()" class="member-name-link">attiva()</a> - Method in class it.unina.picus.catalogo.interno.persistenza.<a href="it/unina/picus/catalogo/interno/persistenza/OffertaOptJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">OffertaOptJpa</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/catalogo/web/MisuraJson.RichiestaAggiornamento.html#attiva()" class="member-name-link">attiva()</a> - Method in record class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/MisuraJson.RichiestaAggiornamento.html" title="class in it.unina.picus.catalogo.web">MisuraJson.RichiestaAggiornamento</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./it/unina/picus/catalogo/web/MisuraJson.RichiestaAggiornamento.html#param-attiva"><code>attiva</code></a> record component.</div>
+</dd>
 <dt><a href="it/unina/picus/utenze/interno/persistenza/ProfiloOptRepository.html#attive(java.util.Set)" class="member-name-link">attive(Set)</a> - Method in interface it.unina.picus.utenze.interno.persistenza.<a href="it/unina/picus/utenze/interno/persistenza/ProfiloOptRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">ProfiloOptRepository</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/utenze/api/UtenzeApi.StatoUtenza.html#ATTIVO" class="member-name-link">ATTIVO</a> - Enum constant in enum class it.unina.picus.utenze.api.<a href="it/unina/picus/utenze/api/UtenzeApi.StatoUtenza.html" title="enum class in it.unina.picus.utenze.api">UtenzeApi.StatoUtenza</a></dt>
@@ -347,6 +389,18 @@ sui tentativi.</div>
 </dl>
 <h2 class="title" id="I:C">C</h2>
 <dl class="index">
+<dt><a href="it/unina/picus/catalogo/interno/dominio/DatiMisuraNonValidiException.html#campi()" class="member-name-link">campi()</a> - Method in exception class it.unina.picus.catalogo.interno.dominio.<a href="it/unina/picus/catalogo/interno/dominio/DatiMisuraNonValidiException.html" title="class in it.unina.picus.catalogo.interno.dominio">DatiMisuraNonValidiException</a></dt>
+<dd>
+<div class="block">Restituisce una vista immutabile degli errori per campo.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/web/CorpoJsonCatalogo.html#campi()" class="member-name-link">campi()</a> - Method in record class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/CorpoJsonCatalogo.html" title="class in it.unina.picus.catalogo.web">CorpoJsonCatalogo</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./it/unina/picus/catalogo/web/CorpoJsonCatalogo.html#param-campi"><code>campi</code></a> record component.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/web/ErroriCatalogo.ErroreCatalogo.html#campi()" class="member-name-link">campi()</a> - Method in record class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/ErroriCatalogo.ErroreCatalogo.html" title="class in it.unina.picus.catalogo.web">ErroriCatalogo.ErroreCatalogo</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./it/unina/picus/catalogo/web/ErroriCatalogo.ErroreCatalogo.html#param-campi"><code>campi</code></a> record component.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/api/DatiRichiestaNonValidiException.html#campi()" class="member-name-link">campi()</a> - Method in exception class it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/DatiRichiestaNonValidiException.html" title="class in it.unina.picus.richieste.api">DatiRichiestaNonValidiException</a></dt>
 <dd>
 <div class="block">Restituisce indicazioni immutabili per la correzione del modulo.</div>
@@ -409,10 +463,12 @@ sui tentativi.</div>
 </dd>
 <dt><a href="it/unina/picus/catalogo/web/CatalogoController.html" class="type-name-link" title="class in it.unina.picus.catalogo.web">CatalogoController</a> - Class in <a href="it/unina/picus/catalogo/web/package-summary.html">it.unina.picus.catalogo.web</a></dt>
 <dd>
-<div class="block">Dati selezionabili dal modulo di invio, senza logica di presentazione.</div>
+<div class="block">Espone gli endpoint REST del modulo Catalogo per consultazione e gestione delle misure persistenti.</div>
 </dd>
-<dt><a href="it/unina/picus/catalogo/web/CatalogoController.html#%3Cinit%3E(it.unina.picus.catalogo.api.ConsultazioneCatalogoApi)" class="member-name-link">CatalogoController(ConsultazioneCatalogoApi)</a> - Constructor for class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/CatalogoController.html" title="class in it.unina.picus.catalogo.web">CatalogoController</a></dt>
-<dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/catalogo/web/CatalogoController.html#%3Cinit%3E(it.unina.picus.catalogo.api.ConsultazioneCatalogoApi,it.unina.picus.catalogo.interno.applicazione.ServizioGestioneCatalogo)" class="member-name-link">CatalogoController(ConsultazioneCatalogoApi, ServizioGestioneCatalogo)</a> - Constructor for class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/CatalogoController.html" title="class in it.unina.picus.catalogo.web">CatalogoController</a></dt>
+<dd>
+<div class="block">Costruisce il controller collegando le capacità di consultazione e gestione catalogo.</div>
+</dd>
 <dt><a href="it/unina/picus/catalogo/api/CatalogoApi.AmbitoErogazione.html#CENTRO_PICUS_A_DISTANZA" class="member-name-link">CENTRO_PICUS_A_DISTANZA</a> - Enum constant in enum class it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/CatalogoApi.AmbitoErogazione.html" title="enum class in it.unina.picus.catalogo.api">CatalogoApi.AmbitoErogazione</a></dt>
 <dd>
 <div class="block">Centro PICUS in modalità a distanza.</div>
@@ -480,6 +536,12 @@ sui tentativi.</div>
 <div class="block">Risolve una misura anche quando non è più attiva.</div>
 </dd>
 <dt><a href="it/unina/picus/catalogo/interno/persistenza/ConsultazioneCatalogoJpa.html#cercaMisura(long)" class="member-name-link">cercaMisura(long)</a> - Method in class it.unina.picus.catalogo.interno.persistenza.<a href="it/unina/picus/catalogo/interno/persistenza/ConsultazioneCatalogoJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">ConsultazioneCatalogoJpa</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/MisuraRepository.html#cercaPerAggiornamento(long)" class="member-name-link">cercaPerAggiornamento(long)</a> - Method in interface it.unina.picus.catalogo.interno.dominio.<a href="it/unina/picus/catalogo/interno/dominio/MisuraRepository.html" title="interface in it.unina.picus.catalogo.interno.dominio">MisuraRepository</a></dt>
+<dd>
+<div class="block">Carica la misura acquisendo un lock pessimistico in scrittura fino al termine della transazione.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/persistenza/MisuraRepositoryJpa.html#cercaPerAggiornamento(long)" class="member-name-link">cercaPerAggiornamento(long)</a> - Method in class it.unina.picus.catalogo.interno.persistenza.<a href="it/unina/picus/catalogo/interno/persistenza/MisuraRepositoryJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">MisuraRepositoryJpa</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/richieste/interno/dominio/RichiestaRepository.html#cercaPerAggiornamento(java.util.UUID)" class="member-name-link">cercaPerAggiornamento(UUID)</a> - Method in interface it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/RichiestaRepository.html" title="interface in it.unina.picus.richieste.interno.dominio">RichiestaRepository</a></dt>
 <dd>
@@ -573,13 +635,33 @@ sui tentativi.</div>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/catalogo/api/CatalogoApi.DatiMisura.html#param-codice"><code>codice</code></a> record component.</div>
 </dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html#codice()" class="member-name-link">codice()</a> - Method in record class it.unina.picus.catalogo.interno.dominio.<a href="it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html" title="class in it.unina.picus.catalogo.interno.dominio">MisuraDiCatalogo</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html#param-codice"><code>codice</code></a> record component.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/web/ErroriCatalogo.ErroreCatalogo.html#codice()" class="member-name-link">codice()</a> - Method in record class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/ErroriCatalogo.ErroreCatalogo.html" title="class in it.unina.picus.catalogo.web">ErroriCatalogo.ErroreCatalogo</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./it/unina/picus/catalogo/web/ErroriCatalogo.ErroreCatalogo.html#param-codice"><code>codice</code></a> record component.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/web/ErroriRichieste.Errore.html#codice()" class="member-name-link">codice()</a> - Method in record class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/ErroriRichieste.Errore.html" title="class in it.unina.picus.richieste.web">ErroriRichieste.Errore</a></dt>
 <dd>
 <div class="block">Returns the value of the <code>codice</code> record component.</div>
 </dd>
+<dt><a href="it/unina/picus/catalogo/web/ErroriCatalogo.html#codiceDuplicato(it.unina.picus.catalogo.interno.dominio.CodiceMisuraDuplicatoException)" class="member-name-link">codiceDuplicato(CodiceMisuraDuplicatoException)</a> - Method in class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/ErroriCatalogo.html" title="class in it.unina.picus.catalogo.web">ErroriCatalogo</a></dt>
+<dd>
+<div class="block">Gestisce il conflitto di unicità sul codice misura (<code>409 Conflict</code>).</div>
+</dd>
 <dt><a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.DatiSchedaOperatore.html#codiceFiscale()" class="member-name-link">codiceFiscale()</a> - Method in record class it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.DatiSchedaOperatore.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.DatiSchedaOperatore</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/monitoraggio/api/MonitoraggioApi.DatiSchedaOperatore.html#param-codiceFiscale"><code>codiceFiscale</code></a> record component.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/CodiceMisuraDuplicatoException.html" class="type-name-link" title="class in it.unina.picus.catalogo.interno.dominio">CodiceMisuraDuplicatoException</a> - Exception Class in <a href="it/unina/picus/catalogo/interno/dominio/package-summary.html">it.unina.picus.catalogo.interno.dominio</a></dt>
+<dd>
+<div class="block">Segnala che il codice indicato è già assegnato a un'altra misura del catalogo.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/CodiceMisuraDuplicatoException.html#%3Cinit%3E()" class="member-name-link">CodiceMisuraDuplicatoException()</a> - Constructor for exception class it.unina.picus.catalogo.interno.dominio.<a href="it/unina/picus/catalogo/interno/dominio/CodiceMisuraDuplicatoException.html" title="class in it.unina.picus.catalogo.interno.dominio">CodiceMisuraDuplicatoException</a></dt>
+<dd>
+<div class="block">Crea l'eccezione con messaggio controllato associato al campo <code>codice</code>.</div>
 </dd>
 <dt><a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.DatiSchedaOperatore.html#cognome()" class="member-name-link">cognome()</a> - Method in record class it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.DatiSchedaOperatore.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.DatiSchedaOperatore</a></dt>
 <dd>
@@ -712,6 +794,16 @@ operativi.</div>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/comunicazioni/api/ComunicazioniApi.Riscontro.html#param-confermataIl"><code>confermataIl</code></a> record component.</div>
 </dd>
+<dt><a href="it/unina/picus/catalogo/web/ConfigurazioneJsonCatalogo.html" class="type-name-link" title="class in it.unina.picus.catalogo.web">ConfigurazioneJsonCatalogo</a> - Class in <a href="it/unina/picus/catalogo/web/package-summary.html">it.unina.picus.catalogo.web</a></dt>
+<dd>
+<div class="block">Configura un parser JSON dedicato agli ingressi del modulo Catalogo con controllo rigoroso
+delle chiavi duplicate, senza alterare i parser degli altri moduli.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/web/ConfigurazioneJsonCatalogo.html#%3Cinit%3E(tools.jackson.databind.json.JsonMapper)" class="member-name-link">ConfigurazioneJsonCatalogo(JsonMapper)</a> - Constructor for class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/ConfigurazioneJsonCatalogo.html" title="class in it.unina.picus.catalogo.web">ConfigurazioneJsonCatalogo</a></dt>
+<dd>
+<div class="block">Crea la configurazione derivando dal mapper condiviso un'istanza con rilevamento stretto
+dei nomi di proprietà duplicati.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/web/ConfigurazioneJsonRichieste.html" class="type-name-link" title="class in it.unina.picus.richieste.web">ConfigurazioneJsonRichieste</a> - Class in <a href="it/unina/picus/richieste/web/package-summary.html">it.unina.picus.richieste.web</a></dt>
 <dd>
 <div class="block">Parser dedicato agli ingressi delle richieste; non cambia i parser degli altri moduli.</div>
@@ -725,6 +817,8 @@ operativi.</div>
 <dt><a href="it/unina/picus/shared/ConfigurazioneTempo.html#%3Cinit%3E()" class="member-name-link">ConfigurazioneTempo()</a> - Constructor for class it.unina.picus.shared.<a href="it/unina/picus/shared/ConfigurazioneTempo.html" title="class in it.unina.picus.shared">ConfigurazioneTempo</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/shared/LoginJsonConfigurer.html#configure(org.springframework.security.config.annotation.web.builders.HttpSecurity)" class="member-name-link">configure(HttpSecurity)</a> - Method in class it.unina.picus.shared.<a href="it/unina/picus/shared/LoginJsonConfigurer.html" title="class in it.unina.picus.shared">LoginJsonConfigurer</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/catalogo/web/ConfigurazioneJsonCatalogo.html#configureMessageConverters(org.springframework.http.converter.HttpMessageConverters.ServerBuilder)" class="member-name-link">configureMessageConverters(HttpMessageConverters.ServerBuilder)</a> - Method in class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/ConfigurazioneJsonCatalogo.html" title="class in it.unina.picus.catalogo.web">ConfigurazioneJsonCatalogo</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/richieste/web/ConfigurazioneJsonRichieste.html#configureMessageConverters(org.springframework.http.converter.HttpMessageConverters.ServerBuilder)" class="member-name-link">configureMessageConverters(HttpMessageConverters.ServerBuilder)</a> - Method in class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/ConfigurazioneJsonRichieste.html" title="class in it.unina.picus.richieste.web">ConfigurazioneJsonRichieste</a></dt>
 <dd>&nbsp;</dd>
@@ -765,6 +859,10 @@ operativi.</div>
 <dt><a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.html#consultaConteggiOpt(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre)" class="member-name-link">consultaConteggiOpt(UtenzeApi.IdentitaAutenticata, UUID, MonitoraggioApi.Trimestre, MonitoraggioApi.Trimestre)</a> - Method in interface it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.html" title="interface in it.unina.picus.monitoraggio.api">MonitoraggioApi</a></dt>
 <dd>
 <div class="block">Consulta i conteggi dichiarati, per un singolo trimestre o cumulati sui trimestri inclusi.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/web/CatalogoController.html#consultaMisura(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,long)" class="member-name-link">consultaMisura(UtenzeApi.IdentitaAutenticata, long)</a> - Method in class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/CatalogoController.html" title="class in it.unina.picus.catalogo.web">CatalogoController</a></dt>
+<dd>
+<div class="block">Restituisce i dati di una misura anche quando è stata disattivata, per consultazione storica.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/api/InvioRichiesteApi.html#consultaRichiesta(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">consultaRichiesta(UtenzeApi.IdentitaAutenticata, UUID)</a> - Method in interface it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/InvioRichiesteApi.html" title="interface in it.unina.picus.richieste.api">InvioRichiesteApi</a></dt>
 <dd>
@@ -905,6 +1003,15 @@ assegnato.</div>
 <dd>
 <div class="block">Creates an instance of a <code>CorpoJson</code> record class.</div>
 </dd>
+<dt><a href="it/unina/picus/catalogo/web/CorpoJsonCatalogo.html" class="type-name-link" title="class in it.unina.picus.catalogo.web">CorpoJsonCatalogo</a> - Record Class in <a href="it/unina/picus/catalogo/web/package-summary.html">it.unina.picus.catalogo.web</a></dt>
+<dd>
+<div class="block">Corpo applicativo delle richieste JSON di Catalogo letto con rilevamento delle chiavi duplicate
+prima del binding nei DTO.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/web/CorpoJsonCatalogo.html#%3Cinit%3E(java.util.Map)" class="member-name-link">CorpoJsonCatalogo(Map)</a> - Constructor for record class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/CorpoJsonCatalogo.html" title="class in it.unina.picus.catalogo.web">CorpoJsonCatalogo</a></dt>
+<dd>
+<div class="block">Creates an instance of a <code>CorpoJsonCatalogo</code> record class.</div>
+</dd>
 <dt><a href="it/unina/picus/comunicazioni/api/DestinatariAvvisi.html#corrisponde(java.util.UUID,java.util.UUID,java.util.UUID)" class="member-name-link">corrisponde(UUID, UUID, UUID)</a> - Method in interface it.unina.picus.comunicazioni.api.<a href="it/unina/picus/comunicazioni/api/DestinatariAvvisi.html" title="interface in it.unina.picus.comunicazioni.api">DestinatariAvvisi</a></dt>
 <dd>
 <div class="block">Verifica che pratica e destinatario coincidano con quelli immutabili del contatto.</div>
@@ -922,6 +1029,14 @@ assegnato.</div>
 <dt><a href="it/unina/picus/catalogo/api/CatalogoApi.html#creaMisura(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.catalogo.api.CatalogoApi.DatiMisura)" class="member-name-link">creaMisura(UtenzeApi.IdentitaAutenticata, CatalogoApi.DatiMisura)</a> - Method in interface it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/CatalogoApi.html" title="interface in it.unina.picus.catalogo.api">CatalogoApi</a></dt>
 <dd>
 <div class="block">Crea una nuova misura attiva.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/applicazione/ServizioGestioneCatalogo.html#creaMisura(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.catalogo.api.CatalogoApi.DatiMisura)" class="member-name-link">creaMisura(UtenzeApi.IdentitaAutenticata, CatalogoApi.DatiMisura)</a> - Method in class it.unina.picus.catalogo.interno.applicazione.<a href="it/unina/picus/catalogo/interno/applicazione/ServizioGestioneCatalogo.html" title="class in it.unina.picus.catalogo.interno.applicazione">ServizioGestioneCatalogo</a></dt>
+<dd>
+<div class="block">Crea una nuova misura attiva dopo aver verificato permessi, validità e unicità del codice.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/web/CatalogoController.html#creaMisura(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.catalogo.web.CorpoJsonCatalogo)" class="member-name-link">creaMisura(UtenzeApi.IdentitaAutenticata, CorpoJsonCatalogo)</a> - Method in class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/CatalogoController.html" title="class in it.unina.picus.catalogo.web">CatalogoController</a></dt>
+<dd>
+<div class="block">Crea una nuova misura attiva nel catalogo persistente su comando del Banco.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.StatoRichiesta.html#CREATA" class="member-name-link">CREATA</a> - Enum constant in enum class it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.StatoRichiesta.html" title="enum class in it.unina.picus.richieste.api">RichiesteApi.StatoRichiesta</a></dt>
 <dd>
@@ -956,6 +1071,10 @@ assegnato.</div>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/catalogo/api/CatalogoApi.Misura.html#param-dati"><code>dati</code></a> record component.</div>
 </dd>
+<dt><a href="it/unina/picus/catalogo/web/MisuraJson.RichiestaAggiornamento.html#dati()" class="member-name-link">dati()</a> - Method in record class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/MisuraJson.RichiestaAggiornamento.html" title="class in it.unina.picus.catalogo.web">MisuraJson.RichiestaAggiornamento</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./it/unina/picus/catalogo/web/MisuraJson.RichiestaAggiornamento.html#param-dati"><code>dati</code></a> record component.</div>
+</dd>
 <dt><a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.SchedaOperatore.html#dati()" class="member-name-link">dati()</a> - Method in record class it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.SchedaOperatore.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.SchedaOperatore</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/monitoraggio/api/MonitoraggioApi.SchedaOperatore.html#param-dati"><code>dati</code></a> record component.</div>
@@ -971,6 +1090,22 @@ assegnato.</div>
 <dt><a href="it/unina/picus/catalogo/api/CatalogoApi.DatiMisura.html#%3Cinit%3E(java.lang.String,java.lang.String,java.lang.String,boolean)" class="member-name-link">DatiMisura(String, String, String, boolean)</a> - Constructor for record class it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/CatalogoApi.DatiMisura.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.DatiMisura</a></dt>
 <dd>
 <div class="block">Creates an instance of a <code>DatiMisura</code> record class.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/DatiMisuraNonValidiException.html" class="type-name-link" title="class in it.unina.picus.catalogo.interno.dominio">DatiMisuraNonValidiException</a> - Exception Class in <a href="it/unina/picus/catalogo/interno/dominio/package-summary.html">it.unina.picus.catalogo.interno.dominio</a></dt>
+<dd>
+<div class="block">Eccezione di dominio per dati di misura incompleti, non conformi o campi non ammessi.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/DatiMisuraNonValidiException.html#%3Cinit%3E(java.lang.String,java.util.Map)" class="member-name-link">DatiMisuraNonValidiException(String, Map)</a> - Constructor for exception class it.unina.picus.catalogo.interno.dominio.<a href="it/unina/picus/catalogo/interno/dominio/DatiMisuraNonValidiException.html" title="class in it.unina.picus.catalogo.interno.dominio">DatiMisuraNonValidiException</a></dt>
+<dd>
+<div class="block">Costruisce l'eccezione con un messaggio generale e la mappa dei campi errati.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/DatiMisuraNonValidiException.html#%3Cinit%3E(java.util.Map)" class="member-name-link">DatiMisuraNonValidiException(Map)</a> - Constructor for exception class it.unina.picus.catalogo.interno.dominio.<a href="it/unina/picus/catalogo/interno/dominio/DatiMisuraNonValidiException.html" title="class in it.unina.picus.catalogo.interno.dominio">DatiMisuraNonValidiException</a></dt>
+<dd>
+<div class="block">Costruisce l'eccezione con i messaggi di errore sui singoli campi.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/web/ErroriCatalogo.html#datiNonValidi(it.unina.picus.catalogo.interno.dominio.DatiMisuraNonValidiException)" class="member-name-link">datiNonValidi(DatiMisuraNonValidiException)</a> - Method in class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/ErroriCatalogo.html" title="class in it.unina.picus.catalogo.web">ErroriCatalogo</a></dt>
+<dd>
+<div class="block">Gestisce i dati di misura mancanti o non validi (<code>400 Bad Request</code>).</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/api/DatiRichiestaNonValidiException.html" class="type-name-link" title="class in it.unina.picus.richieste.api">DatiRichiestaNonValidiException</a> - Exception Class in <a href="it/unina/picus/richieste/api/package-summary.html">it.unina.picus.richieste.api</a></dt>
 <dd>
@@ -1004,6 +1139,10 @@ assegnato.</div>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/catalogo/api/CatalogoApi.DatiMisura.html#param-descrizione"><code>descrizione</code></a> record component.</div>
 </dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html#descrizione()" class="member-name-link">descrizione()</a> - Method in record class it.unina.picus.catalogo.interno.dominio.<a href="it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html" title="class in it.unina.picus.catalogo.interno.dominio">MisuraDiCatalogo</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html#param-descrizione"><code>descrizione</code></a> record component.</div>
+</dd>
 <dt><a href="it/unina/picus/comunicazioni/api/DestinatariAvvisi.html" class="type-name-link" title="interface in it.unina.picus.comunicazioni.api">DestinatariAvvisi</a> - Interface in <a href="it/unina/picus/comunicazioni/api/package-summary.html">it.unina.picus.comunicazioni.api</a></dt>
 <dd>
 <div class="block">Porta di verifica dei riferimenti, fornita dal modulo proprietario del contatto.</div>
@@ -1029,6 +1168,18 @@ assegnato.</div>
 <dt><a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.Allegato.html#dimensioneByte()" class="member-name-link">dimensioneByte()</a> - Method in record class it.unina.picus.comunicazioni.api.<a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.Allegato.html" title="class in it.unina.picus.comunicazioni.api">ComunicazioniApi.Allegato</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/comunicazioni/api/ComunicazioniApi.Allegato.html#param-dimensioneByte"><code>dimensioneByte</code></a> record component.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html#disattiva()" class="member-name-link">disattiva()</a> - Method in record class it.unina.picus.catalogo.interno.dominio.<a href="it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html" title="class in it.unina.picus.catalogo.interno.dominio">MisuraDiCatalogo</a></dt>
+<dd>
+<div class="block">Restituisce una copia disattivata della misura, preservando dati e identificativo storico.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/applicazione/ServizioGestioneCatalogo.html#disattivaMisura(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,long)" class="member-name-link">disattivaMisura(UtenzeApi.IdentitaAutenticata, long)</a> - Method in class it.unina.picus.catalogo.interno.applicazione.<a href="it/unina/picus/catalogo/interno/applicazione/ServizioGestioneCatalogo.html" title="class in it.unina.picus.catalogo.interno.applicazione">ServizioGestioneCatalogo</a></dt>
+<dd>
+<div class="block">Disattiva una misura mantenendo dati e identificativo nello storico.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/web/CatalogoController.html#disattivaMisura(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,long,it.unina.picus.catalogo.web.CorpoJsonCatalogo)" class="member-name-link">disattivaMisura(UtenzeApi.IdentitaAutenticata, long, CorpoJsonCatalogo)</a> - Method in class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/CatalogoController.html" title="class in it.unina.picus.catalogo.web">CatalogoController</a></dt>
+<dd>
+<div class="block">Disattiva una misura esistente per le nuove selezioni e conserva il riferimento storico.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/web/ContattiDisponibilitaController.DatiRisposta.html#disponibile()" class="member-name-link">disponibile()</a> - Method in record class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/ContattiDisponibilitaController.DatiRisposta.html" title="class in it.unina.picus.richieste.web">ContattiDisponibilitaController.DatiRisposta</a></dt>
 <dd>
@@ -1092,7 +1243,9 @@ assegnato.</div>
 <dt><a href="it/unina/picus/catalogo/interno/persistenza/ConsultazioneCatalogoJpa.html#elencoComuni()" class="member-name-link">elencoComuni()</a> - Method in class it.unina.picus.catalogo.interno.persistenza.<a href="it/unina/picus/catalogo/interno/persistenza/ConsultazioneCatalogoJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">ConsultazioneCatalogoJpa</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/catalogo/web/CatalogoController.html#elencoComuni(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">elencoComuni(UtenzeApi.IdentitaAutenticata)</a> - Method in class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/CatalogoController.html" title="class in it.unina.picus.catalogo.web">CatalogoController</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Elenca i comuni censiti nel catalogo.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.html#elencoContatti(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">elencoContatti(UtenzeApi.IdentitaAutenticata, UUID)</a> - Method in interface it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.html" title="interface in it.unina.picus.richieste.api">RichiesteApi</a></dt>
 <dd>
 <div class="block">Elenca per il Banco i contatti di una richiesta, comprese le risposte già acquisite.</div>
@@ -1113,6 +1266,14 @@ assegnato.</div>
 <dd>
 <div class="block">Elenca per il Banco tutte le misure, incluse quelle disattivate.</div>
 </dd>
+<dt><a href="it/unina/picus/catalogo/interno/applicazione/ServizioGestioneCatalogo.html#elencoMisure(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">elencoMisure(UtenzeApi.IdentitaAutenticata)</a> - Method in class it.unina.picus.catalogo.interno.applicazione.<a href="it/unina/picus/catalogo/interno/applicazione/ServizioGestioneCatalogo.html" title="class in it.unina.picus.catalogo.interno.applicazione">ServizioGestioneCatalogo</a></dt>
+<dd>
+<div class="block">Elenca per il Banco tutte le misure del catalogo, comprese quelle disattivate.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/web/CatalogoController.html#elencoMisure(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">elencoMisure(UtenzeApi.IdentitaAutenticata)</a> - Method in class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/CatalogoController.html" title="class in it.unina.picus.catalogo.web">CatalogoController</a></dt>
+<dd>
+<div class="block">Elenca per il Banco tutte le misure del catalogo, comprese quelle disattivate.</div>
+</dd>
 <dt><a href="it/unina/picus/catalogo/api/CatalogoApi.html#elencoMisureAttive()" class="member-name-link">elencoMisureAttive()</a> - Method in interface it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/CatalogoApi.html" title="interface in it.unina.picus.catalogo.api">CatalogoApi</a></dt>
 <dd>
 <div class="block">Elenca le misure selezionabili per una nuova richiesta o dichiarazione di offerta.</div>
@@ -1124,7 +1285,9 @@ assegnato.</div>
 <dt><a href="it/unina/picus/catalogo/interno/persistenza/ConsultazioneCatalogoJpa.html#elencoMisureAttive()" class="member-name-link">elencoMisureAttive()</a> - Method in class it.unina.picus.catalogo.interno.persistenza.<a href="it/unina/picus/catalogo/interno/persistenza/ConsultazioneCatalogoJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">ConsultazioneCatalogoJpa</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/catalogo/web/CatalogoController.html#elencoMisureAttive(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">elencoMisureAttive(UtenzeApi.IdentitaAutenticata)</a> - Method in class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/CatalogoController.html" title="class in it.unina.picus.catalogo.web">CatalogoController</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Elenca le misure attive selezionabili nelle nuove richieste e offerte.</div>
+</dd>
 <dt><a href="it/unina/picus/catalogo/api/CatalogoApi.html#elencoOffertaOpt(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">elencoOffertaOpt(UtenzeApi.IdentitaAutenticata, UUID)</a> - Method in interface it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/CatalogoApi.html" title="interface in it.unina.picus.catalogo.api">CatalogoApi</a></dt>
 <dd>
 <div class="block">Consulta l'offerta corrente di una OPT come titolare o Banco.</div>
@@ -1189,7 +1352,23 @@ assegnato.</div>
 <dd>
 <div class="block">Indicates whether some other object is "equal to" this one.</div>
 </dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class it.unina.picus.catalogo.interno.dominio.<a href="it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html" title="class in it.unina.picus.catalogo.interno.dominio">MisuraDiCatalogo</a></dt>
+<dd>
+<div class="block">Indicates whether some other object is "equal to" this one.</div>
+</dd>
 <dt><a href="it/unina/picus/catalogo/interno/persistenza/OffertaOptJpa.Chiave.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class it.unina.picus.catalogo.interno.persistenza.<a href="it/unina/picus/catalogo/interno/persistenza/OffertaOptJpa.Chiave.html" title="class in it.unina.picus.catalogo.interno.persistenza">OffertaOptJpa.Chiave</a></dt>
+<dd>
+<div class="block">Indicates whether some other object is "equal to" this one.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/web/CorpoJsonCatalogo.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/CorpoJsonCatalogo.html" title="class in it.unina.picus.catalogo.web">CorpoJsonCatalogo</a></dt>
+<dd>
+<div class="block">Indicates whether some other object is "equal to" this one.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/web/ErroriCatalogo.ErroreCatalogo.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/ErroriCatalogo.ErroreCatalogo.html" title="class in it.unina.picus.catalogo.web">ErroriCatalogo.ErroreCatalogo</a></dt>
+<dd>
+<div class="block">Indicates whether some other object is "equal to" this one.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/web/MisuraJson.RichiestaAggiornamento.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/MisuraJson.RichiestaAggiornamento.html" title="class in it.unina.picus.catalogo.web">MisuraJson.RichiestaAggiornamento</a></dt>
 <dd>
 <div class="block">Indicates whether some other object is "equal to" this one.</div>
 </dd>
@@ -1329,6 +1508,10 @@ assegnato.</div>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/catalogo/api/CatalogoApi.DatiMisura.html#param-erogabileADistanza"><code>erogabileADistanza</code></a> record component.</div>
 </dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html#erogabileADistanza()" class="member-name-link">erogabileADistanza()</a> - Method in record class it.unina.picus.catalogo.interno.dominio.<a href="it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html" title="class in it.unina.picus.catalogo.interno.dominio">MisuraDiCatalogo</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html#param-erogabileADistanza"><code>erogabileADistanza</code></a> record component.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.Candidato.html#erogatore()" class="member-name-link">erogatore()</a> - Method in record class it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.Candidato.html" title="class in it.unina.picus.richieste.api">RichiesteApi.Candidato</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/richieste/api/RichiesteApi.Candidato.html#param-erogatore"><code>erogatore</code></a> record component.</div>
@@ -1365,6 +1548,21 @@ assegnato.</div>
 <dd>
 <div class="block">Creates an instance of a <code>Errore</code> record class.</div>
 </dd>
+<dt><a href="it/unina/picus/catalogo/web/ErroriCatalogo.ErroreCatalogo.html#%3Cinit%3E(java.lang.String,java.lang.String,java.util.Map)" class="member-name-link">ErroreCatalogo(String, String, Map)</a> - Constructor for record class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/ErroriCatalogo.ErroreCatalogo.html" title="class in it.unina.picus.catalogo.web">ErroriCatalogo.ErroreCatalogo</a></dt>
+<dd>
+<div class="block">Creates an instance of a <code>ErroreCatalogo</code> record class.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/web/ErroriCatalogo.html" class="type-name-link" title="class in it.unina.picus.catalogo.web">ErroriCatalogo</a> - Class in <a href="it/unina/picus/catalogo/web/package-summary.html">it.unina.picus.catalogo.web</a></dt>
+<dd>
+<div class="block">Traduce gli esiti di errore specifici del modulo Catalogo in risposte JSON uniformi,
+senza esporre valori ricevuti dal client o dettagli interni.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/web/ErroriCatalogo.html#%3Cinit%3E()" class="member-name-link">ErroriCatalogo()</a> - Constructor for class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/ErroriCatalogo.html" title="class in it.unina.picus.catalogo.web">ErroriCatalogo</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/catalogo/web/ErroriCatalogo.ErroreCatalogo.html" class="type-name-link" title="class in it.unina.picus.catalogo.web">ErroriCatalogo.ErroreCatalogo</a> - Record Class in <a href="it/unina/picus/catalogo/web/package-summary.html">it.unina.picus.catalogo.web</a></dt>
+<dd>
+<div class="block">Struttura uniforme degli errori restituiti dagli endpoint di Catalogo.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/web/ErroriRichieste.html" class="type-name-link" title="class in it.unina.picus.richieste.web">ErroriRichieste</a> - Class in <a href="it/unina/picus/richieste/web/package-summary.html">it.unina.picus.richieste.web</a></dt>
 <dd>
 <div class="block">Risposte con messaggi controllati: mai valori del corpo, descrizioni o messaggi del parser.</div>
@@ -1378,6 +1576,18 @@ assegnato.</div>
 <div class="block">Verifica l'esistenza di una pratica senza caricarne i dettagli.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/interno/persistenza/RichiestaRepositoryJpa.html#esiste(java.util.UUID)" class="member-name-link">esiste(UUID)</a> - Method in class it.unina.picus.richieste.interno.persistenza.<a href="it/unina/picus/richieste/interno/persistenza/RichiestaRepositoryJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">RichiestaRepositoryJpa</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/MisuraRepository.html#esisteCodice(java.lang.String)" class="member-name-link">esisteCodice(String)</a> - Method in interface it.unina.picus.catalogo.interno.dominio.<a href="it/unina/picus/catalogo/interno/dominio/MisuraRepository.html" title="interface in it.unina.picus.catalogo.interno.dominio">MisuraRepository</a></dt>
+<dd>
+<div class="block">Verifica in modo case-insensitive se esiste già una misura con il codice indicato.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/persistenza/MisuraRepositoryJpa.html#esisteCodice(java.lang.String)" class="member-name-link">esisteCodice(String)</a> - Method in class it.unina.picus.catalogo.interno.persistenza.<a href="it/unina/picus/catalogo/interno/persistenza/MisuraRepositoryJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">MisuraRepositoryJpa</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/MisuraRepository.html#esisteCodiceSuAltraMisura(java.lang.String,long)" class="member-name-link">esisteCodiceSuAltraMisura(String, long)</a> - Method in interface it.unina.picus.catalogo.interno.dominio.<a href="it/unina/picus/catalogo/interno/dominio/MisuraRepository.html" title="interface in it.unina.picus.catalogo.interno.dominio">MisuraRepository</a></dt>
+<dd>
+<div class="block">Verifica in modo case-insensitive se il codice è usato da una misura diversa da quella indicata.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/persistenza/MisuraRepositoryJpa.html#esisteCodiceSuAltraMisura(java.lang.String,long)" class="member-name-link">esisteCodiceSuAltraMisura(String, long)</a> - Method in class it.unina.picus.catalogo.interno.persistenza.<a href="it/unina/picus/catalogo/interno/persistenza/MisuraRepositoryJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">MisuraRepositoryJpa</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.ContattoDisponibilita.html#esito()" class="member-name-link">esito()</a> - Method in record class it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.ContattoDisponibilita.html" title="class in it.unina.picus.richieste.api">RichiesteApi.ContattoDisponibilita</a></dt>
 <dd>
@@ -1554,7 +1764,23 @@ assegnato.</div>
 <dd>
 <div class="block">Returns a hash code value for this object.</div>
 </dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html#hashCode()" class="member-name-link">hashCode()</a> - Method in record class it.unina.picus.catalogo.interno.dominio.<a href="it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html" title="class in it.unina.picus.catalogo.interno.dominio">MisuraDiCatalogo</a></dt>
+<dd>
+<div class="block">Returns a hash code value for this object.</div>
+</dd>
 <dt><a href="it/unina/picus/catalogo/interno/persistenza/OffertaOptJpa.Chiave.html#hashCode()" class="member-name-link">hashCode()</a> - Method in record class it.unina.picus.catalogo.interno.persistenza.<a href="it/unina/picus/catalogo/interno/persistenza/OffertaOptJpa.Chiave.html" title="class in it.unina.picus.catalogo.interno.persistenza">OffertaOptJpa.Chiave</a></dt>
+<dd>
+<div class="block">Returns a hash code value for this object.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/web/CorpoJsonCatalogo.html#hashCode()" class="member-name-link">hashCode()</a> - Method in record class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/CorpoJsonCatalogo.html" title="class in it.unina.picus.catalogo.web">CorpoJsonCatalogo</a></dt>
+<dd>
+<div class="block">Returns a hash code value for this object.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/web/ErroriCatalogo.ErroreCatalogo.html#hashCode()" class="member-name-link">hashCode()</a> - Method in record class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/ErroriCatalogo.ErroreCatalogo.html" title="class in it.unina.picus.catalogo.web">ErroriCatalogo.ErroreCatalogo</a></dt>
+<dd>
+<div class="block">Returns a hash code value for this object.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/web/MisuraJson.RichiestaAggiornamento.html#hashCode()" class="member-name-link">hashCode()</a> - Method in record class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/MisuraJson.RichiestaAggiornamento.html" title="class in it.unina.picus.catalogo.web">MisuraJson.RichiestaAggiornamento</a></dt>
 <dd>
 <div class="block">Returns a hash code value for this object.</div>
 </dd>
@@ -1699,6 +1925,10 @@ assegnato.</div>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/catalogo/api/CatalogoApi.Misura.html#param-id"><code>id</code></a> record component.</div>
 </dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html#id()" class="member-name-link">id()</a> - Method in record class it.unina.picus.catalogo.interno.dominio.<a href="it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html" title="class in it.unina.picus.catalogo.interno.dominio">MisuraDiCatalogo</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html#param-id"><code>id</code></a> record component.</div>
+</dd>
 <dt><a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.Allegato.html#id()" class="member-name-link">id()</a> - Method in record class it.unina.picus.comunicazioni.api.<a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.Allegato.html" title="class in it.unina.picus.comunicazioni.api">ComunicazioniApi.Allegato</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/comunicazioni/api/ComunicazioniApi.Allegato.html#param-id"><code>id</code></a> record component.</div>
@@ -1838,11 +2068,17 @@ l'attore è sempre quello della sessione, mai un valore inviato dal client.</div
 </dd>
 <dt><a href="it/unina/picus/catalogo/interno/applicazione/package-summary.html">it.unina.picus.catalogo.interno.applicazione</a> - package it.unina.picus.catalogo.interno.applicazione</dt>
 <dd>
-<div class="block">Selezione degli erogatori compatibili con una richiesta di misura.</div>
+<div class="block">Casi d'uso applicativi del modulo Catalogo: gestione amministrativa delle misure
+e ricerca degli erogatori compatibili con una richiesta di misura.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/package-summary.html">it.unina.picus.catalogo.interno.dominio</a> - package it.unina.picus.catalogo.interno.dominio</dt>
+<dd>
+<div class="block">Modello di dominio, invarianti, validazione, regole di accesso e porte di persistenza
+del modulo Catalogo.</div>
 </dd>
 <dt><a href="it/unina/picus/catalogo/interno/persistenza/package-summary.html">it.unina.picus.catalogo.interno.persistenza</a> - package it.unina.picus.catalogo.interno.persistenza</dt>
 <dd>
-<div class="block">Persistenza di misure, comuni, adiacenze e offerte territoriali.</div>
+<div class="block">Adattatori di persistenza JPA per misure, comuni, adiacenze e offerte territoriali del modulo Catalogo.</div>
 </dd>
 <dt><a href="it/unina/picus/catalogo/web/package-summary.html">it.unina.picus.catalogo.web</a> - package it.unina.picus.catalogo.web</dt>
 <dd>
@@ -1938,6 +2174,14 @@ operativi di Richieste.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/web/InvioRichiestaJson.html#leggi(java.util.Map)" class="member-name-link">leggi(Map)</a> - Static method in class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/InvioRichiestaJson.html" title="class in it.unina.picus.richieste.web">InvioRichiestaJson</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/catalogo/web/MisuraJson.html#leggiAggiornamento(java.util.Map)" class="member-name-link">leggiAggiornamento(Map)</a> - Static method in class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/MisuraJson.html" title="class in it.unina.picus.catalogo.web">MisuraJson</a></dt>
+<dd>
+<div class="block">Converte i campi JSON per la sostituzione dei dati e dello stato di una misura.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/web/MisuraJson.html#leggiCreazione(java.util.Map)" class="member-name-link">leggiCreazione(Map)</a> - Static method in class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/MisuraJson.html" title="class in it.unina.picus.catalogo.web">MisuraJson</a></dt>
+<dd>
+<div class="block">Converte e verifica i tipi dei campi JSON per la creazione di una misura.</div>
+</dd>
 <dt><a href="it/unina/picus/utenze/web/LimitatoreAccessi.html" class="type-name-link" title="class in it.unina.picus.utenze.web">LimitatoreAccessi</a> - Class in <a href="it/unina/picus/utenze/web/package-summary.html">it.unina.picus.utenze.web</a></dt>
 <dd>
 <div class="block">Limita i tentativi di accesso per email: dopo <a href="it/unina/picus/utenze/web/LimitatoreAccessi.html#MAX_FALLIMENTI">5</a> tentativi falliti in
@@ -1986,6 +2230,22 @@ operativi di Richieste.</div>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/utenze/web/LimitatoreAccessi.html#MAX_FALLIMENTI" class="member-name-link">MAX_FALLIMENTI</a> - Static variable in class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/LimitatoreAccessi.html" title="class in it.unina.picus.utenze.web">LimitatoreAccessi</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/RegoleValidazioneMisura.html#MAX_LUNGHEZZA_CODICE" class="member-name-link">MAX_LUNGHEZZA_CODICE</a> - Static variable in class it.unina.picus.catalogo.interno.dominio.<a href="it/unina/picus/catalogo/interno/dominio/RegoleValidazioneMisura.html" title="class in it.unina.picus.catalogo.interno.dominio">RegoleValidazioneMisura</a></dt>
+<dd>
+<div class="block">Lunghezza massima ammessa per il codice della misura.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/RegoleValidazioneMisura.html#MAX_LUNGHEZZA_DESCRIZIONE" class="member-name-link">MAX_LUNGHEZZA_DESCRIZIONE</a> - Static variable in class it.unina.picus.catalogo.interno.dominio.<a href="it/unina/picus/catalogo/interno/dominio/RegoleValidazioneMisura.html" title="class in it.unina.picus.catalogo.interno.dominio">RegoleValidazioneMisura</a></dt>
+<dd>
+<div class="block">Lunghezza massima ammessa per la descrizione della misura.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/RegoleValidazioneMisura.html#MAX_LUNGHEZZA_NOME" class="member-name-link">MAX_LUNGHEZZA_NOME</a> - Static variable in class it.unina.picus.catalogo.interno.dominio.<a href="it/unina/picus/catalogo/interno/dominio/RegoleValidazioneMisura.html" title="class in it.unina.picus.catalogo.interno.dominio">RegoleValidazioneMisura</a></dt>
+<dd>
+<div class="block">Lunghezza massima ammessa per il nome della misura.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/web/ErroriCatalogo.ErroreCatalogo.html#messaggio()" class="member-name-link">messaggio()</a> - Method in record class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/ErroriCatalogo.ErroreCatalogo.html" title="class in it.unina.picus.catalogo.web">ErroriCatalogo.ErroreCatalogo</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./it/unina/picus/catalogo/web/ErroriCatalogo.ErroreCatalogo.html#param-messaggio"><code>messaggio</code></a> record component.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/web/ErroriRichieste.Errore.html#messaggio()" class="member-name-link">messaggio()</a> - Method in record class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/ErroriRichieste.Errore.html" title="class in it.unina.picus.richieste.web">ErroriRichieste.Errore</a></dt>
 <dd>
 <div class="block">Returns the value of the <code>messaggio</code> record component.</div>
@@ -1993,6 +2253,14 @@ operativi di Richieste.</div>
 <dt><a href="it/unina/picus/catalogo/api/CatalogoApi.Misura.html#%3Cinit%3E(long,it.unina.picus.catalogo.api.CatalogoApi.DatiMisura,boolean)" class="member-name-link">Misura(long, CatalogoApi.DatiMisura, boolean)</a> - Constructor for record class it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/CatalogoApi.Misura.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.Misura</a></dt>
 <dd>
 <div class="block">Creates an instance of a <code>Misura</code> record class.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html" class="type-name-link" title="class in it.unina.picus.catalogo.interno.dominio">MisuraDiCatalogo</a> - Record Class in <a href="it/unina/picus/catalogo/interno/dominio/package-summary.html">it.unina.picus.catalogo.interno.dominio</a></dt>
+<dd>
+<div class="block">Entità di dominio immutabile che rappresenta una misura del catalogo e ne governa il ciclo di vita.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html#%3Cinit%3E(java.lang.Long,java.lang.String,java.lang.String,java.lang.String,boolean,boolean)" class="member-name-link">MisuraDiCatalogo(Long, String, String, String, boolean, boolean)</a> - Constructor for record class it.unina.picus.catalogo.interno.dominio.<a href="it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html" title="class in it.unina.picus.catalogo.interno.dominio">MisuraDiCatalogo</a></dt>
+<dd>
+<div class="block">Creates an instance of a <code>MisuraDiCatalogo</code> record class.</div>
 </dd>
 <dt><a href="it/unina/picus/catalogo/api/CatalogoApi.OffertaOpt.html#misuraId()" class="member-name-link">misuraId()</a> - Method in record class it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/CatalogoApi.OffertaOpt.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.OffertaOpt</a></dt>
 <dd>
@@ -2027,9 +2295,42 @@ operativi di Richieste.</div>
 <div class="block">Returns the value of the <code>misuraId</code> record component.</div>
 </dd>
 <dt><a href="it/unina/picus/catalogo/interno/persistenza/MisuraJpa.html" class="type-name-link" title="class in it.unina.picus.catalogo.interno.persistenza">MisuraJpa</a> - Class in <a href="it/unina/picus/catalogo/interno/persistenza/package-summary.html">it.unina.picus.catalogo.interno.persistenza</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Entità JPA associata alla tabella <code>catalogo_misure</code>.</div>
+</dd>
 <dt><a href="it/unina/picus/catalogo/interno/persistenza/MisuraJpa.html#%3Cinit%3E()" class="member-name-link">MisuraJpa()</a> - Constructor for class it.unina.picus.catalogo.interno.persistenza.<a href="it/unina/picus/catalogo/interno/persistenza/MisuraJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">MisuraJpa</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Costruttore richiesto da JPA.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/web/MisuraJson.html" class="type-name-link" title="class in it.unina.picus.catalogo.web">MisuraJson</a> - Class in <a href="it/unina/picus/catalogo/web/package-summary.html">it.unina.picus.catalogo.web</a></dt>
+<dd>
+<div class="block">Adattatore di ingresso HTTP che converte il corpo JSON nei DTO di comando del catalogo,
+applicando allow-list esplicite sui campi e controlli di tipo prima del dominio.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/web/MisuraJson.RichiestaAggiornamento.html" class="type-name-link" title="class in it.unina.picus.catalogo.web">MisuraJson.RichiestaAggiornamento</a> - Record Class in <a href="it/unina/picus/catalogo/web/package-summary.html">it.unina.picus.catalogo.web</a></dt>
+<dd>
+<div class="block">Dati e stato estratti da una richiesta di aggiornamento di misura.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/MisuraNonTrovataException.html" class="type-name-link" title="class in it.unina.picus.catalogo.interno.dominio">MisuraNonTrovataException</a> - Exception Class in <a href="it/unina/picus/catalogo/interno/dominio/package-summary.html">it.unina.picus.catalogo.interno.dominio</a></dt>
+<dd>
+<div class="block">Segnala l'assenza di una misura richiesta esplicitamente per identificativo.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/MisuraNonTrovataException.html#%3Cinit%3E()" class="member-name-link">MisuraNonTrovataException()</a> - Constructor for exception class it.unina.picus.catalogo.interno.dominio.<a href="it/unina/picus/catalogo/interno/dominio/MisuraNonTrovataException.html" title="class in it.unina.picus.catalogo.interno.dominio">MisuraNonTrovataException</a></dt>
+<dd>
+<div class="block">Crea l'eccezione con un messaggio generico privo di dettagli interni.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/MisuraRepository.html" class="type-name-link" title="interface in it.unina.picus.catalogo.interno.dominio">MisuraRepository</a> - Interface in <a href="it/unina/picus/catalogo/interno/dominio/package-summary.html">it.unina.picus.catalogo.interno.dominio</a></dt>
+<dd>
+<div class="block">Porta di persistenza del dominio per il ciclo di vita delle misure di catalogo.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/persistenza/MisuraRepositoryJpa.html" class="type-name-link" title="class in it.unina.picus.catalogo.interno.persistenza">MisuraRepositoryJpa</a> - Class in <a href="it/unina/picus/catalogo/interno/persistenza/package-summary.html">it.unina.picus.catalogo.interno.persistenza</a></dt>
+<dd>
+<div class="block">Adattatore JPA/PostgreSQL della porta <a href="it/unina/picus/catalogo/interno/dominio/MisuraRepository.html" title="interface in it.unina.picus.catalogo.interno.dominio"><code>MisuraRepository</code></a>.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/persistenza/MisuraRepositoryJpa.html#%3Cinit%3E(jakarta.persistence.EntityManager)" class="member-name-link">MisuraRepositoryJpa(EntityManager)</a> - Constructor for class it.unina.picus.catalogo.interno.persistenza.<a href="it/unina/picus/catalogo/interno/persistenza/MisuraRepositoryJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">MisuraRepositoryJpa</a></dt>
+<dd>
+<div class="block">Costruisce il repository con il gestore della persistenza JPA.</div>
+</dd>
 <dt><a href="index.html#picus-modules-heading" class="search-tag-link">Moduli e componenti</a> - Section in Overview</dt>
 <dd>&nbsp;</dd>
 <dt><a href="index.html#monitoraggio-heading" class="search-tag-link">Monitoraggio</a> - Section in Overview</dt>
@@ -2081,6 +2382,10 @@ operativi di Richieste.</div>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/catalogo/api/CatalogoApi.DatiMisura.html#param-nome"><code>nome</code></a> record component.</div>
 </dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html#nome()" class="member-name-link">nome()</a> - Method in record class it.unina.picus.catalogo.interno.dominio.<a href="it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html" title="class in it.unina.picus.catalogo.interno.dominio">MisuraDiCatalogo</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html#param-nome"><code>nome</code></a> record component.</div>
+</dd>
 <dt><a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.DatiSchedaOperatore.html#nome()" class="member-name-link">nome()</a> - Method in record class it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.DatiSchedaOperatore.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.DatiSchedaOperatore</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/monitoraggio/api/MonitoraggioApi.DatiSchedaOperatore.html#param-nome"><code>nome</code></a> record component.</div>
@@ -2125,6 +2430,10 @@ operativi di Richieste.</div>
 <dd>
 <div class="block">L'erogatore ha declinato il contatto.</div>
 </dd>
+<dt><a href="it/unina/picus/catalogo/web/ErroriCatalogo.html#nonTrovata()" class="member-name-link">nonTrovata()</a> - Method in class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/ErroriCatalogo.html" title="class in it.unina.picus.catalogo.web">ErroriCatalogo</a></dt>
+<dd>
+<div class="block">Gestisce l'assenza della misura richiesta (<code>404 Not Found</code>).</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/web/ErroriRichieste.html#nonTrovata()" class="member-name-link">nonTrovata()</a> - Method in class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/ErroriRichieste.html" title="class in it.unina.picus.richieste.web">ErroriRichieste</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/utenze/interno/applicazione/UtenzeService.html#normalizzaEmail(java.lang.String)" class="member-name-link">normalizzaEmail(String)</a> - Static method in class it.unina.picus.utenze.interno.applicazione.<a href="it/unina/picus/utenze/interno/applicazione/UtenzeService.html" title="class in it.unina.picus.utenze.interno.applicazione">UtenzeService</a></dt>
@@ -2140,6 +2449,14 @@ operativi di Richieste.</div>
 <dt><a href="it/unina/picus/utenze/web/LimitatoreAccessi.html#numeroChiavi()" class="member-name-link">numeroChiavi()</a> - Method in class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/LimitatoreAccessi.html" title="class in it.unina.picus.utenze.web">LimitatoreAccessi</a></dt>
 <dd>
 <div class="block">Solo per i test.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html#nuova(it.unina.picus.catalogo.api.CatalogoApi.DatiMisura)" class="member-name-link">nuova(CatalogoApi.DatiMisura)</a> - Static method in record class it.unina.picus.catalogo.interno.dominio.<a href="it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html" title="class in it.unina.picus.catalogo.interno.dominio">MisuraDiCatalogo</a></dt>
+<dd>
+<div class="block">Crea una nuova misura attiva a partire dai dati forniti, validandoli e normalizzandoli.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/persistenza/MisuraJpa.html#nuova(it.unina.picus.catalogo.interno.dominio.MisuraDiCatalogo)" class="member-name-link">nuova(MisuraDiCatalogo)</a> - Static method in class it.unina.picus.catalogo.interno.persistenza.<a href="it/unina/picus/catalogo/interno/persistenza/MisuraJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">MisuraJpa</a></dt>
+<dd>
+<div class="block">Crea una nuova entità JPA pronta per la persistenza a partire dal modello di dominio.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/web/ContattiViewController.html#nuova(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,org.springframework.ui.Model)" class="member-name-link">nuova(UtenzeApi.IdentitaAutenticata, Model)</a> - Method in class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/ContattiViewController.html" title="class in it.unina.picus.richieste.web">ContattiViewController</a></dt>
 <dd>
@@ -2333,6 +2650,10 @@ operativi di Richieste.</div>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/comunicazioni/api/ComunicazioniApi.AvvisoOperativo.html#param-registratoIl"><code>registratoIl</code></a> record component.</div>
 </dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/RegoleAccessoCatalogo.html" class="type-name-link" title="class in it.unina.picus.catalogo.interno.dominio">RegoleAccessoCatalogo</a> - Class in <a href="it/unina/picus/catalogo/interno/dominio/package-summary.html">it.unina.picus.catalogo.interno.dominio</a></dt>
+<dd>
+<div class="block">Regole di autorizzazione per la gestione amministrativa del catalogo delle misure (#46).</div>
+</dd>
 <dt><a href="it/unina/picus/comunicazioni/interno/dominio/RegoleAccessoComunicazione.html" class="type-name-link" title="class in it.unina.picus.comunicazioni.interno.dominio">RegoleAccessoComunicazione</a> - Class in <a href="it/unina/picus/comunicazioni/interno/dominio/package-summary.html">it.unina.picus.comunicazioni.interno.dominio</a></dt>
 <dd>
 <div class="block">Regole di accesso alle comunicazioni del Banco (#28, criterio 7).</div>
@@ -2360,6 +2681,10 @@ operativi di Richieste.</div>
 <dt><a href="it/unina/picus/richieste/interno/dominio/RegoleAnnullamento.Decisione.html" class="type-name-link" title="enum class in it.unina.picus.richieste.interno.dominio">RegoleAnnullamento.Decisione</a> - Enum Class in <a href="it/unina/picus/richieste/interno/dominio/package-summary.html">it.unina.picus.richieste.interno.dominio</a></dt>
 <dd>
 <div class="block">Cosa deve fare il caso d'uso dopo aver applicato le regole.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/RegoleValidazioneMisura.html" class="type-name-link" title="class in it.unina.picus.catalogo.interno.dominio">RegoleValidazioneMisura</a> - Class in <a href="it/unina/picus/catalogo/interno/dominio/package-summary.html">it.unina.picus.catalogo.interno.dominio</a></dt>
+<dd>
+<div class="block">Regole di validazione e normalizzazione dei dati descrittivi di una misura di catalogo.</div>
 </dd>
 <dt><a href="it/unina/picus/utenze/web/IdentitaResolver.html#resolveArgument(org.springframework.core.MethodParameter,org.springframework.web.method.support.ModelAndViewContainer,org.springframework.web.context.request.NativeWebRequest,org.springframework.web.bind.support.WebDataBinderFactory)" class="member-name-link">resolveArgument(MethodParameter, ModelAndViewContainer, NativeWebRequest, WebDataBinderFactory)</a> - Method in class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/IdentitaResolver.html" title="class in it.unina.picus.utenze.web">IdentitaResolver</a></dt>
 <dd>&nbsp;</dd>
@@ -2400,6 +2725,10 @@ operativi di Richieste.</div>
 <dt><a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.TipoAvviso.html#RICHIESTA_DISPONIBILITA" class="member-name-link">RICHIESTA_DISPONIBILITA</a> - Enum constant in enum class it.unina.picus.comunicazioni.api.<a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.TipoAvviso.html" title="enum class in it.unina.picus.comunicazioni.api">ComunicazioniApi.TipoAvviso</a></dt>
 <dd>
 <div class="block">Disponibilità da valutare per il contatto ricevuto.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/web/MisuraJson.RichiestaAggiornamento.html#%3Cinit%3E(it.unina.picus.catalogo.api.CatalogoApi.DatiMisura,boolean)" class="member-name-link">RichiestaAggiornamento(CatalogoApi.DatiMisura, boolean)</a> - Constructor for record class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/MisuraJson.RichiestaAggiornamento.html" title="class in it.unina.picus.catalogo.web">MisuraJson.RichiestaAggiornamento</a></dt>
+<dd>
+<div class="block">Creates an instance of a <code>RichiestaAggiornamento</code> record class.</div>
 </dd>
 <dt><a href="it/unina/picus/shared/RichiestaApi.html" class="type-name-link" title="class in it.unina.picus.shared">RichiestaApi</a> - Class in <a href="it/unina/picus/shared/package-summary.html">it.unina.picus.shared</a></dt>
 <dd>
@@ -2516,6 +2845,10 @@ nel modo giusto: le pagine HTML rimandano al login (302), le API ricevono <code>
 </dd>
 <dt><a href="it/unina/picus/richieste/web/RichiesteController.html#%3Cinit%3E(it.unina.picus.richieste.api.InvioRichiesteApi)" class="member-name-link">RichiesteController(InvioRichiesteApi)</a> - Constructor for class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/RichiesteController.html" title="class in it.unina.picus.richieste.web">RichiesteController</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html#ricostruita(long,java.lang.String,java.lang.String,java.lang.String,boolean,boolean)" class="member-name-link">ricostruita(long, String, String, String, boolean, boolean)</a> - Static method in record class it.unina.picus.catalogo.interno.dominio.<a href="it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html" title="class in it.unina.picus.catalogo.interno.dominio">MisuraDiCatalogo</a></dt>
+<dd>
+<div class="block">Ricostruisce una misura già persistita mantenendone l'identificativo stabile.</div>
+</dd>
 <dt><a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.html#riepilogaSchede(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre)" class="member-name-link">riepilogaSchede(UtenzeApi.IdentitaAutenticata, MonitoraggioApi.Trimestre)</a> - Method in interface it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.html" title="interface in it.unina.picus.monitoraggio.api">MonitoraggioApi</a></dt>
 <dd>
 <div class="block">Riepiloga per il Banco le schede ricevute nel trimestre selezionato.</div>
@@ -2609,6 +2942,13 @@ nel modo giusto: le pagine HTML rimandano al login (302), le API ricevono <code>
 </dl>
 <h2 class="title" id="I:S">S</h2>
 <dl class="index">
+<dt><a href="it/unina/picus/catalogo/interno/dominio/MisuraRepository.html#salvaNuova(it.unina.picus.catalogo.interno.dominio.MisuraDiCatalogo)" class="member-name-link">salvaNuova(MisuraDiCatalogo)</a> - Method in interface it.unina.picus.catalogo.interno.dominio.<a href="it/unina/picus/catalogo/interno/dominio/MisuraRepository.html" title="interface in it.unina.picus.catalogo.interno.dominio">MisuraRepository</a></dt>
+<dd>
+<div class="block">Persiste una nuova misura e restituisce l'istanza completa dell'identificativo generato,
+oppure vuoto se il database rileva un conflitto concorrente di unicità sul codice.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/persistenza/MisuraRepositoryJpa.html#salvaNuova(it.unina.picus.catalogo.interno.dominio.MisuraDiCatalogo)" class="member-name-link">salvaNuova(MisuraDiCatalogo)</a> - Method in class it.unina.picus.catalogo.interno.persistenza.<a href="it/unina/picus/catalogo/interno/persistenza/MisuraRepositoryJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">MisuraRepositoryJpa</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.html#scaricaAllegato(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">scaricaAllegato(UtenzeApi.IdentitaAutenticata, UUID)</a> - Method in interface it.unina.picus.comunicazioni.api.<a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.html" title="interface in it.unina.picus.comunicazioni.api">ComunicazioniApi</a></dt>
 <dd>
 <div class="block">Scarica un allegato con gli stessi controlli di accesso della comunicazione.</div>
@@ -2640,6 +2980,14 @@ nel modo giusto: le pagine HTML rimandano al login (302), le API ricevono <code>
 <dt><a href="it/unina/picus/richieste/interno/applicazione/ServizioCoordinamentoRichieste.html#%3Cinit%3E(it.unina.picus.richieste.interno.dominio.RichiestaRepository,it.unina.picus.richieste.interno.dominio.ContattiRepository,it.unina.picus.catalogo.api.RicercaErogatoriApi,it.unina.picus.richieste.api.InvioRichiesteApi,it.unina.picus.comunicazioni.api.AvvisiOperativiApi,java.time.Clock)" class="member-name-link">ServizioCoordinamentoRichieste(RichiestaRepository, ContattiRepository, RicercaErogatoriApi, InvioRichiesteApi, AvvisiOperativiApi, Clock)</a> - Constructor for class it.unina.picus.richieste.interno.applicazione.<a href="it/unina/picus/richieste/interno/applicazione/ServizioCoordinamentoRichieste.html" title="class in it.unina.picus.richieste.interno.applicazione">ServizioCoordinamentoRichieste</a></dt>
 <dd>
 <div class="block">Collega il coordinamento alle porte di persistenza e degli altri moduli.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/applicazione/ServizioGestioneCatalogo.html" class="type-name-link" title="class in it.unina.picus.catalogo.interno.applicazione">ServizioGestioneCatalogo</a> - Class in <a href="it/unina/picus/catalogo/interno/applicazione/package-summary.html">it.unina.picus.catalogo.interno.applicazione</a></dt>
+<dd>
+<div class="block">Gestisce l'elenco amministrativo, la creazione, la modifica e la disattivazione delle misure (#163).</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/applicazione/ServizioGestioneCatalogo.html#%3Cinit%3E(it.unina.picus.catalogo.interno.dominio.MisuraRepository)" class="member-name-link">ServizioGestioneCatalogo(MisuraRepository)</a> - Constructor for class it.unina.picus.catalogo.interno.applicazione.<a href="it/unina/picus/catalogo/interno/applicazione/ServizioGestioneCatalogo.html" title="class in it.unina.picus.catalogo.interno.applicazione">ServizioGestioneCatalogo</a></dt>
+<dd>
+<div class="block">Costruisce il servizio con la porta repository delle misure.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/interno/applicazione/ServizioInvioRichieste.html" class="type-name-link" title="class in it.unina.picus.richieste.interno.applicazione">ServizioInvioRichieste</a> - Class in <a href="it/unina/picus/richieste/interno/applicazione/package-summary.html">it.unina.picus.richieste.interno.applicazione</a></dt>
 <dd>
@@ -2811,7 +3159,23 @@ capo a coda (login, area per ruolo, logout) senza database.</div>
 <dd>
 <div class="block">Returns a string representation of this record class.</div>
 </dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html#toString()" class="member-name-link">toString()</a> - Method in record class it.unina.picus.catalogo.interno.dominio.<a href="it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html" title="class in it.unina.picus.catalogo.interno.dominio">MisuraDiCatalogo</a></dt>
+<dd>
+<div class="block">Returns a string representation of this record class.</div>
+</dd>
 <dt><a href="it/unina/picus/catalogo/interno/persistenza/OffertaOptJpa.Chiave.html#toString()" class="member-name-link">toString()</a> - Method in record class it.unina.picus.catalogo.interno.persistenza.<a href="it/unina/picus/catalogo/interno/persistenza/OffertaOptJpa.Chiave.html" title="class in it.unina.picus.catalogo.interno.persistenza">OffertaOptJpa.Chiave</a></dt>
+<dd>
+<div class="block">Returns a string representation of this record class.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/web/CorpoJsonCatalogo.html#toString()" class="member-name-link">toString()</a> - Method in record class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/CorpoJsonCatalogo.html" title="class in it.unina.picus.catalogo.web">CorpoJsonCatalogo</a></dt>
+<dd>
+<div class="block">Returns a string representation of this record class.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/web/ErroriCatalogo.ErroreCatalogo.html#toString()" class="member-name-link">toString()</a> - Method in record class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/ErroriCatalogo.ErroreCatalogo.html" title="class in it.unina.picus.catalogo.web">ErroriCatalogo.ErroreCatalogo</a></dt>
+<dd>
+<div class="block">Returns a string representation of this record class.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/web/MisuraJson.RichiestaAggiornamento.html#toString()" class="member-name-link">toString()</a> - Method in record class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/MisuraJson.RichiestaAggiornamento.html" title="class in it.unina.picus.catalogo.web">MisuraJson.RichiestaAggiornamento</a></dt>
 <dd>
 <div class="block">Returns a string representation of this record class.</div>
 </dd>
@@ -2959,6 +3323,12 @@ capo a coda (login, area per ruolo, logout) senza database.</div>
 <dd>
 <div class="block">Crea un riferimento a un trimestre.</div>
 </dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/MisuraRepository.html#trovaTutte()" class="member-name-link">trovaTutte()</a> - Method in interface it.unina.picus.catalogo.interno.dominio.<a href="it/unina/picus/catalogo/interno/dominio/MisuraRepository.html" title="interface in it.unina.picus.catalogo.interno.dominio">MisuraRepository</a></dt>
+<dd>
+<div class="block">Restituisce tutte le misure censite, comprese quelle disattivate, ordinate per codice.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/persistenza/MisuraRepositoryJpa.html#trovaTutte()" class="member-name-link">trovaTutte()</a> - Method in class it.unina.picus.catalogo.interno.persistenza.<a href="it/unina/picus/catalogo/interno/persistenza/MisuraRepositoryJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">MisuraRepositoryJpa</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.TipoDestinatari.html#TUTTE_LE_OPT" class="member-name-link">TUTTE_LE_OPT</a> - Enum constant in enum class it.unina.picus.comunicazioni.api.<a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.TipoDestinatari.html" title="enum class in it.unina.picus.comunicazioni.api">ComunicazioniApi.TipoDestinatari</a></dt>
 <dd>
 <div class="block">Tutti gli account organizzativi OPT attivi.</div>
@@ -3016,6 +3386,10 @@ capo a coda (login, area per ruolo, logout) senza database.</div>
 <dt><a href="it/unina/picus/richieste/interno/dominio/ValidazioneAccordo.html#valida(it.unina.picus.richieste.api.RichiesteApi.DettagliAccordo)" class="member-name-link">valida(RichiesteApi.DettagliAccordo)</a> - Static method in class it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/ValidazioneAccordo.html" title="class in it.unina.picus.richieste.interno.dominio">ValidazioneAccordo</a></dt>
 <dd>
 <div class="block">Valida i dettagli e aggrega gli errori per consentire la correzione nello stesso invio.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/RegoleValidazioneMisura.html#validaENormalizza(it.unina.picus.catalogo.api.CatalogoApi.DatiMisura)" class="member-name-link">validaENormalizza(CatalogoApi.DatiMisura)</a> - Static method in class it.unina.picus.catalogo.interno.dominio.<a href="it/unina/picus/catalogo/interno/dominio/RegoleValidazioneMisura.html" title="class in it.unina.picus.catalogo.interno.dominio">RegoleValidazioneMisura</a></dt>
+<dd>
+<div class="block">Valida e normalizza i dati della misura accumulando tutti gli errori riscontrati.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/web/ErroriRichieste.html#validazione(it.unina.picus.richieste.api.DatiRichiestaNonValidiException)" class="member-name-link">validazione(DatiRichiestaNonValidiException)</a> - Method in class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/ErroriRichieste.html" title="class in it.unina.picus.richieste.web">ErroriRichieste</a></dt>
 <dd>&nbsp;</dd>
@@ -3137,6 +3511,10 @@ the order they are declared.</div>
 <dd>
 <div class="block">Annullamento: il Banco, la OPT titolare o l'erogatore assegnato.</div>
 </dd>
+<dt><a href="it/unina/picus/catalogo/interno/dominio/RegoleAccessoCatalogo.html#verificaBanco(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">verificaBanco(UtenzeApi.IdentitaAutenticata)</a> - Static method in class it.unina.picus.catalogo.interno.dominio.<a href="it/unina/picus/catalogo/interno/dominio/RegoleAccessoCatalogo.html" title="class in it.unina.picus.catalogo.interno.dominio">RegoleAccessoCatalogo</a></dt>
+<dd>
+<div class="block">Verifica che l'attore autenticato possieda il ruolo del Banco di coordinamento.</div>
+</dd>
 <dt><a href="it/unina/picus/comunicazioni/interno/dominio/RegoleAccessoComunicazione.html#verificaBanco(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">verificaBanco(UtenzeApi.IdentitaAutenticata)</a> - Static method in class it.unina.picus.comunicazioni.interno.dominio.<a href="it/unina/picus/comunicazioni/interno/dominio/RegoleAccessoComunicazione.html" title="class in it.unina.picus.comunicazioni.interno.dominio">RegoleAccessoComunicazione</a></dt>
 <dd>
 <div class="block">Invio delle comunicazioni, elenco delle inviate e dei riscontri: riservati al Banco.</div>
@@ -3166,6 +3544,10 @@ destinatario.</div>
 <dt><a href="it/unina/picus/monitoraggio/interno/dominio/RegoleAccessoScheda.html#verificaConsultazione(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">verificaConsultazione(UtenzeApi.IdentitaAutenticata, UUID)</a> - Static method in class it.unina.picus.monitoraggio.interno.dominio.<a href="it/unina/picus/monitoraggio/interno/dominio/RegoleAccessoScheda.html" title="class in it.unina.picus.monitoraggio.interno.dominio">RegoleAccessoScheda</a></dt>
 <dd>
 <div class="block">Consultazione di una scheda: il Banco oppure l'operatore titolare, e nessun altro.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/web/MisuraJson.html#verificaCorpoVuoto(it.unina.picus.catalogo.web.CorpoJsonCatalogo)" class="member-name-link">verificaCorpoVuoto(CorpoJsonCatalogo)</a> - Static method in class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/MisuraJson.html" title="class in it.unina.picus.catalogo.web">MisuraJson</a></dt>
+<dd>
+<div class="block">Verifica che un comando privo di parametri non riceva proprietà o valori <code>null</code> inattesi.</div>
 </dd>
 <dt><a href="it/unina/picus/utenze/api/UtenzeApi.html#verificaCredenziali(java.lang.String,java.lang.String)" class="member-name-link">verificaCredenziali(String, String)</a> - Method in interface it.unina.picus.utenze.api.<a href="it/unina/picus/utenze/api/UtenzeApi.html" title="interface in it.unina.picus.utenze.api">UtenzeApi</a></dt>
 <dd>

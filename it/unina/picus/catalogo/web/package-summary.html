@@ -73,13 +73,43 @@ loadScripts(document, 'script');</script>
 <ul class="summary-list">
 <li>
 <div id="class-summary">
-<div class="caption"><span>Classes</span></div>
+<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="class-summary-tab0" role="tab" aria-selected="true" aria-controls="class-summary.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary', 2)" class="active-table-tab">All Classes and Interfaces</button><button id="class-summary-tab2" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab2', 2)" class="table-tab">Classes</button><button id="class-summary-tab4" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab4', 2)" class="table-tab">Record Classes</button></div>
+<div id="class-summary.tabpanel" role="tabpanel" aria-labelledby="class-summary-tab0">
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Class</div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color class-summary class-summary-tab2"><a href="CatalogoController.html" title="class in it.unina.picus.catalogo.web">CatalogoController</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab2">
-<div class="block">Dati selezionabili dal modulo di invio, senza logica di presentazione.</div>
+<div class="block">Espone gli endpoint REST del modulo Catalogo per consultazione e gestione delle misure persistenti.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="ConfigurazioneJsonCatalogo.html" title="class in it.unina.picus.catalogo.web">ConfigurazioneJsonCatalogo</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
+<div class="block">Configura un parser JSON dedicato agli ingressi del modulo Catalogo con controllo rigoroso
+delle chiavi duplicate, senza alterare i parser degli altri moduli.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab4"><a href="CorpoJsonCatalogo.html" title="class in it.unina.picus.catalogo.web">CorpoJsonCatalogo</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab4">
+<div class="block">Corpo applicativo delle richieste JSON di Catalogo letto con rilevamento delle chiavi duplicate
+prima del binding nei DTO.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="ErroriCatalogo.html" title="class in it.unina.picus.catalogo.web">ErroriCatalogo</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
+<div class="block">Traduce gli esiti di errore specifici del modulo Catalogo in risposte JSON uniformi,
+senza esporre valori ricevuti dal client o dettagli interni.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab4"><a href="ErroriCatalogo.ErroreCatalogo.html" title="class in it.unina.picus.catalogo.web">ErroriCatalogo.ErroreCatalogo</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab4">
+<div class="block">Struttura uniforme degli errori restituiti dagli endpoint di Catalogo.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="MisuraJson.html" title="class in it.unina.picus.catalogo.web">MisuraJson</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
+<div class="block">Adattatore di ingresso HTTP che converte il corpo JSON nei DTO di comando del catalogo,
+applicando allow-list esplicite sui campi e controlli di tipo prima del dominio.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab4"><a href="MisuraJson.RichiestaAggiornamento.html" title="class in it.unina.picus.catalogo.web">MisuraJson.RichiestaAggiornamento</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab4">
+<div class="block">Dati e stato estratti da una richiesta di aggiornamento di misura.</div>
+</div>
 </div>
 </div>
 </div>

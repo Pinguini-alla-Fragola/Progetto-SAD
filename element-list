@@ -1,6 +1,7 @@
 it.unina.picus
 it.unina.picus.catalogo.api
 it.unina.picus.catalogo.interno.applicazione
+it.unina.picus.catalogo.interno.dominio
 it.unina.picus.catalogo.interno.persistenza
 it.unina.picus.catalogo.web
 it.unina.picus.comunicazioni.api

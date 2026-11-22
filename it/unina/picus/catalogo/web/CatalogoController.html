@@ -60,12 +60,17 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-summary" tabindex="0">Method Summary</a></li>
 <li><a href="#constructor-detail" tabindex="0">Constructor Details</a>
 <ol class="toc-list">
-<li><a href="#%3Cinit%3E(it.unina.picus.catalogo.api.ConsultazioneCatalogoApi)" tabindex="0">CatalogoController(ConsultazioneCatalogoApi)</a></li>
+<li><a href="#%3Cinit%3E(it.unina.picus.catalogo.api.ConsultazioneCatalogoApi,it.unina.picus.catalogo.interno.applicazione.ServizioGestioneCatalogo)" tabindex="0">CatalogoController(ConsultazioneCatalogoApi, ServizioGestioneCatalogo)</a></li>
 </ol>
 </li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
 <li><a href="#elencoMisureAttive(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" tabindex="0">elencoMisureAttive(UtenzeApi.IdentitaAutenticata)</a></li>
+<li><a href="#elencoMisure(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" tabindex="0">elencoMisure(UtenzeApi.IdentitaAutenticata)</a></li>
+<li><a href="#consultaMisura(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,long)" tabindex="0">consultaMisura(UtenzeApi.IdentitaAutenticata, long)</a></li>
+<li><a href="#creaMisura(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.catalogo.web.CorpoJsonCatalogo)" tabindex="0">creaMisura(UtenzeApi.IdentitaAutenticata, CorpoJsonCatalogo)</a></li>
+<li><a href="#aggiornaMisura(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,long,it.unina.picus.catalogo.web.CorpoJsonCatalogo)" tabindex="0">aggiornaMisura(UtenzeApi.IdentitaAutenticata, long, CorpoJsonCatalogo)</a></li>
+<li><a href="#disattivaMisura(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,long,it.unina.picus.catalogo.web.CorpoJsonCatalogo)" tabindex="0">disattivaMisura(UtenzeApi.IdentitaAutenticata, long, CorpoJsonCatalogo)</a></li>
 <li><a href="#elencoComuni(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" tabindex="0">elencoComuni(UtenzeApi.IdentitaAutenticata)</a></li>
 </ol>
 </li>
@@ -87,7 +92,10 @@ loadScripts(document, 'script');</script>
                 produces="application/json")
 </span><span class="modifiers">public class </span><span class="element-name type-name-label">CatalogoController</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">Dati selezionabili dal modulo di invio, senza logica di presentazione.</div>
+<div class="block">Espone gli endpoint REST del modulo Catalogo per consultazione e gestione delle misure persistenti.
+
+<p>Delega la consultazione a <a href="../api/ConsultazioneCatalogoApi.html" title="interface in it.unina.picus.catalogo.api"><code>ConsultazioneCatalogoApi</code></a> e i comandi riservati al Banco a
+<a href="../interno/applicazione/ServizioGestioneCatalogo.html" title="class in it.unina.picus.catalogo.interno.applicazione"><code>ServizioGestioneCatalogo</code></a>, senza introdurre logica di presentazione.</p></div>
 </div>
 </section>
 <section class="summary">
@@ -100,8 +108,11 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(it.unina.picus.catalogo.api.ConsultazioneCatalogoApi)" class="member-name-link">CatalogoController</a><wbr>(<a href="../api/ConsultazioneCatalogoApi.html" title="interface in it.unina.picus.catalogo.api">ConsultazioneCatalogoApi</a>&nbsp;catalogo)</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(it.unina.picus.catalogo.api.ConsultazioneCatalogoApi,it.unina.picus.catalogo.interno.applicazione.ServizioGestioneCatalogo)" class="member-name-link">CatalogoController</a><wbr>(<a href="../api/ConsultazioneCatalogoApi.html" title="interface in it.unina.picus.catalogo.api">ConsultazioneCatalogoApi</a>&nbsp;catalogo,
+ <a href="../interno/applicazione/ServizioGestioneCatalogo.html" title="class in it.unina.picus.catalogo.interno.applicazione">ServizioGestioneCatalogo</a>&nbsp;gestione)</code></div>
+<div class="col-last even-row-color">
+<div class="block">Costruisce il controller collegando le capacità di consultazione e gestione catalogo.</div>
+</div>
 </div>
 </section>
 </li>
@@ -116,12 +127,47 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../api/CatalogoApi.Misura.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.Misura</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#aggiornaMisura(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,long,it.unina.picus.catalogo.web.CorpoJsonCatalogo)" class="member-name-link">aggiornaMisura</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+ long&nbsp;id,
+ <a href="CorpoJsonCatalogo.html" title="class in it.unina.picus.catalogo.web">CorpoJsonCatalogo</a>&nbsp;corpo)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Sostituisce i dati aggiornabili di una misura conservandone l'identificativo.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../api/CatalogoApi.Misura.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.Misura</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#consultaMisura(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,long)" class="member-name-link">consultaMisura</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+ long&nbsp;id)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Restituisce i dati di una misura anche quando è stata disattivata, per consultazione storica.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.springframework.http.ResponseEntity<wbr>&lt;<a href="../api/CatalogoApi.Misura.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.Misura</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#creaMisura(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.catalogo.web.CorpoJsonCatalogo)" class="member-name-link">creaMisura</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+ <a href="CorpoJsonCatalogo.html" title="class in it.unina.picus.catalogo.web">CorpoJsonCatalogo</a>&nbsp;corpo)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Crea una nuova misura attiva nel catalogo persistente su comando del Banco.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../api/CatalogoApi.Misura.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.Misura</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#disattivaMisura(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,long,it.unina.picus.catalogo.web.CorpoJsonCatalogo)" class="member-name-link">disattivaMisura</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+ long&nbsp;id,
+ <a href="CorpoJsonCatalogo.html" title="class in it.unina.picus.catalogo.web">CorpoJsonCatalogo</a>&nbsp;corpo)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Disattiva una misura esistente per le nuove selezioni e conserva il riferimento storico.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../api/CatalogoApi.Comune.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.Comune</a>&gt;</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#elencoComuni(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">elencoComuni</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Elenca i comuni censiti nel catalogo.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../api/CatalogoApi.Misura.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.Misura</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#elencoMisureAttive(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">elencoMisureAttive</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#elencoMisure(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">elencoMisure</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Elenca per il Banco tutte le misure del catalogo, comprese quelle disattivate.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../api/CatalogoApi.Misura.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.Misura</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#elencoMisureAttive(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">elencoMisureAttive</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Elenca le misure attive selezionabili nelle nuove richieste e offerte.</div>
+</div>
 </div>
 </div>
 </div>
@@ -140,10 +186,17 @@ loadScripts(document, 'script');</script>
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(it.unina.picus.catalogo.api.ConsultazioneCatalogoApi)">
+<section class="detail" id="&lt;init&gt;(it.unina.picus.catalogo.api.ConsultazioneCatalogoApi,it.unina.picus.catalogo.interno.applicazione.ServizioGestioneCatalogo)">
 <h3>CatalogoController</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">CatalogoController</span><wbr><span class="parameters">(<a href="../api/ConsultazioneCatalogoApi.html" title="interface in it.unina.picus.catalogo.api">ConsultazioneCatalogoApi</a>&nbsp;catalogo)</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">CatalogoController</span><wbr><span class="parameters">(<a href="../api/ConsultazioneCatalogoApi.html" title="interface in it.unina.picus.catalogo.api">ConsultazioneCatalogoApi</a>&nbsp;catalogo,
+ <a href="../interno/applicazione/ServizioGestioneCatalogo.html" title="class in it.unina.picus.catalogo.interno.applicazione">ServizioGestioneCatalogo</a>&nbsp;gestione)</span></div>
+<div class="block">Costruisce il controller collegando le capacità di consultazione e gestione catalogo.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>catalogo</code> - servizio di lettura di misure attive, storiche e comuni</dd>
+<dd><code>gestione</code> - servizio applicativo per creazione, modifica e disattivazione delle misure</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -161,6 +214,123 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="annotations">@GetMapping("/misure")
 </span><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../api/CatalogoApi.Misura.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.Misura</a>&gt;</span>&nbsp;<span class="element-name">elencoMisureAttive</span><wbr><span class="parameters">(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore)</span></div>
+<div class="block">Elenca le misure attive selezionabili nelle nuove richieste e offerte.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>attore</code> - identità autenticata corrente</dd>
+<dt>Returns:</dt>
+<dd>misure attive ordinate per codice</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="elencoMisure(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)">
+<h3>elencoMisure</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="annotations">@GetMapping("/misure/tutte")
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../api/CatalogoApi.Misura.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.Misura</a>&gt;</span>&nbsp;<span class="element-name">elencoMisure</span><wbr><span class="parameters">(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore)</span></div>
+<div class="block">Elenca per il Banco tutte le misure del catalogo, comprese quelle disattivate.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>attore</code> - identità verificata del Banco di coordinamento</dd>
+<dt>Returns:</dt>
+<dd>elenco completo delle misure presenti in catalogo</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="consultaMisura(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,long)">
+<h3>consultaMisura</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="annotations">@GetMapping("/misure/{id}")
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../api/CatalogoApi.Misura.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.Misura</a></span>&nbsp;<span class="element-name">consultaMisura</span><wbr><span class="parameters">(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+ @PathVariable
+ long&nbsp;id)</span></div>
+<div class="block">Restituisce i dati di una misura anche quando è stata disattivata, per consultazione storica.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>attore</code> - identità autenticata corrente</dd>
+<dd><code>id</code> - identificativo stabile della misura</dd>
+<dt>Returns:</dt>
+<dd>dettaglio della misura trovata</dd>
+<dt>Throws:</dt>
+<dd><code><a href="../interno/dominio/MisuraNonTrovataException.html" title="class in it.unina.picus.catalogo.interno.dominio">MisuraNonTrovataException</a></code> - se l'identificativo non corrisponde ad alcuna misura</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="creaMisura(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.catalogo.web.CorpoJsonCatalogo)">
+<h3>creaMisura</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="annotations">@PostMapping(value="/misure",
+             consumes="application/json")
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type">org.springframework.http.ResponseEntity&lt;<a href="../api/CatalogoApi.Misura.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.Misura</a>&gt;</span>&nbsp;<span class="element-name">creaMisura</span><wbr><span class="parameters">(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+ @RequestBody
+ <a href="CorpoJsonCatalogo.html" title="class in it.unina.picus.catalogo.web">CorpoJsonCatalogo</a>&nbsp;corpo)</span></div>
+<div class="block">Crea una nuova misura attiva nel catalogo persistente su comando del Banco.
+Il campo facoltativo <code>erogabileADistanza</code> assume il valore <code>false</code> se omesso.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>attore</code> - identità verificata del Banco di coordinamento</dd>
+<dd><code>corpo</code> - proprietà JSON della nuova misura</dd>
+<dt>Returns:</dt>
+<dd>risposta <code>201 Created</code> con intestazione <code>Location</code> e misura creata</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="aggiornaMisura(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,long,it.unina.picus.catalogo.web.CorpoJsonCatalogo)">
+<h3>aggiornaMisura</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="annotations">@PutMapping(value="/misure/{id}",
+            consumes="application/json")
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../api/CatalogoApi.Misura.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.Misura</a></span>&nbsp;<span class="element-name">aggiornaMisura</span><wbr><span class="parameters">(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+ @PathVariable
+ long&nbsp;id,
+ @RequestBody
+ <a href="CorpoJsonCatalogo.html" title="class in it.unina.picus.catalogo.web">CorpoJsonCatalogo</a>&nbsp;corpo)</span></div>
+<div class="block">Sostituisce i dati aggiornabili di una misura conservandone l'identificativo.
+
+<p>Il corpo dichiara esplicitamente <code>erogabileADistanza</code> e <code>attiva</code>.
+Con <code>attiva</code> a <code>false</code> la sostituzione disattiva la misura.
+Impostare <code>attiva</code> a <code>true</code> riattiva una misura disattivata.
+Per la sola disattivazione usare
+<code>POST /api/catalogo/misure/{id}/disattivazione</code>.</p></div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>attore</code> - identità verificata del Banco di coordinamento</dd>
+<dd><code>id</code> - identificativo stabile della misura da aggiornare</dd>
+<dd><code>corpo</code> - proprietà JSON aggiornate della misura</dd>
+<dt>Returns:</dt>
+<dd>misura aggiornata</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="disattivaMisura(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,long,it.unina.picus.catalogo.web.CorpoJsonCatalogo)">
+<h3>disattivaMisura</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="annotations">@PostMapping("/misure/{id}/disattivazione")
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../api/CatalogoApi.Misura.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.Misura</a></span>&nbsp;<span class="element-name">disattivaMisura</span><wbr><span class="parameters">(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+ @PathVariable
+ long&nbsp;id,
+ @RequestBody(required=false)
+ <a href="CorpoJsonCatalogo.html" title="class in it.unina.picus.catalogo.web">CorpoJsonCatalogo</a>&nbsp;corpo)</span></div>
+<div class="block">Disattiva una misura esistente per le nuove selezioni e conserva il riferimento storico.
+Se la misura è già disattivata, restituisce il suo stato corrente.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>attore</code> - identità verificata del Banco di coordinamento</dd>
+<dd><code>id</code> - identificativo stabile della misura da disattivare</dd>
+<dd><code>corpo</code> - corpo opzionale che, se presente, deve essere un oggetto JSON vuoto</dd>
+<dt>Returns:</dt>
+<dd>misura aggiornata con <code>attiva = false</code></dd>
+</dl>
 </div>
 </section>
 </li>
@@ -170,6 +340,13 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="annotations">@GetMapping("/comuni")
 </span><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../api/CatalogoApi.Comune.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.Comune</a>&gt;</span>&nbsp;<span class="element-name">elencoComuni</span><wbr><span class="parameters">(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore)</span></div>
+<div class="block">Elenca i comuni censiti nel catalogo.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>attore</code> - identità autenticata corrente</dd>
+<dt>Returns:</dt>
+<dd>comuni ordinati per nome</dd>
+</dl>
 </div>
 </section>
 </li>

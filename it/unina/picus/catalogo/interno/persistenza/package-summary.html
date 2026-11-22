@@ -66,7 +66,16 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="package-signature">package <span class="element-name">it.unina.picus.catalogo.interno.persistenza</span></div>
 <section class="package-description" id="package-description">
-<div class="block">Persistenza di misure, comuni, adiacenze e offerte territoriali.</div>
+<div class="block">Adattatori di persistenza JPA per misure, comuni, adiacenze e offerte territoriali del modulo Catalogo.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="MisuraRepositoryJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza"><code>MisuraRepositoryJpa</code></a></li>
+<li><a href="ConsultazioneCatalogoJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza"><code>ConsultazioneCatalogoJpa</code></a></li>
+</ul>
+</dd>
+</dl>
 </section>
 </div>
 <section class="summary">
@@ -87,17 +96,23 @@ loadScripts(document, 'script');</script>
 <div class="block">Adattatore di lettura: restituisce DTO senza esporre le entità JPA.</div>
 </div>
 <div class="col-first odd-row-color class-summary class-summary-tab2"><a href="MisuraJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">MisuraJpa</a></div>
-<div class="col-last odd-row-color class-summary class-summary-tab2">&nbsp;</div>
-<div class="col-first even-row-color class-summary class-summary-tab2"><a href="OffertaOptJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">OffertaOptJpa</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
+<div class="block">Entità JPA associata alla tabella <code>catalogo_misure</code>.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="MisuraRepositoryJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">MisuraRepositoryJpa</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="block">Adattatore JPA/PostgreSQL della porta <a href="../dominio/MisuraRepository.html" title="interface in it.unina.picus.catalogo.interno.dominio"><code>MisuraRepository</code></a>.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="OffertaOptJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">OffertaOptJpa</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
 <div class="block">Dichiarazione corrente di offerta dell'account organizzativo OPT.</div>
 </div>
-<div class="col-first odd-row-color class-summary class-summary-tab4"><a href="OffertaOptJpa.Chiave.html" title="class in it.unina.picus.catalogo.interno.persistenza">OffertaOptJpa.Chiave</a></div>
-<div class="col-last odd-row-color class-summary class-summary-tab4">
+<div class="col-first even-row-color class-summary class-summary-tab4"><a href="OffertaOptJpa.Chiave.html" title="class in it.unina.picus.catalogo.interno.persistenza">OffertaOptJpa.Chiave</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab4">
 <div class="block">Chiave della dichiarazione per OPT e misura.</div>
 </div>
-<div class="col-first even-row-color class-summary class-summary-tab2"><a href="OffertaTerritorialeJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">OffertaTerritorialeJpa</a></div>
-<div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="OffertaTerritorialeJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">OffertaTerritorialeJpa</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
 <div class="block">Lettura dell'offerta e delle adiacenze di proprietà del catalogo.</div>
 </div>
 </div>

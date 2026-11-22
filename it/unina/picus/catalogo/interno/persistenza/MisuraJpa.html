@@ -65,7 +65,10 @@ loadScripts(document, 'script');</script>
 </li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
+<li><a href="#nuova(it.unina.picus.catalogo.interno.dominio.MisuraDiCatalogo)" tabindex="0">nuova(MisuraDiCatalogo)</a></li>
+<li><a href="#aggiorna(it.unina.picus.catalogo.interno.dominio.MisuraDiCatalogo)" tabindex="0">aggiorna(MisuraDiCatalogo)</a></li>
 <li><a href="#aDto()" tabindex="0">aDto()</a></li>
+<li><a href="#aDominio()" tabindex="0">aDominio()</a></li>
 </ol>
 </li>
 </ol>
@@ -84,6 +87,10 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="annotations">@Entity
 </span><span class="modifiers">public class </span><span class="element-name type-name-label">MisuraJpa</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
+<div class="block">Entità JPA associata alla tabella <code>catalogo_misure</code>.
+
+<p>Espone esclusivamente fabbriche e metodi di aggiornamento controllati a livello di package,
+preservando l'identificativo stabile assegnato alla prima persistenza.</p></div>
 </div>
 </section>
 <section class="summary">
@@ -99,7 +106,9 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color"><code>protected </code></div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E()" class="member-name-link">MisuraJpa</a>()</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Costruttore richiesto da JPA.</div>
+</div>
 </div>
 </section>
 </li>
@@ -108,15 +117,32 @@ loadScripts(document, 'script');</script>
 <section class="method-summary" id="method-summary">
 <h2>Method Summary</h2>
 <div id="method-summary-table">
-<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab4" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab4', 3)" class="table-tab">Concrete Methods</button></div>
+<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab1" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab1', 3)" class="table-tab">Static Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab4" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab4', 3)" class="table-tab">Concrete Methods</button></div>
 <div id="method-summary-table.tabpanel" role="tabpanel" aria-labelledby="method-summary-table-tab0">
 <div class="summary-table three-column-summary">
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>(package private) <a href="../../api/CatalogoApi.Misura.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.Misura</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#aDto()" class="member-name-link">aDto</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>(package private) <a href="../dominio/MisuraDiCatalogo.html" title="class in it.unina.picus.catalogo.interno.dominio">MisuraDiCatalogo</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#aDominio()" class="member-name-link">aDominio</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Converte l'entità persistita nell'oggetto di dominio corrispondente.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>(package private) <a href="../../api/CatalogoApi.Misura.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.Misura</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#aDto()" class="member-name-link">aDto</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Proietta l'entità persistita nel DTO pubblico del modulo Catalogo.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>(package private) void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#aggiorna(it.unina.picus.catalogo.interno.dominio.MisuraDiCatalogo)" class="member-name-link">aggiorna</a><wbr>(<a href="../dominio/MisuraDiCatalogo.html" title="class in it.unina.picus.catalogo.interno.dominio">MisuraDiCatalogo</a>&nbsp;misura)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Applica i nuovi attributi dal dominio senza alterare l'identificativo persistito.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>(package private) static <a href="MisuraJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">MisuraJpa</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#nuova(it.unina.picus.catalogo.interno.dominio.MisuraDiCatalogo)" class="member-name-link">nuova</a><wbr>(<a href="../dominio/MisuraDiCatalogo.html" title="class in it.unina.picus.catalogo.interno.dominio">MisuraDiCatalogo</a>&nbsp;misura)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Crea una nuova entità JPA pronta per la persistenza a partire dal modello di dominio.</div>
+</div>
 </div>
 </div>
 </div>
@@ -139,6 +165,7 @@ loadScripts(document, 'script');</script>
 <h3>MisuraJpa</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="element-name">MisuraJpa</span>()</div>
+<div class="block">Costruttore richiesto da JPA.</div>
 </div>
 </section>
 </li>
@@ -151,10 +178,56 @@ loadScripts(document, 'script');</script>
 <h2>Method Details</h2>
 <ul class="member-list">
 <li>
+<section class="detail" id="nuova(it.unina.picus.catalogo.interno.dominio.MisuraDiCatalogo)">
+<h3>nuova</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">static</span>&nbsp;<span class="return-type"><a href="MisuraJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">MisuraJpa</a></span>&nbsp;<span class="element-name">nuova</span><wbr><span class="parameters">(<a href="../dominio/MisuraDiCatalogo.html" title="class in it.unina.picus.catalogo.interno.dominio">MisuraDiCatalogo</a>&nbsp;misura)</span></div>
+<div class="block">Crea una nuova entità JPA pronta per la persistenza a partire dal modello di dominio.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>misura</code> - misura di dominio appena creata</dd>
+<dt>Returns:</dt>
+<dd>nuova entità JPA con identificativo ancora gestito dal database</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="aggiorna(it.unina.picus.catalogo.interno.dominio.MisuraDiCatalogo)">
+<h3>aggiorna</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">aggiorna</span><wbr><span class="parameters">(<a href="../dominio/MisuraDiCatalogo.html" title="class in it.unina.picus.catalogo.interno.dominio">MisuraDiCatalogo</a>&nbsp;misura)</span></div>
+<div class="block">Applica i nuovi attributi dal dominio senza alterare l'identificativo persistito.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>misura</code> - stato di dominio aggiornato della misura</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="aDto()">
 <h3>aDto</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="return-type"><a href="../../api/CatalogoApi.Misura.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.Misura</a></span>&nbsp;<span class="element-name">aDto</span>()</div>
+<div class="block">Proietta l'entità persistita nel DTO pubblico del modulo Catalogo.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>DTO immutabile della misura</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="aDominio()">
+<h3>aDominio</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="return-type"><a href="../dominio/MisuraDiCatalogo.html" title="class in it.unina.picus.catalogo.interno.dominio">MisuraDiCatalogo</a></span>&nbsp;<span class="element-name">aDominio</span>()</div>
+<div class="block">Converte l'entità persistita nell'oggetto di dominio corrispondente.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>entità di dominio ricostruita con il proprio identificativo stabile</dd>
+</dl>
 </div>
 </section>
 </li>
