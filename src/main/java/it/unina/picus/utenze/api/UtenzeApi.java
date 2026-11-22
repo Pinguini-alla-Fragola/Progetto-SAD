@@ -2,8 +2,8 @@ package it.unina.picus.utenze.api;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Fornisce identità verificate e le informazioni minime degli account necessarie ai moduli PICUS.
@@ -60,6 +60,32 @@ public interface UtenzeApi {
     List<ProfiloErogatore> elencoOptAttive(Set<UUID> accountIds);
 
     /**
+     * Elenca gli account di un ruolo per la gestione amministrativa del Banco, in qualsiasi stato.
+     *
+     * @param ruolo ruolo degli account da elencare
+     * @return account amministrativi del ruolo richiesto, eventualmente nessuno
+     */
+    List<AccountAmministrativo> elencoAccountPerRuolo(RuoloUtente ruolo);
+
+    /**
+     * Revoca l'accesso di una OPT attiva o in attesa di attivazione e invalida gli inviti pendenti.
+     *
+     * @param optAccountId identificativo dell'account OPT da revocare
+     * @throws UtenzaNonTrovataException se l'account non esiste
+     * @throws OperazioneUtenzaNonConsentitaException se il ruolo è diverso o l'account è già revocato
+     */
+    void revocaUtenzaOpt(UUID optAccountId);
+
+    /**
+     * Revoca l'accesso di un operatore attivo o in attesa di attivazione e invalida gli inviti pendenti.
+     *
+     * @param operatoreAccountId identificativo dell'account operatore da revocare
+     * @throws UtenzaNonTrovataException se l'account non esiste
+     * @throws OperazioneUtenzaNonConsentitaException se il ruolo è diverso o l'account è già revocato
+     */
+    void revocaUtenzaOperatore(UUID operatoreAccountId);
+
+    /**
      * Rilegge il profilo attivo e la competenza personale, bloccandoli fino al commit chiamante.
      * Richiede una transazione di scrittura già aperta. L'ordine è account, profilo, competenza;
      * la revoca o la modifica concorrente non può superare questa verifica prima del commit.
@@ -96,6 +122,27 @@ public interface UtenzeApi {
      * @param stato stato corrente dell'utenza
      */
     record AccountSintetico(UUID id, String nomeVisualizzato, RuoloUtente ruolo, StatoUtenza stato) {}
+
+    /**
+     * Dati di un account per le operazioni amministrative del Banco.
+     *
+     * @param id identificativo stabile dell'account
+     * @param nomeVisualizzato nome mostrato nelle liste
+     * @param email indirizzo associato all'account
+     * @param riferimento codice struttura per una OPT o tipologia per un operatore, se disponibile
+     * @param comuneCodice comune della OPT o territorio dell'operatore, se disponibile
+     * @param ruolo ruolo dell'account
+     * @param stato stato corrente dell'utenza
+     */
+    record AccountAmministrativo(
+            UUID id,
+            String nomeVisualizzato,
+            String email,
+            String riferimento,
+            String comuneCodice,
+            RuoloUtente ruolo,
+            StatoUtenza stato
+    ) {}
 
     /**
      * Dati di profilo utilizzati dal Catalogo per individuare gli erogatori compatibili.
