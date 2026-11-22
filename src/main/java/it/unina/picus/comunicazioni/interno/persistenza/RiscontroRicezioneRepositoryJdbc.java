@@ -34,7 +34,7 @@ public class RiscontroRicezioneRepositoryJdbc implements RiscontroRicezioneRepos
     public Optional<Set<UUID>> cercaDestinatari(UUID comunicazioneId) {
         var righe = jdbc.query("""
                 select d.destinatario_id
-                from comunicazioni_messaggi m
+                from comunicazioni m
                 left join comunicazioni_destinatari d on d.comunicazione_id = m.id
                 where m.id = ?
                 """, (rs, numeroRiga) -> rs.getObject("destinatario_id", UUID.class), comunicazioneId);
