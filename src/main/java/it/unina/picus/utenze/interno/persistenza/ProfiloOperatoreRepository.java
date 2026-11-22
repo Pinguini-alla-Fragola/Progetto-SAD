@@ -8,6 +8,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ProfiloOperatoreRepository extends JpaRepository<ProfiloOperatoreJpa, UUID> {
+    boolean existsByCodiceFiscale(String codiceFiscale);
+
     @Query("""
             select p.accountId as accountId, a.nome as nome, p.tipologia as tipologia,
                    p.comuneCodice as comuneCodice, p.centroPicus as centroPicus
