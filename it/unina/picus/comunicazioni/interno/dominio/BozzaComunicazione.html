@@ -60,7 +60,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-summary" tabindex="0">Method Summary</a></li>
 <li><a href="#constructor-detail" tabindex="0">Constructor Details</a>
 <ol class="toc-list">
-<li><a href="#%3Cinit%3E(java.lang.String,java.lang.String,it.unina.picus.comunicazioni.api.ComunicazioniApi.TipoDestinatari,java.util.Set,it.unina.picus.comunicazioni.interno.dominio.LetturaGruppo)" tabindex="0">BozzaComunicazione(String, String, ComunicazioniApi.TipoDestinatari, Set, LetturaGruppo)</a></li>
+<li><a href="#%3Cinit%3E(java.lang.String,java.lang.String,it.unina.picus.comunicazioni.api.ComunicazioniApi.TipoDestinatari,java.util.Set,it.unina.picus.comunicazioni.interno.dominio.LetturaGruppo,java.util.List)" tabindex="0">BozzaComunicazione(String, String, ComunicazioniApi.TipoDestinatari, Set, LetturaGruppo, List)</a></li>
 </ol>
 </li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
@@ -73,6 +73,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#tipo()" tabindex="0">tipo()</a></li>
 <li><a href="#gruppo()" tabindex="0">gruppo()</a></li>
 <li><a href="#letturaGruppo()" tabindex="0">letturaGruppo()</a></li>
+<li><a href="#allegati()" tabindex="0">allegati()</a></li>
 </ol>
 </li>
 </ol>
@@ -95,10 +96,11 @@ loadScripts(document, 'script');</script>
 <dd><code><span id="param-tipo">tipo</span></code> - tipo di destinatari scelto</dd>
 <dd><code><span id="param-gruppo">gruppo</span></code> - account scelti dal Banco, senza ripetizioni</dd>
 <dd><code><span id="param-letturaGruppo">letturaGruppo</span></code> - esito della lettura del gruppo</dd>
+<dd><code><span id="param-allegati">allegati</span></code> - file allegati, ancora da controllare</dd>
 </dl>
 <hr>
 <div class="horizontal-scroll">
-<div class="type-signature"><span class="modifiers">public record </span><span class="element-name type-name-label">BozzaComunicazione</span>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;titolo, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;contenuto, <a href="../../api/ComunicazioniApi.TipoDestinatari.html" title="enum class in it.unina.picus.comunicazioni.api">ComunicazioniApi.TipoDestinatari</a>&nbsp;tipo, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html" title="class or interface in java.util" class="external-link">Set</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&gt;&nbsp;gruppo, <a href="LetturaGruppo.html" title="enum class in it.unina.picus.comunicazioni.interno.dominio">LetturaGruppo</a>&nbsp;letturaGruppo)
+<div class="type-signature"><span class="modifiers">public record </span><span class="element-name type-name-label">BozzaComunicazione</span>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;titolo, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;contenuto, <a href="../../api/ComunicazioniApi.TipoDestinatari.html" title="enum class in it.unina.picus.comunicazioni.api">ComunicazioniApi.TipoDestinatari</a>&nbsp;tipo, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html" title="class or interface in java.util" class="external-link">Set</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&gt;&nbsp;gruppo, <a href="LetturaGruppo.html" title="enum class in it.unina.picus.comunicazioni.interno.dominio">LetturaGruppo</a>&nbsp;letturaGruppo, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="AllegatoRicevuto.html" title="class in it.unina.picus.comunicazioni.interno.dominio">AllegatoRicevuto</a>&gt;&nbsp;allegati)
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Record.html" title="class or interface in java.lang" class="external-link">Record</a></span></div>
 <div class="block">Comunicazione che il Banco vuole inviare, con i campi già ripuliti. Un testo vuoto vale <code>null</code>, come un
 tipo di destinatari sconosciuto; <code>letturaGruppo</code> dice se gli account del gruppo sono stati letti.</div>
@@ -114,11 +116,12 @@ tipo di destinatari sconosciuto; <code>letturaGruppo</code> dice se gli account 
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(java.lang.String,java.lang.String,it.unina.picus.comunicazioni.api.ComunicazioniApi.TipoDestinatari,java.util.Set,it.unina.picus.comunicazioni.interno.dominio.LetturaGruppo)" class="member-name-link">BozzaComunicazione</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;titolo,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(java.lang.String,java.lang.String,it.unina.picus.comunicazioni.api.ComunicazioniApi.TipoDestinatari,java.util.Set,it.unina.picus.comunicazioni.interno.dominio.LetturaGruppo,java.util.List)" class="member-name-link">BozzaComunicazione</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;titolo,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;contenuto,
  <a href="../../api/ComunicazioniApi.TipoDestinatari.html" title="enum class in it.unina.picus.comunicazioni.api">ComunicazioniApi.TipoDestinatari</a>&nbsp;tipo,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html" title="class or interface in java.util" class="external-link">Set</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&gt;&nbsp;gruppo,
- <a href="LetturaGruppo.html" title="enum class in it.unina.picus.comunicazioni.interno.dominio">LetturaGruppo</a>&nbsp;letturaGruppo)</code></div>
+ <a href="LetturaGruppo.html" title="enum class in it.unina.picus.comunicazioni.interno.dominio">LetturaGruppo</a>&nbsp;letturaGruppo,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="AllegatoRicevuto.html" title="class in it.unina.picus.comunicazioni.interno.dominio">AllegatoRicevuto</a>&gt;&nbsp;allegati)</code></div>
 <div class="col-last even-row-color">
 <div class="block">Creates an instance of a <code>BozzaComunicazione</code> record class.</div>
 </div>
@@ -136,44 +139,49 @@ tipo di destinatari sconosciuto; <code>letturaGruppo</code> dice se gli account 
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#contenuto()" class="member-name-link">contenuto</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="AllegatoRicevuto.html" title="class in it.unina.picus.comunicazioni.interno.dominio">AllegatoRicevuto</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#allegati()" class="member-name-link">allegati</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the value of the <a href="#param-allegati"><code>allegati</code></a> record component.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#contenuto()" class="member-name-link">contenuto</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the value of the <a href="#param-contenuto"><code>contenuto</code></a> record component.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#equals(java.lang.Object)" class="member-name-link">equals</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;o)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#equals(java.lang.Object)" class="member-name-link">equals</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;o)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Indicates whether some other object is "equal to" this one.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html" title="class or interface in java.util" class="external-link">Set</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#gruppo()" class="member-name-link">gruppo</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html" title="class or interface in java.util" class="external-link">Set</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#gruppo()" class="member-name-link">gruppo</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the value of the <a href="#param-gruppo"><code>gruppo</code></a> record component.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final int</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hashCode()" class="member-name-link">hashCode</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final int</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hashCode()" class="member-name-link">hashCode</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns a hash code value for this object.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="LetturaGruppo.html" title="enum class in it.unina.picus.comunicazioni.interno.dominio">LetturaGruppo</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#letturaGruppo()" class="member-name-link">letturaGruppo</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="LetturaGruppo.html" title="enum class in it.unina.picus.comunicazioni.interno.dominio">LetturaGruppo</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#letturaGruppo()" class="member-name-link">letturaGruppo</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the value of the <a href="#param-letturaGruppo"><code>letturaGruppo</code></a> record component.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../api/ComunicazioniApi.TipoDestinatari.html" title="enum class in it.unina.picus.comunicazioni.api">ComunicazioniApi.TipoDestinatari</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#tipo()" class="member-name-link">tipo</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../api/ComunicazioniApi.TipoDestinatari.html" title="enum class in it.unina.picus.comunicazioni.api">ComunicazioniApi.TipoDestinatari</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#tipo()" class="member-name-link">tipo</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the value of the <a href="#param-tipo"><code>tipo</code></a> record component.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#titolo()" class="member-name-link">titolo</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#titolo()" class="member-name-link">titolo</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the value of the <a href="#param-titolo"><code>titolo</code></a> record component.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#toString()" class="member-name-link">toString</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#toString()" class="member-name-link">toString</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns a string representation of this record class.</div>
 </div>
 </div>
@@ -194,14 +202,15 @@ tipo di destinatari sconosciuto; <code>letturaGruppo</code> dice se gli account 
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(java.lang.String,java.lang.String,it.unina.picus.comunicazioni.api.ComunicazioniApi.TipoDestinatari,java.util.Set,it.unina.picus.comunicazioni.interno.dominio.LetturaGruppo)">
+<section class="detail" id="&lt;init&gt;(java.lang.String,java.lang.String,it.unina.picus.comunicazioni.api.ComunicazioniApi.TipoDestinatari,java.util.Set,it.unina.picus.comunicazioni.interno.dominio.LetturaGruppo,java.util.List)">
 <h3>BozzaComunicazione</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">BozzaComunicazione</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;titolo,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;contenuto,
  <a href="../../api/ComunicazioniApi.TipoDestinatari.html" title="enum class in it.unina.picus.comunicazioni.api">ComunicazioniApi.TipoDestinatari</a>&nbsp;tipo,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html" title="class or interface in java.util" class="external-link">Set</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&gt;&nbsp;gruppo,
- <a href="LetturaGruppo.html" title="enum class in it.unina.picus.comunicazioni.interno.dominio">LetturaGruppo</a>&nbsp;letturaGruppo)</span></div>
+ <a href="LetturaGruppo.html" title="enum class in it.unina.picus.comunicazioni.interno.dominio">LetturaGruppo</a>&nbsp;letturaGruppo,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="AllegatoRicevuto.html" title="class in it.unina.picus.comunicazioni.interno.dominio">AllegatoRicevuto</a>&gt;&nbsp;allegati)</span></div>
 <div class="block">Creates an instance of a <code>BozzaComunicazione</code> record class.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
@@ -210,6 +219,7 @@ tipo di destinatari sconosciuto; <code>letturaGruppo</code> dice se gli account 
 <dd><code>tipo</code> - the value for the <a href="#param-tipo"><code>tipo</code></a> record component</dd>
 <dd><code>gruppo</code> - the value for the <a href="#param-gruppo"><code>gruppo</code></a> record component</dd>
 <dd><code>letturaGruppo</code> - the value for the <a href="#param-letturaGruppo"><code>letturaGruppo</code></a> record component</dd>
+<dd><code>allegati</code> - the value for the <a href="#param-allegati"><code>allegati</code></a> record component</dd>
 </dl>
 </div>
 </section>
@@ -330,6 +340,19 @@ tipo di destinatari sconosciuto; <code>letturaGruppo</code> dice se gli account 
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>the value of the <a href="#param-letturaGruppo"><code>letturaGruppo</code></a> record component</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="allegati()">
+<h3>allegati</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="AllegatoRicevuto.html" title="class in it.unina.picus.comunicazioni.interno.dominio">AllegatoRicevuto</a>&gt;</span>&nbsp;<span class="element-name">allegati</span>()</div>
+<div class="block">Returns the value of the <a href="#param-allegati"><code>allegati</code></a> record component.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>the value of the <a href="#param-allegati"><code>allegati</code></a> record component</dd>
 </dl>
 </div>
 </section>

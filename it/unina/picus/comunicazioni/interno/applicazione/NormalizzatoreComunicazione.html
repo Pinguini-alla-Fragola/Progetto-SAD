@@ -60,6 +60,8 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
 <li><a href="#normalizza(it.unina.picus.comunicazioni.interno.applicazione.ComandoInvioComunicazione)" tabindex="0">normalizza(ComandoInvioComunicazione)</a></li>
+<li><a href="#testo(java.lang.String)" tabindex="0">testo(String)</a></li>
+<li><a href="#tipo(java.lang.String)" tabindex="0">tipo(String)</a></li>
 </ol>
 </li>
 </ol>
@@ -96,6 +98,16 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>(package private) static <a href="../dominio/BozzaComunicazione.html" title="class in it.unina.picus.comunicazioni.interno.dominio">BozzaComunicazione</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#normalizza(it.unina.picus.comunicazioni.interno.applicazione.ComandoInvioComunicazione)" class="member-name-link">normalizza</a><wbr>(<a href="ComandoInvioComunicazione.html" title="class in it.unina.picus.comunicazioni.interno.applicazione">ComandoInvioComunicazione</a>&nbsp;comando)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>(package private) static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#testo(java.lang.String)" class="member-name-link">testo</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;valore)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Toglie gli spazi ai bordi, lasciando com'è il testo interno; un testo vuoto diventa <code>null</code>.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>(package private) static <a href="../../api/ComunicazioniApi.TipoDestinatari.html" title="enum class in it.unina.picus.comunicazioni.api">ComunicazioniApi.TipoDestinatari</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#tipo(java.lang.String)" class="member-name-link">tipo</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;valore)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Converte il nome del tipo di destinatari.</div>
+</div>
 </div>
 </div>
 </div>
@@ -118,6 +130,28 @@ loadScripts(document, 'script');</script>
 <h3>normalizza</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">static</span>&nbsp;<span class="return-type"><a href="../dominio/BozzaComunicazione.html" title="class in it.unina.picus.comunicazioni.interno.dominio">BozzaComunicazione</a></span>&nbsp;<span class="element-name">normalizza</span><wbr><span class="parameters">(<a href="ComandoInvioComunicazione.html" title="class in it.unina.picus.comunicazioni.interno.applicazione">ComandoInvioComunicazione</a>&nbsp;comando)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="testo(java.lang.String)">
+<h3>testo</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">testo</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;valore)</span></div>
+<div class="block">Toglie gli spazi ai bordi, lasciando com'è il testo interno; un testo vuoto diventa <code>null</code>.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="tipo(java.lang.String)">
+<h3>tipo</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">static</span>&nbsp;<span class="return-type"><a href="../../api/ComunicazioniApi.TipoDestinatari.html" title="enum class in it.unina.picus.comunicazioni.api">ComunicazioniApi.TipoDestinatari</a></span>&nbsp;<span class="element-name">tipo</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;valore)</span></div>
+<div class="block">Converte il nome del tipo di destinatari.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>il tipo, oppure <code>null</code> se manca o non esiste</dd>
+</dl>
 </div>
 </section>
 </li>

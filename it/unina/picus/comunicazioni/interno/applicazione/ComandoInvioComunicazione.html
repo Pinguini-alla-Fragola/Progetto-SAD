@@ -60,11 +60,12 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-summary" tabindex="0">Method Summary</a></li>
 <li><a href="#constructor-detail" tabindex="0">Constructor Details</a>
 <ol class="toc-list">
-<li><a href="#%3Cinit%3E(java.lang.String,java.lang.String,java.lang.String,java.util.List)" tabindex="0">ComandoInvioComunicazione(String, String, String, List)</a></li>
+<li><a href="#%3Cinit%3E(java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.List)" tabindex="0">ComandoInvioComunicazione(String, String, String, List, List)</a></li>
 </ol>
 </li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
+<li><a href="#conAllegati(java.util.List)" tabindex="0">conAllegati(List)</a></li>
 <li><a href="#toString()" tabindex="0">toString()</a></li>
 <li><a href="#hashCode()" tabindex="0">hashCode()</a></li>
 <li><a href="#equals(java.lang.Object)" tabindex="0">equals(Object)</a></li>
@@ -72,6 +73,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#contenuto()" tabindex="0">contenuto()</a></li>
 <li><a href="#destinatariTipo()" tabindex="0">destinatariTipo()</a></li>
 <li><a href="#gruppo()" tabindex="0">gruppo()</a></li>
+<li><a href="#allegati()" tabindex="0">allegati()</a></li>
 </ol>
 </li>
 </ol>
@@ -93,10 +95,11 @@ loadScripts(document, 'script');</script>
 <dd><code><span id="param-contenuto">contenuto</span></code> - testo della comunicazione</dd>
 <dd><code><span id="param-destinatariTipo">destinatariTipo</span></code> - nome del tipo di destinatari scelto</dd>
 <dd><code><span id="param-gruppo">gruppo</span></code> - identificativi degli account scelti, solo per l'invio a un gruppo</dd>
+<dd><code><span id="param-allegati">allegati</span></code> - file allegati; vuoto se non ce ne sono</dd>
 </dl>
 <hr>
 <div class="horizontal-scroll">
-<div class="type-signature"><span class="modifiers">public record </span><span class="element-name type-name-label">ComandoInvioComunicazione</span>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;titolo, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;contenuto, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;destinatariTipo, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;gruppo)
+<div class="type-signature"><span class="modifiers">public record </span><span class="element-name type-name-label">ComandoInvioComunicazione</span>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;titolo, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;contenuto, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;destinatariTipo, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;gruppo, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../dominio/AllegatoRicevuto.html" title="class in it.unina.picus.comunicazioni.interno.dominio">AllegatoRicevuto</a>&gt;&nbsp;allegati)
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Record.html" title="class or interface in java.lang" class="external-link">Record</a></span></div>
 <div class="block">Richiesta del Banco di inviare una comunicazione, con i campi così come arrivano dal modulo.</div>
 </div>
@@ -111,10 +114,11 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(java.lang.String,java.lang.String,java.lang.String,java.util.List)" class="member-name-link">ComandoInvioComunicazione</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;titolo,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.List)" class="member-name-link">ComandoInvioComunicazione</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;titolo,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;contenuto,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;destinatariTipo,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;gruppo)</code></div>
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;gruppo,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../dominio/AllegatoRicevuto.html" title="class in it.unina.picus.comunicazioni.interno.dominio">AllegatoRicevuto</a>&gt;&nbsp;allegati)</code></div>
 <div class="col-last even-row-color">
 <div class="block">Creates an instance of a <code>ComandoInvioComunicazione</code> record class.</div>
 </div>
@@ -132,6 +136,16 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../dominio/AllegatoRicevuto.html" title="class in it.unina.picus.comunicazioni.interno.dominio">AllegatoRicevuto</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#allegati()" class="member-name-link">allegati</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the value of the <a href="#param-allegati"><code>allegati</code></a> record component.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ComandoInvioComunicazione.html" title="class in it.unina.picus.comunicazioni.interno.applicazione">ComandoInvioComunicazione</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#conAllegati(java.util.List)" class="member-name-link">conAllegati</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../dominio/AllegatoRicevuto.html" title="class in it.unina.picus.comunicazioni.interno.dominio">AllegatoRicevuto</a>&gt;&nbsp;file)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Stessa richiesta, con i file allegati.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#contenuto()" class="member-name-link">contenuto</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -185,13 +199,14 @@ loadScripts(document, 'script');</script>
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(java.lang.String,java.lang.String,java.lang.String,java.util.List)">
+<section class="detail" id="&lt;init&gt;(java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.List)">
 <h3>ComandoInvioComunicazione</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">ComandoInvioComunicazione</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;titolo,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;contenuto,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;destinatariTipo,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;gruppo)</span></div>
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;gruppo,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../dominio/AllegatoRicevuto.html" title="class in it.unina.picus.comunicazioni.interno.dominio">AllegatoRicevuto</a>&gt;&nbsp;allegati)</span></div>
 <div class="block">Creates an instance of a <code>ComandoInvioComunicazione</code> record class.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
@@ -199,6 +214,7 @@ loadScripts(document, 'script');</script>
 <dd><code>contenuto</code> - the value for the <a href="#param-contenuto"><code>contenuto</code></a> record component</dd>
 <dd><code>destinatariTipo</code> - the value for the <a href="#param-destinatariTipo"><code>destinatariTipo</code></a> record component</dd>
 <dd><code>gruppo</code> - the value for the <a href="#param-gruppo"><code>gruppo</code></a> record component</dd>
+<dd><code>allegati</code> - the value for the <a href="#param-allegati"><code>allegati</code></a> record component</dd>
 </dl>
 </div>
 </section>
@@ -211,6 +227,21 @@ loadScripts(document, 'script');</script>
 <section class="method-details" id="method-detail">
 <h2>Method Details</h2>
 <ul class="member-list">
+<li>
+<section class="detail" id="conAllegati(java.util.List)">
+<h3>conAllegati</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ComandoInvioComunicazione.html" title="class in it.unina.picus.comunicazioni.interno.applicazione">ComandoInvioComunicazione</a></span>&nbsp;<span class="element-name">conAllegati</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../dominio/AllegatoRicevuto.html" title="class in it.unina.picus.comunicazioni.interno.dominio">AllegatoRicevuto</a>&gt;&nbsp;file)</span></div>
+<div class="block">Stessa richiesta, con i file allegati.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>file</code> - allegati ricevuti</dd>
+<dt>Returns:</dt>
+<dd>un nuovo comando con gli stessi campi e questi allegati</dd>
+</dl>
+</div>
+</section>
+</li>
 <li>
 <section class="detail" id="toString()">
 <h3>toString</h3>
@@ -306,6 +337,19 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>the value of the <a href="#param-gruppo"><code>gruppo</code></a> record component</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="allegati()">
+<h3>allegati</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../dominio/AllegatoRicevuto.html" title="class in it.unina.picus.comunicazioni.interno.dominio">AllegatoRicevuto</a>&gt;</span>&nbsp;<span class="element-name">allegati</span>()</div>
+<div class="block">Returns the value of the <a href="#param-allegati"><code>allegati</code></a> record component.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>the value of the <a href="#param-allegati"><code>allegati</code></a> record component</dd>
 </dl>
 </div>
 </section>

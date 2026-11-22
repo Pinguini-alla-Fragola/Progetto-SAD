@@ -66,6 +66,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
 <li><a href="#invia(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.comunicazioni.interno.applicazione.ComandoInvioComunicazione)" tabindex="0">invia(UtenzeApi.IdentitaAutenticata, ComandoInvioComunicazione)</a></li>
+<li><a href="#selezionabili(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.lang.String)" tabindex="0">selezionabili(UtenzeApi.IdentitaAutenticata, String)</a></li>
 </ol>
 </li>
 </ol>
@@ -126,7 +127,13 @@ implements <a href="InvioComunicazioni.html" title="interface in it.unina.picus.
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#invia(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.comunicazioni.interno.applicazione.ComandoInvioComunicazione)" class="member-name-link">invia</a><wbr>(<a href="../../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  <a href="ComandoInvioComunicazione.html" title="class in it.unina.picus.comunicazioni.interno.applicazione">ComandoInvioComunicazione</a>&nbsp;comando)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Controlla la comunicazione, individua gli account destinatari e la registra insieme a loro.</div>
+<div class="block">Controlla la comunicazione, individua gli account destinatari e la registra insieme a loro e agli allegati.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="AccountSelezionabile.html" title="class in it.unina.picus.comunicazioni.interno.applicazione">AccountSelezionabile</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#selezionabili(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.lang.String)" class="member-name-link">selezionabili</a><wbr>(<a href="../../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;destinatariTipo)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Elenca gli account attivi tra cui il Banco può scegliere il gruppo per un tipo di destinatari.</div>
 </div>
 </div>
 </div>
@@ -171,7 +178,7 @@ implements <a href="InvioComunicazioni.html" title="interface in it.unina.picus.
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ComunicazioneInviata.html" title="class in it.unina.picus.comunicazioni.interno.applicazione">ComunicazioneInviata</a></span>&nbsp;<span class="element-name">invia</span><wbr><span class="parameters">(<a href="../../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  <a href="ComandoInvioComunicazione.html" title="class in it.unina.picus.comunicazioni.interno.applicazione">ComandoInvioComunicazione</a>&nbsp;comando)</span></div>
 <div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="InvioComunicazioni.html#invia(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.comunicazioni.interno.applicazione.ComandoInvioComunicazione)">InvioComunicazioni</a></code></span></div>
-<div class="block">Controlla la comunicazione, individua gli account destinatari e la registra insieme a loro.</div>
+<div class="block">Controlla la comunicazione, individua gli account destinatari e la registra insieme a loro e agli allegati.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="InvioComunicazioni.html#invia(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.comunicazioni.interno.applicazione.ComandoInvioComunicazione)">invia</a></code>&nbsp;in interface&nbsp;<code><a href="InvioComunicazioni.html" title="interface in it.unina.picus.comunicazioni.interno.applicazione">InvioComunicazioni</a></code></dd>
@@ -180,6 +187,27 @@ implements <a href="InvioComunicazioni.html" title="interface in it.unina.picus.
 <dd><code>comando</code> - i campi compilati dal Banco</dd>
 <dt>Returns:</dt>
 <dd>l'esito dell'invio</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="selezionabili(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.lang.String)">
+<h3>selezionabili</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="annotations">@Transactional(readOnly=true)
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="AccountSelezionabile.html" title="class in it.unina.picus.comunicazioni.interno.applicazione">AccountSelezionabile</a>&gt;</span>&nbsp;<span class="element-name">selezionabili</span><wbr><span class="parameters">(<a href="../../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;destinatariTipo)</span></div>
+<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="InvioComunicazioni.html#selezionabili(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.lang.String)">InvioComunicazioni</a></code></span></div>
+<div class="block">Elenca gli account attivi tra cui il Banco può scegliere il gruppo per un tipo di destinatari.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="InvioComunicazioni.html#selezionabili(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.lang.String)">selezionabili</a></code>&nbsp;in interface&nbsp;<code><a href="InvioComunicazioni.html" title="interface in it.unina.picus.comunicazioni.interno.applicazione">InvioComunicazioni</a></code></dd>
+<dt>Parameters:</dt>
+<dd><code>attore</code> - l'utente che fa la richiesta, ricavato dal server dalla sessione</dd>
+<dd><code>destinatariTipo</code> - nome del tipo di destinatari</dd>
+<dt>Returns:</dt>
+<dd>gli account selezionabili, in ordine di nome</dd>
 </dl>
 </div>
 </section>

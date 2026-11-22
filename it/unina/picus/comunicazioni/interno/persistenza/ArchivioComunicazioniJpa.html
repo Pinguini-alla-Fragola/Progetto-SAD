@@ -67,6 +67,12 @@ loadScripts(document, 'script');</script>
 <ol class="toc-list">
 <li><a href="#registra(it.unina.picus.comunicazioni.interno.dominio.NuovaComunicazione)" tabindex="0">registra(NuovaComunicazione)</a></li>
 <li><a href="#contaDaConfermare(java.util.UUID)" tabindex="0">contaDaConfermare(UUID)</a></li>
+<li><a href="#elencoInviate(it.unina.picus.comunicazioni.interno.dominio.FiltroComunicazioni)" tabindex="0">elencoInviate(FiltroComunicazioni)</a></li>
+<li><a href="#elencoRicevute(java.util.UUID,it.unina.picus.comunicazioni.interno.dominio.FiltroComunicazioni)" tabindex="0">elencoRicevute(UUID, FiltroComunicazioni)</a></li>
+<li><a href="#cerca(java.util.UUID,java.util.UUID)" tabindex="0">cerca(UUID, UUID)</a></li>
+<li><a href="#destinatari(java.util.UUID)" tabindex="0">destinatari(UUID)</a></li>
+<li><a href="#comunicazioneDellAllegato(java.util.UUID)" tabindex="0">comunicazioneDellAllegato(UUID)</a></li>
+<li><a href="#allegato(java.util.UUID)" tabindex="0">allegato(UUID)</a></li>
 </ol>
 </li>
 </ol>
@@ -91,7 +97,9 @@ loadScripts(document, 'script');</script>
 </span><span class="modifiers">class </span><span class="element-name type-name-label">ArchivioComunicazioniJpa</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>
 implements <a href="../dominio/ArchivioComunicazioni.html" title="interface in it.unina.picus.comunicazioni.interno.dominio">ArchivioComunicazioni</a></span></div>
-<div class="block">Salva le comunicazioni e i loro destinatari nel database condiviso del monolite.</div>
+<div class="block">Salva e legge le comunicazioni, i destinatari e gli allegati nel database condiviso del monolite. Gli elenchi
+leggono una pagina alla volta, già filtrata dal database, e gli allegati senza il loro contenuto, con poche query
+per tutte le comunicazioni della pagina.</div>
 </div>
 </section>
 <section class="summary">
@@ -120,15 +128,48 @@ implements <a href="../dominio/ArchivioComunicazioni.html" title="interface in i
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>long</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#contaDaConfermare(java.util.UUID)" class="member-name-link">contaDaConfermare</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;destinatarioId)</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="../dominio/FileSalvato.html" title="class in it.unina.picus.comunicazioni.interno.dominio">FileSalvato</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#allegato(java.util.UUID)" class="member-name-link">allegato</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;allegatoId)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Legge un allegato con il suo contenuto.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="../dominio/ComunicazioneSalvata.html" title="class in it.unina.picus.comunicazioni.interno.dominio">ComunicazioneSalvata</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#cerca(java.util.UUID,java.util.UUID)" class="member-name-link">cerca</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;comunicazioneId,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;lettoreId)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Cerca una comunicazione.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#comunicazioneDellAllegato(java.util.UUID)" class="member-name-link">comunicazioneDellAllegato</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;allegatoId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Indica a quale comunicazione appartiene un allegato, senza leggerne il contenuto.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>long</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#contaDaConfermare(java.util.UUID)" class="member-name-link">contaDaConfermare</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;destinatarioId)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Conta le comunicazioni ricevute da un account e non ancora confermate.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html" title="class or interface in java.util" class="external-link">Set</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#destinatari(java.util.UUID)" class="member-name-link">destinatari</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;comunicazioneId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Restituisce gli account registrati come destinatari al momento dell'invio.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../dominio/PaginaComunicazioni.html" title="class in it.unina.picus.comunicazioni.interno.dominio">PaginaComunicazioni</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#elencoInviate(it.unina.picus.comunicazioni.interno.dominio.FiltroComunicazioni)" class="member-name-link">elencoInviate</a><wbr>(<a href="../dominio/FiltroComunicazioni.html" title="class in it.unina.picus.comunicazioni.interno.dominio">FiltroComunicazioni</a>&nbsp;filtro)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Restituisce una pagina delle comunicazioni inviate che rispettano il filtro, dalla più recente.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../dominio/PaginaComunicazioni.html" title="class in it.unina.picus.comunicazioni.interno.dominio">PaginaComunicazioni</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#elencoRicevute(java.util.UUID,it.unina.picus.comunicazioni.interno.dominio.FiltroComunicazioni)" class="member-name-link">elencoRicevute</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;destinatarioId,
+ <a href="../dominio/FiltroComunicazioni.html" title="class in it.unina.picus.comunicazioni.interno.dominio">FiltroComunicazioni</a>&nbsp;filtro)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Restituisce una pagina delle comunicazioni ricevute da un account che rispettano il filtro, dalla più
+recente, ciascuna con la conferma di quell'account.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#registra(it.unina.picus.comunicazioni.interno.dominio.NuovaComunicazione)" class="member-name-link">registra</a><wbr>(<a href="../dominio/NuovaComunicazione.html" title="class in it.unina.picus.comunicazioni.interno.dominio">NuovaComunicazione</a>&nbsp;comunicazione)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Salva la comunicazione e i suoi destinatari, tutti insieme.</div>
+<div class="block">Salva la comunicazione, i suoi destinatari e i suoi allegati, tutti insieme.</div>
 </div>
 </div>
 </div>
@@ -169,7 +210,7 @@ implements <a href="../dominio/ArchivioComunicazioni.html" title="interface in i
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">registra</span><wbr><span class="parameters">(<a href="../dominio/NuovaComunicazione.html" title="class in it.unina.picus.comunicazioni.interno.dominio">NuovaComunicazione</a>&nbsp;comunicazione)</span></div>
 <div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../dominio/ArchivioComunicazioni.html#registra(it.unina.picus.comunicazioni.interno.dominio.NuovaComunicazione)">ArchivioComunicazioni</a></code></span></div>
-<div class="block">Salva la comunicazione e i suoi destinatari, tutti insieme.</div>
+<div class="block">Salva la comunicazione, i suoi destinatari e i suoi allegati, tutti insieme.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../dominio/ArchivioComunicazioni.html#registra(it.unina.picus.comunicazioni.interno.dominio.NuovaComunicazione)">registra</a></code>&nbsp;in interface&nbsp;<code><a href="../dominio/ArchivioComunicazioni.html" title="interface in it.unina.picus.comunicazioni.interno.dominio">ArchivioComunicazioni</a></code></dd>
@@ -194,6 +235,126 @@ implements <a href="../dominio/ArchivioComunicazioni.html" title="interface in i
 <dd><code>destinatarioId</code> - account destinatario</dd>
 <dt>Returns:</dt>
 <dd>numero di comunicazioni in attesa della conferma di ricezione</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="elencoInviate(it.unina.picus.comunicazioni.interno.dominio.FiltroComunicazioni)">
+<h3>elencoInviate</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="annotations">@Transactional(readOnly=true)
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../dominio/PaginaComunicazioni.html" title="class in it.unina.picus.comunicazioni.interno.dominio">PaginaComunicazioni</a></span>&nbsp;<span class="element-name">elencoInviate</span><wbr><span class="parameters">(<a href="../dominio/FiltroComunicazioni.html" title="class in it.unina.picus.comunicazioni.interno.dominio">FiltroComunicazioni</a>&nbsp;filtro)</span></div>
+<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../dominio/ArchivioComunicazioni.html#elencoInviate(it.unina.picus.comunicazioni.interno.dominio.FiltroComunicazioni)">ArchivioComunicazioni</a></code></span></div>
+<div class="block">Restituisce una pagina delle comunicazioni inviate che rispettano il filtro, dalla più recente. Il filtro
+sulla conferma di ricezione non vale per le inviate e viene ignorato.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="../dominio/ArchivioComunicazioni.html#elencoInviate(it.unina.picus.comunicazioni.interno.dominio.FiltroComunicazioni)">elencoInviate</a></code>&nbsp;in interface&nbsp;<code><a href="../dominio/ArchivioComunicazioni.html" title="interface in it.unina.picus.comunicazioni.interno.dominio">ArchivioComunicazioni</a></code></dd>
+<dt>Parameters:</dt>
+<dd><code>filtro</code> - ricerca e pagina</dd>
+<dt>Returns:</dt>
+<dd>la pagina, senza il contenuto degli allegati</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="elencoRicevute(java.util.UUID,it.unina.picus.comunicazioni.interno.dominio.FiltroComunicazioni)">
+<h3>elencoRicevute</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="annotations">@Transactional(readOnly=true)
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../dominio/PaginaComunicazioni.html" title="class in it.unina.picus.comunicazioni.interno.dominio">PaginaComunicazioni</a></span>&nbsp;<span class="element-name">elencoRicevute</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;destinatarioId,
+ <a href="../dominio/FiltroComunicazioni.html" title="class in it.unina.picus.comunicazioni.interno.dominio">FiltroComunicazioni</a>&nbsp;filtro)</span></div>
+<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../dominio/ArchivioComunicazioni.html#elencoRicevute(java.util.UUID,it.unina.picus.comunicazioni.interno.dominio.FiltroComunicazioni)">ArchivioComunicazioni</a></code></span></div>
+<div class="block">Restituisce una pagina delle comunicazioni ricevute da un account che rispettano il filtro, dalla più
+recente, ciascuna con la conferma di quell'account.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="../dominio/ArchivioComunicazioni.html#elencoRicevute(java.util.UUID,it.unina.picus.comunicazioni.interno.dominio.FiltroComunicazioni)">elencoRicevute</a></code>&nbsp;in interface&nbsp;<code><a href="../dominio/ArchivioComunicazioni.html" title="interface in it.unina.picus.comunicazioni.interno.dominio">ArchivioComunicazioni</a></code></dd>
+<dt>Parameters:</dt>
+<dd><code>destinatarioId</code> - account destinatario</dd>
+<dd><code>filtro</code> - ricerca e pagina</dd>
+<dt>Returns:</dt>
+<dd>la pagina, senza il contenuto degli allegati</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="cerca(java.util.UUID,java.util.UUID)">
+<h3>cerca</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="annotations">@Transactional(readOnly=true)
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="../dominio/ComunicazioneSalvata.html" title="class in it.unina.picus.comunicazioni.interno.dominio">ComunicazioneSalvata</a>&gt;</span>&nbsp;<span class="element-name">cerca</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;comunicazioneId,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;lettoreId)</span></div>
+<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../dominio/ArchivioComunicazioni.html#cerca(java.util.UUID,java.util.UUID)">ArchivioComunicazioni</a></code></span></div>
+<div class="block">Cerca una comunicazione.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="../dominio/ArchivioComunicazioni.html#cerca(java.util.UUID,java.util.UUID)">cerca</a></code>&nbsp;in interface&nbsp;<code><a href="../dominio/ArchivioComunicazioni.html" title="interface in it.unina.picus.comunicazioni.interno.dominio">ArchivioComunicazioni</a></code></dd>
+<dt>Parameters:</dt>
+<dd><code>comunicazioneId</code> - comunicazione cercata</dd>
+<dd><code>lettoreId</code> - account che la consulta, per indicare la sua conferma se è un destinatario</dd>
+<dt>Returns:</dt>
+<dd>la comunicazione, se esiste</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="destinatari(java.util.UUID)">
+<h3>destinatari</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="annotations">@Transactional(readOnly=true)
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html" title="class or interface in java.util" class="external-link">Set</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&gt;</span>&nbsp;<span class="element-name">destinatari</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;comunicazioneId)</span></div>
+<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../dominio/ArchivioComunicazioni.html#destinatari(java.util.UUID)">ArchivioComunicazioni</a></code></span></div>
+<div class="block">Restituisce gli account registrati come destinatari al momento dell'invio.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="../dominio/ArchivioComunicazioni.html#destinatari(java.util.UUID)">destinatari</a></code>&nbsp;in interface&nbsp;<code><a href="../dominio/ArchivioComunicazioni.html" title="interface in it.unina.picus.comunicazioni.interno.dominio">ArchivioComunicazioni</a></code></dd>
+<dt>Parameters:</dt>
+<dd><code>comunicazioneId</code> - comunicazione</dd>
+<dt>Returns:</dt>
+<dd>gli account destinatari; vuoto se la comunicazione non esiste</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="comunicazioneDellAllegato(java.util.UUID)">
+<h3>comunicazioneDellAllegato</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="annotations">@Transactional(readOnly=true)
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&gt;</span>&nbsp;<span class="element-name">comunicazioneDellAllegato</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;allegatoId)</span></div>
+<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../dominio/ArchivioComunicazioni.html#comunicazioneDellAllegato(java.util.UUID)">ArchivioComunicazioni</a></code></span></div>
+<div class="block">Indica a quale comunicazione appartiene un allegato, senza leggerne il contenuto.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="../dominio/ArchivioComunicazioni.html#comunicazioneDellAllegato(java.util.UUID)">comunicazioneDellAllegato</a></code>&nbsp;in interface&nbsp;<code><a href="../dominio/ArchivioComunicazioni.html" title="interface in it.unina.picus.comunicazioni.interno.dominio">ArchivioComunicazioni</a></code></dd>
+<dt>Parameters:</dt>
+<dd><code>allegatoId</code> - allegato</dd>
+<dt>Returns:</dt>
+<dd>la comunicazione, se l'allegato esiste</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="allegato(java.util.UUID)">
+<h3>allegato</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="annotations">@Transactional(readOnly=true)
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="../dominio/FileSalvato.html" title="class in it.unina.picus.comunicazioni.interno.dominio">FileSalvato</a>&gt;</span>&nbsp;<span class="element-name">allegato</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;allegatoId)</span></div>
+<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../dominio/ArchivioComunicazioni.html#allegato(java.util.UUID)">ArchivioComunicazioni</a></code></span></div>
+<div class="block">Legge un allegato con il suo contenuto.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="../dominio/ArchivioComunicazioni.html#allegato(java.util.UUID)">allegato</a></code>&nbsp;in interface&nbsp;<code><a href="../dominio/ArchivioComunicazioni.html" title="interface in it.unina.picus.comunicazioni.interno.dominio">ArchivioComunicazioni</a></code></dd>
+<dt>Parameters:</dt>
+<dd><code>allegatoId</code> - allegato</dd>
+<dt>Returns:</dt>
+<dd>l'allegato, se esiste</dd>
 </dl>
 </div>
 </section>

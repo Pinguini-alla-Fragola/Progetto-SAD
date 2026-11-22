@@ -57,8 +57,14 @@ loadScripts(document, 'script');</script>
 <ol class="toc-list" tabindex="-1">
 <li><a href="#" tabindex="0">Description</a></li>
 <li><a href="#nested-class-summary" tabindex="0">Nested Class Summary</a></li>
+<li><a href="#field-summary" tabindex="0">Field Summary</a></li>
 <li><a href="#constructor-summary" tabindex="0">Constructor Summary</a></li>
 <li><a href="#method-summary" tabindex="0">Method Summary</a></li>
+<li><a href="#field-detail" tabindex="0">Field Details</a>
+<ol class="toc-list">
+<li><a href="#PARTE_DATI" tabindex="0">PARTE_DATI</a></li>
+</ol>
+</li>
 <li><a href="#constructor-detail" tabindex="0">Constructor Details</a>
 <ol class="toc-list">
 <li><a href="#%3Cinit%3E(it.unina.picus.comunicazioni.interno.applicazione.InvioComunicazioni,it.unina.picus.comunicazioni.interno.applicazione.NotificheComunicazioni)" tabindex="0">ComunicazioniController(InvioComunicazioni, NotificheComunicazioni)</a></li>
@@ -67,6 +73,8 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
 <li><a href="#invia(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.comunicazioni.web.ComunicazioniController.NuovaComunicazioneJson)" tabindex="0">invia(UtenzeApi.IdentitaAutenticata, ComunicazioniController.NuovaComunicazioneJson)</a></li>
+<li><a href="#inviaConAllegati(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.comunicazioni.web.ComunicazioniController.NuovaComunicazioneJson,java.util.List)" tabindex="0">inviaConAllegati(UtenzeApi.IdentitaAutenticata, ComunicazioniController.NuovaComunicazioneJson, List)</a></li>
+<li><a href="#selezionabili(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.lang.String)" tabindex="0">selezionabili(UtenzeApi.IdentitaAutenticata, String)</a></li>
 <li><a href="#daConfermare(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" tabindex="0">daConfermare(UtenzeApi.IdentitaAutenticata)</a></li>
 </ol>
 </li>
@@ -88,8 +96,9 @@ loadScripts(document, 'script');</script>
                 produces="application/json")
 </span><span class="modifiers">public class </span><span class="element-name type-name-label">ComunicazioniController</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">Riceve l'invio delle comunicazioni del Banco e la richiesta del contatore da confermare. I nomi dei campi
-JSON sono quelli del modulo già presente nella pagina del Banco.</div>
+<div class="block">Riceve l'invio delle comunicazioni del Banco, l'elenco degli account da scegliere per un gruppo e la richiesta
+del contatore da confermare. I nomi dei campi sono quelli del modulo della pagina del Banco. La lettura delle
+comunicazioni è in <a href="ConsultazioneComunicazioniController.html" title="class in it.unina.picus.comunicazioni.web"><code>ConsultazioneComunicazioniController</code></a>.</div>
 </div>
 </section>
 <section class="summary">
@@ -104,19 +113,41 @@ JSON sono quelli del modulo già presente nella pagina del Banco.</div>
 <div class="table-header col-second">Class</div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color"><code>static final record&nbsp;</code></div>
-<div class="col-second even-row-color"><code><a href="ComunicazioniController.ComunicazioneInviataJson.html" class="type-name-link" title="class in it.unina.picus.comunicazioni.web">ComunicazioniController.ComunicazioneInviataJson</a></code></div>
+<div class="col-second even-row-color"><code><a href="ComunicazioniController.AccountJson.html" class="type-name-link" title="class in it.unina.picus.comunicazioni.web">ComunicazioniController.AccountJson</a></code></div>
 <div class="col-last even-row-color">
-<div class="block">Ciò che il browser riceve dopo l'invio.</div>
+<div class="block">Account che il Banco può scegliere per un gruppo.</div>
 </div>
 <div class="col-first odd-row-color"><code>static final record&nbsp;</code></div>
-<div class="col-second odd-row-color"><code><a href="ComunicazioniController.DaConfermareJson.html" class="type-name-link" title="class in it.unina.picus.comunicazioni.web">ComunicazioniController.DaConfermareJson</a></code></div>
+<div class="col-second odd-row-color"><code><a href="ComunicazioniController.ComunicazioneInviataJson.html" class="type-name-link" title="class in it.unina.picus.comunicazioni.web">ComunicazioniController.ComunicazioneInviataJson</a></code></div>
 <div class="col-last odd-row-color">
-<div class="block">Numero di comunicazioni ricevute che aspettano la conferma.</div>
+<div class="block">Ciò che il browser riceve dopo l'invio.</div>
 </div>
 <div class="col-first even-row-color"><code>static final record&nbsp;</code></div>
-<div class="col-second even-row-color"><code><a href="ComunicazioniController.NuovaComunicazioneJson.html" class="type-name-link" title="class in it.unina.picus.comunicazioni.web">ComunicazioniController.NuovaComunicazioneJson</a></code></div>
+<div class="col-second even-row-color"><code><a href="ComunicazioniController.DaConfermareJson.html" class="type-name-link" title="class in it.unina.picus.comunicazioni.web">ComunicazioniController.DaConfermareJson</a></code></div>
 <div class="col-last even-row-color">
-<div class="block">Campi del modulo di invio così come li manda il browser.</div>
+<div class="block">Numero di comunicazioni ricevute che aspettano la conferma.</div>
+</div>
+<div class="col-first odd-row-color"><code>static final record&nbsp;</code></div>
+<div class="col-second odd-row-color"><code><a href="ComunicazioniController.NuovaComunicazioneJson.html" class="type-name-link" title="class in it.unina.picus.comunicazioni.web">ComunicazioniController.NuovaComunicazioneJson</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Campi del modulo di invio così come li manda il browser in JSON, senza allegati.</div>
+</div>
+</div>
+</section>
+</li>
+<!-- =========== FIELD SUMMARY =========== -->
+<li>
+<section class="field-summary" id="field-summary">
+<h2>Field Summary</h2>
+<div class="caption"><span>Fields</span></div>
+<div class="summary-table three-column-summary">
+<div class="table-header col-first">Modifier and Type</div>
+<div class="table-header col-second">Field</div>
+<div class="table-header col-last">Description</div>
+<div class="col-first even-row-color"><code>(package private) static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#PARTE_DATI" class="member-name-link">PARTE_DATI</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Nome della parte JSON che porta i campi del modulo nell'invio con allegati.</div>
 </div>
 </div>
 </section>
@@ -153,8 +184,19 @@ JSON sono quelli del modulo già presente nella pagina del Banco.</div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#invia(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.comunicazioni.web.ComunicazioniController.NuovaComunicazioneJson)" class="member-name-link">invia</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  <a href="ComunicazioniController.NuovaComunicazioneJson.html" title="class in it.unina.picus.comunicazioni.web">ComunicazioniController.NuovaComunicazioneJson</a>&nbsp;corpo)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Invia la comunicazione e risponde <code>201</code>.</div>
+<div class="block">Invio in JSON, senza allegati.</div>
 </div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.springframework.http.ResponseEntity<wbr>&lt;<a href="ComunicazioniController.ComunicazioneInviataJson.html" title="class in it.unina.picus.comunicazioni.web">ComunicazioniController.ComunicazioneInviataJson</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#inviaConAllegati(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.comunicazioni.web.ComunicazioniController.NuovaComunicazioneJson,java.util.List)" class="member-name-link">inviaConAllegati</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+ <a href="ComunicazioniController.NuovaComunicazioneJson.html" title="class in it.unina.picus.comunicazioni.web">ComunicazioniController.NuovaComunicazioneJson</a>&nbsp;dati,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;org.springframework.web.multipart.MultipartFile&gt;&nbsp;files)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Invio dal modulo della pagina, con eventuali allegati.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="ComunicazioniController.AccountJson.html" title="class in it.unina.picus.comunicazioni.web">ComunicazioniController.AccountJson</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#selezionabili(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.lang.String)" class="member-name-link">selezionabili</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;tipo)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
 </div>
@@ -167,6 +209,31 @@ JSON sono quelli del modulo già presente nella pagina del Banco.</div>
 </section>
 <section class="details">
 <ul class="details-list">
+<!-- ============ FIELD DETAIL =========== -->
+<li>
+<section class="field-details" id="field-detail">
+<h2>Field Details</h2>
+<ul class="member-list">
+<li>
+<section class="detail" id="PARTE_DATI">
+<h3>PARTE_DATI</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">PARTE_DATI</span></div>
+<div class="block">Nome della parte JSON che porta i campi del modulo nell'invio con allegati.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../../../constant-values.html#it.unina.picus.comunicazioni.web.ComunicazioniController.PARTE_DATI">Constant Field Values</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+</ul>
+</section>
+</li>
 <!-- ========= CONSTRUCTOR DETAIL ======== -->
 <li>
 <section class="constructor-details" id="constructor-detail">
@@ -197,8 +264,35 @@ JSON sono quelli del modulo già presente nella pagina del Banco.</div>
 </span><span class="modifiers">public</span>&nbsp;<span class="return-type">org.springframework.http.ResponseEntity&lt;<a href="ComunicazioniController.ComunicazioneInviataJson.html" title="class in it.unina.picus.comunicazioni.web">ComunicazioniController.ComunicazioneInviataJson</a>&gt;</span>&nbsp;<span class="element-name">invia</span><wbr><span class="parameters">(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  @RequestBody
  <a href="ComunicazioniController.NuovaComunicazioneJson.html" title="class in it.unina.picus.comunicazioni.web">ComunicazioniController.NuovaComunicazioneJson</a>&nbsp;corpo)</span></div>
-<div class="block">Invia la comunicazione e risponde <code>201</code>. Non indica l'indirizzo della comunicazione: la sua
-consultazione arriverà con la #141.</div>
+<div class="block">Invio in JSON, senza allegati. Risponde <code>201</code>.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="inviaConAllegati(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.comunicazioni.web.ComunicazioniController.NuovaComunicazioneJson,java.util.List)">
+<h3>inviaConAllegati</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="annotations">@PostMapping(consumes="multipart/form-data")
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type">org.springframework.http.ResponseEntity&lt;<a href="ComunicazioniController.ComunicazioneInviataJson.html" title="class in it.unina.picus.comunicazioni.web">ComunicazioniController.ComunicazioneInviataJson</a>&gt;</span>&nbsp;<span class="element-name">inviaConAllegati</span><wbr><span class="parameters">(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+ @RequestPart("dati")
+ <a href="ComunicazioniController.NuovaComunicazioneJson.html" title="class in it.unina.picus.comunicazioni.web">ComunicazioniController.NuovaComunicazioneJson</a>&nbsp;dati,
+ @RequestPart(name="files",required=false)
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;org.springframework.web.multipart.MultipartFile&gt;&nbsp;files)</span></div>
+<div class="block">Invio dal modulo della pagina, con eventuali allegati. I campi arrivano tutti insieme nella parte JSON
+<code>dati</code>, con la stessa forma e gli stessi controlli dell'invio senza allegati: così anche un gruppo di
+1000 account occupa una sola parte della richiesta, e le parti restano al massimo una più i file. Il numero
+di file si controlla prima di leggerne il contenuto. Risponde <code>201</code>.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="selezionabili(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.lang.String)">
+<h3>selezionabili</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="annotations">@GetMapping("/destinatari")
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="ComunicazioniController.AccountJson.html" title="class in it.unina.picus.comunicazioni.web">ComunicazioniController.AccountJson</a>&gt;</span>&nbsp;<span class="element-name">selezionabili</span><wbr><span class="parameters">(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+ @RequestParam
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;tipo)</span></div>
 </div>
 </section>
 </li>

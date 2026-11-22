@@ -67,6 +67,9 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
 <li><a href="#datiNonValidi(it.unina.picus.comunicazioni.interno.applicazione.DatiComunicazioneNonValidiException)" tabindex="0">datiNonValidi(DatiComunicazioneNonValidiException)</a></li>
+<li><a href="#moduloTroppoGrande(org.springframework.web.multipart.MultipartException)" tabindex="0">moduloTroppoGrande(MultipartException)</a></li>
+<li><a href="#parteMancante()" tabindex="0">parteMancante()</a></li>
+<li><a href="#nonTrovata()" tabindex="0">nonTrovata()</a></li>
 </ol>
 </li>
 </ol>
@@ -82,10 +85,10 @@ loadScripts(document, 'script');</script>
 <section class="class-description" id="class-description">
 <hr>
 <div class="horizontal-scroll">
-<div class="type-signature"><span class="annotations">@RestControllerAdvice(assignableTypes=<a href="ComunicazioniController.html" title="class in it.unina.picus.comunicazioni.web">ComunicazioniController</a>.class)
+<div class="type-signature"><span class="annotations">@RestControllerAdvice(assignableTypes={<a href="ComunicazioniController.html" title="class in it.unina.picus.comunicazioni.web">ComunicazioniController</a>.class,<a href="ConsultazioneComunicazioniController.html" title="class in it.unina.picus.comunicazioni.web">ConsultazioneComunicazioniController</a>.class})
 </span><span class="modifiers">public class </span><span class="element-name type-name-label">ErroriComunicazioni</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">Trasforma i dati non validi dell'invio in una risposta con i campi da correggere, senza mai i valori inseriti.
+<div class="block">Trasforma gli errori delle comunicazioni in risposte con messaggi controllati, senza mai i valori inseriti.
 Il JSON illeggibile è già gestito per questo package dai gestori comuni.</div>
 </div>
 </section>
@@ -135,6 +138,19 @@ Il JSON illeggibile è già gestito per questo package dai gestori comuni.</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.springframework.http.ResponseEntity<wbr>&lt;<a href="ErroriComunicazioni.Errore.html" title="class in it.unina.picus.comunicazioni.web">ErroriComunicazioni.Errore</a>&gt;</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#datiNonValidi(it.unina.picus.comunicazioni.interno.applicazione.DatiComunicazioneNonValidiException)" class="member-name-link">datiNonValidi</a><wbr>(<a href="../interno/applicazione/DatiComunicazioneNonValidiException.html" title="class in it.unina.picus.comunicazioni.interno.applicazione">DatiComunicazioneNonValidiException</a>&nbsp;ex)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.springframework.http.ResponseEntity<wbr>&lt;<a href="ErroriComunicazioni.Errore.html" title="class in it.unina.picus.comunicazioni.web">ErroriComunicazioni.Errore</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#moduloTroppoGrande(org.springframework.web.multipart.MultipartException)" class="member-name-link">moduloTroppoGrande</a><wbr>(org.springframework.web.multipart.MultipartException&nbsp;ex)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Il server ferma la richiesta mentre arriva, prima delle regole, se supera uno dei limiti del modulo.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.springframework.http.ResponseEntity<wbr>&lt;<a href="ErroriComunicazioni.Errore.html" title="class in it.unina.picus.comunicazioni.web">ErroriComunicazioni.Errore</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#nonTrovata()" class="member-name-link">nonTrovata</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.springframework.http.ResponseEntity<wbr>&lt;<a href="ErroriComunicazioni.Errore.html" title="class in it.unina.picus.comunicazioni.web">ErroriComunicazioni.Errore</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#parteMancante()" class="member-name-link">parteMancante</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Manca la parte con i campi del modulo: la pagina la manda sempre, quindi la richiesta non viene da lì.</div>
+</div>
 </div>
 </div>
 </div>
@@ -174,6 +190,37 @@ Il JSON illeggibile è già gestito per questo package dai gestori comuni.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="annotations">@ExceptionHandler(<a href="../interno/applicazione/DatiComunicazioneNonValidiException.html" title="class in it.unina.picus.comunicazioni.interno.applicazione">DatiComunicazioneNonValidiException</a>.class)
 </span><span class="modifiers">public</span>&nbsp;<span class="return-type">org.springframework.http.ResponseEntity&lt;<a href="ErroriComunicazioni.Errore.html" title="class in it.unina.picus.comunicazioni.web">ErroriComunicazioni.Errore</a>&gt;</span>&nbsp;<span class="element-name">datiNonValidi</span><wbr><span class="parameters">(<a href="../interno/applicazione/DatiComunicazioneNonValidiException.html" title="class in it.unina.picus.comunicazioni.interno.applicazione">DatiComunicazioneNonValidiException</a>&nbsp;ex)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="moduloTroppoGrande(org.springframework.web.multipart.MultipartException)">
+<h3>moduloTroppoGrande</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="annotations">@ExceptionHandler(org.springframework.web.multipart.MultipartException.class)
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type">org.springframework.http.ResponseEntity&lt;<a href="ErroriComunicazioni.Errore.html" title="class in it.unina.picus.comunicazioni.web">ErroriComunicazioni.Errore</a>&gt;</span>&nbsp;<span class="element-name">moduloTroppoGrande</span><wbr><span class="parameters">(org.springframework.web.multipart.MultipartException&nbsp;ex)</span></div>
+<div class="block">Il server ferma la richiesta mentre arriva, prima delle regole, se supera uno dei limiti del modulo. Le parti
+sono al massimo una per i campi più una per file: troppe parti vogliono dire troppi file. Ogni altro limite
+superato riguarda la dimensione dei file.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="parteMancante()">
+<h3>parteMancante</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="annotations">@ExceptionHandler(org.springframework.web.multipart.support.MissingServletRequestPartException.class)
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type">org.springframework.http.ResponseEntity&lt;<a href="ErroriComunicazioni.Errore.html" title="class in it.unina.picus.comunicazioni.web">ErroriComunicazioni.Errore</a>&gt;</span>&nbsp;<span class="element-name">parteMancante</span>()</div>
+<div class="block">Manca la parte con i campi del modulo: la pagina la manda sempre, quindi la richiesta non viene da lì.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="nonTrovata()">
+<h3>nonTrovata</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="annotations">@ExceptionHandler(<a href="../interno/applicazione/RisorsaComunicazioniNonTrovataException.html" title="class in it.unina.picus.comunicazioni.interno.applicazione">RisorsaComunicazioniNonTrovataException</a>.class)
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type">org.springframework.http.ResponseEntity&lt;<a href="ErroriComunicazioni.Errore.html" title="class in it.unina.picus.comunicazioni.web">ErroriComunicazioni.Errore</a>&gt;</span>&nbsp;<span class="element-name">nonTrovata</span>()</div>
 </div>
 </section>
 </li>
