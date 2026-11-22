@@ -11,6 +11,7 @@ import java.util.Base64;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -133,6 +134,29 @@ public class AttivazioneUtenzaService {
 
         // 3. Invalida i token ancora attivi ed emette quello nuovo (ordine: account -> token)
         return emettiNuovoToken(account);
+    }
+
+    /**
+     * Reinvio richiesto da chi possiede l'indirizzo, senza sessione: serve un nuovo link solo se l'email
+     * appartiene a un account in attesa di attivazione, di qualsiasi ruolo. Per ogni altro indirizzo
+     * (sconosciuto, già attivo, revocato) non succede nulla e il chiamante non deve far capire la differenza.
+     *
+     * <p>Lo stato si controlla di nuovo dopo aver preso il lock sull'account, così una attivazione o una
+     * revoca arrivata nel frattempo non lascia un link valido.</p>
+     *
+     * @param email indirizzo digitato dall'utente
+     * @return i dati del nuovo link, oppure vuoto se l'indirizzo non è idoneo
+     */
+    public Optional<DatiInvioAttivazione> rigeneraTokenPerEmail(String email) {
+        String chiave = UtenzeService.normalizzaEmail(email);
+        if (chiave == null) {
+            return Optional.empty();
+        }
+        return accounts.findByEmailIgnoreCase(chiave)
+                .map(AccountJpa::getId)
+                .flatMap(accounts::findByIdForUpdate)
+                .filter(a -> StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(a.getStato()))
+                .map(this::emettiNuovoToken);
     }
 
     /**

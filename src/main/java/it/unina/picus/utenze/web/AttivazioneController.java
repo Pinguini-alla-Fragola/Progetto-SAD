@@ -34,7 +34,8 @@ class AttivazioneController {
         modello.addAttribute("attivazione", true);
         modello.addAttribute("valido", valido);
         modello.addAttribute("token", token);
-        modello.addAttribute("endpoint", "/api/auth/attiva");
+        // Link valido: si sceglie la password. Altrimenti si può chiedere un nuovo link con la propria email.
+        modello.addAttribute("endpoint", valido ? "/api/auth/attiva/conferma" : "/api/auth/attiva/reinvio");
         return "credenziali";
     }
 
