@@ -26,6 +26,14 @@ public class AccountJpa {
     protected AccountJpa() {
     }
 
+    public AccountJpa(String email, String passwordHash, String nome, String ruolo, String stato) {
+        this.email = email;
+        this.passwordHash = passwordHash;
+        this.nome = nome;
+        this.ruolo = ruolo;
+        this.stato = stato;
+    }
+
     public static AccountJpa inAttesaDiAttivazione(String email, String nome, RuoloUtente ruolo) {
         AccountJpa account = new AccountJpa();
         account.email = Objects.requireNonNull(email, "email obbligatoria");
