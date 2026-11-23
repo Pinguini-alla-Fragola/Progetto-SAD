@@ -5,13 +5,29 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import jakarta.persistence.LockModeType;
+
 public interface TokenRecuperoPasswordRepository extends JpaRepository<TokenRecuperoPasswordJpa, UUID> {
 
     Optional<TokenRecuperoPasswordJpa> findByTokenHash(String tokenHash);
+
+    /**
+     * Cerca solo l'account del link, senza caricare il link nel contesto di persistenza. Serve a chi poi prende il
+     * lock con {@link #findByTokenHashForUpdate}: se il link fosse già caricato, la lettura con lock restituirebbe la
+     * copia in memoria con lo stato di prima e non quello aggiornato da un uso o da una sostituzione concorrente.
+     */
+    @Query("select t.accountId from TokenRecuperoPasswordJpa t where t.tokenHash = :hash")
+    Optional<UUID> findAccountIdByTokenHash(@Param("hash") String hash);
+
+    /** Legge il link con il lock di scrittura; l'account va bloccato prima. */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select t from TokenRecuperoPasswordJpa t where t.tokenHash = :hash")
+    Optional<TokenRecuperoPasswordJpa> findByTokenHashForUpdate(@Param("hash") String hash);
 
     @Modifying
     @Query("""
