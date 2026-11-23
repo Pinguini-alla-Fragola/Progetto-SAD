@@ -5,7 +5,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.ObjectProvider;
@@ -19,8 +19,11 @@ import org.springframework.stereotype.Component;
  * ricevuto, perché ogni nuovo link sostituisce il precedente.
  *
  * <p>La chiave è l'email digitata, esista o no l'account, così il rifiuto non rivela quali indirizzi sono
- * registrati. Lo stato è in memoria (MVP a istanza singola) e ha un tetto di {@value #MAX_CHIAVI} indirizzi:
- * a mappa piena si eliminano le chiavi scadute, e se non basta la richiesta nuova è rifiutata.</p>
+ * registrati. Lo stato è in memoria (MVP a istanza singola) e ricorda al massimo {@value #MAX_CHIAVI}
+ * indirizzi: a mappa piena si dimentica quello usato meno di recente. Una richiesta nuova non viene mai
+ * rifiutata per mancanza di spazio, altrimenti chi invia molti indirizzi inventati farebbe rispondere
+ * {@code 429} a tutti gli utenti reali. Il prezzo è che, con {@value #MAX_CHIAVI} richieste ad altri
+ * indirizzi, il contatore di un indirizzo si azzera: costo molto più alto del vantaggio ottenuto.</p>
  */
 @Component
 class LimitatoreReinvii {
@@ -30,33 +33,34 @@ class LimitatoreReinvii {
     static final int MAX_CHIAVI = 10_000;
 
     private final Clock clock;
-    private final Map<String, Deque<Instant>> richieste = new HashMap<>(); // protetta da this
+    private final Map<String, Deque<Instant>> richieste; // protetta da this
 
     @Autowired
     LimitatoreReinvii(ObjectProvider<Clock> clock) {
-        this(clock.getIfAvailable(Clock::systemUTC));
+        this(clock.getIfAvailable(Clock::systemUTC), MAX_CHIAVI);
     }
 
     LimitatoreReinvii(Clock clock) {
+        this(clock, MAX_CHIAVI);
+    }
+
+    /** Il tetto è un parametro solo perché i test possano riempire la mappa senza diecimila richieste. */
+    LimitatoreReinvii(Clock clock, int maxChiavi) {
         this.clock = clock;
+        // ordine di accesso: la chiave dimenticata a mappa piena è quella usata meno di recente
+        this.richieste = new LinkedHashMap<>(16, 0.75f, true) {
+            @Override
+            protected boolean removeEldestEntry(Map.Entry<String, Deque<Instant>> piuVecchia) {
+                return size() > maxChiavi;
+            }
+        };
     }
 
     /** @return false se la richiesta supera il limite e va rifiutata; altrimenti la registra e la ammette. */
     synchronized boolean ammetti(String chiave) {
         Instant ora = clock.instant();
         Instant limite = ora.minus(FINESTRA);
-        Deque<Instant> coda = richieste.get(chiave);
-        if (coda == null) {
-            if (richieste.size() >= MAX_CHIAVI) {
-                // ogni coda memorizzata contiene almeno una richiesta
-                richieste.values().removeIf(q -> q.peekLast().isBefore(limite));
-                if (richieste.size() >= MAX_CHIAVI) {
-                    return false;
-                }
-            }
-            coda = new ArrayDeque<>();
-            richieste.put(chiave, coda);
-        }
+        Deque<Instant> coda = richieste.computeIfAbsent(chiave, k -> new ArrayDeque<>());
         while (!coda.isEmpty() && coda.peekFirst().isBefore(limite)) {
             coda.removeFirst();
         }
