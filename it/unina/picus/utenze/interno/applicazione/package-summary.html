@@ -73,7 +73,7 @@ loadScripts(document, 'script');</script>
 <ul class="summary-list">
 <li>
 <div id="class-summary">
-<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="class-summary-tab0" role="tab" aria-selected="true" aria-controls="class-summary.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary', 2)" class="active-table-tab">All Classes and Interfaces</button><button id="class-summary-tab1" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab1', 2)" class="table-tab">Interfaces</button><button id="class-summary-tab2" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab2', 2)" class="table-tab">Classes</button><button id="class-summary-tab4" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab4', 2)" class="table-tab">Record Classes</button><button id="class-summary-tab5" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab5', 2)" class="table-tab">Exception Classes</button></div>
+<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="class-summary-tab0" role="tab" aria-selected="true" aria-controls="class-summary.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary', 2)" class="active-table-tab">All Classes and Interfaces</button><button id="class-summary-tab1" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab1', 2)" class="table-tab">Interfaces</button><button id="class-summary-tab2" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab2', 2)" class="table-tab">Classes</button><button id="class-summary-tab3" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab3', 2)" class="table-tab">Enum Classes</button><button id="class-summary-tab4" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab4', 2)" class="table-tab">Record Classes</button><button id="class-summary-tab5" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab5', 2)" class="table-tab">Exception Classes</button></div>
 <div id="class-summary.tabpanel" role="tabpanel" aria-labelledby="class-summary-tab0">
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Class</div>
@@ -87,6 +87,12 @@ l'impostazione iniziale della password (Task #147).</div>
 <div class="col-last odd-row-color class-summary class-summary-tab4">&nbsp;</div>
 <div class="col-first even-row-color class-summary class-summary-tab4"><a href="AttivazioneUtenzaService.LinkAttivazioneDaInviareEvent.html" title="class in it.unina.picus.utenze.interno.applicazione">AttivazioneUtenzaService.LinkAttivazioneDaInviareEvent</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab4">&nbsp;</div>
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="CodaInvitiImportazioneOpt.html" title="class in it.unina.picus.utenze.interno.applicazione">CodaInvitiImportazioneOpt</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
+<div class="block">Conserva gli inviti CSV in attesa e prepara il link prima della consegna.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab4"><a href="CodaInvitiImportazioneOpt.Consegna.html" title="class in it.unina.picus.utenze.interno.applicazione">CodaInvitiImportazioneOpt.Consegna</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab4">&nbsp;</div>
 <div class="col-first odd-row-color class-summary class-summary-tab4"><a href="ComandoCreaOperatore.html" title="class in it.unina.picus.utenze.interno.applicazione">ComandoCreaOperatore</a></div>
 <div class="col-last odd-row-color class-summary class-summary-tab4">
 <div class="block">Richiesta del Banco di creare un Operatore, con i campi così come arrivano dal modulo.</div>
@@ -95,9 +101,25 @@ l'impostazione iniziale della password (Task #147).</div>
 <div class="col-last even-row-color class-summary class-summary-tab2">
 <div class="block">L'elenco delle regole applicate alla creazione di un Operatore.</div>
 </div>
-<div class="col-first odd-row-color class-summary class-summary-tab1"><a href="CreazioneOperatori.html" title="interface in it.unina.picus.utenze.interno.applicazione">CreazioneOperatori</a></div>
-<div class="col-last odd-row-color class-summary class-summary-tab1">
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="ConsegnaInvitiImportazioneOpt.html" title="class in it.unina.picus.utenze.interno.applicazione">ConsegnaInvitiImportazioneOpt</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
+<div class="block">Consegna gli inviti persistiti dopo il commit e fuori dalla richiesta HTTP.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="ConsegnaLinkAttivazione.html" title="class in it.unina.picus.utenze.interno.applicazione">ConsegnaLinkAttivazione</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="block">Consegna all'utente il link di attivazione già salvato.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab3"><a href="ConsegnaLinkAttivazione.Esito.html" title="enum class in it.unina.picus.utenze.interno.applicazione">ConsegnaLinkAttivazione.Esito</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab3">
+<div class="block">Risultato di un tentativo di consegna.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab1"><a href="CreazioneOperatori.html" title="interface in it.unina.picus.utenze.interno.applicazione">CreazioneOperatori</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab1">
 <div class="block">Caso d'uso: il Banco crea l'account personale di un Operatore.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab5"><a href="CsvOptNonValidoException.html" title="class in it.unina.picus.utenze.interno.applicazione">CsvOptNonValidoException</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab5">
+<div class="block">Indica che il file CSV delle OPT non può essere elaborato.</div>
 </div>
 <div class="col-first even-row-color class-summary class-summary-tab5"><a href="DatiOperatoreNonValidiException.html" title="class in it.unina.picus.utenze.interno.applicazione">DatiOperatoreNonValidiException</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab5">
@@ -105,8 +127,24 @@ l'impostazione iniziale della password (Task #147).</div>
 </div>
 <div class="col-first odd-row-color class-summary class-summary-tab5"><a href="DatiOptNonValidiException.html" title="class in it.unina.picus.utenze.interno.applicazione">DatiOptNonValidiException</a></div>
 <div class="col-last odd-row-color class-summary class-summary-tab5">&nbsp;</div>
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="ElaborazioneRigaOpt.html" title="class in it.unina.picus.utenze.interno.applicazione">ElaborazioneRigaOpt</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="block">Applica una riga dell'importazione entro un confine transazionale indipendente.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="ImportazioneOptService.html" title="class in it.unina.picus.utenze.interno.applicazione">ImportazioneOptService</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
+<div class="block">Coordina l'importazione confermata dal Banco e raccoglie il report.</div>
+</div>
 <div class="col-first even-row-color class-summary class-summary-tab2"><a href="InvioLinkAttivazioneListener.html" title="class in it.unina.picus.utenze.interno.applicazione">InvioLinkAttivazioneListener</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab2">&nbsp;</div>
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="LettoreCsvOpt.html" title="class in it.unina.picus.utenze.interno.applicazione">LettoreCsvOpt</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
+<div class="block">Legge il tracciato CSV delle OPT e rileva errori strutturali e duplicati interni al file.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab4"><a href="LettoreCsvOpt.Riga.html" title="class in it.unina.picus.utenze.interno.applicazione">LettoreCsvOpt.Riga</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab4">
+<div class="block">Riga del tracciato con numero fisico iniziale, valori ed eventuali errori del file.</div>
+</div>
 <div class="col-first odd-row-color class-summary class-summary-tab2"><a href="NormalizzatoreDatiOperatore.html" title="class in it.unina.picus.utenze.interno.applicazione">NormalizzatoreDatiOperatore</a></div>
 <div class="col-last odd-row-color class-summary class-summary-tab2">
 <div class="block">Ripulisce i campi ricevuti, così che le regole lavorino sempre su dati nella stessa forma.</div>
@@ -119,8 +157,24 @@ l'impostazione iniziale della password (Task #147).</div>
 <div class="col-last odd-row-color class-summary class-summary-tab2">&nbsp;</div>
 <div class="col-first even-row-color class-summary class-summary-tab4"><a href="RegistrazioneOptService.ComandoRegistrazioneOpt.html" title="class in it.unina.picus.utenze.interno.applicazione">RegistrazioneOptService.ComandoRegistrazioneOpt</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab4">&nbsp;</div>
-<div class="col-first odd-row-color class-summary class-summary-tab4"><a href="RegistrazioneOptService.EsitoRegistrazioneOpt.html" title="class in it.unina.picus.utenze.interno.applicazione">RegistrazioneOptService.EsitoRegistrazioneOpt</a></div>
-<div class="col-last odd-row-color class-summary class-summary-tab4">&nbsp;</div>
+<div class="col-first odd-row-color class-summary class-summary-tab4"><a href="RegistrazioneOptService.DatiOpt.html" title="class in it.unina.picus.utenze.interno.applicazione">RegistrazioneOptService.DatiOpt</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab4">
+<div class="block">Anagrafica normalizzata secondo le regole condivise delle OPT.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab4"><a href="RegistrazioneOptService.EsitoRegistrazioneOpt.html" title="class in it.unina.picus.utenze.interno.applicazione">RegistrazioneOptService.EsitoRegistrazioneOpt</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab4">&nbsp;</div>
+<div class="col-first odd-row-color class-summary class-summary-tab4"><a href="ReportImportazioneOpt.html" title="class in it.unina.picus.utenze.interno.applicazione">ReportImportazioneOpt</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab4">
+<div class="block">Resoconto dell'importazione delle OPT, privo dei valori anagrafici presenti nel CSV.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab3"><a href="ReportImportazioneOpt.Esito.html" title="enum class in it.unina.picus.utenze.interno.applicazione">ReportImportazioneOpt.Esito</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab3">
+<div class="block">Esito della singola riga del CSV.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab4"><a href="ReportImportazioneOpt.RisultatoRiga.html" title="class in it.unina.picus.utenze.interno.applicazione">ReportImportazioneOpt.RisultatoRiga</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab4">
+<div class="block">Esito con il numero fisico della prima linea della riga CSV.</div>
+</div>
 <div class="col-first even-row-color class-summary class-summary-tab2"><a href="ServizioCreazioneOperatori.html" title="class in it.unina.picus.utenze.interno.applicazione">ServizioCreazioneOperatori</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab2">
 <div class="block">Coordina i passi della creazione: permesso, pulizia dei dati, controlli e registrazione.</div>

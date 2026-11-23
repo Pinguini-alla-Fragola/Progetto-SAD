@@ -69,12 +69,17 @@ loadScripts(document, 'script');</script>
 </li>
 <li><a href="#constructor-detail" tabindex="0">Constructor Details</a>
 <ol class="toc-list">
-<li><a href="#%3Cinit%3E(it.unina.picus.utenze.interno.persistenza.AccountRepository,it.unina.picus.utenze.interno.persistenza.ProfiloOptRepository,it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService)" tabindex="0">RegistrazioneOptService(AccountRepository, ProfiloOptRepository, AttivazioneUtenzaService)</a></li>
+<li><a href="#%3Cinit%3E(it.unina.picus.utenze.interno.persistenza.AccountRepository,it.unina.picus.utenze.interno.persistenza.ProfiloOptRepository,it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService,it.unina.picus.utenze.interno.applicazione.CodaInvitiImportazioneOpt)" tabindex="0">RegistrazioneOptService(AccountRepository, ProfiloOptRepository, AttivazioneUtenzaService, CodaInvitiImportazioneOpt)</a></li>
 </ol>
 </li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
 <li><a href="#registraOpt(it.unina.picus.utenze.interno.applicazione.RegistrazioneOptService.ComandoRegistrazioneOpt)" tabindex="0">registraOpt(RegistrazioneOptService.ComandoRegistrazioneOpt)</a></li>
+<li><a href="#preparaReinvio(java.util.UUID)" tabindex="0">preparaReinvio(UUID)</a></li>
+<li><a href="#concludeReinvio(java.util.UUID,it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService.DatiInvioAttivazione,boolean)" tabindex="0">concludeReinvio(UUID, AttivazioneUtenzaService.DatiInvioAttivazione, boolean)</a></li>
+<li><a href="#valida(it.unina.picus.utenze.interno.applicazione.RegistrazioneOptService.ComandoRegistrazioneOpt)" tabindex="0">valida(RegistrazioneOptService.ComandoRegistrazioneOpt)</a></li>
+<li><a href="#creaAccount(it.unina.picus.utenze.interno.applicazione.RegistrazioneOptService.DatiOpt)" tabindex="0">creaAccount(RegistrazioneOptService.DatiOpt)</a></li>
+<li><a href="#classificaViolazioneVincolo(org.springframework.dao.DataIntegrityViolationException)" tabindex="0">classificaViolazioneVincolo(DataIntegrityViolationException)</a></li>
 </ol>
 </li>
 </ol>
@@ -111,9 +116,14 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color"><code>static final record&nbsp;</code></div>
 <div class="col-second even-row-color"><code><a href="RegistrazioneOptService.ComandoRegistrazioneOpt.html" class="type-name-link" title="class in it.unina.picus.utenze.interno.applicazione">RegistrazioneOptService.ComandoRegistrazioneOpt</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code>static final record&nbsp;</code></div>
-<div class="col-second odd-row-color"><code><a href="RegistrazioneOptService.EsitoRegistrazioneOpt.html" class="type-name-link" title="class in it.unina.picus.utenze.interno.applicazione">RegistrazioneOptService.EsitoRegistrazioneOpt</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>(package private) static final record&nbsp;</code></div>
+<div class="col-second odd-row-color"><code><a href="RegistrazioneOptService.DatiOpt.html" class="type-name-link" title="class in it.unina.picus.utenze.interno.applicazione">RegistrazioneOptService.DatiOpt</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Anagrafica normalizzata secondo le regole condivise delle OPT.</div>
+</div>
+<div class="col-first even-row-color"><code>static final record&nbsp;</code></div>
+<div class="col-second even-row-color"><code><a href="RegistrazioneOptService.EsitoRegistrazioneOpt.html" class="type-name-link" title="class in it.unina.picus.utenze.interno.applicazione">RegistrazioneOptService.EsitoRegistrazioneOpt</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
 </div>
 </section>
 </li>
@@ -146,9 +156,10 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(it.unina.picus.utenze.interno.persistenza.AccountRepository,it.unina.picus.utenze.interno.persistenza.ProfiloOptRepository,it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService)" class="member-name-link">RegistrazioneOptService</a><wbr>(<a href="../persistenza/AccountRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">AccountRepository</a>&nbsp;accounts,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(it.unina.picus.utenze.interno.persistenza.AccountRepository,it.unina.picus.utenze.interno.persistenza.ProfiloOptRepository,it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService,it.unina.picus.utenze.interno.applicazione.CodaInvitiImportazioneOpt)" class="member-name-link">RegistrazioneOptService</a><wbr>(<a href="../persistenza/AccountRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">AccountRepository</a>&nbsp;accounts,
  <a href="../persistenza/ProfiloOptRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">ProfiloOptRepository</a>&nbsp;profiliOpt,
- <a href="AttivazioneUtenzaService.html" title="class in it.unina.picus.utenze.interno.applicazione">AttivazioneUtenzaService</a>&nbsp;attivazioneService)</code></div>
+ <a href="AttivazioneUtenzaService.html" title="class in it.unina.picus.utenze.interno.applicazione">AttivazioneUtenzaService</a>&nbsp;attivazioneService,
+ <a href="CodaInvitiImportazioneOpt.html" title="class in it.unina.picus.utenze.interno.applicazione">CodaInvitiImportazioneOpt</a>&nbsp;codaInviti)</code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 </div>
 </section>
@@ -158,15 +169,44 @@ loadScripts(document, 'script');</script>
 <section class="method-summary" id="method-summary">
 <h2>Method Summary</h2>
 <div id="method-summary-table">
-<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab4" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab4', 3)" class="table-tab">Concrete Methods</button></div>
+<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab1" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab1', 3)" class="table-tab">Static Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab4" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab4', 3)" class="table-tab">Concrete Methods</button></div>
 <div id="method-summary-table.tabpanel" role="tabpanel" aria-labelledby="method-summary-table-tab0">
 <div class="summary-table three-column-summary">
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>(package private) static <a href="DatiOptNonValidiException.html" title="class in it.unina.picus.utenze.interno.applicazione">DatiOptNonValidiException</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#classificaViolazioneVincolo(org.springframework.dao.DataIntegrityViolationException)" class="member-name-link">classificaViolazioneVincolo</a><wbr>(org.springframework.dao.DataIntegrityViolationException&nbsp;ex)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Converte i conflitti anagrafici prevedibili in scarti e propaga gli altri errori tecnici.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#concludeReinvio(java.util.UUID,it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService.DatiInvioAttivazione,boolean)" class="member-name-link">concludeReinvio</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;accountId,
+ <a href="AttivazioneUtenzaService.DatiInvioAttivazione.html" title="class in it.unina.picus.utenze.interno.applicazione">AttivazioneUtenzaService.DatiInvioAttivazione</a>&nbsp;dati,
+ boolean&nbsp;riuscito)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Registra l'esito dell'invio e rimuove l'invito CSV solo se la consegna è riuscita.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>(package private) <a href="../persistenza/AccountJpa.html" title="class in it.unina.picus.utenze.interno.persistenza">AccountJpa</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#creaAccount(it.unina.picus.utenze.interno.applicazione.RegistrazioneOptService.DatiOpt)" class="member-name-link">creaAccount</a><wbr>(<a href="RegistrazioneOptService.DatiOpt.html" title="class in it.unina.picus.utenze.interno.applicazione">RegistrazioneOptService.DatiOpt</a>&nbsp;dati)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Crea account e profilo nella transazione del caso d'uso chiamante.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="AttivazioneUtenzaService.DatiInvioAttivazione.html" title="class in it.unina.picus.utenze.interno.applicazione">AttivazioneUtenzaService.DatiInvioAttivazione</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#preparaReinvio(java.util.UUID)" class="member-name-link">preparaReinvio</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;accountId)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Prepara un nuovo link per il reinvio del Banco, lasciando attivi i link precedenti.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="RegistrazioneOptService.EsitoRegistrazioneOpt.html" title="class in it.unina.picus.utenze.interno.applicazione">RegistrazioneOptService.EsitoRegistrazioneOpt</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#registraOpt(it.unina.picus.utenze.interno.applicazione.RegistrazioneOptService.ComandoRegistrazioneOpt)" class="member-name-link">registraOpt</a><wbr>(<a href="RegistrazioneOptService.ComandoRegistrazioneOpt.html" title="class in it.unina.picus.utenze.interno.applicazione">RegistrazioneOptService.ComandoRegistrazioneOpt</a>&nbsp;comando)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Registra una nuova OPT in attesa di attivazione e prepara il link monouso.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>(package private) static <a href="RegistrazioneOptService.DatiOpt.html" title="class in it.unina.picus.utenze.interno.applicazione">RegistrazioneOptService.DatiOpt</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#valida(it.unina.picus.utenze.interno.applicazione.RegistrazioneOptService.ComandoRegistrazioneOpt)" class="member-name-link">valida</a><wbr>(<a href="RegistrazioneOptService.ComandoRegistrazioneOpt.html" title="class in it.unina.picus.utenze.interno.applicazione">RegistrazioneOptService.ComandoRegistrazioneOpt</a>&nbsp;comando)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Applica le regole condivise della registrazione manuale e dell'importazione.</div>
+</div>
 </div>
 </div>
 </div>
@@ -241,12 +281,13 @@ loadScripts(document, 'script');</script>
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(it.unina.picus.utenze.interno.persistenza.AccountRepository,it.unina.picus.utenze.interno.persistenza.ProfiloOptRepository,it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService)">
+<section class="detail" id="&lt;init&gt;(it.unina.picus.utenze.interno.persistenza.AccountRepository,it.unina.picus.utenze.interno.persistenza.ProfiloOptRepository,it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService,it.unina.picus.utenze.interno.applicazione.CodaInvitiImportazioneOpt)">
 <h3>RegistrazioneOptService</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">RegistrazioneOptService</span><wbr><span class="parameters">(<a href="../persistenza/AccountRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">AccountRepository</a>&nbsp;accounts,
+<div class="member-signature"><span class="element-name">RegistrazioneOptService</span><wbr><span class="parameters">(<a href="../persistenza/AccountRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">AccountRepository</a>&nbsp;accounts,
  <a href="../persistenza/ProfiloOptRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">ProfiloOptRepository</a>&nbsp;profiliOpt,
- <a href="AttivazioneUtenzaService.html" title="class in it.unina.picus.utenze.interno.applicazione">AttivazioneUtenzaService</a>&nbsp;attivazioneService)</span></div>
+ <a href="AttivazioneUtenzaService.html" title="class in it.unina.picus.utenze.interno.applicazione">AttivazioneUtenzaService</a>&nbsp;attivazioneService,
+ <a href="CodaInvitiImportazioneOpt.html" title="class in it.unina.picus.utenze.interno.applicazione">CodaInvitiImportazioneOpt</a>&nbsp;codaInviti)</span></div>
 </div>
 </section>
 </li>
@@ -263,6 +304,86 @@ loadScripts(document, 'script');</script>
 <h3>registraOpt</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="RegistrazioneOptService.EsitoRegistrazioneOpt.html" title="class in it.unina.picus.utenze.interno.applicazione">RegistrazioneOptService.EsitoRegistrazioneOpt</a></span>&nbsp;<span class="element-name">registraOpt</span><wbr><span class="parameters">(<a href="RegistrazioneOptService.ComandoRegistrazioneOpt.html" title="class in it.unina.picus.utenze.interno.applicazione">RegistrazioneOptService.ComandoRegistrazioneOpt</a>&nbsp;comando)</span></div>
+<div class="block">Registra una nuova OPT in attesa di attivazione e prepara il link monouso.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>comando</code> - dati inseriti dal Banco</dd>
+<dt>Returns:</dt>
+<dd>identificativo dell'account e dati per l'invio dopo il commit</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="preparaReinvio(java.util.UUID)">
+<h3>preparaReinvio</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="AttivazioneUtenzaService.DatiInvioAttivazione.html" title="class in it.unina.picus.utenze.interno.applicazione">AttivazioneUtenzaService.DatiInvioAttivazione</a></span>&nbsp;<span class="element-name">preparaReinvio</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;accountId)</span></div>
+<div class="block">Prepara un nuovo link per il reinvio del Banco, lasciando attivi i link precedenti.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>accountId</code> - identificativo dell'OPT in attesa</dd>
+<dt>Returns:</dt>
+<dd>dati per l'invio dopo il commit</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="concludeReinvio(java.util.UUID,it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService.DatiInvioAttivazione,boolean)">
+<h3>concludeReinvio</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">concludeReinvio</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;accountId,
+ <a href="AttivazioneUtenzaService.DatiInvioAttivazione.html" title="class in it.unina.picus.utenze.interno.applicazione">AttivazioneUtenzaService.DatiInvioAttivazione</a>&nbsp;dati,
+ boolean&nbsp;riuscito)</span></div>
+<div class="block">Registra l'esito dell'invio e rimuove l'invito CSV solo se la consegna è riuscita.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>accountId</code> - identificativo dell'OPT</dd>
+<dd><code>dati</code> - link preparato per questo reinvio</dd>
+<dd><code>riuscito</code> - consegna accettata dal server SMTP oppure completata in modalità simulata</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="valida(it.unina.picus.utenze.interno.applicazione.RegistrazioneOptService.ComandoRegistrazioneOpt)">
+<h3>valida</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">static</span>&nbsp;<span class="return-type"><a href="RegistrazioneOptService.DatiOpt.html" title="class in it.unina.picus.utenze.interno.applicazione">RegistrazioneOptService.DatiOpt</a></span>&nbsp;<span class="element-name">valida</span><wbr><span class="parameters">(<a href="RegistrazioneOptService.ComandoRegistrazioneOpt.html" title="class in it.unina.picus.utenze.interno.applicazione">RegistrazioneOptService.ComandoRegistrazioneOpt</a>&nbsp;comando)</span></div>
+<div class="block">Applica le regole condivise della registrazione manuale e dell'importazione.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>comando</code> - anagrafica di ingresso</dd>
+<dt>Returns:</dt>
+<dd>anagrafica normalizzata</dd>
+<dt>Throws:</dt>
+<dd><code><a href="DatiOptNonValidiException.html" title="class in it.unina.picus.utenze.interno.applicazione">DatiOptNonValidiException</a></code> - se un campo è invalido</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="creaAccount(it.unina.picus.utenze.interno.applicazione.RegistrazioneOptService.DatiOpt)">
+<h3>creaAccount</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="return-type"><a href="../persistenza/AccountJpa.html" title="class in it.unina.picus.utenze.interno.persistenza">AccountJpa</a></span>&nbsp;<span class="element-name">creaAccount</span><wbr><span class="parameters">(<a href="RegistrazioneOptService.DatiOpt.html" title="class in it.unina.picus.utenze.interno.applicazione">RegistrazioneOptService.DatiOpt</a>&nbsp;dati)</span></div>
+<div class="block">Crea account e profilo nella transazione del caso d'uso chiamante.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>dati</code> - anagrafica già validata</dd>
+<dt>Returns:</dt>
+<dd>account OPT in attesa di attivazione</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="classificaViolazioneVincolo(org.springframework.dao.DataIntegrityViolationException)">
+<h3>classificaViolazioneVincolo</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">static</span>&nbsp;<span class="return-type"><a href="DatiOptNonValidiException.html" title="class in it.unina.picus.utenze.interno.applicazione">DatiOptNonValidiException</a></span>&nbsp;<span class="element-name">classificaViolazioneVincolo</span><wbr><span class="parameters">(org.springframework.dao.DataIntegrityViolationException&nbsp;ex)</span></div>
+<div class="block">Converte i conflitti anagrafici prevedibili in scarti e propaga gli altri errori tecnici.</div>
 </div>
 </section>
 </li>

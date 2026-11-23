@@ -60,6 +60,8 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
 <li><a href="#findByTokenHash(java.lang.String)" tabindex="0">findByTokenHash(String)</a></li>
+<li><a href="#findAccountIdByTokenHash(java.lang.String)" tabindex="0">findAccountIdByTokenHash(String)</a></li>
+<li><a href="#ultimoOrdineEmissione(java.util.UUID)" tabindex="0">ultimoOrdineEmissione(UUID)</a></li>
 <li><a href="#findByTokenHashForUpdate(java.lang.String)" tabindex="0">findByTokenHashForUpdate(String)</a></li>
 <li><a href="#findAttiviByAccountIdForUpdate(java.util.UUID)" tabindex="0">findAttiviByAccountIdForUpdate(UUID)</a></li>
 <li><a href="#invalidaTokenAttiviPerAccount(java.util.UUID,java.time.Instant)" tabindex="0">invalidaTokenAttiviPerAccount(UUID, Instant)</a></li>
@@ -96,18 +98,24 @@ extends org.springframework.data.jpa.repository.JpaRepository&lt;<a href="TokenA
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="TokenAttivazioneJpa.html" title="class in it.unina.picus.utenze.interno.persistenza">TokenAttivazioneJpa</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#findAttiviByAccountIdForUpdate(java.util.UUID)" class="member-name-link">findAttiviByAccountIdForUpdate</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;accountId)</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#findAccountIdByTokenHash(java.lang.String)" class="member-name-link">findAccountIdByTokenHash</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;hash)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="TokenAttivazioneJpa.html" title="class in it.unina.picus.utenze.interno.persistenza">TokenAttivazioneJpa</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#findByTokenHash(java.lang.String)" class="member-name-link">findByTokenHash</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;tokenHash)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="TokenAttivazioneJpa.html" title="class in it.unina.picus.utenze.interno.persistenza">TokenAttivazioneJpa</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#findAttiviByAccountIdForUpdate(java.util.UUID)" class="member-name-link">findAttiviByAccountIdForUpdate</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;accountId)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="TokenAttivazioneJpa.html" title="class in it.unina.picus.utenze.interno.persistenza">TokenAttivazioneJpa</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#findByTokenHashForUpdate(java.lang.String)" class="member-name-link">findByTokenHashForUpdate</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;hash)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#findByTokenHash(java.lang.String)" class="member-name-link">findByTokenHash</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;tokenHash)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>int</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#invalidaTokenAttiviPerAccount(java.util.UUID,java.time.Instant)" class="member-name-link">invalidaTokenAttiviPerAccount</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;accountId,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="TokenAttivazioneJpa.html" title="class in it.unina.picus.utenze.interno.persistenza">TokenAttivazioneJpa</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#findByTokenHashForUpdate(java.lang.String)" class="member-name-link">findByTokenHashForUpdate</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;hash)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>int</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#invalidaTokenAttiviPerAccount(java.util.UUID,java.time.Instant)" class="member-name-link">invalidaTokenAttiviPerAccount</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;accountId,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/time/Instant.html" title="class or interface in java.time" class="external-link">Instant</a>&nbsp;ora)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>long</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#ultimoOrdineEmissione(java.util.UUID)" class="member-name-link">ultimoOrdineEmissione</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;accountId)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">&nbsp;</div>
 </div>
 </div>
@@ -146,6 +154,26 @@ extends org.springframework.data.jpa.repository.JpaRepository&lt;<a href="TokenA
 <h3>findByTokenHash</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="TokenAttivazioneJpa.html" title="class in it.unina.picus.utenze.interno.persistenza">TokenAttivazioneJpa</a>&gt;</span>&nbsp;<span class="element-name">findByTokenHash</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;tokenHash)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="findAccountIdByTokenHash(java.lang.String)">
+<h3>findAccountIdByTokenHash</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="annotations">@Query("select t.accountId from TokenAttivazioneJpa t where t.tokenHash = :hash")
+</span><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&gt;</span>&nbsp;<span class="element-name">findAccountIdByTokenHash</span><wbr><span class="parameters">(@Param("hash")
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;hash)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="ultimoOrdineEmissione(java.util.UUID)">
+<h3>ultimoOrdineEmissione</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="annotations">@Query("select coalesce(max(t.ordineEmissione), 0) from TokenAttivazioneJpa t where t.accountId = :accountId")
+</span><span class="return-type">long</span>&nbsp;<span class="element-name">ultimoOrdineEmissione</span><wbr><span class="parameters">(@Param("accountId")
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;accountId)</span></div>
 </div>
 </section>
 </li>
