@@ -44,6 +44,9 @@ import it.unina.picus.utenze.api.UtenzeApi.TipoErogatore;
  *
  * <p>Punto aperto (CA-06): la issue parla di operatori «tenuti a compilare» la scheda, ma non dice chi siano;
  * il modello della pagina usa {@code TUTTI_GLI_OPERATORI}. Il test verifica solo il canale, non la platea.</p>
+ *
+ * <p>Il collegamento tra il pulsante del modello di scadenza e l'invio del Banco (payload della POST normale) è
+ * verificato in {@code src/test/js/comunicazioni.test.mjs}; qui si verifica la ricezione via HTTP.</p>
  */
 @DisplayName("#55 CA-01, CA-02, CA-06 · Invio a OPT e operatori e avviso di scadenza")
 class InvioComunicazioniTest extends ComunicazioniBlackBoxTest {
