@@ -74,7 +74,7 @@ public final class RegoleAnnullamento {
      *
      * @param motivo testo già valutato rispetto allo stato di partenza
      * @return testo originale o {@code null} se il motivo è vuoto
-     * @throws DatiRichiestaNonValidiException se il motivo supera il limite o contiene caratteri
+     * @throws DatiRichiestaNonValidiException se il motivo supera il limite, contiene Unicode malformato o caratteri
      *         di controllo diversi da tabulazioni e ritorni a capo
      */
     static String motivoDaRegistrare(String motivo) {
@@ -85,7 +85,9 @@ public final class RegoleAnnullamento {
         if (eVuoto(motivo)) {
             return null;
         }
-        if (motivo.codePoints().anyMatch(c -> Character.isISOControl(c) && c != '\t' && c != '\n' && c != '\r')) {
+        if (motivo.codePoints().anyMatch(c ->
+                (c >= Character.MIN_SURROGATE && c <= Character.MAX_SURROGATE)
+                        || (Character.isISOControl(c) && c != '\t' && c != '\n' && c != '\r'))) {
             throw new DatiRichiestaNonValidiException(Map.of("motivo", "Usa testo semplice per il motivo"));
         }
         return motivo;
