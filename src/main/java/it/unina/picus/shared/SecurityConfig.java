@@ -100,9 +100,9 @@ class SecurityConfig {
                 .with(new LoginJsonConfigurer(json), Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/api/auth/csrf", "/recupera", "/attiva").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/attiva", "/api/auth/attiva/**").permitAll()
                         .requestMatchers("/login", "/error", "/css/**", "/js/**", "/img/**", "/fonts/**", "/favicon.ico").permitAll()
-                        // Autorizzazione prima del binding MVC, anche con corpo o UUID malformati.
+                        .requestMatchers(HttpMethod.POST, "/api/opt", "/api/opt/*/revoca", "/api/opt/*/reinvia-invito", "/api/operatori/*/revoca").hasRole("BANCO")
                         .requestMatchers(HttpMethod.POST, "/api/richieste").hasRole("OPT")
                         .requestMatchers(HttpMethod.GET, "/api/richieste/mie").hasRole("OPT")
                         .requestMatchers(HttpMethod.GET, "/api/contatti-disponibilita/*").hasAnyRole("OPT", "OPERATORE")
@@ -116,6 +116,19 @@ class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/monitoraggio/conteggi-opt").hasRole("OPT")
                         .requestMatchers(HttpMethod.GET, "/api/monitoraggio/conteggi-opt").hasAnyRole("OPT", "BANCO")
                         .requestMatchers(HttpMethod.GET, "/api/monitoraggio/categorie").hasAnyRole("OPT", "BANCO")
+                        .requestMatchers(HttpMethod.POST, "/api/utenze/operatori").hasRole("BANCO")
+                        .requestMatchers(HttpMethod.GET, "/api/catalogo/offerte-opt/*").hasAnyRole("OPT", "BANCO")
+                        .requestMatchers(HttpMethod.HEAD, "/api/catalogo/offerte-opt/*").hasAnyRole("OPT", "BANCO")
+                        .requestMatchers("/api/catalogo/offerte-opt/misure/*").hasRole("OPT")
+                        .requestMatchers(HttpMethod.GET, "/api/catalogo/misure/tutte").hasRole("BANCO")
+                        .requestMatchers(HttpMethod.POST, "/api/catalogo/misure",
+                                "/api/catalogo/misure/*/disattivazione").hasRole("BANCO")
+                        .requestMatchers(HttpMethod.PUT, "/api/catalogo/misure/*").hasRole("BANCO")
+                        // Comunicazioni: il ruolo si controlla prima di leggere il modulo, allegati compresi.
+                        .requestMatchers(HttpMethod.POST, "/api/comunicazioni").hasRole("BANCO")
+                        .requestMatchers(HttpMethod.GET, "/api/comunicazioni/inviate",
+                                "/api/comunicazioni/destinatari").hasRole("BANCO")
+                        .requestMatchers(HttpMethod.GET, "/api/comunicazioni/ricevute").hasAnyRole("OPT", "OPERATORE")
                         // ogni ruolo vede solo la propria area
                         .requestMatchers("/banco/**").hasRole("BANCO")
                         .requestMatchers("/opt/**").hasRole("OPT")

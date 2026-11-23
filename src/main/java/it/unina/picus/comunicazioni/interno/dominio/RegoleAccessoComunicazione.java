@@ -96,6 +96,16 @@ public final class RegoleAccessoComunicazione {
         richiedi(consente(PUO_CONFERMARE, attore, destinatari), "Conferma riservata ai destinatari");
     }
 
+    /**
+     * Ammette soltanto i ruoli che possono ricevere comunicazioni: le OPT e gli operatori, non il Banco.
+     *
+     * @param attore identità verificata della sessione
+     * @throws SecurityException se l'identità è incompleta o il ruolo non può ricevere comunicazioni
+     */
+    public static void verificaPossibileDestinatario(IdentitaAutenticata attore) {
+        richiediRuolo(attore, RUOLI_DESTINATARI, "Riservato ai destinatari delle comunicazioni");
+    }
+
     private static void richiediRuolo(IdentitaAutenticata attore, Set<RuoloUtente> ammessi, String messaggio) {
         richiedi(identitaCompleta(attore) && ammessi.contains(attore.ruolo()), messaggio);
     }
