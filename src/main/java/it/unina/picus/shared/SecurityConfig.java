@@ -114,6 +114,10 @@ class SecurityConfig {
                                 "/api/richieste/*/conferma", "/api/richieste/*/rifiuta").hasRole("BANCO")
                         .requestMatchers(HttpMethod.GET, "/api/richieste/coda", "/api/richieste/*/candidati",
                                 "/api/richieste/*/contatti", "/api/richieste/*/contatti/*").hasRole("BANCO")
+                        // Monitoraggio conteggi trimestrali OPT (#43)
+                        .requestMatchers(HttpMethod.POST, "/api/monitoraggio/conteggi-opt").hasRole("OPT")
+                        .requestMatchers(HttpMethod.GET, "/api/monitoraggio/conteggi-opt").hasAnyRole("OPT", "BANCO")
+                        .requestMatchers(HttpMethod.GET, "/api/monitoraggio/categorie").hasAnyRole("OPT", "BANCO")
                         .requestMatchers(HttpMethod.POST, "/api/utenze/operatori").hasRole("BANCO")
                         .requestMatchers(HttpMethod.GET, "/api/catalogo/offerte-opt/*").hasAnyRole("OPT", "BANCO")
                         .requestMatchers(HttpMethod.HEAD, "/api/catalogo/offerte-opt/*").hasAnyRole("OPT", "BANCO")
