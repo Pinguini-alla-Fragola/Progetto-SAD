@@ -293,6 +293,8 @@ body[data-area] { --sidebar-width: 15rem; --workspace-gutter: 2rem; background: 
 .count-rows { display: grid; gap: .75rem; margin-bottom: .875rem; }
 .count-row .campo { gap: 0; }
 .count-row .btn { margin: 0; }
+.conteggi-opt-righe :is(.count-head, .count-row) { grid-template-columns: minmax(0, 1fr) 8rem 6rem; }
+.conteggi-opt-righe .rimuovi-voce { justify-self: start; }
 .count-row .campo > span { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .record { padding: 1.25rem 0; border-bottom: 1px solid var(--color-line); }
 .record:first-child { padding-top: 0; }
@@ -502,7 +504,7 @@ body[data-area] .picus-footer { background: var(--color-white); }
     .form-section-content { clear: both; margin-left: 0; }
     .form-section { padding-block: 1.25rem; }
     .count-head { display: none; }
-    .count-row { grid-template-columns: minmax(0, 1fr) 6rem; }
+    .count-row, .conteggi-opt-righe .count-row { grid-template-columns: minmax(0, 1fr) 6rem; }
     .count-row .campo { gap: .375rem; }
     .count-row .campo > span { position: static; width: auto; height: auto; overflow: visible; clip-path: none; white-space: normal; }
     .count-row .btn { grid-column: 1 / -1; justify-self: start; }

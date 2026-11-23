@@ -85,13 +85,19 @@ export async function initConteggiOpt(area) {
     const collegaConsultazione = (form, lista, esito, riprova, mostraOpt) => {
         let progressivo = 0;
         let ultimoPeriodo;
+        let filtroInModifica = false;
+
+        const pulisciConsultazione = () => {
+            esito.textContent = '';
+            riprova.hidden = true;
+            lista.hidden = true;
+        };
 
         const consulta = async periodo => {
             const richiesta = ++progressivo;
             ultimoPeriodo = periodo;
-            esito.textContent = '';
-            riprova.hidden = true;
-            lista.hidden = true;
+            filtroInModifica = false;
+            pulisciConsultazione();
 
             const { anno, trimestre, annoFine, trimestreFine } = periodo;
             const params = new URLSearchParams({ anno, trimestre });
@@ -124,9 +130,18 @@ export async function initConteggiOpt(area) {
                 trimestreFine: form.elements.trimestreFine.value
             });
         });
-        riprova.addEventListener('click', () => consulta(ultimoPeriodo));
+        form.addEventListener('input', () => {
+            progressivo++;
+            ultimoPeriodo = undefined;
+            filtroInModifica = true;
+            pulisciConsultazione();
+        });
+        riprova.addEventListener('click', () => {
+            if (!riprova.hidden && ultimoPeriodo) return consulta(ultimoPeriodo);
+        });
 
         return (anno, trimestre) => {
+            if (filtroInModifica) return;
             if (ultimoPeriodo) return consulta(ultimoPeriodo);
             form.elements.anno.value = anno;
             form.elements.trimestre.value = trimestre;
@@ -151,6 +166,13 @@ export async function initConteggiOpt(area) {
             }
         }
 
+        const aggiornaRimozione = () => {
+            const ultimaVoce = contenitoreVoci.childElementCount === 1;
+            for (const pulsante of contenitoreVoci.querySelectorAll('.rimuovi-voce')) {
+                pulsante.hidden = ultimaVoce;
+            }
+        };
+
         const aggiungiRigaVoce = () => {
             if (!contenitoreVoci) return;
             const riga = document.createElement('div');
@@ -158,6 +180,8 @@ export async function initConteggiOpt(area) {
 
             const labelVoce = document.createElement('label');
             labelVoce.className = 'campo';
+            const titoloVoce = document.createElement('span');
+            titoloVoce.textContent = 'Voce';
             const select = document.createElement('select');
             select.className = 'form-control';
             select.name = 'voce';
@@ -168,10 +192,12 @@ export async function initConteggiOpt(area) {
                 opt.textContent = cat.descrizione;
                 select.append(opt);
             }
-            labelVoce.append(select);
+            labelVoce.append(titoloVoce, select);
 
             const labelVal = document.createElement('label');
             labelVal.className = 'campo';
+            const titoloValore = document.createElement('span');
+            titoloValore.textContent = 'Conteggio';
             const input = document.createElement('input');
             input.className = 'form-control';
             input.type = 'text';
@@ -179,17 +205,32 @@ export async function initConteggiOpt(area) {
             input.inputMode = 'numeric';
             input.pattern = '[0-9]+';
             input.required = true;
-            labelVal.append(input);
+            labelVal.append(titoloValore, input);
 
-            riga.append(labelVoce, labelVal);
+            const rimuovi = document.createElement('button');
+            rimuovi.type = 'button';
+            rimuovi.className = 'btn btn-secondary btn-sm rimuovi-voce';
+            rimuovi.textContent = 'Rimuovi';
+            rimuovi.setAttribute('aria-label', 'Rimuovi voce');
+            rimuovi.addEventListener('click', () => {
+                const vicina = riga.nextElementSibling ?? riga.previousElementSibling;
+                if (!vicina) return;
+                riga.remove();
+                aggiornaRimozione();
+                vicina.querySelector('select[name="voce"]').focus();
+            });
+
+            riga.append(labelVoce, labelVal, rimuovi);
             contenitoreVoci.append(riga);
+            aggiornaRimozione();
+            return select;
         };
 
         if (contenitoreVoci) {
-            contenitoreVoci.innerHTML = '';
+            contenitoreVoci.replaceChildren();
             aggiungiRigaVoce();
         }
-        btnAggiungi?.addEventListener('click', aggiungiRigaVoce);
+        btnAggiungi?.addEventListener('click', () => aggiungiRigaVoce()?.focus());
 
         const aggiornaListaOpt = collegaConsultazione(
             document.getElementById('filtro-conteggi-opt'),
