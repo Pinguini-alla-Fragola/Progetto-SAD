@@ -23,7 +23,8 @@ import it.unina.picus.utenze.interno.applicazione.RichiestaRecuperoPassword;
  * <p>La richiesta risponde allo stesso modo per ogni indirizzo scritto correttamente, sia che l'account sia
  * attivo, sia che non esista, sia in attesa di attivazione o revocato: chi non è autenticato non deve poter
  * scoprire quali indirizzi sono registrati. Per lo stesso motivo tutto il lavoro sull'account avviene in
- * secondo piano ({@link RichiestaRecuperoPassword}) e il numero di richieste per indirizzo è limitato.</p>
+ * secondo piano ({@link RichiestaRecuperoPassword}) e il numero di richieste per indirizzo è limitato. Se la
+ * coda del lavoro in secondo piano è piena rispondono {@code 503} tutti gli indirizzi, allo stesso modo.</p>
  */
 @Controller
 class RecuperoPasswordController {
@@ -33,6 +34,8 @@ class RecuperoPasswordController {
             + "Il link vale 15 minuti.";
     static final String MESSAGGIO_TROPPE_RICHIESTE =
             "Hai fatto troppe richieste per questo indirizzo. Riprova tra qualche minuto.";
+    static final String MESSAGGIO_SERVIZIO_OCCUPATO =
+            "Il servizio è momentaneamente occupato. Riprova tra qualche minuto.";
     static final String MESSAGGIO_NON_DISPONIBILE = "Funzionalità non disponibile nel profilo skeleton";
 
     /** L'email resta un valore JSON generico fino al controllo del tipo: un numero o un booleano non diventano testo. */
@@ -79,7 +82,12 @@ class RecuperoPasswordController {
         if (!limitatore.ammetti(email.get())) {
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(Map.of("messaggio", MESSAGGIO_TROPPE_RICHIESTE));
         }
-        richiesta.get().richiedi(email.get());
+        if (!richiesta.get().richiedi(email.get())) {
+            // La richiesta non è stata presa in carico: non conta tra quelle concesse all'indirizzo.
+            limitatore.rilascia(email.get());
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(Map.of("messaggio", MESSAGGIO_SERVIZIO_OCCUPATO));
+        }
         return ResponseEntity.ok(Map.of("messaggio", MESSAGGIO_CONFERMA));
     }
 }
