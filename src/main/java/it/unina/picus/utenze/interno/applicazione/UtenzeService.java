@@ -194,7 +194,8 @@ class UtenzeService implements UtenzeApi {
         }
 
         if (encoder.upgradeEncoding(passwordHash)) {
-            accounts.aggiornaHash(account.getId(), encoder.encode(password));
+            // Solo se l'hash è ancora quello verificato: un cambio password concorrente non va annullato.
+            accounts.aggiornaHashSeInvariato(account.getId(), passwordHash, encoder.encode(password));
         }
         return Optional.of(identita(account));
     }
