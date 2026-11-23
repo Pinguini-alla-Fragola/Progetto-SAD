@@ -43,6 +43,19 @@ public class ServizioAnnullamentoRichieste {
     }
 
     /**
+     * Controlla l'accesso prima che il controller legga il corpo del comando.
+     * Il comando ripete il controllo sulla richiesta bloccata prima di modificarla.
+     *
+     * @param attore identità verificata dalla sessione
+     * @param richiestaId identificativo della richiesta
+     */
+    @Transactional(readOnly = true)
+    public void verificaAccesso(IdentitaAutenticata attore, UUID richiestaId) {
+        var richiesta = richieste.cercaPerId(richiestaId).orElseThrow(RisorsaRichiesteNonTrovataException::new);
+        RegoleAccessoRichiesta.verificaAnnullamento(attore, new Soggetti(richiesta.titolareId(), richiesta.erogatoreId()));
+    }
+
+    /**
      * Annulla la richiesta dopo aver verificato i permessi sulla pratica bloccata.
      * Il lock è condiviso con l'interpello, l'assegnazione e la risposta. Dopo l'annullamento
      * questi comandi ricevono un conflitto di stato e lo storico dei contatti resta consultabile.
