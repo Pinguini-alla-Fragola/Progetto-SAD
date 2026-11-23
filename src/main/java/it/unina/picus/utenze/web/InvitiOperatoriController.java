@@ -15,6 +15,7 @@ import it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService;
 import it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService.DatiInvioAttivazione;
 import it.unina.picus.utenze.interno.applicazione.ConsegnaLinkAttivazione;
 import it.unina.picus.utenze.interno.applicazione.ConsegnaLinkAttivazione.Esito;
+import it.unina.picus.utenze.interno.applicazione.ConclusioneReinvio;
 
 /** Reinvio del link di attivazione di un Operatore in attesa, a cura del Banco. */
 @RestController
@@ -27,21 +28,26 @@ class InvitiOperatoriController {
 
     private final AttivazioneUtenzaService attivazione;
     private final ConsegnaLinkAttivazione consegna;
+    private final ConclusioneReinvio conclusione;
 
-    InvitiOperatoriController(AttivazioneUtenzaService attivazione, ConsegnaLinkAttivazione consegna) {
+    InvitiOperatoriController(AttivazioneUtenzaService attivazione, ConsegnaLinkAttivazione consegna,
+            ConclusioneReinvio conclusione) {
         this.attivazione = attivazione;
         this.consegna = consegna;
+        this.conclusione = conclusione;
     }
 
     /**
-     * Sostituisce il link precedente con uno nuovo e lo spedisce. Risponde {@code 404} se l'account non esiste,
+     * Crea un nuovo link, lo spedisce e solo se la posta lo accetta sostituisce il precedente: se l'invio fallisce
+     * l'Operatore conserva il link che aveva già ricevuto. Risponde {@code 404} se l'account non esiste,
      * {@code 409} se non è un Operatore o non è più in attesa di attivazione (gli errori li traduce
      * {@link ErroriUtenze}).
      */
     @PostMapping("/{id}/reinvia-invito")
     ResponseEntity<EsitoReinvio> reinvia(@PathVariable UUID id) {
-        DatiInvioAttivazione invito = attivazione.rigeneraTokenPerAccount(id, RuoloUtente.OPERATORE);
+        DatiInvioAttivazione invito = attivazione.preparaReinvio(id, RuoloUtente.OPERATORE);
         Esito esito = consegna.consegna(invito);
+        conclusione.concludi(id, invito, esito != Esito.NON_RIUSCITO);
         if (esito == Esito.NON_RIUSCITO) {
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
                     .body(new EsitoReinvio(id, false, true, MessaggiInvito.REINVIO_NON_RIUSCITO));
