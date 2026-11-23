@@ -84,7 +84,8 @@ public class AttivazioneUtenzaService {
     /**
      * Genera un nuovo token monouso per un account in attesa di attivazione,
      * invalida eventuali token precedenti ancora attivi sotto lock e restituisce
-     * i dati per la consegna post-commit.
+     * i dati per la consegna post-commit. L'account deve essere appena inserito
+     * nella transazione corrente oppure già bloccato dal chiamante.
      */
     public DatiInvioAttivazione preparaTokenAttivazione(AccountJpa account) {
         Objects.requireNonNull(account, "account obbligatorio");
@@ -101,19 +102,7 @@ public class AttivazioneUtenzaService {
             tokens.saveAllAndFlush(precedenti);
         }
 
-        String tokenInChiaro = generaTokenCasuale();
-        String tokenHash = calcolaSha256(tokenInChiaro);
-
-        TokenAttivazioneJpa nuovoToken = new TokenAttivazioneJpa(
-                UUID.randomUUID(),
-                account.getId(),
-                tokenHash,
-                ora.plus(durataValidita),
-                ora
-        );
-        tokens.saveAndFlush(nuovoToken);
-
-        return new DatiInvioAttivazione(account.getEmail(), account.getNome(), tokenInChiaro);
+        return creaToken(account, ora, false);
     }
 
     /**
@@ -176,7 +165,7 @@ public class AttivazioneUtenzaService {
     }
 
     /**
-     * Consuma il token monouso in modo atomico (ordine lock: prima token, poi account),
+     * Consuma il token monouso in modo atomico (ordine lock: prima account, poi token),
      * rilegge stato e scadenza sotto lock, imposta l'hash BCrypt della nuova password
      * e attiva l'account.
      */
@@ -189,9 +178,8 @@ public class AttivazioneUtenzaService {
 
         String hash = calcolaSha256(tokenInChiaro.strip());
 
-        // 1. Risoluzione senza lock per individuare l'account da serializzare
-        UUID accountId = tokens.findByTokenHash(hash)
-                .map(TokenAttivazioneJpa::getAccountId)
+        // Legge solo l'accountId: il token entra nel contesto JPA dopo il lock dell'account.
+        UUID accountId = tokens.findAccountIdByTokenHash(hash)
                 .orElseThrow(() -> new TokenAttivazioneNonValidoException("Link di attivazione non valido."));
 
         // 2. Ordine unico di lock: prima AccountJpa, poi TokenAttivazioneJpa
@@ -224,11 +212,12 @@ public class AttivazioneUtenzaService {
      * I tentativi precedenti possono aver già raggiunto la casella del destinatario.
      */
     DatiInvioAttivazione preparaTokenImportazioneOpt(AccountJpa account) {
-        return creaTokenSenzaSostituire(account, true);
+        return creaToken(account, Instant.now(clock), true);
     }
 
     DatiInvioAttivazione preparaReinvioOpt(UUID accountId) {
-        return creaTokenSenzaSostituire(bloccaAccountPerReinvio(accountId, RuoloUtente.OPT), false);
+        AccountJpa account = bloccaAccountPerReinvio(accountId, RuoloUtente.OPT);
+        return creaToken(account, Instant.now(clock), false);
     }
 
     void concludeReinvioOpt(UUID accountId, DatiInvioAttivazione dati, boolean riuscito) {
@@ -253,16 +242,17 @@ public class AttivazioneUtenzaService {
 
         // Anche i link CSV preparati durante l'invio manuale sono sostituiti.
         attivi.stream()
-                .filter(token -> token.isDaImportazioneOpt() || token.getCreatoIl().isBefore(inviato.getCreatoIl()))
+                .filter(token -> token.isDaImportazioneOpt() || token.getOrdineEmissione() < inviato.getOrdineEmissione())
                 .forEach(token -> token.segnaComeUsato(ora));
     }
 
-    private DatiInvioAttivazione creaTokenSenzaSostituire(AccountJpa account, boolean daImportazioneOpt) {
-        Instant ora = Instant.now(clock);
+    private DatiInvioAttivazione creaToken(AccountJpa account, Instant ora, boolean daImportazioneOpt) {
+        // L'inserimento dell'account o il suo lock serializza le emissioni anche su più istanze.
+        long ordineEmissione = tokens.ultimoOrdineEmissione(account.getId()) + 1;
         String tokenInChiaro = generaTokenCasuale();
         tokens.saveAndFlush(new TokenAttivazioneJpa(
                 UUID.randomUUID(), account.getId(), calcolaSha256(tokenInChiaro),
-                ora.plus(durataValidita), ora, daImportazioneOpt));
+                ora.plus(durataValidita), ora, daImportazioneOpt, ordineEmissione));
         return new DatiInvioAttivazione(account.getEmail(), account.getNome(), tokenInChiaro);
     }
 

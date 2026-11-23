@@ -34,21 +34,25 @@ public class TokenAttivazioneJpa {
     @Column(name = "da_importazione_opt", nullable = false)
     private boolean daImportazioneOpt;
 
+    @Column(name = "ordine_emissione", nullable = false, updatable = false)
+    private long ordineEmissione;
+
     protected TokenAttivazioneJpa() {
     }
 
-    public TokenAttivazioneJpa(UUID id, UUID accountId, String tokenHash, Instant scadenza, Instant creatoIl) {
-        this(id, accountId, tokenHash, scadenza, creatoIl, false);
-    }
-
     public TokenAttivazioneJpa(UUID id, UUID accountId, String tokenHash, Instant scadenza, Instant creatoIl,
-                               boolean daImportazioneOpt) {
+                               boolean daImportazioneOpt, long ordineEmissione) {
         this.id = Objects.requireNonNull(id, "id obbligatorio");
         this.accountId = Objects.requireNonNull(accountId, "accountId obbligatorio");
         this.tokenHash = Objects.requireNonNull(tokenHash, "tokenHash obbligatorio");
         this.scadenza = Objects.requireNonNull(scadenza, "scadenza obbligatoria");
         this.creatoIl = Objects.requireNonNull(creatoIl, "creatoIl obbligatorio");
         this.daImportazioneOpt = daImportazioneOpt;
+        this.ordineEmissione = ordineEmissione;
+    }
+
+    public long getOrdineEmissione() {
+        return ordineEmissione;
     }
 
     public boolean isDaImportazioneOpt() {
