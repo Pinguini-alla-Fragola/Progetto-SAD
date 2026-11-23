@@ -1,14 +1,9 @@
 package it.unina.picus.utenze.interno.applicazione;
 
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Base64;
-import java.util.HexFormat;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -40,8 +35,6 @@ import it.unina.picus.utenze.interno.persistenza.TokenAttivazioneRepository;
 public class AttivazioneUtenzaService {
 
     static final int LUNGHEZZA_MIN_PASSWORD = 12;
-    private static final int BYTE_TOKEN = 32; // 256 bit di entropia
-    private static final SecureRandom RANDOM = new SecureRandom();
 
     private final AccountRepository accounts;
     private final TokenAttivazioneRepository tokens;
@@ -101,8 +94,8 @@ public class AttivazioneUtenzaService {
             tokens.saveAllAndFlush(precedenti);
         }
 
-        String tokenInChiaro = generaTokenCasuale();
-        String tokenHash = calcolaSha256(tokenInChiaro);
+        String tokenInChiaro = TokenMonouso.genera();
+        String tokenHash = TokenMonouso.impronta(tokenInChiaro);
 
         TokenAttivazioneJpa nuovoToken = new TokenAttivazioneJpa(
                 UUID.randomUUID(),
@@ -154,8 +147,8 @@ public class AttivazioneUtenzaService {
             tokens.saveAllAndFlush(precedenti);
         }
 
-        String tokenInChiaro = generaTokenCasuale();
-        String tokenHash = calcolaSha256(tokenInChiaro);
+        String tokenInChiaro = TokenMonouso.genera();
+        String tokenHash = TokenMonouso.impronta(tokenInChiaro);
         TokenAttivazioneJpa nuovoToken = new TokenAttivazioneJpa(
                 UUID.randomUUID(),
                 account.getId(),
@@ -186,7 +179,7 @@ public class AttivazioneUtenzaService {
             return false;
         }
         Instant ora = Instant.now(clock);
-        return tokens.findByTokenHash(calcolaSha256(tokenInChiaro.strip()))
+        return tokens.findByTokenHash(TokenMonouso.impronta(tokenInChiaro.strip()))
                 .filter(t -> !t.isUsato() && !t.isScaduto(ora))
                 .flatMap(t -> accounts.findById(t.getAccountId()))
                 .filter(a -> StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(a.getStato()))
@@ -205,7 +198,7 @@ public class AttivazioneUtenzaService {
             throw new TokenAttivazioneNonValidoException("Link di attivazione non valido o mancante.");
         }
 
-        String hash = calcolaSha256(tokenInChiaro.strip());
+        String hash = TokenMonouso.impronta(tokenInChiaro.strip());
 
         // 1. Risoluzione senza lock per individuare l'account da serializzare
         UUID accountId = tokens.findByTokenHash(hash)
@@ -246,22 +239,6 @@ public class AttivazioneUtenzaService {
         }
         if (password.getBytes(StandardCharsets.UTF_8).length > UtenzeService.LUNGHEZZA_MAX_PASSWORD_BYTE) {
             throw new IllegalArgumentException("La password supera la lunghezza massima consentita di 72 byte.");
-        }
-    }
-
-    private static String generaTokenCasuale() {
-        byte[] bytes = new byte[BYTE_TOKEN];
-        RANDOM.nextBytes(bytes);
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
-    }
-
-    static String calcolaSha256(String valore) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hashBytes = digest.digest(valore.getBytes(StandardCharsets.UTF_8));
-            return HexFormat.of().formatHex(hashBytes);
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("Algoritmo SHA-256 non disponibile", e);
         }
     }
 }
