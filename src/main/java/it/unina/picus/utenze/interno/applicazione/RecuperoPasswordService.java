@@ -9,7 +9,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,18 +52,18 @@ public class RecuperoPasswordService {
         }
     }
 
+    /** Durata fissata dalla US #33 e ripetuta nei testi di email e pagina: non è configurabile. */
+    static final Duration DURATA_VALIDITA = Duration.ofMinutes(15);
+
     private final AccountRepository accounts;
     private final TokenRecuperoPasswordRepository tokens;
-    private final Duration durataValidita;
     private final Clock clock;
 
     @Autowired
-    public RecuperoPasswordService(AccountRepository accounts, TokenRecuperoPasswordRepository tokens, Clock clock,
-            @Value("${picus.utenze.recupero.validita:PT15M}") Duration durataValidita) {
+    public RecuperoPasswordService(AccountRepository accounts, TokenRecuperoPasswordRepository tokens, Clock clock) {
         this.accounts = Objects.requireNonNull(accounts);
         this.tokens = Objects.requireNonNull(tokens);
         this.clock = Objects.requireNonNull(clock);
-        this.durataValidita = Objects.requireNonNull(durataValidita);
     }
 
     /**
@@ -157,7 +156,7 @@ public class RecuperoPasswordService {
                 UUID.randomUUID(),
                 account.getId(),
                 TokenMonouso.impronta(tokenInChiaro),
-                ora.plus(durataValidita),
+                ora.plus(DURATA_VALIDITA),
                 ora));
         return new DatiInvioRecupero(link.getId(), account.getEmail(), account.getNome(), tokenInChiaro);
     }
