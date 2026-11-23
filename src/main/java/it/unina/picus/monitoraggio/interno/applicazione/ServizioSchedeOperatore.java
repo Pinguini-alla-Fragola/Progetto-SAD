@@ -76,7 +76,10 @@ public class ServizioSchedeOperatore implements SchedeOperatoreApi {
     public SchedaOperatore consultaSchedaOperatore(IdentitaAutenticata attore, UUID schedaId) {
         RegoleAccessoScheda.verificaRuoloConsultazione(attore);
         return archivio.cerca(schedaId, titolare -> RegoleAccessoScheda.verificaConsultazione(attore, titolare))
-                .orElseThrow(() -> new NoSuchElementException("Scheda non trovata"));
+                .orElseThrow(() -> {
+                    RegoleAccessoScheda.verificaConsultazione(attore, null);
+                    return new NoSuchElementException("Scheda non trovata");
+                });
     }
 
     /**

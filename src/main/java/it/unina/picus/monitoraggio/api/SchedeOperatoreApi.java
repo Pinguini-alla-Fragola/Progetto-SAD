@@ -42,8 +42,8 @@ public interface SchedeOperatoreApi {
      * @param attore identità verificata del titolare o del Banco
      * @param schedaId identificativo della scheda
      * @return dati della scheda inviata
-     * @throws SecurityException se l'attore non può consultare la scheda
-     * @throws NoSuchElementException se la scheda non esiste
+     * @throws SecurityException se l'attore non può consultare la scheda o se è un operatore e la scheda è assente
+     * @throws NoSuchElementException se la scheda non esiste e l'attore è il Banco
      */
     SchedaOperatore consultaSchedaOperatore(IdentitaAutenticata attore, UUID schedaId);
 }

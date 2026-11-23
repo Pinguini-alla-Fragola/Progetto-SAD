@@ -1,6 +1,5 @@
 package it.unina.picus.monitoraggio.interno.dominio;
 
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.BiPredicate;
@@ -77,9 +76,8 @@ public final class RegoleAccessoScheda {
      * Consultazione di una scheda: il Banco oppure l'operatore titolare, e nessun altro.
      *
      * @param attore identità verificata della sessione
-     * @param operatoreId account dell'operatore titolare, letto dalla scheda salvata
+     * @param operatoreId account dell'operatore titolare, oppure {@code null} se la scheda è assente
      * @throws SecurityException se l'identità è incompleta o l'attore è una OPT o un altro operatore
-     * @throws NullPointerException se {@code operatoreId} manca per un attore con identità completa
      * @see MonitoraggioApi#consultaSchedaOperatore
      */
     public static void verificaConsultazione(IdentitaAutenticata attore, UUID operatoreId) {
@@ -108,14 +106,12 @@ public final class RegoleAccessoScheda {
 
     /**
      * Valuta una politica solo su un'identità completa: un attore incompleto non ha mai accesso.
-     * Il titolare della scheda è una precondizione per un attore completo.
      */
     private static boolean consente(BiPredicate<IdentitaAutenticata, UUID> politica,
                                     IdentitaAutenticata attore, UUID operatoreId) {
         if (!identitaCompleta(attore)) {
             return false;
         }
-        Objects.requireNonNull(operatoreId, "operatoreId");
         return politica.test(attore, operatoreId);
     }
 }

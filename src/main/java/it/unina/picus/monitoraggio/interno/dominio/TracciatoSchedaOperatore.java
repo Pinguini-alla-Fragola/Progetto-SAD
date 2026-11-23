@@ -86,7 +86,12 @@ public final class TracciatoSchedaOperatore {
 
     /** Allinea i testi al limite della colonna e ai caratteri supportati dal database. */
     private static void verificaTesto(String campo, String valore, Map<String, String> errori) {
-        if (valore != null && (valore.codePointCount(0, valore.length()) > LUNGHEZZA_TESTO || valore.indexOf('\0') >= 0)) {
+        if (valore == null) {
+            return;
+        }
+        if (valore.codePoints().anyMatch(c -> c == 0 || (c >= Character.MIN_SURROGATE && c <= Character.MAX_SURROGATE))) {
+            errori.put(campo, "Usa un testo Unicode valido");
+        } else if (valore.codePointCount(0, valore.length()) > LUNGHEZZA_TESTO) {
             errori.put(campo, "Usa al massimo 255 caratteri di testo");
         }
     }
