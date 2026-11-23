@@ -15,16 +15,19 @@ select to_regclass('comunicazioni_avvisi_operativi') is not null as picus_prefli
 \gset
 \if :picus_preflight_avvisi_presenti
 
--- Riferimenti incoerenti o avvisi orfani (incompatibili con V13).
+-- Avvisi di disponibilità orfani o con riferimenti incoerenti (incompatibili con V13).
 select a.id as avviso_id, a.contatto_id, a.richiesta_id, a.destinatario_id,
        c.richiesta_id as richiesta_attesa, c.erogatore_id as destinatario_atteso
 from comunicazioni_avvisi_operativi a
 left join richieste_contatti_disponibilita c on c.id = a.contatto_id
-where c.id is null or c.richiesta_id <> a.richiesta_id or c.erogatore_id <> a.destinatario_id;
+where a.tipo = 'RICHIESTA_DISPONIBILITA'
+    and (c.id is null or c.richiesta_id <> a.richiesta_id or c.erogatore_id <> a.destinatario_id);
 
--- Duplicati per contatto e tipo (incompatibili con V13).
+-- Avvisi di disponibilità duplicati per contatto (incompatibili con V13).
 select contatto_id, tipo, count(*) as avvisi
-from comunicazioni_avvisi_operativi group by contatto_id, tipo having count(*) > 1;
+from comunicazioni_avvisi_operativi
+where tipo = 'RICHIESTA_DISPONIBILITA'
+group by contatto_id, tipo having count(*) > 1;
 
 \else
 \echo 'Avvisi operativi assenti (schema precedente a V10): i due controlli sugli avvisi non sono applicabili.'

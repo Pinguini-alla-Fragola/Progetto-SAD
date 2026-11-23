@@ -140,7 +140,7 @@ function rigaRichiesta(r, azioni, banco) {
 }
 export async function caricaAvvisi() {
     return caricaLista('assegnazioni', async () => {
-        const avvisi = await api('/api/avvisi');
+        const avvisi = (await api('/api/avvisi')).filter(avviso => avviso.tipo === 'RICHIESTA_DISPONIBILITA');
         const risultati = await Promise.allSettled(avvisi.map(a => api('/api/contatti-disponibilita/' + a.contattoId)));
         return avvisi.map((avviso, index) => {
             const risultato = risultati[index];

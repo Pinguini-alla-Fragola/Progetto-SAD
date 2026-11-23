@@ -17,7 +17,6 @@ import it.unina.picus.shared.InvioEmail;
 import it.unina.picus.utenze.api.OperazioneUtenzaNonConsentitaException;
 import it.unina.picus.utenze.api.UtenzaNonTrovataException;
 import it.unina.picus.utenze.api.UtenzeApi;
-import it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService;
 import it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService.DatiInvioAttivazione;
 import it.unina.picus.utenze.interno.applicazione.DatiOptNonValidiException;
 import it.unina.picus.utenze.interno.applicazione.RegistrazioneOptService;
@@ -29,17 +28,14 @@ import it.unina.picus.utenze.interno.applicazione.RegistrazioneOptService.EsitoR
 class RegistrazioneOptController {
 
     private final Optional<RegistrazioneOptService> registrazioneService;
-    private final Optional<AttivazioneUtenzaService> attivazioneService;
     private final Optional<InvioEmail> invioEmail;
     private final UtenzeApi utenze;
 
     RegistrazioneOptController(
             Optional<RegistrazioneOptService> registrazioneService,
-            Optional<AttivazioneUtenzaService> attivazioneService,
             Optional<InvioEmail> invioEmail,
             UtenzeApi utenze) {
         this.registrazioneService = registrazioneService;
-        this.attivazioneService = attivazioneService;
         this.invioEmail = invioEmail;
         this.utenze = utenze;
     }
@@ -107,14 +103,15 @@ class RegistrazioneOptController {
 
     @PostMapping("/{id}/reinvia-invito")
     ResponseEntity<?> reinviaInvito(@PathVariable UUID id) {
-        if (attivazioneService.isEmpty()) {
+        if (registrazioneService.isEmpty()) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(Map.of("messaggio", "Funzionalità non disponibile nel profilo skeleton"));
         }
         try {
-            DatiInvioAttivazione datiInvio = attivazioneService.get()
-                    .rigeneraTokenPerAccount(id, UtenzeApi.RuoloUtente.OPT);
+            var servizio = registrazioneService.get();
+            DatiInvioAttivazione datiInvio = servizio.preparaReinvio(id);
             EsitoInvio esitoInvio = tentaInvioAttivazione(datiInvio);
+            servizio.concludeReinvio(id, datiInvio, !esitoInvio.errore());
             if (esitoInvio.errore()) {
                 return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(Map.of(
                         "accountId", id,
