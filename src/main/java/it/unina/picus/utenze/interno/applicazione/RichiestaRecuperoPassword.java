@@ -17,8 +17,8 @@ import it.unina.picus.utenze.interno.applicazione.RecuperoPasswordService.DatiIn
 /**
  * Richiesta di recupero della password, fatta senza sessione.
  *
- * <p>La richiesta si limita ad accodare il lavoro e ritorna subito: nuovo link, invalidazione del precedente e
- * invio dell'email avvengono in secondo piano. Così la risposta ha gli stessi tempi per ogni indirizzo, sia che
+ * <p>La richiesta si limita ad accodare il lavoro e ritorna subito: nuovo link, invio dell'email e sostituzione
+ * del link precedente avvengono in secondo piano. Così la risposta ha gli stessi tempi per ogni indirizzo, sia che
  * abbia un account attivo sia che non esista, sia in attesa di attivazione o revocato, e chi non è autenticato non
  * può scoprire quali indirizzi sono registrati.</p>
  */
@@ -56,17 +56,29 @@ public class RichiestaRecuperoPassword {
     /** L'indirizzo non compare nei log: dire quale è stato scartato lo rivelerebbe a chi legge i log. */
     private void elabora(String email) {
         try {
-            recupero.emettiLink(email).ifPresent(this::consegna);
+            recupero.preparaLink(email).ifPresent(this::consegna);
         } catch (RuntimeException e) {
             LOG.warn("Richiesta di recupero password non elaborata (causa={})", e.getClass().getSimpleName());
         }
     }
 
     private void consegna(DatiInvioRecupero dati) {
+        boolean accettata = false;
         try {
             invioEmail.inviaLinkResetPassword(dati.emailDestinatario(), dati.nomeDestinatario(), dati.tokenInChiaro());
+            accettata = true;
         } catch (RuntimeException e) {
-            LOG.warn("Invio del link di recupero password non riuscito: l'utente può chiedere un nuovo link");
+            LOG.warn("Invio del link di recupero password non riuscito: restano validi i link già inviati");
+        }
+        try {
+            if (accettata) {
+                recupero.confermaConsegna(dati.idLink());
+            } else {
+                recupero.scartaLink(dati.idLink());
+            }
+        } catch (RuntimeException e) {
+            LOG.warn("Aggiornamento dei link di recupero non riuscito dopo l'invio (causa={})",
+                    e.getClass().getSimpleName());
         }
     }
 }
