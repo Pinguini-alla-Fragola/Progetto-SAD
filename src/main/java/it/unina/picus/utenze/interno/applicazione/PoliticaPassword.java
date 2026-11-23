@@ -27,7 +27,9 @@ final class PoliticaPassword {
         if (password.length() < LUNGHEZZA_MIN) {
             throw new PasswordNonValidaException("La password deve contenere almeno " + LUNGHEZZA_MIN + " caratteri.");
         }
-        if (password.getBytes(StandardCharsets.UTF_8).length > UtenzeService.LUNGHEZZA_MAX_PASSWORD_BYTE) {
+        // Un carattere vale almeno un byte: se i caratteri sono già troppi non serve convertire un testo enorme.
+        if (password.length() > UtenzeService.LUNGHEZZA_MAX_PASSWORD_BYTE
+                || password.getBytes(StandardCharsets.UTF_8).length > UtenzeService.LUNGHEZZA_MAX_PASSWORD_BYTE) {
             throw new PasswordNonValidaException("La password supera la lunghezza massima consentita di "
                     + UtenzeService.LUNGHEZZA_MAX_PASSWORD_BYTE + " byte.");
         }
