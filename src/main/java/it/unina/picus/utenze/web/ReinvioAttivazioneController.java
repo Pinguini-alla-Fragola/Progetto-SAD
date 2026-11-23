@@ -2,6 +2,7 @@ package it.unina.picus.utenze.web;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 import org.springframework.context.annotation.Profile;
@@ -57,13 +58,14 @@ class ReinvioAttivazioneController {
         if (email.length() > LUNGHEZZA_MAX_EMAIL || !EMAIL.matcher(email).matches()) {
             return emailNonValida();
         }
-        if (!limitatore.ammetti(email)) {
+        Optional<LimitatoreReinvii.Ammissione> ammissione = limitatore.ammetti(email);
+        if (ammissione.isEmpty()) {
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
                     .body(Map.of("messaggio", MESSAGGIO_TROPPE_RICHIESTE));
         }
         if (!reinvio.richiedi(email)) {
-            // La richiesta non è stata presa in carico: non conta tra quelle concesse all'indirizzo.
-            limitatore.rilascia(email);
+            // La richiesta non è stata presa in carico: si restituisce proprio il suo posto nel limite.
+            limitatore.rilascia(ammissione.get());
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(Map.of("messaggio", MESSAGGIO_SERVIZIO_OCCUPATO));
         }
