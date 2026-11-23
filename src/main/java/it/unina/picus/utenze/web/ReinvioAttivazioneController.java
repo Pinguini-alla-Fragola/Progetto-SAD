@@ -11,16 +11,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService;
-import it.unina.picus.utenze.interno.applicazione.ConsegnaLinkAttivazione;
+import it.unina.picus.utenze.interno.applicazione.ReinvioLinkSuRichiesta;
 
 /**
  * Nuovo link di attivazione chiesto da chi possiede l'indirizzo, senza sessione (link scaduto o già usato).
  *
  * <p>La risposta è la stessa per ogni indirizzo scritto correttamente, sia che l'account esista e sia in
  * attesa, sia che non esista o sia già attivo o revocato: chi non è autenticato non deve poter scoprire
- * quali indirizzi sono registrati. Per lo stesso motivo la email parte in secondo piano e la risposta non
- * aspetta la posta.</p>
+ * quali indirizzi sono registrati. Per lo stesso motivo tutto il lavoro sull'account (nuovo token e email)
+ * avviene in secondo piano ({@link ReinvioLinkSuRichiesta}): la risposta ha gli stessi tempi per ogni indirizzo.</p>
  */
 @RestController
 @Profile("!skeleton")
@@ -38,14 +37,11 @@ class ReinvioAttivazioneController {
     /** L'email resta un valore JSON generico fino al controllo del tipo: un numero o un booleano non diventano testo. */
     record RichiestaReinvio(Object email) {}
 
-    private final AttivazioneUtenzaService attivazione;
-    private final ConsegnaLinkAttivazione consegna;
+    private final ReinvioLinkSuRichiesta reinvio;
     private final LimitatoreReinvii limitatore;
 
-    ReinvioAttivazioneController(AttivazioneUtenzaService attivazione, ConsegnaLinkAttivazione consegna,
-            LimitatoreReinvii limitatore) {
-        this.attivazione = attivazione;
-        this.consegna = consegna;
+    ReinvioAttivazioneController(ReinvioLinkSuRichiesta reinvio, LimitatoreReinvii limitatore) {
+        this.reinvio = reinvio;
         this.limitatore = limitatore;
     }
 
@@ -62,7 +58,7 @@ class ReinvioAttivazioneController {
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
                     .body(Map.of("messaggio", MESSAGGIO_TROPPE_RICHIESTE));
         }
-        attivazione.rigeneraTokenPerEmail(email).ifPresent(consegna::consegnaSenzaAttendere);
+        reinvio.richiedi(email);
         return ResponseEntity.ok(Map.of("messaggio", MESSAGGIO_CONFERMA));
     }
 
