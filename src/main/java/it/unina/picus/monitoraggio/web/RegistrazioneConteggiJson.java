@@ -13,6 +13,8 @@ import it.unina.picus.monitoraggio.api.MonitoraggioApi.VoceMisura;
 /** Lettura esplicita dei campi della registrazione conteggi senza coercizione dei numeri frazionari. */
 final class RegistrazioneConteggiJson {
 
+    static final long MASSIMO_INTERO_SICURO_JS = 9_007_199_254_740_991L;
+
     private static final Set<String> CAMPI_RADICE = Set.of("anno", "trimestre", "voci");
     private static final Set<String> CAMPI_VOCE = Set.of("misuraId", "voce", "valore");
 
@@ -63,7 +65,7 @@ final class RegistrazioneConteggiJson {
                     errori.put("voci[" + i + "].voce", "Indica il codice della voce.");
                 }
 
-                Long valore = leggiLong(mappaVoce.get("valore"));
+                Long valore = leggiConteggio(mappaVoce.get("valore"));
                 if (valore == null) {
                     errori.put("voci[" + i + "].valore", "Il conteggio deve essere un numero intero non negativo.");
                 }
@@ -103,6 +105,19 @@ final class RegistrazioneConteggiJson {
             return l.intValue();
         }
         return null;
+    }
+
+    private static Long leggiConteggio(Object valore) {
+        // I client JavaScript possono inviare come testo i conteggi oltre la propria precisione intera.
+        if (valore instanceof String testo && testo.matches("[1-9][0-9]{15,18}")) {
+            try {
+                long numero = Long.parseLong(testo);
+                return numero > MASSIMO_INTERO_SICURO_JS ? numero : null;
+            } catch (NumberFormatException ex) {
+                return null;
+            }
+        }
+        return leggiLong(valore);
     }
 
     private static Long leggiLong(Object valore) {

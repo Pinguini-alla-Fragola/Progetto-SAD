@@ -4,6 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -23,7 +27,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -70,18 +73,19 @@ class MonitoraggioOptServiceTest {
 
         attivaCategorie("PERSONE_RAGGIUNTE", "MINORI");
         when(catalogo.cercaMisura(10L)).thenReturn(Optional.of(mock()));
-        when(conteggiRepo.findByOptIdAndAnnoAndTrimestreAndMisuraIdAndVoce(any(), any(int.class), any(int.class), any(long.class), any()))
-                .thenReturn(Optional.empty());
+        when(conteggiRepo.inserisciSeAssente(any(UUID.class), eq(optId), eq(2026), eq(1), eq(10L),
+                anyString(), anyLong(), eq(now))).thenReturn(1);
 
         service.registraConteggiOpt(opt, q1, List.of(
                 new VoceMisura(10L, "PERSONE_RAGGIUNTE", 42L),
                 new VoceMisura(10L, "MINORI", 15L)));
 
-        ArgumentCaptor<ConteggioOptJpa> captor = ArgumentCaptor.forClass(ConteggioOptJpa.class);
-        verify(conteggiRepo, org.mockito.Mockito.times(2)).save(captor.capture());
-        assertEquals(optId, captor.getAllValues().get(0).getOptId());
-        assertEquals(42L, captor.getAllValues().get(0).getValore());
-        assertEquals(15L, captor.getAllValues().get(1).getValore());
+        var ordine = inOrder(conteggiRepo);
+        ordine.verify(conteggiRepo).inserisciSeAssente(
+                any(UUID.class), eq(optId), eq(2026), eq(1), eq(10L), eq("MINORI"), eq(15L), eq(now));
+        ordine.verify(conteggiRepo).inserisciSeAssente(
+                any(UUID.class), eq(optId), eq(2026), eq(1), eq(10L), eq("PERSONE_RAGGIUNTE"), eq(42L), eq(now));
+        ordine.verifyNoMoreInteractions();
     }
 
     @Test
@@ -101,6 +105,8 @@ class MonitoraggioOptServiceTest {
 
         service.registraConteggiOpt(opt, q1, List.of(new VoceMisura(10L, "MINORI", 15L)));
 
+        verify(conteggiRepo).inserisciSeAssente(
+                any(UUID.class), eq(optId), eq(2026), eq(1), eq(10L), eq("MINORI"), eq(15L), eq(now));
         verify(conteggiRepo, never()).save(any());
     }
 
@@ -119,7 +125,7 @@ class MonitoraggioOptServiceTest {
 
         assertTrue(ex.campi().containsKey("voci[0].voce"));
         assertTrue(ex.campi().containsKey("voci[0].valore"));
-        verify(conteggiRepo, never()).save(any());
+        verifyNoInteractions(conteggiRepo);
     }
 
     @Test
@@ -134,7 +140,7 @@ class MonitoraggioOptServiceTest {
 
         ConteggioOptJpa r1 = new ConteggioOptJpa(UUID.randomUUID(), optId, 2026, 1, 10L, "PERSONE_RAGGIUNTE", 20L, now);
         ConteggioOptJpa r2 = new ConteggioOptJpa(UUID.randomUUID(), optId, 2026, 2, 10L, "PERSONE_RAGGIUNTE", 30L, now);
-        when(conteggiRepo.cercaNelPeriodo(optId, 20261, 20262)).thenReturn(List.of(r1, r2));
+        when(conteggiRepo.cercaNelPeriodo(optId, 2026, 1, 2026, 2)).thenReturn(List.of(r1, r2));
 
         List<ConteggioOpt> risultato = service.consultaConteggiOpt(
                 opt, optId, new Trimestre(2026, 1), new Trimestre(2026, 2));

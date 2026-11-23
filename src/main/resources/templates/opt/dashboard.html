@@ -74,7 +74,7 @@
                 <div role="tabpanel" id="conteggi-view-compila" aria-labelledby="conteggi-tab-compila" tabindex="0">
                     <h2 class="picus-card-title">Conteggi trimestrali</h2><form id="conteggi" class="picus-form form-layout">
                     <fieldset class="form-section"><legend>Periodo</legend><div class="form-section-content"><div class="picus-fields fields-period">
-                        <label class="campo ">Anno<input class="form-control" name="anno" type="number" required min="2000" max="9999" data-anno></label>
+                        <label class="campo ">Anno<input class="form-control" name="anno" type="number" required min="2000" max="2100" data-anno></label>
                         <label class="campo ">Trimestre<select class="form-control" name="trimestre" required ><option value="1">1º trimestre</option><option value="2">2º trimestre</option><option value="3">3º trimestre</option><option value="4">4º trimestre</option></select></label>
                     </div></div></fieldset><fieldset class="form-section"><legend>Misura</legend><div class="form-section-content"><div class="picus-fields fields-one">
                     <label class="campo "><span class="sr-only">Misura</span><select class="form-control" name="misuraId" required data-misure-storiche></select></label>
@@ -85,12 +85,13 @@
                 <div role="tabpanel" id="conteggi-view-inviati" aria-labelledby="conteggi-tab-inviati" tabindex="0" hidden>
                     <h2 class="sr-only">Invii registrati</h2><form id="filtro-conteggi-opt" class="picus-form form-layout">
                     <div class="picus-fields fields-period">
-                        <label class="campo ">Anno inizio<input class="form-control" name="anno" type="number" required min="2000" max="9999" data-anno></label>
+                        <label class="campo ">Anno inizio<input class="form-control" name="anno" type="number" required min="2000" max="2100" data-anno></label>
                         <label class="campo ">Trimestre inizio<select class="form-control" name="trimestre" required ><option value="1">1º trimestre</option><option value="2">2º trimestre</option><option value="3">3º trimestre</option><option value="4">4º trimestre</option></select></label>
-                        <label class="campo ">Anno fine (opz.)<input class="form-control" name="annoFine" type="number" min="2000" max="9999"></label>
-                        <label class="campo ">Trimestre fine<select class="form-control" name="trimestreFine" ><option value="">Stesso trimestre</option><option value="1">1º trimestre</option><option value="2">2º trimestre</option><option value="3">3º trimestre</option><option value="4">4º trimestre</option></select></label>
+                        <label class="campo ">Anno fine (opz.)<input class="form-control" name="annoFine" type="number" min="2000" max="2100"></label>
+                        <label class="campo ">Trimestre fine<select class="form-control" name="trimestreFine" ><option value="">Seleziona</option><option value="1">1º trimestre</option><option value="2">2º trimestre</option><option value="3">3º trimestre</option><option value="4">4º trimestre</option></select></label>
                     </div>
-                    <div class="form-submit"><button class="btn btn-secondary btn-sm" type="submit">Consulta conteggi</button></div>
+                    <p class="form-text">Per consultare un solo trimestre lascia vuoti entrambi i campi finali.</p>
+                    <div class="form-submit"><button class="btn btn-secondary btn-sm" type="submit">Consulta conteggi</button><p class="picus-esito" role="status"></p></div>
                 </form><div class="picus-list" id="conteggi-lista" aria-live="polite"></div>
                 </div>
             </div>

@@ -3,6 +3,7 @@ package it.unina.picus.monitoraggio.interno.applicazione;
 import java.math.BigInteger;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -128,7 +129,11 @@ public class MonitoraggioOptService implements ConteggiOptApi {
         Instant adesso = Instant.now(clock);
         UUID optId = attore.accountId();
 
-        for (VoceMisura item : conteggi) {
+        // Invii equivalenti acquisiscono i lock delle voci nello stesso ordine.
+        var vociOrdinate = conteggi.stream()
+                .sorted(Comparator.comparingLong(VoceMisura::misuraId).thenComparing(voce -> voce.voce().trim()))
+                .toList();
+        for (VoceMisura item : vociOrdinate) {
             String voce = item.voce().trim();
             int inseriti = conteggiRepo.inserisciSeAssente(
                     UUID.randomUUID(), optId, trimestre.anno(), trimestre.numero(),

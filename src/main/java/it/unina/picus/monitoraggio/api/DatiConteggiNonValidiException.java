@@ -7,6 +7,7 @@ import java.util.Map;
  * sintattici o di dominio del tracciato.
  */
 public class DatiConteggiNonValidiException extends IllegalArgumentException {
+    /** Messaggi di validazione indicizzati per campo. */
     private final Map<String, String> campi;
 
     /**

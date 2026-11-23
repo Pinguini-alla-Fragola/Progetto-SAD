@@ -1,6 +1,29 @@
 import { api } from './area-client.js';
 import { renderList } from './list-view.js';
 
+const MASSIMO_CONTEGGIO = 9_223_372_036_854_775_807n;
+
+export function valoreConteggio(testo) {
+    if (!/^[0-9]{1,19}$/.test(testo)) {
+        throw new Error('Inserisci un conteggio intero non negativo con al massimo 19 cifre.');
+    }
+    const valore = BigInt(testo);
+    if (valore > MASSIMO_CONTEGGIO) {
+        throw new Error('Il conteggio supera il limite di 9223372036854775807.');
+    }
+    return valore <= BigInt(Number.MAX_SAFE_INTEGER) ? Number(valore) : valore.toString();
+}
+
+export function aggiungiFinePeriodo(params, annoFine, trimestreFine) {
+    if (Boolean(annoFine) !== Boolean(trimestreFine)) {
+        throw new Error("Indica sia l'anno sia il trimestre finale.");
+    }
+    if (annoFine) {
+        params.set('annoFine', annoFine);
+        params.set('trimestreFine', trimestreFine);
+    }
+}
+
 export async function initConteggiOpt(area) {
     const utenteId = document.body.dataset.utente;
     let categorie = [];
@@ -97,10 +120,10 @@ export async function initConteggiOpt(area) {
             labelVal.className = 'campo';
             const input = document.createElement('input');
             input.className = 'form-control';
-            input.type = 'number';
+            input.type = 'text';
             input.name = 'valore';
-            input.min = '0';
-            input.step = '1';
+            input.inputMode = 'numeric';
+            input.pattern = '[0-9]+';
             input.required = true;
             labelVal.append(input);
 
@@ -123,14 +146,13 @@ export async function initConteggiOpt(area) {
             const anno = Number(form.elements.anno.value);
             const trimestre = Number(form.elements.trimestre.value);
             const misuraId = Number(form.elements.misuraId.value);
-            const righe = Array.from(contenitoreVoci.querySelectorAll('.count-row')).map(r => ({
-                misuraId,
-                voce: r.querySelector('select[name="voce"]').value,
-                valore: Number(r.querySelector('input[name="valore"]').value)
-            }));
-
             submitBtn.disabled = true;
             try {
+                const righe = Array.from(contenitoreVoci.querySelectorAll('.count-row')).map(r => ({
+                    misuraId,
+                    voce: r.querySelector('select[name="voce"]').value,
+                    valore: valoreConteggio(r.querySelector('input[name="valore"]').value)
+                }));
                 await api('/api/monitoraggio/conteggi-opt', {
                     method: 'POST',
                     body: { anno, trimestre, voci: righe }
@@ -150,10 +172,7 @@ export async function initConteggiOpt(area) {
 
         const aggiornaListaOpt = async (anno, trimestre, annoFine, trimestreFine) => {
             const params = new URLSearchParams({ optId: utenteId, anno, trimestre });
-            if (annoFine && trimestreFine) {
-                params.set('annoFine', annoFine);
-                params.set('trimestreFine', trimestreFine);
-            }
+            aggiungiFinePeriodo(params, annoFine, trimestreFine);
             const dati = await api(`/api/monitoraggio/conteggi-opt?${params.toString()}`);
             renderRigheConteggi(listaEl, dati, false);
         };
@@ -164,7 +183,13 @@ export async function initConteggiOpt(area) {
             const trimestre = filtroForm.elements.trimestre.value;
             const annoFine = filtroForm.elements.annoFine.value;
             const trimestreFine = filtroForm.elements.trimestreFine.value;
-            await aggiornaListaOpt(anno, trimestre, annoFine, trimestreFine);
+            const esito = filtroForm.querySelector('.picus-esito');
+            esito.textContent = '';
+            try {
+                await aggiornaListaOpt(anno, trimestre, annoFine, trimestreFine);
+            } catch (err) {
+                esito.textContent = err.message;
+            }
         });
     }
 
@@ -183,12 +208,8 @@ export async function initConteggiOpt(area) {
             const trimestreFine = formBanco.elements.trimestreFine.value;
 
             const params = new URLSearchParams({ anno, trimestre });
-            if (annoFine && trimestreFine) {
-                params.set('annoFine', annoFine);
-                params.set('trimestreFine', trimestreFine);
-            }
-
             try {
+                aggiungiFinePeriodo(params, annoFine, trimestreFine);
                 const dati = await api(`/api/monitoraggio/conteggi-opt?${params.toString()}`);
                 renderRigheConteggi(listaBanco, dati, true);
             } catch (err) {

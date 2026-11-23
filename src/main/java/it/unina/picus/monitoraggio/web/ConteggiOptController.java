@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import it.unina.picus.monitoraggio.api.ConteggiOptApi;
 import it.unina.picus.monitoraggio.api.ConteggiOptApi.CategoriaVoce;
+import it.unina.picus.monitoraggio.api.DatiConteggiNonValidiException;
 import it.unina.picus.monitoraggio.api.MonitoraggioApi.ConteggioOpt;
 import it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
@@ -44,7 +45,7 @@ class ConteggiOptController {
     }
 
     @GetMapping("/conteggi-opt")
-    List<ConteggioOpt> consultaConteggi(
+    List<ConteggioJson> consultaConteggi(
             @RequestParam(required = false) UUID optId,
             @RequestParam int anno,
             @RequestParam int trimestre,
@@ -52,11 +53,29 @@ class ConteggiOptController {
             @RequestParam(required = false) Integer trimestreFine,
             IdentitaAutenticata attore) {
 
+        if ((annoFine == null) != (trimestreFine == null)) {
+            throw new DatiConteggiNonValidiException("Indica sia l'anno sia il trimestre finale.",
+                    annoFine == null ? Map.of("annoFine", "Indica l'anno finale.")
+                            : Map.of("trimestreFine", "Indica il trimestre finale."));
+        }
         Trimestre da = new Trimestre(anno, trimestre);
-        Trimestre a = (annoFine != null && trimestreFine != null)
-                ? new Trimestre(annoFine, trimestreFine)
-                : da;
+        Trimestre a = annoFine == null ? da : new Trimestre(annoFine, trimestreFine);
 
-        return monitoraggio.consultaConteggiOpt(attore, optId, da, a);
+        return monitoraggio.consultaConteggiOpt(attore, optId, da, a).stream()
+                .map(ConteggioJson::da)
+                .toList();
     }
+
+    record ConteggioJson(UUID optId, VoceJson conteggio) {
+        private static ConteggioJson da(ConteggioOpt risultato) {
+            var voce = risultato.conteggio();
+            long valore = voce.valore();
+            // Conserva i numeri JSON già esatti e trasmette gli interi più grandi come testo decimale.
+            Object valoreJson = valore > RegistrazioneConteggiJson.MASSIMO_INTERO_SICURO_JS
+                    ? Long.toString(valore) : valore;
+            return new ConteggioJson(risultato.optId(), new VoceJson(voce.misuraId(), voce.voce(), valoreJson));
+        }
+    }
+
+    record VoceJson(long misuraId, String voce, Object valore) {}
 }

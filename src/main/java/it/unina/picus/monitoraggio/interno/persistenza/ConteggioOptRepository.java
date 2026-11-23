@@ -5,13 +5,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import jakarta.persistence.LockModeType;
+
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface ConteggioOptRepository extends JpaRepository<ConteggioOptJpa, UUID> {
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<ConteggioOptJpa> findByOptIdAndAnnoAndTrimestreAndMisuraIdAndVoce(
             UUID optId, int anno, int trimestre, long misuraId, String voce);
 
