@@ -3,6 +3,7 @@ import { setupWorkspace } from './workspace.js';
 import { renderList } from './list-view.js';
 import { caricaRichieste, caricaAvvisi, caricaCatalogo } from './richieste-area.js';
 import { segnalaFunzioniInattive } from './funzioni-inattive.js';
+import { initConteggiOpt } from './conteggi-opt.js';
 
 const byId = id => document.getElementById(id);
 const area = document.body.dataset.area;
@@ -129,7 +130,7 @@ if (utenti) {
     renderList(utenti, righeUtenti, opzioniUtenti);
 }
 
-for (const contenitore of document.querySelectorAll('#voci-conteggi, #voci-scheda')) {
+for (const contenitore of document.querySelectorAll('#voci-scheda')) {
     const riga = document.createElement('div');
     riga.className = 'count-row';
     for (const [label, type] of [['Voce', 'text'], ['Conteggio', 'number']]) {
@@ -186,7 +187,7 @@ if (formNuovaOpt) {
     });
 }
 
-const lavori = [];
+const lavori = [initConteggiOpt(area)];
 if (area === 'banco') lavori.push(caricaRichieste(area), caricaCatalogo());
 else {
     lavori.push(caricaAvvisi());
