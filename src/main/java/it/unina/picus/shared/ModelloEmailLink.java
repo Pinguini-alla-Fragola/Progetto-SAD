@@ -14,7 +14,7 @@ final class ModelloEmailLink {
     /** Oggetto e corpo dell'email nelle due versioni. */
     record Contenuto(String oggetto, String testo, String html) {}
 
-    /** Durata scritta nelle regole degli accessi; è anche il valore di partenza di {@code picus.utenze.recupero.validita}. */
+    /** Durata scritta nelle regole degli accessi: è la stessa con cui scade il link, che non è configurabile. */
     private static final int VALIDITA_RECUPERO_MINUTI = 15;
 
     private ModelloEmailLink() {

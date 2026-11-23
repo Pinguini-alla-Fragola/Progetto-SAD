@@ -74,7 +74,8 @@ public class AttivazioneUtenzaService {
     /**
      * Genera un nuovo token monouso per un account in attesa di attivazione,
      * invalida eventuali token precedenti ancora attivi sotto lock e restituisce
-     * i dati per la consegna post-commit.
+     * i dati per la consegna post-commit. L'account deve essere appena inserito
+     * nella transazione corrente oppure già bloccato dal chiamante.
      */
     public DatiInvioAttivazione preparaTokenAttivazione(AccountJpa account) {
         Objects.requireNonNull(account, "account obbligatorio");
@@ -91,29 +92,22 @@ public class AttivazioneUtenzaService {
             tokens.saveAllAndFlush(precedenti);
         }
 
-        String tokenInChiaro = TokenMonouso.genera();
-        String tokenHash = TokenMonouso.impronta(tokenInChiaro);
-
-        TokenAttivazioneJpa nuovoToken = new TokenAttivazioneJpa(
-                UUID.randomUUID(),
-                account.getId(),
-                tokenHash,
-                ora.plus(durataValidita),
-                ora
-        );
-        tokens.saveAndFlush(nuovoToken);
-
-        return new DatiInvioAttivazione(account.getEmail(), account.getNome(), tokenInChiaro);
+        return creaToken(account, ora, false);
     }
 
     /**
      * Rigenera un token monouso per un account del ruolo atteso ancora in attesa di attivazione.
      *
      * <p>Mantiene lo stesso ordine dei lock di {@link #attivaAccount} e {@code UtenzeService.revocaAccount}
-     * (prima i token pendenti, poi l'account) e rilegge i token attivi dopo l'acquisizione del lock
+     * (prima l'account, poi i token pendenti) e rilegge i token attivi dopo l'acquisizione del lock
      * sull'account per serializzare eventuali reinvii concorrenti ed evitare doppi token attivi.</p>
      */
     public DatiInvioAttivazione rigeneraTokenPerAccount(UUID accountId, RuoloUtente ruoloAtteso) {
+        AccountJpa account = bloccaAccountPerReinvio(accountId, ruoloAtteso);
+        return preparaTokenAttivazione(account);
+    }
+
+    private AccountJpa bloccaAccountPerReinvio(UUID accountId, RuoloUtente ruoloAtteso) {
         if (accountId == null) {
             throw new UtenzaNonTrovataException("Identificativo account obbligatorio.");
         }
@@ -132,30 +126,7 @@ public class AttivazioneUtenzaService {
             throw new OperazioneUtenzaNonConsentitaException("L'account non è in attesa di attivazione.");
         }
 
-        // 3. Blocca e invalida tutti i token ancora attivi (ordine: account -> token)
-        List<TokenAttivazioneJpa> precedenti = tokens.findAttiviByAccountIdForUpdate(accountId);
-        Instant ora = Instant.now(clock);
-        for (TokenAttivazioneJpa vecchio : precedenti) {
-            if (!vecchio.isUsato()) {
-                vecchio.segnaComeUsato(ora);
-            }
-        }
-        if (!precedenti.isEmpty()) {
-            tokens.saveAllAndFlush(precedenti);
-        }
-
-        String tokenInChiaro = TokenMonouso.genera();
-        String tokenHash = TokenMonouso.impronta(tokenInChiaro);
-        TokenAttivazioneJpa nuovoToken = new TokenAttivazioneJpa(
-                UUID.randomUUID(),
-                account.getId(),
-                tokenHash,
-                ora.plus(durataValidita),
-                ora
-        );
-        tokens.saveAndFlush(nuovoToken);
-
-        return new DatiInvioAttivazione(account.getEmail(), account.getNome(), tokenInChiaro);
+        return account;
     }
 
     /**
@@ -184,7 +155,7 @@ public class AttivazioneUtenzaService {
     }
 
     /**
-     * Consuma il token monouso in modo atomico (ordine lock: prima token, poi account),
+     * Consuma il token monouso in modo atomico (ordine lock: prima account, poi token),
      * rilegge stato e scadenza sotto lock, imposta l'hash BCrypt della nuova password
      * e attiva l'account.
      */
@@ -197,9 +168,8 @@ public class AttivazioneUtenzaService {
 
         String hash = TokenMonouso.impronta(tokenInChiaro.strip());
 
-        // 1. Risoluzione senza lock per individuare l'account da serializzare
-        UUID accountId = tokens.findByTokenHash(hash)
-                .map(TokenAttivazioneJpa::getAccountId)
+        // Legge solo l'accountId: il token entra nel contesto JPA dopo il lock dell'account.
+        UUID accountId = tokens.findAccountIdByTokenHash(hash)
                 .orElseThrow(() -> new TokenAttivazioneNonValidoException("Link di attivazione non valido."));
 
         // 2. Ordine unico di lock: prima AccountJpa, poi TokenAttivazioneJpa
@@ -225,5 +195,54 @@ public class AttivazioneUtenzaService {
         account.attivaConPassword(passwordEncoder.encode(nuovaPassword));
         tokens.saveAndFlush(token);
         accounts.saveAndFlush(account);
+    }
+
+    /**
+     * Crea il link di un tentativo di consegna con l'account già bloccato dalla coda.
+     * I tentativi precedenti possono aver già raggiunto la casella del destinatario.
+     */
+    DatiInvioAttivazione preparaTokenImportazioneOpt(AccountJpa account) {
+        return creaToken(account, Instant.now(clock), true);
+    }
+
+    DatiInvioAttivazione preparaReinvioOpt(UUID accountId) {
+        AccountJpa account = bloccaAccountPerReinvio(accountId, RuoloUtente.OPT);
+        return creaToken(account, Instant.now(clock), false);
+    }
+
+    void concludeReinvioOpt(UUID accountId, DatiInvioAttivazione dati, boolean riuscito) {
+        var account = accounts.findByIdForUpdate(accountId);
+        if (account.isEmpty() || !StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(account.get().getStato())) {
+            return;
+        }
+
+        String hash = TokenMonouso.impronta(dati.tokenInChiaro());
+        var attivi = tokens.findAttiviByAccountIdForUpdate(accountId);
+        var tokenInviato = attivi.stream().filter(token -> token.getTokenHash().equals(hash)).findFirst();
+        if (tokenInviato.isEmpty()) {
+            return;
+        }
+
+        var inviato = tokenInviato.get();
+        Instant ora = Instant.now(clock);
+        if (!riuscito) {
+            inviato.segnaComeUsato(ora);
+            return;
+        }
+
+        // Anche i link CSV preparati durante l'invio manuale sono sostituiti.
+        attivi.stream()
+                .filter(token -> token.isDaImportazioneOpt() || token.getOrdineEmissione() < inviato.getOrdineEmissione())
+                .forEach(token -> token.segnaComeUsato(ora));
+    }
+
+    private DatiInvioAttivazione creaToken(AccountJpa account, Instant ora, boolean daImportazioneOpt) {
+        // L'inserimento dell'account o il suo lock serializza le emissioni anche su più istanze.
+        long ordineEmissione = tokens.ultimoOrdineEmissione(account.getId()) + 1;
+        String tokenInChiaro = TokenMonouso.genera();
+        tokens.saveAndFlush(new TokenAttivazioneJpa(
+                UUID.randomUUID(), account.getId(), TokenMonouso.impronta(tokenInChiaro),
+                ora.plus(durataValidita), ora, daImportazioneOpt, ordineEmissione));
+        return new DatiInvioAttivazione(account.getEmail(), account.getNome(), tokenInChiaro);
     }
 }

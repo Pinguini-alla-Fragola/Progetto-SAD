@@ -106,6 +106,7 @@ class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/opt", "/api/opt/*/revoca", "/api/opt/*/reinvia-invito", "/api/operatori/*/revoca").hasRole("BANCO")
                         .requestMatchers(HttpMethod.POST, "/api/richieste").hasRole("OPT")
                         .requestMatchers(HttpMethod.GET, "/api/richieste/mie").hasRole("OPT")
+                        .requestMatchers(HttpMethod.POST, "/api/opt/importazioni").hasRole("BANCO")
                         .requestMatchers(HttpMethod.GET, "/api/contatti-disponibilita/*").hasAnyRole("OPT", "OPERATORE")
                         .requestMatchers(HttpMethod.POST, "/api/contatti-disponibilita/*/risposta").hasAnyRole("OPT", "OPERATORE")
                         .requestMatchers(HttpMethod.POST, "/api/richieste/*/presa-in-carico",
@@ -114,6 +115,9 @@ class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/richieste/coda", "/api/richieste/*/candidati",
                                 "/api/richieste/*/contatti", "/api/richieste/*/contatti/*").hasRole("BANCO")
                         .requestMatchers(HttpMethod.POST, "/api/utenze/operatori").hasRole("BANCO")
+                        .requestMatchers(HttpMethod.GET, "/api/catalogo/offerte-opt/*").hasAnyRole("OPT", "BANCO")
+                        .requestMatchers(HttpMethod.HEAD, "/api/catalogo/offerte-opt/*").hasAnyRole("OPT", "BANCO")
+                        .requestMatchers("/api/catalogo/offerte-opt/misure/*").hasRole("OPT")
                         .requestMatchers(HttpMethod.GET, "/api/catalogo/misure/tutte").hasRole("BANCO")
                         .requestMatchers(HttpMethod.POST, "/api/catalogo/misure",
                                 "/api/catalogo/misure/*/disattivazione").hasRole("BANCO")
@@ -127,6 +131,11 @@ class SecurityConfig {
                         .requestMatchers("/banco/**").hasRole("BANCO")
                         .requestMatchers("/opt/**").hasRole("OPT")
                         .requestMatchers("/operatore/**").hasRole("OPERATORE")
+                        .requestMatchers("/api/monitoraggio/schede-operatore",
+                                "/api/monitoraggio/schede-operatore/modulo",
+                                "/api/monitoraggio/schede-operatore/mie").hasRole("OPERATORE")
+                        .requestMatchers("/api/monitoraggio/schede-operatore/ricevute").hasRole("BANCO")
+                        .requestMatchers("/api/monitoraggio/schede-operatore/*").hasAnyRole("BANCO", "OPERATORE")
                         .anyRequest().authenticated())
                 .exceptionHandling(eccezioni -> eccezioni
                         .authenticationEntryPoint(NON_AUTENTICATO)
