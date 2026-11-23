@@ -4,7 +4,7 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * Regola concordata per le password: la stessa all'attivazione e al recupero, così una password accettata in un
- * caso non viene rifiutata nell'altro. Almeno 12 caratteri; al massimo 72 byte, il limite oltre il quale BCrypt
+ * caso non viene rifiutata nell'altro. Almeno 12 caratteri Unicode; al massimo 72 byte, il limite oltre il quale BCrypt
  * ignorerebbe il resto della password.
  */
 final class PoliticaPassword {
@@ -24,7 +24,8 @@ final class PoliticaPassword {
         if (password == null || password.isBlank()) {
             throw new PasswordNonValidaException("La password è obbligatoria.");
         }
-        if (password.length() < LUNGHEZZA_MIN) {
+        // Si contano i caratteri Unicode, non le unità UTF-16: un simbolo fuori dal piano base ne vale due.
+        if (password.codePointCount(0, password.length()) < LUNGHEZZA_MIN) {
             throw new PasswordNonValidaException("La password deve contenere almeno " + LUNGHEZZA_MIN + " caratteri.");
         }
         // Un carattere vale almeno un byte: se i caratteri sono già troppi non serve convertire un testo enorme.
