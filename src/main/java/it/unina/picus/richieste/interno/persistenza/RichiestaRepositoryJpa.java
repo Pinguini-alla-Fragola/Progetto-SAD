@@ -24,6 +24,24 @@ public class RichiestaRepositoryJpa implements RichiestaRepository {
     }
 
     @Override
+    public List<RichiestaDiMisura> cercaPerAggiornamentoDaErogatore(UUID erogatoreId) {
+        if (erogatoreId == null) {
+            return List.of();
+        }
+        var entita = entityManager.createQuery("""
+                select r from RichiestaJpa r
+                where r.erogatoreId = :erogatore
+                  and r.stato in :stati
+                order by r.id
+                """, RichiestaJpa.class)
+                .setParameter("erogatore", erogatoreId)
+                .setParameter("stati", List.of(StatoRichiesta.IN_PROGRAMMAZIONE, StatoRichiesta.CONFERMATA))
+                .setLockMode(LockModeType.PESSIMISTIC_WRITE)
+                .getResultList();
+        entita.forEach(r -> entityManager.refresh(r, LockModeType.PESSIMISTIC_WRITE));
+        return entita.stream().map(RichiestaJpa::aDominio).toList();
+    }
+    @Override
     public RichiestaDiMisura registra(RichiestaDiMisura richiesta) {
         int inserite = entityManager.createNativeQuery("""
                 insert into richieste

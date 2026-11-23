@@ -40,6 +40,15 @@ public interface RichiesteApi extends InvioRichiesteApi, CoordinamentoRichiesteA
     RichiestaSintesi invia(IdentitaAutenticata attore, DatiInvio dati, UUID riferimentoInvio);
 
     /**
+     * Annulla automaticamente le richieste {@link StatoRichiesta#IN_PROGRAMMAZIONE} o
+     * {@link StatoRichiesta#CONFERMATA} assegnate all'erogatore revocato, registra la revoca
+     * come motivo e avvisa i soggetti coinvolti (Banco, OPT titolare ed erogatore assegnato).
+     *
+     * @param erogatoreId identificativo dell'account OPT o Operatore revocato
+     * @return numero di richieste annullate
+     */
+    int annullaRichiestePerRevocaErogatore(UUID erogatoreId);
+    /**
      * Elenca le richieste inviate dalla OPT autenticata.
      *
      * @param attore identità verificata della OPT titolare

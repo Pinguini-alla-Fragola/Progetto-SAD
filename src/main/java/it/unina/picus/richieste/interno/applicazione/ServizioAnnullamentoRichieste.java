@@ -21,6 +21,10 @@ import org.springframework.transaction.annotation.Transactional;
 /** Service Layer per registrare l'annullamento e consegnare gli avvisi nella stessa transazione. */
 @Service
 public class ServizioAnnullamentoRichieste {
+
+    /** Motivo registrato automaticamente quando il Banco revoca l'utenza dell'erogatore assegnato (#67). */
+    public static final String MOTIVO_REVOCA_EROGATORE = "Revoca dell'utenza dell'erogatore assegnato";
+
     private final RichiestaRepository richieste;
     private final InvioRichiesteApi consultazione;
     private final UtenzeApi utenze;
@@ -35,7 +39,7 @@ public class ServizioAnnullamentoRichieste {
      * @param avvisi scrittura degli avvisi operativi
      */
     public ServizioAnnullamentoRichieste(RichiestaRepository richieste, InvioRichiesteApi consultazione,
-            UtenzeApi utenze, AvvisiAnnullamentoApi avvisi) {
+                                         UtenzeApi utenze, AvvisiAnnullamentoApi avvisi) {
         this.richieste = richieste;
         this.consultazione = consultazione;
         this.utenze = utenze;
@@ -69,6 +73,34 @@ public class ServizioAnnullamentoRichieste {
             avvisi.avvisaAnnullamento(richiestaId, destinatari(soggetti));
         }
         return consultazione.consultaRichiesta(attore, richiestaId).richiesta();
+    }
+
+    /**
+     * Annulla automaticamente le pratiche In programmazione o Confermate assegnate
+     * all'erogatore revocato, registra la revoca come motivo e invia gli avvisi
+     * nella stessa transazione (#67).
+     *
+     * @param erogatoreId identificativo dell'utenza OPT o Operatore revocata
+     * @return numero di richieste effettivamente annullate
+     * @see RichiesteApi#annullaRichiestePerRevocaErogatore(UUID)
+     */
+    @Transactional
+    public int annullaRichiestePerRevocaErogatore(UUID erogatoreId) {
+        if (erogatoreId == null) {
+            return 0;
+        }
+        var daAnnullare = richieste.cercaPerAggiornamentoDaErogatore(erogatoreId);
+        int annullate = 0;
+        for (var richiesta : daAnnullare) {
+            var annullata = richiesta.annulla(MOTIVO_REVOCA_EROGATORE);
+            if (!annullata.equals(richiesta)) {
+                richieste.aggiorna(annullata);
+                var soggetti = new Soggetti(richiesta.titolareId(), richiesta.erogatoreId());
+                avvisi.avvisaAnnullamento(richiesta.id(), destinatari(soggetti));
+                annullate++;
+            }
+        }
+        return annullate;
     }
 
     /** {@return account del Banco, della OPT titolare e dell'eventuale erogatore assegnato} */
