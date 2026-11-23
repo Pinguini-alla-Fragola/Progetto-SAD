@@ -91,8 +91,11 @@
                         <label class="campo ">Trimestre fine<select class="form-control" name="trimestreFine" ><option value="">Seleziona</option><option value="1">1º trimestre</option><option value="2">2º trimestre</option><option value="3">3º trimestre</option><option value="4">4º trimestre</option></select></label>
                     </div>
                     <p class="form-text">Per consultare un solo trimestre lascia vuoti entrambi i campi finali.</p>
-                    <div class="form-submit"><button class="btn btn-secondary btn-sm" type="submit">Consulta conteggi</button><p class="picus-esito" role="status"></p></div>
-                </form><div class="picus-list" id="conteggi-lista" aria-live="polite"></div>
+                    <div class="form-submit"><button class="btn btn-secondary btn-sm" type="submit">Consulta conteggi</button></div>
+                </form>
+                <p class="picus-esito" id="conteggi-lettura-esito" role="status"></p>
+                <button class="btn btn-secondary btn-sm" id="conteggi-riprova" type="button" aria-controls="conteggi-lista" hidden>Riprova la consultazione</button>
+                <div class="picus-list" id="conteggi-lista" aria-live="polite"></div>
                 </div>
             </div>
         </section>

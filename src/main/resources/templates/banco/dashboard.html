@@ -213,8 +213,11 @@
                     <label class="campo ">Anno (facoltativo)<input class="form-control" name="annoFine" type="number" min="2000" max="2100"></label>
                     <label class="campo ">Trimestre<select class="form-control" name="trimestreFine" ><option value="">Seleziona</option><option value="1">1º trimestre</option><option value="2">2º trimestre</option><option value="3">3º trimestre</option><option value="4">4º trimestre</option></select></label>
                 </div></div></fieldset><p class="form-text">Per consultare un solo trimestre lascia vuoti entrambi i campi finali.</p>
-                    <div class="form-submit"><button class="btn btn-primary" type="submit">Consulta il monitoraggio</button><p class="picus-esito" role="status"></p></div>
-                </form><div class="picus-list" id="riepilogo-opt-lista" aria-live="polite"></div>
+                    <div class="form-submit"><button class="btn btn-primary" type="submit">Consulta il monitoraggio</button></div>
+                </form>
+                <p class="picus-esito" id="riepilogo-opt-esito" role="status"></p>
+                <button class="btn btn-secondary btn-sm" id="riepilogo-opt-riprova" type="button" aria-controls="riepilogo-opt-lista" hidden>Riprova la consultazione</button>
+                <div class="picus-list" id="riepilogo-opt-lista" aria-live="polite"></div>
                 </div>
             </div>
         </section>

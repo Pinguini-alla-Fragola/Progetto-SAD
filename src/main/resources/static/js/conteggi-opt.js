@@ -82,6 +82,60 @@ export async function initConteggiOpt(area) {
         });
     };
 
+    const collegaConsultazione = (form, lista, esito, riprova, mostraOpt) => {
+        let progressivo = 0;
+        let ultimoPeriodo;
+
+        const consulta = async periodo => {
+            const richiesta = ++progressivo;
+            ultimoPeriodo = periodo;
+            esito.textContent = '';
+            riprova.hidden = true;
+            lista.hidden = true;
+
+            const { anno, trimestre, annoFine, trimestreFine } = periodo;
+            const params = new URLSearchParams({ anno, trimestre });
+            if (!mostraOpt) params.set('optId', utenteId);
+            try {
+                aggiungiFinePeriodo(params, annoFine, trimestreFine);
+            } catch (err) {
+                esito.textContent = err.message;
+                return;
+            }
+
+            try {
+                const dati = await api(`/api/monitoraggio/conteggi-opt?${params}`);
+                if (richiesta !== progressivo) return;
+                renderRigheConteggi(lista, dati, mostraOpt);
+                lista.hidden = false;
+            } catch (err) {
+                if (richiesta !== progressivo) return;
+                esito.textContent = err.message;
+                riprova.hidden = false;
+            }
+        };
+
+        form.addEventListener('submit', event => {
+            event.preventDefault();
+            return consulta({
+                anno: form.elements.anno.value,
+                trimestre: form.elements.trimestre.value,
+                annoFine: form.elements.annoFine.value,
+                trimestreFine: form.elements.trimestreFine.value
+            });
+        });
+        riprova.addEventListener('click', () => consulta(ultimoPeriodo));
+
+        return (anno, trimestre) => {
+            if (ultimoPeriodo) return consulta(ultimoPeriodo);
+            form.elements.anno.value = anno;
+            form.elements.trimestre.value = trimestre;
+            form.elements.annoFine.value = '';
+            form.elements.trimestreFine.value = '';
+            return consulta({ anno, trimestre });
+        };
+    };
+
     if (area === 'opt') {
         const form = document.getElementById('conteggi');
         const contenitoreVoci = document.getElementById('voci-conteggi');
@@ -137,6 +191,14 @@ export async function initConteggiOpt(area) {
         }
         btnAggiungi?.addEventListener('click', aggiungiRigaVoce);
 
+        const aggiornaListaOpt = collegaConsultazione(
+            document.getElementById('filtro-conteggi-opt'),
+            document.getElementById('conteggi-lista'),
+            document.getElementById('conteggi-lettura-esito'),
+            document.getElementById('conteggi-riprova'),
+            false
+        );
+
         form?.addEventListener('submit', async event => {
             event.preventDefault();
             const esito = form.querySelector('.picus-esito');
@@ -157,64 +219,25 @@ export async function initConteggiOpt(area) {
                     method: 'POST',
                     body: { anno, trimestre, voci: righe }
                 });
-                esito.textContent = 'Conteggi trimestrali salvati correttamente.';
-                await aggiornaListaOpt(anno, trimestre);
             } catch (err) {
                 const dettagliCampi = Object.values(err.campi || {}).join(' ');
                 esito.textContent = dettagliCampi ? `${err.message} ${dettagliCampi}` : err.message;
+                return;
             } finally {
                 submitBtn.disabled = false;
             }
-        });
-
-        const filtroForm = document.getElementById('filtro-conteggi-opt');
-        const listaEl = document.getElementById('conteggi-lista');
-
-        const aggiornaListaOpt = async (anno, trimestre, annoFine, trimestreFine) => {
-            const params = new URLSearchParams({ optId: utenteId, anno, trimestre });
-            aggiungiFinePeriodo(params, annoFine, trimestreFine);
-            const dati = await api(`/api/monitoraggio/conteggi-opt?${params.toString()}`);
-            renderRigheConteggi(listaEl, dati, false);
-        };
-
-        filtroForm?.addEventListener('submit', async event => {
-            event.preventDefault();
-            const anno = filtroForm.elements.anno.value;
-            const trimestre = filtroForm.elements.trimestre.value;
-            const annoFine = filtroForm.elements.annoFine.value;
-            const trimestreFine = filtroForm.elements.trimestreFine.value;
-            const esito = filtroForm.querySelector('.picus-esito');
-            esito.textContent = '';
-            try {
-                await aggiornaListaOpt(anno, trimestre, annoFine, trimestreFine);
-            } catch (err) {
-                esito.textContent = err.message;
-            }
+            esito.textContent = 'Conteggi trimestrali salvati correttamente.';
+            await aggiornaListaOpt(anno, trimestre);
         });
     }
 
     if (area === 'banco') {
-        const formBanco = document.getElementById('riepilogo-opt');
-        const listaBanco = document.getElementById('riepilogo-opt-lista');
-
-        formBanco?.addEventListener('submit', async event => {
-            event.preventDefault();
-            const esito = formBanco.querySelector('.picus-esito');
-            esito.textContent = '';
-
-            const anno = formBanco.elements.anno.value;
-            const trimestre = formBanco.elements.trimestre.value;
-            const annoFine = formBanco.elements.annoFine.value;
-            const trimestreFine = formBanco.elements.trimestreFine.value;
-
-            const params = new URLSearchParams({ anno, trimestre });
-            try {
-                aggiungiFinePeriodo(params, annoFine, trimestreFine);
-                const dati = await api(`/api/monitoraggio/conteggi-opt?${params.toString()}`);
-                renderRigheConteggi(listaBanco, dati, true);
-            } catch (err) {
-                esito.textContent = err.message;
-            }
-        });
+        collegaConsultazione(
+            document.getElementById('riepilogo-opt'),
+            document.getElementById('riepilogo-opt-lista'),
+            document.getElementById('riepilogo-opt-esito'),
+            document.getElementById('riepilogo-opt-riprova'),
+            true
+        );
     }
 }
