@@ -16,6 +16,14 @@ public interface TokenAttivazioneRepository extends JpaRepository<TokenAttivazio
 
     Optional<TokenAttivazioneJpa> findByTokenHash(String tokenHash);
 
+    /**
+     * Cerca solo l'account del token, senza caricare il token nel contesto di persistenza. Serve a chi poi prende il
+     * lock con {@link #findByTokenHashForUpdate}: se il token fosse già caricato, la lettura con lock restituirebbe la
+     * copia in memoria con lo stato di prima e non quello aggiornato da un reinvio concorrente.
+     */
+    @Query("select t.accountId from TokenAttivazioneJpa t where t.tokenHash = :hash")
+    Optional<UUID> findAccountIdByTokenHash(@Param("hash") String hash);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select t from TokenAttivazioneJpa t where t.tokenHash = :hash")
     Optional<TokenAttivazioneJpa> findByTokenHashForUpdate(@Param("hash") String hash);

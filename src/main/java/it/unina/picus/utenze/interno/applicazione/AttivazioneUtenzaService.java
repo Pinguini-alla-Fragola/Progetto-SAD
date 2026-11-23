@@ -269,9 +269,10 @@ public class AttivazioneUtenzaService {
 
         String hash = calcolaSha256(tokenInChiaro.strip());
 
-        // 1. Risoluzione senza lock per individuare l'account da serializzare
-        UUID accountId = tokens.findByTokenHash(hash)
-                .map(TokenAttivazioneJpa::getAccountId)
+        // 1. Risoluzione senza lock per individuare l'account da serializzare. Si legge solo l'identificativo: se il
+        //    token fosse già caricato, la lettura con lock restituirebbe la copia in memoria con lo stato di prima e
+        //    un link appena sostituito da un reinvio attiverebbe comunque l'account.
+        UUID accountId = tokens.findAccountIdByTokenHash(hash)
                 .orElseThrow(() -> new TokenAttivazioneNonValidoException("Link di attivazione non valido."));
 
         // 2. Ordine unico di lock: prima AccountJpa, poi TokenAttivazioneJpa
