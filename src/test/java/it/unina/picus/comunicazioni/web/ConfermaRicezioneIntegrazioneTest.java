@@ -1,6 +1,8 @@
 package it.unina.picus.comunicazioni.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -23,10 +25,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.test.context.TestSecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import it.unina.picus.shared.AccessoDiProva;
 import it.unina.picus.shared.DatiSintetici;
@@ -52,11 +58,10 @@ class ConfermaRicezioneIntegrazioneTest {
 
     private static final String CONFERMA = "/api/comunicazioni/{id}/ricezione";
 
-    /** Account che provano a confermare una comunicazione indirizzata ad altri. */
+    /** Destinatari possibili che provano a confermare una comunicazione indirizzata ad altri. */
     enum Estraneo {
         OPT_FUORI_DAL_GRUPPO,
-        OPERATORE,
-        BANCO
+        OPERATORE
     }
 
     /** Tipologie di operatore destinatario. */
@@ -252,6 +257,19 @@ class ConfermaRicezioneIntegrazioneTest {
         assertThat(confermati(perB)).isEmpty();
     }
 
+    @Test
+    @DisplayName("AC6 - il Banco che ha inviato la comunicazione non conferma al posto dei destinatari: 403 senza modifiche")
+    void ac6_bancoNonConfermaSullaRotta() throws Exception {
+        UUID id = inviaAGruppo("GRUPPO_OPT", optA, optB);
+
+        come(banco).post(CONFERMA, null, id)
+                .andExpect(status().isForbidden())
+                .andExpect(result -> assertThat(result.getResponse().getContentAsString()).isEmpty());
+
+        assertThat(confermati(id)).isEmpty();
+        assertThat(righe(id)).isEqualTo(2);
+    }
+
     // ------------------------------------------------------------------ casi limite della #143
 
     @Test
@@ -270,6 +288,34 @@ class ConfermaRicezioneIntegrazioneTest {
         SessioneDiProva.anonima(mvc).post(CONFERMA, null, id).andExpect(status().isUnauthorized());
 
         assertThat(confermati(id)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("#143 - identificativo che non è un UUID: 400 e nessun riscontro")
+    void identificativoNonUuid() throws Exception {
+        UUID id = inviaAGruppo("GRUPPO_OPT", optA);
+
+        come(optA).post(CONFERMA, null, "non-un-uuid").andExpect(status().isBadRequest());
+
+        assertThat(confermati(id)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("#143 - destinatario autenticato senza token CSRF: 403 e nessun riscontro; con il token conferma")
+    void senzaTokenCsrf() throws Exception {
+        UUID id = inviaAGruppo("GRUPPO_OPT", optA);
+        MockHttpSession sessione = accediSenzaClientDiProva(optA);
+
+        eseguiNellaSessione(sessione, post(CONFERMA, id))
+                .andExpect(status().isForbidden());
+        assertThat(confermati(id)).isEmpty();
+
+        // controllo: la stessa sessione con il token conferma, quindi il 403 dipendeva solo dal token mancante
+        String csrf = leggiCsrf(sessione);
+        eseguiNellaSessione(sessione, post(CONFERMA, id)
+                .header(JsonPath.read(csrf, "$.headerName"), (String) JsonPath.read(csrf, "$.token")))
+                .andExpect(status().isOk());
+        assertThat(confermati(id)).containsOnlyKeys(optA);
     }
 
     @Test
@@ -339,8 +385,38 @@ class ConfermaRicezioneIntegrazioneTest {
         return switch (estraneo) {
             case OPT_FUORI_DAL_GRUPPO -> optEstranea;
             case OPERATORE -> operatoreA;
-            case BANCO -> banco;
         };
+    }
+
+    /**
+     * Login reale gestito qui invece che da {@link SessioneDiProva}, che aggiunge sempre il token CSRF: serve
+     * per inviare un comando autenticato senza token. La password è generata a ogni esecuzione.
+     */
+    private MockHttpSession accediSenzaClientDiProva(UUID account) throws Exception {
+        String password = "prova-" + UUID.randomUUID();
+        jdbc.update("update utenze_account set password_hash = ? where id = ?", encoder.encode(password), account);
+        String email = jdbc.queryForObject("select email from utenze_account where id = ?", String.class, account);
+        MockHttpSession sessione = new MockHttpSession();
+        String csrf = leggiCsrf(sessione);
+        eseguiNellaSessione(sessione, post("/api/auth/login")
+                .header(JsonPath.read(csrf, "$.headerName"), (String) JsonPath.read(csrf, "$.token"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"email\": \"" + email + "\", \"password\": \"" + password + "\"}"))
+                .andExpect(status().isNoContent());
+        return sessione;
+    }
+
+    private String leggiCsrf(MockHttpSession sessione) throws Exception {
+        return eseguiNellaSessione(sessione, get("/api/auth/csrf"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+    }
+
+    /** Come in {@link SessioneDiProva}: l'identità arriva soltanto dalla sessione. */
+    private ResultActions eseguiNellaSessione(MockHttpSession sessione, MockHttpServletRequestBuilder richiesta)
+            throws Exception {
+        TestSecurityContextHolder.clearContext();
+        return mvc.perform(richiesta.session(sessione));
     }
 
     private Instant confermataIl(UUID comunicazione, UUID destinatario) {
