@@ -1,5 +1,6 @@
 package it.unina.picus.monitoraggio.interno.applicazione;
 
+import java.math.BigInteger;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.HashMap;
@@ -19,8 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import it.unina.picus.catalogo.api.ConsultazioneCatalogoApi;
 import it.unina.picus.monitoraggio.api.ConteggiOptApi;
-import it.unina.picus.monitoraggio.api.MonitoraggioApi.ConteggioOpt;
 import it.unina.picus.monitoraggio.api.DatiConteggiNonValidiException;
+import it.unina.picus.monitoraggio.api.MonitoraggioApi.ConteggioOpt;
 import it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre;
 import it.unina.picus.monitoraggio.api.MonitoraggioApi.VoceMisura;
 import it.unina.picus.monitoraggio.interno.dominio.RegoleAccessoConteggi;
@@ -38,6 +39,10 @@ import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
 @Service
 @Profile("!skeleton")
 public class MonitoraggioOptService implements ConteggiOptApi {
+
+    public static final int ANNO_MINIMO = 2000;
+    public static final int ANNO_MASSIMO = 2100;
+    private static final BigInteger MAX_CUMULATIVO = BigInteger.valueOf(Long.MAX_VALUE);
 
     private final ConteggioOptRepository conteggiRepo;
     private final CategoriaMonitoraggioRepository categorieRepo;
@@ -61,8 +66,7 @@ public class MonitoraggioOptService implements ConteggiOptApi {
         this.clock = clock.orElse(Clock.systemUTC());
     }
 
-    public record CategoriaVoce(String codice, String descrizione) {}
-
+    @Override
     @Transactional(readOnly = true)
     public List<CategoriaVoce> elencoCategorieAttive() {
         return categorieRepo.findByAttivaTrueOrderByCodiceAsc().stream()
@@ -80,6 +84,8 @@ public class MonitoraggioOptService implements ConteggiOptApi {
                     "Trimestre obbligatorio.",
                     Map.of("trimestre", "Seleziona anno e trimestre."));
         }
+        validaPeriodo(trimestre, "anno", "trimestre");
+
         if (conteggi == null || conteggi.isEmpty()) {
             throw new DatiConteggiNonValidiException(
                     "Inserisci almeno una voce di conteggio.",
@@ -124,21 +130,19 @@ public class MonitoraggioOptService implements ConteggiOptApi {
 
         for (VoceMisura item : conteggi) {
             String voce = item.voce().trim();
-            Optional<ConteggioOptJpa> esistenteOpt = conteggiRepo
-                    .findByOptIdAndAnnoAndTrimestreAndMisuraIdAndVoce(
-                            optId, trimestre.anno(), trimestre.numero(), item.misuraId(), voce);
+            int inseriti = conteggiRepo.inserisciSeAssente(
+                    UUID.randomUUID(), optId, trimestre.anno(), trimestre.numero(),
+                    item.misuraId(), voce, item.valore(), adesso);
 
-            if (esistenteOpt.isEmpty()) {
-                conteggiRepo.save(new ConteggioOptJpa(
-                        UUID.randomUUID(), optId, trimestre.anno(), trimestre.numero(),
-                        item.misuraId(), voce, item.valore(), adesso));
-            } else {
-                ConteggioOptJpa esistente = esistenteOpt.get();
+            if (inseriti == 0) {
+                ConteggioOptJpa esistente = conteggiRepo
+                        .findByOptIdAndAnnoAndTrimestreAndMisuraIdAndVoce(
+                                optId, trimestre.anno(), trimestre.numero(), item.misuraId(), voce)
+                        .orElseThrow(() -> new IllegalStateException("Conflitto concorrente durante la lettura del conteggio."));
+
                 if (esistente.getValore() == item.valore()) {
-                    // Ritrasmissione identica: operazione idempotente (nessun duplicato né errore)
                     continue;
                 }
-                // Valore diverso -> è una correzione: verifica se abilitata dal Banco
                 verificaCorrezioneConsentita(adesso);
                 esistente.aggiornaValore(item.valore(), adesso);
                 conteggiRepo.save(esistente);
@@ -154,9 +158,10 @@ public class MonitoraggioOptService implements ConteggiOptApi {
         if (da == null || a == null) {
             throw new IllegalArgumentException("Periodo iniziale e finale obbligatori.");
         }
-        int inizio = da.anno() * 10 + da.numero();
-        int fine = a.anno() * 10 + a.numero();
-        if (inizio > fine) {
+        validaPeriodo(da, "anno", "trimestre");
+        validaPeriodo(a, "annoFine", "trimestreFine");
+
+        if (da.anno() > a.anno() || (da.anno() == a.anno() && da.numero() > a.numero())) {
             throw new IllegalArgumentException("Il trimestre iniziale non può essere successivo a quello finale.");
         }
 
@@ -168,21 +173,45 @@ public class MonitoraggioOptService implements ConteggiOptApi {
             }
         }
 
-        List<ConteggioOptJpa> righe = conteggiRepo.cercaNelPeriodo(optId, inizio, fine);
+        List<ConteggioOptJpa> righe = conteggiRepo.cercaNelPeriodo(
+                optId, da.anno(), da.numero(), a.anno(), a.numero());
 
         record ChiaveAggregazione(UUID optId, long misuraId, String voce) {}
-        Map<ChiaveAggregazione, Long> cumulativi = new LinkedHashMap<>();
+        Map<ChiaveAggregazione, BigInteger> cumulativi = new LinkedHashMap<>();
 
         for (ConteggioOptJpa riga : righe) {
             ChiaveAggregazione chiave = new ChiaveAggregazione(riga.getOptId(), riga.getMisuraId(), riga.getVoce());
-            cumulativi.merge(chiave, riga.getValore(), Long::sum);
+            BigInteger totaleAggiornato = cumulativi
+                    .getOrDefault(chiave, BigInteger.ZERO)
+                    .add(BigInteger.valueOf(riga.getValore()));
+            if (totaleAggiornato.compareTo(MAX_CUMULATIVO) > 0) {
+                throw new IllegalStateException(
+                        "Il totale cumulativo per la voce " + riga.getVoce() + " supera il limite massimo rappresentabile.");
+            }
+            cumulativi.put(chiave, totaleAggiornato);
         }
 
         return cumulativi.entrySet().stream()
                 .map(entry -> new ConteggioOpt(
                         entry.getKey().optId(),
-                        new VoceMisura(entry.getKey().misuraId(), entry.getKey().voce(), entry.getValue())))
+                        new VoceMisura(
+                                entry.getKey().misuraId(),
+                                entry.getKey().voce(),
+                                entry.getValue().longValueExact())))
                 .toList();
+    }
+
+    private void validaPeriodo(Trimestre periodo, String campoAnno, String campoTrimestre) {
+        Map<String, String> errori = new LinkedHashMap<>();
+        if (periodo.anno() < ANNO_MINIMO || periodo.anno() > ANNO_MASSIMO) {
+            errori.put(campoAnno, "L'anno deve essere compreso tra " + ANNO_MINIMO + " e " + ANNO_MASSIMO + ".");
+        }
+        if (periodo.numero() < 1 || periodo.numero() > 4) {
+            errori.put(campoTrimestre, "Il trimestre deve essere compreso tra 1 e 4.");
+        }
+        if (!errori.isEmpty()) {
+            throw new DatiConteggiNonValidiException("Periodo di riferimento non valido.", errori);
+        }
     }
 
     private boolean misuraEsiste(long misuraId, Map<Long, Boolean> cache) {

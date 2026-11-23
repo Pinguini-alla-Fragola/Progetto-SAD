@@ -23,6 +23,15 @@ public class SkeletonMonitoraggioService implements ConteggiOptApi {
     private final Map<String, Long> archivio = new ConcurrentHashMap<>();
 
     @Override
+    public List<CategoriaVoce> elencoCategorieAttive() {
+        return List.of(
+                new CategoriaVoce("PERSONE_RAGGIUNTE", "Persone raggiunte nel trimestre"),
+                new CategoriaVoce("MINORI", "Minori raggiunti"),
+                new CategoriaVoce("ANZIANI", "Anziani raggiunti"),
+                new CategoriaVoce("NUCLEI_FAMILIARI", "Nuclei familiari raggiunti"));
+    }
+
+    @Override
     public void registraConteggiOpt(IdentitaAutenticata attore, Trimestre trimestre, List<VoceMisura> conteggi) {
         RegoleAccessoConteggi.verificaRegistrazione(attore);
         if (trimestre == null || conteggi == null || conteggi.isEmpty()) {

@@ -21,18 +21,36 @@ export async function initConteggiOpt(area) {
 
     const formattaMisura = id => misureMap.get(String(id)) || `Misura #${id}`;
 
+    const creaCellaTesto = (etichetta, valore, inGrassetto = false) => {
+        const cell = document.createElement('div');
+        cell.className = 'account-cell';
+
+        const labelEl = document.createElement('span');
+        labelEl.className = 'cell-label';
+        labelEl.textContent = etichetta;
+
+        const valEl = document.createElement(inGrassetto ? 'strong' : 'span');
+        valEl.textContent = String(valore ?? '');
+
+        cell.append(labelEl, valEl);
+        return cell;
+    };
+
     const renderRigheConteggi = (listaEl, dati, mostraOpt) => {
         const righe = (dati || []).map(item => {
             const art = document.createElement('article');
             art.className = 'account-row';
             const c = item.conteggio;
             const labelVoce = categorie.find(cat => cat.codice === c.voce)?.descrizione || c.voce;
-            art.innerHTML = `
-                ${mostraOpt ? `<div class="account-cell"><span class="cell-label">OPT</span><span>${item.optId}</span></div>` : ''}
-                <div class="account-cell"><span class="cell-label">Misura</span><strong>${formattaMisura(c.misuraId)}</strong></div>
-                <div class="account-cell"><span class="cell-label">Voce</span><span>${labelVoce}</span></div>
-                <div class="account-cell"><span class="cell-label">Conteggio</span><strong>${c.valore}</strong></div>
-            `;
+
+            if (mostraOpt) {
+                art.append(creaCellaTesto('OPT', item.optId, false));
+            }
+            art.append(
+                creaCellaTesto('Misura', formattaMisura(c.misuraId), true),
+                creaCellaTesto('Voce', labelVoce, false),
+                creaCellaTesto('Conteggio', c.valore, true)
+            );
             return art;
         });
         renderList(listaEl, righe, {
