@@ -38,14 +38,17 @@ public class RegistrazioneOptService {
     private final AccountRepository accounts;
     private final ProfiloOptRepository profiliOpt;
     private final AttivazioneUtenzaService attivazioneService;
+    private final CodaInvitiImportazioneOpt codaInviti;
 
-    public RegistrazioneOptService(
+    RegistrazioneOptService(
             AccountRepository accounts,
             ProfiloOptRepository profiliOpt,
-            AttivazioneUtenzaService attivazioneService) {
+            AttivazioneUtenzaService attivazioneService,
+            CodaInvitiImportazioneOpt codaInviti) {
         this.accounts = Objects.requireNonNull(accounts);
         this.profiliOpt = Objects.requireNonNull(profiliOpt);
         this.attivazioneService = Objects.requireNonNull(attivazioneService);
+        this.codaInviti = Objects.requireNonNull(codaInviti);
     }
 
     public record ComandoRegistrazioneOpt(
@@ -70,6 +73,31 @@ public class RegistrazioneOptService {
     public EsitoRegistrazioneOpt registraOpt(ComandoRegistrazioneOpt comando) {
         AccountJpa account = creaAccount(valida(comando));
         return new EsitoRegistrazioneOpt(account.getId(), attivazioneService.preparaTokenAttivazione(account));
+    }
+
+    /**
+     * Prepara un nuovo link per il reinvio del Banco, lasciando attivi i link precedenti.
+     *
+     * @param accountId identificativo dell'OPT in attesa
+     * @return dati per l'invio dopo il commit
+     */
+    public DatiInvioAttivazione preparaReinvio(UUID accountId) {
+        return attivazioneService.preparaReinvioOpt(accountId);
+    }
+
+    /**
+     * Registra l'esito dell'invio e rimuove l'invito CSV solo se la consegna è riuscita.
+     *
+     * @param accountId identificativo dell'OPT
+     * @param dati link preparato per questo reinvio
+     * @param riuscito consegna accettata dal server SMTP oppure completata in modalità simulata
+     */
+    public void concludeReinvio(UUID accountId, DatiInvioAttivazione dati, boolean riuscito) {
+        if (riuscito) {
+            // La prenotazione del job acquisisce i lock nello stesso ordine: coda, account, token.
+            codaInviti.rimuovi(accountId);
+        }
+        attivazioneService.concludeReinvioOpt(accountId, dati, riuscito);
     }
 
     /**

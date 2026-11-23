@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import it.unina.picus.utenze.api.UtenzeApi.StatoUtenza;
 import it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService.DatiInvioAttivazione;
 import it.unina.picus.utenze.interno.persistenza.AccountRepository;
-import it.unina.picus.utenze.interno.persistenza.TokenAttivazioneRepository;
 
 /** Conserva gli inviti CSV in attesa e prepara il link prima della consegna. */
 @Service
@@ -28,14 +27,11 @@ class CodaInvitiImportazioneOpt {
 
     private final JdbcClient jdbc;
     private final AccountRepository accounts;
-    private final TokenAttivazioneRepository tokens;
     private final AttivazioneUtenzaService attivazione;
 
-    CodaInvitiImportazioneOpt(JdbcClient jdbc, AccountRepository accounts,
-                            TokenAttivazioneRepository tokens, AttivazioneUtenzaService attivazione) {
+    CodaInvitiImportazioneOpt(JdbcClient jdbc, AccountRepository accounts, AttivazioneUtenzaService attivazione) {
         this.jdbc = jdbc;
         this.accounts = accounts;
-        this.tokens = tokens;
         this.attivazione = attivazione;
     }
 
@@ -62,12 +58,8 @@ class CodaInvitiImportazioneOpt {
 
         var invito = prossimo.orElseThrow();
         var account = accounts.findByIdForUpdate(invito.accountId()).orElseThrow();
-        // Un token di un reinvio manuale ha precedenza su quello della coda.
-        if (!StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(account.getStato())
-                || tokens.findAttiviByAccountIdForUpdate(invito.accountId()).stream()
-                        .anyMatch(token -> !token.isDaImportazioneOpt())) {
-            jdbc.sql("delete from utenze_inviti_importazione_opt where account_id = ?")
-                    .param(invito.accountId()).update();
+        if (!StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(account.getStato())) {
+            rimuovi(invito.accountId());
             return Optional.empty();
         }
 
@@ -82,6 +74,11 @@ class CodaInvitiImportazioneOpt {
                 .param("disponibileDal", disponibileDal, Types.TIMESTAMP_WITH_TIMEZONE)
                 .param("accountId", invito.accountId()).update();
         return Optional.of(new Consegna(invito.accountId(), tentativo, dati));
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    void rimuovi(UUID accountId) {
+        jdbc.sql("delete from utenze_inviti_importazione_opt where account_id = ?").param(accountId).update();
     }
 
     public void completa(Consegna consegna) {

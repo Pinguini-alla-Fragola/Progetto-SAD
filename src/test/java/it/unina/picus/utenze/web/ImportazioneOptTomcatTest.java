@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.when;
 
 import java.net.CookieManager;
 import java.net.URI;
@@ -19,6 +20,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -196,6 +198,83 @@ class ImportazioneOptTomcatTest {
                 select tentativi from utenze_inviti_importazione_opt
                  where disponibile_dal is null and account_id = (select id from utenze_account where email = ?)
                 """, Integer.class, email)).isEqualTo(5);
+    }
+
+    @Test
+    void unReinvioManualeFallitoLasciaRiprendereLInvitoCsv() throws Exception {
+        String email = "reinvio-fallito@picus.test";
+        var tentativi = new LinkedBlockingQueue<String>();
+        var numero = new AtomicInteger();
+        doAnswer(chiamata -> {
+            tentativi.add(chiamata.getArgument(2));
+            if (numero.incrementAndGet() <= 2) {
+                throw new IllegalStateException("Esito SMTP non confermato");
+            }
+            return null;
+        }).when(posta).inviaLinkAttivazione(eq(email), anyString(), anyString());
+
+        UUID account = importaOptPerReinvio("REINVIO-FALLITO", "12345678904", email);
+        String primoLinkCsv = tentativi.poll(5, SECONDS);
+        assertThat(primoLinkCsv).isNotNull();
+        assertThat(reinviaInvito(account).statusCode()).isEqualTo(502);
+        assertThat(invitiAccodati(account)).isEqualTo(1);
+        String linkManuale = tentativi.poll(5, SECONDS);
+        assertThat(linkManuale).isNotNull();
+        assertThat(attivazione.isTokenValido(linkManuale)).isFalse();
+
+        rendiDisponibile(email);
+        String nuovoLinkCsv = tentativi.poll(5, SECONDS);
+        assertThat(nuovoLinkCsv).isNotNull();
+        assertThat(attivazione.isTokenValido(nuovoLinkCsv)).isTrue();
+        assertThat(attivazione.isTokenValido(primoLinkCsv)).isTrue();
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void unReinvioManualeRiuscitoSostituisceLInvitoCsv(boolean simulato) throws Exception {
+        String codice = simulato ? "REINVIO-SIMULATO" : "REINVIO-ACCETTATO";
+        String codiceFiscale = simulato ? "12345678906" : "12345678905";
+        String email = simulato ? "reinvio-simulato@picus.test" : "reinvio-accettato@picus.test";
+        when(posta.isSimulato()).thenReturn(simulato);
+        var tentativi = new LinkedBlockingQueue<String>();
+        var numero = new AtomicInteger();
+        doAnswer(chiamata -> {
+            tentativi.add(chiamata.getArgument(2));
+            if (numero.incrementAndGet() == 1) {
+                throw new IllegalStateException("Esito SMTP non confermato");
+            }
+            return null;
+        }).when(posta).inviaLinkAttivazione(eq(email), anyString(), anyString());
+
+        UUID account = importaOptPerReinvio(codice, codiceFiscale, email);
+        String linkCsv = tentativi.poll(5, SECONDS);
+        assertThat(linkCsv).isNotNull();
+        var risposta = reinviaInvito(account);
+        assertThat(risposta.statusCode()).isEqualTo(200);
+        assertThat(json.readTree(risposta.body()).get("invitoInviato").asBoolean()).isEqualTo(!simulato);
+        assertThat(invitiAccodati(account)).isZero();
+        String linkManuale = tentativi.poll(5, SECONDS);
+        assertThat(linkManuale).isNotNull();
+        assertThat(attivazione.isTokenValido(linkManuale)).isTrue();
+        assertThat(attivazione.isTokenValido(linkCsv)).isFalse();
+    }
+
+    private UUID importaOptPerReinvio(String codice, String codiceFiscale, String email) throws Exception {
+        String csv = INTESTAZIONE + codice + ",OPT sintetica,napoli," + codiceFiscale + "," + email + "\n";
+        assertThat(carica(csv, tokenCsrf()).statusCode()).isEqualTo(200);
+        return jdbc.queryForObject("select id from utenze_account where email = ?", UUID.class, email);
+    }
+
+    private HttpResponse<String> reinviaInvito(UUID account) throws Exception {
+        JsonNode csrf = tokenCsrf();
+        return invia(richiesta("/api/opt/" + account + "/reinvia-invito")
+                .header(csrf.get("headerName").asText(), csrf.get("token").asText())
+                .POST(HttpRequest.BodyPublishers.noBody()));
+    }
+
+    private int invitiAccodati(UUID account) {
+        return jdbc.queryForObject("select count(*) from utenze_inviti_importazione_opt where account_id = ?",
+                Integer.class, account);
     }
 
     private void rendiDisponibile(String email) {
