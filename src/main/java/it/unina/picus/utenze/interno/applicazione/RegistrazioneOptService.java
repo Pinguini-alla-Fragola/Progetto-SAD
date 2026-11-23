@@ -38,14 +38,17 @@ public class RegistrazioneOptService {
     private final AccountRepository accounts;
     private final ProfiloOptRepository profiliOpt;
     private final AttivazioneUtenzaService attivazioneService;
+    private final CodaInvitiImportazioneOpt codaInviti;
 
-    public RegistrazioneOptService(
+    RegistrazioneOptService(
             AccountRepository accounts,
             ProfiloOptRepository profiliOpt,
-            AttivazioneUtenzaService attivazioneService) {
+            AttivazioneUtenzaService attivazioneService,
+            CodaInvitiImportazioneOpt codaInviti) {
         this.accounts = Objects.requireNonNull(accounts);
         this.profiliOpt = Objects.requireNonNull(profiliOpt);
         this.attivazioneService = Objects.requireNonNull(attivazioneService);
+        this.codaInviti = Objects.requireNonNull(codaInviti);
     }
 
     public record ComandoRegistrazioneOpt(
@@ -61,7 +64,50 @@ public class RegistrazioneOptService {
             DatiInvioAttivazione datiInvio
     ) {}
 
+    /**
+     * Registra una nuova OPT in attesa di attivazione e prepara il link monouso.
+     *
+     * @param comando dati inseriti dal Banco
+     * @return identificativo dell'account e dati per l'invio dopo il commit
+     */
     public EsitoRegistrazioneOpt registraOpt(ComandoRegistrazioneOpt comando) {
+        AccountJpa account = creaAccount(valida(comando));
+        return new EsitoRegistrazioneOpt(account.getId(), attivazioneService.preparaTokenAttivazione(account));
+    }
+
+    /**
+     * Prepara un nuovo link per il reinvio del Banco, lasciando attivi i link precedenti.
+     *
+     * @param accountId identificativo dell'OPT in attesa
+     * @return dati per l'invio dopo il commit
+     */
+    public DatiInvioAttivazione preparaReinvio(UUID accountId) {
+        return attivazioneService.preparaReinvioOpt(accountId);
+    }
+
+    /**
+     * Registra l'esito dell'invio e rimuove l'invito CSV solo se la consegna è riuscita.
+     *
+     * @param accountId identificativo dell'OPT
+     * @param dati link preparato per questo reinvio
+     * @param riuscito consegna accettata dal server SMTP oppure completata in modalità simulata
+     */
+    public void concludeReinvio(UUID accountId, DatiInvioAttivazione dati, boolean riuscito) {
+        if (riuscito) {
+            // La prenotazione del job acquisisce i lock nello stesso ordine: coda, account, token.
+            codaInviti.rimuovi(accountId);
+        }
+        attivazioneService.concludeReinvioOpt(accountId, dati, riuscito);
+    }
+
+    /**
+     * Applica le regole condivise della registrazione manuale e dell'importazione.
+     *
+     * @param comando anagrafica di ingresso
+     * @return anagrafica normalizzata
+     * @throws DatiOptNonValidiException se un campo è invalido
+     */
+    static DatiOpt valida(ComandoRegistrazioneOpt comando) {
         Objects.requireNonNull(comando, "comando obbligatorio");
 
         String codiceStruttura = validaTestoObbligatorio(
@@ -87,35 +133,44 @@ public class RegistrazioneOptService {
 
         String codiceFiscale = validaCodiceFiscale(comando.codiceFiscale());
         String email = validaEmail(comando.email());
+        return new DatiOpt(codiceStruttura, nome, comuneCodice, codiceFiscale, email);
+    }
 
-        if (accounts.existsByEmailIgnoreCase(email)) {
+    /**
+     * Crea account e profilo nella transazione del caso d'uso chiamante.
+     *
+     * @param dati anagrafica già validata
+     * @return account OPT in attesa di attivazione
+     */
+    AccountJpa creaAccount(DatiOpt dati) {
+        if (accounts.existsByEmailIgnoreCase(dati.email())) {
             throw new DatiOptNonValidiException("email", "Esiste già un account associato a questa email.");
         }
-        if (profiliOpt.existsByCodiceStrutturaIgnoreCase(codiceStruttura)) {
+        if (profiliOpt.existsByCodiceStrutturaIgnoreCase(dati.codiceStruttura())) {
             throw new DatiOptNonValidiException("codiceStruttura", "Esiste già una OPT registrata con questo codice struttura.");
         }
 
         try {
-            AccountJpa account = AccountJpa.inAttesaDiAttivazione(email, nome, RuoloUtente.OPT);
+            AccountJpa account = AccountJpa.inAttesaDiAttivazione(dati.email(), dati.nome(), RuoloUtente.OPT);
             account = accounts.saveAndFlush(account);
 
             ProfiloOptJpa profilo = new ProfiloOptJpa(
                     account.getId(),
-                    codiceStruttura,
-                    comuneCodice,
-                    codiceFiscale
+                    dati.codiceStruttura(),
+                    dati.comuneCodice(),
+                    dati.codiceFiscale()
             );
             profiliOpt.saveAndFlush(profilo);
 
-            DatiInvioAttivazione datiInvio = attivazioneService.preparaTokenAttivazione(account);
-            return new EsitoRegistrazioneOpt(account.getId(), datiInvio);
+            return account;
 
         } catch (DataIntegrityViolationException ex) {
             throw classificaViolazioneVincolo(ex);
         }
     }
 
-    private static DatiOptNonValidiException classificaViolazioneVincolo(DataIntegrityViolationException ex) {
+    /** Converte i conflitti anagrafici prevedibili in scarti e propaga gli altri errori tecnici. */
+    static DatiOptNonValidiException classificaViolazioneVincolo(DataIntegrityViolationException ex) {
         String nomeVincolo = estraiNomeVincolo(ex);
         if (nomeVincolo == null || nomeVincolo.isBlank()) {
             throw ex;
@@ -198,5 +253,9 @@ public class RegistrazioneOptService {
                     "Il codice fiscale non ha un formato valido (16 caratteri alfanumerici o 11 cifre).");
         }
         return cf;
+    }
+
+    /** Anagrafica normalizzata secondo le regole condivise delle OPT. */
+    record DatiOpt(String codiceStruttura, String nome, String comuneCodice, String codiceFiscale, String email) {
     }
 }
