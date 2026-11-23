@@ -85,6 +85,14 @@ public class AttivazioneUtenzaService {
         }
     }
 
+    /**
+     * Link appena creato, non ancora consegnato.
+     *
+     * @param idToken identificativo del token salvato, per confermarlo o scartarlo dopo l'invio
+     * @param dati dati per la consegna
+     */
+    public record LinkPreparato(UUID idToken, DatiInvioAttivazione dati) {}
+
     public record LinkAttivazioneDaInviareEvent(String emailDestinatario, String nomeDestinatario, String tokenInChiaro) {
         @Override
         public String toString() {
@@ -137,17 +145,22 @@ public class AttivazioneUtenzaService {
     }
 
     /**
-     * Reinvio richiesto da chi possiede l'indirizzo, senza sessione: serve un nuovo link solo se l'email
-     * appartiene a un account in attesa di attivazione, di qualsiasi ruolo. Per ogni altro indirizzo
-     * (sconosciuto, già attivo, revocato) non succede nulla e il chiamante non deve far capire la differenza.
+     * Primo passo del reinvio richiesto da chi possiede l'indirizzo, senza sessione: crea un nuovo link solo se
+     * l'email appartiene a un account in attesa di attivazione, di qualsiasi ruolo, e non tocca quelli già
+     * emessi. Per ogni altro indirizzo (sconosciuto, già attivo, revocato) non succede nulla e il chiamante non
+     * deve far capire la differenza.
      *
-     * <p>Lo stato si controlla di nuovo dopo aver preso il lock sull'account, così una attivazione o una
-     * revoca arrivata nel frattempo non lascia un link valido.</p>
+     * <p>Il link precedente si invalida solo quando la posta ha accettato l'email ({@link #confermaConsegna}):
+     * se l'invio fallisce ({@link #scartaToken}) l'utente conserva l'ultimo link che ha ricevuto davvero. I tre
+     * passi sono transazioni separate, così durante l'invio non c'è nessun lock.</p>
+     *
+     * <p>Lo stato si controlla dopo aver preso il lock sull'account, così una attivazione o una revoca arrivata
+     * nel frattempo non lascia un link valido.</p>
      *
      * @param email indirizzo digitato dall'utente
-     * @return i dati del nuovo link, oppure vuoto se l'indirizzo non è idoneo
+     * @return il link creato, oppure vuoto se l'indirizzo non è idoneo
      */
-    public Optional<DatiInvioAttivazione> rigeneraTokenPerEmail(String email) {
+    public Optional<LinkPreparato> preparaTokenPerEmail(String email) {
         String chiave = UtenzeService.normalizzaEmail(email);
         if (chiave == null) {
             return Optional.empty();
@@ -155,7 +168,35 @@ public class AttivazioneUtenzaService {
         return accounts.findIdByEmailIgnoreCase(chiave)
                 .flatMap(accounts::findByIdForUpdate)
                 .filter(a -> StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(a.getStato()))
-                .map(this::emettiNuovoToken);
+                .map(this::creaToken);
+    }
+
+    /**
+     * La posta ha accettato l'email: da ora il link nuovo sostituisce quelli emessi prima. Si invalidano solo i
+     * link più vecchi di questo, così due richieste ravvicinate non si annullano a vicenda e resta valido
+     * l'ultimo. Se l'account nel frattempo non è più in attesa non si fa nulla: attivazione e revoca hanno già
+     * chiuso tutti i link.
+     *
+     * @param idToken link appena consegnato
+     */
+    public void confermaConsegna(UUID idToken) {
+        tokens.findById(idToken).ifPresent(token -> {
+            Optional<AccountJpa> account = accounts.findByIdForUpdate(token.getAccountId());
+            if (account.filter(a -> StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(a.getStato())).isPresent()) {
+                tokens.invalidaPrecedenti(token.getAccountId(), token.getCreatoIl(), Instant.now(clock));
+            }
+        });
+    }
+
+    /**
+     * La posta non ha accettato l'email: il link non è mai arrivato a nessuno, quindi si scarta e restano validi
+     * quelli di prima.
+     *
+     * @param idToken link che non è stato consegnato
+     */
+    public void scartaToken(UUID idToken) {
+        // un solo aggiornamento condizionato: non serve il lock e non legge uno stato superato da altre richieste
+        tokens.chiudiSeAttivo(idToken, Instant.now(clock));
     }
 
     /**
@@ -172,15 +213,21 @@ public class AttivazioneUtenzaService {
             tokens.saveAllAndFlush(precedenti);
         }
 
+        return creaToken(account).dati();
+    }
+
+    /** Crea il token per l'account, bloccato dal chiamante, senza toccare quelli già emessi. */
+    private LinkPreparato creaToken(AccountJpa account) {
+        Instant ora = Instant.now(clock);
         String tokenInChiaro = generaTokenCasuale();
-        tokens.saveAndFlush(new TokenAttivazioneJpa(
+        TokenAttivazioneJpa token = tokens.saveAndFlush(new TokenAttivazioneJpa(
                 UUID.randomUUID(),
                 account.getId(),
                 calcolaSha256(tokenInChiaro),
                 ora.plus(durataValidita),
                 ora));
-
-        return new DatiInvioAttivazione(account.getEmail(), account.getNome(), tokenInChiaro);
+        return new LinkPreparato(token.getId(),
+                new DatiInvioAttivazione(account.getEmail(), account.getNome(), tokenInChiaro));
     }
 
     /**

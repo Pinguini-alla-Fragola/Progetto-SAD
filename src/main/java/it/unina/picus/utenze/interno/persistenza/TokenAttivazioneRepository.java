@@ -37,4 +37,26 @@ public interface TokenAttivazioneRepository extends JpaRepository<TokenAttivazio
                and t.usatoIl is null
             """)
     int invalidaTokenAttiviPerAccount(@Param("accountId") UUID accountId, @Param("ora") Instant ora);
+
+    /** Chiude un solo token, se non è già stato chiuso da altri. */
+    @Modifying
+    @Query("""
+            update TokenAttivazioneJpa t
+               set t.usatoIl = :ora
+             where t.id = :id
+               and t.usatoIl is null
+            """)
+    int chiudiSeAttivo(@Param("id") UUID id, @Param("ora") Instant ora);
+
+    /** Chiude i token ancora non usati dell'account creati prima di quello indicato. */
+    @Modifying
+    @Query("""
+            update TokenAttivazioneJpa t
+               set t.usatoIl = :ora
+             where t.accountId = :accountId
+               and t.usatoIl is null
+               and t.creatoIl < :prima
+            """)
+    int invalidaPrecedenti(@Param("accountId") UUID accountId, @Param("prima") Instant prima,
+            @Param("ora") Instant ora);
 }

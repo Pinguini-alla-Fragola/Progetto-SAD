@@ -11,13 +11,18 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+import it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService.LinkPreparato;
+
 /**
  * Nuovo link di attivazione chiesto da chi possiede l'indirizzo, senza sessione.
  *
- * <p>La richiesta si limita ad accodare il lavoro e ritorna subito: nuovo token, invalidazione del
- * precedente e invio dell'email avvengono in secondo piano. Così la risposta ha gli stessi tempi per ogni
+ * <p>La richiesta si limita ad accodare il lavoro e ritorna subito: nuovo token, invio dell'email e
+ * sostituzione del link precedente avvengono in secondo piano. Così la risposta ha gli stessi tempi per ogni
  * indirizzo, sia che abbia un account in attesa sia che non esista, sia già attivo o revocato, e chi non è
  * autenticato non può scoprire quali indirizzi sono registrati.</p>
+ *
+ * <p>Se la posta rifiuta l'email, il nuovo link viene scartato e restano validi quelli di prima; se la accetta,
+ * il nuovo link sostituisce i precedenti ({@link AttivazioneUtenzaService#preparaTokenPerEmail}).</p>
  */
 @Component
 @Profile("!skeleton")
@@ -53,13 +58,27 @@ public class ReinvioLinkSuRichiesta {
     /** L'indirizzo non compare nei log: dire quale è stato scartato lo rivelerebbe a chi legge i log. */
     private void elabora(String email) {
         try {
-            attivazione.rigeneraTokenPerEmail(email).ifPresent(dati -> {
-                if (consegna.consegna(dati) == ConsegnaLinkAttivazione.Esito.NON_RIUSCITO) {
-                    LOG.warn("Invio del nuovo link di attivazione non riuscito: l'utente può chiederlo di nuovo");
-                }
-            });
+            attivazione.preparaTokenPerEmail(email).ifPresent(this::consegna);
         } catch (RuntimeException e) {
             LOG.warn("Richiesta di un nuovo link di attivazione non elaborata (causa={})", e.getClass().getSimpleName());
+        }
+    }
+
+    /** Il nuovo link sostituisce il precedente solo se la posta lo ha accettato; la modalità demo vale come accettato. */
+    private void consegna(LinkPreparato link) {
+        boolean accettato = consegna.consegna(link.dati()) != ConsegnaLinkAttivazione.Esito.NON_RIUSCITO;
+        if (!accettato) {
+            LOG.warn("Invio del nuovo link di attivazione non riuscito: restano validi i link già inviati");
+        }
+        try {
+            if (accettato) {
+                attivazione.confermaConsegna(link.idToken());
+            } else {
+                attivazione.scartaToken(link.idToken());
+            }
+        } catch (RuntimeException e) {
+            LOG.warn("Aggiornamento dei link di attivazione non riuscito dopo l'invio (causa={})",
+                    e.getClass().getSimpleName());
         }
     }
 }
