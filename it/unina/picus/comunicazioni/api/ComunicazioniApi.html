@@ -68,7 +68,6 @@ loadScripts(document, 'script');</script>
 <li><a href="#confermaRicezione(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" tabindex="0">confermaRicezione(UtenzeApi.IdentitaAutenticata, UUID)</a></li>
 <li><a href="#elencoRiscontri(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" tabindex="0">elencoRiscontri(UtenzeApi.IdentitaAutenticata, UUID)</a></li>
 <li><a href="#avvisaDisponibilita(java.util.UUID,java.util.UUID,java.util.UUID)" tabindex="0">avvisaDisponibilita(UUID, UUID, UUID)</a></li>
-<li><a href="#avvisaAnnullamento(java.util.UUID,java.util.Set)" tabindex="0">avvisaAnnullamento(UUID, Set)</a></li>
 <li><a href="#elencoAvvisiOperativi(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" tabindex="0">elencoAvvisiOperativi(UtenzeApi.IdentitaAutenticata)</a></li>
 </ol>
 </li>
@@ -82,12 +81,12 @@ loadScripts(document, 'script');</script>
 <section class="class-description" id="class-description">
 <dl class="notes">
 <dt>All Superinterfaces:</dt>
-<dd><code><a href="AvvisiOperativiApi.html" title="interface in it.unina.picus.comunicazioni.api">AvvisiOperativiApi</a></code></dd>
+<dd><code><a href="AvvisiAnnullamentoApi.html" title="interface in it.unina.picus.comunicazioni.api">AvvisiAnnullamentoApi</a>, <a href="AvvisiOperativiApi.html" title="interface in it.unina.picus.comunicazioni.api">AvvisiOperativiApi</a></code></dd>
 </dl>
 <hr>
 <div class="horizontal-scroll">
 <div class="type-signature"><span class="modifiers">public interface </span><span class="element-name type-name-label">ComunicazioniApi</span><span class="extends-implements">
-extends <a href="AvvisiOperativiApi.html" title="interface in it.unina.picus.comunicazioni.api">AvvisiOperativiApi</a></span></div>
+extends <a href="AvvisiOperativiApi.html" title="interface in it.unina.picus.comunicazioni.api">AvvisiOperativiApi</a>, <a href="AvvisiAnnullamentoApi.html" title="interface in it.unina.picus.comunicazioni.api">AvvisiAnnullamentoApi</a></span></div>
 <div class="block">Gestisce le comunicazioni del Banco, i riscontri dei destinatari e la consegna degli avvisi
 operativi. Richieste rimane responsabile della pratica e delle azioni a cui puntano gli avvisi.</div>
 </div>
@@ -158,66 +157,63 @@ operativi. Richieste rimane responsabile della pratica e delle azioni a cui punt
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#avvisaAnnullamento(java.util.UUID,java.util.Set)" class="member-name-link">avvisaAnnullamento</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;richiestaId,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html" title="class or interface in java.util" class="external-link">Set</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&gt;&nbsp;destinatari)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Registra gli avvisi per un annullamento acquisito da Richieste.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#avvisaDisponibilita(java.util.UUID,java.util.UUID,java.util.UUID)" class="member-name-link">avvisaDisponibilita</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;richiestaId,
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#avvisaDisponibilita(java.util.UUID,java.util.UUID,java.util.UUID)" class="member-name-link">avvisaDisponibilita</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;richiestaId,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;contattoId,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;destinatarioId)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Registra l'avviso per un contatto di disponibilità acquisito da Richieste.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/time/Instant.html" title="class or interface in java.time" class="external-link">Instant</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#confermaRicezione(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">confermaRicezione</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/time/Instant.html" title="class or interface in java.time" class="external-link">Instant</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#confermaRicezione(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">confermaRicezione</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;comunicazioneId)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Registra la conferma esplicita per l'account destinatario.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="ComunicazioniApi.Comunicazione.html" title="class in it.unina.picus.comunicazioni.api">ComunicazioniApi.Comunicazione</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#consultaComunicazione(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">consultaComunicazione</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="ComunicazioniApi.Comunicazione.html" title="class in it.unina.picus.comunicazioni.api">ComunicazioniApi.Comunicazione</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#consultaComunicazione(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">consultaComunicazione</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;comunicazioneId)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Consulta il testo e i metadati degli allegati.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="ComunicazioniApi.AvvisoOperativo.html" title="class in it.unina.picus.comunicazioni.api">ComunicazioniApi.AvvisoOperativo</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#elencoAvvisiOperativi(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">elencoAvvisiOperativi</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="ComunicazioniApi.AvvisoOperativo.html" title="class in it.unina.picus.comunicazioni.api">ComunicazioniApi.AvvisoOperativo</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#elencoAvvisiOperativi(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">elencoAvvisiOperativi</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Elenca gli avvisi operativi destinati all'account, senza esporre i dati della pratica.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="ComunicazioniApi.Comunicazione.html" title="class in it.unina.picus.comunicazioni.api">ComunicazioniApi.Comunicazione</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#elencoInviate(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">elencoInviate</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="ComunicazioniApi.Comunicazione.html" title="class in it.unina.picus.comunicazioni.api">ComunicazioniApi.Comunicazione</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#elencoInviate(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">elencoInviate</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Elenca per il Banco le comunicazioni inviate, consultabili anche dopo l'invio.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="ComunicazioniApi.Comunicazione.html" title="class in it.unina.picus.comunicazioni.api">ComunicazioniApi.Comunicazione</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#elencoRicevute(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">elencoRicevute</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="ComunicazioniApi.Comunicazione.html" title="class in it.unina.picus.comunicazioni.api">ComunicazioniApi.Comunicazione</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#elencoRicevute(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">elencoRicevute</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Elenca le comunicazioni ricevute dall'account autenticato.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="ComunicazioniApi.Riscontro.html" title="class in it.unina.picus.comunicazioni.api">ComunicazioniApi.Riscontro</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#elencoRiscontri(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">elencoRiscontri</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="ComunicazioniApi.Riscontro.html" title="class in it.unina.picus.comunicazioni.api">ComunicazioniApi.Riscontro</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#elencoRiscontri(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">elencoRiscontri</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;comunicazioneId)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Elenca i riscontri per il Banco, inclusi i destinatari che devono ancora confermare.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="ComunicazioniApi.Comunicazione.html" title="class in it.unina.picus.comunicazioni.api">ComunicazioniApi.Comunicazione</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#inviaComunicazione(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.comunicazioni.api.ComunicazioniApi.DatiComunicazione)" class="member-name-link">inviaComunicazione</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="ComunicazioniApi.Comunicazione.html" title="class in it.unina.picus.comunicazioni.api">ComunicazioniApi.Comunicazione</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#inviaComunicazione(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.comunicazioni.api.ComunicazioniApi.DatiComunicazione)" class="member-name-link">inviaComunicazione</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  <a href="ComunicazioniApi.DatiComunicazione.html" title="class in it.unina.picus.comunicazioni.api">ComunicazioniApi.DatiComunicazione</a>&nbsp;dati)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Invia una comunicazione del Banco.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="ComunicazioniApi.FileAllegato.html" title="class in it.unina.picus.comunicazioni.api">ComunicazioniApi.FileAllegato</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#scaricaAllegato(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">scaricaAllegato</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="ComunicazioniApi.FileAllegato.html" title="class in it.unina.picus.comunicazioni.api">ComunicazioniApi.FileAllegato</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#scaricaAllegato(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">scaricaAllegato</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;allegatoId)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Scarica un allegato con gli stessi controlli di accesso della comunicazione.</div>
 </div>
 </div>
 </div>
 </div>
+<div class="inherited-list">
+<h3 id="methods-inherited-from-class-it.unina.picus.comunicazioni.api.AvvisiAnnullamentoApi">Methods inherited from interface&nbsp;<a href="AvvisiAnnullamentoApi.html#method-summary" title="interface in it.unina.picus.comunicazioni.api">AvvisiAnnullamentoApi</a></h3>
+<code><a href="AvvisiAnnullamentoApi.html#avvisaAnnullamento(java.util.UUID,java.util.Set)" title="avvisaAnnullamento(UUID, Set)">avvisaAnnullamento</a></code></div>
 </section>
 </li>
 </ul>
@@ -386,22 +382,6 @@ per lo stesso contatto e destinatario producono un solo avviso visibile nell'app
 <li><a href="#avvisaDisponibilita(java.util.UUID,java.util.UUID,java.util.UUID)"><code>avvisaDisponibilita(UUID, UUID, UUID)</code></a></li>
 </ul>
 </dd>
-</dl>
-</div>
-</section>
-</li>
-<li>
-<section class="detail" id="avvisaAnnullamento(java.util.UUID,java.util.Set)">
-<h3>avvisaAnnullamento</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">avvisaAnnullamento</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;richiestaId,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html" title="class or interface in java.util" class="external-link">Set</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&gt;&nbsp;destinatari)</span></div>
-<div class="block">Registra gli avvisi per un annullamento acquisito da Richieste. Più chiamate per la stessa
-richiesta producono un solo avviso di annullamento per account destinatario.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>richiestaId</code> - riferimento alla pratica annullata</dd>
-<dd><code>destinatari</code> - account coinvolti individuati da Richieste</dd>
 </dl>
 </div>
 </section>

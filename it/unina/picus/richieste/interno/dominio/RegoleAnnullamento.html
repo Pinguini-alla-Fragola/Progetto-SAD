@@ -62,6 +62,7 @@ loadScripts(document, 'script');</script>
 <ol class="toc-list">
 <li><a href="#motivoObbligatorio(it.unina.picus.richieste.api.RichiesteApi.StatoRichiesta)" tabindex="0">motivoObbligatorio(RichiesteApi.StatoRichiesta)</a></li>
 <li><a href="#valuta(it.unina.picus.richieste.api.RichiesteApi.StatoRichiesta,java.lang.String)" tabindex="0">valuta(RichiesteApi.StatoRichiesta, String)</a></li>
+<li><a href="#motivoDaRegistrare(java.lang.String)" tabindex="0">motivoDaRegistrare(String)</a></li>
 </ol>
 </li>
 </ol>
@@ -129,15 +130,20 @@ stessa risposta.</div>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#motivoObbligatorio(it.unina.picus.richieste.api.RichiesteApi.StatoRichiesta)" class="member-name-link">motivoObbligatorio</a><wbr>(<a href="../../api/RichiesteApi.StatoRichiesta.html" title="enum class in it.unina.picus.richieste.api">RichiesteApi.StatoRichiesta</a>&nbsp;stato)</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>(package private) static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#motivoDaRegistrare(java.lang.String)" class="member-name-link">motivoDaRegistrare</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;motivo)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Prepara il motivo del primo annullamento per la persistenza.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#motivoObbligatorio(it.unina.picus.richieste.api.RichiesteApi.StatoRichiesta)" class="member-name-link">motivoObbligatorio</a><wbr>(<a href="../../api/RichiesteApi.StatoRichiesta.html" title="enum class in it.unina.picus.richieste.api">RichiesteApi.StatoRichiesta</a>&nbsp;stato)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Dice se per annullare partendo da questo stato serve un motivo.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="RegoleAnnullamento.Decisione.html" title="enum class in it.unina.picus.richieste.interno.dominio">RegoleAnnullamento.Decisione</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#valuta(it.unina.picus.richieste.api.RichiesteApi.StatoRichiesta,java.lang.String)" class="member-name-link">valuta</a><wbr>(<a href="../../api/RichiesteApi.StatoRichiesta.html" title="enum class in it.unina.picus.richieste.api">RichiesteApi.StatoRichiesta</a>&nbsp;stato,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="RegoleAnnullamento.Decisione.html" title="enum class in it.unina.picus.richieste.interno.dominio">RegoleAnnullamento.Decisione</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#valuta(it.unina.picus.richieste.api.RichiesteApi.StatoRichiesta,java.lang.String)" class="member-name-link">valuta</a><wbr>(<a href="../../api/RichiesteApi.StatoRichiesta.html" title="enum class in it.unina.picus.richieste.api">RichiesteApi.StatoRichiesta</a>&nbsp;stato,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;motivo)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Applica le regole di stato e di motivo a un comando di annullamento già autorizzato.</div>
 </div>
 </div>
@@ -191,6 +197,24 @@ come U+00A0 e U+202F.</div>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - se manca il motivo negli stati in cui è obbligatorio, cioè
         tutti tranne Creata e Annullata</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="motivoDaRegistrare(java.lang.String)">
+<h3>motivoDaRegistrare</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">motivoDaRegistrare</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;motivo)</span></div>
+<div class="block">Prepara il motivo del primo annullamento per la persistenza.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>motivo</code> - testo già valutato rispetto allo stato di partenza</dd>
+<dt>Returns:</dt>
+<dd>testo originale o <code>null</code> se il motivo è vuoto</dd>
+<dt>Throws:</dt>
+<dd><code><a href="../../api/DatiRichiestaNonValidiException.html" title="class in it.unina.picus.richieste.api">DatiRichiestaNonValidiException</a></code> - se il motivo supera il limite, contiene Unicode malformato o caratteri
+        di controllo diversi da tabulazioni e ritorni a capo</dd>
 </dl>
 </div>
 </section>

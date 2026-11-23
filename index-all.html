@@ -311,13 +311,33 @@ oppure restituisce vuoto se il database rileva un conflitto concorrente di unici
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/monitoraggio/api/MonitoraggioApi.Trimestre.html#param-anno"><code>anno</code></a> record component.</div>
 </dd>
+<dt><a href="it/unina/picus/richieste/web/AnnullamentoRichiesteController.html#annulla(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,jakarta.servlet.http.HttpServletRequest)" class="member-name-link">annulla(UtenzeApi.IdentitaAutenticata, UUID, HttpServletRequest)</a> - Method in class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/AnnullamentoRichiesteController.html" title="class in it.unina.picus.richieste.web">AnnullamentoRichiesteController</a></dt>
+<dd>
+<div class="block">Registra l'annullamento o restituisce la sintesi dell'esito già registrato.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/interno/dominio/RichiestaDiMisura.html#annulla(java.lang.String)" class="member-name-link">annulla(String)</a> - Method in record class it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/RichiestaDiMisura.html" title="class in it.unina.picus.richieste.interno.dominio">RichiestaDiMisura</a></dt>
+<dd>
+<div class="block">Applica un annullamento autorizzato conservando l'assegnazione e i dettagli dell'accordo.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/interno/dominio/RegoleAnnullamento.Decisione.html#ANNULLA" class="member-name-link">ANNULLA</a> - Enum constant in enum class it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/RegoleAnnullamento.Decisione.html" title="enum class in it.unina.picus.richieste.interno.dominio">RegoleAnnullamento.Decisione</a></dt>
 <dd>
 <div class="block">Annulla la richiesta, conserva i dati già registrati e fa avvisare i soggetti coinvolti.</div>
 </dd>
+<dt><a href="it/unina/picus/richieste/web/AnnullamentoRichiesteController.html" class="type-name-link" title="class in it.unina.picus.richieste.web">AnnullamentoRichiesteController</a> - Class in <a href="it/unina/picus/richieste/web/package-summary.html">it.unina.picus.richieste.web</a></dt>
+<dd>
+<div class="block">Adattatore REST del comando di annullamento per i soggetti coinvolti nella richiesta.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/web/AnnullamentoRichiesteController.html#%3Cinit%3E(it.unina.picus.richieste.interno.applicazione.ServizioAnnullamentoRichieste,it.unina.picus.richieste.web.ConfigurazioneJsonRichieste)" class="member-name-link">AnnullamentoRichiesteController(ServizioAnnullamentoRichieste, ConfigurazioneJsonRichieste)</a> - Constructor for class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/AnnullamentoRichiesteController.html" title="class in it.unina.picus.richieste.web">AnnullamentoRichiesteController</a></dt>
+<dd>
+<div class="block">Collega l'adattatore al caso d'uso transazionale.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.html#annullaRichiesta(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,java.lang.String)" class="member-name-link">annullaRichiesta(UtenzeApi.IdentitaAutenticata, UUID, String)</a> - Method in interface it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.html" title="interface in it.unina.picus.richieste.api">RichiesteApi</a></dt>
 <dd>
 <div class="block">Annulla la richiesta in qualsiasi stato per il Banco, la OPT titolare o l'erogatore assegnato.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/interno/applicazione/ServizioAnnullamentoRichieste.html#annullaRichiesta(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,java.lang.String)" class="member-name-link">annullaRichiesta(UtenzeApi.IdentitaAutenticata, UUID, String)</a> - Method in class it.unina.picus.richieste.interno.applicazione.<a href="it/unina/picus/richieste/interno/applicazione/ServizioAnnullamentoRichieste.html" title="class in it.unina.picus.richieste.interno.applicazione">ServizioAnnullamentoRichieste</a></dt>
+<dd>
+<div class="block">Annulla la richiesta dopo aver verificato i permessi sulla pratica bloccata.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.StatoRichiesta.html#ANNULLATA" class="member-name-link">ANNULLATA</a> - Enum constant in enum class it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.StatoRichiesta.html" title="enum class in it.unina.picus.richieste.api">RichiesteApi.StatoRichiesta</a></dt>
 <dd>
@@ -428,9 +448,13 @@ sui tentativi.</div>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/utenze/web/AutenticazionePicus.html#authenticate(org.springframework.security.core.Authentication)" class="member-name-link">authenticate(Authentication)</a> - Method in class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/AutenticazionePicus.html" title="class in it.unina.picus.utenze.web">AutenticazionePicus</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.html#avvisaAnnullamento(java.util.UUID,java.util.Set)" class="member-name-link">avvisaAnnullamento(UUID, Set)</a> - Method in interface it.unina.picus.comunicazioni.api.<a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.html" title="interface in it.unina.picus.comunicazioni.api">ComunicazioniApi</a></dt>
+<dt><a href="it/unina/picus/comunicazioni/api/AvvisiAnnullamentoApi.html#avvisaAnnullamento(java.util.UUID,java.util.Set)" class="member-name-link">avvisaAnnullamento(UUID, Set)</a> - Method in interface it.unina.picus.comunicazioni.api.<a href="it/unina/picus/comunicazioni/api/AvvisiAnnullamentoApi.html" title="interface in it.unina.picus.comunicazioni.api">AvvisiAnnullamentoApi</a></dt>
 <dd>
-<div class="block">Registra gli avvisi per un annullamento acquisito da Richieste.</div>
+<div class="block">Registra un solo avviso per richiesta e destinatario nella transazione chiamante.</div>
+</dd>
+<dt><a href="it/unina/picus/comunicazioni/interno/persistenza/AvvisiOperativiJpa.html#avvisaAnnullamento(java.util.UUID,java.util.Set)" class="member-name-link">avvisaAnnullamento(UUID, Set)</a> - Method in class it.unina.picus.comunicazioni.interno.persistenza.<a href="it/unina/picus/comunicazioni/interno/persistenza/AvvisiOperativiJpa.html" title="class in it.unina.picus.comunicazioni.interno.persistenza">AvvisiOperativiJpa</a></dt>
+<dd>
+<div class="block">Registra un solo avviso per richiesta e destinatario nella transazione chiamante.</div>
 </dd>
 <dt><a href="it/unina/picus/comunicazioni/api/AvvisiOperativiApi.html#avvisaDisponibilita(java.util.UUID,java.util.UUID,java.util.UUID)" class="member-name-link">avvisaDisponibilita(UUID, UUID, UUID)</a> - Method in interface it.unina.picus.comunicazioni.api.<a href="it/unina/picus/comunicazioni/api/AvvisiOperativiApi.html" title="interface in it.unina.picus.comunicazioni.api">AvvisiOperativiApi</a></dt>
 <dd>
@@ -442,6 +466,10 @@ sui tentativi.</div>
 </dd>
 <dt><a href="it/unina/picus/comunicazioni/interno/persistenza/AvvisiOperativiJpa.html#avvisaDisponibilita(java.util.UUID,java.util.UUID,java.util.UUID)" class="member-name-link">avvisaDisponibilita(UUID, UUID, UUID)</a> - Method in class it.unina.picus.comunicazioni.interno.persistenza.<a href="it/unina/picus/comunicazioni/interno/persistenza/AvvisiOperativiJpa.html" title="class in it.unina.picus.comunicazioni.interno.persistenza">AvvisiOperativiJpa</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/comunicazioni/api/AvvisiAnnullamentoApi.html" class="type-name-link" title="interface in it.unina.picus.comunicazioni.api">AvvisiAnnullamentoApi</a> - Interface in <a href="it/unina/picus/comunicazioni/api/package-summary.html">it.unina.picus.comunicazioni.api</a></dt>
+<dd>
+<div class="block">Porta di scrittura degli avvisi in-app prodotti da un annullamento.</div>
+</dd>
 <dt><a href="it/unina/picus/comunicazioni/api/AvvisiOperativiApi.html" class="type-name-link" title="interface in it.unina.picus.comunicazioni.api">AvvisiOperativiApi</a> - Interface in <a href="it/unina/picus/comunicazioni/api/package-summary.html">it.unina.picus.comunicazioni.api</a></dt>
 <dd>
 <div class="block">Avvisi di disponibilità in-app, indipendenti dalle comunicazioni generali del Banco.</div>
@@ -454,7 +482,7 @@ sui tentativi.</div>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/comunicazioni/interno/persistenza/AvvisiOperativiJpa.html" class="type-name-link" title="class in it.unina.picus.comunicazioni.interno.persistenza">AvvisiOperativiJpa</a> - Class in <a href="it/unina/picus/comunicazioni/interno/persistenza/package-summary.html">it.unina.picus.comunicazioni.interno.persistenza</a></dt>
 <dd>
-<div class="block">Consegna in-app atomica con il contatto, tramite il database condiviso del monolite.</div>
+<div class="block">Consegna in-app atomica con il comando sulla richiesta, tramite il database condiviso.</div>
 </dd>
 <dt><a href="it/unina/picus/comunicazioni/interno/persistenza/AvvisiOperativiJpa.html#%3Cinit%3E(jakarta.persistence.EntityManager,java.time.Clock,it.unina.picus.comunicazioni.api.DestinatariAvvisi)" class="member-name-link">AvvisiOperativiJpa(EntityManager, Clock, DestinatariAvvisi)</a> - Constructor for class it.unina.picus.comunicazioni.interno.persistenza.<a href="it/unina/picus/comunicazioni/interno/persistenza/AvvisiOperativiJpa.html" title="class in it.unina.picus.comunicazioni.interno.persistenza">AvvisiOperativiJpa</a></dt>
 <dd>&nbsp;</dd>
@@ -3685,6 +3713,10 @@ operativi di Richieste.</div>
 <dd>
 <div class="block">Converte e verifica i tipi dei campi JSON per la creazione di una misura.</div>
 </dd>
+<dt><a href="it/unina/picus/richieste/web/ConfigurazioneJsonRichieste.html#leggiFacoltativo(jakarta.servlet.http.HttpServletRequest)" class="member-name-link">leggiFacoltativo(HttpServletRequest)</a> - Method in class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/ConfigurazioneJsonRichieste.html" title="class in it.unina.picus.richieste.web">ConfigurazioneJsonRichieste</a></dt>
+<dd>
+<div class="block">Legge il corpo facoltativo dei comandi che controllano l'accesso prima del binding.</div>
+</dd>
 <dt><a href="it/unina/picus/comunicazioni/interno/dominio/BozzaComunicazione.html#letturaGruppo()" class="member-name-link">letturaGruppo()</a> - Method in record class it.unina.picus.comunicazioni.interno.dominio.<a href="it/unina/picus/comunicazioni/interno/dominio/BozzaComunicazione.html" title="class in it.unina.picus.comunicazioni.interno.dominio">BozzaComunicazione</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/comunicazioni/interno/dominio/BozzaComunicazione.html#param-letturaGruppo"><code>letturaGruppo</code></a> record component.</div>
@@ -3978,6 +4010,14 @@ applicando allow-list esplicite sui campi e controlli di tipo prima del dominio.
 </dd>
 <dt><a href="it/unina/picus/utenze/web/AttivazioneController.html#mostraPaginaAttivazione(java.lang.String,org.springframework.ui.Model)" class="member-name-link">mostraPaginaAttivazione(String, Model)</a> - Method in class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/AttivazioneController.html" title="class in it.unina.picus.utenze.web">AttivazioneController</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/richieste/interno/dominio/RichiestaDiMisura.html#motivoAnnullamento()" class="member-name-link">motivoAnnullamento()</a> - Method in record class it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/RichiestaDiMisura.html" title="class in it.unina.picus.richieste.interno.dominio">RichiestaDiMisura</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>motivoAnnullamento</code> record component.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/interno/dominio/RegoleAnnullamento.html#motivoDaRegistrare(java.lang.String)" class="member-name-link">motivoDaRegistrare(String)</a> - Static method in class it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/RegoleAnnullamento.html" title="class in it.unina.picus.richieste.interno.dominio">RegoleAnnullamento</a></dt>
+<dd>
+<div class="block">Prepara il motivo del primo annullamento per la persistenza.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/interno/dominio/RegoleAnnullamento.html#motivoObbligatorio(it.unina.picus.richieste.api.RichiesteApi.StatoRichiesta)" class="member-name-link">motivoObbligatorio(RichiesteApi.StatoRichiesta)</a> - Static method in class it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/RegoleAnnullamento.html" title="class in it.unina.picus.richieste.interno.dominio">RegoleAnnullamento</a></dt>
 <dd>
 <div class="block">Dice se per annullare partendo da questo stato serve un motivo.</div>
@@ -4845,6 +4885,10 @@ nel modo giusto: le pagine HTML rimandano al login (302), le API ricevono <code>
 </dd>
 <dt><a href="it/unina/picus/richieste/interno/dominio/RichiestaDiMisura.html#%3Cinit%3E(java.util.UUID,java.util.UUID,long,it.unina.picus.richieste.api.RichiesteApi.TipoDestinatario,java.lang.String,java.lang.String,java.time.Instant,it.unina.picus.richieste.api.RichiesteApi.StatoRichiesta,java.util.UUID,it.unina.picus.richieste.api.RichiesteApi.DettagliAccordo,java.util.UUID,it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione)" class="member-name-link">RichiestaDiMisura(UUID, UUID, long, RichiesteApi.TipoDestinatario, String, String, Instant, RichiesteApi.StatoRichiesta, UUID, RichiesteApi.DettagliAccordo, UUID, CatalogoApi.AmbitoErogazione)</a> - Constructor for record class it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/RichiestaDiMisura.html" title="class in it.unina.picus.richieste.interno.dominio">RichiestaDiMisura</a></dt>
 <dd>
+<div class="block">Rappresenta una pratica priva di motivo di annullamento registrato.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/interno/dominio/RichiestaDiMisura.html#%3Cinit%3E(java.util.UUID,java.util.UUID,long,it.unina.picus.richieste.api.RichiesteApi.TipoDestinatario,java.lang.String,java.lang.String,java.time.Instant,it.unina.picus.richieste.api.RichiesteApi.StatoRichiesta,java.util.UUID,it.unina.picus.richieste.api.RichiesteApi.DettagliAccordo,java.util.UUID,it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione,java.lang.String)" class="member-name-link">RichiestaDiMisura(UUID, UUID, long, RichiesteApi.TipoDestinatario, String, String, Instant, RichiesteApi.StatoRichiesta, UUID, RichiesteApi.DettagliAccordo, UUID, CatalogoApi.AmbitoErogazione, String)</a> - Constructor for record class it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/RichiestaDiMisura.html" title="class in it.unina.picus.richieste.interno.dominio">RichiestaDiMisura</a></dt>
+<dd>
 <div class="block">Creates an instance of a <code>RichiestaDiMisura</code> record class.</div>
 </dd>
 <dt><a href="it/unina/picus/comunicazioni/interno/applicazione/RichiestaElenco.html" class="type-name-link" title="class in it.unina.picus.comunicazioni.interno.applicazione">RichiestaElenco</a> - Record Class in <a href="it/unina/picus/comunicazioni/interno/applicazione/package-summary.html">it.unina.picus.comunicazioni.interno.applicazione</a></dt>
@@ -5159,6 +5203,14 @@ oppure vuoto se il database rileva un conflitto concorrente di unicità sul codi
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/comunicazioni/interno/dominio/FiltroComunicazioni.FiltroAllegati.html#SENZA" class="member-name-link">SENZA</a> - Enum constant in enum class it.unina.picus.comunicazioni.interno.dominio.<a href="it/unina/picus/comunicazioni/interno/dominio/FiltroComunicazioni.FiltroAllegati.html" title="enum class in it.unina.picus.comunicazioni.interno.dominio">FiltroComunicazioni.FiltroAllegati</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/richieste/interno/applicazione/ServizioAnnullamentoRichieste.html" class="type-name-link" title="class in it.unina.picus.richieste.interno.applicazione">ServizioAnnullamentoRichieste</a> - Class in <a href="it/unina/picus/richieste/interno/applicazione/package-summary.html">it.unina.picus.richieste.interno.applicazione</a></dt>
+<dd>
+<div class="block">Service Layer per registrare l'annullamento e consegnare gli avvisi nella stessa transazione.</div>
+</dd>
+<dt><a href="it/unina/picus/richieste/interno/applicazione/ServizioAnnullamentoRichieste.html#%3Cinit%3E(it.unina.picus.richieste.interno.dominio.RichiestaRepository,it.unina.picus.richieste.api.InvioRichiesteApi,it.unina.picus.utenze.api.UtenzeApi,it.unina.picus.comunicazioni.api.AvvisiAnnullamentoApi)" class="member-name-link">ServizioAnnullamentoRichieste(RichiestaRepository, InvioRichiesteApi, UtenzeApi, AvvisiAnnullamentoApi)</a> - Constructor for class it.unina.picus.richieste.interno.applicazione.<a href="it/unina/picus/richieste/interno/applicazione/ServizioAnnullamentoRichieste.html" title="class in it.unina.picus.richieste.interno.applicazione">ServizioAnnullamentoRichieste</a></dt>
+<dd>
+<div class="block">Collega il comando alle porte usate per leggere, aggiornare e notificare la richiesta.</div>
+</dd>
 <dt><a href="it/unina/picus/comunicazioni/interno/applicazione/ServizioConsultazioneComunicazioni.html" class="type-name-link" title="class in it.unina.picus.comunicazioni.interno.applicazione">ServizioConsultazioneComunicazioni</a> - Class in <a href="it/unina/picus/comunicazioni/interno/applicazione/package-summary.html">it.unina.picus.comunicazioni.interno.applicazione</a></dt>
 <dd>
 <div class="block">Restituisce le comunicazioni a chi può vederle.</div>
@@ -6183,6 +6235,10 @@ the order they are declared.</div>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/utenze/interno/dominio/RegolaUnicita.html#verifica(it.unina.picus.utenze.interno.dominio.DatiOperatore,it.unina.picus.utenze.interno.dominio.Errori)" class="member-name-link">verifica(DatiOperatore, Errori)</a> - Method in class it.unina.picus.utenze.interno.dominio.<a href="it/unina/picus/utenze/interno/dominio/RegolaUnicita.html" title="class in it.unina.picus.utenze.interno.dominio">RegolaUnicita</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/richieste/interno/applicazione/ServizioAnnullamentoRichieste.html#verificaAccesso(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">verificaAccesso(UtenzeApi.IdentitaAutenticata, UUID)</a> - Method in class it.unina.picus.richieste.interno.applicazione.<a href="it/unina/picus/richieste/interno/applicazione/ServizioAnnullamentoRichieste.html" title="class in it.unina.picus.richieste.interno.applicazione">ServizioAnnullamentoRichieste</a></dt>
+<dd>
+<div class="block">Controlla l'accesso prima che il controller legga il corpo del comando.</div>
+</dd>
 <dt><a href="it/unina/picus/utenze/api/UtenzeApi.html#verificaAccountSessione(java.util.UUID)" class="member-name-link">verificaAccountSessione(UUID)</a> - Method in interface it.unina.picus.utenze.api.<a href="it/unina/picus/utenze/api/UtenzeApi.html" title="interface in it.unina.picus.utenze.api">UtenzeApi</a></dt>
 <dd>
 <div class="block">Conferma l'identità associata a una sessione valida, verificando lo stato corrente dell'account.</div>

@@ -66,6 +66,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
 <li><a href="#configureMessageConverters(org.springframework.http.converter.HttpMessageConverters.ServerBuilder)" tabindex="0">configureMessageConverters(HttpMessageConverters.ServerBuilder)</a></li>
+<li><a href="#leggiFacoltativo(jakarta.servlet.http.HttpServletRequest)" tabindex="0">leggiFacoltativo(HttpServletRequest)</a></li>
 </ol>
 </li>
 </ol>
@@ -121,6 +122,11 @@ implements org.springframework.web.servlet.config.annotation.WebMvcConfigurer</s
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#configureMessageConverters(org.springframework.http.converter.HttpMessageConverters.ServerBuilder)" class="member-name-link">configureMessageConverters</a><wbr>(org.springframework.http.converter.HttpMessageConverters.ServerBuilder&nbsp;converters)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>(package private) <a href="CorpoJson.html" title="class in it.unina.picus.richieste.web">CorpoJson</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#leggiFacoltativo(jakarta.servlet.http.HttpServletRequest)" class="member-name-link">leggiFacoltativo</a><wbr>(jakarta.servlet.http.HttpServletRequest&nbsp;richiesta)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Legge il corpo facoltativo dei comandi che controllano l'accesso prima del binding.</div>
+</div>
 </div>
 </div>
 </div>
@@ -166,6 +172,15 @@ implements org.springframework.web.servlet.config.annotation.WebMvcConfigurer</s
 <dt>Specified by:</dt>
 <dd><code>configureMessageConverters</code>&nbsp;in interface&nbsp;<code>org.springframework.web.servlet.config.annotation.WebMvcConfigurer</code></dd>
 </dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="leggiFacoltativo(jakarta.servlet.http.HttpServletRequest)">
+<h3>leggiFacoltativo</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="return-type"><a href="CorpoJson.html" title="class in it.unina.picus.richieste.web">CorpoJson</a></span>&nbsp;<span class="element-name">leggiFacoltativo</span><wbr><span class="parameters">(jakarta.servlet.http.HttpServletRequest&nbsp;richiesta)</span></div>
+<div class="block">Legge il corpo facoltativo dei comandi che controllano l'accesso prima del binding.</div>
 </div>
 </section>
 </li>
