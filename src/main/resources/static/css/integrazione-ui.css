@@ -57,6 +57,7 @@
 }
 
 .campi-inattivi { border: 0; margin: 0; padding: 0; }
+.campi-form { border: 0; margin: 0; padding: 0; }
 .campi-inattivi :disabled { filter: grayscale(1); }
 .azione-inattiva { display: inline-flex; flex-direction: column; align-items: flex-start; gap: .375rem; max-width: 100%; }
 .azione-inattiva:has(> .btn-block) { display: block; }

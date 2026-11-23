@@ -37,4 +37,10 @@ public class ComunicazioneJpa {
         this.tipoDestinatari = tipoDestinatari;
         this.inviataIl = inviataIl;
     }
+
+    public UUID getId() { return id; }
+    public String getTitolo() { return titolo; }
+    public String getTesto() { return testo; }
+    public TipoDestinatari getTipoDestinatari() { return tipoDestinatari; }
+    public Instant getInviataIl() { return inviataIl; }
 }

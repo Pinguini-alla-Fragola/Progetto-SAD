@@ -1,62 +1,169 @@
 package it.unina.picus.utenze.interno.applicazione;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.Set;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.annotation.Propagation;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.LockModeType;
-import it.unina.picus.utenze.interno.persistenza.ProfiloOptJpa;
-import it.unina.picus.utenze.interno.persistenza.ProfiloOperatoreJpa;
-import it.unina.picus.utenze.interno.persistenza.OperatoreMisuraJpa;
+import org.springframework.transaction.annotation.Transactional;
 
+import it.unina.picus.utenze.api.OperazioneUtenzaNonConsentitaException;
+import it.unina.picus.utenze.api.UtenzaNonTrovataException;
 import it.unina.picus.utenze.api.UtenzeApi;
 import it.unina.picus.utenze.interno.persistenza.AccountJpa;
 import it.unina.picus.utenze.interno.persistenza.AccountRepository;
+import it.unina.picus.utenze.interno.persistenza.OperatoreMisuraJpa;
+import it.unina.picus.utenze.interno.persistenza.ProfiloOperatoreJpa;
 import it.unina.picus.utenze.interno.persistenza.ProfiloOperatoreRepository;
+import it.unina.picus.utenze.interno.persistenza.ProfiloOptJpa;
 import it.unina.picus.utenze.interno.persistenza.ProfiloOptRepository;
+import it.unina.picus.utenze.interno.persistenza.TokenAttivazioneJpa;
+import it.unina.picus.utenze.interno.persistenza.TokenAttivazioneRepository;
+import it.unina.picus.utenze.interno.persistenza.TokenRecuperoPasswordRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 
-/**
- * Verifica delle credenziali e delle sessioni.
- *
- * <p>Esito unico per l'esterno: credenziali errate, email sconosciuta e account non attivo sono
- * indistinguibili (nessuna enumerazione degli account). Il limite sui tentativi è applicato a monte,
- * dal livello web (vedi LimitatoreAccessi). In ogni caso
- * viene eseguito un confronto BCrypt, per non rivelare l'esistenza dell'account dai tempi di risposta.</p>
- */
 @Service
 @Profile("!skeleton")
 @Transactional
 class UtenzeService implements UtenzeApi {
 
     static final int LUNGHEZZA_MAX_EMAIL = 254;
-    /** BCrypt considera solo i primi 72 byte: il limite è in byte UTF-8, non in caratteri. */
     static final int LUNGHEZZA_MAX_PASSWORD_BYTE = 72;
 
     private final AccountRepository accounts;
     private final ProfiloOptRepository profiliOpt;
     private final ProfiloOperatoreRepository profiliOperatore;
+    private final TokenAttivazioneRepository tokensAttivazione;
+    private final TokenRecuperoPasswordRepository tokensRecupero;
     private final PasswordEncoder encoder;
     private final EntityManager em;
-    /** Hash fittizio contro cui confrontare quando l'account non può essere verificato. */
+    private final Clock clock;
     private final String hashFittizio;
 
+    @Autowired
     UtenzeService(AccountRepository accounts, ProfiloOptRepository profiliOpt,
-            ProfiloOperatoreRepository profiliOperatore, PasswordEncoder encoder, EntityManager em) {
+                  ProfiloOperatoreRepository profiliOperatore,
+                  TokenAttivazioneRepository tokensAttivazione,
+                  TokenRecuperoPasswordRepository tokensRecupero,
+                  PasswordEncoder encoder, EntityManager em) {
+        this(accounts, profiliOpt, profiliOperatore, tokensAttivazione, tokensRecupero, encoder, em,
+                Clock.systemUTC());
+    }
+
+    UtenzeService(AccountRepository accounts, ProfiloOptRepository profiliOpt,
+                  ProfiloOperatoreRepository profiliOperatore,
+                  TokenAttivazioneRepository tokensAttivazione,
+                  TokenRecuperoPasswordRepository tokensRecupero,
+                  PasswordEncoder encoder, EntityManager em, Clock clock) {
         this.accounts = accounts;
         this.profiliOpt = profiliOpt;
         this.profiliOperatore = profiliOperatore;
+        this.tokensAttivazione = tokensAttivazione;
+        this.tokensRecupero = tokensRecupero;
         this.encoder = encoder;
         this.em = em;
+        this.clock = Objects.requireNonNull(clock);
         this.hashFittizio = encoder.encode(UUID.randomUUID().toString());
+    }
+
+    @Override
+    public void revocaUtenzaOpt(UUID optAccountId) {
+        revocaAccount(optAccountId, RuoloUtente.OPT,
+                "La revoca manuale è consentita solo per account con ruolo OPT.");
+    }
+
+    @Override
+    public void revocaUtenzaOperatore(UUID operatoreAccountId) {
+        revocaAccount(operatoreAccountId, RuoloUtente.OPERATORE,
+                "La revoca manuale è consentita solo per account con ruolo OPERATORE.");
+    }
+
+    private void revocaAccount(UUID accountId, RuoloUtente ruoloAtteso, String messaggioErroreRuolo) {
+        if (accountId == null) {
+            throw new UtenzaNonTrovataException("Identificativo account obbligatorio.");
+        }
+
+        // 1. Punto unico di serializzazione: prima AccountJpa, poi TokenAttivazioneJpa
+        AccountJpa account = accounts.findByIdForUpdate(accountId)
+                .orElseThrow(() -> new UtenzaNonTrovataException("Account non trovato."));
+
+        // 2. Verifica ruolo e stato sotto lock esclusivo dell'account
+        if (!ruoloAtteso.name().equals(account.getRuolo())) {
+            throw new OperazioneUtenzaNonConsentitaException(messaggioErroreRuolo);
+        }
+
+        if (StatoUtenza.REVOCATO.name().equals(account.getStato())) {
+            throw new OperazioneUtenzaNonConsentitaException("L'account è già stato revocato.");
+        }
+
+        // 3. Blocca e invalida i token ancora attivi (ordine: account -> token)
+        List<TokenAttivazioneJpa> tokenAttivi = tokensAttivazione.findAttiviByAccountIdForUpdate(accountId);
+        Instant ora = Instant.now(clock);
+        account.revoca();
+        accounts.saveAndFlush(account);
+
+        for (TokenAttivazioneJpa token : tokenAttivi) {
+            if (!token.isUsato()) {
+                token.segnaComeUsato(ora);
+            }
+        }
+        if (!tokenAttivi.isEmpty()) {
+            tokensAttivazione.saveAllAndFlush(tokenAttivi);
+        }
+        // Anche un eventuale link di recupero password ancora valido non deve sopravvivere alla revoca.
+        tokensRecupero.invalidaTokenAttiviPerAccount(accountId, ora);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AccountAmministrativo> elencoAccountPerRuolo(RuoloUtente ruolo) {
+        List<AccountJpa> lista = accounts.findByRuolo(ruolo.name());
+        if (lista.isEmpty()) {
+            return List.of();
+        }
+        if (ruolo == RuoloUtente.OPT) {
+            Map<UUID, ProfiloOptJpa> profili = profiliOpt.findAllById(
+                    lista.stream().map(AccountJpa::getId).toList()
+            ).stream().collect(Collectors.toMap(ProfiloOptJpa::getAccountId, Function.identity()));
+            return lista.stream().map(a -> {
+                ProfiloOptJpa p = profili.get(a.getId());
+                String codiceStruttura = p != null ? p.getCodiceStruttura() : null;
+                String comune = p != null ? p.getComuneCodice() : null;
+                return new AccountAmministrativo(
+                        a.getId(), a.getNome(), a.getEmail(), codiceStruttura, comune,
+                        RuoloUtente.OPT, StatoUtenza.valueOf(a.getStato()));
+            }).toList();
+        }
+        if (ruolo == RuoloUtente.OPERATORE) {
+            Map<UUID, ProfiloOperatoreJpa> profili = profiliOperatore.findAllById(
+                    lista.stream().map(AccountJpa::getId).toList()
+            ).stream().collect(Collectors.toMap(ProfiloOperatoreJpa::getAccountId, Function.identity()));
+            return lista.stream().map(a -> {
+                ProfiloOperatoreJpa p = profili.get(a.getId());
+                String comune = p != null ? p.getComuneCodice() : null;
+                String ref = p != null ? p.getTipologia() : null;
+                return new AccountAmministrativo(
+                        a.getId(), a.getNome(), a.getEmail(), ref, comune,
+                        RuoloUtente.OPERATORE, StatoUtenza.valueOf(a.getStato()));
+            }).toList();
+        }
+        return lista.stream().map(a -> new AccountAmministrativo(
+                a.getId(), a.getNome(), a.getEmail(), null, null,
+                RuoloUtente.valueOf(a.getRuolo()), StatoUtenza.valueOf(a.getStato()))).toList();
     }
 
     @Override
@@ -75,12 +182,18 @@ class UtenzeService implements UtenzeApi {
         }
 
         AccountJpa account = trovato.get();
-        if (!encoder.matches(password, account.getPasswordHash())
+        String passwordHash = account.getPasswordHash();
+        if (passwordHash == null) {
+            confrontoFittizio();
+            return Optional.empty();
+        }
+
+        if (!encoder.matches(password, passwordHash)
                 || !StatoUtenza.ATTIVO.name().equals(account.getStato())) {
             return Optional.empty();
         }
 
-        if (encoder.upgradeEncoding(account.getPasswordHash())) {
+        if (encoder.upgradeEncoding(passwordHash)) {
             accounts.aggiornaHash(account.getId(), encoder.encode(password));
         }
         return Optional.of(identita(account));
@@ -168,7 +281,7 @@ class UtenzeService implements UtenzeApi {
                 var competenza = blocca(OperatoreMisuraJpa.class, new OperatoreMisuraJpa.Chiave(accountId, misuraId));
                 yield profilo == null || competenza == null ? Optional.empty()
                         : Optional.of(new ProfiloErogatore(accountId, account.getNome(),
-                                TipoErogatore.valueOf(profilo.getTipologia()), profilo.getComuneCodice(), profilo.isCentroPicus()));
+                        TipoErogatore.valueOf(profilo.getTipologia()), profilo.getComuneCodice(), profilo.isCentroPicus()));
             }
             case BANCO -> Optional.empty();
         };
@@ -177,7 +290,6 @@ class UtenzeService implements UtenzeApi {
     private <T> T blocca(Class<T> tipo, Object id) {
         var entita = em.find(tipo, id, LockModeType.PESSIMISTIC_READ);
         if (entita != null) {
-            // La sessione o una consultazione precedente può avere popolato la cache di primo livello.
             em.refresh(entita, LockModeType.PESSIMISTIC_READ);
         }
         return entita;
