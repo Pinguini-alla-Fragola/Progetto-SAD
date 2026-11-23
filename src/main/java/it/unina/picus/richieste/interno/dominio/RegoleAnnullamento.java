@@ -1,8 +1,10 @@
 package it.unina.picus.richieste.interno.dominio;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import it.unina.picus.richieste.api.DatiRichiestaNonValidiException;
 import it.unina.picus.richieste.api.RichiesteApi;
 import it.unina.picus.richieste.api.RichiesteApi.StatoRichiesta;
 
@@ -33,6 +35,7 @@ public final class RegoleAnnullamento {
     // Stati con motivo facoltativo: Creata e Annullata (la ripetizione è idempotente).
     private static final Set<StatoRichiesta> MOTIVO_FACOLTATIVO =
             Set.of(StatoRichiesta.CREATA, StatoRichiesta.ANNULLATA);
+    private static final int LUNGHEZZA_MASSIMA_MOTIVO = 500;
 
     private RegoleAnnullamento() {
     }
@@ -61,9 +64,33 @@ public final class RegoleAnnullamento {
      */
     public static Decisione valuta(StatoRichiesta stato, String motivo) {
         if (motivoObbligatorio(stato) && eVuoto(motivo)) {
-            throw new IllegalArgumentException("Motivo obbligatorio");
+            throw new DatiRichiestaNonValidiException(Map.of("motivo", "Motivo obbligatorio"));
         }
         return stato == StatoRichiesta.ANNULLATA ? Decisione.GIA_ANNULLATA : Decisione.ANNULLA;
+    }
+
+    /**
+     * Prepara il motivo del primo annullamento per la persistenza.
+     *
+     * @param motivo testo già valutato rispetto allo stato di partenza
+     * @return testo originale o {@code null} se il motivo è vuoto
+     * @throws DatiRichiestaNonValidiException se il motivo supera il limite, contiene Unicode malformato o caratteri
+     *         di controllo diversi da tabulazioni e ritorni a capo
+     */
+    static String motivoDaRegistrare(String motivo) {
+        if (motivo != null && motivo.length() > LUNGHEZZA_MASSIMA_MOTIVO) {
+            throw new DatiRichiestaNonValidiException(Map.of("motivo",
+                    "Il motivo può contenere al massimo " + LUNGHEZZA_MASSIMA_MOTIVO + " caratteri"));
+        }
+        if (eVuoto(motivo)) {
+            return null;
+        }
+        if (motivo.codePoints().anyMatch(c ->
+                (c >= Character.MIN_SURROGATE && c <= Character.MAX_SURROGATE)
+                        || (Character.isISOControl(c) && c != '\t' && c != '\n' && c != '\r'))) {
+            throw new DatiRichiestaNonValidiException(Map.of("motivo", "Usa testo semplice per il motivo"));
+        }
+        return motivo;
     }
 
     // isBlank() non considera spazi i caratteri non separabili: isSpaceChar li include.
