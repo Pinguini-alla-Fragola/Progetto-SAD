@@ -14,7 +14,7 @@ import java.util.UUID;
  * Raccoglie i conteggi trimestrali delle OPT e le schede personali degli operatori del Banco.
  * I dati descrivono attività dichiarate e sono indipendenti dal ciclo della singola richiesta.
  */
-public interface MonitoraggioApi {
+public interface MonitoraggioApi extends SchedeOperatoreApi {
 
     /**
      * Registra i conteggi della OPT autenticata per il trimestre. Lo stesso valore ritrasmesso
@@ -46,40 +46,16 @@ public interface MonitoraggioApi {
      */
     List<ConteggioOpt> consultaConteggiOpt(IdentitaAutenticata attore, UUID optId, Trimestre da, Trimestre a);
 
-    /**
-     * Invia la scheda personale trimestrale dell'operatore autenticato. Il modulo ricava il
-     * titolare dall'identità verificata. Il tracciato e le regole di firma e correzione seguono
-     * il raffinamento della storia di compilazione.
-     *
-     * @param attore identità verificata dell'operatore interno o esterno pagato dal Banco
-     * @param trimestre periodo di rendicontazione
-     * @param dati dati dichiarati nella scheda personale
-     * @return identificativo della scheda ricevuta
-     * @throws SecurityException se l'attore non è un operatore autorizzato
-     * @throws IllegalArgumentException se i dati non rispettano il tracciato applicabile
-     * @throws IllegalStateException se il periodo o la scheda esistente non consentono un nuovo invio
-     */
+    /** {@inheritDoc} */
+    @Override
     UUID inviaSchedaOperatore(IdentitaAutenticata attore, Trimestre trimestre, DatiSchedaOperatore dati);
 
-    /**
-     * Elenca le schede personali inviate dall'operatore autenticato.
-     *
-     * @param attore identità verificata dell'operatore titolare
-     * @return riferimenti alle proprie schede
-     * @throws SecurityException se l'attore non è un operatore autorizzato
-     */
+    /** {@inheritDoc} */
+    @Override
     List<SchedaSintesi> elencoSchedeOperatore(IdentitaAutenticata attore);
 
-    /**
-     * Consulta la scheda personale. Il Banco può leggerla per la rendicontazione e
-     * l'operatore titolare può consultare la propria.
-     *
-     * @param attore identità verificata del Banco autorizzato o dell'operatore titolare
-     * @param schedaId identificativo della scheda
-     * @return scheda personale visibile all'attore
-     * @throws SecurityException se l'attore non può consultare la scheda
-     * @throws NoSuchElementException se la scheda non esiste
-     */
+    /** {@inheritDoc} */
+    @Override
     SchedaOperatore consultaSchedaOperatore(IdentitaAutenticata attore, UUID schedaId);
 
     /**
@@ -132,8 +108,7 @@ public interface MonitoraggioApi {
     record ConteggioOpt(UUID optId, VoceMisura conteggio) {}
 
     /**
-     * Dati iniziali della scheda personale. Obbligatorietà, firma e versione del tracciato
-     * restano da definire con il raffinamento dei requisiti di monitoraggio.
+     * Dati dichiarati per la scheda personale TM-OP-01, inviata senza firma.
      *
      * @param nome nome dell'operatore
      * @param cognome cognome dell'operatore

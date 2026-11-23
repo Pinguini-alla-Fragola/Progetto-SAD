@@ -24,9 +24,9 @@ public interface TokenAttivazioneRepository extends JpaRepository<TokenAttivazio
     @Query("select t.accountId from TokenAttivazioneJpa t where t.tokenHash = :hash")
     Optional<UUID> findAccountIdByTokenHash(@Param("hash") String hash);
 
-    /** Istante dell'ultimo token emesso per l'account; da leggere con il lock dell'account già preso. */
-    @Query("select max(t.creatoIl) from TokenAttivazioneJpa t where t.accountId = :accountId")
-    Optional<Instant> ultimaEmissione(@Param("accountId") UUID accountId);
+    /** Numero di emissione dell'ultimo token dell'account; da leggere con il lock dell'account già preso. */
+    @Query("select coalesce(max(t.ordineEmissione), 0) from TokenAttivazioneJpa t where t.accountId = :accountId")
+    long ultimoOrdineEmissione(@Param("accountId") UUID accountId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select t from TokenAttivazioneJpa t where t.tokenHash = :hash")
@@ -60,15 +60,19 @@ public interface TokenAttivazioneRepository extends JpaRepository<TokenAttivazio
             """)
     int chiudiSeAttivo(@Param("id") UUID id, @Param("ora") Instant ora);
 
-    /** Chiude i token ancora non usati dell'account creati prima di quello indicato. */
+    /**
+     * Chiude i token ancora non usati dell'account che il token consegnato sostituisce: quelli emessi prima di lui e
+     * quelli dell'importazione CSV, che potrebbero essere stati preparati nel frattempo.
+     */
     @Modifying
     @Query("""
             update TokenAttivazioneJpa t
                set t.usatoIl = :ora
              where t.accountId = :accountId
                and t.usatoIl is null
-               and t.creatoIl < :prima
+               and t.id <> :consegnato
+               and (t.ordineEmissione < :ordine or t.daImportazioneOpt = true)
             """)
-    int invalidaPrecedenti(@Param("accountId") UUID accountId, @Param("prima") Instant prima,
-            @Param("ora") Instant ora);
+    int invalidaPrecedenti(@Param("accountId") UUID accountId, @Param("consegnato") UUID consegnato,
+            @Param("ordine") long ordine, @Param("ora") Instant ora);
 }

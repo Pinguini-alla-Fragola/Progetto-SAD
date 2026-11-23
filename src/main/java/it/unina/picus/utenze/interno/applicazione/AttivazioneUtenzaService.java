@@ -7,7 +7,6 @@ import java.security.SecureRandom;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.HexFormat;
 import java.util.List;
@@ -113,14 +112,25 @@ public class AttivazioneUtenzaService {
     /**
      * Genera un nuovo token monouso per un account in attesa di attivazione,
      * invalida eventuali token precedenti ancora attivi sotto lock e restituisce
-     * i dati per la consegna post-commit.
+     * i dati per la consegna post-commit. L'account deve essere appena inserito
+     * nella transazione corrente oppure già bloccato dal chiamante.
      */
     public DatiInvioAttivazione preparaTokenAttivazione(AccountJpa account) {
         Objects.requireNonNull(account, "account obbligatorio");
         if (!StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(account.getStato())) {
             throw new IllegalStateException("L'account non è in stato IN_ATTESA_DI_ATTIVAZIONE");
         }
-        return emettiNuovoToken(account);
+
+        List<TokenAttivazioneJpa> precedenti = tokens.findAttiviByAccountIdForUpdate(account.getId());
+        Instant ora = Instant.now(clock);
+        for (TokenAttivazioneJpa vecchio : precedenti) {
+            vecchio.segnaComeUsato(ora);
+        }
+        if (!precedenti.isEmpty()) {
+            tokens.saveAllAndFlush(precedenti);
+        }
+
+        return creaToken(account, ora, false).dati();
     }
 
     /**
@@ -128,10 +138,15 @@ public class AttivazioneUtenzaService {
      * primo link, alla creazione, sia per i reinvii, che sostituiscono il link precedente.
      *
      * <p>Mantiene lo stesso ordine dei lock di {@link #attivaAccount} e {@code UtenzeService.revocaAccount}
-     * (prima l'account, poi i suoi token) e rilegge i token attivi dopo aver preso il lock sull'account,
-     * per serializzare i reinvii concorrenti ed evitare più token attivi insieme.</p>
+     * (prima l'account, poi i token pendenti) e rilegge i token attivi dopo l'acquisizione del lock
+     * sull'account per serializzare eventuali reinvii concorrenti ed evitare doppi token attivi.</p>
      */
     public DatiInvioAttivazione rigeneraTokenPerAccount(UUID accountId, RuoloUtente ruoloAtteso) {
+        AccountJpa account = bloccaAccountPerReinvio(accountId, ruoloAtteso);
+        return preparaTokenAttivazione(account);
+    }
+
+    private AccountJpa bloccaAccountPerReinvio(UUID accountId, RuoloUtente ruoloAtteso) {
         if (accountId == null) {
             throw new UtenzaNonTrovataException("Identificativo account obbligatorio.");
         }
@@ -150,8 +165,7 @@ public class AttivazioneUtenzaService {
             throw new OperazioneUtenzaNonConsentitaException("L'account non è in attesa di attivazione.");
         }
 
-        // 3. Invalida i token ancora attivi ed emette quello nuovo (ordine: account -> token)
-        return emettiNuovoToken(account);
+        return account;
     }
 
     /**
@@ -178,13 +192,13 @@ public class AttivazioneUtenzaService {
         return accounts.findIdByEmailIgnoreCase(chiave)
                 .flatMap(accounts::findByIdForUpdate)
                 .filter(a -> StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(a.getStato()))
-                .map(this::creaToken);
+                .map(a -> creaToken(a, Instant.now(clock), false));
     }
 
     /**
-     * La posta ha accettato l'email: da ora il link nuovo sostituisce quelli emessi prima. Si invalidano solo i
-     * link più vecchi di questo, così due richieste ravvicinate non si annullano a vicenda e resta valido
-     * l'ultimo. Se l'account nel frattempo non è più in attesa non si fa nulla: attivazione e revoca hanno già
+     * La posta ha accettato l'email: da ora il link nuovo sostituisce quelli emessi prima. Si invalidano i link con
+     * numero di emissione minore e quelli dell'importazione CSV, così due richieste ravvicinate non si annullano
+     * a vicenda e resta valido l'ultimo. Se l'account nel frattempo non è più in attesa non si fa nulla: attivazione e revoca hanno già
      * chiuso tutti i link.
      *
      * @param idToken link appena consegnato
@@ -193,7 +207,8 @@ public class AttivazioneUtenzaService {
         tokens.findById(idToken).ifPresent(token -> {
             Optional<AccountJpa> account = accounts.findByIdForUpdate(token.getAccountId());
             if (account.filter(a -> StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(a.getStato())).isPresent()) {
-                tokens.invalidaPrecedenti(token.getAccountId(), token.getCreatoIl(), Instant.now(clock));
+                tokens.invalidaPrecedenti(token.getAccountId(), token.getId(), token.getOrdineEmissione(),
+                        Instant.now(clock));
                 eventPublisher.publishEvent(new LinkAttivazioneConsegnato(token.getAccountId()));
             }
         });
@@ -208,50 +223,6 @@ public class AttivazioneUtenzaService {
     public void scartaToken(UUID idToken) {
         // un solo aggiornamento condizionato: non serve il lock e non legge uno stato superato da altre richieste
         tokens.chiudiSeAttivo(idToken, Instant.now(clock));
-    }
-
-    /**
-     * Invalida i token ancora attivi dell'account e ne crea uno nuovo. Il chiamante tiene già il lock
-     * sull'account (o l'account è appena nato) e ha controllato che sia in attesa di attivazione.
-     */
-    private DatiInvioAttivazione emettiNuovoToken(AccountJpa account) {
-        List<TokenAttivazioneJpa> precedenti = tokens.findAttiviByAccountIdForUpdate(account.getId());
-        Instant ora = Instant.now(clock);
-        for (TokenAttivazioneJpa vecchio : precedenti) {
-            vecchio.segnaComeUsato(ora);
-        }
-        if (!precedenti.isEmpty()) {
-            tokens.saveAllAndFlush(precedenti);
-        }
-
-        return creaToken(account).dati();
-    }
-
-    /**
-     * Istante di emissione del prossimo token dell'account. Ogni token ha un istante strettamente maggiore di quelli
-     * già emessi: l'orologio può restituire lo stesso valore due volte e il database conserva solo i microsecondi,
-     * quindi il timestamp da solo non direbbe quale token è il precedente. Il valore si assegna sotto il lock
-     * dell'account, e la sostituzione ({@link #confermaConsegna}) confronta proprio questo ordine.
-     */
-    private Instant prossimaEmissione(UUID accountId) {
-        Instant adesso = Instant.now(clock).truncatedTo(ChronoUnit.MICROS);
-        return tokens.ultimaEmissione(accountId)
-                .map(ultima -> ultima.isBefore(adesso) ? adesso : ultima.plus(1, ChronoUnit.MICROS))
-                .orElse(adesso);
-    }
-
-    /** Crea il token per l'account, bloccato dal chiamante, senza toccare quelli già emessi. */
-    private LinkPreparato creaToken(AccountJpa account) {
-        Instant ora = prossimaEmissione(account.getId());
-        String tokenInChiaro = generaTokenCasuale();
-        TokenAttivazioneJpa token = tokens.saveAndFlush(new TokenAttivazioneJpa(
-                UUID.randomUUID(),
-                account.getId(),
-                calcolaSha256(tokenInChiaro),
-                ora.plus(durataValidita),
-                ora));
-        return new LinkPreparato(token.getId(),
-                new DatiInvioAttivazione(account.getEmail(), account.getNome(), tokenInChiaro));
     }
 
     /**
@@ -280,7 +251,7 @@ public class AttivazioneUtenzaService {
     }
 
     /**
-     * Consuma il token monouso in modo atomico (ordine lock: prima token, poi account),
+     * Consuma il token monouso in modo atomico (ordine lock: prima account, poi token),
      * rilegge stato e scadenza sotto lock, imposta l'hash BCrypt della nuova password
      * e attiva l'account.
      */
@@ -322,6 +293,61 @@ public class AttivazioneUtenzaService {
         account.attivaConPassword(passwordEncoder.encode(nuovaPassword));
         tokens.saveAndFlush(token);
         accounts.saveAndFlush(account);
+    }
+
+    /**
+     * Crea il link di un tentativo di consegna con l'account già bloccato dalla coda.
+     * I tentativi precedenti possono aver già raggiunto la casella del destinatario.
+     */
+    DatiInvioAttivazione preparaTokenImportazioneOpt(AccountJpa account) {
+        return creaToken(account, Instant.now(clock), true).dati();
+    }
+
+    DatiInvioAttivazione preparaReinvioOpt(UUID accountId) {
+        AccountJpa account = bloccaAccountPerReinvio(accountId, RuoloUtente.OPT);
+        return creaToken(account, Instant.now(clock), false).dati();
+    }
+
+    void concludeReinvioOpt(UUID accountId, DatiInvioAttivazione dati, boolean riuscito) {
+        var account = accounts.findByIdForUpdate(accountId);
+        if (account.isEmpty() || !StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(account.get().getStato())) {
+            return;
+        }
+
+        String hash = calcolaSha256(dati.tokenInChiaro());
+        var attivi = tokens.findAttiviByAccountIdForUpdate(accountId);
+        var tokenInviato = attivi.stream().filter(token -> token.getTokenHash().equals(hash)).findFirst();
+        if (tokenInviato.isEmpty()) {
+            return;
+        }
+
+        var inviato = tokenInviato.get();
+        Instant ora = Instant.now(clock);
+        if (!riuscito) {
+            inviato.segnaComeUsato(ora);
+            return;
+        }
+
+        // Anche i link CSV preparati durante l'invio manuale sono sostituiti.
+        attivi.stream()
+                .filter(token -> token.isDaImportazioneOpt() || token.getOrdineEmissione() < inviato.getOrdineEmissione())
+                .forEach(token -> token.segnaComeUsato(ora));
+    }
+
+    /**
+     * Salva un nuovo token senza toccare quelli già emessi. Ogni token ha un numero di emissione strettamente
+     * maggiore dei precedenti dell'account, ed è questo ordine, e non il timestamp, che dice quale link sostituisce
+     * quale.
+     */
+    private LinkPreparato creaToken(AccountJpa account, Instant ora, boolean daImportazioneOpt) {
+        // L'inserimento dell'account o il suo lock serializza le emissioni anche su più istanze.
+        long ordineEmissione = tokens.ultimoOrdineEmissione(account.getId()) + 1;
+        String tokenInChiaro = generaTokenCasuale();
+        TokenAttivazioneJpa token = tokens.saveAndFlush(new TokenAttivazioneJpa(
+                UUID.randomUUID(), account.getId(), calcolaSha256(tokenInChiaro),
+                ora.plus(durataValidita), ora, daImportazioneOpt, ordineEmissione));
+        return new LinkPreparato(token.getId(),
+                new DatiInvioAttivazione(account.getEmail(), account.getNome(), tokenInChiaro));
     }
 
     private static void validaPassword(String password) {
