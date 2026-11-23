@@ -152,8 +152,7 @@ public class AttivazioneUtenzaService {
         if (chiave == null) {
             return Optional.empty();
         }
-        return accounts.findByEmailIgnoreCase(chiave)
-                .map(AccountJpa::getId)
+        return accounts.findIdByEmailIgnoreCase(chiave)
                 .flatMap(accounts::findByIdForUpdate)
                 .filter(a -> StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(a.getStato()))
                 .map(this::emettiNuovoToken);
