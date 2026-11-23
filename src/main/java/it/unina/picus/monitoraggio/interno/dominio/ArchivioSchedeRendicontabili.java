@@ -15,10 +15,11 @@ import java.util.Set;
 public interface ArchivioSchedeRendicontabili {
 
     /**
-     * Legge le versioni inviate e accettate per il periodo indicato, da uno stato coerente
-     * dell'archivio. Sono comprese le correzioni ammesse e le schede già inviate da operatori
-     * successivamente revocati. Bozze e tentativi di invio o di correzione respinti sono esclusi.
-     * Ogni progressivo compare una sola volta per operatore e trimestre.
+     * Legge gli invii accettati per il periodo indicato, da uno stato coerente dell'archivio.
+     * L'archivio del primo invio (#58) restituisce al più una scheda per operatore e trimestre,
+     * con progressivo 1, anche se l'operatore è stato revocato dopo l'invio. Bozze e tentativi
+     * respinti sono esclusi. Le regole per le correzioni sono definite nella #41 e il relativo
+     * flusso è distinto dal primo invio.
      *
      * @param trimestre anno e trimestre da cui leggere gli invii
      * @return versioni accettate, eventualmente una lista vuota
