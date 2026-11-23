@@ -100,7 +100,7 @@ class SecurityConfig {
                 .with(new LoginJsonConfigurer(json), Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/api/auth/csrf", "/recupera", "/attiva").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/attiva", "/api/auth/attiva/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/attiva", "/api/auth/attiva/**", "/api/auth/recupera").permitAll()
                         .requestMatchers("/login", "/error", "/css/**", "/js/**", "/img/**", "/fonts/**", "/favicon.ico").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/opt", "/api/opt/*/revoca", "/api/opt/*/reinvia-invito", "/api/operatori/*/revoca").hasRole("BANCO")
                         .requestMatchers(HttpMethod.POST, "/api/richieste").hasRole("OPT")

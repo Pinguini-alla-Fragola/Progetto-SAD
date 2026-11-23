@@ -19,6 +19,14 @@ public interface AccountRepository extends JpaRepository<AccountJpa, UUID> {
 
     Optional<AccountJpa> findByEmailIgnoreCase(String email);
 
+    /**
+     * Cerca solo l'identificativo, senza caricare l'account nel contesto di persistenza. Serve a chi poi prende il
+     * lock con {@link #findByIdForUpdate}: se l'account fosse già caricato, la lettura con lock restituirebbe
+     * l'istanza in memoria con lo stato di prima e non quello aggiornato da una revoca o attivazione concorrente.
+     */
+    @Query("select a.id from AccountJpa a where lower(a.email) = lower(:email)")
+    Optional<UUID> findIdByEmailIgnoreCase(@Param("email") String email);
+
     boolean existsByEmailIgnoreCase(String email);
 
     List<AccountJpa> findByRuoloAndStato(String ruolo, String stato);

@@ -21,6 +21,9 @@ public class InvioEmailSmtpAdapter implements InvioEmail {
 
     private static final Logger LOG = LoggerFactory.getLogger(InvioEmailSmtpAdapter.class);
 
+    private static final String PERCORSO_ATTIVAZIONE = "/attiva";
+    private static final String PERCORSO_RECUPERO = "/recupera";
+
     private final JavaMailSender mailSender;
     private final String baseUrl;
     private final String mittente;
@@ -62,16 +65,41 @@ public class InvioEmailSmtpAdapter implements InvioEmail {
         }
     }
 
-    // TODO #33
     @Override
     public void inviaLinkResetPassword(String emailDestinatario, String nomeDestinatario, String tokenInChiaro) {
-        // Da implementare nella User Story #33
+        String link = costruisciLink(PERCORSO_RECUPERO, tokenInChiaro);
+        ModelloEmailLink.Contenuto contenuto = ModelloEmailLink.recuperoPassword(nomeDestinatario, link);
+        spedisci(emailDestinatario, contenuto, "recupero password");
+    }
+
+    /** Spedisce il messaggio; in caso di errore registra solo il tipo di email e la causa, mai indirizzo o link. */
+    private void spedisci(String emailDestinatario, ModelloEmailLink.Contenuto contenuto, String tipoEmail) {
+        try {
+            MimeMessage messaggio = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(messaggio, true, StandardCharsets.UTF_8.name());
+
+            helper.setFrom(mittente, nomeMittente);
+            helper.setTo(emailDestinatario);
+            helper.setSubject(contenuto.oggetto());
+            helper.setText(contenuto.testo(), contenuto.html());
+
+            mailSender.send(messaggio);
+            LOG.info("Email di {} inviata con successo (trasporto=SMTP)", tipoEmail);
+
+        } catch (MessagingException | MailException | UnsupportedEncodingException e) {
+            LOG.error("Invio email di {} fallito (trasporto=SMTP, causa={})", tipoEmail, e.getClass().getSimpleName());
+            throw new IllegalStateException("Impossibile inviare l'email di " + tipoEmail, e);
+        }
     }
 
     String costruisciLink(String tokenInChiaro) {
+        return costruisciLink(PERCORSO_ATTIVAZIONE, tokenInChiaro);
+    }
+
+    private String costruisciLink(String percorso, String tokenInChiaro) {
         String baseNormalizzata = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
         String tokenEncoded = URLEncoder.encode(tokenInChiaro, StandardCharsets.UTF_8);
-        return baseNormalizzata + "/attiva?token=" + tokenEncoded;
+        return baseNormalizzata + percorso + "?token=" + tokenEncoded;
     }
 
     private String costruisciCorpoEmailTesto(String nomeDestinatario, String emailDestinatario, String linkAttivazione) {

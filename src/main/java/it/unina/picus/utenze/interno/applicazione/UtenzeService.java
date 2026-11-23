@@ -32,6 +32,7 @@ import it.unina.picus.utenze.interno.persistenza.ProfiloOptJpa;
 import it.unina.picus.utenze.interno.persistenza.ProfiloOptRepository;
 import it.unina.picus.utenze.interno.persistenza.TokenAttivazioneJpa;
 import it.unina.picus.utenze.interno.persistenza.TokenAttivazioneRepository;
+import it.unina.picus.utenze.interno.persistenza.TokenRecuperoPasswordRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 
@@ -47,6 +48,7 @@ class UtenzeService implements UtenzeApi {
     private final ProfiloOptRepository profiliOpt;
     private final ProfiloOperatoreRepository profiliOperatore;
     private final TokenAttivazioneRepository tokensAttivazione;
+    private final TokenRecuperoPasswordRepository tokensRecupero;
     private final PasswordEncoder encoder;
     private final EntityManager em;
     private final Clock clock;
@@ -56,18 +58,22 @@ class UtenzeService implements UtenzeApi {
     UtenzeService(AccountRepository accounts, ProfiloOptRepository profiliOpt,
                   ProfiloOperatoreRepository profiliOperatore,
                   TokenAttivazioneRepository tokensAttivazione,
+                  TokenRecuperoPasswordRepository tokensRecupero,
                   PasswordEncoder encoder, EntityManager em) {
-        this(accounts, profiliOpt, profiliOperatore, tokensAttivazione, encoder, em, Clock.systemUTC());
+        this(accounts, profiliOpt, profiliOperatore, tokensAttivazione, tokensRecupero, encoder, em,
+                Clock.systemUTC());
     }
 
     UtenzeService(AccountRepository accounts, ProfiloOptRepository profiliOpt,
                   ProfiloOperatoreRepository profiliOperatore,
                   TokenAttivazioneRepository tokensAttivazione,
+                  TokenRecuperoPasswordRepository tokensRecupero,
                   PasswordEncoder encoder, EntityManager em, Clock clock) {
         this.accounts = accounts;
         this.profiliOpt = profiliOpt;
         this.profiliOperatore = profiliOperatore;
         this.tokensAttivazione = tokensAttivazione;
+        this.tokensRecupero = tokensRecupero;
         this.encoder = encoder;
         this.em = em;
         this.clock = Objects.requireNonNull(clock);
@@ -118,6 +124,8 @@ class UtenzeService implements UtenzeApi {
         if (!tokenAttivi.isEmpty()) {
             tokensAttivazione.saveAllAndFlush(tokenAttivi);
         }
+        // Anche un eventuale link di recupero password ancora valido non deve sopravvivere alla revoca.
+        tokensRecupero.invalidaTokenAttiviPerAccount(accountId, ora);
     }
 
     @Override

@@ -38,14 +38,6 @@ class AreaController {
         return "login";
     }
 
-    /** Espone la vista delle credenziali mentre il recupero password attende il servizio dedicato. */
-    @GetMapping("/recupera")
-    String recupera(Model modello) {
-        modello.addAttribute("attivazione", false);
-        modello.addAttribute("valido", false);
-        return "credenziali";
-    }
-
     @GetMapping({"/", "/dashboard"})
     String home(IdentitaAutenticata identita) {
         return "redirect:/" + vistaArea(identita.ruolo());
