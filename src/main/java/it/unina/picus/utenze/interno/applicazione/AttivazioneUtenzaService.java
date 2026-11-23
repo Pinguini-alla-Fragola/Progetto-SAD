@@ -79,21 +79,12 @@ public class AttivazioneUtenzaService {
     }
 
     /**
-     * Link appena creato, non ancora consegnato.
+     * Link appena creato, non ancora consegnato, per chi lo chiede con la propria email.
      *
-     * @param idToken identificativo del token salvato, per confermarlo o scartarlo dopo l'invio
+     * @param accountId account a cui appartiene il link, per concludere il reinvio dopo l'invio
      * @param dati dati per la consegna
      */
-    public record LinkPreparato(UUID idToken, DatiInvioAttivazione dati) {}
-
-    /**
-     * Pubblicato, nella stessa transazione, quando la posta ha accettato un nuovo link e questo ha sostituito i
-     * precedenti. Chi tiene inviti in attesa per quell'account, per esempio la coda dell'importazione CSV, li
-     * toglie solo adesso e non prima: se il nuovo invio fosse fallito, l'invito originale servirebbe ancora.
-     *
-     * @param accountId account che ha ricevuto il nuovo link
-     */
-    public record LinkAttivazioneConsegnato(UUID accountId) {}
+    public record LinkPreparato(UUID accountId, DatiInvioAttivazione dati) {}
 
     public record LinkAttivazioneDaInviareEvent(String emailDestinatario, String nomeDestinatario, String tokenInChiaro) {
         @Override
@@ -123,7 +114,7 @@ public class AttivazioneUtenzaService {
             tokens.saveAllAndFlush(precedenti);
         }
 
-        return creaToken(account, ora, false).dati();
+        return creaToken(account, ora, false);
     }
 
     /**
@@ -167,9 +158,9 @@ public class AttivazioneUtenzaService {
      * emessi. Per ogni altro indirizzo (sconosciuto, già attivo, revocato) non succede nulla e il chiamante non
      * deve far capire la differenza.
      *
-     * <p>Il link precedente si invalida solo quando la posta ha accettato l'email ({@link #confermaConsegna}):
-     * se l'invio fallisce ({@link #scartaToken}) l'utente conserva l'ultimo link che ha ricevuto davvero. I tre
-     * passi sono transazioni separate, così durante l'invio non c'è nessun lock.</p>
+     * <p>Il link precedente si invalida solo quando la posta ha accettato l'email: l'esito si registra con
+     * {@link #concludeReinvio}, e se l'invio fallisce l'utente conserva l'ultimo link che ha ricevuto davvero. I
+     * tre passi sono transazioni separate, così durante l'invio non c'è nessun lock.</p>
      *
      * <p>Lo stato si controlla dopo aver preso il lock sull'account, così una attivazione o una revoca arrivata
      * nel frattempo non lascia un link valido.</p>
@@ -185,37 +176,22 @@ public class AttivazioneUtenzaService {
         return accounts.findIdByEmailIgnoreCase(chiave)
                 .flatMap(accounts::findByIdForUpdate)
                 .filter(a -> StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(a.getStato()))
-                .map(a -> creaToken(a, Instant.now(clock), false));
+                .map(a -> new LinkPreparato(a.getId(), creaToken(a, Instant.now(clock), false)));
     }
 
     /**
-     * La posta ha accettato l'email: da ora il link nuovo sostituisce quelli emessi prima. Si invalidano i link con
-     * numero di emissione minore e quelli dell'importazione CSV, così due richieste ravvicinate non si annullano
-     * a vicenda e resta valido l'ultimo. Se l'account nel frattempo non è più in attesa non si fa nulla: attivazione e revoca hanno già
-     * chiuso tutti i link.
+     * Primo passo del reinvio del Banco: crea un nuovo link per l'account del ruolo atteso ancora in attesa di
+     * attivazione, senza chiudere quelli già emessi. Il link nuovo sostituisce i precedenti solo quando
+     * {@link #concludeReinvio} registra che la posta lo ha accettato; se l'invio fallisce, l'utente conserva l'ultimo
+     * link che ha ricevuto davvero.
      *
-     * @param idToken link appena consegnato
+     * @param accountId account in attesa di attivazione
+     * @param ruoloAtteso ruolo che l'account deve avere
+     * @return dati per consegnare il nuovo link
      */
-    public void confermaConsegna(UUID idToken) {
-        tokens.findById(idToken).ifPresent(token -> {
-            Optional<AccountJpa> account = accounts.findByIdForUpdate(token.getAccountId());
-            if (account.filter(a -> StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(a.getStato())).isPresent()) {
-                tokens.invalidaPrecedenti(token.getAccountId(), token.getId(), token.getOrdineEmissione(),
-                        Instant.now(clock));
-                eventPublisher.publishEvent(new LinkAttivazioneConsegnato(token.getAccountId()));
-            }
-        });
-    }
-
-    /**
-     * La posta non ha accettato l'email: il link non è mai arrivato a nessuno, quindi si scarta e restano validi
-     * quelli di prima.
-     *
-     * @param idToken link che non è stato consegnato
-     */
-    public void scartaToken(UUID idToken) {
-        // un solo aggiornamento condizionato: non serve il lock e non legge uno stato superato da altre richieste
-        tokens.chiudiSeAttivo(idToken, Instant.now(clock));
+    public DatiInvioAttivazione preparaReinvio(UUID accountId, RuoloUtente ruoloAtteso) {
+        AccountJpa account = bloccaAccountPerReinvio(accountId, ruoloAtteso);
+        return creaToken(account, Instant.now(clock), false);
     }
 
     /**
@@ -293,15 +269,19 @@ public class AttivazioneUtenzaService {
      * I tentativi precedenti possono aver già raggiunto la casella del destinatario.
      */
     DatiInvioAttivazione preparaTokenImportazioneOpt(AccountJpa account) {
-        return creaToken(account, Instant.now(clock), true).dati();
+        return creaToken(account, Instant.now(clock), true);
     }
 
-    DatiInvioAttivazione preparaReinvioOpt(UUID accountId) {
-        AccountJpa account = bloccaAccountPerReinvio(accountId, RuoloUtente.OPT);
-        return creaToken(account, Instant.now(clock), false).dati();
-    }
-
-    void concludeReinvioOpt(UUID accountId, DatiInvioAttivazione dati, boolean riuscito) {
+    /**
+     * Ultimo passo del reinvio: se la posta ha accettato l'email il link nuovo sostituisce i precedenti, altrimenti
+     * viene scartato e restano validi quelli di prima. Va chiamato dopo aver tolto, se c'è, l'invito dalla coda
+     * dell'importazione CSV ({@link ConclusioneReinvio}), per tenere l'ordine dei lock coda, account, token.
+     *
+     * @param accountId account che ha ricevuto il link
+     * @param dati link preparato per questo reinvio
+     * @param riuscito consegna accettata dal server SMTP oppure completata in modalità simulata
+     */
+    void concludeReinvio(UUID accountId, DatiInvioAttivazione dati, boolean riuscito) {
         var account = accounts.findByIdForUpdate(accountId);
         if (account.isEmpty() || !StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(account.get().getStato())) {
             return;
@@ -332,15 +312,14 @@ public class AttivazioneUtenzaService {
      * maggiore dei precedenti dell'account, ed è questo ordine, e non il timestamp, che dice quale link sostituisce
      * quale.
      */
-    private LinkPreparato creaToken(AccountJpa account, Instant ora, boolean daImportazioneOpt) {
+    private DatiInvioAttivazione creaToken(AccountJpa account, Instant ora, boolean daImportazioneOpt) {
         // L'inserimento dell'account o il suo lock serializza le emissioni anche su più istanze.
         long ordineEmissione = tokens.ultimoOrdineEmissione(account.getId()) + 1;
         String tokenInChiaro = TokenMonouso.genera();
-        TokenAttivazioneJpa token = tokens.saveAndFlush(new TokenAttivazioneJpa(
+        tokens.saveAndFlush(new TokenAttivazioneJpa(
                 UUID.randomUUID(), account.getId(), TokenMonouso.impronta(tokenInChiaro),
                 ora.plus(durataValidita), ora, daImportazioneOpt, ordineEmissione));
-        return new LinkPreparato(token.getId(),
-                new DatiInvioAttivazione(account.getEmail(), account.getNome(), tokenInChiaro));
+        return new DatiInvioAttivazione(account.getEmail(), account.getNome(), tokenInChiaro);
     }
 
     private static void validaPassword(String password) {

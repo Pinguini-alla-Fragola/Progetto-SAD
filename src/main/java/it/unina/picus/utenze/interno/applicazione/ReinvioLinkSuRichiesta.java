@@ -35,7 +35,7 @@ import jakarta.annotation.PreDestroy;
  * dall'account. Ogni rifiuto è contato e scritto nel log.</p>
  *
  * <p>Se la posta rifiuta l'email, il nuovo link viene scartato e restano validi quelli di prima; se la accetta,
- * il nuovo link sostituisce i precedenti ({@link AttivazioneUtenzaService#preparaTokenPerEmail}).</p>
+ * il nuovo link sostituisce i precedenti ({@link ConclusioneReinvio}).</p>
  */
 @Component
 @Profile("!skeleton")
@@ -46,21 +46,24 @@ public class ReinvioLinkSuRichiesta {
 
     private final AttivazioneUtenzaService attivazione;
     private final ConsegnaLinkAttivazione consegna;
+    private final ConclusioneReinvio conclusione;
     private final Executor esecutore;
     private final AtomicLong scartate = new AtomicLong();
 
     @Autowired
     ReinvioLinkSuRichiesta(AttivazioneUtenzaService attivazione, ConsegnaLinkAttivazione consegna,
+            ConclusioneReinvio conclusione,
             @Value("${picus.utenze.attivazione.reinvio.esecutore.thread:2}") int thread,
             @Value("${picus.utenze.attivazione.reinvio.esecutore.coda:50}") int capacitaCoda) {
-        this(attivazione, consegna, nuovoEsecutore(thread, capacitaCoda));
+        this(attivazione, consegna, conclusione, nuovoEsecutore(thread, capacitaCoda));
     }
 
     /** Per chi vuole un esecutore diverso, per esempio uno sincrono che non accoda. */
     ReinvioLinkSuRichiesta(AttivazioneUtenzaService attivazione, ConsegnaLinkAttivazione consegna,
-            Executor esecutore) {
+            ConclusioneReinvio conclusione, Executor esecutore) {
         this.attivazione = Objects.requireNonNull(attivazione);
         this.consegna = Objects.requireNonNull(consegna);
+        this.conclusione = Objects.requireNonNull(conclusione);
         this.esecutore = Objects.requireNonNull(esecutore);
     }
 
@@ -110,11 +113,7 @@ public class ReinvioLinkSuRichiesta {
             LOG.warn("Invio del nuovo link di attivazione non riuscito: restano validi i link già inviati");
         }
         try {
-            if (accettato) {
-                attivazione.confermaConsegna(link.idToken());
-            } else {
-                attivazione.scartaToken(link.idToken());
-            }
+            conclusione.concludi(link.accountId(), link.dati(), accettato);
         } catch (RuntimeException e) {
             LOG.warn("Aggiornamento dei link di attivazione non riuscito dopo l'invio (causa={})",
                     e.getClass().getSimpleName());
