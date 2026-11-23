@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import it.unina.picus.monitoraggio.api.MonitoraggioApi;
+import it.unina.picus.monitoraggio.api.ConteggiOptApi;
+import it.unina.picus.monitoraggio.api.DatiConteggiNonValidiException;
 import it.unina.picus.monitoraggio.api.MonitoraggioApi.ConteggioOpt;
 import it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre;
 import it.unina.picus.monitoraggio.api.MonitoraggioApi.VoceMisura;
-import it.unina.picus.monitoraggio.interno.applicazione.DatiConteggiNonValidiException;
 import it.unina.picus.monitoraggio.interno.applicazione.MonitoraggioOptService;
 import it.unina.picus.monitoraggio.interno.applicazione.MonitoraggioOptService.CategoriaVoce;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
@@ -26,10 +26,10 @@ import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 @RequestMapping("/api/monitoraggio")
 class ConteggiOptController {
 
-    private final MonitoraggioApi monitoraggio;
+    private final ConteggiOptApi monitoraggio;
     private final Optional<MonitoraggioOptService> monitoraggioDettaglio;
 
-    ConteggiOptController(MonitoraggioApi monitoraggio, Optional<MonitoraggioOptService> monitoraggioDettaglio) {
+    ConteggiOptController(ConteggiOptApi monitoraggio, Optional<MonitoraggioOptService> monitoraggioDettaglio) {
         this.monitoraggio = monitoraggio;
         this.monitoraggioDettaglio = monitoraggioDettaglio;
     }

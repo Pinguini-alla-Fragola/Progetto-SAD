@@ -8,13 +8,17 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
-import it.unina.picus.monitoraggio.api.MonitoraggioApi;
+import it.unina.picus.monitoraggio.api.ConteggiOptApi;
+import it.unina.picus.monitoraggio.api.DatiConteggiNonValidiException;
+import it.unina.picus.monitoraggio.api.MonitoraggioApi.ConteggioOpt;
+import it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre;
+import it.unina.picus.monitoraggio.api.MonitoraggioApi.VoceMisura;
 import it.unina.picus.monitoraggio.interno.dominio.RegoleAccessoConteggi;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 
 @Service
 @Profile("skeleton")
-public class SkeletonMonitoraggioService implements MonitoraggioApi {
+public class SkeletonMonitoraggioService implements ConteggiOptApi {
 
     private final Map<String, Long> archivio = new ConcurrentHashMap<>();
 
@@ -42,9 +46,4 @@ public class SkeletonMonitoraggioService implements MonitoraggioApi {
         RegoleAccessoConteggi.verificaConsultazione(attore, optId);
         return List.of();
     }
-
-    @Override public UUID inviaSchedaOperatore(IdentitaAutenticata a, Trimestre t, DatiSchedaOperatore d) { throw new UnsupportedOperationException(); }
-    @Override public List<SchedaSintesi> elencoSchedeOperatore(IdentitaAutenticata a) { throw new UnsupportedOperationException(); }
-    @Override public SchedaOperatore consultaSchedaOperatore(IdentitaAutenticata a, UUID id) { throw new UnsupportedOperationException(); }
-    @Override public RiepilogoTrimestre riepilogaSchede(IdentitaAutenticata a, Trimestre t) { throw new UnsupportedOperationException(); }
 }

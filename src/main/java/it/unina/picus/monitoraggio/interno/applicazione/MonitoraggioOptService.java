@@ -18,7 +18,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import it.unina.picus.catalogo.api.ConsultazioneCatalogoApi;
-import it.unina.picus.monitoraggio.api.MonitoraggioApi;
+import it.unina.picus.monitoraggio.api.ConteggiOptApi;
+import it.unina.picus.monitoraggio.api.MonitoraggioApi.ConteggioOpt;
+import it.unina.picus.monitoraggio.api.DatiConteggiNonValidiException;
+import it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre;
+import it.unina.picus.monitoraggio.api.MonitoraggioApi.VoceMisura;
 import it.unina.picus.monitoraggio.interno.dominio.RegoleAccessoConteggi;
 import it.unina.picus.monitoraggio.interno.persistenza.CategoriaMonitoraggioJpa;
 import it.unina.picus.monitoraggio.interno.persistenza.CategoriaMonitoraggioRepository;
@@ -33,7 +37,7 @@ import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
 
 @Service
 @Profile("!skeleton")
-public class MonitoraggioOptService implements MonitoraggioApi {
+public class MonitoraggioOptService implements ConteggiOptApi {
 
     private final ConteggioOptRepository conteggiRepo;
     private final CategoriaMonitoraggioRepository categorieRepo;
@@ -72,10 +76,14 @@ public class MonitoraggioOptService implements MonitoraggioApi {
         RegoleAccessoConteggi.verificaRegistrazione(attore);
 
         if (trimestre == null) {
-            throw new DatiConteggiNonValidiException("Trimestre obbligatorio.", Map.of("trimestre", "Seleziona anno e trimestre."));
+            throw new DatiConteggiNonValidiException(
+                    "Trimestre obbligatorio.",
+                    Map.of("trimestre", "Seleziona anno e trimestre."));
         }
         if (conteggi == null || conteggi.isEmpty()) {
-            throw new DatiConteggiNonValidiException("Inserisci almeno una voce di conteggio.", Map.of("voci", "Inserisci almeno una voce valida."));
+            throw new DatiConteggiNonValidiException(
+                    "Inserisci almeno una voce di conteggio.",
+                    Map.of("voci", "Inserisci almeno una voce valida."));
         }
 
         Map<String, String> errori = new LinkedHashMap<>();
@@ -191,27 +199,5 @@ public class MonitoraggioOptService implements MonitoraggioApi {
             throw new IllegalStateException(
                     "Il termine fissato dal Banco per le correzioni dei conteggi è scaduto.");
         }
-    }
-
-    // --- Metodi schede operatore (fuori perimetro #43, stub coerenti col contratto) ---
-
-    @Override
-    public UUID inviaSchedaOperatore(IdentitaAutenticata attore, Trimestre trimestre, DatiSchedaOperatore dati) {
-        throw new UnsupportedOperationException("Invio scheda operatore non ancora implementato.");
-    }
-
-    @Override
-    public List<SchedaSintesi> elencoSchedeOperatore(IdentitaAutenticata attore) {
-        throw new UnsupportedOperationException("Elenco schede operatore non ancora implementato.");
-    }
-
-    @Override
-    public SchedaOperatore consultaSchedaOperatore(IdentitaAutenticata attore, UUID schedaId) {
-        throw new UnsupportedOperationException("Consultazione scheda operatore non ancora implementato.");
-    }
-
-    @Override
-    public RiepilogoTrimestre riepilogaSchede(IdentitaAutenticata attore, Trimestre trimestre) {
-        throw new UnsupportedOperationException("Riepilogo schede operatore non ancora implementato.");
     }
 }

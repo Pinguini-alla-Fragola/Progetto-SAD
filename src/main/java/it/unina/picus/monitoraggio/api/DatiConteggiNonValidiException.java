@@ -1,4 +1,4 @@
-package it.unina.picus.monitoraggio.interno.applicazione;
+package it.unina.picus.monitoraggio.api;
 
 import java.util.Map;
 

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import it.unina.picus.monitoraggio.interno.applicazione.DatiConteggiNonValidiException;
+import it.unina.picus.monitoraggio.api.DatiConteggiNonValidiException;
 
 @RestControllerAdvice(basePackages = "it.unina.picus.monitoraggio.web")
 class ErroriMonitoraggio {
