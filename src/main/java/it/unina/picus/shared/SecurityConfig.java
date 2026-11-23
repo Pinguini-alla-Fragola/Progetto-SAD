@@ -113,6 +113,9 @@ class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/richieste/coda", "/api/richieste/*/candidati",
                                 "/api/richieste/*/contatti", "/api/richieste/*/contatti/*").hasRole("BANCO")
                         .requestMatchers(HttpMethod.POST, "/api/utenze/operatori").hasRole("BANCO")
+                        .requestMatchers(HttpMethod.GET, "/api/catalogo/offerte-opt/*").hasAnyRole("OPT", "BANCO")
+                        .requestMatchers(HttpMethod.HEAD, "/api/catalogo/offerte-opt/*").hasAnyRole("OPT", "BANCO")
+                        .requestMatchers("/api/catalogo/offerte-opt/misure/*").hasRole("OPT")
                         .requestMatchers(HttpMethod.GET, "/api/catalogo/misure/tutte").hasRole("BANCO")
                         .requestMatchers(HttpMethod.POST, "/api/catalogo/misure",
                                 "/api/catalogo/misure/*/disattivazione").hasRole("BANCO")
