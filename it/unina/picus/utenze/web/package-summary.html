@@ -95,6 +95,14 @@ sui tentativi.</div>
 <div class="col-last even-row-color class-summary class-summary-tab2">
 <div class="block">Legge i campi JSON accettando soltanto il tipo previsto per ciascuno.</div>
 </div>
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="ConfigurazioneLimitatori.html" title="class in it.unina.picus.utenze.web">ConfigurazioneLimitatori</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
+<div class="block">Soglie dei limitatori delle richieste senza sessione: una istanza per ciascun uso, con valori propri.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="EmailDigitata.html" title="class in it.unina.picus.utenze.web">EmailDigitata</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="block">Legge l'indirizzo scritto da un utente non autenticato in un modulo di richiesta (recupero, nuovo link).</div>
+</div>
 <div class="col-first odd-row-color class-summary class-summary-tab2"><a href="ErroriUtenze.html" title="class in it.unina.picus.utenze.web">ErroriUtenze</a></div>
 <div class="col-last odd-row-color class-summary class-summary-tab2">
 <div class="block">Trasforma gli errori del modulo Utenze in risposte con messaggi controllati, senza mai i valori inseriti.</div>
@@ -117,6 +125,15 @@ l'attore è sempre quello della sessione, mai un valore inviato dal client.</div
 <div class="block">Limita i tentativi di accesso per email: dopo <a href="LimitatoreAccessi.html#MAX_FALLIMENTI">5</a> tentativi falliti in
 <code>FINESTRA</code> il tentativo successivo, se arriva entro <code>ATTESA</code> dall'ultimo, è rifiutato.</div>
 </div>
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="LimitatoreRichieste.html" title="class in it.unina.picus.utenze.web">LimitatoreRichieste</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="block">Limita le richieste senza sessione che mandano una email, per esempio il recupero della password: al massimo
+<code>maxRichieste</code> per chiave in ogni <code>finestra</code>.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab4"><a href="LimitatoreRichieste.Ammissione.html" title="class in it.unina.picus.utenze.web">LimitatoreRichieste.Ammissione</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab4">
+<div class="block">Prenotazione di un posto nel limite.</div>
+</div>
 <div class="col-first even-row-color class-summary class-summary-tab2"><a href="OperatoriController.html" title="class in it.unina.picus.utenze.web">OperatoriController</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab2">
 <div class="block">Riceve la richiesta con cui il Banco crea l'account personale di un Operatore.</div>
@@ -132,6 +149,14 @@ l'attore è sempre quello della sessione, mai un valore inviato dal client.</div
 <div class="col-first odd-row-color class-summary class-summary-tab4"><a href="PrincipalePicus.html" title="class in it.unina.picus.utenze.web">PrincipalePicus</a></div>
 <div class="col-last odd-row-color class-summary class-summary-tab4">
 <div class="block">Identità conservata nella sessione HTTP: solo ID e ruolo, nessun dato personale né credenziale.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="RecuperoPasswordController.html" title="class in it.unina.picus.utenze.web">RecuperoPasswordController</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="block">Recupero autonomo della password (US #33): pagina di richiesta e di cambio password, e richiesta del link.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab4"><a href="RecuperoPasswordController.RichiestaRecupero.html" title="class in it.unina.picus.utenze.web">RecuperoPasswordController.RichiestaRecupero</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab4">
+<div class="block">L'email resta un valore JSON generico fino al controllo del tipo: un numero o un booleano non diventano testo.</div>
 </div>
 <div class="col-first even-row-color class-summary class-summary-tab2"><a href="RegistrazioneOptController.html" title="class in it.unina.picus.utenze.web">RegistrazioneOptController</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab2">&nbsp;</div>

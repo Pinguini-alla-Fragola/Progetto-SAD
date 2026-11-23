@@ -68,8 +68,8 @@ loadScripts(document, 'script');</script>
 </li>
 <li><a href="#constructor-detail" tabindex="0">Constructor Details</a>
 <ol class="toc-list">
-<li><a href="#%3Cinit%3E(it.unina.picus.utenze.interno.persistenza.AccountRepository,it.unina.picus.utenze.interno.persistenza.ProfiloOptRepository,it.unina.picus.utenze.interno.persistenza.ProfiloOperatoreRepository,it.unina.picus.utenze.interno.persistenza.TokenAttivazioneRepository,org.springframework.security.crypto.password.PasswordEncoder,jakarta.persistence.EntityManager)" tabindex="0">UtenzeService(AccountRepository, ProfiloOptRepository, ProfiloOperatoreRepository, TokenAttivazioneRepository, PasswordEncoder, EntityManager)</a></li>
-<li><a href="#%3Cinit%3E(it.unina.picus.utenze.interno.persistenza.AccountRepository,it.unina.picus.utenze.interno.persistenza.ProfiloOptRepository,it.unina.picus.utenze.interno.persistenza.ProfiloOperatoreRepository,it.unina.picus.utenze.interno.persistenza.TokenAttivazioneRepository,org.springframework.security.crypto.password.PasswordEncoder,jakarta.persistence.EntityManager,java.time.Clock)" tabindex="0">UtenzeService(AccountRepository, ProfiloOptRepository, ProfiloOperatoreRepository, TokenAttivazioneRepository, PasswordEncoder, EntityManager, Clock)</a></li>
+<li><a href="#%3Cinit%3E(it.unina.picus.utenze.interno.persistenza.AccountRepository,it.unina.picus.utenze.interno.persistenza.ProfiloOptRepository,it.unina.picus.utenze.interno.persistenza.ProfiloOperatoreRepository,it.unina.picus.utenze.interno.persistenza.TokenAttivazioneRepository,it.unina.picus.utenze.interno.persistenza.TokenRecuperoPasswordRepository,org.springframework.security.crypto.password.PasswordEncoder,jakarta.persistence.EntityManager)" tabindex="0">UtenzeService(AccountRepository, ProfiloOptRepository, ProfiloOperatoreRepository, TokenAttivazioneRepository, TokenRecuperoPasswordRepository, PasswordEncoder, EntityManager)</a></li>
+<li><a href="#%3Cinit%3E(it.unina.picus.utenze.interno.persistenza.AccountRepository,it.unina.picus.utenze.interno.persistenza.ProfiloOptRepository,it.unina.picus.utenze.interno.persistenza.ProfiloOperatoreRepository,it.unina.picus.utenze.interno.persistenza.TokenAttivazioneRepository,it.unina.picus.utenze.interno.persistenza.TokenRecuperoPasswordRepository,org.springframework.security.crypto.password.PasswordEncoder,jakarta.persistence.EntityManager,java.time.Clock)" tabindex="0">UtenzeService(AccountRepository, ProfiloOptRepository, ProfiloOperatoreRepository, TokenAttivazioneRepository, TokenRecuperoPasswordRepository, PasswordEncoder, EntityManager, Clock)</a></li>
 </ol>
 </li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
@@ -150,17 +150,19 @@ implements <a href="../../api/UtenzeApi.html" title="interface in it.unina.picus
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(it.unina.picus.utenze.interno.persistenza.AccountRepository,it.unina.picus.utenze.interno.persistenza.ProfiloOptRepository,it.unina.picus.utenze.interno.persistenza.ProfiloOperatoreRepository,it.unina.picus.utenze.interno.persistenza.TokenAttivazioneRepository,org.springframework.security.crypto.password.PasswordEncoder,jakarta.persistence.EntityManager)" class="member-name-link">UtenzeService</a><wbr>(<a href="../persistenza/AccountRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">AccountRepository</a>&nbsp;accounts,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(it.unina.picus.utenze.interno.persistenza.AccountRepository,it.unina.picus.utenze.interno.persistenza.ProfiloOptRepository,it.unina.picus.utenze.interno.persistenza.ProfiloOperatoreRepository,it.unina.picus.utenze.interno.persistenza.TokenAttivazioneRepository,it.unina.picus.utenze.interno.persistenza.TokenRecuperoPasswordRepository,org.springframework.security.crypto.password.PasswordEncoder,jakarta.persistence.EntityManager)" class="member-name-link">UtenzeService</a><wbr>(<a href="../persistenza/AccountRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">AccountRepository</a>&nbsp;accounts,
  <a href="../persistenza/ProfiloOptRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">ProfiloOptRepository</a>&nbsp;profiliOpt,
  <a href="../persistenza/ProfiloOperatoreRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">ProfiloOperatoreRepository</a>&nbsp;profiliOperatore,
  <a href="../persistenza/TokenAttivazioneRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">TokenAttivazioneRepository</a>&nbsp;tokensAttivazione,
+ <a href="../persistenza/TokenRecuperoPasswordRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">TokenRecuperoPasswordRepository</a>&nbsp;tokensRecupero,
  org.springframework.security.crypto.password.PasswordEncoder&nbsp;encoder,
  jakarta.persistence.EntityManager&nbsp;em)</code></div>
 <div class="col-last even-row-color">&nbsp;</div>
-<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(it.unina.picus.utenze.interno.persistenza.AccountRepository,it.unina.picus.utenze.interno.persistenza.ProfiloOptRepository,it.unina.picus.utenze.interno.persistenza.ProfiloOperatoreRepository,it.unina.picus.utenze.interno.persistenza.TokenAttivazioneRepository,org.springframework.security.crypto.password.PasswordEncoder,jakarta.persistence.EntityManager,java.time.Clock)" class="member-name-link">UtenzeService</a><wbr>(<a href="../persistenza/AccountRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">AccountRepository</a>&nbsp;accounts,
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(it.unina.picus.utenze.interno.persistenza.AccountRepository,it.unina.picus.utenze.interno.persistenza.ProfiloOptRepository,it.unina.picus.utenze.interno.persistenza.ProfiloOperatoreRepository,it.unina.picus.utenze.interno.persistenza.TokenAttivazioneRepository,it.unina.picus.utenze.interno.persistenza.TokenRecuperoPasswordRepository,org.springframework.security.crypto.password.PasswordEncoder,jakarta.persistence.EntityManager,java.time.Clock)" class="member-name-link">UtenzeService</a><wbr>(<a href="../persistenza/AccountRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">AccountRepository</a>&nbsp;accounts,
  <a href="../persistenza/ProfiloOptRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">ProfiloOptRepository</a>&nbsp;profiliOpt,
  <a href="../persistenza/ProfiloOperatoreRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">ProfiloOperatoreRepository</a>&nbsp;profiliOperatore,
  <a href="../persistenza/TokenAttivazioneRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">TokenAttivazioneRepository</a>&nbsp;tokensAttivazione,
+ <a href="../persistenza/TokenRecuperoPasswordRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">TokenRecuperoPasswordRepository</a>&nbsp;tokensRecupero,
  org.springframework.security.crypto.password.PasswordEncoder&nbsp;encoder,
  jakarta.persistence.EntityManager&nbsp;em,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/time/Clock.html" title="class or interface in java.time" class="external-link">Clock</a>&nbsp;clock)</code></div>
@@ -297,7 +299,7 @@ implements <a href="../../api/UtenzeApi.html" title="interface in it.unina.picus
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(it.unina.picus.utenze.interno.persistenza.AccountRepository,it.unina.picus.utenze.interno.persistenza.ProfiloOptRepository,it.unina.picus.utenze.interno.persistenza.ProfiloOperatoreRepository,it.unina.picus.utenze.interno.persistenza.TokenAttivazioneRepository,org.springframework.security.crypto.password.PasswordEncoder,jakarta.persistence.EntityManager)">
+<section class="detail" id="&lt;init&gt;(it.unina.picus.utenze.interno.persistenza.AccountRepository,it.unina.picus.utenze.interno.persistenza.ProfiloOptRepository,it.unina.picus.utenze.interno.persistenza.ProfiloOperatoreRepository,it.unina.picus.utenze.interno.persistenza.TokenAttivazioneRepository,it.unina.picus.utenze.interno.persistenza.TokenRecuperoPasswordRepository,org.springframework.security.crypto.password.PasswordEncoder,jakarta.persistence.EntityManager)">
 <h3>UtenzeService</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="annotations">@Autowired
@@ -305,19 +307,21 @@ implements <a href="../../api/UtenzeApi.html" title="interface in it.unina.picus
  <a href="../persistenza/ProfiloOptRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">ProfiloOptRepository</a>&nbsp;profiliOpt,
  <a href="../persistenza/ProfiloOperatoreRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">ProfiloOperatoreRepository</a>&nbsp;profiliOperatore,
  <a href="../persistenza/TokenAttivazioneRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">TokenAttivazioneRepository</a>&nbsp;tokensAttivazione,
+ <a href="../persistenza/TokenRecuperoPasswordRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">TokenRecuperoPasswordRepository</a>&nbsp;tokensRecupero,
  org.springframework.security.crypto.password.PasswordEncoder&nbsp;encoder,
  jakarta.persistence.EntityManager&nbsp;em)</span></div>
 </div>
 </section>
 </li>
 <li>
-<section class="detail" id="&lt;init&gt;(it.unina.picus.utenze.interno.persistenza.AccountRepository,it.unina.picus.utenze.interno.persistenza.ProfiloOptRepository,it.unina.picus.utenze.interno.persistenza.ProfiloOperatoreRepository,it.unina.picus.utenze.interno.persistenza.TokenAttivazioneRepository,org.springframework.security.crypto.password.PasswordEncoder,jakarta.persistence.EntityManager,java.time.Clock)">
+<section class="detail" id="&lt;init&gt;(it.unina.picus.utenze.interno.persistenza.AccountRepository,it.unina.picus.utenze.interno.persistenza.ProfiloOptRepository,it.unina.picus.utenze.interno.persistenza.ProfiloOperatoreRepository,it.unina.picus.utenze.interno.persistenza.TokenAttivazioneRepository,it.unina.picus.utenze.interno.persistenza.TokenRecuperoPasswordRepository,org.springframework.security.crypto.password.PasswordEncoder,jakarta.persistence.EntityManager,java.time.Clock)">
 <h3>UtenzeService</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="element-name">UtenzeService</span><wbr><span class="parameters">(<a href="../persistenza/AccountRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">AccountRepository</a>&nbsp;accounts,
  <a href="../persistenza/ProfiloOptRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">ProfiloOptRepository</a>&nbsp;profiliOpt,
  <a href="../persistenza/ProfiloOperatoreRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">ProfiloOperatoreRepository</a>&nbsp;profiliOperatore,
  <a href="../persistenza/TokenAttivazioneRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">TokenAttivazioneRepository</a>&nbsp;tokensAttivazione,
+ <a href="../persistenza/TokenRecuperoPasswordRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">TokenRecuperoPasswordRepository</a>&nbsp;tokensRecupero,
  org.springframework.security.crypto.password.PasswordEncoder&nbsp;encoder,
  jakarta.persistence.EntityManager&nbsp;em,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/time/Clock.html" title="class or interface in java.time" class="external-link">Clock</a>&nbsp;clock)</span></div>

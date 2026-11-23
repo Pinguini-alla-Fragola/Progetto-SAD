@@ -81,7 +81,6 @@ loadScripts(document, 'script');</script>
 <li><a href="#preparaTokenImportazioneOpt(it.unina.picus.utenze.interno.persistenza.AccountJpa)" tabindex="0">preparaTokenImportazioneOpt(AccountJpa)</a></li>
 <li><a href="#preparaReinvioOpt(java.util.UUID)" tabindex="0">preparaReinvioOpt(UUID)</a></li>
 <li><a href="#concludeReinvioOpt(java.util.UUID,it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService.DatiInvioAttivazione,boolean)" tabindex="0">concludeReinvioOpt(UUID, AttivazioneUtenzaService.DatiInvioAttivazione, boolean)</a></li>
-<li><a href="#calcolaSha256(java.lang.String)" tabindex="0">calcolaSha256(String)</a></li>
 </ol>
 </li>
 </ol>
@@ -170,7 +169,7 @@ l'impostazione iniziale della password (Task #147).</div>
 <section class="method-summary" id="method-summary">
 <h2>Method Summary</h2>
 <div id="method-summary-table">
-<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab1" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab1', 3)" class="table-tab">Static Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab4" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab4', 3)" class="table-tab">Concrete Methods</button></div>
+<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab4" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab4', 3)" class="table-tab">Concrete Methods</button></div>
 <div id="method-summary-table.tabpanel" role="tabpanel" aria-labelledby="method-summary-table-tab0">
 <div class="summary-table three-column-summary">
 <div class="table-header col-first">Modifier and Type</div>
@@ -184,43 +183,40 @@ l'impostazione iniziale della password (Task #147).</div>
 rilegge stato e scadenza sotto lock, imposta l'hash BCrypt della nuova password
 e attiva l'account.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>(package private) static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#calcolaSha256(java.lang.String)" class="member-name-link">calcolaSha256</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;valore)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>(package private) void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#concludeReinvioOpt(java.util.UUID,it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService.DatiInvioAttivazione,boolean)" class="member-name-link">concludeReinvioOpt</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;accountId,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>(package private) void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#concludeReinvioOpt(java.util.UUID,it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService.DatiInvioAttivazione,boolean)" class="member-name-link">concludeReinvioOpt</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;accountId,
  <a href="AttivazioneUtenzaService.DatiInvioAttivazione.html" title="class in it.unina.picus.utenze.interno.applicazione">AttivazioneUtenzaService.DatiInvioAttivazione</a>&nbsp;dati,
  boolean&nbsp;riuscito)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#generaEInviaAttivazione(it.unina.picus.utenze.interno.persistenza.AccountJpa)" class="member-name-link">generaEInviaAttivazione</a><wbr>(<a href="../persistenza/AccountJpa.html" title="class in it.unina.picus.utenze.interno.persistenza">AccountJpa</a>&nbsp;account)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#generaEInviaAttivazione(it.unina.picus.utenze.interno.persistenza.AccountJpa)" class="member-name-link">generaEInviaAttivazione</a><wbr>(<a href="../persistenza/AccountJpa.html" title="class in it.unina.picus.utenze.interno.persistenza">AccountJpa</a>&nbsp;account)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Mantiene la compatibilità per i chiamanti interni che usano l'evento AFTER_COMMIT.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isTokenValido(java.lang.String)" class="member-name-link">isTokenValido</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;tokenInChiaro)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isTokenValido(java.lang.String)" class="member-name-link">isTokenValido</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;tokenInChiaro)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Verifica che un token esista, non sia scaduto e non sia già stato usato.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>(package private) <a href="AttivazioneUtenzaService.DatiInvioAttivazione.html" title="class in it.unina.picus.utenze.interno.applicazione">AttivazioneUtenzaService.DatiInvioAttivazione</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#preparaReinvioOpt(java.util.UUID)" class="member-name-link">preparaReinvioOpt</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;accountId)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="AttivazioneUtenzaService.DatiInvioAttivazione.html" title="class in it.unina.picus.utenze.interno.applicazione">AttivazioneUtenzaService.DatiInvioAttivazione</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#preparaTokenAttivazione(it.unina.picus.utenze.interno.persistenza.AccountJpa)" class="member-name-link">preparaTokenAttivazione</a><wbr>(<a href="../persistenza/AccountJpa.html" title="class in it.unina.picus.utenze.interno.persistenza">AccountJpa</a>&nbsp;account)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>(package private) <a href="AttivazioneUtenzaService.DatiInvioAttivazione.html" title="class in it.unina.picus.utenze.interno.applicazione">AttivazioneUtenzaService.DatiInvioAttivazione</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#preparaReinvioOpt(java.util.UUID)" class="member-name-link">preparaReinvioOpt</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;accountId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="AttivazioneUtenzaService.DatiInvioAttivazione.html" title="class in it.unina.picus.utenze.interno.applicazione">AttivazioneUtenzaService.DatiInvioAttivazione</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#preparaTokenAttivazione(it.unina.picus.utenze.interno.persistenza.AccountJpa)" class="member-name-link">preparaTokenAttivazione</a><wbr>(<a href="../persistenza/AccountJpa.html" title="class in it.unina.picus.utenze.interno.persistenza">AccountJpa</a>&nbsp;account)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Genera un nuovo token monouso per un account in attesa di attivazione,
 invalida eventuali token precedenti ancora attivi sotto lock e restituisce
 i dati per la consegna post-commit.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>(package private) <a href="AttivazioneUtenzaService.DatiInvioAttivazione.html" title="class in it.unina.picus.utenze.interno.applicazione">AttivazioneUtenzaService.DatiInvioAttivazione</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#preparaTokenImportazioneOpt(it.unina.picus.utenze.interno.persistenza.AccountJpa)" class="member-name-link">preparaTokenImportazioneOpt</a><wbr>(<a href="../persistenza/AccountJpa.html" title="class in it.unina.picus.utenze.interno.persistenza">AccountJpa</a>&nbsp;account)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>(package private) <a href="AttivazioneUtenzaService.DatiInvioAttivazione.html" title="class in it.unina.picus.utenze.interno.applicazione">AttivazioneUtenzaService.DatiInvioAttivazione</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#preparaTokenImportazioneOpt(it.unina.picus.utenze.interno.persistenza.AccountJpa)" class="member-name-link">preparaTokenImportazioneOpt</a><wbr>(<a href="../persistenza/AccountJpa.html" title="class in it.unina.picus.utenze.interno.persistenza">AccountJpa</a>&nbsp;account)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Crea il link di un tentativo di consegna con l'account già bloccato dalla coda.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="AttivazioneUtenzaService.DatiInvioAttivazione.html" title="class in it.unina.picus.utenze.interno.applicazione">AttivazioneUtenzaService.DatiInvioAttivazione</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#rigeneraTokenPerAccount(java.util.UUID,it.unina.picus.utenze.api.UtenzeApi.RuoloUtente)" class="member-name-link">rigeneraTokenPerAccount</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;accountId,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="AttivazioneUtenzaService.DatiInvioAttivazione.html" title="class in it.unina.picus.utenze.interno.applicazione">AttivazioneUtenzaService.DatiInvioAttivazione</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#rigeneraTokenPerAccount(java.util.UUID,it.unina.picus.utenze.api.UtenzeApi.RuoloUtente)" class="member-name-link">rigeneraTokenPerAccount</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;accountId,
  <a href="../../api/UtenzeApi.RuoloUtente.html" title="enum class in it.unina.picus.utenze.api">UtenzeApi.RuoloUtente</a>&nbsp;ruoloAtteso)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Rigenera un token monouso per un account del ruolo atteso ancora in attesa di attivazione.</div>
 </div>
 </div>
@@ -381,14 +377,6 @@ I tentativi precedenti possono aver già raggiunto la casella del destinatario.<
 <div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">concludeReinvioOpt</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;accountId,
  <a href="AttivazioneUtenzaService.DatiInvioAttivazione.html" title="class in it.unina.picus.utenze.interno.applicazione">AttivazioneUtenzaService.DatiInvioAttivazione</a>&nbsp;dati,
  boolean&nbsp;riuscito)</span></div>
-</div>
-</section>
-</li>
-<li>
-<section class="detail" id="calcolaSha256(java.lang.String)">
-<h3>calcolaSha256</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">calcolaSha256</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;valore)</span></div>
 </div>
 </section>
 </li>

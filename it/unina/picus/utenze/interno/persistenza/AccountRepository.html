@@ -61,6 +61,7 @@ loadScripts(document, 'script');</script>
 <ol class="toc-list">
 <li><a href="#findByIdForUpdate(java.util.UUID)" tabindex="0">findByIdForUpdate(UUID)</a></li>
 <li><a href="#findByEmailIgnoreCase(java.lang.String)" tabindex="0">findByEmailIgnoreCase(String)</a></li>
+<li><a href="#findIdByEmailIgnoreCase(java.lang.String)" tabindex="0">findIdByEmailIgnoreCase(String)</a></li>
 <li><a href="#existsByEmailIgnoreCase(java.lang.String)" tabindex="0">existsByEmailIgnoreCase(String)</a></li>
 <li><a href="#findByRuoloAndStato(java.lang.String,java.lang.String)" tabindex="0">findByRuoloAndStato(String, String)</a></li>
 <li><a href="#findByRuolo(java.lang.String)" tabindex="0">findByRuolo(String)</a></li>
@@ -118,6 +119,11 @@ extends org.springframework.data.jpa.repository.JpaRepository&lt;<a href="Accoun
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#findByRuoloAndStato(java.lang.String,java.lang.String)" class="member-name-link">findByRuoloAndStato</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;ruolo,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;stato)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#findIdByEmailIgnoreCase(java.lang.String)" class="member-name-link">findIdByEmailIgnoreCase</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;email)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Cerca solo l'identificativo, senza caricare l'account nel contesto di persistenza.</div>
+</div>
 </div>
 </div>
 </div>
@@ -166,6 +172,19 @@ extends org.springframework.data.jpa.repository.JpaRepository&lt;<a href="Accoun
 <h3>findByEmailIgnoreCase</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="AccountJpa.html" title="class in it.unina.picus.utenze.interno.persistenza">AccountJpa</a>&gt;</span>&nbsp;<span class="element-name">findByEmailIgnoreCase</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;email)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="findIdByEmailIgnoreCase(java.lang.String)">
+<h3>findIdByEmailIgnoreCase</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="annotations">@Query("select a.id from AccountJpa a where lower(a.email) = lower(:email)")
+</span><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&gt;</span>&nbsp;<span class="element-name">findIdByEmailIgnoreCase</span><wbr><span class="parameters">(@Param("email")
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;email)</span></div>
+<div class="block">Cerca solo l'identificativo, senza caricare l'account nel contesto di persistenza. Serve a chi poi prende il
+lock con <a href="#findByIdForUpdate(java.util.UUID)"><code>findByIdForUpdate(UUID)</code></a>: se l'account fosse già caricato, la lettura con lock restituirebbe
+l'istanza in memoria con lo stato di prima e non quello aggiornato da una revoca o attivazione concorrente.</div>
 </div>
 </section>
 </li>
