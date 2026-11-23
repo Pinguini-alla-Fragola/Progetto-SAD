@@ -341,12 +341,35 @@ class RevocaEConcorrenzaOptPostgresTest extends IntegrazionePostgresBase {
             Throwable errAttivazione = fAttivazione.get(15, TimeUnit.SECONDS);
 
             assertNull(errRevoca);
-            assertTrue(errAttivazione instanceof TokenAttivazioneNonValidoException);
+            // I due comandi sono serializzati dal lock sull'account:
+            // - se l'attivazione prende il lock per prima, riesce (null) e la revoca successiva porta l'account a REVOCATO;
+            // - se la revoca prende il lock per prima, l'attivazione trova l'account revocato e fallisce.
+            assertTrue(errAttivazione == null || errAttivazione instanceof TokenAttivazioneNonValidoException,
+                    () -> "Errore inatteso dall'attivazione: " + errAttivazione);
         }
 
         assertEquals(StatoUtenza.REVOCATO, utenzeApi.cercaAccount(accountId).orElseThrow().stato());
         assertThrows(TokenAttivazioneNonValidoException.class,
                 () -> attivazioneUtenzaService.attivaAccount(token, "AltraPassword123!"));
+    }
+
+    @Test
+    @DisplayName("Attivazione dopo revoca: rifiuta il token pendente anche se non scaduto")
+    void attivazioneDopoRevoca_rifiutaTokenPendente() {
+        String codice = "OPT-REV-SEQ-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        String emailOpt = "rev-seq-" + UUID.randomUUID() + "@picus.test";
+        EsitoRegistrazioneOpt reg = registrazioneOptService.registraOpt(new ComandoRegistrazioneOpt(
+                codice, "OPT Revoca Sequenziale", "napoli", "12345678906", emailOpt
+        ));
+
+        UUID accountId = reg.accountId();
+        String token = reg.datiInvio().tokenInChiaro();
+
+        utenzeApi.revocaUtenzaOpt(accountId);
+
+        assertThrows(TokenAttivazioneNonValidoException.class,
+                () -> attivazioneUtenzaService.attivaAccount(token, "PasswordSicura123!"));
+        assertEquals(StatoUtenza.REVOCATO, utenzeApi.cercaAccount(accountId).orElseThrow().stato());
     }
 
     private MockHttpSession creaEAccedi(String ruolo) throws Exception {
