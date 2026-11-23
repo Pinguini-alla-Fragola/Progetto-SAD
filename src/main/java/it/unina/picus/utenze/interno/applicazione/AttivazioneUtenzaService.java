@@ -94,6 +94,15 @@ public class AttivazioneUtenzaService {
      */
     public record LinkPreparato(UUID idToken, DatiInvioAttivazione dati) {}
 
+    /**
+     * Pubblicato, nella stessa transazione, quando la posta ha accettato un nuovo link e questo ha sostituito i
+     * precedenti. Chi tiene inviti in attesa per quell'account, per esempio la coda dell'importazione CSV, li
+     * toglie solo adesso e non prima: se il nuovo invio fosse fallito, l'invito originale servirebbe ancora.
+     *
+     * @param accountId account che ha ricevuto il nuovo link
+     */
+    public record LinkAttivazioneConsegnato(UUID accountId) {}
+
     public record LinkAttivazioneDaInviareEvent(String emailDestinatario, String nomeDestinatario, String tokenInChiaro) {
         @Override
         public String toString() {
@@ -185,6 +194,7 @@ public class AttivazioneUtenzaService {
             Optional<AccountJpa> account = accounts.findByIdForUpdate(token.getAccountId());
             if (account.filter(a -> StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(a.getStato())).isPresent()) {
                 tokens.invalidaPrecedenti(token.getAccountId(), token.getCreatoIl(), Instant.now(clock));
+                eventPublisher.publishEvent(new LinkAttivazioneConsegnato(token.getAccountId()));
             }
         });
     }
