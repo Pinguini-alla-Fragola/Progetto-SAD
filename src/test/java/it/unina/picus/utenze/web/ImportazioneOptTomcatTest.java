@@ -2,9 +2,13 @@ package it.unina.picus.utenze.web;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.net.CookieManager;
@@ -33,9 +37,11 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import it.unina.picus.shared.InvioEmail;
 import it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService;
+import it.unina.picus.utenze.interno.applicazione.ConsegnaLinkAttivazione;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -61,6 +67,8 @@ class ImportazioneOptTomcatTest {
     private AttivazioneUtenzaService attivazione;
     @MockitoBean
     private InvioEmail posta;
+    @MockitoSpyBean
+    private ConsegnaLinkAttivazione consegnaLink;
 
     private HttpClient client;
 
@@ -131,6 +139,20 @@ class ImportazioneOptTomcatTest {
         assertThat(secondaImportazione.statusCode()).isEqualTo(200);
         assertThat(json.readTree(secondaImportazione.body()).get("righe")).hasSize(450)
                 .allSatisfy(riga -> assertThat(riga.get("esito").asText()).isEqualTo("INVARIATA"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void completaLInvitoCsvDopoLaConsegnaCondivisa(boolean simulato) throws Exception {
+        String codice = simulato ? "CSV-INVITO-SIMULATO" : "CSV-INVITO-INVIATO";
+        String codiceFiscale = simulato ? "12345678908" : "12345678907";
+        String email = simulato ? "invito-simulato@picus.test" : "invito-inviato@picus.test";
+        when(posta.isSimulato()).thenReturn(simulato);
+
+        UUID account = importaOptPerReinvio(codice, codiceFiscale, email);
+
+        verify(consegnaLink, timeout(5000)).consegna(argThat(dati -> email.equals(dati.emailDestinatario())));
+        await().atMost(Duration.ofSeconds(5)).untilAsserted(() -> assertThat(invitiAccodati(account)).isZero());
     }
 
     @ParameterizedTest

@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import it.unina.picus.shared.InvioEmail;
+import it.unina.picus.utenze.interno.applicazione.ConsegnaLinkAttivazione.Esito;
 
 /** Consegna gli inviti persistiti dopo il commit e fuori dalla richiesta HTTP. */
 @Configuration(proxyBeanMethods = false)
@@ -19,11 +19,11 @@ class ConsegnaInvitiImportazioneOpt {
     private static final int INVITI_PER_CICLO = 50;
 
     private final CodaInvitiImportazioneOpt coda;
-    private final InvioEmail invioEmail;
+    private final ConsegnaLinkAttivazione consegnaLink;
 
-    ConsegnaInvitiImportazioneOpt(CodaInvitiImportazioneOpt coda, InvioEmail invioEmail) {
+    ConsegnaInvitiImportazioneOpt(CodaInvitiImportazioneOpt coda, ConsegnaLinkAttivazione consegnaLink) {
         this.coda = coda;
-        this.invioEmail = invioEmail;
+        this.consegnaLink = consegnaLink;
     }
 
     @Scheduled(fixedDelay = 1000)
@@ -33,21 +33,17 @@ class ConsegnaInvitiImportazioneOpt {
             if (prenotazione.isEmpty()) {
                 return;
             }
-            var consegna = prenotazione.orElseThrow();
-            var dati = consegna.dati();
-            try {
-                invioEmail.inviaLinkAttivazione(dati.emailDestinatario(), dati.nomeDestinatario(), dati.tokenInChiaro());
-            } catch (RuntimeException ex) {
-                if (consegna.tentativo() == CodaInvitiImportazioneOpt.MASSIMO_TENTATIVI) {
-                    LOG.warn("Tentativi automatici esauriti per l'invito OPT (accountId={}, causa={})",
-                            consegna.accountId(), ex.getClass().getSimpleName());
+            var invito = prenotazione.orElseThrow();
+            if (consegnaLink.consegna(invito.dati()) == Esito.NON_RIUSCITO) {
+                if (invito.tentativo() == CodaInvitiImportazioneOpt.MASSIMO_TENTATIVI) {
+                    LOG.warn("Tentativi automatici esauriti per l'invito OPT (accountId={})", invito.accountId());
                 } else {
-                    LOG.warn("Consegna dell'invito OPT da riprovare (accountId={}, tentativo={}, causa={})",
-                            consegna.accountId(), consegna.tentativo(), ex.getClass().getSimpleName());
+                    LOG.warn("Consegna dell'invito OPT da riprovare (accountId={}, tentativo={})",
+                            invito.accountId(), invito.tentativo());
                 }
                 continue;
             }
-            coda.completa(consegna);
+            coda.completa(invito);
         }
     }
 }
