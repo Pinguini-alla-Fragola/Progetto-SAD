@@ -22,6 +22,10 @@ public interface TokenRecuperoPasswordRepository extends JpaRepository<TokenRecu
             """)
     int invalidaTokenAttiviPerAccount(@Param("accountId") UUID accountId, @Param("ora") Instant ora);
 
+    /** Istante dell'ultimo link emesso per l'account; da leggere con il lock dell'account già preso. */
+    @Query("select max(t.creatoIl) from TokenRecuperoPasswordJpa t where t.accountId = :accountId")
+    Optional<Instant> ultimaEmissione(@Param("accountId") UUID accountId);
+
     /** Chiude un solo link, se non è già stato chiuso da altri. */
     @Modifying
     @Query("""

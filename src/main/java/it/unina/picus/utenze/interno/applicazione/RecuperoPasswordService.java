@@ -3,6 +3,7 @@ package it.unina.picus.utenze.interno.applicazione;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -135,9 +136,22 @@ public class RecuperoPasswordService {
                 .isPresent();
     }
 
+    /**
+     * Istante di emissione del prossimo link dell'account. Ogni link ha un istante strettamente maggiore di quelli
+     * già emessi: l'orologio può restituire lo stesso valore due volte e il database conserva solo i microsecondi,
+     * quindi il timestamp da solo non direbbe quale link è il precedente. Il valore si assegna sotto il lock
+     * dell'account, e la sostituzione ({@link #confermaConsegna}) confronta proprio questo ordine.
+     */
+    private Instant prossimaEmissione(UUID accountId) {
+        Instant adesso = Instant.now(clock).truncatedTo(ChronoUnit.MICROS);
+        return tokens.ultimaEmissione(accountId)
+                .map(ultima -> ultima.isBefore(adesso) ? adesso : ultima.plus(1, ChronoUnit.MICROS))
+                .orElse(adesso);
+    }
+
     /** Crea il token per l'account, bloccato dal chiamante. */
     private DatiInvioRecupero creaLink(AccountJpa account) {
-        Instant ora = Instant.now(clock);
+        Instant ora = prossimaEmissione(account.getId());
         String tokenInChiaro = TokenMonouso.genera();
         TokenRecuperoPasswordJpa link = tokens.saveAndFlush(new TokenRecuperoPasswordJpa(
                 UUID.randomUUID(),
