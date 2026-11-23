@@ -19,7 +19,8 @@ import it.unina.picus.utenze.interno.applicazione.ReinvioLinkSuRichiesta;
  * <p>La risposta è la stessa per ogni indirizzo scritto correttamente, sia che l'account esista e sia in
  * attesa, sia che non esista o sia già attivo o revocato: chi non è autenticato non deve poter scoprire
  * quali indirizzi sono registrati. Per lo stesso motivo tutto il lavoro sull'account (nuovo token e email)
- * avviene in secondo piano ({@link ReinvioLinkSuRichiesta}): la risposta ha gli stessi tempi per ogni indirizzo.</p>
+ * avviene in secondo piano ({@link ReinvioLinkSuRichiesta}): la risposta ha gli stessi tempi per ogni indirizzo.
+ * Se la coda del lavoro in secondo piano è piena rispondono {@code 503} tutti gli indirizzi, allo stesso modo.</p>
  */
 @RestController
 @Profile("!skeleton")
@@ -30,6 +31,8 @@ class ReinvioAttivazioneController {
     static final String MESSAGGIO_EMAIL_NON_VALIDA = "Inserisci un indirizzo email valido.";
     static final String MESSAGGIO_TROPPE_RICHIESTE =
             "Hai chiesto troppi link per questo indirizzo. Riprova tra qualche minuto.";
+    static final String MESSAGGIO_SERVIZIO_OCCUPATO =
+            "Il servizio è momentaneamente occupato. Riprova tra qualche minuto.";
 
     private static final int LUNGHEZZA_MAX_EMAIL = 254;
     private static final Pattern EMAIL = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
@@ -58,7 +61,12 @@ class ReinvioAttivazioneController {
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
                     .body(Map.of("messaggio", MESSAGGIO_TROPPE_RICHIESTE));
         }
-        reinvio.richiedi(email);
+        if (!reinvio.richiedi(email)) {
+            // La richiesta non è stata presa in carico: non conta tra quelle concesse all'indirizzo.
+            limitatore.rilascia(email);
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(Map.of("messaggio", MESSAGGIO_SERVIZIO_OCCUPATO));
+        }
         return ResponseEntity.ok(Map.of("messaggio", MESSAGGIO_CONFERMA));
     }
 

@@ -70,4 +70,12 @@ class LimitatoreReinvii {
         coda.addLast(ora);
         return true;
     }
+
+    /** Toglie l'ultima richiesta ammessa per la chiave: serve quando poi non è stata presa in carico. */
+    synchronized void rilascia(String chiave) {
+        Deque<Instant> coda = richieste.get(chiave);
+        if (coda != null) {
+            coda.pollLast();
+        }
+    }
 }
