@@ -79,12 +79,13 @@ class RecuperoPasswordController {
                     "messaggio", EmailDigitata.MESSAGGIO_NON_VALIDA,
                     "campi", Map.of("email", EmailDigitata.MESSAGGIO_NON_VALIDA)));
         }
-        if (!limitatore.ammetti(email.get())) {
+        Optional<LimitatoreRichieste.Ammissione> ammissione = limitatore.ammetti(email.get());
+        if (ammissione.isEmpty()) {
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(Map.of("messaggio", MESSAGGIO_TROPPE_RICHIESTE));
         }
         if (!richiesta.get().richiedi(email.get())) {
-            // La richiesta non è stata presa in carico: non conta tra quelle concesse all'indirizzo.
-            limitatore.rilascia(email.get());
+            // La richiesta non è stata presa in carico: si restituisce proprio il suo posto nel limite.
+            limitatore.rilascia(ammissione.get());
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(Map.of("messaggio", MESSAGGIO_SERVIZIO_OCCUPATO));
         }
