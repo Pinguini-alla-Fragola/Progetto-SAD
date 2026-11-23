@@ -68,7 +68,8 @@ public class RegistrazioneOptService {
      * @return identificativo dell'account e dati per l'invio dopo il commit
      */
     public EsitoRegistrazioneOpt registraOpt(ComandoRegistrazioneOpt comando) {
-        return registra(valida(comando));
+        AccountJpa account = creaAccount(valida(comando));
+        return new EsitoRegistrazioneOpt(account.getId(), attivazioneService.preparaTokenAttivazione(account));
     }
 
     /**
@@ -108,12 +109,12 @@ public class RegistrazioneOptService {
     }
 
     /**
-     * Crea account, profilo e token nella transazione del caso d'uso chiamante.
+     * Crea account e profilo nella transazione del caso d'uso chiamante.
      *
      * @param dati anagrafica già validata
-     * @return identificativo dell'account e dati per l'invio dopo il commit
+     * @return account OPT in attesa di attivazione
      */
-    EsitoRegistrazioneOpt registra(DatiOpt dati) {
+    AccountJpa creaAccount(DatiOpt dati) {
         if (accounts.existsByEmailIgnoreCase(dati.email())) {
             throw new DatiOptNonValidiException("email", "Esiste già un account associato a questa email.");
         }
@@ -133,8 +134,7 @@ public class RegistrazioneOptService {
             );
             profiliOpt.saveAndFlush(profilo);
 
-            DatiInvioAttivazione datiInvio = attivazioneService.preparaTokenAttivazione(account);
-            return new EsitoRegistrazioneOpt(account.getId(), datiInvio);
+            return account;
 
         } catch (DataIntegrityViolationException ex) {
             throw classificaViolazioneVincolo(ex);
