@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Recupero password · PICUS</title>
+    <link rel="icon" href="/img/picus.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/css/picus.css">
+    <script src="/js/recupero.js" type="module"></script>
+    <link rel="stylesheet" href="/css/integrazione-ui.css">
+</head>
+<body class="flow-page">
+<a th:replace="~{fragments/layout :: skip}" href="#contenuto">Vai al contenuto</a>
+<header class="picus-navbar">
+    <div class="nav-inner">
+        <a th:replace="~{fragments/layout :: brand}" href="/">PICUS</a>
+        <a href="/login" class="nav-link"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#back"></use></svg> Accedi</a>
+    </div>
+</header>
+<main id="contenuto" class="mobile-wrapper credentials" tabindex="-1">
+    <header class="mobile-header">
+        <h1 th:text="${cambioPassword ? 'Scegli una nuova password' : 'Recupera la password'}">Recupera la password</h1>
+    </header>
+    <div class="mobile-body">
+        <p class="page-description" th:if="${linkNonValido}">
+            Il link di recupero non è valido, è scaduto oppure è già stato utilizzato.
+            Richiedine uno nuovo indicando l’email del tuo account, oppure <a href="/login">torna all’accesso</a>.
+        </p>
+        <p class="page-description" th:if="${!cambioPassword and !linkNonValido}">
+            Indica l’email del tuo account: se è attivo ti invieremo un link per scegliere una nuova password.
+            Il link vale 15 minuti.
+        </p>
+
+        <form id="richiesta-recupero" method="post" action="/recupera" th:unless="${cambioPassword}"
+              data-endpoint="/api/auth/recupera">
+            <fieldset>
+                <div class="form-group">
+                    <label class="form-label" for="email">Email dell’account</label>
+                    <input id="email" class="form-control" type="email" name="email" required maxlength="254"
+                           autocomplete="email">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Richiedi il link</button>
+                <p id="esito" class="picus-esito" role="status"></p>
+            </fieldset>
+        </form>
+
+        <!-- Il cambio password si attiva con il task #161: finché non esiste la conferma resta una vista inattiva. -->
+        <form id="cambio-password" method="post" action="/recupera" th:if="${cambioPassword}" data-form-anteprima>
+            <fieldset class="campi-inattivi" disabled>
+                <input type="hidden" name="token" th:value="${token}">
+                <div class="form-group">
+                    <label class="form-label" for="password">Nuova password</label>
+                    <input id="password" class="form-control" name="nuovaPassword" type="password" required
+                           minlength="12" maxlength="72" autocomplete="new-password" aria-describedby="password-help">
+                    <p class="form-text" id="password-help">Usa almeno 12 caratteri.</p>
+                </div>
+                <span class="azione-inattiva" data-funzione-inattiva>
+                    <button type="submit" class="btn btn-primary btn-block">Salva la nuova password</button>
+                </span>
+            </fieldset>
+        </form>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

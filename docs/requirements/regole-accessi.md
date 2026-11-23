@@ -18,6 +18,7 @@ Stati ammessi per l’utenza sono In attesa di attivazione, Attivo e Revocato. #
 | Recupero | Solo account attivo, link monouso di 15 minuti |
 | Password cambiata | Nuova password valida, precedente non più utilizzabile |
 | Tentativi ripetuti | Cinque fallimenti in cinque minuti; attesa proposta di 60 secondi |
+| Richieste di recupero | Con la propria email, senza sessione; al massimo 3 richieste in 5 minuti per indirizzo, soglia da validare; un nuovo link invalida il precedente |
 | Messaggi pubblici | Stesso riscontro per email esistente o non abilitata, senza rivelare l’account |
 | Logout | Sessione terminata sul server; successivo riuso della sessione negato |
 
