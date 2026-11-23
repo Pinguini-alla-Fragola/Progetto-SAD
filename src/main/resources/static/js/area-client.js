@@ -10,6 +10,8 @@ export class ErroreHttp extends Error {
         super(messaggi[stato] || dati?.messaggio || 'Operazione non riuscita. Riprova tra poco.');
         this.stato = stato;
         this.campi = dati?.campi || {};
+        // testo del server, anche quando il messaggio mostrato è quello generico dello stato HTTP
+        this.messaggioServer = dati?.messaggio || null;
     }
 }
 

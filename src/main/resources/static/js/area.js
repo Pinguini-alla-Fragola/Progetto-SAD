@@ -75,7 +75,8 @@ if (utenti) {
                 const risultato = await api(`/api/${risorsa}/${encodeURIComponent(id)}/reinvia-invito`, { method: 'POST' });
                 esito.textContent = risultato?.messaggio || `Invito reinviato a ${email || nome}.`;
             } catch (causa) {
-                esito.textContent = causa?.message || 'Impossibile reinviare l\'invito. Riprova.';
+                // 404 e 409 hanno un motivo preciso (account inesistente, già attivo, ruolo diverso): meglio il testo del server
+                esito.textContent = causa?.messaggioServer || causa?.message || 'Impossibile reinviare l\'invito. Riprova.';
             } finally {
                 btnReinvia.disabled = false;
             }
