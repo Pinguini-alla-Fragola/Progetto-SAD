@@ -31,15 +31,28 @@ public class TokenAttivazioneJpa {
     @Column(name = "usato_il")
     private Instant usatoIl;
 
+    @Column(name = "da_importazione_opt", nullable = false)
+    private boolean daImportazioneOpt;
+
     protected TokenAttivazioneJpa() {
     }
 
     public TokenAttivazioneJpa(UUID id, UUID accountId, String tokenHash, Instant scadenza, Instant creatoIl) {
+        this(id, accountId, tokenHash, scadenza, creatoIl, false);
+    }
+
+    public TokenAttivazioneJpa(UUID id, UUID accountId, String tokenHash, Instant scadenza, Instant creatoIl,
+                               boolean daImportazioneOpt) {
         this.id = Objects.requireNonNull(id, "id obbligatorio");
         this.accountId = Objects.requireNonNull(accountId, "accountId obbligatorio");
         this.tokenHash = Objects.requireNonNull(tokenHash, "tokenHash obbligatorio");
         this.scadenza = Objects.requireNonNull(scadenza, "scadenza obbligatoria");
         this.creatoIl = Objects.requireNonNull(creatoIl, "creatoIl obbligatorio");
+        this.daImportazioneOpt = daImportazioneOpt;
+    }
+
+    public boolean isDaImportazioneOpt() {
+        return daImportazioneOpt;
     }
 
     public boolean isUsato() {

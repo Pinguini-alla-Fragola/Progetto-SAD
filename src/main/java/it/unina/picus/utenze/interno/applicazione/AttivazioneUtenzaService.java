@@ -56,7 +56,7 @@ public class AttivazioneUtenzaService {
             TokenAttivazioneRepository tokens,
             PasswordEncoder passwordEncoder,
             ApplicationEventPublisher eventPublisher,
-            @Value("${picus.utenze.attivazione.validita:PT72H}") Duration durataValidita) {
+            @Value("${picus.utenze.attivazione.validita:PT48H}") Duration durataValidita) {
         this(accounts, tokens, passwordEncoder, eventPublisher, durataValidita, Clock.systemUTC());
     }
 
@@ -235,6 +235,19 @@ public class AttivazioneUtenzaService {
         account.attivaConPassword(passwordEncoder.encode(nuovaPassword));
         tokens.saveAndFlush(token);
         accounts.saveAndFlush(account);
+    }
+
+    /**
+     * Crea il link di un tentativo di consegna con l'account già bloccato dalla coda.
+     * I tentativi precedenti possono aver già raggiunto la casella del destinatario.
+     */
+    DatiInvioAttivazione preparaTokenImportazioneOpt(AccountJpa account) {
+        Instant ora = Instant.now(clock);
+        String tokenInChiaro = generaTokenCasuale();
+        tokens.saveAndFlush(new TokenAttivazioneJpa(
+                UUID.randomUUID(), account.getId(), calcolaSha256(tokenInChiaro),
+                ora.plus(durataValidita), ora, true));
+        return new DatiInvioAttivazione(account.getEmail(), account.getNome(), tokenInChiaro);
     }
 
     private static void validaPassword(String password) {

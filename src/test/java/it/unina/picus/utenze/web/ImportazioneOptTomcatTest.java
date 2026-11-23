@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -141,7 +142,7 @@ class ImportazioneOptTomcatTest {
     }
 
     @Test
-    void riprovaUnInvitoDopoUnErroreSmtp() throws Exception {
+    void riprovaUnInvitoGiaAccettatoSenzaInvalidareIlPrimoLink() throws Exception {
         String email = "interrotto@picus.test";
         var primaConsegna = new CountDownLatch(1);
         var secondaConsegna = new CountDownLatch(1);
@@ -151,7 +152,7 @@ class ImportazioneOptTomcatTest {
             String token = chiamata.getArgument(2);
             if (primoToken.compareAndSet(null, token)) {
                 primaConsegna.countDown();
-                throw new IllegalStateException("SMTP temporaneamente non disponibile");
+                throw new IllegalStateException("SMTP ha accettato il messaggio ma la conferma è andata persa");
             }
             secondoToken.set(token);
             secondaConsegna.countDown();
@@ -162,13 +163,46 @@ class ImportazioneOptTomcatTest {
         assertThat(risposta.statusCode()).isEqualTo(200);
         assertThat(primaConsegna.await(5, SECONDS)).isTrue();
         assertThat(attivazione.isTokenValido(primoToken.get())).isTrue();
+        rendiDisponibile(email);
+        assertThat(secondaConsegna.await(5, SECONDS)).isTrue();
+        assertThat(attivazione.isTokenValido(secondoToken.get())).isTrue();
+        assertThat(attivazione.isTokenValido(primoToken.get())).isTrue();
+
+        attivazione.attivaAccount(primoToken.get(), PASSWORD);
+        assertThat(attivazione.isTokenValido(primoToken.get())).isFalse();
+        assertThat(attivazione.isTokenValido(secondoToken.get())).isFalse();
+    }
+
+    @Test
+    void interrompeIRitentativiDopoCinqueErroriSmtp() throws Exception {
+        String email = "rifiutato@picus.test";
+        var tentativi = new LinkedBlockingQueue<Boolean>();
+        doAnswer(chiamata -> {
+            tentativi.add(true);
+            throw new IllegalStateException("SMTP rifiuta il destinatario");
+        }).when(posta).inviaLinkAttivazione(eq(email), anyString(), anyString());
+
+        var risposta = carica(INTESTAZIONE + "RIFIUTATA,OPT sintetica,napoli,12345678903," + email + "\n", tokenCsrf());
+        assertThat(risposta.statusCode()).isEqualTo(200);
+
+        for (int numero = 1; numero <= 5; numero++) {
+            assertThat(tentativi.poll(5, SECONDS)).isTrue();
+            if (numero < 5) {
+                rendiDisponibile(email);
+            }
+        }
+        assertThat(tentativi.poll(3, SECONDS)).isNull();
+        assertThat(jdbc.queryForObject("""
+                select tentativi from utenze_inviti_importazione_opt
+                 where disponibile_dal is null and account_id = (select id from utenze_account where email = ?)
+                """, Integer.class, email)).isEqualTo(5);
+    }
+
+    private void rendiDisponibile(String email) {
         assertThat(jdbc.update("""
                 update utenze_inviti_importazione_opt set disponibile_dal = current_timestamp
                  where account_id = (select id from utenze_account where email = ?)
                 """, email)).isEqualTo(1);
-        assertThat(secondaConsegna.await(5, SECONDS)).isTrue();
-        assertThat(attivazione.isTokenValido(secondoToken.get())).isTrue();
-        assertThat(attivazione.isTokenValido(primoToken.get())).isFalse();
     }
 
     @Test

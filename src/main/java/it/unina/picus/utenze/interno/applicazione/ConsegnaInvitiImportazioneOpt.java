@@ -38,7 +38,13 @@ class ConsegnaInvitiImportazioneOpt {
             try {
                 invioEmail.inviaLinkAttivazione(dati.emailDestinatario(), dati.nomeDestinatario(), dati.tokenInChiaro());
             } catch (RuntimeException ex) {
-                LOG.warn("Consegna dell'invito OPT importato da riprovare (causa={})", ex.getClass().getSimpleName());
+                if (consegna.tentativo() == CodaInvitiImportazioneOpt.MASSIMO_TENTATIVI) {
+                    LOG.warn("Tentativi automatici esauriti per l'invito OPT (accountId={}, causa={})",
+                            consegna.accountId(), ex.getClass().getSimpleName());
+                } else {
+                    LOG.warn("Consegna dell'invito OPT da riprovare (accountId={}, tentativo={}, causa={})",
+                            consegna.accountId(), consegna.tentativo(), ex.getClass().getSimpleName());
+                }
                 continue;
             }
             coda.completa(consegna);
