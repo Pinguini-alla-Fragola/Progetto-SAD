@@ -323,6 +323,10 @@ oppure restituisce vuoto se il database rileva un conflitto concorrente di unici
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/monitoraggio/api/MonitoraggioApi.Trimestre.html#param-anno"><code>anno</code></a> record component.</div>
 </dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.RigaSintesi.html#anno()" class="member-name-link">anno()</a> - Method in record class it.unina.picus.monitoraggio.interno.persistenza.<a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.RigaSintesi.html" title="class in it.unina.picus.monitoraggio.interno.persistenza">ArchivioSchedeJpa.RigaSintesi</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>anno</code> record component.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/web/AnnullamentoRichiesteController.html#annulla(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,jakarta.servlet.http.HttpServletRequest)" class="member-name-link">annulla(UtenzeApi.IdentitaAutenticata, UUID, HttpServletRequest)</a> - Method in class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/AnnullamentoRichiesteController.html" title="class in it.unina.picus.richieste.web">AnnullamentoRichiesteController</a></dt>
 <dd>
 <div class="block">Registra l'annullamento o restituisce la sintesi dell'esito già registrato.</div>
@@ -373,6 +377,30 @@ oppure restituisce vuoto se il database rileva un conflitto concorrente di unici
 </dd>
 <dt><a href="it/unina/picus/comunicazioni/interno/persistenza/ArchivioComunicazioniJpa.html#%3Cinit%3E(jakarta.persistence.EntityManager)" class="member-name-link">ArchivioComunicazioniJpa(EntityManager)</a> - Constructor for class it.unina.picus.comunicazioni.interno.persistenza.<a href="it/unina/picus/comunicazioni/interno/persistenza/ArchivioComunicazioniJpa.html" title="class in it.unina.picus.comunicazioni.interno.persistenza">ArchivioComunicazioniJpa</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.html" class="type-name-link" title="class in it.unina.picus.monitoraggio.interno.persistenza">ArchivioSchedeJpa</a> - Class in <a href="it/unina/picus/monitoraggio/interno/persistenza/package-summary.html">it.unina.picus.monitoraggio.interno.persistenza</a></dt>
+<dd>
+<div class="block">Adattatore JPA delle schede personali.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.html#%3Cinit%3E(jakarta.persistence.EntityManager)" class="member-name-link">ArchivioSchedeJpa(EntityManager)</a> - Constructor for class it.unina.picus.monitoraggio.interno.persistenza.<a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.html" title="class in it.unina.picus.monitoraggio.interno.persistenza">ArchivioSchedeJpa</a></dt>
+<dd>
+<div class="block">Collega l'archivio al contesto di persistenza della transazione corrente.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.RigaSintesi.html" class="type-name-link" title="class in it.unina.picus.monitoraggio.interno.persistenza">ArchivioSchedeJpa.RigaSintesi</a> - Record Class in <a href="it/unina/picus/monitoraggio/interno/persistenza/package-summary.html">it.unina.picus.monitoraggio.interno.persistenza</a></dt>
+<dd>
+<div class="block">Proiezione delle sole colonne di sintesi, senza anagrafica e conteggi.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/ArchivioSchedeOperatore.html" class="type-name-link" title="interface in it.unina.picus.monitoraggio.interno.dominio">ArchivioSchedeOperatore</a> - Interface in <a href="it/unina/picus/monitoraggio/interno/dominio/package-summary.html">it.unina.picus.monitoraggio.interno.dominio</a></dt>
+<dd>
+<div class="block">Porta di persistenza e consultazione delle schede personali già inviate.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/ArchivioSchedeRendicontabili.html" class="type-name-link" title="interface in it.unina.picus.monitoraggio.interno.dominio">ArchivioSchedeRendicontabili</a> - Interface in <a href="it/unina/picus/monitoraggio/interno/dominio/package-summary.html">it.unina.picus.monitoraggio.interno.dominio</a></dt>
+<dd>
+<div class="block">Porta di lettura delle schede registrate dal caso d'uso di invio (#58).</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/ArchivioSchedeRendicontabili.VersioneInviata.html" class="type-name-link" title="class in it.unina.picus.monitoraggio.interno.dominio">ArchivioSchedeRendicontabili.VersioneInviata</a> - Record Class in <a href="it/unina/picus/monitoraggio/interno/dominio/package-summary.html">it.unina.picus.monitoraggio.interno.dominio</a></dt>
+<dd>
+<div class="block">Dati di un invio accettato, proiettati per il riepilogo.</div>
+</dd>
 <dt><a href="it/unina/picus/utenze/web/AreaController.html" class="type-name-link" title="class in it.unina.picus.utenze.web">AreaController</a> - Class in <a href="it/unina/picus/utenze/web/package-summary.html">it.unina.picus.utenze.web</a></dt>
 <dd>
 <div class="block">Adattatore MVC per il login e le aree riservate dei tre ruoli.</div>
@@ -383,6 +411,12 @@ oppure restituisce vuoto se il database rileva un conflitto concorrente di unici
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/monitoraggio/api/MonitoraggioApi.DatiSchedaOperatore.html#param-areaLivello"><code>areaLivello</code></a> record component.</div>
 </dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/persistenza/SchedaOperatoreJpa.html#aScheda()" class="member-name-link">aScheda()</a> - Method in class it.unina.picus.monitoraggio.interno.persistenza.<a href="it/unina/picus/monitoraggio/interno/persistenza/SchedaOperatoreJpa.html" title="class in it.unina.picus.monitoraggio.interno.persistenza">SchedaOperatoreJpa</a></dt>
+<dd>
+<div class="block">Ricompone la scheda completa dopo il controllo della titolarità.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.RigaSintesi.html#aSintesi()" class="member-name-link">aSintesi()</a> - Method in record class it.unina.picus.monitoraggio.interno.persistenza.<a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.RigaSintesi.html" title="class in it.unina.picus.monitoraggio.interno.persistenza">ArchivioSchedeJpa.RigaSintesi</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/richieste/web/CoordinamentoRichiesteController.html#assegna(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,it.unina.picus.richieste.web.CorpoJson)" class="member-name-link">assegna(UtenzeApi.IdentitaAutenticata, UUID, CorpoJson)</a> - Method in class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/CoordinamentoRichiesteController.html" title="class in it.unina.picus.richieste.web">CoordinamentoRichiesteController</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/richieste/interno/dominio/RichiestaDiMisura.html#assegna(java.util.UUID,it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione)" class="member-name-link">assegna(UUID, CatalogoApi.AmbitoErogazione)</a> - Method in record class it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/RichiestaDiMisura.html" title="class in it.unina.picus.richieste.interno.dominio">RichiestaDiMisura</a></dt>
@@ -464,6 +498,10 @@ sui tentativi.</div>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/utenze/web/AutenticazionePicus.html#authenticate(org.springframework.security.core.Authentication)" class="member-name-link">authenticate(Authentication)</a> - Method in class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/AutenticazionePicus.html" title="class in it.unina.picus.utenze.web">AutenticazionePicus</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/persistenza/SchedaOperatoreJpa.html#aVersioneInviata()" class="member-name-link">aVersioneInviata()</a> - Method in class it.unina.picus.monitoraggio.interno.persistenza.<a href="it/unina/picus/monitoraggio/interno/persistenza/SchedaOperatoreJpa.html" title="class in it.unina.picus.monitoraggio.interno.persistenza">SchedaOperatoreJpa</a></dt>
+<dd>
+<div class="block">Proietta il primo invio.</div>
+</dd>
 <dt><a href="it/unina/picus/comunicazioni/api/AvvisiAnnullamentoApi.html#avvisaAnnullamento(java.util.UUID,java.util.Set)" class="member-name-link">avvisaAnnullamento(UUID, Set)</a> - Method in interface it.unina.picus.comunicazioni.api.<a href="it/unina/picus/comunicazioni/api/AvvisiAnnullamentoApi.html" title="interface in it.unina.picus.comunicazioni.api">AvvisiAnnullamentoApi</a></dt>
 <dd>
 <div class="block">Registra un solo avviso per richiesta e destinatario nella transazione chiamante.</div>
@@ -598,6 +636,22 @@ sui tentativi.</div>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/comunicazioni/web/ErroriComunicazioni.Errore.html#param-campi"><code>campi</code></a> record component.</div>
 </dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/DatiSchedaNonValidiException.html#campi()" class="member-name-link">campi()</a> - Method in exception class it.unina.picus.monitoraggio.interno.dominio.<a href="it/unina/picus/monitoraggio/interno/dominio/DatiSchedaNonValidiException.html" title="class in it.unina.picus.monitoraggio.interno.dominio">DatiSchedaNonValidiException</a></dt>
+<dd>
+<div class="block">Returns gli errori per campo, senza i valori dichiarati.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/TracciatoSchedaOperatore.html#campi()" class="member-name-link">campi()</a> - Static method in class it.unina.picus.monitoraggio.interno.dominio.<a href="it/unina/picus/monitoraggio/interno/dominio/TracciatoSchedaOperatore.html" title="class in it.unina.picus.monitoraggio.interno.dominio">TracciatoSchedaOperatore</a></dt>
+<dd>
+<div class="block">Returns i campi compilabili del tracciato provvisorio, nell'ordine del modulo.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Errore.html#campi()" class="member-name-link">campi()</a> - Method in record class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Errore.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController.Errore</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>campi</code> record component.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Modulo.html#campi()" class="member-name-link">campi()</a> - Method in record class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Modulo.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController.Modulo</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>campi</code> record component.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/api/DatiRichiestaNonValidiException.html#campi()" class="member-name-link">campi()</a> - Method in exception class it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/DatiRichiestaNonValidiException.html" title="class in it.unina.picus.richieste.api">DatiRichiestaNonValidiException</a></dt>
 <dd>
 <div class="block">Restituisce indicazioni immutabili per la correzione del modulo.</div>
@@ -631,6 +685,10 @@ sui tentativi.</div>
 <dt><a href="it/unina/picus/utenze/interno/dominio/RegistrazioneInConflittoException.html#campo()" class="member-name-link">campo()</a> - Method in exception class it.unina.picus.utenze.interno.dominio.<a href="it/unina/picus/utenze/interno/dominio/RegistrazioneInConflittoException.html" title="class in it.unina.picus.utenze.interno.dominio">RegistrazioneInConflittoException</a></dt>
 <dd>
 <div class="block">Indica quale campo è risultato duplicato.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/TracciatoSchedaOperatore.Campo.html#%3Cinit%3E(java.lang.String,java.lang.String,boolean)" class="member-name-link">Campo(String, String, boolean)</a> - Constructor for record class it.unina.picus.monitoraggio.interno.dominio.<a href="it/unina/picus/monitoraggio/interno/dominio/TracciatoSchedaOperatore.Campo.html" title="class in it.unina.picus.monitoraggio.interno.dominio">TracciatoSchedaOperatore.Campo</a></dt>
+<dd>
+<div class="block">Creates an instance of a <code>Campo</code> record class.</div>
 </dd>
 <dt><a href="it/unina/picus/comunicazioni/interno/applicazione/NormalizzatoreFiltro.html#CAMPO_ALLEGATI" class="member-name-link">CAMPO_ALLEGATI</a> - Static variable in class it.unina.picus.comunicazioni.interno.applicazione.<a href="it/unina/picus/comunicazioni/interno/applicazione/NormalizzatoreFiltro.html" title="class in it.unina.picus.comunicazioni.interno.applicazione">NormalizzatoreFiltro</a></dt>
 <dd>&nbsp;</dd>
@@ -706,6 +764,10 @@ sui tentativi.</div>
 <dd>
 <div class="block">Costruisce il controller collegando le capacità di consultazione e gestione catalogo.</div>
 </dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/ArchivioSchedeRendicontabili.VersioneInviata.html#categorieTracciato()" class="member-name-link">categorieTracciato()</a> - Method in record class it.unina.picus.monitoraggio.interno.dominio.<a href="it/unina/picus/monitoraggio/interno/dominio/ArchivioSchedeRendicontabili.VersioneInviata.html" title="class in it.unina.picus.monitoraggio.interno.dominio">ArchivioSchedeRendicontabili.VersioneInviata</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./it/unina/picus/monitoraggio/interno/dominio/ArchivioSchedeRendicontabili.VersioneInviata.html#param-categorieTracciato"><code>categorieTracciato</code></a> record component.</div>
+</dd>
 <dt><a href="it/unina/picus/utenze/interno/dominio/CampoOperatore.html#CENTRO_PICUS" class="member-name-link">CENTRO_PICUS</a> - Static variable in class it.unina.picus.utenze.interno.dominio.<a href="it/unina/picus/utenze/interno/dominio/CampoOperatore.html" title="class in it.unina.picus.utenze.interno.dominio">CampoOperatore</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/catalogo/api/CatalogoApi.AmbitoErogazione.html#CENTRO_PICUS_A_DISTANZA" class="member-name-link">CENTRO_PICUS_A_DISTANZA</a> - Enum constant in enum class it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/CatalogoApi.AmbitoErogazione.html" title="enum class in it.unina.picus.catalogo.api">CatalogoApi.AmbitoErogazione</a></dt>
@@ -734,6 +796,14 @@ sui tentativi.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/interno/persistenza/ContattiRepositoryJpa.html#cerca(java.util.UUID)" class="member-name-link">cerca(UUID)</a> - Method in class it.unina.picus.richieste.interno.persistenza.<a href="it/unina/picus/richieste/interno/persistenza/ContattiRepositoryJpa.html" title="class in it.unina.picus.richieste.interno.persistenza">ContattiRepositoryJpa</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/ArchivioSchedeOperatore.html#cerca(java.util.UUID,java.util.function.Consumer)" class="member-name-link">cerca(UUID, Consumer)</a> - Method in interface it.unina.picus.monitoraggio.interno.dominio.<a href="it/unina/picus/monitoraggio/interno/dominio/ArchivioSchedeOperatore.html" title="interface in it.unina.picus.monitoraggio.interno.dominio">ArchivioSchedeOperatore</a></dt>
+<dd>
+<div class="block">Cerca la scheda e verifica l'accesso prima di costruire il dettaglio.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.html#cerca(java.util.UUID,java.util.function.Consumer)" class="member-name-link">cerca(UUID, Consumer)</a> - Method in class it.unina.picus.monitoraggio.interno.persistenza.<a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.html" title="class in it.unina.picus.monitoraggio.interno.persistenza">ArchivioSchedeJpa</a></dt>
+<dd>
+<div class="block">Cerca la scheda e verifica l'accesso prima di costruire il dettaglio.</div>
+</dd>
 <dt><a href="it/unina/picus/comunicazioni/interno/dominio/ArchivioComunicazioni.html#cerca(java.util.UUID,java.util.UUID)" class="member-name-link">cerca(UUID, UUID)</a> - Method in interface it.unina.picus.comunicazioni.interno.dominio.<a href="it/unina/picus/comunicazioni/interno/dominio/ArchivioComunicazioni.html" title="interface in it.unina.picus.comunicazioni.interno.dominio">ArchivioComunicazioni</a></dt>
 <dd>
 <div class="block">Cerca una comunicazione.</div>
@@ -928,6 +998,10 @@ sui tentativi.</div>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/comunicazioni/web/ErroriComunicazioni.Errore.html#param-codice"><code>codice</code></a> record component.</div>
 </dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Errore.html#codice()" class="member-name-link">codice()</a> - Method in record class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Errore.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController.Errore</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>codice</code> record component.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/web/ErroriRichieste.Errore.html#codice()" class="member-name-link">codice()</a> - Method in record class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/ErroriRichieste.Errore.html" title="class in it.unina.picus.richieste.web">ErroriRichieste.Errore</a></dt>
 <dd>
 <div class="block">Returns the value of the <code>codice</code> record component.</div>
@@ -935,6 +1009,10 @@ sui tentativi.</div>
 <dt><a href="it/unina/picus/utenze/web/ErroriUtenze.Errore.html#codice()" class="member-name-link">codice()</a> - Method in record class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/ErroriUtenze.Errore.html" title="class in it.unina.picus.utenze.web">ErroriUtenze.Errore</a></dt>
 <dd>
 <div class="block">Returns the value of the <code>codice</code> record component.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/TracciatoSchedaOperatore.html#CODICE" class="member-name-link">CODICE</a> - Static variable in class it.unina.picus.monitoraggio.interno.dominio.<a href="it/unina/picus/monitoraggio/interno/dominio/TracciatoSchedaOperatore.html" title="class in it.unina.picus.monitoraggio.interno.dominio">TracciatoSchedaOperatore</a></dt>
+<dd>
+<div class="block">Codice stabile della scheda personale.</div>
 </dd>
 <dt><a href="it/unina/picus/utenze/interno/dominio/CampoOperatore.html#CODICE_FISCALE" class="member-name-link">CODICE_FISCALE</a> - Static variable in class it.unina.picus.utenze.interno.dominio.<a href="it/unina/picus/utenze/interno/dominio/CampoOperatore.html" title="class in it.unina.picus.utenze.interno.dominio">CampoOperatore</a></dt>
 <dd>&nbsp;</dd>
@@ -1454,7 +1532,15 @@ assegnato.</div>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.html#consultaSchedaOperatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">consultaSchedaOperatore(UtenzeApi.IdentitaAutenticata, UUID)</a> - Method in interface it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.html" title="interface in it.unina.picus.monitoraggio.api">MonitoraggioApi</a></dt>
 <dd>
-<div class="block">Consulta la scheda personale.</div>
+<div class="block">Consulta la scheda salvata come titolare o come Banco autorizzato.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/api/SchedeOperatoreApi.html#consultaSchedaOperatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">consultaSchedaOperatore(UtenzeApi.IdentitaAutenticata, UUID)</a> - Method in interface it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/SchedeOperatoreApi.html" title="interface in it.unina.picus.monitoraggio.api">SchedeOperatoreApi</a></dt>
+<dd>
+<div class="block">Consulta la scheda salvata come titolare o come Banco autorizzato.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/applicazione/ServizioSchedeOperatore.html#consultaSchedaOperatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">consultaSchedaOperatore(UtenzeApi.IdentitaAutenticata, UUID)</a> - Method in class it.unina.picus.monitoraggio.interno.applicazione.<a href="it/unina/picus/monitoraggio/interno/applicazione/ServizioSchedeOperatore.html" title="class in it.unina.picus.monitoraggio.interno.applicazione">ServizioSchedeOperatore</a></dt>
+<dd>
+<div class="block">Consulta la scheda salvata come titolare o come Banco autorizzato.</div>
 </dd>
 <dt><a href="it/unina/picus/catalogo/api/ConsultazioneCatalogoApi.html" class="type-name-link" title="interface in it.unina.picus.catalogo.api">ConsultazioneCatalogoApi</a> - Interface in <a href="it/unina/picus/catalogo/api/package-summary.html">it.unina.picus.catalogo.api</a></dt>
 <dd>
@@ -1562,6 +1648,10 @@ suoi allegati a chi ha il permesso di vederli.</div>
 <dt><a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.RiepilogoTrimestre.html#conteggi()" class="member-name-link">conteggi()</a> - Method in record class it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.RiepilogoTrimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.RiepilogoTrimestre</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/monitoraggio/api/MonitoraggioApi.RiepilogoTrimestre.html#param-conteggi"><code>conteggi</code></a> record component.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/ArchivioSchedeRendicontabili.VersioneInviata.html#conteggiDichiarati()" class="member-name-link">conteggiDichiarati()</a> - Method in record class it.unina.picus.monitoraggio.interno.dominio.<a href="it/unina/picus/monitoraggio/interno/dominio/ArchivioSchedeRendicontabili.VersioneInviata.html" title="class in it.unina.picus.monitoraggio.interno.dominio">ArchivioSchedeRendicontabili.VersioneInviata</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./it/unina/picus/monitoraggio/interno/dominio/ArchivioSchedeRendicontabili.VersioneInviata.html#param-conteggiDichiarati"><code>conteggiDichiarati</code></a> record component.</div>
 </dd>
 <dt><a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.ConteggioOpt.html#conteggio()" class="member-name-link">conteggio()</a> - Method in record class it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.ConteggioOpt.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.ConteggioOpt</a></dt>
 <dd>
@@ -1847,6 +1937,10 @@ prima del binding nei DTO.</div>
 </dd>
 <dt><a href="it/unina/picus/comunicazioni/web/ErroriComunicazioni.html#datiNonValidi(it.unina.picus.comunicazioni.interno.applicazione.DatiComunicazioneNonValidiException)" class="member-name-link">datiNonValidi(DatiComunicazioneNonValidiException)</a> - Method in class it.unina.picus.comunicazioni.web.<a href="it/unina/picus/comunicazioni/web/ErroriComunicazioni.html" title="class in it.unina.picus.comunicazioni.web">ErroriComunicazioni</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.html#datiNonValidi(it.unina.picus.monitoraggio.interno.dominio.DatiSchedaNonValidiException)" class="member-name-link">datiNonValidi(DatiSchedaNonValidiException)</a> - Method in class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController</a></dt>
+<dd>
+<div class="block">Espone i soli messaggi controllati della validazione.</div>
+</dd>
 <dt><a href="it/unina/picus/utenze/web/ErroriUtenze.html#datiNonValidi(it.unina.picus.utenze.interno.applicazione.DatiOperatoreNonValidiException)" class="member-name-link">datiNonValidi(DatiOperatoreNonValidiException)</a> - Method in class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/ErroriUtenze.html" title="class in it.unina.picus.utenze.web">ErroriUtenze</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/utenze/interno/dominio/DatiOperatore.html" class="type-name-link" title="class in it.unina.picus.utenze.interno.dominio">DatiOperatore</a> - Record Class in <a href="it/unina/picus/utenze/interno/dominio/package-summary.html">it.unina.picus.utenze.interno.dominio</a></dt>
@@ -1886,6 +1980,14 @@ prima del binding nei DTO.</div>
 <dt><a href="it/unina/picus/richieste/web/ContattiDisponibilitaController.DatiRisposta.html#%3Cinit%3E(java.lang.Boolean)" class="member-name-link">DatiRisposta(Boolean)</a> - Constructor for record class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/ContattiDisponibilitaController.DatiRisposta.html" title="class in it.unina.picus.richieste.web">ContattiDisponibilitaController.DatiRisposta</a></dt>
 <dd>
 <div class="block">Creates an instance of a <code>DatiRisposta</code> record class.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/DatiSchedaNonValidiException.html" class="type-name-link" title="class in it.unina.picus.monitoraggio.interno.dominio">DatiSchedaNonValidiException</a> - Exception Class in <a href="it/unina/picus/monitoraggio/interno/dominio/package-summary.html">it.unina.picus.monitoraggio.interno.dominio</a></dt>
+<dd>
+<div class="block">Errori di validazione della scheda, indicizzati per nome del campo.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/DatiSchedaNonValidiException.html#%3Cinit%3E(java.util.Map)" class="member-name-link">DatiSchedaNonValidiException(Map)</a> - Constructor for exception class it.unina.picus.monitoraggio.interno.dominio.<a href="it/unina/picus/monitoraggio/interno/dominio/DatiSchedaNonValidiException.html" title="class in it.unina.picus.monitoraggio.interno.dominio">DatiSchedaNonValidiException</a></dt>
+<dd>
+<div class="block">Acquisisce una copia immutabile degli errori da restituire al compilatore.</div>
 </dd>
 <dt><a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.DatiSchedaOperatore.html#%3Cinit%3E(java.lang.String,java.lang.String,java.lang.String,java.time.LocalDate,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.math.BigDecimal,java.math.BigDecimal,java.util.Map)" class="member-name-link">DatiSchedaOperatore(String, String, String, LocalDate, String, String, String, String, BigDecimal, BigDecimal, Map)</a> - Constructor for record class it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.DatiSchedaOperatore.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.DatiSchedaOperatore</a></dt>
 <dd>
@@ -2003,6 +2105,10 @@ prima del binding nei DTO.</div>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/comunicazioni/web/ConsultazioneComunicazioniController.ComunicazioneJson.html#param-dettagliAllegati"><code>dettagliAllegati</code></a> record component.</div>
 </dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.html#dettaglio(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">dettaglio(UtenzeApi.IdentitaAutenticata, UUID)</a> - Method in class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController</a></dt>
+<dd>
+<div class="block">Restituisce la scheda al titolare o al Banco autorizzato.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/web/ContattiViewController.html#dettaglio(java.util.UUID,it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,org.springframework.ui.Model)" class="member-name-link">dettaglio(UUID, UtenzeApi.IdentitaAutenticata, Model)</a> - Method in class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/ContattiViewController.html" title="class in it.unina.picus.richieste.web">ContattiViewController</a></dt>
 <dd>
 <div class="block">Consulta tramite il caso d'uso, che filtra i dati e controlla il legame con la pratica.</div>
@@ -2103,6 +2209,14 @@ prima del binding nei DTO.</div>
 <dt><a href="it/unina/picus/comunicazioni/web/ConsultazioneComunicazioniController.PaginaJson.html#elementi()" class="member-name-link">elementi()</a> - Method in record class it.unina.picus.comunicazioni.web.<a href="it/unina/picus/comunicazioni/web/ConsultazioneComunicazioniController.PaginaJson.html" title="class in it.unina.picus.comunicazioni.web">ConsultazioneComunicazioniController.PaginaJson</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/comunicazioni/web/ConsultazioneComunicazioniController.PaginaJson.html#param-elementi"><code>elementi</code></a> record component.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/ArchivioSchedeRendicontabili.html#elencaVersioniInviate(it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre)" class="member-name-link">elencaVersioniInviate(MonitoraggioApi.Trimestre)</a> - Method in interface it.unina.picus.monitoraggio.interno.dominio.<a href="it/unina/picus/monitoraggio/interno/dominio/ArchivioSchedeRendicontabili.html" title="interface in it.unina.picus.monitoraggio.interno.dominio">ArchivioSchedeRendicontabili</a></dt>
+<dd>
+<div class="block">Legge gli invii accettati per il periodo indicato, da uno stato coerente dell'archivio.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.html#elencaVersioniInviate(it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre)" class="member-name-link">elencaVersioniInviate(MonitoraggioApi.Trimestre)</a> - Method in class it.unina.picus.monitoraggio.interno.persistenza.<a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.html" title="class in it.unina.picus.monitoraggio.interno.persistenza">ArchivioSchedeJpa</a></dt>
+<dd>
+<div class="block">Legge gli invii accettati per il periodo indicato, da uno stato coerente dell'archivio.</div>
 </dd>
 <dt><a href="it/unina/picus/comunicazioni/web/AvvisiOperativiController.html#elenco(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">elenco(UtenzeApi.IdentitaAutenticata)</a> - Method in class it.unina.picus.comunicazioni.web.<a href="it/unina/picus/comunicazioni/web/AvvisiOperativiController.html" title="class in it.unina.picus.comunicazioni.web">AvvisiOperativiController</a></dt>
 <dd>&nbsp;</dd>
@@ -2265,7 +2379,19 @@ recente, ciascuna con la conferma di quell'account.</div>
 </dd>
 <dt><a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.html#elencoSchedeOperatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">elencoSchedeOperatore(UtenzeApi.IdentitaAutenticata)</a> - Method in interface it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.html" title="interface in it.unina.picus.monitoraggio.api">MonitoraggioApi</a></dt>
 <dd>
-<div class="block">Elenca le schede personali inviate dall'operatore autenticato.</div>
+<div class="block">Elenca le schede inviate dall'operatore autenticato.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/api/SchedeOperatoreApi.html#elencoSchedeOperatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">elencoSchedeOperatore(UtenzeApi.IdentitaAutenticata)</a> - Method in interface it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/SchedeOperatoreApi.html" title="interface in it.unina.picus.monitoraggio.api">SchedeOperatoreApi</a></dt>
+<dd>
+<div class="block">Elenca le schede inviate dall'operatore autenticato.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/applicazione/ServizioSchedeOperatore.html#elencoSchedeOperatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">elencoSchedeOperatore(UtenzeApi.IdentitaAutenticata)</a> - Method in class it.unina.picus.monitoraggio.interno.applicazione.<a href="it/unina/picus/monitoraggio/interno/applicazione/ServizioSchedeOperatore.html" title="class in it.unina.picus.monitoraggio.interno.applicazione">ServizioSchedeOperatore</a></dt>
+<dd>
+<div class="block">Elenca le schede inviate dall'operatore autenticato.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/applicazione/ServizioSchedeOperatore.html#elencoSchedeRicevute(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre)" class="member-name-link">elencoSchedeRicevute(UtenzeApi.IdentitaAutenticata, MonitoraggioApi.Trimestre)</a> - Method in class it.unina.picus.monitoraggio.interno.applicazione.<a href="it/unina/picus/monitoraggio/interno/applicazione/ServizioSchedeOperatore.html" title="class in it.unina.picus.monitoraggio.interno.applicazione">ServizioSchedeOperatore</a></dt>
+<dd>
+<div class="block">Elenca per il Banco i riferimenti da cui consultare le schede di un singolo trimestre.</div>
 </dd>
 <dt><a href="it/unina/picus/utenze/api/UtenzeApi.AccountAmministrativo.html#email()" class="member-name-link">email()</a> - Method in record class it.unina.picus.utenze.api.<a href="it/unina/picus/utenze/api/UtenzeApi.AccountAmministrativo.html" title="class in it.unina.picus.utenze.api">UtenzeApi.AccountAmministrativo</a></dt>
 <dd>
@@ -2509,6 +2635,30 @@ recente, ciascuna con la conferma di quell'account.</div>
 <dd>
 <div class="block">Indicates whether some other object is "equal to" this one.</div>
 </dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/ArchivioSchedeRendicontabili.VersioneInviata.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class it.unina.picus.monitoraggio.interno.dominio.<a href="it/unina/picus/monitoraggio/interno/dominio/ArchivioSchedeRendicontabili.VersioneInviata.html" title="class in it.unina.picus.monitoraggio.interno.dominio">ArchivioSchedeRendicontabili.VersioneInviata</a></dt>
+<dd>
+<div class="block">Indicates whether some other object is "equal to" this one.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/TracciatoSchedaOperatore.Campo.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class it.unina.picus.monitoraggio.interno.dominio.<a href="it/unina/picus/monitoraggio/interno/dominio/TracciatoSchedaOperatore.Campo.html" title="class in it.unina.picus.monitoraggio.interno.dominio">TracciatoSchedaOperatore.Campo</a></dt>
+<dd>
+<div class="block">Indicates whether some other object is "equal to" this one.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.RigaSintesi.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class it.unina.picus.monitoraggio.interno.persistenza.<a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.RigaSintesi.html" title="class in it.unina.picus.monitoraggio.interno.persistenza">ArchivioSchedeJpa.RigaSintesi</a></dt>
+<dd>
+<div class="block">Indicates whether some other object is "equal to" this one.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Errore.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Errore.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController.Errore</a></dt>
+<dd>
+<div class="block">Indicates whether some other object is "equal to" this one.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Modulo.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Modulo.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController.Modulo</a></dt>
+<dd>
+<div class="block">Indicates whether some other object is "equal to" this one.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Ricevuta.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Ricevuta.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController.Ricevuta</a></dt>
+<dd>
+<div class="block">Indicates whether some other object is "equal to" this one.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.AccordoADistanza.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.AccordoADistanza.html" title="class in it.unina.picus.richieste.api">RichiesteApi.AccordoADistanza</a></dt>
 <dd>
 <div class="block">Indicates whether some other object is "equal to" this one.</div>
@@ -2706,6 +2856,10 @@ recente, ciascuna con la conferma di quell'account.</div>
 <div class="block">Returns the value of the <code>erogatoreId</code> record component.</div>
 </dd>
 <dt><a href="it/unina/picus/comunicazioni/web/ErroriComunicazioni.Errore.html#%3Cinit%3E(java.lang.String,java.lang.String,java.util.Map)" class="member-name-link">Errore(String, String, Map)</a> - Constructor for record class it.unina.picus.comunicazioni.web.<a href="it/unina/picus/comunicazioni/web/ErroriComunicazioni.Errore.html" title="class in it.unina.picus.comunicazioni.web">ErroriComunicazioni.Errore</a></dt>
+<dd>
+<div class="block">Creates an instance of a <code>Errore</code> record class.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Errore.html#%3Cinit%3E(java.lang.String,java.lang.String,java.util.Map)" class="member-name-link">Errore(String, String, Map)</a> - Constructor for record class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Errore.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController.Errore</a></dt>
 <dd>
 <div class="block">Creates an instance of a <code>Errore</code> record class.</div>
 </dd>
@@ -3050,6 +3204,10 @@ senza esporre valori ricevuti dal client o dettagli interni.</div>
 </dd>
 <dt><a href="it/unina/picus/utenze/interno/dominio/DisponibilitaEmail.html#GIA_IN_USO" class="member-name-link">GIA_IN_USO</a> - Enum constant in enum class it.unina.picus.utenze.interno.dominio.<a href="it/unina/picus/utenze/interno/dominio/DisponibilitaEmail.html" title="enum class in it.unina.picus.utenze.interno.dominio">DisponibilitaEmail</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.html#giaInviata()" class="member-name-link">giaInviata()</a> - Method in class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController</a></dt>
+<dd>
+<div class="block">Segnala un invio già registrato nel periodo, senza modificare la scheda salvata.</div>
+</dd>
 <dt><a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.DatiComunicazione.html#gruppo()" class="member-name-link">gruppo()</a> - Method in record class it.unina.picus.comunicazioni.api.<a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.DatiComunicazione.html" title="class in it.unina.picus.comunicazioni.api">ComunicazioniApi.DatiComunicazione</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/comunicazioni/api/ComunicazioniApi.DatiComunicazione.html#param-gruppo"><code>gruppo</code></a> record component.</div>
@@ -3270,6 +3428,30 @@ senza esporre valori ricevuti dal client o dettagli interni.</div>
 <div class="block">Returns a hash code value for this object.</div>
 </dd>
 <dt><a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.VoceMisura.html#hashCode()" class="member-name-link">hashCode()</a> - Method in record class it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.VoceMisura.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.VoceMisura</a></dt>
+<dd>
+<div class="block">Returns a hash code value for this object.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/ArchivioSchedeRendicontabili.VersioneInviata.html#hashCode()" class="member-name-link">hashCode()</a> - Method in record class it.unina.picus.monitoraggio.interno.dominio.<a href="it/unina/picus/monitoraggio/interno/dominio/ArchivioSchedeRendicontabili.VersioneInviata.html" title="class in it.unina.picus.monitoraggio.interno.dominio">ArchivioSchedeRendicontabili.VersioneInviata</a></dt>
+<dd>
+<div class="block">Returns a hash code value for this object.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/TracciatoSchedaOperatore.Campo.html#hashCode()" class="member-name-link">hashCode()</a> - Method in record class it.unina.picus.monitoraggio.interno.dominio.<a href="it/unina/picus/monitoraggio/interno/dominio/TracciatoSchedaOperatore.Campo.html" title="class in it.unina.picus.monitoraggio.interno.dominio">TracciatoSchedaOperatore.Campo</a></dt>
+<dd>
+<div class="block">Returns a hash code value for this object.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.RigaSintesi.html#hashCode()" class="member-name-link">hashCode()</a> - Method in record class it.unina.picus.monitoraggio.interno.persistenza.<a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.RigaSintesi.html" title="class in it.unina.picus.monitoraggio.interno.persistenza">ArchivioSchedeJpa.RigaSintesi</a></dt>
+<dd>
+<div class="block">Returns a hash code value for this object.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Errore.html#hashCode()" class="member-name-link">hashCode()</a> - Method in record class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Errore.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController.Errore</a></dt>
+<dd>
+<div class="block">Returns a hash code value for this object.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Modulo.html#hashCode()" class="member-name-link">hashCode()</a> - Method in record class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Modulo.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController.Modulo</a></dt>
+<dd>
+<div class="block">Returns a hash code value for this object.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Ricevuta.html#hashCode()" class="member-name-link">hashCode()</a> - Method in record class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Ricevuta.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController.Ricevuta</a></dt>
 <dd>
 <div class="block">Returns a hash code value for this object.</div>
 </dd>
@@ -3498,6 +3680,14 @@ senza esporre valori ricevuti dal client o dettagli interni.</div>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/monitoraggio/api/MonitoraggioApi.SchedaSintesi.html#param-id"><code>id</code></a> record component.</div>
 </dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.RigaSintesi.html#id()" class="member-name-link">id()</a> - Method in record class it.unina.picus.monitoraggio.interno.persistenza.<a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.RigaSintesi.html" title="class in it.unina.picus.monitoraggio.interno.persistenza">ArchivioSchedeJpa.RigaSintesi</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>id</code> record component.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Ricevuta.html#id()" class="member-name-link">id()</a> - Method in record class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Ricevuta.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController.Ricevuta</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>id</code> record component.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.ContattoDisponibilita.html#id()" class="member-name-link">id()</a> - Method in record class it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.ContattoDisponibilita.html" title="class in it.unina.picus.richieste.api">RichiesteApi.ContattoDisponibilita</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/richieste/api/RichiesteApi.ContattoDisponibilita.html#param-id"><code>id</code></a> record component.</div>
@@ -3650,6 +3840,10 @@ troncato produce un errore oppure l'avviso di dati mancanti, e in entrambi i cas
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/richieste/web/RichiesteController.html#invia(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.richieste.web.CorpoJson,java.lang.String)" class="member-name-link">invia(UtenzeApi.IdentitaAutenticata, CorpoJson, String)</a> - Method in class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/RichiesteController.html" title="class in it.unina.picus.richieste.web">RichiesteController</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.html#invia(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.lang.Integer,java.lang.Integer,java.io.InputStream)" class="member-name-link">invia(UtenzeApi.IdentitaAutenticata, Integer, Integer, InputStream)</a> - Method in class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController</a></dt>
+<dd>
+<div class="block">Invia la scheda e conferma con HTTP 201, riferimento alla risorsa e periodo registrato.</div>
+</dd>
 <dt><a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.html#inviaComunicazione(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.comunicazioni.api.ComunicazioniApi.DatiComunicazione)" class="member-name-link">inviaComunicazione(UtenzeApi.IdentitaAutenticata, ComunicazioniApi.DatiComunicazione)</a> - Method in interface it.unina.picus.comunicazioni.api.<a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.html" title="interface in it.unina.picus.comunicazioni.api">ComunicazioniApi</a></dt>
 <dd>
 <div class="block">Invia una comunicazione del Banco.</div>
@@ -3672,7 +3866,15 @@ troncato produce un errore oppure l'avviso di dati mancanti, e in entrambi i cas
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.html#inviaSchedaOperatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,it.unina.picus.monitoraggio.api.MonitoraggioApi.DatiSchedaOperatore)" class="member-name-link">inviaSchedaOperatore(UtenzeApi.IdentitaAutenticata, MonitoraggioApi.Trimestre, MonitoraggioApi.DatiSchedaOperatore)</a> - Method in interface it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.html" title="interface in it.unina.picus.monitoraggio.api">MonitoraggioApi</a></dt>
 <dd>
-<div class="block">Invia la scheda personale trimestrale dell'operatore autenticato.</div>
+<div class="block">Registra il primo invio di un trimestre concluso a nome dell'operatore autenticato.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/api/SchedeOperatoreApi.html#inviaSchedaOperatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,it.unina.picus.monitoraggio.api.MonitoraggioApi.DatiSchedaOperatore)" class="member-name-link">inviaSchedaOperatore(UtenzeApi.IdentitaAutenticata, MonitoraggioApi.Trimestre, MonitoraggioApi.DatiSchedaOperatore)</a> - Method in interface it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/SchedeOperatoreApi.html" title="interface in it.unina.picus.monitoraggio.api">SchedeOperatoreApi</a></dt>
+<dd>
+<div class="block">Registra il primo invio di un trimestre concluso a nome dell'operatore autenticato.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/applicazione/ServizioSchedeOperatore.html#inviaSchedaOperatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,it.unina.picus.monitoraggio.api.MonitoraggioApi.DatiSchedaOperatore)" class="member-name-link">inviaSchedaOperatore(UtenzeApi.IdentitaAutenticata, MonitoraggioApi.Trimestre, MonitoraggioApi.DatiSchedaOperatore)</a> - Method in class it.unina.picus.monitoraggio.interno.applicazione.<a href="it/unina/picus/monitoraggio/interno/applicazione/ServizioSchedeOperatore.html" title="class in it.unina.picus.monitoraggio.interno.applicazione">ServizioSchedeOperatore</a></dt>
+<dd>
+<div class="block">Registra il primo invio di un trimestre concluso a nome dell'operatore autenticato.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/interno/dominio/RichiestaDiMisura.html#inviata(java.util.UUID,it.unina.picus.richieste.api.RichiesteApi.DatiInvio,java.time.Instant,java.util.UUID)" class="member-name-link">inviata(UUID, RichiesteApi.DatiInvio, Instant, UUID)</a> - Static method in record class it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/RichiestaDiMisura.html" title="class in it.unina.picus.richieste.interno.dominio">RichiestaDiMisura</a></dt>
 <dd>
@@ -3705,6 +3907,10 @@ troncato produce un errore oppure l'avviso di dati mancanti, e in entrambi i cas
 <dt><a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.SchedaSintesi.html#inviataIl()" class="member-name-link">inviataIl()</a> - Method in record class it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.SchedaSintesi.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.SchedaSintesi</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/monitoraggio/api/MonitoraggioApi.SchedaSintesi.html#param-inviataIl"><code>inviataIl</code></a> record component.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.RigaSintesi.html#inviataIl()" class="member-name-link">inviataIl()</a> - Method in record class it.unina.picus.monitoraggio.interno.persistenza.<a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.RigaSintesi.html" title="class in it.unina.picus.monitoraggio.interno.persistenza">ArchivioSchedeJpa.RigaSintesi</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>inviataIl</code> record component.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.RichiestaSintesi.html#inviataIl()" class="member-name-link">inviataIl()</a> - Method in record class it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.RichiestaSintesi.html" title="class in it.unina.picus.richieste.api">RichiesteApi.RichiestaSintesi</a></dt>
 <dd>
@@ -3835,9 +4041,17 @@ operativi di Richieste.</div>
 <dd>
 <div class="block">Componenti interni del modulo Monitoraggio.</div>
 </dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/applicazione/package-summary.html">it.unina.picus.monitoraggio.interno.applicazione</a> - package it.unina.picus.monitoraggio.interno.applicazione</dt>
+<dd>
+<div class="block">Casi d'uso del modulo Monitoraggio.</div>
+</dd>
 <dt><a href="it/unina/picus/monitoraggio/interno/dominio/package-summary.html">it.unina.picus.monitoraggio.interno.dominio</a> - package it.unina.picus.monitoraggio.interno.dominio</dt>
 <dd>
 <div class="block">Regole di accesso ai conteggi delle OPT e alle schede degli operatori.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/persistenza/package-summary.html">it.unina.picus.monitoraggio.interno.persistenza</a> - package it.unina.picus.monitoraggio.interno.persistenza</dt>
+<dd>
+<div class="block">Persistenza delle schede personali e proiezioni per la consultazione e la rendicontazione.</div>
 </dd>
 <dt><a href="it/unina/picus/monitoraggio/web/package-summary.html">it.unina.picus.monitoraggio.web</a> - package it.unina.picus.monitoraggio.web</dt>
 <dd>
@@ -3899,6 +4113,10 @@ operativi di Richieste.</div>
 </dl>
 <h2 class="title" id="I:L">L</h2>
 <dl class="index">
+<dt><a href="it/unina/picus/monitoraggio/web/LettoreSchedaJson.html#leggi(java.io.InputStream)" class="member-name-link">leggi(InputStream)</a> - Method in class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/LettoreSchedaJson.html" title="class in it.unina.picus.monitoraggio.web">LettoreSchedaJson</a></dt>
+<dd>
+<div class="block">Legge un oggetto JSON di dimensione limitata e restituisce i soli dati dichiarabili.</div>
+</dd>
 <dt><a href="it/unina/picus/utenze/interno/applicazione/LettoreCsvOpt.html#leggi(java.io.InputStream)" class="member-name-link">leggi(InputStream)</a> - Static method in class it.unina.picus.utenze.interno.applicazione.<a href="it/unina/picus/utenze/interno/applicazione/LettoreCsvOpt.html" title="class in it.unina.picus.utenze.interno.applicazione">LettoreCsvOpt</a></dt>
 <dd>
 <div class="block">Legge e chiude il file prima che il chiamante possa applicare gli aggiornamenti.</div>
@@ -3932,6 +4150,14 @@ operativi di Richieste.</div>
 <dt><a href="it/unina/picus/utenze/interno/applicazione/LettoreCsvOpt.Riga.html" class="type-name-link" title="class in it.unina.picus.utenze.interno.applicazione">LettoreCsvOpt.Riga</a> - Record Class in <a href="it/unina/picus/utenze/interno/applicazione/package-summary.html">it.unina.picus.utenze.interno.applicazione</a></dt>
 <dd>
 <div class="block">Riga del tracciato con numero fisico iniziale, valori ed eventuali errori del file.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/web/LettoreSchedaJson.html" class="type-name-link" title="class in it.unina.picus.monitoraggio.web">LettoreSchedaJson</a> - Class in <a href="it/unina/picus/monitoraggio/web/package-summary.html">it.unina.picus.monitoraggio.web</a></dt>
+<dd>
+<div class="block">Binding dedicato alla scheda.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/web/LettoreSchedaJson.html#%3Cinit%3E(tools.jackson.databind.json.JsonMapper)" class="member-name-link">LettoreSchedaJson(JsonMapper)</a> - Constructor for class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/LettoreSchedaJson.html" title="class in it.unina.picus.monitoraggio.web">LettoreSchedaJson</a></dt>
+<dd>
+<div class="block">Prepara il lettore con controllo di tipi, chiavi duplicate e campi sconosciuti.</div>
 </dd>
 <dt><a href="it/unina/picus/comunicazioni/interno/dominio/BozzaComunicazione.html#letturaGruppo()" class="member-name-link">letturaGruppo()</a> - Method in record class it.unina.picus.comunicazioni.interno.dominio.<a href="it/unina/picus/comunicazioni/interno/dominio/BozzaComunicazione.html" title="class in it.unina.picus.comunicazioni.interno.dominio">BozzaComunicazione</a></dt>
 <dd>
@@ -4055,6 +4281,10 @@ con migliaia di misure appesantirebbe il database.</div>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/comunicazioni/web/ErroriComunicazioni.Errore.html#param-messaggio"><code>messaggio</code></a> record component.</div>
 </dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Errore.html#messaggio()" class="member-name-link">messaggio()</a> - Method in record class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Errore.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController.Errore</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>messaggio</code> record component.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/web/ErroriRichieste.Errore.html#messaggio()" class="member-name-link">messaggio()</a> - Method in record class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/ErroriRichieste.Errore.html" title="class in it.unina.picus.richieste.web">ErroriRichieste.Errore</a></dt>
 <dd>
 <div class="block">Returns the value of the <code>messaggio</code> record component.</div>
@@ -4066,6 +4296,10 @@ con migliaia di misure appesantirebbe il database.</div>
 <dt><a href="it/unina/picus/utenze/interno/dominio/RegolaUnicita.html#messaggioDuplicato(java.lang.String)" class="member-name-link">messaggioDuplicato(String)</a> - Static method in class it.unina.picus.utenze.interno.dominio.<a href="it/unina/picus/utenze/interno/dominio/RegolaUnicita.html" title="class in it.unina.picus.utenze.interno.dominio">RegolaUnicita</a></dt>
 <dd>
 <div class="block">Restituisce il messaggio per un valore già registrato, anche quando il duplicato emerge solo al salvataggio.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.html#mie(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">mie(UtenzeApi.IdentitaAutenticata)</a> - Method in class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController</a></dt>
+<dd>
+<div class="block">Elenca le schede personali inviate dall'operatore autenticato.</div>
 </dd>
 <dt><a href="it/unina/picus/catalogo/api/CatalogoApi.Misura.html#%3Cinit%3E(long,it.unina.picus.catalogo.api.CatalogoApi.DatiMisura,boolean)" class="member-name-link">Misura(long, CatalogoApi.DatiMisura, boolean)</a> - Constructor for record class it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/CatalogoApi.Misura.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.Misura</a></dt>
 <dd>
@@ -4188,6 +4422,14 @@ applicando allow-list esplicite sui campi e controlli di tipo prima del dominio.
 </dd>
 <dt><a href="index.html#picus-modules-heading" class="search-tag-link">Moduli e componenti</a> - Section in Overview</dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.html#modulo(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.lang.Integer,java.lang.Integer)" class="member-name-link">modulo(UtenzeApi.IdentitaAutenticata, Integer, Integer)</a> - Method in class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController</a></dt>
+<dd>
+<div class="block">Restituisce all'operatore i campi del modulo per il periodo selezionato.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Modulo.html#%3Cinit%3E(it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,java.lang.String,java.lang.String,java.util.List)" class="member-name-link">Modulo(MonitoraggioApi.Trimestre, String, String, List)</a> - Constructor for record class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Modulo.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController.Modulo</a></dt>
+<dd>
+<div class="block">Creates an instance of a <code>Modulo</code> record class.</div>
+</dd>
 <dt><a href="it/unina/picus/comunicazioni/web/ErroriComunicazioni.html#moduloTroppoGrande(org.springframework.web.multipart.MultipartException)" class="member-name-link">moduloTroppoGrande(MultipartException)</a> - Method in class it.unina.picus.comunicazioni.web.<a href="it/unina/picus/comunicazioni/web/ErroriComunicazioni.html" title="class in it.unina.picus.comunicazioni.web">ErroriComunicazioni</a></dt>
 <dd>
 <div class="block">Il server ferma la richiesta mentre arriva, prima delle regole, se supera uno dei limiti del modulo.</div>
@@ -4204,7 +4446,7 @@ applicando allow-list esplicite sui campi e controlli di tipo prima del dominio.
 </dd>
 <dt><a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.DatiSchedaOperatore.html" class="type-name-link" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.DatiSchedaOperatore</a> - Record Class in <a href="it/unina/picus/monitoraggio/api/package-summary.html">it.unina.picus.monitoraggio.api</a></dt>
 <dd>
-<div class="block">Dati iniziali della scheda personale.</div>
+<div class="block">Dati dichiarati per la scheda personale TM-OP-01, inviata senza firma.</div>
 </dd>
 <dt><a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.RiepilogoTrimestre.html" class="type-name-link" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.RiepilogoTrimestre</a> - Record Class in <a href="it/unina/picus/monitoraggio/api/package-summary.html">it.unina.picus.monitoraggio.api</a></dt>
 <dd>
@@ -4272,6 +4514,10 @@ applicando allow-list esplicite sui campi e controlli di tipo prima del dominio.
 <dt><a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.DatiSchedaOperatore.html#nome()" class="member-name-link">nome()</a> - Method in record class it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.DatiSchedaOperatore.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.DatiSchedaOperatore</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/monitoraggio/api/MonitoraggioApi.DatiSchedaOperatore.html#param-nome"><code>nome</code></a> record component.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/TracciatoSchedaOperatore.Campo.html#nome()" class="member-name-link">nome()</a> - Method in record class it.unina.picus.monitoraggio.interno.dominio.<a href="it/unina/picus/monitoraggio/interno/dominio/TracciatoSchedaOperatore.Campo.html" title="class in it.unina.picus.monitoraggio.interno.dominio">TracciatoSchedaOperatore.Campo</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./it/unina/picus/monitoraggio/interno/dominio/TracciatoSchedaOperatore.Campo.html#param-nome"><code>nome</code></a> record component.</div>
 </dd>
 <dt><a href="it/unina/picus/utenze/interno/applicazione/ComandoCreaOperatore.html#nome()" class="member-name-link">nome()</a> - Method in record class it.unina.picus.utenze.interno.applicazione.<a href="it/unina/picus/utenze/interno/applicazione/ComandoCreaOperatore.html" title="class in it.unina.picus.utenze.interno.applicazione">ComandoCreaOperatore</a></dt>
 <dd>
@@ -4395,6 +4641,10 @@ applicando allow-list esplicite sui campi e controlli di tipo prima del dominio.
 </dd>
 <dt><a href="it/unina/picus/comunicazioni/web/ErroriComunicazioni.html#nonTrovata()" class="member-name-link">nonTrovata()</a> - Method in class it.unina.picus.comunicazioni.web.<a href="it/unina/picus/comunicazioni/web/ErroriComunicazioni.html" title="class in it.unina.picus.comunicazioni.web">ErroriComunicazioni</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.html#nonTrovata()" class="member-name-link">nonTrovata()</a> - Method in class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController</a></dt>
+<dd>
+<div class="block">Segnala l'assenza della scheda richiesta.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/web/ErroriRichieste.html#nonTrovata()" class="member-name-link">nonTrovata()</a> - Method in class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/ErroriRichieste.html" title="class in it.unina.picus.richieste.web">ErroriRichieste</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/catalogo/web/OffertaOptController.html#nonTrovata(java.util.NoSuchElementException)" class="member-name-link">nonTrovata(NoSuchElementException)</a> - Method in class it.unina.picus.catalogo.web.<a href="it/unina/picus/catalogo/web/OffertaOptController.html" title="class in it.unina.picus.catalogo.web">OffertaOptController</a></dt>
@@ -4447,6 +4697,10 @@ applicando allow-list esplicite sui campi e controlli di tipo prima del dominio.
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/utenze/interno/applicazione/ReportImportazioneOpt.RisultatoRiga.html#param-numeroRiga"><code>numeroRiga</code></a> record component.</div>
 </dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/ArchivioSchedeRendicontabili.VersioneInviata.html#numeroVersione()" class="member-name-link">numeroVersione()</a> - Method in record class it.unina.picus.monitoraggio.interno.dominio.<a href="it/unina/picus/monitoraggio/interno/dominio/ArchivioSchedeRendicontabili.VersioneInviata.html" title="class in it.unina.picus.monitoraggio.interno.dominio">ArchivioSchedeRendicontabili.VersioneInviata</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./it/unina/picus/monitoraggio/interno/dominio/ArchivioSchedeRendicontabili.VersioneInviata.html#param-numeroVersione"><code>numeroVersione</code></a> record component.</div>
+</dd>
 <dt><a href="it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html#nuova(it.unina.picus.catalogo.api.CatalogoApi.DatiMisura)" class="member-name-link">nuova(CatalogoApi.DatiMisura)</a> - Static method in record class it.unina.picus.catalogo.interno.dominio.<a href="it/unina/picus/catalogo/interno/dominio/MisuraDiCatalogo.html" title="class in it.unina.picus.catalogo.interno.dominio">MisuraDiCatalogo</a></dt>
 <dd>
 <div class="block">Crea una nuova misura attiva a partire dai dati forniti, validandoli e normalizzandoli.</div>
@@ -4490,6 +4744,10 @@ applicando allow-list esplicite sui campi e controlli di tipo prima del dominio.
 </dl>
 <h2 class="title" id="I:O">O</h2>
 <dl class="index">
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/TracciatoSchedaOperatore.Campo.html#obbligatorio()" class="member-name-link">obbligatorio()</a> - Method in record class it.unina.picus.monitoraggio.interno.dominio.<a href="it/unina/picus/monitoraggio/interno/dominio/TracciatoSchedaOperatore.Campo.html" title="class in it.unina.picus.monitoraggio.interno.dominio">TracciatoSchedaOperatore.Campo</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./it/unina/picus/monitoraggio/interno/dominio/TracciatoSchedaOperatore.Campo.html#param-obbligatorio"><code>obbligatorio</code></a> record component.</div>
+</dd>
 <dt><a href="it/unina/picus/catalogo/api/CatalogoApi.OffertaOpt.html#%3Cinit%3E(long,boolean)" class="member-name-link">OffertaOpt(long, boolean)</a> - Constructor for record class it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/CatalogoApi.OffertaOpt.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.OffertaOpt</a></dt>
 <dd>
 <div class="block">Creates an instance of a <code>OffertaOpt</code> record class.</div>
@@ -4547,6 +4805,14 @@ applicando allow-list esplicite sui campi e controlli di tipo prima del dominio.
 <dt><a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.SchedaSintesi.html#operatoreId()" class="member-name-link">operatoreId()</a> - Method in record class it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.SchedaSintesi.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.SchedaSintesi</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/monitoraggio/api/MonitoraggioApi.SchedaSintesi.html#param-operatoreId"><code>operatoreId</code></a> record component.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.RigaSintesi.html#operatoreId()" class="member-name-link">operatoreId()</a> - Method in record class it.unina.picus.monitoraggio.interno.persistenza.<a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.RigaSintesi.html" title="class in it.unina.picus.monitoraggio.interno.persistenza">ArchivioSchedeJpa.RigaSintesi</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>operatoreId</code> record component.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/persistenza/SchedaOperatoreJpa.html#operatoreId()" class="member-name-link">operatoreId()</a> - Method in class it.unina.picus.monitoraggio.interno.persistenza.<a href="it/unina/picus/monitoraggio/interno/persistenza/SchedaOperatoreJpa.html" title="class in it.unina.picus.monitoraggio.interno.persistenza">SchedaOperatoreJpa</a></dt>
+<dd>
+<div class="block">Identifica il titolare senza caricare la collezione dei conteggi.</div>
 </dd>
 <dt><a href="it/unina/picus/utenze/interno/persistenza/OperatoreMisuraJpa.html" class="type-name-link" title="class in it.unina.picus.utenze.interno.persistenza">OperatoreMisuraJpa</a> - Class in <a href="it/unina/picus/utenze/interno/persistenza/package-summary.html">it.unina.picus.utenze.interno.persistenza</a></dt>
 <dd>
@@ -4663,6 +4929,10 @@ applicando allow-list esplicite sui campi e controlli di tipo prima del dominio.
 <dd>
 <div class="block">Assegna alla query i valori cercati.</div>
 </dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.html#parametroNonValido(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException)" class="member-name-link">parametroNonValido(MethodArgumentTypeMismatchException)</a> - Method in class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController</a></dt>
+<dd>
+<div class="block">Segnala un parametro di URL malformato senza restituirne il valore.</div>
+</dd>
 <dt><a href="it/unina/picus/comunicazioni/web/ComunicazioniController.html#PARTE_DATI" class="member-name-link">PARTE_DATI</a> - Static variable in class it.unina.picus.comunicazioni.web.<a href="it/unina/picus/comunicazioni/web/ComunicazioniController.html" title="class in it.unina.picus.comunicazioni.web">ComunicazioniController</a></dt>
 <dd>
 <div class="block">Nome della parte JSON che porta i campi del modulo nell'invio con allegati.</div>
@@ -4690,12 +4960,22 @@ caratteri o codice.</div>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/utenze/interno/dominio/Errori.html#perCampo()" class="member-name-link">perCampo()</a> - Method in class it.unina.picus.utenze.interno.dominio.<a href="it/unina/picus/utenze/interno/dominio/Errori.html" title="class in it.unina.picus.utenze.interno.dominio">Errori</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.html#PERCORSO" class="member-name-link">PERCORSO</a> - Static variable in class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/comunicazioni/interno/persistenza/CondizioniElenco.html#perInviate(it.unina.picus.comunicazioni.interno.dominio.FiltroComunicazioni)" class="member-name-link">perInviate(FiltroComunicazioni)</a> - Static method in class it.unina.picus.comunicazioni.interno.persistenza.<a href="it/unina/picus/comunicazioni/interno/persistenza/CondizioniElenco.html" title="class in it.unina.picus.comunicazioni.interno.persistenza">CondizioniElenco</a></dt>
 <dd>
 <div class="block">Comunicazioni inviate: il filtro sulla ricezione non vale.</div>
 </dd>
 <dt><a href="it/unina/picus/utenze/interno/persistenza/ProfiloOperatoreRepository.html#perMisura(long)" class="member-name-link">perMisura(long)</a> - Method in interface it.unina.picus.utenze.interno.persistenza.<a href="it/unina/picus/utenze/interno/persistenza/ProfiloOperatoreRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">ProfiloOperatoreRepository</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/ArchivioSchedeOperatore.html#perOperatore(java.util.UUID)" class="member-name-link">perOperatore(UUID)</a> - Method in interface it.unina.picus.monitoraggio.interno.dominio.<a href="it/unina/picus/monitoraggio/interno/dominio/ArchivioSchedeOperatore.html" title="interface in it.unina.picus.monitoraggio.interno.dominio">ArchivioSchedeOperatore</a></dt>
+<dd>
+<div class="block">Proietta i riferimenti alle schede dell'operatore.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.html#perOperatore(java.util.UUID)" class="member-name-link">perOperatore(UUID)</a> - Method in class it.unina.picus.monitoraggio.interno.persistenza.<a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.html" title="class in it.unina.picus.monitoraggio.interno.persistenza">ArchivioSchedeJpa</a></dt>
+<dd>
+<div class="block">Proietta i riferimenti alle schede dell'operatore.</div>
+</dd>
 <dt><a href="it/unina/picus/comunicazioni/interno/persistenza/CondizioniElenco.html#perRicevute(java.util.UUID,it.unina.picus.comunicazioni.interno.dominio.FiltroComunicazioni)" class="member-name-link">perRicevute(UUID, FiltroComunicazioni)</a> - Static method in class it.unina.picus.comunicazioni.interno.persistenza.<a href="it/unina/picus/comunicazioni/interno/persistenza/CondizioniElenco.html" title="class in it.unina.picus.comunicazioni.interno.persistenza">CondizioniElenco</a></dt>
 <dd>
 <div class="block">Comunicazioni ricevute da un account, sempre filtrate per quell'account.</div>
@@ -4703,6 +4983,14 @@ caratteri o codice.</div>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.TipoDestinatario.html#PERSONA" class="member-name-link">PERSONA</a> - Enum constant in enum class it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.TipoDestinatario.html" title="enum class in it.unina.picus.richieste.api">RichiesteApi.TipoDestinatario</a></dt>
 <dd>
 <div class="block">Singola persona.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/ArchivioSchedeOperatore.html#perTrimestre(it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre)" class="member-name-link">perTrimestre(MonitoraggioApi.Trimestre)</a> - Method in interface it.unina.picus.monitoraggio.interno.dominio.<a href="it/unina/picus/monitoraggio/interno/dominio/ArchivioSchedeOperatore.html" title="interface in it.unina.picus.monitoraggio.interno.dominio">ArchivioSchedeOperatore</a></dt>
+<dd>
+<div class="block">Proietta i riferimenti alle schede inviate nel periodo.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.html#perTrimestre(it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre)" class="member-name-link">perTrimestre(MonitoraggioApi.Trimestre)</a> - Method in class it.unina.picus.monitoraggio.interno.persistenza.<a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.html" title="class in it.unina.picus.monitoraggio.interno.persistenza">ArchivioSchedeJpa</a></dt>
+<dd>
+<div class="block">Proietta i riferimenti alle schede inviate nel periodo.</div>
 </dd>
 <dt><a href="it/unina/picus/PicusApplication.html" class="type-name-link" title="class in it.unina.picus">PicusApplication</a> - Class in <a href="it/unina/picus/package-summary.html">it.unina.picus</a></dt>
 <dd>&nbsp;</dd>
@@ -4824,6 +5112,14 @@ i dati per la consegna post-commit.</div>
 </dd>
 <dt><a href="it/unina/picus/comunicazioni/interno/persistenza/ArchivioComunicazioniJpa.html#registra(it.unina.picus.comunicazioni.interno.dominio.NuovaComunicazione)" class="member-name-link">registra(NuovaComunicazione)</a> - Method in class it.unina.picus.comunicazioni.interno.persistenza.<a href="it/unina/picus/comunicazioni/interno/persistenza/ArchivioComunicazioniJpa.html" title="class in it.unina.picus.comunicazioni.interno.persistenza">ArchivioComunicazioniJpa</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/ArchivioSchedeOperatore.html#registra(it.unina.picus.monitoraggio.api.MonitoraggioApi.SchedaOperatore)" class="member-name-link">registra(MonitoraggioApi.SchedaOperatore)</a> - Method in interface it.unina.picus.monitoraggio.interno.dominio.<a href="it/unina/picus/monitoraggio/interno/dominio/ArchivioSchedeOperatore.html" title="interface in it.unina.picus.monitoraggio.interno.dominio">ArchivioSchedeOperatore</a></dt>
+<dd>
+<div class="block">Registra la scheda e i suoi conteggi nella stessa transazione.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.html#registra(it.unina.picus.monitoraggio.api.MonitoraggioApi.SchedaOperatore)" class="member-name-link">registra(MonitoraggioApi.SchedaOperatore)</a> - Method in class it.unina.picus.monitoraggio.interno.persistenza.<a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.html" title="class in it.unina.picus.monitoraggio.interno.persistenza">ArchivioSchedeJpa</a></dt>
+<dd>
+<div class="block">Registra la scheda e i suoi conteggi nella stessa transazione.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/interno/dominio/RichiestaRepository.html#registra(it.unina.picus.richieste.interno.dominio.RichiestaDiMisura)" class="member-name-link">registra(RichiestaDiMisura)</a> - Method in interface it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/RichiestaRepository.html" title="interface in it.unina.picus.richieste.interno.dominio">RichiestaRepository</a></dt>
 <dd>
 <div class="block">Registra atomicamente l'invio oppure restituisce quello già presente con la stessa chiave.</div>
@@ -5095,6 +5391,10 @@ e un invio a tutti non accetta un gruppo, per non lasciare dubbi su chi ricever�
 <dd>
 <div class="block">Capacità di ricerca dell'offerta, separata dai comandi di amministrazione del catalogo.</div>
 </dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Ricevuta.html#%3Cinit%3E(java.util.UUID,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre)" class="member-name-link">Ricevuta(UUID, MonitoraggioApi.Trimestre)</a> - Constructor for record class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Ricevuta.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController.Ricevuta</a></dt>
+<dd>
+<div class="block">Creates an instance of a <code>Ricevuta</code> record class.</div>
+</dd>
 <dt><a href="it/unina/picus/comunicazioni/interno/applicazione/ConsultazioneComunicazioni.html#ricevute(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.comunicazioni.interno.applicazione.RichiestaElenco)" class="member-name-link">ricevute(UtenzeApi.IdentitaAutenticata, RichiestaElenco)</a> - Method in interface it.unina.picus.comunicazioni.interno.applicazione.<a href="it/unina/picus/comunicazioni/interno/applicazione/ConsultazioneComunicazioni.html" title="interface in it.unina.picus.comunicazioni.interno.applicazione">ConsultazioneComunicazioni</a></dt>
 <dd>
 <div class="block">Restituisce una pagina delle comunicazioni ricevute dall'account della sessione, con ricerca e filtri su
@@ -5102,6 +5402,10 @@ tutto lo storico.</div>
 </dd>
 <dt><a href="it/unina/picus/comunicazioni/interno/applicazione/ServizioConsultazioneComunicazioni.html#ricevute(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.comunicazioni.interno.applicazione.RichiestaElenco)" class="member-name-link">ricevute(UtenzeApi.IdentitaAutenticata, RichiestaElenco)</a> - Method in class it.unina.picus.comunicazioni.interno.applicazione.<a href="it/unina/picus/comunicazioni/interno/applicazione/ServizioConsultazioneComunicazioni.html" title="class in it.unina.picus.comunicazioni.interno.applicazione">ServizioConsultazioneComunicazioni</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.html#ricevute(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.lang.Integer,java.lang.Integer)" class="member-name-link">ricevute(UtenzeApi.IdentitaAutenticata, Integer, Integer)</a> - Method in class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController</a></dt>
+<dd>
+<div class="block">Elenca per il Banco le schede ricevute nel periodo selezionato.</div>
+</dd>
 <dt><a href="it/unina/picus/comunicazioni/web/ConsultazioneComunicazioniController.html#ricevute(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)" class="member-name-link">ricevute(UtenzeApi.IdentitaAutenticata, String, String, String, String, String)</a> - Method in class it.unina.picus.comunicazioni.web.<a href="it/unina/picus/comunicazioni/web/ConsultazioneComunicazioniController.html" title="class in it.unina.picus.comunicazioni.web">ConsultazioneComunicazioniController</a></dt>
 <dd>
 <div class="block">Pagina delle comunicazioni ricevute, con gli stessi parametri delle inviate più lo stato di ricezione.</div>
@@ -5339,6 +5643,10 @@ nel modo giusto: le pagine HTML rimandano al login (302), le API ricevono <code>
 <dd>
 <div class="block">Creates an instance of a <code>RigaCoda</code> record class.</div>
 </dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.RigaSintesi.html#%3Cinit%3E(java.util.UUID,java.util.UUID,int,int,java.time.Instant)" class="member-name-link">RigaSintesi(UUID, UUID, int, int, Instant)</a> - Constructor for record class it.unina.picus.monitoraggio.interno.persistenza.<a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.RigaSintesi.html" title="class in it.unina.picus.monitoraggio.interno.persistenza">ArchivioSchedeJpa.RigaSintesi</a></dt>
+<dd>
+<div class="block">Creates an instance of a <code>RigaSintesi</code> record class.</div>
+</dd>
 <dt><a href="it/unina/picus/utenze/interno/applicazione/AttivazioneUtenzaService.html#rigeneraTokenPerAccount(java.util.UUID,it.unina.picus.utenze.api.UtenzeApi.RuoloUtente)" class="member-name-link">rigeneraTokenPerAccount(UUID, UtenzeApi.RuoloUtente)</a> - Method in class it.unina.picus.utenze.interno.applicazione.<a href="it/unina/picus/utenze/interno/applicazione/AttivazioneUtenzaService.html" title="class in it.unina.picus.utenze.interno.applicazione">AttivazioneUtenzaService</a></dt>
 <dd>
 <div class="block">Rigenera un token monouso per un account del ruolo atteso ancora in attesa di attivazione.</div>
@@ -5467,9 +5775,29 @@ oppure vuoto se il database rileva un conflitto concorrente di unicità sul codi
 <dd>
 <div class="block">Un vero o falso; se manca vale falso.</div>
 </dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/SchedaGiaInviataException.html" class="type-name-link" title="class in it.unina.picus.monitoraggio.interno.dominio">SchedaGiaInviataException</a> - Exception Class in <a href="it/unina/picus/monitoraggio/interno/dominio/package-summary.html">it.unina.picus.monitoraggio.interno.dominio</a></dt>
+<dd>
+<div class="block">Esito del primo invio se l'account ha già registrato una scheda nello stesso periodo.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/SchedaGiaInviataException.html#%3Cinit%3E()" class="member-name-link">SchedaGiaInviataException()</a> - Constructor for exception class it.unina.picus.monitoraggio.interno.dominio.<a href="it/unina/picus/monitoraggio/interno/dominio/SchedaGiaInviataException.html" title="class in it.unina.picus.monitoraggio.interno.dominio">SchedaGiaInviataException</a></dt>
+<dd>
+<div class="block">Crea il conflitto senza esporre i dati della scheda registrata.</div>
+</dd>
 <dt><a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.SchedaOperatore.html#%3Cinit%3E(it.unina.picus.monitoraggio.api.MonitoraggioApi.SchedaSintesi,it.unina.picus.monitoraggio.api.MonitoraggioApi.DatiSchedaOperatore)" class="member-name-link">SchedaOperatore(MonitoraggioApi.SchedaSintesi, MonitoraggioApi.DatiSchedaOperatore)</a> - Constructor for record class it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.SchedaOperatore.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.SchedaOperatore</a></dt>
 <dd>
 <div class="block">Creates an instance of a <code>SchedaOperatore</code> record class.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/persistenza/SchedaOperatoreJpa.html" class="type-name-link" title="class in it.unina.picus.monitoraggio.interno.persistenza">SchedaOperatoreJpa</a> - Class in <a href="it/unina/picus/monitoraggio/interno/persistenza/package-summary.html">it.unina.picus.monitoraggio.interno.persistenza</a></dt>
+<dd>
+<div class="block">Scheda personale inviata.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/persistenza/SchedaOperatoreJpa.html#%3Cinit%3E()" class="member-name-link">SchedaOperatoreJpa()</a> - Constructor for class it.unina.picus.monitoraggio.interno.persistenza.<a href="it/unina/picus/monitoraggio/interno/persistenza/SchedaOperatoreJpa.html" title="class in it.unina.picus.monitoraggio.interno.persistenza">SchedaOperatoreJpa</a></dt>
+<dd>
+<div class="block">Costruttore riservato a JPA.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/persistenza/SchedaOperatoreJpa.html#%3Cinit%3E(it.unina.picus.monitoraggio.api.MonitoraggioApi.SchedaOperatore)" class="member-name-link">SchedaOperatoreJpa(MonitoraggioApi.SchedaOperatore)</a> - Constructor for class it.unina.picus.monitoraggio.interno.persistenza.<a href="it/unina/picus/monitoraggio/interno/persistenza/SchedaOperatoreJpa.html" title="class in it.unina.picus.monitoraggio.interno.persistenza">SchedaOperatoreJpa</a></dt>
+<dd>
+<div class="block">Converte l'invio già validato in un'entità da inserire.</div>
 </dd>
 <dt><a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.SchedaSintesi.html#%3Cinit%3E(java.util.UUID,java.util.UUID,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,java.time.Instant)" class="member-name-link">SchedaSintesi(UUID, UUID, MonitoraggioApi.Trimestre, Instant)</a> - Constructor for record class it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.SchedaSintesi.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.SchedaSintesi</a></dt>
 <dd>
@@ -5478,6 +5806,30 @@ oppure vuoto se il database rileva un conflitto concorrente di unicità sul codi
 <dt><a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.RiepilogoTrimestre.html#schede()" class="member-name-link">schede()</a> - Method in record class it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.RiepilogoTrimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.RiepilogoTrimestre</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/monitoraggio/api/MonitoraggioApi.RiepilogoTrimestre.html#param-schede"><code>schede</code></a> record component.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/api/SchedeOperatoreApi.html" class="type-name-link" title="interface in it.unina.picus.monitoraggio.api">SchedeOperatoreApi</a> - Interface in <a href="it/unina/picus/monitoraggio/api/package-summary.html">it.unina.picus.monitoraggio.api</a></dt>
+<dd>
+<div class="block">Contratto di invio e consultazione delle schede personali degli operatori del Banco.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.html" class="type-name-link" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController</a> - Class in <a href="it/unina/picus/monitoraggio/web/package-summary.html">it.unina.picus.monitoraggio.web</a></dt>
+<dd>
+<div class="block">API HTTP del primo invio e della consultazione della scheda personale TM-OP-01.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.html#%3Cinit%3E(it.unina.picus.monitoraggio.interno.applicazione.ServizioSchedeOperatore,it.unina.picus.monitoraggio.web.LettoreSchedaJson)" class="member-name-link">SchedeOperatoreController(ServizioSchedeOperatore, LettoreSchedaJson)</a> - Constructor for class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController</a></dt>
+<dd>
+<div class="block">Collega gli endpoint ai casi d'uso e al lettore del tracciato JSON.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Errore.html" class="type-name-link" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController.Errore</a> - Record Class in <a href="it/unina/picus/monitoraggio/web/package-summary.html">it.unina.picus.monitoraggio.web</a></dt>
+<dd>
+<div class="block">Errore HTTP senza valori dichiarati dal compilatore.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Modulo.html" class="type-name-link" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController.Modulo</a> - Record Class in <a href="it/unina/picus/monitoraggio/web/package-summary.html">it.unina.picus.monitoraggio.web</a></dt>
+<dd>
+<div class="block">Metadati del tracciato applicabile per il periodo selezionato.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Ricevuta.html" class="type-name-link" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController.Ricevuta</a> - Record Class in <a href="it/unina/picus/monitoraggio/web/package-summary.html">it.unina.picus.monitoraggio.web</a></dt>
+<dd>
+<div class="block">Conferma del primo invio accettato.</div>
 </dd>
 <dt><a href="it/unina/picus/shared/SecurityConfig.html" class="type-name-link" title="class in it.unina.picus.shared">SecurityConfig</a> - Class in <a href="it/unina/picus/shared/package-summary.html">it.unina.picus.shared</a></dt>
 <dd>
@@ -5567,6 +5919,14 @@ oppure vuoto se il database rileva un conflitto concorrente di unicità sul codi
 </dd>
 <dt><a href="it/unina/picus/catalogo/interno/applicazione/ServizioRicercaErogatori.html#%3Cinit%3E(it.unina.picus.catalogo.api.ConsultazioneCatalogoApi,it.unina.picus.catalogo.interno.persistenza.OffertaTerritorialeJpa,it.unina.picus.utenze.api.UtenzeApi)" class="member-name-link">ServizioRicercaErogatori(ConsultazioneCatalogoApi, OffertaTerritorialeJpa, UtenzeApi)</a> - Constructor for class it.unina.picus.catalogo.interno.applicazione.<a href="it/unina/picus/catalogo/interno/applicazione/ServizioRicercaErogatori.html" title="class in it.unina.picus.catalogo.interno.applicazione">ServizioRicercaErogatori</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/applicazione/ServizioSchedeOperatore.html" class="type-name-link" title="class in it.unina.picus.monitoraggio.interno.applicazione">ServizioSchedeOperatore</a> - Class in <a href="it/unina/picus/monitoraggio/interno/applicazione/package-summary.html">it.unina.picus.monitoraggio.interno.applicazione</a></dt>
+<dd>
+<div class="block">Coordina il primo invio e la consultazione autorizzata delle schede personali.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/applicazione/ServizioSchedeOperatore.html#%3Cinit%3E(it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeOperatore,java.time.Clock)" class="member-name-link">ServizioSchedeOperatore(ArchivioSchedeOperatore, Clock)</a> - Constructor for class it.unina.picus.monitoraggio.interno.applicazione.<a href="it/unina/picus/monitoraggio/interno/applicazione/ServizioSchedeOperatore.html" title="class in it.unina.picus.monitoraggio.interno.applicazione">ServizioSchedeOperatore</a></dt>
+<dd>
+<div class="block">Crea il servizio applicativo delle schede personali.</div>
+</dd>
 <dt><a href="it/unina/picus/utenze/interno/applicazione/ConsegnaLinkAttivazione.Esito.html#SIMULATO" class="member-name-link">SIMULATO</a> - Enum constant in enum class it.unina.picus.utenze.interno.applicazione.<a href="it/unina/picus/utenze/interno/applicazione/ConsegnaLinkAttivazione.Esito.html" title="enum class in it.unina.picus.utenze.interno.applicazione">ConsegnaLinkAttivazione.Esito</a></dt>
 <dd>
 <div class="block">Modalità demo: il link è stato generato ma nessuna email è partita.</div>
@@ -5574,6 +5934,10 @@ oppure vuoto se il database rileva un conflitto concorrente di unicità sul codi
 <dt><a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.SchedaOperatore.html#sintesi()" class="member-name-link">sintesi()</a> - Method in record class it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.SchedaOperatore.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.SchedaOperatore</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/monitoraggio/api/MonitoraggioApi.SchedaOperatore.html#param-sintesi"><code>sintesi</code></a> record component.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/ArchivioSchedeRendicontabili.VersioneInviata.html#sintesi()" class="member-name-link">sintesi()</a> - Method in record class it.unina.picus.monitoraggio.interno.dominio.<a href="it/unina/picus/monitoraggio/interno/dominio/ArchivioSchedeRendicontabili.VersioneInviata.html" title="class in it.unina.picus.monitoraggio.interno.dominio">ArchivioSchedeRendicontabili.VersioneInviata</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./it/unina/picus/monitoraggio/interno/dominio/ArchivioSchedeRendicontabili.VersioneInviata.html#param-sintesi"><code>sintesi</code></a> record component.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/interno/dominio/RegoleAccessoRichiesta.Soggetti.html#%3Cinit%3E(java.util.UUID,java.util.UUID)" class="member-name-link">Soggetti(UUID, UUID)</a> - Constructor for record class it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/RegoleAccessoRichiesta.Soggetti.html" title="class in it.unina.picus.richieste.interno.dominio">RegoleAccessoRichiesta.Soggetti</a></dt>
 <dd>
@@ -5738,6 +6102,10 @@ capo a coda (login, area per ruolo, logout) senza database.</div>
 <dt><a href="it/unina/picus/comunicazioni/interno/dominio/NuovoAllegato.html#tipo()" class="member-name-link">tipo()</a> - Method in record class it.unina.picus.comunicazioni.interno.dominio.<a href="it/unina/picus/comunicazioni/interno/dominio/NuovoAllegato.html" title="class in it.unina.picus.comunicazioni.interno.dominio">NuovoAllegato</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/comunicazioni/interno/dominio/NuovoAllegato.html#param-tipo"><code>tipo</code></a> record component.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/TracciatoSchedaOperatore.Campo.html#tipo()" class="member-name-link">tipo()</a> - Method in record class it.unina.picus.monitoraggio.interno.dominio.<a href="it/unina/picus/monitoraggio/interno/dominio/TracciatoSchedaOperatore.Campo.html" title="class in it.unina.picus.monitoraggio.interno.dominio">TracciatoSchedaOperatore.Campo</a></dt>
+<dd>
+<div class="block">Returns the value of the <a href="./it/unina/picus/monitoraggio/interno/dominio/TracciatoSchedaOperatore.Campo.html#param-tipo"><code>tipo</code></a> record component.</div>
 </dd>
 <dt><a href="it/unina/picus/utenze/api/UtenzeApi.ProfiloErogatore.html#tipo()" class="member-name-link">tipo()</a> - Method in record class it.unina.picus.utenze.api.<a href="it/unina/picus/utenze/api/UtenzeApi.ProfiloErogatore.html" title="class in it.unina.picus.utenze.api">UtenzeApi.ProfiloErogatore</a></dt>
 <dd>
@@ -6079,6 +6447,30 @@ capo a coda (login, area per ruolo, logout) senza database.</div>
 <dd>
 <div class="block">Returns a string representation of this record class.</div>
 </dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/ArchivioSchedeRendicontabili.VersioneInviata.html#toString()" class="member-name-link">toString()</a> - Method in record class it.unina.picus.monitoraggio.interno.dominio.<a href="it/unina/picus/monitoraggio/interno/dominio/ArchivioSchedeRendicontabili.VersioneInviata.html" title="class in it.unina.picus.monitoraggio.interno.dominio">ArchivioSchedeRendicontabili.VersioneInviata</a></dt>
+<dd>
+<div class="block">Returns a string representation of this record class.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/TracciatoSchedaOperatore.Campo.html#toString()" class="member-name-link">toString()</a> - Method in record class it.unina.picus.monitoraggio.interno.dominio.<a href="it/unina/picus/monitoraggio/interno/dominio/TracciatoSchedaOperatore.Campo.html" title="class in it.unina.picus.monitoraggio.interno.dominio">TracciatoSchedaOperatore.Campo</a></dt>
+<dd>
+<div class="block">Returns a string representation of this record class.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.RigaSintesi.html#toString()" class="member-name-link">toString()</a> - Method in record class it.unina.picus.monitoraggio.interno.persistenza.<a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.RigaSintesi.html" title="class in it.unina.picus.monitoraggio.interno.persistenza">ArchivioSchedeJpa.RigaSintesi</a></dt>
+<dd>
+<div class="block">Returns a string representation of this record class.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Errore.html#toString()" class="member-name-link">toString()</a> - Method in record class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Errore.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController.Errore</a></dt>
+<dd>
+<div class="block">Returns a string representation of this record class.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Modulo.html#toString()" class="member-name-link">toString()</a> - Method in record class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Modulo.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController.Modulo</a></dt>
+<dd>
+<div class="block">Returns a string representation of this record class.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Ricevuta.html#toString()" class="member-name-link">toString()</a> - Method in record class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Ricevuta.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController.Ricevuta</a></dt>
+<dd>
+<div class="block">Returns a string representation of this record class.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.AccordoADistanza.html#toString()" class="member-name-link">toString()</a> - Method in record class it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.AccordoADistanza.html" title="class in it.unina.picus.richieste.api">RichiesteApi.AccordoADistanza</a></dt>
 <dd>
 <div class="block">Returns a string representation of this record class.</div>
@@ -6243,6 +6635,18 @@ capo a coda (login, area per ruolo, logout) senza database.</div>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/comunicazioni/web/ConsultazioneComunicazioniController.PaginaJson.html#param-totale"><code>totale</code></a> record component.</div>
 </dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Modulo.html#tracciato()" class="member-name-link">tracciato()</a> - Method in record class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Modulo.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController.Modulo</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>tracciato</code> record component.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/TracciatoSchedaOperatore.html" class="type-name-link" title="class in it.unina.picus.monitoraggio.interno.dominio">TracciatoSchedaOperatore</a> - Class in <a href="it/unina/picus/monitoraggio/interno/dominio/package-summary.html">it.unina.picus.monitoraggio.interno.dominio</a></dt>
+<dd>
+<div class="block">Tracciato provvisorio di primo invio TM-OP-01.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/TracciatoSchedaOperatore.Campo.html" class="type-name-link" title="class in it.unina.picus.monitoraggio.interno.dominio">TracciatoSchedaOperatore.Campo</a> - Record Class in <a href="it/unina/picus/monitoraggio/interno/dominio/package-summary.html">it.unina.picus.monitoraggio.interno.dominio</a></dt>
+<dd>
+<div class="block">Campo del modulo compilabile.</div>
+</dd>
 <dt><a href="it/unina/picus/catalogo/api/CatalogoApi.OffertaOpt.html#tramiteProfessionista()" class="member-name-link">tramiteProfessionista()</a> - Method in record class it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/CatalogoApi.OffertaOpt.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.OffertaOpt</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/catalogo/api/CatalogoApi.OffertaOpt.html#param-tramiteProfessionista"><code>tramiteProfessionista</code></a> record component.</div>
@@ -6250,6 +6654,18 @@ capo a coda (login, area per ruolo, logout) senza database.</div>
 <dt><a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.SchedaSintesi.html#trimestre()" class="member-name-link">trimestre()</a> - Method in record class it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.SchedaSintesi.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.SchedaSintesi</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/monitoraggio/api/MonitoraggioApi.SchedaSintesi.html#param-trimestre"><code>trimestre</code></a> record component.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.RigaSintesi.html#trimestre()" class="member-name-link">trimestre()</a> - Method in record class it.unina.picus.monitoraggio.interno.persistenza.<a href="it/unina/picus/monitoraggio/interno/persistenza/ArchivioSchedeJpa.RigaSintesi.html" title="class in it.unina.picus.monitoraggio.interno.persistenza">ArchivioSchedeJpa.RigaSintesi</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>trimestre</code> record component.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Modulo.html#trimestre()" class="member-name-link">trimestre()</a> - Method in record class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Modulo.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController.Modulo</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>trimestre</code> record component.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Ricevuta.html#trimestre()" class="member-name-link">trimestre()</a> - Method in record class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Ricevuta.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController.Ricevuta</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>trimestre</code> record component.</div>
 </dd>
 <dt><a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.Trimestre.html#%3Cinit%3E(int,int)" class="member-name-link">Trimestre(int, int)</a> - Constructor for record class it.unina.picus.monitoraggio.api.<a href="it/unina/picus/monitoraggio/api/MonitoraggioApi.Trimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.Trimestre</a></dt>
 <dd>
@@ -6333,6 +6749,10 @@ capo a coda (login, area per ruolo, logout) senza database.</div>
 </dl>
 <h2 class="title" id="I:V">V</h2>
 <dl class="index">
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/TracciatoSchedaOperatore.html#valida(it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,it.unina.picus.monitoraggio.api.MonitoraggioApi.DatiSchedaOperatore)" class="member-name-link">valida(MonitoraggioApi.Trimestre, MonitoraggioApi.DatiSchedaOperatore)</a> - Static method in class it.unina.picus.monitoraggio.interno.dominio.<a href="it/unina/picus/monitoraggio/interno/dominio/TracciatoSchedaOperatore.html" title="class in it.unina.picus.monitoraggio.interno.dominio">TracciatoSchedaOperatore</a></dt>
+<dd>
+<div class="block">Controlla i dati minimi richiesti e i limiti di rappresentazione del tracciato.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/interno/dominio/ValidazioneAccordo.html#valida(it.unina.picus.richieste.api.RichiesteApi.DettagliAccordo)" class="member-name-link">valida(RichiesteApi.DettagliAccordo)</a> - Static method in class it.unina.picus.richieste.interno.dominio.<a href="it/unina/picus/richieste/interno/dominio/ValidazioneAccordo.html" title="class in it.unina.picus.richieste.interno.dominio">ValidazioneAccordo</a></dt>
 <dd>
 <div class="block">Valida i dettagli e aggrega gli errori per consentire la correzione nello stesso invio.</div>
@@ -6682,6 +7102,10 @@ dal Banco.</div>
 </dd>
 <dt><a href="it/unina/picus/catalogo/interno/applicazione/VerificaRiferimentiCatalogo.html#%3Cinit%3E(it.unina.picus.catalogo.api.ConsultazioneCatalogoApi)" class="member-name-link">VerificaRiferimentiCatalogo(ConsultazioneCatalogoApi)</a> - Constructor for class it.unina.picus.catalogo.interno.applicazione.<a href="it/unina/picus/catalogo/interno/applicazione/VerificaRiferimentiCatalogo.html" title="class in it.unina.picus.catalogo.interno.applicazione">VerificaRiferimentiCatalogo</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/RegoleAccessoScheda.html#verificaRuoloConsultazione(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">verificaRuoloConsultazione(UtenzeApi.IdentitaAutenticata)</a> - Static method in class it.unina.picus.monitoraggio.interno.dominio.<a href="it/unina/picus/monitoraggio/interno/dominio/RegoleAccessoScheda.html" title="class in it.unina.picus.monitoraggio.interno.dominio">RegoleAccessoScheda</a></dt>
+<dd>
+<div class="block">Esclude i ruoli non ammessi prima di cercare la scheda.</div>
+</dd>
 <dt><a href="it/unina/picus/utenze/web/VerificaSessioneFilter.html" class="type-name-link" title="class in it.unina.picus.utenze.web">VerificaSessioneFilter</a> - Class in <a href="it/unina/picus/utenze/web/package-summary.html">it.unina.picus.utenze.web</a></dt>
 <dd>
 <div class="block">A ogni richiesta conferma che l'account della sessione esista ancora e sia attivo: una revoca
@@ -6690,6 +7114,18 @@ come in <a href="it/unina/picus/shared/RichiestaApi.html" title="class in it.uni
 </dd>
 <dt><a href="it/unina/picus/utenze/web/VerificaSessioneFilter.html#%3Cinit%3E(it.unina.picus.utenze.api.UtenzeApi)" class="member-name-link">VerificaSessioneFilter(UtenzeApi)</a> - Constructor for class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/VerificaSessioneFilter.html" title="class in it.unina.picus.utenze.web">VerificaSessioneFilter</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Modulo.html#versione()" class="member-name-link">versione()</a> - Method in record class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.Modulo.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController.Modulo</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>versione</code> record component.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/TracciatoSchedaOperatore.html#VERSIONE" class="member-name-link">VERSIONE</a> - Static variable in class it.unina.picus.monitoraggio.interno.dominio.<a href="it/unina/picus/monitoraggio/interno/dominio/TracciatoSchedaOperatore.html" title="class in it.unina.picus.monitoraggio.interno.dominio">TracciatoSchedaOperatore</a></dt>
+<dd>
+<div class="block">Versione del tracciato iniziale applicata agli invii.</div>
+</dd>
+<dt><a href="it/unina/picus/monitoraggio/interno/dominio/ArchivioSchedeRendicontabili.VersioneInviata.html#%3Cinit%3E(it.unina.picus.monitoraggio.api.MonitoraggioApi.SchedaSintesi,long,java.util.Map,java.util.Set)" class="member-name-link">VersioneInviata(MonitoraggioApi.SchedaSintesi, long, Map, Set)</a> - Constructor for record class it.unina.picus.monitoraggio.interno.dominio.<a href="it/unina/picus/monitoraggio/interno/dominio/ArchivioSchedeRendicontabili.VersioneInviata.html" title="class in it.unina.picus.monitoraggio.interno.dominio">ArchivioSchedeRendicontabili.VersioneInviata</a></dt>
+<dd>
+<div class="block">Valida la proiezione e acquisisce copie immutabili dei conteggi e delle categorie.</div>
+</dd>
 <dt><a href="it/unina/picus/utenze/interno/persistenza/RegistroOperatoriJpa.html#VINCOLO_CODICE_FISCALE" class="member-name-link">VINCOLO_CODICE_FISCALE</a> - Static variable in class it.unina.picus.utenze.interno.persistenza.<a href="it/unina/picus/utenze/interno/persistenza/RegistroOperatoriJpa.html" title="class in it.unina.picus.utenze.interno.persistenza">RegistroOperatoriJpa</a></dt>
 <dd>
 <div class="block">Vincolo di unicità del codice fiscale, dichiarato nella V16.</div>

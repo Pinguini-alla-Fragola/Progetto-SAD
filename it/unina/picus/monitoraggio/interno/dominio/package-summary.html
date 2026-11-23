@@ -82,15 +82,40 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color">
 <div class="block">Componenti interni del modulo Monitoraggio.</div>
 </div>
+<div class="col-first odd-row-color"><a href="../applicazione/package-summary.html">it.unina.picus.monitoraggio.interno.applicazione</a></div>
+<div class="col-last odd-row-color">
+<div class="block">Casi d'uso del modulo Monitoraggio.</div>
+</div>
+<div class="col-first even-row-color"><a href="../persistenza/package-summary.html">it.unina.picus.monitoraggio.interno.persistenza</a></div>
+<div class="col-last even-row-color">
+<div class="block">Persistenza delle schede personali e proiezioni per la consultazione e la rendicontazione.</div>
+</div>
 </div>
 </div>
 </li>
 <li>
 <div id="class-summary">
-<div class="caption"><span>Classes</span></div>
+<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="class-summary-tab0" role="tab" aria-selected="true" aria-controls="class-summary.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary', 2)" class="active-table-tab">All Classes and Interfaces</button><button id="class-summary-tab1" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab1', 2)" class="table-tab">Interfaces</button><button id="class-summary-tab2" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab2', 2)" class="table-tab">Classes</button><button id="class-summary-tab4" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab4', 2)" class="table-tab">Record Classes</button><button id="class-summary-tab5" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab5', 2)" class="table-tab">Exception Classes</button></div>
+<div id="class-summary.tabpanel" role="tabpanel" aria-labelledby="class-summary-tab0">
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Class</div>
 <div class="table-header col-last">Description</div>
+<div class="col-first even-row-color class-summary class-summary-tab1"><a href="ArchivioSchedeOperatore.html" title="interface in it.unina.picus.monitoraggio.interno.dominio">ArchivioSchedeOperatore</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab1">
+<div class="block">Porta di persistenza e consultazione delle schede personali già inviate.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab1"><a href="ArchivioSchedeRendicontabili.html" title="interface in it.unina.picus.monitoraggio.interno.dominio">ArchivioSchedeRendicontabili</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab1">
+<div class="block">Porta di lettura delle schede registrate dal caso d'uso di invio (#58).</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab4"><a href="ArchivioSchedeRendicontabili.VersioneInviata.html" title="class in it.unina.picus.monitoraggio.interno.dominio">ArchivioSchedeRendicontabili.VersioneInviata</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab4">
+<div class="block">Dati di un invio accettato, proiettati per il riepilogo.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab5"><a href="DatiSchedaNonValidiException.html" title="class in it.unina.picus.monitoraggio.interno.dominio">DatiSchedaNonValidiException</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab5">
+<div class="block">Errori di validazione della scheda, indicizzati per nome del campo.</div>
+</div>
 <div class="col-first even-row-color class-summary class-summary-tab2"><a href="RegoleAccessoConteggi.html" title="class in it.unina.picus.monitoraggio.interno.dominio">RegoleAccessoConteggi</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab2">
 <div class="block">Regole di accesso ai conteggi trimestrali delle OPT (#28, criterio 5).</div>
@@ -98,6 +123,19 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color class-summary class-summary-tab2"><a href="RegoleAccessoScheda.html" title="class in it.unina.picus.monitoraggio.interno.dominio">RegoleAccessoScheda</a></div>
 <div class="col-last odd-row-color class-summary class-summary-tab2">
 <div class="block">Regole di accesso alle schede personali degli operatori (#28, criteri 4 e 5).</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab5"><a href="SchedaGiaInviataException.html" title="class in it.unina.picus.monitoraggio.interno.dominio">SchedaGiaInviataException</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab5">
+<div class="block">Esito del primo invio se l'account ha già registrato una scheda nello stesso periodo.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="TracciatoSchedaOperatore.html" title="class in it.unina.picus.monitoraggio.interno.dominio">TracciatoSchedaOperatore</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
+<div class="block">Tracciato provvisorio di primo invio TM-OP-01.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab4"><a href="TracciatoSchedaOperatore.Campo.html" title="class in it.unina.picus.monitoraggio.interno.dominio">TracciatoSchedaOperatore.Campo</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab4">
+<div class="block">Campo del modulo compilabile.</div>
+</div>
 </div>
 </div>
 </div>

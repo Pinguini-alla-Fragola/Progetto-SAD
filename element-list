@@ -12,7 +12,9 @@ it.unina.picus.comunicazioni.interno.persistenza
 it.unina.picus.comunicazioni.web
 it.unina.picus.monitoraggio.api
 it.unina.picus.monitoraggio.interno
+it.unina.picus.monitoraggio.interno.applicazione
 it.unina.picus.monitoraggio.interno.dominio
+it.unina.picus.monitoraggio.interno.persistenza
 it.unina.picus.monitoraggio.web
 it.unina.picus.richieste.api
 it.unina.picus.richieste.interno.applicazione

@@ -76,9 +76,14 @@ loadScripts(document, 'script');</script>
 <h1 title="Interface MonitoraggioApi" class="title">Interface MonitoraggioApi</h1>
 </div>
 <section class="class-description" id="class-description">
+<dl class="notes">
+<dt>All Superinterfaces:</dt>
+<dd><code><a href="SchedeOperatoreApi.html" title="interface in it.unina.picus.monitoraggio.api">SchedeOperatoreApi</a></code></dd>
+</dl>
 <hr>
 <div class="horizontal-scroll">
-<div class="type-signature"><span class="modifiers">public interface </span><span class="element-name type-name-label">MonitoraggioApi</span></div>
+<div class="type-signature"><span class="modifiers">public interface </span><span class="element-name type-name-label">MonitoraggioApi</span><span class="extends-implements">
+extends <a href="SchedeOperatoreApi.html" title="interface in it.unina.picus.monitoraggio.api">SchedeOperatoreApi</a></span></div>
 <div class="block">Raccoglie i conteggi trimestrali delle OPT e le schede personali degli operatori del Banco.
 I dati descrivono attività dichiarate e sono indipendenti dal ciclo della singola richiesta.</div>
 </div>
@@ -102,7 +107,7 @@ I dati descrivono attività dichiarate e sono indipendenti dal ciclo della singo
 <div class="col-first odd-row-color"><code>static final record&nbsp;</code></div>
 <div class="col-second odd-row-color"><code><a href="MonitoraggioApi.DatiSchedaOperatore.html" class="type-name-link" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.DatiSchedaOperatore</a></code></div>
 <div class="col-last odd-row-color">
-<div class="block">Dati iniziali della scheda personale.</div>
+<div class="block">Dati dichiarati per la scheda personale TM-OP-01, inviata senza firma.</div>
 </div>
 <div class="col-first even-row-color"><code>static final record&nbsp;</code></div>
 <div class="col-second even-row-color"><code><a href="MonitoraggioApi.RiepilogoTrimestre.html" class="type-name-link" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.RiepilogoTrimestre</a></code></div>
@@ -155,19 +160,19 @@ I dati descrivono attività dichiarate e sono indipendenti dal ciclo della singo
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#consultaSchedaOperatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">consultaSchedaOperatore</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;schedaId)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Consulta la scheda personale.</div>
+<div class="block">Consulta la scheda salvata come titolare o come Banco autorizzato.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="MonitoraggioApi.SchedaSintesi.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.SchedaSintesi</a>&gt;</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#elencoSchedeOperatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">elencoSchedeOperatore</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Elenca le schede personali inviate dall'operatore autenticato.</div>
+<div class="block">Elenca le schede inviate dall'operatore autenticato.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#inviaSchedaOperatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,it.unina.picus.monitoraggio.api.MonitoraggioApi.DatiSchedaOperatore)" class="member-name-link">inviaSchedaOperatore</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  <a href="MonitoraggioApi.Trimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.Trimestre</a>&nbsp;trimestre,
  <a href="MonitoraggioApi.DatiSchedaOperatore.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.DatiSchedaOperatore</a>&nbsp;dati)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Invia la scheda personale trimestrale dell'operatore autenticato.</div>
+<div class="block">Registra il primo invio di un trimestre concluso a nome dell'operatore autenticato.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#registraConteggiOpt(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,java.util.List)" class="member-name-link">registraConteggiOpt</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
@@ -253,20 +258,17 @@ assente, mentre uno zero dichiarato è un valore. Le categorie sovrapponibili re
 <div class="member-signature"><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a></span>&nbsp;<span class="element-name">inviaSchedaOperatore</span><wbr><span class="parameters">(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  <a href="MonitoraggioApi.Trimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.Trimestre</a>&nbsp;trimestre,
  <a href="MonitoraggioApi.DatiSchedaOperatore.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.DatiSchedaOperatore</a>&nbsp;dati)</span></div>
-<div class="block">Invia la scheda personale trimestrale dell'operatore autenticato. Il modulo ricava il
-titolare dall'identità verificata. Il tracciato e le regole di firma e correzione seguono
-il raffinamento della storia di compilazione.</div>
+<div class="block">Registra il primo invio di un trimestre concluso a nome dell'operatore autenticato.
+L'invio è consentito dal primo giorno del trimestre successivo nel fuso <code>Europe/Rome</code>.</div>
 <dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="SchedeOperatoreApi.html#inviaSchedaOperatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,it.unina.picus.monitoraggio.api.MonitoraggioApi.DatiSchedaOperatore)">inviaSchedaOperatore</a></code>&nbsp;in interface&nbsp;<code><a href="SchedeOperatoreApi.html" title="interface in it.unina.picus.monitoraggio.api">SchedeOperatoreApi</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>attore</code> - identità verificata dell'operatore interno o esterno pagato dal Banco</dd>
-<dd><code>trimestre</code> - periodo di rendicontazione</dd>
-<dd><code>dati</code> - dati dichiarati nella scheda personale</dd>
+<dd><code>trimestre</code> - periodo dichiarato</dd>
+<dd><code>dati</code> - dati dichiarati senza firma</dd>
 <dt>Returns:</dt>
-<dd>identificativo della scheda ricevuta</dd>
-<dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/SecurityException.html" title="class or interface in java.lang" class="external-link">SecurityException</a></code> - se l'attore non è un operatore autorizzato</dd>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - se i dati non rispettano il tracciato applicabile</dd>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - se il periodo o la scheda esistente non consentono un nuovo invio</dd>
+<dd>identificativo della scheda inviata</dd>
 </dl>
 </div>
 </section>
@@ -276,14 +278,14 @@ il raffinamento della storia di compilazione.</div>
 <h3>elencoSchedeOperatore</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="MonitoraggioApi.SchedaSintesi.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.SchedaSintesi</a>&gt;</span>&nbsp;<span class="element-name">elencoSchedeOperatore</span><wbr><span class="parameters">(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore)</span></div>
-<div class="block">Elenca le schede personali inviate dall'operatore autenticato.</div>
+<div class="block">Elenca le schede inviate dall'operatore autenticato.</div>
 <dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="SchedeOperatoreApi.html#elencoSchedeOperatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)">elencoSchedeOperatore</a></code>&nbsp;in interface&nbsp;<code><a href="SchedeOperatoreApi.html" title="interface in it.unina.picus.monitoraggio.api">SchedeOperatoreApi</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>attore</code> - identità verificata dell'operatore titolare</dd>
 <dt>Returns:</dt>
-<dd>riferimenti alle proprie schede</dd>
-<dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/SecurityException.html" title="class or interface in java.lang" class="external-link">SecurityException</a></code> - se l'attore non è un operatore autorizzato</dd>
+<dd>riferimenti alle schede proprie, eventualmente nessuna</dd>
 </dl>
 </div>
 </section>
@@ -294,17 +296,15 @@ il raffinamento della storia di compilazione.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="return-type"><a href="MonitoraggioApi.SchedaOperatore.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.SchedaOperatore</a></span>&nbsp;<span class="element-name">consultaSchedaOperatore</span><wbr><span class="parameters">(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;schedaId)</span></div>
-<div class="block">Consulta la scheda personale. Il Banco può leggerla per la rendicontazione e
-l'operatore titolare può consultare la propria.</div>
+<div class="block">Consulta la scheda salvata come titolare o come Banco autorizzato.</div>
 <dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="SchedeOperatoreApi.html#consultaSchedaOperatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)">consultaSchedaOperatore</a></code>&nbsp;in interface&nbsp;<code><a href="SchedeOperatoreApi.html" title="interface in it.unina.picus.monitoraggio.api">SchedeOperatoreApi</a></code></dd>
 <dt>Parameters:</dt>
-<dd><code>attore</code> - identità verificata del Banco autorizzato o dell'operatore titolare</dd>
+<dd><code>attore</code> - identità verificata del titolare o del Banco</dd>
 <dd><code>schedaId</code> - identificativo della scheda</dd>
 <dt>Returns:</dt>
-<dd>scheda personale visibile all'attore</dd>
-<dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/SecurityException.html" title="class or interface in java.lang" class="external-link">SecurityException</a></code> - se l'attore non può consultare la scheda</dd>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/NoSuchElementException.html" title="class or interface in java.util" class="external-link">NoSuchElementException</a></code> - se la scheda non esiste</dd>
+<dd>dati della scheda inviata</dd>
 </dl>
 </div>
 </section>

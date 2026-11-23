@@ -60,6 +60,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
 <li><a href="#verificaOperatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" tabindex="0">verificaOperatore(UtenzeApi.IdentitaAutenticata)</a></li>
+<li><a href="#verificaRuoloConsultazione(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" tabindex="0">verificaRuoloConsultazione(UtenzeApi.IdentitaAutenticata)</a></li>
 <li><a href="#verificaConsultazione(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" tabindex="0">verificaConsultazione(UtenzeApi.IdentitaAutenticata, UUID)</a></li>
 <li><a href="#verificaRiepilogo(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" tabindex="0">verificaRiepilogo(UtenzeApi.IdentitaAutenticata)</a></li>
 </ol>
@@ -133,6 +134,11 @@ dal Banco.</div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Riepilogo delle schede ricevute nel trimestre, per la rendicontazione: riservato al Banco.</div>
 </div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#verificaRuoloConsultazione(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">verificaRuoloConsultazione</a><wbr>(<a href="../../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Esclude i ruoli non ammessi prima di cercare la scheda.</div>
+</div>
 </div>
 </div>
 </div>
@@ -174,6 +180,22 @@ dal Banco. La scheda inviata appartiene all'operatore autenticato.</div>
 </section>
 </li>
 <li>
+<section class="detail" id="verificaRuoloConsultazione(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)">
+<h3>verificaRuoloConsultazione</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">verificaRuoloConsultazione</span><wbr><span class="parameters">(<a href="../../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore)</span></div>
+<div class="block">Esclude i ruoli non ammessi prima di cercare la scheda. Dopo la ricerca
+<a href="#verificaConsultazione(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)"><code>verificaConsultazione(UtenzeApi.IdentitaAutenticata, UUID)</code></a> controlla anche la titolarità.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>attore</code> - identità verificata della sessione</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/SecurityException.html" title="class or interface in java.lang" class="external-link">SecurityException</a></code> - se l'identità è incompleta o il ruolo non è ammesso</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="verificaConsultazione(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)">
 <h3>verificaConsultazione</h3>
 <div class="horizontal-scroll">
@@ -183,10 +205,9 @@ dal Banco. La scheda inviata appartiene all'operatore autenticato.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>attore</code> - identità verificata della sessione</dd>
-<dd><code>operatoreId</code> - account dell'operatore titolare, letto dalla scheda salvata</dd>
+<dd><code>operatoreId</code> - account dell'operatore titolare, oppure <code>null</code> se la scheda è assente</dd>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/SecurityException.html" title="class or interface in java.lang" class="external-link">SecurityException</a></code> - se l'identità è incompleta o l'attore è una OPT o un altro operatore</dd>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/NullPointerException.html" title="class or interface in java.lang" class="external-link">NullPointerException</a></code> - se <code>operatoreId</code> manca per un attore con identità completa</dd>
 <dt>See Also:</dt>
 <dd>
 <ul class="tag-list-long">
