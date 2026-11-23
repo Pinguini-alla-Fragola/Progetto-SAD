@@ -130,6 +130,11 @@ class SecurityConfig {
                         .requestMatchers("/banco/**").hasRole("BANCO")
                         .requestMatchers("/opt/**").hasRole("OPT")
                         .requestMatchers("/operatore/**").hasRole("OPERATORE")
+                        .requestMatchers("/api/monitoraggio/schede-operatore",
+                                "/api/monitoraggio/schede-operatore/modulo",
+                                "/api/monitoraggio/schede-operatore/mie").hasRole("OPERATORE")
+                        .requestMatchers("/api/monitoraggio/schede-operatore/ricevute").hasRole("BANCO")
+                        .requestMatchers("/api/monitoraggio/schede-operatore/*").hasAnyRole("BANCO", "OPERATORE")
                         .anyRequest().authenticated())
                 .exceptionHandling(eccezioni -> eccezioni
                         .authenticationEntryPoint(NON_AUTENTICATO)
