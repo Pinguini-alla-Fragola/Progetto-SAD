@@ -7,6 +7,8 @@
     <link rel="icon" href="/img/picus.svg" type="image/svg+xml">
     <link rel="stylesheet" href="/css/picus.css">
     <script src="/js/area.js" type="module"></script>
+    <script src="/js/notifiche-comunicazioni.js" type="module"></script>
+    <script src="/js/comunicazioni.js" type="module"></script>
     <link rel="stylesheet" href="/css/integrazione-ui.css">
 </head>
 <body data-area="opt" th:attr="data-utente=${utente.id}">
@@ -62,7 +64,7 @@
 </div>
 </section>
 <section class="area-panel" id="comunicazioni" tabindex="-1" aria-label="Comunicazioni">
-<h2 class="sr-only">Comunicazioni ricevute</h2><div class="picus-list" id="messaggi" aria-live="polite" data-funzione-inattiva></div>
+<h2 class="sr-only">Comunicazioni ricevute</h2><div class="picus-list" id="messaggi" aria-live="polite"></div>
 </section>
 <section class="area-panel" id="monitoraggio" tabindex="-1" aria-label="Monitoraggio">
 <div class="workspace-tabs" data-tabs><div class="tab-list" role="tablist" aria-label="Conteggi trimestrali">
