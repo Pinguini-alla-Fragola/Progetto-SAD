@@ -24,6 +24,10 @@ public interface TokenAttivazioneRepository extends JpaRepository<TokenAttivazio
     @Query("select t.accountId from TokenAttivazioneJpa t where t.tokenHash = :hash")
     Optional<UUID> findAccountIdByTokenHash(@Param("hash") String hash);
 
+    /** Istante dell'ultimo token emesso per l'account; da leggere con il lock dell'account già preso. */
+    @Query("select max(t.creatoIl) from TokenAttivazioneJpa t where t.accountId = :accountId")
+    Optional<Instant> ultimaEmissione(@Param("accountId") UUID accountId);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select t from TokenAttivazioneJpa t where t.tokenHash = :hash")
     Optional<TokenAttivazioneJpa> findByTokenHashForUpdate(@Param("hash") String hash);
