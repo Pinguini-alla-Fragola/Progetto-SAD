@@ -1,6 +1,5 @@
 package it.unina.picus.utenze.interno.applicazione;
 
-import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -33,8 +32,6 @@ import it.unina.picus.utenze.interno.persistenza.TokenAttivazioneRepository;
 @Profile("!skeleton")
 @Transactional
 public class AttivazioneUtenzaService {
-
-    static final int LUNGHEZZA_MIN_PASSWORD = 12;
 
     private final AccountRepository accounts;
     private final TokenAttivazioneRepository tokens;
@@ -192,7 +189,7 @@ public class AttivazioneUtenzaService {
      * e attiva l'account.
      */
     public void attivaAccount(String tokenInChiaro, String nuovaPassword) {
-        validaPassword(nuovaPassword);
+        PoliticaPassword.verifica(nuovaPassword);
 
         if (tokenInChiaro == null || tokenInChiaro.isBlank()) {
             throw new TokenAttivazioneNonValidoException("Link di attivazione non valido o mancante.");
@@ -228,17 +225,5 @@ public class AttivazioneUtenzaService {
         account.attivaConPassword(passwordEncoder.encode(nuovaPassword));
         tokens.saveAndFlush(token);
         accounts.saveAndFlush(account);
-    }
-
-    private static void validaPassword(String password) {
-        if (password == null || password.isBlank()) {
-            throw new IllegalArgumentException("La password è obbligatoria.");
-        }
-        if (password.length() < LUNGHEZZA_MIN_PASSWORD) {
-            throw new IllegalArgumentException("La password deve contenere almeno " + LUNGHEZZA_MIN_PASSWORD + " caratteri.");
-        }
-        if (password.getBytes(StandardCharsets.UTF_8).length > UtenzeService.LUNGHEZZA_MAX_PASSWORD_BYTE) {
-            throw new IllegalArgumentException("La password supera la lunghezza massima consentita di 72 byte.");
-        }
     }
 }
