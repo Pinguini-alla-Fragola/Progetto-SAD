@@ -65,6 +65,9 @@ loadScripts(document, 'script');</script>
 </li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
+<li><a href="#elencoOffertaOpt(java.util.UUID)" tabindex="0">elencoOffertaOpt(UUID)</a></li>
+<li><a href="#registraOffertaOpt(java.util.UUID,long,boolean)" tabindex="0">registraOffertaOpt(UUID, long, boolean)</a></li>
+<li><a href="#ritiraOffertaOpt(java.util.UUID,long)" tabindex="0">ritiraOffertaOpt(UUID, long)</a></li>
 <li><a href="#optAttivePerMisura(long)" tabindex="0">optAttivePerMisura(long)</a></li>
 <li><a href="#comuniLimitrofi(java.lang.String)" tabindex="0">comuniLimitrofi(String)</a></li>
 <li><a href="#bloccaMisura(long)" tabindex="0">bloccaMisura(long)</a></li>
@@ -89,7 +92,7 @@ loadScripts(document, 'script');</script>
 @Transactional(readOnly=true)
 </span><span class="modifiers">public class </span><span class="element-name type-name-label">OffertaTerritorialeJpa</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">Lettura dell'offerta e delle adiacenze di proprietà del catalogo.</div>
+<div class="block">Adattatore di persistenza dell'offerta OPT e delle adiacenze del catalogo.</div>
 </div>
 </section>
 <section class="summary">
@@ -103,7 +106,9 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(jakarta.persistence.EntityManager)" class="member-name-link">OffertaTerritorialeJpa</a><wbr>(jakarta.persistence.EntityManager&nbsp;entityManager)</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Collega l'adattatore alla persistenza del catalogo.</div>
+</div>
 </div>
 </section>
 </li>
@@ -137,10 +142,32 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#comuniLimitrofi(java.lang.String)" class="member-name-link">comuniLimitrofi</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;comune)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#optAttivePerMisura(long)" class="member-name-link">optAttivePerMisura</a><wbr>(long&nbsp;misuraId)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Cerca i comuni confinanti con quello indicato.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../../api/CatalogoApi.OffertaOpt.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.OffertaOpt</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#elencoOffertaOpt(java.util.UUID)" class="member-name-link">elencoOffertaOpt</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;optId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Legge le dichiarazioni correnti dell'OPT, comprese quelle per misure disattivate.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#optAttivePerMisura(long)" class="member-name-link">optAttivePerMisura</a><wbr>(long&nbsp;misuraId)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Cerca le OPT che hanno una dichiarazione corrente per la misura.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#registraOffertaOpt(java.util.UUID,long,boolean)" class="member-name-link">registraOffertaOpt</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;optId,
+ long&nbsp;misuraId,
+ boolean&nbsp;tramiteProfessionista)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Registra o riattiva una dichiarazione in un'unica istruzione.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#ritiraOffertaOpt(java.util.UUID,long)" class="member-name-link">ritiraOffertaOpt</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;optId,
+ long&nbsp;misuraId)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Ritira una dichiarazione corrente conservando la riga e i suoi riferimenti.</div>
+</div>
 </div>
 </div>
 </div>
@@ -163,6 +190,11 @@ loadScripts(document, 'script');</script>
 <h3>OffertaTerritorialeJpa</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">OffertaTerritorialeJpa</span><wbr><span class="parameters">(jakarta.persistence.EntityManager&nbsp;entityManager)</span></div>
+<div class="block">Collega l'adattatore alla persistenza del catalogo.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>entityManager</code> - gestore delle entità del catalogo</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -175,10 +207,69 @@ loadScripts(document, 'script');</script>
 <h2>Method Details</h2>
 <ul class="member-list">
 <li>
+<section class="detail" id="elencoOffertaOpt(java.util.UUID)">
+<h3>elencoOffertaOpt</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../../api/CatalogoApi.OffertaOpt.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.OffertaOpt</a>&gt;</span>&nbsp;<span class="element-name">elencoOffertaOpt</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;optId)</span></div>
+<div class="block">Legge le dichiarazioni correnti dell'OPT, comprese quelle per misure disattivate.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>optId</code> - account organizzativo titolare</dd>
+<dt>Returns:</dt>
+<dd>dichiarazioni correnti ordinate per identificativo della misura</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="registraOffertaOpt(java.util.UUID,long,boolean)">
+<h3>registraOffertaOpt</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="annotations">@Transactional(propagation=MANDATORY)
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">registraOffertaOpt</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;optId,
+ long&nbsp;misuraId,
+ boolean&nbsp;tramiteProfessionista)</span></div>
+<div class="block">Registra o riattiva una dichiarazione in un'unica istruzione. La chiave primaria
+serializza dichiarazioni concorrenti per la stessa coppia OPT e misura.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>optId</code> - account organizzativo titolare</dd>
+<dd><code>misuraId</code> - misura da offrire, già verificata e bloccata dal chiamante</dd>
+<dd><code>tramiteProfessionista</code> - indica il ricorso a un professionista esterno</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="ritiraOffertaOpt(java.util.UUID,long)">
+<h3>ritiraOffertaOpt</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="annotations">@Transactional(propagation=MANDATORY)
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">ritiraOffertaOpt</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;optId,
+ long&nbsp;misuraId)</span></div>
+<div class="block">Ritira una dichiarazione corrente conservando la riga e i suoi riferimenti.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>optId</code> - account organizzativo titolare</dd>
+<dd><code>misuraId</code> - misura da ritirare</dd>
+<dt>Returns:</dt>
+<dd>vero se è stata ritirata una dichiarazione corrente</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="optAttivePerMisura(long)">
 <h3>optAttivePerMisura</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&gt;</span>&nbsp;<span class="element-name">optAttivePerMisura</span><wbr><span class="parameters">(long&nbsp;misuraId)</span></div>
+<div class="block">Cerca le OPT che hanno una dichiarazione corrente per la misura.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>misuraId</code> - identificativo della misura</dd>
+<dt>Returns:</dt>
+<dd>identificativi delle OPT con offerta corrente</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -187,6 +278,13 @@ loadScripts(document, 'script');</script>
 <h3>comuniLimitrofi</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</span>&nbsp;<span class="element-name">comuniLimitrofi</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;comune)</span></div>
+<div class="block">Cerca i comuni confinanti con quello indicato.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>comune</code> - codice del comune di riferimento</dd>
+<dt>Returns:</dt>
+<dd>codici dei comuni limitrofi</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -212,6 +310,13 @@ loadScripts(document, 'script');</script>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">bloccaOfferta</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;optId,
  long&nbsp;misuraId)</span></div>
 <div class="block">Protegge la dichiarazione corrente da ritiro o cancellazione concorrenti.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>optId</code> - account organizzativo titolare</dd>
+<dd><code>misuraId</code> - identificativo della misura</dd>
+<dt>Returns:</dt>
+<dd>vero se la dichiarazione corrente esiste ed è bloccata</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -222,6 +327,13 @@ loadScripts(document, 'script');</script>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">bloccaAdiacenza</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;primo,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;secondo)</span></div>
 <div class="block">Protegge il legame territoriale usato dalla verifica di compatibilità.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>primo</code> - codice del primo comune</dd>
+<dd><code>secondo</code> - codice del secondo comune</dd>
+<dt>Returns:</dt>
+<dd>vero se il legame esiste ed è bloccato</dd>
+</dl>
 </div>
 </section>
 </li>
