@@ -157,8 +157,10 @@ export class ElencoComunicazioni {
             return;
         }
         this.pagina = pagina;
+        // Solo chi riceve conferma la ricezione (OPT e Operatori): il Banco, che invia, non vede il pulsante.
         this.voci.replaceChildren(...communicationCards(elementi, {
-            banco: this.banco, formatDate: formatoData, onConfirm: () => this.carica()
+            banco: this.banco, formatDate: formatoData, onConfirm: () => this.carica(),
+            conConferma: !this.banco
         }));
         const filtrato = Boolean(this.ricerca.value.trim()) || this.filtri.some(({ scelta }) => scelta.value);
         const primo = pagina * dimensione + 1;
