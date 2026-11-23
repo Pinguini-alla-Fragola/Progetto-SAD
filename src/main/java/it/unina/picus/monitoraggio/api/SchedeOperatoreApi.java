@@ -14,14 +14,15 @@ import java.util.UUID;
 public interface SchedeOperatoreApi {
 
     /**
-     * Registra il primo invio del trimestre a nome dell'operatore autenticato.
+     * Registra il primo invio di un trimestre concluso a nome dell'operatore autenticato.
+     * L'invio è consentito dal primo giorno del trimestre successivo nel fuso {@code Europe/Rome}.
      *
      * @param attore identità verificata dell'operatore interno o esterno pagato dal Banco
      * @param trimestre periodo dichiarato
      * @param dati dati dichiarati senza firma
      * @return identificativo della scheda inviata
      * @throws SecurityException se l'attore non è un operatore autorizzato
-     * @throws IllegalArgumentException se il periodo o i dati non sono validi
+     * @throws IllegalArgumentException se il trimestre è assente o non concluso oppure se i dati non sono validi
      * @throws IllegalStateException se esiste già una scheda per l'operatore e il trimestre
      */
     UUID inviaSchedaOperatore(IdentitaAutenticata attore, Trimestre trimestre, DatiSchedaOperatore dati);

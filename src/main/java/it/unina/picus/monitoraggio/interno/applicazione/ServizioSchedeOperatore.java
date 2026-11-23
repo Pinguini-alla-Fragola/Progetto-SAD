@@ -15,6 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.IsoFields;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -25,6 +28,8 @@ import java.util.UUID;
 @Profile("!skeleton")
 @Transactional(readOnly = true)
 public class ServizioSchedeOperatore implements SchedeOperatoreApi {
+
+    private static final ZoneId FUSO_RENDICONTAZIONE = ZoneId.of("Europe/Rome");
 
     private final ArchivioSchedeOperatore archivio;
     private final Clock orologio;
@@ -46,7 +51,15 @@ public class ServizioSchedeOperatore implements SchedeOperatoreApi {
     public UUID inviaSchedaOperatore(IdentitaAutenticata attore, Trimestre trimestre, DatiSchedaOperatore dati) {
         RegoleAccessoScheda.verificaOperatore(attore);
         TracciatoSchedaOperatore.valida(trimestre, dati);
-        var sintesi = new SchedaSintesi(UUID.randomUUID(), attore.accountId(), trimestre, orologio.instant());
+        var istanteInvio = orologio.instant();
+        var dataInvio = LocalDate.ofInstant(istanteInvio, FUSO_RENDICONTAZIONE);
+        int annoCorrente = dataInvio.getYear();
+        int trimestreCorrente = dataInvio.get(IsoFields.QUARTER_OF_YEAR);
+        if (trimestre.anno() > annoCorrente
+                || (trimestre.anno() == annoCorrente && trimestre.numero() >= trimestreCorrente)) {
+            throw new DatiSchedaNonValidiException(Map.of("trimestre", "Scegli un trimestre concluso"));
+        }
+        var sintesi = new SchedaSintesi(UUID.randomUUID(), attore.accountId(), trimestre, istanteInvio);
         archivio.registra(new SchedaOperatore(sintesi, dati));
         return sintesi.id();
     }
