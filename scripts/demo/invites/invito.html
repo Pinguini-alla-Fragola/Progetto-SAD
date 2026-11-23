@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="it">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Invito alla demo PICUS</title>
+    <link rel="icon" type="image/svg+xml" href="/invito/logo.svg">
+    <script src="/invito/script.js" defer></script>
+    <style>
+        @font-face {
+            font-family: Inter;
+            src: url("/invito/inter.woff2") format("woff2");
+            font-weight: 400 800;
+            font-display: swap;
+        }
+
+        :root {
+            color-scheme: dark;
+            --bg-color: #0d1117;
+            --surface-color: #161b22;
+            --border-color: #30363d;
+            --text-primary: #f0f6fc;
+            --text-secondary: #8b949e;
+            --accent-color: #58a6ff;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            display: grid;
+            place-items: center;
+            min-height: 100vh;
+            min-height: 100svh;
+            margin: 0;
+            padding: clamp(1rem, 4vw, 3rem);
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font: 1rem/1.5 Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: minmax(0, 23rem) minmax(0, 34rem);
+            align-items: center;
+            gap: clamp(2rem, 6vw, 5.5rem);
+            width: min(100%, 63rem);
+        }
+
+        .logo-link { display: block; }
+
+        .logo {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        .contenuto { min-width: 0; }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(2.25rem, 4.2vw, 3.8rem);
+            font-weight: 800;
+            line-height: 1.12;
+            letter-spacing: -0.035em;
+        }
+
+        #stato, #rientro p, noscript { color: var(--text-secondary); }
+        #stato { margin: 0.9rem 0 1.6rem; }
+        #stato a {
+            color: var(--accent-color);
+            font-weight: 600;
+            text-underline-offset: 0.2em;
+            white-space: nowrap;
+        }
+        #rientro h2 { margin: 0; font-size: 1.3rem; font-weight: 600; }
+        #rientro p { margin: 0.5rem 0 1.25rem; }
+
+        label { display: block; font-weight: 600; }
+
+        input {
+            width: 100%;
+            min-height: 2.9rem;
+            margin: 0.4rem 0 1rem;
+            padding: 0.7rem 0.85rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            background-color: var(--surface-color);
+            color: var(--text-primary);
+            font: inherit;
+        }
+
+        input[readonly] { font-family: ui-monospace, monospace; }
+
+        button, .azione {
+            display: inline-block;
+            min-height: 2.75rem;
+            padding: 0.55rem 0.15rem 0.25rem;
+            border: 0;
+            border-bottom: 3px solid var(--accent-color);
+            background: transparent;
+            color: var(--text-primary);
+            font: inherit;
+            font-size: 1.125rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        button:not(:disabled):hover, .azione:hover { color: var(--accent-color); }
+        button:disabled { opacity: 0.65; cursor: wait; }
+
+        :where(button, a, input):focus-visible {
+            outline: 2px solid var(--accent-color);
+            outline-offset: 3px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 1.5rem;
+                width: min(100%, 34rem);
+            }
+
+            .logo-link { justify-self: center; width: min(54vw, 13rem); }
+            h1, #stato { text-align: center; }
+
+            #accesso button {
+                display: block;
+                inline-size: fit-content;
+                margin-inline: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <a class="logo-link" href="https://strawberrypenguin.it/" aria-label="Torna alla pagina iniziale di PICUS">
+            <img class="logo" src="/invito/logo.svg" width="1024" height="1024" alt="Logo dei Pinguini alla Fragola">
+        </a>
+        <div class="contenuto">
+            <h1>Accedi alla demo PICUS</h1>
+            <p id="stato" role="status">
+                Apri il link d’invito o inserisci il codice che hai ricevuto.
+                <a href="mailto:antonio.caprio@studenti.unina.it">Nessun invito?</a>
+            </p>
+            <form id="accesso" hidden>
+                <div id="campo-codice">
+                    <label for="codice">Codice d’invito o di rientro</label>
+                    <input id="codice" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" required>
+                </div>
+                <button type="submit">Entra nella demo</button>
+            </form>
+            <section id="rientro" aria-labelledby="titolo-rientro" hidden>
+                <h2 id="titolo-rientro">Salva il codice di rientro</h2>
+                <p>Puoi riutilizzarlo fino al <time id="scadenza"></time>.</p>
+                <label for="codice-rientro">Codice di rientro</label>
+                <input id="codice-rientro" type="text" readonly spellcheck="false">
+                <label for="link-rientro">Link di rientro</label>
+                <input id="link-rientro" type="text" readonly spellcheck="false">
+                <a id="vai-al-login" class="azione" href="/login">Vai al login PICUS</a>
+            </section>
+            <noscript>Per usare un invito, abilita JavaScript e riapri il link.</noscript>
+        </div>
+    </main>
+</body>
+</html>

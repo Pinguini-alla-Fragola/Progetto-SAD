@@ -1,0 +1,20 @@
+#!/sbin/openrc-run
+
+description="Firewall di ingresso del VPS PICUS"
+
+depend() {
+    need localmount
+    before docker caddy
+}
+
+start() {
+    ebegin "Caricamento del firewall PICUS"
+    /usr/sbin/nft -f /opt/picus-demo/firewall.nft
+    eend $?
+}
+
+stop() {
+    ebegin "Rimozione della tabella firewall PICUS"
+    /usr/sbin/nft delete table inet picus_demo
+    eend $?
+}

@@ -1,0 +1,13 @@
+#!/sbin/openrc-run
+
+name="Inviti della demo PICUS"
+description="Gestisce il riscatto degli inviti e autorizza le sessioni per Caddy"
+supervisor=supervise-daemon
+command=/usr/bin/python3
+command_args="/usr/local/lib/picus-demo-invites/gateway.py serve"
+command_user=picus-invites:picus-invites
+
+depend() {
+    need localmount
+    before caddy
+}

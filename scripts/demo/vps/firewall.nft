@@ -1,0 +1,14 @@
+destroy table inet picus_demo
+table inet picus_demo {
+    chain input {
+        type filter hook input priority 0; policy drop;
+        iifname "lo" accept
+        ct state { established, related } accept
+        ct state invalid drop
+        ip protocol icmp accept
+        meta l4proto ipv6-icmp accept
+        udp sport 67 udp dport 68 accept
+        udp sport 547 udp dport 546 accept
+        tcp dport { 22, 80, 443 } accept
+    }
+}

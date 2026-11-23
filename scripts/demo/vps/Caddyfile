@@ -1,0 +1,23 @@
+{
+	log {
+		output file /var/log/caddy/caddy.log {
+			roll_size 10MiB
+			roll_keep 3
+		}
+		format filter {
+			wrap json
+			fields {
+				request>uri query {
+					replace token REDACTED
+				}
+			}
+		}
+	}
+	servers {
+		protocols h1 h2
+	}
+}
+
+demo.picus.strawberrypenguin.it {
+	import /usr/local/lib/picus-demo-invites/Caddyfile.routes
+}

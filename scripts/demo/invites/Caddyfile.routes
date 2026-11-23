@@ -1,0 +1,33 @@
+@invito path /invito /invito/riscatta /invito/script.js /invito/logo.svg /invito/inter.woff2
+handle @invito {
+	request_body {
+		max_size 1KB
+	}
+	reverse_proxy 127.0.0.1:8787 {
+		header_up X-Picus-Client-IP {client_ip}
+	}
+}
+
+handle {
+	forward_auth 127.0.0.1:8787 {
+		uri /verifica
+	}
+	@allegati {
+		method POST
+		path /api/comunicazioni
+	}
+	@standard not {
+		method POST
+		path /api/comunicazioni
+	}
+	request_body @allegati {
+		max_size 26MiB
+	}
+	request_body @standard {
+		max_size 1MB
+	}
+	reverse_proxy 127.0.0.1:8080 {
+		header_up -Authorization
+		header_up -Forwarded
+	}
+}

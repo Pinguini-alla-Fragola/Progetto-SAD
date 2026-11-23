@@ -1,0 +1,28 @@
+compatibility_level = 3.6
+myhostname = mail.picus.strawberrypenguin.it
+myorigin = $myhostname
+mydestination = localhost, $myhostname
+inet_interfaces = all
+inet_protocols = ipv4
+mynetworks = 127.0.0.0/8, 172.30.194.0/28
+smtpd_client_restrictions = permit_mynetworks, reject
+smtpd_relay_restrictions = permit_mynetworks, reject
+smtpd_recipient_restrictions = check_recipient_access lmdb:/etc/postfix/picus-recipients, reject
+smtpd_client_event_limit_exceptions =
+smtpd_client_message_rate_limit = 4
+anvil_rate_time_unit = 60s
+message_size_limit = 1048576
+
+virtual_alias_domains = picus.test
+virtual_alias_maps = regexp:/etc/postfix/picus-aliases
+alias_maps = lmdb:/etc/postfix/aliases
+alias_database = lmdb:/etc/postfix/aliases
+home_mailbox = Maildir/
+mailbox_size_limit = 0
+
+smtp_tls_security_level = encrypt
+smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
+smtpd_milters = inet:127.0.0.1:8891
+milter_default_action = tempfail
+milter_protocol = 6
+maillog_file = /dev/stdout

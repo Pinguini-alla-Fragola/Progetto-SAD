@@ -1,0 +1,55 @@
+x-demo-logging: &demo-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  picus-db:
+    restart: unless-stopped
+    mem_limit: 1g
+    cpus: "1.0"
+    logging: *demo-logging
+
+  picus-webapp:
+    image: picus-demo/webapp:${PICUS_RELEASE:?Imposta PICUS_RELEASE}
+    restart: unless-stopped
+    mem_limit: 1536m
+    cpus: "1.5"
+    logging: *demo-logging
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=65.0"
+      SERVER_FORWARD_HEADERS_STRATEGY: native
+      PICUS_DB_URL: jdbc:postgresql://picus-db:5432/${PICUS_VPS_DB_NAME:-picus}
+      PICUS_MAIL_HOST: picus-smtp
+      PICUS_MAIL_PORT: "25"
+      PICUS_MAIL_FROM: noreply@mail.picus.strawberrypenguin.it
+      PICUS_APP_BASE_URL: https://demo.picus.strawberrypenguin.it
+      SPRING_APPLICATION_JSON: '{"spring":{"mail":{"properties":{"mail.smtp.auth":"false","mail.smtp.starttls.enable":"false"}}}}'
+    networks:
+      - default
+      - mail
+
+  picus-smtp:
+    image: picus-demo/smtp:v1
+    restart: unless-stopped
+    mem_limit: 192m
+    logging: *demo-logging
+    volumes:
+      - /opt/picus-demo/mail:/run/picus-mail:ro
+      - coda-mail:/var/spool/postfix
+      - posta-collaudo:/var/lib/picus-capture
+    networks:
+      - mail
+
+networks:
+  mail:
+    ipam:
+      config:
+        - subnet: 172.30.194.0/28
+
+volumes:
+  coda-mail:
+  posta-collaudo:

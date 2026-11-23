@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+base=/opt/picus-demo
+exec docker compose --project-name picus-demo --env-file "$base/runtime.env" \
+    -f "$base/source/docker-compose.yml" -f "$base/compose.vps.yml" "$@"
