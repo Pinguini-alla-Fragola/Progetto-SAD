@@ -2,6 +2,7 @@ package it.unina.picus.catalogo.interno.persistenza;
 
 import it.unina.picus.catalogo.api.CatalogoApi.Misura;
 import it.unina.picus.catalogo.api.CatalogoApi.OffertaOpt;
+import it.unina.picus.catalogo.api.SelezioneMisureApi;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.Tuple;
@@ -13,10 +14,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-/** Adattatore di persistenza dell'offerta OPT e delle adiacenze del catalogo. */
+/** Adattatore di persistenza dell'offerta OPT, delle adiacenze e della selezione delle misure. */
 @Repository
 @Transactional(readOnly = true)
-public class OffertaTerritorialeJpa {
+public class OffertaTerritorialeJpa implements SelezioneMisureApi {
     private final EntityManager entityManager;
 
     /**
@@ -112,6 +113,13 @@ public class OffertaTerritorialeJpa {
      */
     public Optional<Misura> bloccaMisura(long id) {
         return Optional.ofNullable(blocca(MisuraJpa.class, id)).map(MisuraJpa::aDto);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Transactional(propagation = Propagation.MANDATORY)
+    public boolean bloccaMisuraAttiva(long misuraId) {
+        return bloccaMisura(misuraId).filter(Misura::attiva).isPresent();
     }
 
     /**

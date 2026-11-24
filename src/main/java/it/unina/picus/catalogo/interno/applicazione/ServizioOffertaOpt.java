@@ -1,6 +1,5 @@
 package it.unina.picus.catalogo.interno.applicazione;
 
-import it.unina.picus.catalogo.api.CatalogoApi.Misura;
 import it.unina.picus.catalogo.api.CatalogoApi.OffertaOpt;
 import it.unina.picus.catalogo.api.GestioneOffertaOptApi;
 import it.unina.picus.catalogo.interno.persistenza.OffertaTerritorialeJpa;
@@ -57,7 +56,9 @@ public class ServizioOffertaOpt implements GestioneOffertaOptApi {
     @Transactional
     public void registraOffertaOpt(IdentitaAutenticata attore, long misuraId, boolean tramiteProfessionista) {
         UUID optId = verificaOpt(attore);
-        offerta.bloccaMisura(misuraId).filter(Misura::attiva).orElseThrow(MisuraNonOffribileException::new);
+        if (!offerta.bloccaMisuraAttiva(misuraId)) {
+            throw new MisuraNonOffribileException();
+        }
         bloccaProfiloOpt(optId, misuraId);
         offerta.registraOffertaOpt(optId, misuraId, tramiteProfessionista);
     }

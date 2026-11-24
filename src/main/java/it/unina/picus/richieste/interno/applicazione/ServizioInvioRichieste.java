@@ -1,5 +1,6 @@
 package it.unina.picus.richieste.interno.applicazione;
 
+import it.unina.picus.catalogo.api.CatalogoApi.Misura;
 import it.unina.picus.catalogo.api.ConsultazioneCatalogoApi;
 import it.unina.picus.richieste.api.DatiRichiestaNonValidiException;
 import it.unina.picus.richieste.api.InvioRichiesteApi;
@@ -8,6 +9,7 @@ import it.unina.picus.richieste.api.RichiesteApi.RichiestaDettaglio;
 import it.unina.picus.richieste.api.RichiesteApi.RichiestaSintesi;
 import it.unina.picus.richieste.interno.dominio.RichiestaDiMisura;
 import it.unina.picus.richieste.interno.dominio.RichiestaRepository;
+import it.unina.picus.richieste.interno.dominio.RichiestaRepository.MisuraNonSelezionabileException;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,8 @@ import java.util.UUID;
 @Service
 @Transactional(readOnly = true)
 public class ServizioInvioRichieste implements InvioRichiesteApi {
+    private static final String ERRORE_MISURA = "Seleziona una misura disponibile";
+
     private final RichiestaRepository repository;
     private final ConsultazioneCatalogoApi catalogo;
     private final Clock clock;
@@ -38,6 +42,10 @@ public class ServizioInvioRichieste implements InvioRichiesteApi {
         this.clock = clock;
     }
 
+    /**
+     * Convalida i riferimenti del nuovo invio e registra la richiesta nella stessa transazione.
+     * Un ritento di un invio già registrato può ancora leggere la misura dallo storico.
+     */
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public RichiestaSintesi invia(IdentitaAutenticata attore, DatiInvio dati, UUID riferimentoInvio) {
@@ -49,8 +57,15 @@ public class ServizioInvioRichieste implements InvioRichiesteApi {
         }
 
         Map<String, String> errori = new LinkedHashMap<>();
-        if (catalogo.cercaMisura(normalizzati.misuraId()).filter(m -> m.attiva()).isEmpty()) {
-            errori.put("misuraId", "Seleziona una misura disponibile");
+        if (catalogo.cercaMisura(normalizzati.misuraId()).filter(Misura::attiva).isEmpty()) {
+            if (riferimentoInvio != null) {
+                // Un invio concorrente può avere concluso prima della disattivazione.
+                var concorrente = repository.cercaPerInvio(attore.accountId(), riferimentoInvio);
+                if (concorrente.isPresent()) {
+                    return confermaInvio(concorrente.get(), normalizzati);
+                }
+            }
+            errori.put("misuraId", ERRORE_MISURA);
         }
         if (catalogo.cercaComune(normalizzati.comuneCodice()).isEmpty()) {
             errori.put("comuneCodice", "Seleziona un comune del catalogo");
@@ -60,7 +75,11 @@ public class ServizioInvioRichieste implements InvioRichiesteApi {
         }
 
         var nuova = RichiestaDiMisura.inviata(attore.accountId(), normalizzati, clock.instant(), riferimentoInvio);
-        return confermaInvio(repository.registra(nuova), normalizzati);
+        try {
+            return confermaInvio(repository.registra(nuova), normalizzati);
+        } catch (MisuraNonSelezionabileException e) {
+            throw new DatiRichiestaNonValidiException(Map.of("misuraId", ERRORE_MISURA));
+        }
     }
 
     private RichiestaSintesi confermaInvio(RichiestaDiMisura richiesta, DatiInvio dati) {
@@ -119,7 +138,7 @@ public class ServizioInvioRichieste implements InvioRichiesteApi {
     private static DatiInvio validaENormalizza(DatiInvio dati) {
         Map<String, String> errori = new LinkedHashMap<>();
         if (dati == null || dati.misuraId() <= 0) {
-            errori.put("misuraId", "Seleziona una misura disponibile");
+            errori.put("misuraId", ERRORE_MISURA);
         }
         if (dati == null || dati.tipoDestinatario() == null) {
             errori.put("tipoDestinatario", "Seleziona PERSONA o NUCLEO");
