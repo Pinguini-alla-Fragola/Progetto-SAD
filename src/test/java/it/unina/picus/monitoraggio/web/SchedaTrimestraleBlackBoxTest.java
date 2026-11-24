@@ -58,7 +58,7 @@ import tools.jackson.databind.json.JsonMapper;
  *
  * <p>Il database si usa solo per preparare account e profili: le schede si inviano e si rileggono soltanto
  * dalle API. Ogni test ha account nuovi e le schede degli altri test restano nel database, quindi gli elenchi
- * del Banco si confrontano solo prima e dopo o sulla scheda del test.</p>
+ * del Banco si filtrano sulla scheda del test oppure si leggono in un periodo riservato al singolo caso.</p>
  *
  * <p>Tecniche: classi di equivalenza e valori limite con un solo difetto per caso (CA-03), tipologie di
  * operatore e coppie complete di colleghi (CA-01, CA-02, CA-07), test negativi di sicurezza con controllo
@@ -79,10 +79,20 @@ class SchedaTrimestraleBlackBoxTest extends BlackBoxPostgresTest {
     private static final String CAMPI_ERRATI = "Controlla i campi della scheda";
     private static final String PARAMETRI_ERRATI = "Controlla i parametri";
 
-    private static final Set<String> CAMPI_SCHEDA = Set.of("nome", "cognome", "luogoNascita", "dataNascita",
-            "codiceFiscale", "qualifica", "tipologiaContratto", "areaLivello", "ore", "costoOrarioLordo", "conteggi");
-    private static final Set<String> DECIMALI = Set.of("ore", "costoOrarioLordo");
-    private static final Set<String> OBBLIGATORI = Set.of("ore", "costoOrarioLordo", "conteggi");
+    /** Campi attesi del tracciato TM-OP-01 v0.1: nome, tipo e obbligatorietà. */
+    private static final Map<String, Campo> TRACCIATO = Map.ofEntries(
+            Map.entry("nome", new Campo("testo", false)),
+            Map.entry("cognome", new Campo("testo", false)),
+            Map.entry("luogoNascita", new Campo("testo", false)),
+            Map.entry("dataNascita", new Campo("data", false)),
+            Map.entry("codiceFiscale", new Campo("testo", false)),
+            Map.entry("qualifica", new Campo("testo", false)),
+            Map.entry("tipologiaContratto", new Campo("testo", false)),
+            Map.entry("areaLivello", new Campo("testo", false)),
+            Map.entry("ore", new Campo("decimale", true)),
+            Map.entry("costoOrarioLordo", new Campo("decimale", true)),
+            Map.entry("conteggi", new Campo("conteggiPerCategoria", true)));
+    private static final Set<String> CAMPI_SCHEDA = TRACCIATO.keySet();
 
     /** Emoji fuori dal piano base: un code point, due caratteri Java. */
     private static final String EMOJI = Character.toString(0x1F600);
@@ -91,6 +101,13 @@ class SchedaTrimestraleBlackBoxTest extends BlackBoxPostgresTest {
     private static final Periodo PERIODO = new Periodo("2025", "4");
     /** Altro periodo concluso, per i controlli positivi. */
     private static final Periodo ALTRO_PERIODO = new Periodo("2026", "2");
+
+    // Periodi conclusi riservati a un solo caso: nessun altro test vi salva schede, neppure in parallelo,
+    // quindi le ricevute del Banco contengono soltanto la scheda del caso.
+    /** Riservato a {@link #optNonInvia()}. */
+    private static final Periodo PERIODO_OPT = new Periodo("1901", "1");
+    /** Riservato a {@link #sessioneAssente()}. */
+    private static final Periodo PERIODO_SENZA_SESSIONE = new Periodo("1902", "1");
 
     /** Numeri letti senza perdita di precisione: un double non rappresenta 13 cifre intere e 6 decimali. */
     private static final JsonMapper JSON = JsonMapper.builder()
@@ -106,6 +123,9 @@ class SchedaTrimestraleBlackBoxTest extends BlackBoxPostgresTest {
     void preparaClient() {
         http = new ClientHttp(web);
     }
+
+    /** Tipo e obbligatorietà di un campo del tracciato. */
+    private record Campo(Object tipo, Object obbligatorio) {}
 
     /** Parametri di periodo come li invia il client; {@code null} è un parametro assente. */
     private record Periodo(String anno, String trimestre) {
@@ -136,10 +156,10 @@ class SchedaTrimestraleBlackBoxTest extends BlackBoxPostgresTest {
         assertEquals("TM-OP-01", modulo.get("tracciato"));
         assertFalse(assertInstanceOf(String.class, modulo.get("versione")).isBlank(), "versione assente");
         List<Map<String, Object>> campi = comeLista(modulo.get("campi"));
-        campi.forEach(campo -> assertEquals(Set.of("nome", "tipo", "obbligatorio"), campo.keySet()));
-        assertEquals(CAMPI_SCHEDA, campi.stream().map(c -> (String) c.get("nome")).collect(Collectors.toSet()));
-        assertEquals(OBBLIGATORI, campi.stream().filter(c -> Boolean.TRUE.equals(c.get("obbligatorio")))
-                .map(c -> (String) c.get("nome")).collect(Collectors.toSet()));
+        assertEquals(CAMPI_SCHEDA.stream().sorted().toList(),
+                campi.stream().map(c -> (String) c.get("nome")).sorted().toList(), "una sola voce per campo");
+        campi.forEach(c -> assertEquals(TRACCIATO.get(c.get("nome")), new Campo(c.get("tipo"), c.get("obbligatorio")),
+                () -> "tipo e obbligatorietà di " + c.get("nome")));
     }
 
     // ------------------------------------------------------------------ CA-02 invio e consultazione
@@ -394,18 +414,19 @@ class SchedaTrimestraleBlackBoxTest extends BlackBoxPostgresTest {
     @DisplayName("CA-06 · la OPT che invia una scheda personale riceve FORBIDDEN e nulla viene registrato")
     void optNonInvia() throws Exception {
         MockHttpSession titolare = http.accedi(scenario.operatore(TipoErogatore.ESTERNO_PAGATO_BANCO));
-        String id = assertInviata(invia(titolare, PERIODO, json(dati())), PERIODO);
+        String id = assertInviata(invia(titolare, PERIODO_OPT, json(dati())), PERIODO_OPT);
         MockHttpSession banco = http.accedi(scenario.banco());
         Account opt = scenario.optRichiedente();
         MockHttpSession sessioneOpt = http.accedi(opt);
         Map<String, Object> prima = scheda(titolare, id);
-        List<Map<String, Object>> ricevutePrima = elenco(banco, conPeriodo(get(RICEVUTE), PERIODO));
+        List<Map<String, Object>> ricevutePrima = elenco(banco, conPeriodo(get(RICEVUTE), PERIODO_OPT));
+        assertEquals(List.of(id), ids(ricevutePrima), "solo la scheda preesistente nel periodo riservato");
 
-        MockHttpServletResponse risposta = invia(sessioneOpt, PERIODO, json(dati()));
+        MockHttpServletResponse risposta = invia(sessioneOpt, PERIODO_OPT, json(dati()));
 
         ClientHttp.assertDiniegoSenzaCorpo(risposta);
         assertNull(risposta.getHeader("Location"));
-        List<Map<String, Object>> ricevuteDopo = elenco(banco, conPeriodo(get(RICEVUTE), PERIODO));
+        List<Map<String, Object>> ricevuteDopo = elenco(banco, conPeriodo(get(RICEVUTE), PERIODO_OPT));
         assertEquals(ricevutePrima, ricevuteDopo, "nessuna scheda creata");
         assertTrue(ricevuteDopo.stream().noneMatch(s -> opt.id().toString().equals(s.get("operatoreId"))));
         assertEquals(prima, scheda(titolare, id));
@@ -482,17 +503,19 @@ class SchedaTrimestraleBlackBoxTest extends BlackBoxPostgresTest {
     void sessioneAssente() throws Exception {
         MockHttpSession titolare = http.accedi(scenario.operatore(TipoErogatore.INTERNO_BANCO));
         MockHttpSession banco = http.accedi(scenario.banco());
-        String id = assertInviata(invia(titolare, PERIODO, json(dati())), PERIODO);
+        String id = assertInviata(invia(titolare, PERIODO_SENZA_SESSIONE, json(dati())), PERIODO_SENZA_SESSIONE);
         Map<String, Object> prima = scheda(titolare, id);
-        List<Map<String, Object>> ricevutePrima = elenco(banco, conPeriodo(get(RICEVUTE), ALTRO_PERIODO));
+        List<Map<String, Object>> ricevutePrima = elenco(banco, conPeriodo(get(RICEVUTE), PERIODO_SENZA_SESSIONE));
+        assertEquals(List.of(id), ids(ricevutePrima), "solo la scheda preesistente nel periodo riservato");
         SessioneAnonima anonima = http.sessioneAnonima();
 
-        ClientHttp.assertNonAutenticatoSenzaDati(leggi(anonima.sessione(), conPeriodo(get(MODULO), PERIODO)));
+        ClientHttp.assertNonAutenticatoSenzaDati(leggi(anonima.sessione(),
+                conPeriodo(get(MODULO), PERIODO_SENZA_SESSIONE)));
         ClientHttp.assertNonAutenticatoSenzaDati(leggi(anonima.sessione(), get(SCHEDA, id)));
         ClientHttp.assertNonAutenticatoSenzaDati(
-                invia(anonima.sessione(), anonima.csrf(), ALTRO_PERIODO, json(dati())));
+                invia(anonima.sessione(), anonima.csrf(), PERIODO_SENZA_SESSIONE, json(dati())));
 
-        assertEquals(ricevutePrima, elenco(banco, conPeriodo(get(RICEVUTE), ALTRO_PERIODO)));
+        assertEquals(ricevutePrima, elenco(banco, conPeriodo(get(RICEVUTE), PERIODO_SENZA_SESSIONE)));
         assertEquals(prima, scheda(titolare, id));
     }
 
@@ -659,7 +682,7 @@ class SchedaTrimestraleBlackBoxTest extends BlackBoxPostgresTest {
         assertEquals(Set.of(), riletti.keySet().stream().filter(c -> !CAMPI_SCHEDA.contains(c))
                 .collect(Collectors.toSet()), "soli campi del tracciato");
         for (String campo : CAMPI_SCHEDA) {
-            if (DECIMALI.contains(campo)) {
+            if ("decimale".equals(TRACCIATO.get(campo).tipo())) {
                 assertEquals(0, decimale(inviati.get(campo)).compareTo(decimale(riletti.get(campo))),
                         () -> campo + ": inviato " + inviati.get(campo) + ", riletto " + riletti.get(campo));
             } else {
