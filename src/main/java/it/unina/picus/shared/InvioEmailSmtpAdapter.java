@@ -21,6 +21,9 @@ public class InvioEmailSmtpAdapter implements InvioEmail {
 
     private static final Logger LOG = LoggerFactory.getLogger(InvioEmailSmtpAdapter.class);
 
+    private static final String PERCORSO_ATTIVAZIONE = "/attiva";
+    private static final String PERCORSO_RECUPERO = "/recupera";
+
     private final JavaMailSender mailSender;
     private final String baseUrl;
     private final String mittente;
@@ -40,7 +43,7 @@ public class InvioEmailSmtpAdapter implements InvioEmail {
     @Override
     public void inviaLinkAttivazione(String emailDestinatario, String nomeDestinatario, String tokenInChiaro) {
         String linkAttivazione = costruisciLink(tokenInChiaro);
-        String oggetto = "PICUS | Attivazione del tuo account organizzativo";
+        String oggetto = "PICUS | Attivazione del tuo account";
         String corpoHtml = costruisciCorpoEmailHtml(nomeDestinatario, emailDestinatario, linkAttivazione);
         String corpoTesto = costruisciCorpoEmailTesto(nomeDestinatario, emailDestinatario, linkAttivazione);
 
@@ -62,16 +65,41 @@ public class InvioEmailSmtpAdapter implements InvioEmail {
         }
     }
 
-    // TODO #33
     @Override
     public void inviaLinkResetPassword(String emailDestinatario, String nomeDestinatario, String tokenInChiaro) {
-        // Da implementare nella User Story #33
+        String link = costruisciLink(PERCORSO_RECUPERO, tokenInChiaro);
+        ModelloEmailLink.Contenuto contenuto = ModelloEmailLink.recuperoPassword(nomeDestinatario, link);
+        spedisci(emailDestinatario, contenuto, "recupero password");
+    }
+
+    /** Spedisce il messaggio; in caso di errore registra solo il tipo di email e la causa, mai indirizzo o link. */
+    private void spedisci(String emailDestinatario, ModelloEmailLink.Contenuto contenuto, String tipoEmail) {
+        try {
+            MimeMessage messaggio = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(messaggio, true, StandardCharsets.UTF_8.name());
+
+            helper.setFrom(mittente, nomeMittente);
+            helper.setTo(emailDestinatario);
+            helper.setSubject(contenuto.oggetto());
+            helper.setText(contenuto.testo(), contenuto.html());
+
+            mailSender.send(messaggio);
+            LOG.info("Email di {} inviata con successo (trasporto=SMTP)", tipoEmail);
+
+        } catch (MessagingException | MailException | UnsupportedEncodingException e) {
+            LOG.error("Invio email di {} fallito (trasporto=SMTP, causa={})", tipoEmail, e.getClass().getSimpleName());
+            throw new IllegalStateException("Impossibile inviare l'email di " + tipoEmail, e);
+        }
     }
 
     String costruisciLink(String tokenInChiaro) {
+        return costruisciLink(PERCORSO_ATTIVAZIONE, tokenInChiaro);
+    }
+
+    private String costruisciLink(String percorso, String tokenInChiaro) {
         String baseNormalizzata = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
         String tokenEncoded = URLEncoder.encode(tokenInChiaro, StandardCharsets.UTF_8);
-        return baseNormalizzata + "/attiva?token=" + tokenEncoded;
+        return baseNormalizzata + percorso + "?token=" + tokenEncoded;
     }
 
     private String costruisciCorpoEmailTesto(String nomeDestinatario, String emailDestinatario, String linkAttivazione) {
@@ -82,7 +110,7 @@ public class InvioEmailSmtpAdapter implements InvioEmail {
         return """
                 %s
 
-                L'Amministratore del Banco ha registrato la tua organizzazione sulla piattaforma PICUS.
+                L'Amministratore del Banco ha creato il tuo accesso alla piattaforma PICUS.
                 Il tuo account (%s) è stato creato ed è attualmente in attesa di attivazione.
 
                 Per completare l'attivazione e impostare la tua password personale, apri il seguente link:
@@ -90,7 +118,7 @@ public class InvioEmailSmtpAdapter implements InvioEmail {
 
                 Informazioni importanti:
                 - Il link è strettamente personale e monouso: una volta impostata la password, non sarà più riutilizzabile.
-                - Per motivi di sicurezza, il link ha una validità limitata nel tempo. Se dovesse scadere, contatta l'Amministratore del Banco per richiederne l'invio di uno nuovo.
+                - Per motivi di sicurezza, il link ha una validità limitata nel tempo. Se dovesse scadere, apri la pagina del link e richiedine uno nuovo indicando questo indirizzo email.
                 - Se non riconosci questa registrazione, ti invitiamo a ignorare questa comunicazione.
 
                 Cordiali saluti,
@@ -134,7 +162,7 @@ public class InvioEmailSmtpAdapter implements InvioEmail {
                                                 Gentile <strong>%s</strong>,
                                             </p>
                                             <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 1.6; color: #374151;">
-                                                L'Amministratore del Banco ha completato la registrazione della tua organizzazione sulla piattaforma <strong>PICUS</strong>. Il tuo profilo è stato creato ed è attualmente in stato <em>«In attesa di attivazione»</em>.
+                                                L'Amministratore del Banco ha creato il tuo accesso alla piattaforma <strong>PICUS</strong>. Il tuo account è stato creato ed è attualmente in stato <em>«In attesa di attivazione»</em>.
                                             </p>
                                             <table role="presentation" width="100%%" cellspacing="0" cellpadding="0" border="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 24px;">
                                                 <tr>
@@ -162,7 +190,7 @@ public class InvioEmailSmtpAdapter implements InvioEmail {
                                                         <strong>Note importanti sulla sicurezza:</strong>
                                                         <ul style="margin: 6px 0 0 0; padding-left: 18px;">
                                                             <li>Questo link è <strong>monouso</strong>: dopo aver impostato la password non sarà più valido.</li>
-                                                            <li>Il link è soggetto a <strong>scadenza temporale</strong>. In caso di scadenza, contatta l'Amministratore del Banco per richiedere un nuovo invio.</li>
+                                                            <li>Il link è soggetto a <strong>scadenza temporale</strong>. In caso di scadenza, apri la pagina del link e richiedine uno nuovo indicando questo indirizzo email.</li>
                                                         </ul>
                                                     </td>
                                                 </tr>

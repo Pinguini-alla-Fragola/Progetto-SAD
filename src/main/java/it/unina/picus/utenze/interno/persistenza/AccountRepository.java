@@ -19,6 +19,14 @@ public interface AccountRepository extends JpaRepository<AccountJpa, UUID> {
 
     Optional<AccountJpa> findByEmailIgnoreCase(String email);
 
+    /**
+     * Cerca solo l'identificativo, senza caricare l'account nel contesto di persistenza. Serve a chi poi prende il
+     * lock con {@link #findByIdForUpdate}: se l'account fosse già caricato, la lettura con lock restituirebbe
+     * l'istanza in memoria con lo stato di prima e non quello aggiornato da una revoca o attivazione concorrente.
+     */
+    @Query("select a.id from AccountJpa a where lower(a.email) = lower(:email)")
+    Optional<UUID> findIdByEmailIgnoreCase(@Param("email") String email);
+
     boolean existsByEmailIgnoreCase(String email);
 
     List<AccountJpa> findByRuoloAndStato(String ruolo, String stato);
@@ -26,4 +34,15 @@ public interface AccountRepository extends JpaRepository<AccountJpa, UUID> {
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("update AccountJpa a set a.passwordHash = :hash where a.id = :id")
     int aggiornaHash(@Param("id") UUID id, @Param("hash") String hash);
+
+    /**
+     * Sostituisce l'hash solo se è ancora quello che chi aggiorna ha letto e verificato. Serve all'aggiornamento
+     * del costo dell'hash al login: se nel frattempo la password è stata cambiata, l'hash nuovo non va sovrascritto
+     * con quello della password vecchia.
+     *
+     * @return 1 se l'hash è stato sostituito, 0 se nel frattempo è cambiato
+     */
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("update AccountJpa a set a.passwordHash = :nuovo where a.id = :id and a.passwordHash = :atteso")
+    int aggiornaHashSeInvariato(@Param("id") UUID id, @Param("atteso") String atteso, @Param("nuovo") String nuovo);
 }

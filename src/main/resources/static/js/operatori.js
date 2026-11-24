@@ -31,6 +31,13 @@ function popolaCatalogo(form, comuni, misure) {
     }
 }
 
+/** Il server dice se il link di attivazione è partito: se non è partito, il Banco lo può reinviare dall'elenco. */
+function descriviInvito(creato) {
+    if (creato.erroreInvio) return "L'invio dell'email è fallito: puoi reinviare l'invito dall'elenco Account.";
+    if (creato.invitoInviato) return 'Email di attivazione inviata.';
+    return 'Email non inviata (modalità demo).';
+}
+
 function leggiDati(form) {
     return {
         nome: form.elements.nome.value,
@@ -78,7 +85,7 @@ async function invia(form, esito, bottone) {
         form.reset();
         aggiornaCentroPicus(form);
         esito.textContent = 'Account creato per ' + creato.nomeVisualizzato + ' (' + creato.email
-            + '). Stato: in attesa di attivazione.';
+            + '). Stato: in attesa di attivazione. ' + descriviInvito(creato);
     } catch (causa) {
         esito.textContent = messaggioErrore(causa);
         mostraErrori(form, causa.campi ?? {});

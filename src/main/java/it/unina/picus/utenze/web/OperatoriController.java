@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 import it.unina.picus.utenze.api.UtenzeApi.StatoUtenza;
 import it.unina.picus.utenze.interno.applicazione.ComandoCreaOperatore;
+import it.unina.picus.utenze.interno.applicazione.ConsegnaLinkAttivazione;
+import it.unina.picus.utenze.interno.applicazione.ConsegnaLinkAttivazione.Esito;
 import it.unina.picus.utenze.interno.applicazione.CreazioneOperatori;
 import it.unina.picus.utenze.interno.applicazione.OperatoreCreato;
 import it.unina.picus.utenze.interno.dominio.CampoOperatore;
@@ -50,29 +52,38 @@ public class OperatoriController {
         }
     }
 
-    /** Ciò che il browser riceve dopo la creazione. */
-    public record OperatoreCreatoJson(UUID id, String nomeVisualizzato, String email, String stato) {
+    /**
+     * Ciò che il browser riceve dopo la creazione, con l'esito dell'invio del link: il token non esce mai dal
+     * server.
+     */
+    public record OperatoreCreatoJson(UUID id, String nomeVisualizzato, String email, String stato,
+            boolean invitoInviato, boolean erroreInvio, String messaggio) {
 
-        static OperatoreCreatoJson da(OperatoreCreato creato) {
+        static OperatoreCreatoJson da(OperatoreCreato creato, Esito esito) {
             return new OperatoreCreatoJson(creato.id(), creato.nomeVisualizzato(), creato.email(),
-                    StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name());
+                    StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name(), esito == Esito.INVIATO, esito == Esito.NON_RIUSCITO,
+                    MessaggiInvito.allaCreazione(esito, "Operatore creato"));
         }
     }
 
     private final CreazioneOperatori creazione;
+    private final ConsegnaLinkAttivazione consegna;
 
-    public OperatoriController(CreazioneOperatori creazione) {
+    public OperatoriController(CreazioneOperatori creazione, ConsegnaLinkAttivazione consegna) {
         this.creazione = creazione;
+        this.consegna = consegna;
     }
 
     /**
-     * Crea l'Operatore e risponde {@code 201}. Non indica un indirizzo della risorsa, perché in questa fase non
-     * esiste ancora una pagina che mostri il singolo Operatore.
+     * Crea l'Operatore, spedisce il link di attivazione e risponde {@code 201}. Se l'email non parte l'account
+     * esiste comunque e la risposta lo dice, perché il Banco può reinviare il link. Non indica un indirizzo
+     * della risorsa, perché in questa fase non esiste ancora una pagina che mostri il singolo Operatore.
      */
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<OperatoreCreatoJson> crea(IdentitaAutenticata attore,
             @RequestBody NuovoOperatoreJson corpo) {
         OperatoreCreato creato = creazione.crea(attore, corpo.comando());
-        return ResponseEntity.status(HttpStatus.CREATED).body(OperatoreCreatoJson.da(creato));
+        Esito esito = consegna.consegna(creato.invito());
+        return ResponseEntity.status(HttpStatus.CREATED).body(OperatoreCreatoJson.da(creato, esito));
     }
 }
