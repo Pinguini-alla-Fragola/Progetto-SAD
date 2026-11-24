@@ -61,7 +61,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-summary" tabindex="0">Method Summary</a></li>
 <li><a href="#constructor-detail" tabindex="0">Constructor Details</a>
 <ol class="toc-list">
-<li><a href="#%3Cinit%3E(it.unina.picus.monitoraggio.api.ConteggiOptApi)" tabindex="0">ConteggiOptController(ConteggiOptApi)</a></li>
+<li><a href="#%3Cinit%3E(it.unina.picus.monitoraggio.api.ConteggiOptApi,it.unina.picus.monitoraggio.interno.applicazione.ConsultazioneConteggiOpt)" tabindex="0">ConteggiOptController(ConteggiOptApi, ConsultazioneConteggiOpt)</a></li>
 </ol>
 </li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
@@ -120,7 +120,8 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(it.unina.picus.monitoraggio.api.ConteggiOptApi)" class="member-name-link">ConteggiOptController</a><wbr>(<a href="../api/ConteggiOptApi.html" title="interface in it.unina.picus.monitoraggio.api">ConteggiOptApi</a>&nbsp;monitoraggio)</code></div>
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(it.unina.picus.monitoraggio.api.ConteggiOptApi,it.unina.picus.monitoraggio.interno.applicazione.ConsultazioneConteggiOpt)" class="member-name-link">ConteggiOptController</a><wbr>(<a href="../api/ConteggiOptApi.html" title="interface in it.unina.picus.monitoraggio.api">ConteggiOptApi</a>&nbsp;monitoraggio,
+ <a href="../interno/applicazione/ConsultazioneConteggiOpt.html" title="interface in it.unina.picus.monitoraggio.interno.applicazione">ConsultazioneConteggiOpt</a>&nbsp;consultazione)</code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 </div>
 </section>
@@ -146,7 +147,9 @@ loadScripts(document, 'script');</script>
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;annoFine,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;trimestreFine,
  <a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Consulta il trimestre iniziale o l'intervallo inclusivo quando sono indicati entrambi i campi finali.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>(package private) org.springframework.http.ResponseEntity<wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Void.html" title="class or interface in java.lang" class="external-link">Void</a>&gt;</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#registraConteggi(java.util.Map,it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" class="member-name-link">registraConteggi</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&gt;&nbsp;corpo,
  <a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore)</code></div>
@@ -169,10 +172,11 @@ loadScripts(document, 'script');</script>
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(it.unina.picus.monitoraggio.api.ConteggiOptApi)">
+<section class="detail" id="&lt;init&gt;(it.unina.picus.monitoraggio.api.ConteggiOptApi,it.unina.picus.monitoraggio.interno.applicazione.ConsultazioneConteggiOpt)">
 <h3>ConteggiOptController</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="element-name">ConteggiOptController</span><wbr><span class="parameters">(<a href="../api/ConteggiOptApi.html" title="interface in it.unina.picus.monitoraggio.api">ConteggiOptApi</a>&nbsp;monitoraggio)</span></div>
+<div class="member-signature"><span class="element-name">ConteggiOptController</span><wbr><span class="parameters">(<a href="../api/ConteggiOptApi.html" title="interface in it.unina.picus.monitoraggio.api">ConteggiOptApi</a>&nbsp;monitoraggio,
+ <a href="../interno/applicazione/ConsultazioneConteggiOpt.html" title="interface in it.unina.picus.monitoraggio.interno.applicazione">ConsultazioneConteggiOpt</a>&nbsp;consultazione)</span></div>
 </div>
 </section>
 </li>
@@ -221,6 +225,7 @@ loadScripts(document, 'script');</script>
  @RequestParam(required=false)
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;trimestreFine,
  <a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore)</span></div>
+<div class="block">Consulta il trimestre iniziale o l'intervallo inclusivo quando sono indicati entrambi i campi finali.</div>
 </div>
 </section>
 </li>

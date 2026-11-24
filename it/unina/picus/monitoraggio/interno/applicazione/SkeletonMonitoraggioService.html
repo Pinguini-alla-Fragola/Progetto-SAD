@@ -69,6 +69,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#elencoCategorieAttive()" tabindex="0">elencoCategorieAttive()</a></li>
 <li><a href="#registraConteggiOpt(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,java.util.List)" tabindex="0">registraConteggiOpt(UtenzeApi.IdentitaAutenticata, MonitoraggioApi.Trimestre, List)</a></li>
 <li><a href="#consultaConteggiOpt(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre)" tabindex="0">consultaConteggiOpt(UtenzeApi.IdentitaAutenticata, UUID, MonitoraggioApi.Trimestre, MonitoraggioApi.Trimestre)</a></li>
+<li><a href="#consultaConteggiEsatti(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre)" tabindex="0">consultaConteggiEsatti(UtenzeApi.IdentitaAutenticata, UUID, MonitoraggioApi.Trimestre, MonitoraggioApi.Trimestre)</a></li>
 </ol>
 </li>
 </ol>
@@ -84,7 +85,7 @@ loadScripts(document, 'script');</script>
 <section class="class-description" id="class-description">
 <dl class="notes">
 <dt>All Implemented Interfaces:</dt>
-<dd><code><a href="../../api/ConteggiOptApi.html" title="interface in it.unina.picus.monitoraggio.api">ConteggiOptApi</a></code></dd>
+<dd><code><a href="../../api/ConteggiOptApi.html" title="interface in it.unina.picus.monitoraggio.api">ConteggiOptApi</a>, <a href="ConsultazioneConteggiOpt.html" title="interface in it.unina.picus.monitoraggio.interno.applicazione">ConsultazioneConteggiOpt</a></code></dd>
 </dl>
 <hr>
 <div class="horizontal-scroll">
@@ -92,7 +93,7 @@ loadScripts(document, 'script');</script>
 @Profile("skeleton")
 </span><span class="modifiers">public class </span><span class="element-name type-name-label">SkeletonMonitoraggioService</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>
-implements <a href="../../api/ConteggiOptApi.html" title="interface in it.unina.picus.monitoraggio.api">ConteggiOptApi</a></span></div>
+implements <a href="../../api/ConteggiOptApi.html" title="interface in it.unina.picus.monitoraggio.api">ConteggiOptApi</a>, <a href="ConsultazioneConteggiOpt.html" title="interface in it.unina.picus.monitoraggio.interno.applicazione">ConsultazioneConteggiOpt</a></span></div>
 </div>
 </section>
 <section class="summary">
@@ -101,6 +102,9 @@ implements <a href="../../api/ConteggiOptApi.html" title="interface in it.unina.
 <li>
 <section class="nested-class-summary" id="nested-class-summary">
 <h2>Nested Class Summary</h2>
+<div class="inherited-list">
+<h3 id="nested-classes-inherited-from-class-it.unina.picus.monitoraggio.interno.applicazione.ConsultazioneConteggiOpt">Nested classes/interfaces inherited from interface&nbsp;<a href="ConsultazioneConteggiOpt.html#nested-class-summary" title="interface in it.unina.picus.monitoraggio.interno.applicazione">ConsultazioneConteggiOpt</a></h3>
+<code><a href="ConsultazioneConteggiOpt.ConteggioEsatto.html" title="class in it.unina.picus.monitoraggio.interno.applicazione">ConsultazioneConteggiOpt.ConteggioEsatto</a></code></div>
 <div class="inherited-list">
 <h3 id="nested-classes-inherited-from-class-it.unina.picus.monitoraggio.api.ConteggiOptApi">Nested classes/interfaces inherited from interface&nbsp;<a href="../../api/ConteggiOptApi.html#nested-class-summary" title="interface in it.unina.picus.monitoraggio.api">ConteggiOptApi</a></h3>
 <code><a href="../../api/ConteggiOptApi.CategoriaVoce.html" title="class in it.unina.picus.monitoraggio.api">ConteggiOptApi.CategoriaVoce</a></code></div>
@@ -130,25 +134,33 @@ implements <a href="../../api/ConteggiOptApi.html" title="interface in it.unina.
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../../api/MonitoraggioApi.ConteggioOpt.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.ConteggioOpt</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#consultaConteggiOpt(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre)" class="member-name-link">consultaConteggiOpt</a><wbr>(<a href="../../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="ConsultazioneConteggiOpt.ConteggioEsatto.html" title="class in it.unina.picus.monitoraggio.interno.applicazione">ConsultazioneConteggiOpt.ConteggioEsatto</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#consultaConteggiEsatti(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre)" class="member-name-link">consultaConteggiEsatti</a><wbr>(<a href="../../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;optId,
  <a href="../../api/MonitoraggioApi.Trimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.Trimestre</a>&nbsp;da,
  <a href="../../api/MonitoraggioApi.Trimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.Trimestre</a>&nbsp;a)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Somma i valori correnti per OPT, misura e voce nei trimestri inclusi.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../../api/MonitoraggioApi.ConteggioOpt.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.ConteggioOpt</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#consultaConteggiOpt(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre)" class="member-name-link">consultaConteggiOpt</a><wbr>(<a href="../../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;optId,
+ <a href="../../api/MonitoraggioApi.Trimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.Trimestre</a>&nbsp;da,
+ <a href="../../api/MonitoraggioApi.Trimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.Trimestre</a>&nbsp;a)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Consulta i conteggi dichiarati nel periodo compreso tra <code>da</code> e <code>a</code>,
 cumulando i valori per OPT, misura e voce.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../../api/ConteggiOptApi.CategoriaVoce.html" title="class in it.unina.picus.monitoraggio.api">ConteggiOptApi.CategoriaVoce</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#elencoCategorieAttive()" class="member-name-link">elencoCategorieAttive</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../../api/ConteggiOptApi.CategoriaVoce.html" title="class in it.unina.picus.monitoraggio.api">ConteggiOptApi.CategoriaVoce</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#elencoCategorieAttive()" class="member-name-link">elencoCategorieAttive</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Restituisce l'elenco ordinato delle categorie di conteggio attive.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#registraConteggiOpt(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,java.util.List)" class="member-name-link">registraConteggiOpt</a><wbr>(<a href="../../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#registraConteggiOpt(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,java.util.List)" class="member-name-link">registraConteggiOpt</a><wbr>(<a href="../../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  <a href="../../api/MonitoraggioApi.Trimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.Trimestre</a>&nbsp;trimestre,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../../api/MonitoraggioApi.VoceMisura.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.VoceMisura</a>&gt;&nbsp;conteggi)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Registra i conteggi della OPT autenticata per il trimestre indicato.</div>
 </div>
 </div>
@@ -228,7 +240,6 @@ cumulando i valori per OPT, misura e voce.</div>
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;optId,
  <a href="../../api/MonitoraggioApi.Trimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.Trimestre</a>&nbsp;da,
  <a href="../../api/MonitoraggioApi.Trimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.Trimestre</a>&nbsp;a)</span></div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../../api/ConteggiOptApi.html#consultaConteggiOpt(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre)">ConteggiOptApi</a></code></span></div>
 <div class="block">Consulta i conteggi dichiarati nel periodo compreso tra <code>da</code> e <code>a</code>,
 cumulando i valori per OPT, misura e voce.</div>
 <dl class="notes">
@@ -241,6 +252,30 @@ cumulando i valori per OPT, misura e voce.</div>
 <dd><code>a</code> - ultimo trimestre incluso nell'intervallo di ricerca</dd>
 <dt>Returns:</dt>
 <dd>elenco dei conteggi aggregati nel periodo selezionato</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="consultaConteggiEsatti(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre)">
+<h3>consultaConteggiEsatti</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="ConsultazioneConteggiOpt.ConteggioEsatto.html" title="class in it.unina.picus.monitoraggio.interno.applicazione">ConsultazioneConteggiOpt.ConteggioEsatto</a>&gt;</span>&nbsp;<span class="element-name">consultaConteggiEsatti</span><wbr><span class="parameters">(<a href="../../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;optId,
+ <a href="../../api/MonitoraggioApi.Trimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.Trimestre</a>&nbsp;da,
+ <a href="../../api/MonitoraggioApi.Trimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.Trimestre</a>&nbsp;a)</span></div>
+<div class="block">Somma i valori correnti per OPT, misura e voce nei trimestri inclusi. Le voci mai
+dichiarate nel periodo sono assenti. Per il singolo trimestre i due estremi coincidono.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="ConsultazioneConteggiOpt.html#consultaConteggiEsatti(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre)">consultaConteggiEsatti</a></code>&nbsp;in interface&nbsp;<code><a href="ConsultazioneConteggiOpt.html" title="interface in it.unina.picus.monitoraggio.interno.applicazione">ConsultazioneConteggiOpt</a></code></dd>
+<dt>Parameters:</dt>
+<dd><code>attore</code> - identità verificata del Banco o della OPT titolare</dd>
+<dd><code>optId</code> - account dell'organizzazione oppure <code>null</code> per tutte le OPT, riservato al Banco</dd>
+<dd><code>da</code> - primo trimestre incluso</dd>
+<dd><code>a</code> - ultimo trimestre incluso</dd>
+<dt>Returns:</dt>
+<dd>conteggi dichiarati, con totali anche oltre il limite di <code>long</code></dd>
 </dl>
 </div>
 </section>

@@ -69,6 +69,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#validaIntervallo(it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre)" tabindex="0">validaIntervallo(MonitoraggioApi.Trimestre, MonitoraggioApi.Trimestre)</a></li>
 <li><a href="#verificaOpt(it.unina.picus.utenze.api.UtenzeApi,java.util.UUID)" tabindex="0">verificaOpt(UtenzeApi, UUID)</a></li>
 <li><a href="#cumula(java.lang.Iterable)" tabindex="0">cumula(Iterable)</a></li>
+<li><a href="#convertiInConteggi(java.util.List)" tabindex="0">convertiInConteggi(List)</a></li>
 </ol>
 </li>
 </ol>
@@ -117,21 +118,28 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>(package private) static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../../api/MonitoraggioApi.ConteggioOpt.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.ConteggioOpt</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#cumula(java.lang.Iterable)" class="member-name-link">cumula</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Iterable.html" title="class or interface in java.lang" class="external-link">Iterable</a>&lt;<a href="../../api/MonitoraggioApi.ConteggioOpt.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.ConteggioOpt</a>&gt;&nbsp;righe)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#convertiInConteggi(java.util.List)" class="member-name-link">convertiInConteggi</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="ConsultazioneConteggiOpt.ConteggioEsatto.html" title="class in it.unina.picus.monitoraggio.interno.applicazione">ConsultazioneConteggiOpt.ConteggioEsatto</a>&gt;&nbsp;totali)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Converte i totali nel tipo con valore <code>long</code> del contratto applicativo esistente.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>(package private) static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="ConsultazioneConteggiOpt.ConteggioEsatto.html" title="class in it.unina.picus.monitoraggio.interno.applicazione">ConsultazioneConteggiOpt.ConteggioEsatto</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#cumula(java.lang.Iterable)" class="member-name-link">cumula</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Iterable.html" title="class or interface in java.lang" class="external-link">Iterable</a>&lt;<a href="../../api/MonitoraggioApi.ConteggioOpt.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.ConteggioOpt</a>&gt;&nbsp;righe)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Somma le dichiarazioni correnti per OPT, misura e voce.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>(package private) static void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#validaIntervallo(it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre)" class="member-name-link">validaIntervallo</a><wbr>(<a href="../../api/MonitoraggioApi.Trimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.Trimestre</a>&nbsp;da,
+ <a href="../../api/MonitoraggioApi.Trimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.Trimestre</a>&nbsp;a)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>(package private) static void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#validaIntervallo(it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre)" class="member-name-link">validaIntervallo</a><wbr>(<a href="../../api/MonitoraggioApi.Trimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.Trimestre</a>&nbsp;da,
- <a href="../../api/MonitoraggioApi.Trimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.Trimestre</a>&nbsp;a)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>(package private) static void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#validaPeriodo(it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,java.lang.String,java.lang.String)" class="member-name-link">validaPeriodo</a><wbr>(<a href="../../api/MonitoraggioApi.Trimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.Trimestre</a>&nbsp;periodo,
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#validaPeriodo(it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,java.lang.String,java.lang.String)" class="member-name-link">validaPeriodo</a><wbr>(<a href="../../api/MonitoraggioApi.Trimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.Trimestre</a>&nbsp;periodo,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;campoAnno,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;campoTrimestre)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>(package private) static void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#verificaOpt(it.unina.picus.utenze.api.UtenzeApi,java.util.UUID)" class="member-name-link">verificaOpt</a><wbr>(<a href="../../../utenze/api/UtenzeApi.html" title="interface in it.unina.picus.utenze.api">UtenzeApi</a>&nbsp;utenze,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;optId)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>(package private) static void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#verificaOpt(it.unina.picus.utenze.api.UtenzeApi,java.util.UUID)" class="member-name-link">verificaOpt</a><wbr>(<a href="../../../utenze/api/UtenzeApi.html" title="interface in it.unina.picus.utenze.api">UtenzeApi</a>&nbsp;utenze,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;optId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
 </div>
@@ -197,7 +205,32 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="cumula(java.lang.Iterable)">
 <h3>cumula</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../../api/MonitoraggioApi.ConteggioOpt.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.ConteggioOpt</a>&gt;</span>&nbsp;<span class="element-name">cumula</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Iterable.html" title="class or interface in java.lang" class="external-link">Iterable</a>&lt;<a href="../../api/MonitoraggioApi.ConteggioOpt.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.ConteggioOpt</a>&gt;&nbsp;righe)</span></div>
+<div class="member-signature"><span class="modifiers">static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="ConsultazioneConteggiOpt.ConteggioEsatto.html" title="class in it.unina.picus.monitoraggio.interno.applicazione">ConsultazioneConteggiOpt.ConteggioEsatto</a>&gt;</span>&nbsp;<span class="element-name">cumula</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Iterable.html" title="class or interface in java.lang" class="external-link">Iterable</a>&lt;<a href="../../api/MonitoraggioApi.ConteggioOpt.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.ConteggioOpt</a>&gt;&nbsp;righe)</span></div>
+<div class="block">Somma le dichiarazioni correnti per OPT, misura e voce. Una chiave nasce solo da una
+dichiarazione effettiva, perciò uno zero dichiarato compare e una voce mancante resta assente.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>righe</code> - valori correnti dei trimestri selezionati</dd>
+<dt>Returns:</dt>
+<dd>totali esatti nell'ordine in cui le chiavi compaiono nelle righe</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="convertiInConteggi(java.util.List)">
+<h3>convertiInConteggi</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../../api/MonitoraggioApi.ConteggioOpt.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.ConteggioOpt</a>&gt;</span>&nbsp;<span class="element-name">convertiInConteggi</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="ConsultazioneConteggiOpt.ConteggioEsatto.html" title="class in it.unina.picus.monitoraggio.interno.applicazione">ConsultazioneConteggiOpt.ConteggioEsatto</a>&gt;&nbsp;totali)</span></div>
+<div class="block">Converte i totali nel tipo con valore <code>long</code> del contratto applicativo esistente.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>totali</code> - conteggi esatti del periodo</dd>
+<dt>Returns:</dt>
+<dd>conteggi rappresentabili nel contratto applicativo</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - se un totale supera il limite del tipo restituito</dd>
+</dl>
 </div>
 </section>
 </li>
