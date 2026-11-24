@@ -42,7 +42,7 @@ public enum Capacita {
     /** Catalogo completo: offerta delle OPT ed elenco delle misure per il Banco. */
     CATALOGO_COMPLETO(CatalogoApi.class, false),
     /** Schede personali e conteggi OPT. */
-    MONITORAGGIO(MonitoraggioApi.class, false),
+    MONITORAGGIO(MonitoraggioApi.class, true),
     /** Comunicazioni del Banco e riscontri. */
     COMUNICAZIONI(ComunicazioniApi.class, false);
 
