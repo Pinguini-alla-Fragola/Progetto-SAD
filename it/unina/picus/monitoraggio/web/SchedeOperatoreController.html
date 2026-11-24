@@ -76,6 +76,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#invia(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.lang.Integer,java.lang.Integer,java.io.InputStream)" tabindex="0">invia(UtenzeApi.IdentitaAutenticata, Integer, Integer, InputStream)</a></li>
 <li><a href="#mie(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" tabindex="0">mie(UtenzeApi.IdentitaAutenticata)</a></li>
 <li><a href="#ricevute(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.lang.Integer,java.lang.Integer)" tabindex="0">ricevute(UtenzeApi.IdentitaAutenticata, Integer, Integer)</a></li>
+<li><a href="#riepilogo(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.lang.Integer,java.lang.Integer)" tabindex="0">riepilogo(UtenzeApi.IdentitaAutenticata, Integer, Integer)</a></li>
 <li><a href="#dettaglio(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" tabindex="0">dettaglio(UtenzeApi.IdentitaAutenticata, UUID)</a></li>
 <li><a href="#datiNonValidi(it.unina.picus.monitoraggio.interno.dominio.DatiSchedaNonValidiException)" tabindex="0">datiNonValidi(DatiSchedaNonValidiException)</a></li>
 <li><a href="#parametroNonValido(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException)" tabindex="0">parametroNonValido(MethodArgumentTypeMismatchException)</a></li>
@@ -130,6 +131,11 @@ loadScripts(document, 'script');</script>
 <div class="col-second even-row-color"><code><a href="SchedeOperatoreController.Ricevuta.html" class="type-name-link" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController.Ricevuta</a></code></div>
 <div class="col-last even-row-color">
 <div class="block">Conferma del primo invio accettato.</div>
+</div>
+<div class="col-first odd-row-color"><code>(package private) static final record&nbsp;</code></div>
+<div class="col-second odd-row-color"><code><a href="SchedeOperatoreController.RiepilogoRicevute.html" class="type-name-link" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController.RiepilogoRicevute</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Totali in stringhe decimali per preservarne la precisione anche nei client JavaScript.</div>
 </div>
 </div>
 </section>
@@ -228,6 +234,13 @@ loadScripts(document, 'script');</script>
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;trimestre)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Elenca per il Banco le schede ricevute nel periodo selezionato.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>(package private) <a href="SchedeOperatoreController.RiepilogoRicevute.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController.RiepilogoRicevute</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#riepilogo(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.lang.Integer,java.lang.Integer)" class="member-name-link">riepilogo</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;anno,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;trimestre)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Riepiloga per il Banco le schede ricevute e i conteggi dichiarati per categoria.</div>
 </div>
 </div>
 </div>
@@ -343,6 +356,20 @@ loadScripts(document, 'script');</script>
  @RequestParam(required=false)
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;trimestre)</span></div>
 <div class="block">Elenca per il Banco le schede ricevute nel periodo selezionato.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="riepilogo(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.lang.Integer,java.lang.Integer)">
+<h3>riepilogo</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="annotations">@GetMapping("/ricevute/riepilogo")
+</span><span class="return-type"><a href="SchedeOperatoreController.RiepilogoRicevute.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController.RiepilogoRicevute</a></span>&nbsp;<span class="element-name">riepilogo</span><wbr><span class="parameters">(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+ @RequestParam(required=false)
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;anno,
+ @RequestParam(required=false)
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;trimestre)</span></div>
+<div class="block">Riepiloga per il Banco le schede ricevute e i conteggi dichiarati per categoria.</div>
 </div>
 </section>
 </li>
