@@ -53,13 +53,13 @@ import it.unina.picus.utenze.api.UtenzeApi.TipoErogatore;
  * pubbliche già consegnate ({@link Capacita}) e con gli endpoint HTTP reali dei contatti
  * ({@link ContattiDisponibilitaHttp}), come farebbero gli utenti.
  *
- * Il database si usa solo per preparare ciò che nessuna capacità consegnata permette ancora di creare,
+ * <p>Il database si usa solo per preparare ciò che nessuna capacità consegnata permette ancora di creare,
  * sempre con dati sintetici: account e profili, una misura dedicata al singolo test, l'offerta delle OPT
  * erogatrici, l'abilitazione degli operatori alla misura e la revoca di un account. La misura dedicata isola
- * i candidati del test: compaiono soltanto gli erogatori che il test ha abilitato.
+ * i candidati del test: compaiono soltanto gli erogatori che il test ha abilitato.</p>
  *
- * Se una capacità non è ancora consegnata il caso viene sospeso; se una capacità consegnata
- * manca, o se un erogatore abilitato dalla fixture non compare tra i candidati, il caso fallisce.
+ * <p>Se una capacità non è ancora consegnata il caso viene <em>sospeso</em>; se una capacità consegnata
+ * manca, o se un erogatore abilitato dalla fixture non compare tra i candidati, il caso <em>fallisce</em>.</p>
  */
 public final class ScenarioAccessi {
 

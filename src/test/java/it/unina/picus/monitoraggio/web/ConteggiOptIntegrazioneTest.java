@@ -20,6 +20,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -67,19 +68,19 @@ import it.unina.picus.shared.SessioneDiProva;
  *
  * Ogni test riporta nel nome il criterio di completamento della #174 e, dove c'è,
  * l'Acceptance Criteria della #43 che verifica:
- * * criterio 1: trimestre, misura, categorie sovrapponibili, dati invalidi e ritrasmissione senza raddoppio.
- * * criterio 2: lettura e scrittura da una seconda OPT e versione valida dopo una correzione ammessa.
+ * - criterio 1: trimestre, misura, categorie sovrapponibili, dati invalidi e ritrasmissione senza raddoppio;
+ * - criterio 2: lettura e scrittura da una seconda OPT e versione valida dopo una correzione ammessa.
  *
- * <p>Ciò che l'applicazione ha registrato si legge dalle righe di {@code monitoraggio_conteggi_opt};
+ * Ciò che l'applicazione ha registrato si legge dalle righe di {@code monitoraggio_conteggi_opt};
  * ciò che vede l'utente si legge dalla consultazione HTTP. Con {@link DatiSintetici} si creano
  * soltanto account e profili, che l'applicazione non permette ancora di creare. L'unica scrittura
  * diretta su un dato del monitoraggio è la configurazione delle correzioni: la decide il Banco, ma
- * non c'è ancora un endpoint per farlo.</p>
+ * non c'è ancora un endpoint per farlo (#172).
  *
- * {@link DatiSintetici#svuota()} non conosce le tabelle del monitoraggio e cancella i profili OPT
- * a cui i conteggi fanno riferimento: per non far fallire le altre classi che condividono il
- * database, questa classe cancella i propri conteggi e ripristina la configurazione prima e dopo
- * ogni test.
+ * {@link DatiSintetici#svuota()} cancella i conteggi e riporta configurazione e categorie del
+ * monitoraggio allo stato della migrazione. La classe la chiama anche dopo ogni test, così le classi
+ * che condividono il database senza usare quella fixture trovano le correzioni disattivate e tutte le
+ * voci attive.
  */
 @IntegrazionePostgresql
 @DisplayName("#174 Salvataggio e isolamento dei conteggi OPT: integrazione su HTTP e PostgreSQL")
@@ -122,7 +123,6 @@ class ConteggiOptIntegrazioneTest {
     /** Given comune: due OPT, il Banco e un operatore, nessun conteggio, correzioni disattivate. */
     @BeforeEach
     void preparaAttori() {
-        ripulisciMonitoraggio();
         dati = new DatiSintetici(jdbc);
         dati.svuota();
         accesso = new AccessoDiProva(mvc, jdbc, encoder);
@@ -137,10 +137,8 @@ class ConteggiOptIntegrazioneTest {
     }
 
     @AfterEach
-    void ripulisciMonitoraggio() {
-        jdbc.update("delete from monitoraggio_conteggi_opt");
-        jdbc.update("update monitoraggio_configurazione set correzioni_abilitate = false, scadenza_correzioni = null");
-        jdbc.update("update monitoraggio_categorie set attiva = true");
+    void ripristinaDati() {
+        dati.svuota();
     }
 
     // ---------------------------------------------------------------------------------------
@@ -508,12 +506,13 @@ class ConteggiOptIntegrazioneTest {
     // ---------------------------------------------------------------------------------------
 
     @Test
-    @DisplayName("C1 / AC5 - primi invii identici e simultanei: ognuno riceve 204 o 409, una sola riga, nessun errore non gestito")
+    @DisplayName("C1 / AC5 - primi invii identici e simultanei: tutti ricevono 204 e resta una sola riga")
     void c1_primoInvioConcorrenteIdentico() throws Exception {
         List<Integer> stati = primiInviiConcorrenti(i -> 42);
 
-        assertSoloEsitiPrevisti(stati);
-        assertTrue(stati.contains(204), "almeno un invio deve essere registrato: " + stati);
+        // una ritrasmissione identica è idempotente anche sotto concorrenza: nessun 409, nessun errore
+        assertEquals(Collections.nCopies(INVII_CONCORRENTI, 204), stati,
+                "ogni invio identico deve ricevere 204: " + stati);
         assertAll(
                 () -> assertEquals(1, righe(), "il vincolo di unicità non deve produrre righe doppie"),
                 () -> assertEquals(42L, valoreSalvato(optA, ANNO, 1, m01, "PERSONE_RAGGIUNTE")));

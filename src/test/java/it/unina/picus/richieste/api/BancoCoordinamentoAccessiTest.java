@@ -36,13 +36,13 @@ import it.unina.picus.utenze.api.UtenzeApi.TipoErogatore;
  * funzioni autorizzate. Controllo complementare: le stesse funzioni sono negate a OPT e operatori,
  * perché l'account Operatore interno non equivale al ruolo Banco.
  *
- * Tecniche: matrice azione × ruolo per le tre azioni di CA-06 (presa in carico, conferma
+ * <p>Tecniche: matrice azione × ruolo per le tre azioni di CA-06 (presa in carico, conferma
  * dell'accordo, rifiuto definitivo), ciascuna sul proprio stato minimo e con il controllo positivo del
  * Banco; la OPT titolare è provata a parte, perché è la classe di attori più vicina ai permessi del
- * Banco sulla propria richiesta.
+ * Banco sulla propria richiesta.</p>
  *
- * La classe sta in {@code richieste.api} perché verifica soprattutto coda, dettaglio, contatti e
- * archivio; contiene anche alcune verifiche su schede e conteggi di Monitoraggio.
+ * <p>La classe sta in {@code richieste.api} perché verifica soprattutto coda, dettaglio, contatti e
+ * archivio; contiene anche alcune verifiche su schede e conteggi di Monitoraggio.</p>
  */
 @DisplayName("#28 CA-05/CA-06 · Funzioni di coordinamento e rendicontazione del Banco")
 class BancoCoordinamentoAccessiTest extends AccessiBlackBoxTest {
