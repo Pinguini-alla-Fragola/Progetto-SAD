@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
@@ -35,6 +36,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpSession;
@@ -110,6 +112,22 @@ class AccessoLoginPostgresTest extends IntegrazionePostgresBase {
                 "select count(*) from flyway_schema_history where not success", Integer.class));
         assertTrue(jdbc.queryForObject(
                 "select count(*) from flyway_schema_history where success", Integer.class) > 0);
+    }
+
+    @Test
+    @DisplayName("Il profilo OPT richiede il codice fiscale (V15, #44)")
+    void profiloOptSenzaCodiceFiscaleRifiutato() {
+        // Un account BANCO non riceve il profilo da nuovoAccount: lo inseriamo qui senza codice fiscale.
+        UUID id = nuovoAccount("BANCO", "ATTIVO").id();
+        String codiceStruttura = "T-" + id.toString().replace("-", "").substring(0, 26);
+
+        DataIntegrityViolationException errore = assertThrows(DataIntegrityViolationException.class, () -> jdbc.update(
+                "insert into utenze_profili_opt (account_id, codice_struttura, comune_codice) values (?, ?, 'napoli')",
+                id, codiceStruttura));
+        assertTrue(errore.getMostSpecificCause().getMessage().contains("codice_fiscale"),
+                "il rifiuto deve dipendere dal codice fiscale mancante");
+        assertEquals(0, jdbc.queryForObject(
+                "select count(*) from utenze_profili_opt where account_id = ?", Integer.class, id));
     }
 
     //login per ruolo e aree
@@ -419,7 +437,10 @@ class AccessoLoginPostgresTest extends IntegrazionePostgresBase {
 
     //helper
 
-    /** Account di prova; per una OPT crea anche il profilo, necessario per salvare richieste. */
+    /**
+     * Account di prova; per una OPT crea anche il profilo, necessario per salvare richieste, con il
+     * codice fiscale obbligatorio dalla V15 (#44).
+     */
     private Account nuovoAccount(String ruolo, String stato) {
         UUID id = UUID.randomUUID();
         String email = "t-" + id + "@picus.test";
@@ -429,8 +450,10 @@ class AccessoLoginPostgresTest extends IntegrazionePostgresBase {
                 """, id, email, hash, "Account di prova", ruolo, stato);
         if ("OPT".equals(ruolo)) {
             String codiceStruttura = "T-" + id.toString().replace("-", "").substring(0, 26);
-            jdbc.update("insert into utenze_profili_opt (account_id, codice_struttura, comune_codice) values (?, ?, 'napoli')",
-                    id, codiceStruttura);
+            jdbc.update("""
+                    insert into utenze_profili_opt (account_id, codice_struttura, comune_codice, codice_fiscale)
+                    values (?, ?, 'napoli', ?)
+                    """, id, codiceStruttura, codiceFiscaleDiProva());
         }
         return new Account(id, email);
     }
