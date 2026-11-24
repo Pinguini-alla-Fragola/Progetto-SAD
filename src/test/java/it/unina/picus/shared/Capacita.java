@@ -5,6 +5,7 @@ import it.unina.picus.catalogo.api.ConsultazioneCatalogoApi;
 import it.unina.picus.catalogo.api.RicercaErogatoriApi;
 import it.unina.picus.comunicazioni.api.AvvisiOperativiApi;
 import it.unina.picus.comunicazioni.api.ComunicazioniApi;
+import it.unina.picus.monitoraggio.api.ConteggiOptApi;
 import it.unina.picus.monitoraggio.api.MonitoraggioApi;
 import it.unina.picus.richieste.api.CoordinamentoRichiesteApi;
 import it.unina.picus.richieste.api.InvioRichiesteApi;
@@ -14,12 +15,12 @@ import it.unina.picus.utenze.api.UtenzeApi;
 /**
  * Capacità pubbliche usate dalla suite #28, con la disponibilità attesa nell'incremento corrente.
  *
- * <p>Una capacità <b>consegnata</b> deve essere presente nel contesto Spring: se manca il test fallisce,
- * perché è una regressione. Una capacità <b>non ancora consegnata</b> sospende i soli casi che la usano.
+ * Una capacità consegnata deve essere presente nel contesto Spring: se manca il test fallisce,
+ * perché è una regressione. Una capacità non ancora consegnata sospende i soli casi che la usano.
  * Quando un caso d'uso viene integrato su {@code main} basta impostare qui {@code consegnata = true}:
- * da quel momento i suoi casi vengono eseguiti e un'eventuale assenza viene segnalata.</p>
+ * da quel momento i suoi casi vengono eseguiti e un'eventuale assenza viene segnalata.
  *
- * <p>Stato allineato a {@code main} dopo #106, #107, #117 e #124.</p>
+ * Stato allineato a {@code main} dopo #106, #107, #117 e #124.
  */
 public enum Capacita {
 
@@ -41,6 +42,8 @@ public enum Capacita {
     CATALOGO_COMPLETO(CatalogoApi.class, false),
     /** Schede personali e conteggi OPT. */
     MONITORAGGIO(MonitoraggioApi.class, false),
+    /** Registrazione e consultazione dei conteggi trimestrali delle OPT (#43). */
+    CONTEGGI_OPT(ConteggiOptApi.class, true),
     /** Comunicazioni del Banco e riscontri. */
     COMUNICAZIONI(ComunicazioniApi.class, false);
 
