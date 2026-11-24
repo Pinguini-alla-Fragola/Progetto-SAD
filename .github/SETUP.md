@@ -9,7 +9,7 @@ GitHub li mostri; `CODEOWNERS` deve esistere nei branch di destinazione delle PR
 ## Code owner e protezione dei branch
 
 Il [CODEOWNERS](CODEOWNERS) assegna `.gitignore` e tutti i file di `.github/`
-esclusivamente a **@CapHello e @giob22**. Non c'è un proprietario generale: sul resto del codice nessun revisore viene richiesto in automatico e basta un'approvazione qualsiasi.
+esclusivamente a **@CapHello e @giob22**.
 
 Dopo la pubblicazione umana dei file nel branch di destinazione:
 

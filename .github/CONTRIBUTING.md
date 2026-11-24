@@ -50,10 +50,6 @@ I code owner di `.gitignore` e dell'intera cartella `.github/`, compreso
 questi percorsi vanno concordate con loro e approvate da uno dei due, diverso
 dall'autore della PR, prima dell'integrazione.
 
-Il team `@Pinguini-alla-Fragola/developers` è il code owner ordinario degli altri
-file. Le protezioni devono richiedere la review dei code owner: consultare la
-[configurazione da completare su GitHub](SETUP.md).
-
 `CODEOWNERS` assegna le revisioni e non vieta tecnicamente ad altri account di
 creare un branch, modificare file o proporre una PR. Non costituisce un sistema
 di permessi di scrittura per singolo percorso.
