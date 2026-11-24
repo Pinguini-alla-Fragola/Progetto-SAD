@@ -35,7 +35,8 @@ import jakarta.annotation.PreDestroy;
  * dall'account. Ogni rifiuto è contato e scritto nel log.</p>
  *
  * <p>Se la posta rifiuta l'email, il nuovo link viene scartato e restano validi quelli di prima; se la accetta,
- * il nuovo link sostituisce i precedenti ({@link ConclusioneReinvio}).</p>
+ * il nuovo link sostituisce i precedenti ({@link ConclusioneReinvio}). Se quell'ultimo aggiornamento fallisce per un
+ * errore transitorio del database si riprova senza rispedire l'email.</p>
  */
 @Component
 @Profile("!skeleton")
@@ -43,6 +44,9 @@ public class ReinvioLinkSuRichiesta {
 
     private static final Logger LOG = LoggerFactory.getLogger(ReinvioLinkSuRichiesta.class);
     private static final long ATTESA_CHIUSURA_SECONDI = 10;
+    /** Tentativi per registrare l'esito dell'invio: un errore transitorio del database non deve lasciare due link validi. */
+    private static final int TENTATIVI_CONCLUSIONE = 3;
+    private static final long ATTESA_TRA_TENTATIVI_MILLIS = 200;
 
     private final AttivazioneUtenzaService attivazione;
     private final ConsegnaLinkAttivazione consegna;
@@ -112,11 +116,38 @@ public class ReinvioLinkSuRichiesta {
         if (!accettato) {
             LOG.warn("Invio del nuovo link di attivazione non riuscito: restano validi i link già inviati");
         }
+        concludi(link, accettato);
+    }
+
+    /**
+     * Registra l'esito dell'invio, riprovando se il database ha un errore transitorio. La email è già partita e non
+     * si rispedisce: ripetere la sola conclusione è sicuro, perché trova lo stesso link per impronta e, se
+     * l'aggiornamento era già andato a buon fine, non cambia nulla. Se tutti i tentativi falliscono restano validi
+     * sia il link già consegnato sia quello nuovo, e il motivo è nel log.
+     */
+    private void concludi(LinkPreparato link, boolean accettato) {
+        for (int tentativo = 1; tentativo <= TENTATIVI_CONCLUSIONE; tentativo++) {
+            try {
+                conclusione.concludi(link.accountId(), link.dati(), accettato);
+                return;
+            } catch (RuntimeException e) {
+                LOG.warn("Aggiornamento dei link di attivazione non riuscito dopo l'invio (causa={}, tentativo {} di {})",
+                        e.getClass().getSimpleName(), tentativo, TENTATIVI_CONCLUSIONE);
+                if (tentativo == TENTATIVI_CONCLUSIONE || !attendiProssimoTentativo(tentativo)) {
+                    return;
+                }
+            }
+        }
+    }
+
+    /** @return falso se il thread è stato interrotto, per esempio alla chiusura dell'applicazione */
+    private static boolean attendiProssimoTentativo(int tentativo) {
         try {
-            conclusione.concludi(link.accountId(), link.dati(), accettato);
-        } catch (RuntimeException e) {
-            LOG.warn("Aggiornamento dei link di attivazione non riuscito dopo l'invio (causa={})",
-                    e.getClass().getSimpleName());
+            Thread.sleep(ATTESA_TRA_TENTATIVI_MILLIS * tentativo);
+            return true;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return false;
         }
     }
 
