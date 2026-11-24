@@ -1426,6 +1426,22 @@ del contatore da confermare.</div>
 <dd>
 <div class="block">Registra la conferma esplicita per l'account destinatario.</div>
 </dd>
+<dt><a href="it/unina/picus/comunicazioni/interno/applicazione/ServizioConfermaRicezione.html#confermaRicezione(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">confermaRicezione(UtenzeApi.IdentitaAutenticata, UUID)</a> - Method in class it.unina.picus.comunicazioni.interno.applicazione.<a href="it/unina/picus/comunicazioni/interno/applicazione/ServizioConfermaRicezione.html" title="class in it.unina.picus.comunicazioni.interno.applicazione">ServizioConfermaRicezione</a></dt>
+<dd>
+<div class="block">Conferma la ricezione per l'account verificato della sessione.</div>
+</dd>
+<dt><a href="it/unina/picus/comunicazioni/web/ConfermaRicezioneController.html#confermaRicezione(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">confermaRicezione(UtenzeApi.IdentitaAutenticata, UUID)</a> - Method in class it.unina.picus.comunicazioni.web.<a href="it/unina/picus/comunicazioni/web/ConfermaRicezioneController.html" title="class in it.unina.picus.comunicazioni.web">ConfermaRicezioneController</a></dt>
+<dd>
+<div class="block">Registra il riscontro tramite il comando esplicito del destinatario.</div>
+</dd>
+<dt><a href="it/unina/picus/comunicazioni/web/ConfermaRicezioneController.html" class="type-name-link" title="class in it.unina.picus.comunicazioni.web">ConfermaRicezioneController</a> - Class in <a href="it/unina/picus/comunicazioni/web/package-summary.html">it.unina.picus.comunicazioni.web</a></dt>
+<dd>
+<div class="block">Espone il comando di conferma di ricezione per il destinatario in sessione.</div>
+</dd>
+<dt><a href="it/unina/picus/comunicazioni/web/ConfermaRicezioneController.html#%3Cinit%3E(it.unina.picus.comunicazioni.interno.applicazione.ServizioConfermaRicezione)" class="member-name-link">ConfermaRicezioneController(ServizioConfermaRicezione)</a> - Constructor for class it.unina.picus.comunicazioni.web.<a href="it/unina/picus/comunicazioni/web/ConfermaRicezioneController.html" title="class in it.unina.picus.comunicazioni.web">ConfermaRicezioneController</a></dt>
+<dd>
+<div class="block">Collega la rotta di conferma al relativo caso d'uso.</div>
+</dd>
 <dt><a href="it/unina/picus/comunicazioni/interno/dominio/FiltroComunicazioni.FiltroRicezione.html#CONFERMATA" class="member-name-link">CONFERMATA</a> - Enum constant in enum class it.unina.picus.comunicazioni.interno.dominio.<a href="it/unina/picus/comunicazioni/interno/dominio/FiltroComunicazioni.FiltroRicezione.html" title="enum class in it.unina.picus.comunicazioni.interno.dominio">FiltroComunicazioni.FiltroRicezione</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.StatoRichiesta.html#CONFERMATA" class="member-name-link">CONFERMATA</a> - Enum constant in enum class it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.StatoRichiesta.html" title="enum class in it.unina.picus.richieste.api">RichiesteApi.StatoRichiesta</a></dt>
@@ -4341,7 +4357,7 @@ operativi di Richieste.</div>
 </dd>
 <dt><a href="it/unina/picus/comunicazioni/interno/applicazione/package-summary.html">it.unina.picus.comunicazioni.interno.applicazione</a> - package it.unina.picus.comunicazioni.interno.applicazione</dt>
 <dd>
-<div class="block">Casi d'uso del modulo Comunicazioni: invio del Banco e avviso delle comunicazioni da confermare.</div>
+<div class="block">Casi d'uso delle comunicazioni del Banco: invio, avvisi e conferma di ricezione.</div>
 </dd>
 <dt><a href="it/unina/picus/comunicazioni/interno/dominio/package-summary.html">it.unina.picus.comunicazioni.interno.dominio</a> - package it.unina.picus.comunicazioni.interno.dominio</dt>
 <dd>
@@ -5611,6 +5627,16 @@ i dati per la consegna post-commit.</div>
 <dd>
 <div class="block">Registra una nuova OPT in attesa di attivazione e prepara il link monouso.</div>
 </dd>
+<dt><a href="it/unina/picus/comunicazioni/interno/dominio/RiscontroRicezioneRepository.html#registraPrimaConferma(java.util.UUID,java.util.UUID,java.time.Instant)" class="member-name-link">registraPrimaConferma(UUID, UUID, Instant)</a> - Method in interface it.unina.picus.comunicazioni.interno.dominio.<a href="it/unina/picus/comunicazioni/interno/dominio/RiscontroRicezioneRepository.html" title="interface in it.unina.picus.comunicazioni.interno.dominio">RiscontroRicezioneRepository</a></dt>
+<dd>
+<div class="block">Registra atomicamente l'istante della prima conferma per la coppia comunicazione e account
+registrata all'invio.</div>
+</dd>
+<dt><a href="it/unina/picus/comunicazioni/interno/persistenza/RiscontroRicezioneRepositoryJdbc.html#registraPrimaConferma(java.util.UUID,java.util.UUID,java.time.Instant)" class="member-name-link">registraPrimaConferma(UUID, UUID, Instant)</a> - Method in class it.unina.picus.comunicazioni.interno.persistenza.<a href="it/unina/picus/comunicazioni/interno/persistenza/RiscontroRicezioneRepositoryJdbc.html" title="class in it.unina.picus.comunicazioni.interno.persistenza">RiscontroRicezioneRepositoryJdbc</a></dt>
+<dd>
+<div class="block">Registra atomicamente l'istante della prima conferma per la coppia comunicazione e account
+registrata all'invio.</div>
+</dd>
 <dt><a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.AvvisoOperativo.html#registratoIl()" class="member-name-link">registratoIl()</a> - Method in record class it.unina.picus.comunicazioni.api.<a href="it/unina/picus/comunicazioni/api/ComunicazioniApi.AvvisoOperativo.html" title="class in it.unina.picus.comunicazioni.api">ComunicazioniApi.AvvisoOperativo</a></dt>
 <dd>
 <div class="block">Returns the value of the <a href="./it/unina/picus/comunicazioni/api/ComunicazioniApi.AvvisoOperativo.html#param-registratoIl"><code>registratoIl</code></a> record component.</div>
@@ -6138,6 +6164,18 @@ nel modo giusto: le pagine HTML rimandano al login (302), le API ricevono <code>
 <dd>
 <div class="block">Creates an instance of a <code>Riscontro</code> record class.</div>
 </dd>
+<dt><a href="it/unina/picus/comunicazioni/interno/dominio/RiscontroRicezioneRepository.html" class="type-name-link" title="interface in it.unina.picus.comunicazioni.interno.dominio">RiscontroRicezioneRepository</a> - Interface in <a href="it/unina/picus/comunicazioni/interno/dominio/package-summary.html">it.unina.picus.comunicazioni.interno.dominio</a></dt>
+<dd>
+<div class="block">Porta di persistenza dei destinatari registrati all'invio e dei loro riscontri di ricezione.</div>
+</dd>
+<dt><a href="it/unina/picus/comunicazioni/interno/persistenza/RiscontroRicezioneRepositoryJdbc.html" class="type-name-link" title="class in it.unina.picus.comunicazioni.interno.persistenza">RiscontroRicezioneRepositoryJdbc</a> - Class in <a href="it/unina/picus/comunicazioni/interno/persistenza/package-summary.html">it.unina.picus.comunicazioni.interno.persistenza</a></dt>
+<dd>
+<div class="block">Adattatore JDBC per i destinatari e le conferme delle comunicazioni del Banco.</div>
+</dd>
+<dt><a href="it/unina/picus/comunicazioni/interno/persistenza/RiscontroRicezioneRepositoryJdbc.html#%3Cinit%3E(org.springframework.jdbc.core.JdbcTemplate)" class="member-name-link">RiscontroRicezioneRepositoryJdbc(JdbcTemplate)</a> - Constructor for class it.unina.picus.comunicazioni.interno.persistenza.<a href="it/unina/picus/comunicazioni/interno/persistenza/RiscontroRicezioneRepositoryJdbc.html" title="class in it.unina.picus.comunicazioni.interno.persistenza">RiscontroRicezioneRepositoryJdbc</a></dt>
+<dd>
+<div class="block">Collega la porta di persistenza al database condiviso dall'applicazione.</div>
+</dd>
 <dt><a href="it/unina/picus/comunicazioni/interno/applicazione/DestinatariComunicazione.html#risolvi(it.unina.picus.comunicazioni.interno.dominio.BozzaComunicazione,it.unina.picus.comunicazioni.interno.dominio.Errori)" class="member-name-link">risolvi(BozzaComunicazione, Errori)</a> - Method in class it.unina.picus.comunicazioni.interno.applicazione.<a href="it/unina/picus/comunicazioni/interno/applicazione/DestinatariComunicazione.html" title="class in it.unina.picus.comunicazioni.interno.applicazione">DestinatariComunicazione</a></dt>
 <dd>
 <div class="block">Restituisce i destinatari della bozza, già controllata dalle regole.</div>
@@ -6338,6 +6376,14 @@ quelli di prima, che l'utente può ancora usare.</div>
 <dt><a href="it/unina/picus/richieste/interno/applicazione/ServizioAnnullamentoRichieste.html#%3Cinit%3E(it.unina.picus.richieste.interno.dominio.RichiestaRepository,it.unina.picus.richieste.api.InvioRichiesteApi,it.unina.picus.utenze.api.UtenzeApi,it.unina.picus.comunicazioni.api.AvvisiAnnullamentoApi)" class="member-name-link">ServizioAnnullamentoRichieste(RichiestaRepository, InvioRichiesteApi, UtenzeApi, AvvisiAnnullamentoApi)</a> - Constructor for class it.unina.picus.richieste.interno.applicazione.<a href="it/unina/picus/richieste/interno/applicazione/ServizioAnnullamentoRichieste.html" title="class in it.unina.picus.richieste.interno.applicazione">ServizioAnnullamentoRichieste</a></dt>
 <dd>
 <div class="block">Collega il comando alle porte usate per leggere, aggiornare e notificare la richiesta.</div>
+</dd>
+<dt><a href="it/unina/picus/comunicazioni/interno/applicazione/ServizioConfermaRicezione.html" class="type-name-link" title="class in it.unina.picus.comunicazioni.interno.applicazione">ServizioConfermaRicezione</a> - Class in <a href="it/unina/picus/comunicazioni/interno/applicazione/package-summary.html">it.unina.picus.comunicazioni.interno.applicazione</a></dt>
+<dd>
+<div class="block">Registra il riscontro esplicito di un destinatario sulla comunicazione del Banco.</div>
+</dd>
+<dt><a href="it/unina/picus/comunicazioni/interno/applicazione/ServizioConfermaRicezione.html#%3Cinit%3E(it.unina.picus.comunicazioni.interno.dominio.RiscontroRicezioneRepository,java.time.Clock)" class="member-name-link">ServizioConfermaRicezione(RiscontroRicezioneRepository, Clock)</a> - Constructor for class it.unina.picus.comunicazioni.interno.applicazione.<a href="it/unina/picus/comunicazioni/interno/applicazione/ServizioConfermaRicezione.html" title="class in it.unina.picus.comunicazioni.interno.applicazione">ServizioConfermaRicezione</a></dt>
+<dd>
+<div class="block">Collega il caso d'uso all'archivio dei destinatari e all'orologio dell'applicazione.</div>
 </dd>
 <dt><a href="it/unina/picus/comunicazioni/interno/applicazione/ServizioConsultazioneComunicazioni.html" class="type-name-link" title="class in it.unina.picus.comunicazioni.interno.applicazione">ServizioConsultazioneComunicazioni</a> - Class in <a href="it/unina/picus/comunicazioni/interno/applicazione/package-summary.html">it.unina.picus.comunicazioni.interno.applicazione</a></dt>
 <dd>
