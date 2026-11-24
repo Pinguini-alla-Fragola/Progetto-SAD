@@ -19,12 +19,14 @@ import it.unina.picus.utenze.api.UtenzeApi;
  * Quando un caso d'uso viene integrato su {@code main} basta impostare qui {@code consegnata = true}:
  * da quel momento i suoi casi vengono eseguiti e un'eventuale assenza viene segnalata.</p>
  *
- * <p>Stato allineato a {@code main} dopo #106, #107, #117 e #124.</p>
+ * <p>Stato allineato a {@code main} dopo #106, #107, #117, #124, #189, #205 e #206.</p>
  */
 public enum Capacita {
 
     /** Identità verificate e dati minimi degli account (#25). */
     UTENZE(UtenzeApi.class, true),
+    /** Importazione delle OPT da CSV (#24), consegnata con la #202: solo rotta HTTP, dati riletti da Utenze. */
+    IMPORTAZIONE_OPT(UtenzeApi.class, true),
     /** Invio, elenco proprio, coda del Banco e consultazione della richiesta (#48). */
     INVIO_RICHIESTE(InvioRichiesteApi.class, true),
     /** Presa in carico, ricerca, contatto, assegnazione, conferma e rifiuto definitivo (#49, #52). */
@@ -40,7 +42,7 @@ public enum Capacita {
     /** Catalogo completo: offerta delle OPT ed elenco delle misure per il Banco. */
     CATALOGO_COMPLETO(CatalogoApi.class, false),
     /** Schede personali e conteggi OPT. */
-    MONITORAGGIO(MonitoraggioApi.class, false),
+    MONITORAGGIO(MonitoraggioApi.class, true),
     /** Comunicazioni del Banco e riscontri. */
     COMUNICAZIONI(ComunicazioniApi.class, false);
 
