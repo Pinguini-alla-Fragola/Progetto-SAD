@@ -67,6 +67,8 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
 <li><a href="#datiNonValidi(it.unina.picus.utenze.interno.applicazione.DatiOperatoreNonValidiException)" tabindex="0">datiNonValidi(DatiOperatoreNonValidiException)</a></li>
+<li><a href="#nonTrovata(it.unina.picus.utenze.api.UtenzaNonTrovataException)" tabindex="0">nonTrovata(UtenzaNonTrovataException)</a></li>
+<li><a href="#nonConsentita(it.unina.picus.utenze.api.OperazioneUtenzaNonConsentitaException)" tabindex="0">nonConsentita(OperazioneUtenzaNonConsentitaException)</a></li>
 <li><a href="#formatoNonValido()" tabindex="0">formatoNonValido()</a></li>
 </ol>
 </li>
@@ -83,7 +85,7 @@ loadScripts(document, 'script');</script>
 <section class="class-description" id="class-description">
 <hr>
 <div class="horizontal-scroll">
-<div class="type-signature"><span class="annotations">@RestControllerAdvice(assignableTypes=<a href="OperatoriController.html" title="class in it.unina.picus.utenze.web">OperatoriController</a>.class)
+<div class="type-signature"><span class="annotations">@RestControllerAdvice(assignableTypes={<a href="OperatoriController.html" title="class in it.unina.picus.utenze.web">OperatoriController</a>.class,<a href="InvitiOperatoriController.html" title="class in it.unina.picus.utenze.web">InvitiOperatoriController</a>.class})
 </span><span class="modifiers">public class </span><span class="element-name type-name-label">ErroriUtenze</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
 <div class="block">Trasforma gli errori del modulo Utenze in risposte con messaggi controllati, senza mai i valori inseriti.</div>
@@ -138,6 +140,14 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.springframework.http.ResponseEntity<wbr>&lt;<a href="ErroriUtenze.Errore.html" title="class in it.unina.picus.utenze.web">ErroriUtenze.Errore</a>&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#formatoNonValido()" class="member-name-link">formatoNonValido</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.springframework.http.ResponseEntity<wbr>&lt;<a href="ErroriUtenze.Errore.html" title="class in it.unina.picus.utenze.web">ErroriUtenze.Errore</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#nonConsentita(it.unina.picus.utenze.api.OperazioneUtenzaNonConsentitaException)" class="member-name-link">nonConsentita</a><wbr>(<a href="../api/OperazioneUtenzaNonConsentitaException.html" title="class in it.unina.picus.utenze.api">OperazioneUtenzaNonConsentitaException</a>&nbsp;ex)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Ruolo o stato dell'account non compatibili con l'operazione, per esempio un reinvio a un account già attivo.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.springframework.http.ResponseEntity<wbr>&lt;<a href="ErroriUtenze.Errore.html" title="class in it.unina.picus.utenze.web">ErroriUtenze.Errore</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#nonTrovata(it.unina.picus.utenze.api.UtenzaNonTrovataException)" class="member-name-link">nonTrovata</a><wbr>(<a href="../api/UtenzaNonTrovataException.html" title="class in it.unina.picus.utenze.api">UtenzaNonTrovataException</a>&nbsp;ex)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
 </div>
@@ -177,6 +187,25 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="annotations">@ExceptionHandler(<a href="../interno/applicazione/DatiOperatoreNonValidiException.html" title="class in it.unina.picus.utenze.interno.applicazione">DatiOperatoreNonValidiException</a>.class)
 </span><span class="modifiers">public</span>&nbsp;<span class="return-type">org.springframework.http.ResponseEntity&lt;<a href="ErroriUtenze.Errore.html" title="class in it.unina.picus.utenze.web">ErroriUtenze.Errore</a>&gt;</span>&nbsp;<span class="element-name">datiNonValidi</span><wbr><span class="parameters">(<a href="../interno/applicazione/DatiOperatoreNonValidiException.html" title="class in it.unina.picus.utenze.interno.applicazione">DatiOperatoreNonValidiException</a>&nbsp;ex)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="nonTrovata(it.unina.picus.utenze.api.UtenzaNonTrovataException)">
+<h3>nonTrovata</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="annotations">@ExceptionHandler(<a href="../api/UtenzaNonTrovataException.html" title="class in it.unina.picus.utenze.api">UtenzaNonTrovataException</a>.class)
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type">org.springframework.http.ResponseEntity&lt;<a href="ErroriUtenze.Errore.html" title="class in it.unina.picus.utenze.web">ErroriUtenze.Errore</a>&gt;</span>&nbsp;<span class="element-name">nonTrovata</span><wbr><span class="parameters">(<a href="../api/UtenzaNonTrovataException.html" title="class in it.unina.picus.utenze.api">UtenzaNonTrovataException</a>&nbsp;ex)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="nonConsentita(it.unina.picus.utenze.api.OperazioneUtenzaNonConsentitaException)">
+<h3>nonConsentita</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="annotations">@ExceptionHandler(<a href="../api/OperazioneUtenzaNonConsentitaException.html" title="class in it.unina.picus.utenze.api">OperazioneUtenzaNonConsentitaException</a>.class)
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type">org.springframework.http.ResponseEntity&lt;<a href="ErroriUtenze.Errore.html" title="class in it.unina.picus.utenze.web">ErroriUtenze.Errore</a>&gt;</span>&nbsp;<span class="element-name">nonConsentita</span><wbr><span class="parameters">(<a href="../api/OperazioneUtenzaNonConsentitaException.html" title="class in it.unina.picus.utenze.api">OperazioneUtenzaNonConsentitaException</a>&nbsp;ex)</span></div>
+<div class="block">Ruolo o stato dell'account non compatibili con l'operazione, per esempio un reinvio a un account già attivo.</div>
 </div>
 </section>
 </li>

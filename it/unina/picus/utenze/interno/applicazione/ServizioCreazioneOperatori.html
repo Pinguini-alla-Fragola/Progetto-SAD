@@ -60,7 +60,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-summary" tabindex="0">Method Summary</a></li>
 <li><a href="#constructor-detail" tabindex="0">Constructor Details</a>
 <ol class="toc-list">
-<li><a href="#%3Cinit%3E(it.unina.picus.utenze.interno.dominio.ValidatoreDatiOperatore,it.unina.picus.utenze.interno.dominio.RegistroOperatori,org.springframework.security.crypto.password.PasswordEncoder)" tabindex="0">ServizioCreazioneOperatori(ValidatoreDatiOperatore, RegistroOperatori, PasswordEncoder)</a></li>
+<li><a href="#%3Cinit%3E(it.unina.picus.utenze.interno.dominio.ValidatoreDatiOperatore,it.unina.picus.utenze.interno.dominio.RegistroOperatori,org.springframework.security.crypto.password.PasswordEncoder,it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService)" tabindex="0">ServizioCreazioneOperatori(ValidatoreDatiOperatore, RegistroOperatori, PasswordEncoder, AttivazioneUtenzaService)</a></li>
 </ol>
 </li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
@@ -91,7 +91,7 @@ loadScripts(document, 'script');</script>
 </span><span class="modifiers">class </span><span class="element-name type-name-label">ServizioCreazioneOperatori</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>
 implements <a href="CreazioneOperatori.html" title="interface in it.unina.picus.utenze.interno.applicazione">CreazioneOperatori</a></span></div>
-<div class="block">Coordina i passi della creazione: permesso, pulizia dei dati, controlli e registrazione.</div>
+<div class="block">Coordina i passi della creazione: permesso, pulizia dei dati, controlli, registrazione e link di attivazione.</div>
 </div>
 </section>
 <section class="summary">
@@ -104,9 +104,10 @@ implements <a href="CreazioneOperatori.html" title="interface in it.unina.picus.
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(it.unina.picus.utenze.interno.dominio.ValidatoreDatiOperatore,it.unina.picus.utenze.interno.dominio.RegistroOperatori,org.springframework.security.crypto.password.PasswordEncoder)" class="member-name-link">ServizioCreazioneOperatori</a><wbr>(<a href="../dominio/ValidatoreDatiOperatore.html" title="class in it.unina.picus.utenze.interno.dominio">ValidatoreDatiOperatore</a>&nbsp;validatore,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(it.unina.picus.utenze.interno.dominio.ValidatoreDatiOperatore,it.unina.picus.utenze.interno.dominio.RegistroOperatori,org.springframework.security.crypto.password.PasswordEncoder,it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService)" class="member-name-link">ServizioCreazioneOperatori</a><wbr>(<a href="../dominio/ValidatoreDatiOperatore.html" title="class in it.unina.picus.utenze.interno.dominio">ValidatoreDatiOperatore</a>&nbsp;validatore,
  <a href="../dominio/RegistroOperatori.html" title="interface in it.unina.picus.utenze.interno.dominio">RegistroOperatori</a>&nbsp;registro,
- org.springframework.security.crypto.password.PasswordEncoder&nbsp;encoder)</code></div>
+ org.springframework.security.crypto.password.PasswordEncoder&nbsp;encoder,
+ <a href="AttivazioneUtenzaService.html" title="class in it.unina.picus.utenze.interno.applicazione">AttivazioneUtenzaService</a>&nbsp;attivazione)</code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 </div>
 </section>
@@ -126,7 +127,8 @@ implements <a href="CreazioneOperatori.html" title="interface in it.unina.picus.
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#crea(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.utenze.interno.applicazione.ComandoCreaOperatore)" class="member-name-link">crea</a><wbr>(<a href="../../api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  <a href="ComandoCreaOperatore.html" title="class in it.unina.picus.utenze.interno.applicazione">ComandoCreaOperatore</a>&nbsp;comando)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Crea l'account e il profilo dell'Operatore, in attesa di attivazione.</div>
+<div class="block">Crea l'account e il profilo dell'Operatore, in attesa di attivazione, e prepara il link monouso di
+attivazione.</div>
 </div>
 </div>
 </div>
@@ -146,12 +148,13 @@ implements <a href="CreazioneOperatori.html" title="interface in it.unina.picus.
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(it.unina.picus.utenze.interno.dominio.ValidatoreDatiOperatore,it.unina.picus.utenze.interno.dominio.RegistroOperatori,org.springframework.security.crypto.password.PasswordEncoder)">
+<section class="detail" id="&lt;init&gt;(it.unina.picus.utenze.interno.dominio.ValidatoreDatiOperatore,it.unina.picus.utenze.interno.dominio.RegistroOperatori,org.springframework.security.crypto.password.PasswordEncoder,it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService)">
 <h3>ServizioCreazioneOperatori</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="element-name">ServizioCreazioneOperatori</span><wbr><span class="parameters">(<a href="../dominio/ValidatoreDatiOperatore.html" title="class in it.unina.picus.utenze.interno.dominio">ValidatoreDatiOperatore</a>&nbsp;validatore,
  <a href="../dominio/RegistroOperatori.html" title="interface in it.unina.picus.utenze.interno.dominio">RegistroOperatori</a>&nbsp;registro,
- org.springframework.security.crypto.password.PasswordEncoder&nbsp;encoder)</span></div>
+ org.springframework.security.crypto.password.PasswordEncoder&nbsp;encoder,
+ <a href="AttivazioneUtenzaService.html" title="class in it.unina.picus.utenze.interno.applicazione">AttivazioneUtenzaService</a>&nbsp;attivazione)</span></div>
 </div>
 </section>
 </li>
@@ -170,8 +173,9 @@ implements <a href="CreazioneOperatori.html" title="interface in it.unina.picus.
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="OperatoreCreato.html" title="class in it.unina.picus.utenze.interno.applicazione">OperatoreCreato</a></span>&nbsp;<span class="element-name">crea</span><wbr><span class="parameters">(<a href="../../api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  <a href="ComandoCreaOperatore.html" title="class in it.unina.picus.utenze.interno.applicazione">ComandoCreaOperatore</a>&nbsp;comando)</span></div>
 <div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="CreazioneOperatori.html#crea(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.utenze.interno.applicazione.ComandoCreaOperatore)">CreazioneOperatori</a></code></span></div>
-<div class="block">Crea l'account e il profilo dell'Operatore, in attesa di attivazione. L'account non ha ancora una
-password che si possa usare: la sceglierà l'Operatore dal link di attivazione.</div>
+<div class="block">Crea l'account e il profilo dell'Operatore, in attesa di attivazione, e prepara il link monouso di
+attivazione. L'account non ha ancora una password che si possa usare: la sceglierà l'Operatore dal link.
+La spedizione dell'email spetta al chiamante, dopo il commit (<a href="ConsegnaLinkAttivazione.html" title="class in it.unina.picus.utenze.interno.applicazione"><code>ConsegnaLinkAttivazione</code></a>).</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="CreazioneOperatori.html#crea(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.utenze.interno.applicazione.ComandoCreaOperatore)">crea</a></code>&nbsp;in interface&nbsp;<code><a href="CreazioneOperatori.html" title="interface in it.unina.picus.utenze.interno.applicazione">CreazioneOperatori</a></code></dd>

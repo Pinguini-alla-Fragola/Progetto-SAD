@@ -61,7 +61,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-summary" tabindex="0">Method Summary</a></li>
 <li><a href="#constructor-detail" tabindex="0">Constructor Details</a>
 <ol class="toc-list">
-<li><a href="#%3Cinit%3E(it.unina.picus.utenze.interno.applicazione.CreazioneOperatori)" tabindex="0">OperatoriController(CreazioneOperatori)</a></li>
+<li><a href="#%3Cinit%3E(it.unina.picus.utenze.interno.applicazione.CreazioneOperatori,it.unina.picus.utenze.interno.applicazione.ConsegnaLinkAttivazione)" tabindex="0">OperatoriController(CreazioneOperatori, ConsegnaLinkAttivazione)</a></li>
 </ol>
 </li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
@@ -110,7 +110,8 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color"><code>static final record&nbsp;</code></div>
 <div class="col-second odd-row-color"><code><a href="OperatoriController.OperatoreCreatoJson.html" class="type-name-link" title="class in it.unina.picus.utenze.web">OperatoriController.OperatoreCreatoJson</a></code></div>
 <div class="col-last odd-row-color">
-<div class="block">Ciò che il browser riceve dopo la creazione.</div>
+<div class="block">Ciò che il browser riceve dopo la creazione, con l'esito dell'invio del link: il token non esce mai dal
+server.</div>
 </div>
 </div>
 </section>
@@ -123,7 +124,8 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(it.unina.picus.utenze.interno.applicazione.CreazioneOperatori)" class="member-name-link">OperatoriController</a><wbr>(<a href="../interno/applicazione/CreazioneOperatori.html" title="interface in it.unina.picus.utenze.interno.applicazione">CreazioneOperatori</a>&nbsp;creazione)</code></div>
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(it.unina.picus.utenze.interno.applicazione.CreazioneOperatori,it.unina.picus.utenze.interno.applicazione.ConsegnaLinkAttivazione)" class="member-name-link">OperatoriController</a><wbr>(<a href="../interno/applicazione/CreazioneOperatori.html" title="interface in it.unina.picus.utenze.interno.applicazione">CreazioneOperatori</a>&nbsp;creazione,
+ <a href="../interno/applicazione/ConsegnaLinkAttivazione.html" title="class in it.unina.picus.utenze.interno.applicazione">ConsegnaLinkAttivazione</a>&nbsp;consegna)</code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 </div>
 </section>
@@ -143,7 +145,7 @@ loadScripts(document, 'script');</script>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#crea(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.utenze.web.OperatoriController.NuovoOperatoreJson)" class="member-name-link">crea</a><wbr>(<a href="../api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  <a href="OperatoriController.NuovoOperatoreJson.html" title="class in it.unina.picus.utenze.web">OperatoriController.NuovoOperatoreJson</a>&nbsp;corpo)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Crea l'Operatore e risponde <code>201</code>.</div>
+<div class="block">Crea l'Operatore, spedisce il link di attivazione e risponde <code>201</code>.</div>
 </div>
 </div>
 </div>
@@ -163,10 +165,11 @@ loadScripts(document, 'script');</script>
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(it.unina.picus.utenze.interno.applicazione.CreazioneOperatori)">
+<section class="detail" id="&lt;init&gt;(it.unina.picus.utenze.interno.applicazione.CreazioneOperatori,it.unina.picus.utenze.interno.applicazione.ConsegnaLinkAttivazione)">
 <h3>OperatoriController</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">OperatoriController</span><wbr><span class="parameters">(<a href="../interno/applicazione/CreazioneOperatori.html" title="interface in it.unina.picus.utenze.interno.applicazione">CreazioneOperatori</a>&nbsp;creazione)</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">OperatoriController</span><wbr><span class="parameters">(<a href="../interno/applicazione/CreazioneOperatori.html" title="interface in it.unina.picus.utenze.interno.applicazione">CreazioneOperatori</a>&nbsp;creazione,
+ <a href="../interno/applicazione/ConsegnaLinkAttivazione.html" title="class in it.unina.picus.utenze.interno.applicazione">ConsegnaLinkAttivazione</a>&nbsp;consegna)</span></div>
 </div>
 </section>
 </li>
@@ -186,8 +189,9 @@ loadScripts(document, 'script');</script>
 </span><span class="modifiers">public</span>&nbsp;<span class="return-type">org.springframework.http.ResponseEntity&lt;<a href="OperatoriController.OperatoreCreatoJson.html" title="class in it.unina.picus.utenze.web">OperatoriController.OperatoreCreatoJson</a>&gt;</span>&nbsp;<span class="element-name">crea</span><wbr><span class="parameters">(<a href="../api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  @RequestBody
  <a href="OperatoriController.NuovoOperatoreJson.html" title="class in it.unina.picus.utenze.web">OperatoriController.NuovoOperatoreJson</a>&nbsp;corpo)</span></div>
-<div class="block">Crea l'Operatore e risponde <code>201</code>. Non indica un indirizzo della risorsa, perché in questa fase non
-esiste ancora una pagina che mostri il singolo Operatore.</div>
+<div class="block">Crea l'Operatore, spedisce il link di attivazione e risponde <code>201</code>. Se l'email non parte l'account
+esiste comunque e la risposta lo dice, perché il Banco può reinviare il link. Non indica un indirizzo
+della risorsa, perché in questa fase non esiste ancora una pagina che mostri il singolo Operatore.</div>
 </div>
 </section>
 </li>

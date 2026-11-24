@@ -60,7 +60,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-summary" tabindex="0">Method Summary</a></li>
 <li><a href="#constructor-detail" tabindex="0">Constructor Details</a>
 <ol class="toc-list">
-<li><a href="#%3Cinit%3E(java.util.UUID,java.lang.String,java.lang.String)" tabindex="0">OperatoreCreato(UUID, String, String)</a></li>
+<li><a href="#%3Cinit%3E(java.util.UUID,java.lang.String,java.lang.String,it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService.DatiInvioAttivazione)" tabindex="0">OperatoreCreato(UUID, String, String, AttivazioneUtenzaService.DatiInvioAttivazione)</a></li>
 </ol>
 </li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
@@ -71,6 +71,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#id()" tabindex="0">id()</a></li>
 <li><a href="#nomeVisualizzato()" tabindex="0">nomeVisualizzato()</a></li>
 <li><a href="#email()" tabindex="0">email()</a></li>
+<li><a href="#invito()" tabindex="0">invito()</a></li>
 </ol>
 </li>
 </ol>
@@ -86,9 +87,16 @@ loadScripts(document, 'script');</script>
 </div>
 </div>
 <section class="class-description" id="class-description">
+<dl class="notes">
+<dt>Record Components:</dt>
+<dd><code><span id="param-id">id</span></code> - identificativo dell'account</dd>
+<dd><code><span id="param-nomeVisualizzato">nomeVisualizzato</span></code> - nome e cognome mostrati nelle liste</dd>
+<dd><code><span id="param-email">email</span></code> - indirizzo a cui va consegnato il link</dd>
+<dd><code><span id="param-invito">invito</span></code> - link di attivazione già salvato, da consegnare dopo il commit; non va mai mostrato al Banco</dd>
+</dl>
 <hr>
 <div class="horizontal-scroll">
-<div class="type-signature"><span class="modifiers">public record </span><span class="element-name type-name-label">OperatoreCreato</span>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;id, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;nomeVisualizzato, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;email)
+<div class="type-signature"><span class="modifiers">public record </span><span class="element-name type-name-label">OperatoreCreato</span>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;id, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;nomeVisualizzato, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;email, <a href="AttivazioneUtenzaService.DatiInvioAttivazione.html" title="class in it.unina.picus.utenze.interno.applicazione">AttivazioneUtenzaService.DatiInvioAttivazione</a>&nbsp;invito)
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Record.html" title="class or interface in java.lang" class="external-link">Record</a></span></div>
 <div class="block">Esito della creazione: l'account nasce sempre in attesa di attivazione.</div>
 </div>
@@ -103,9 +111,10 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(java.util.UUID,java.lang.String,java.lang.String)" class="member-name-link">OperatoreCreato</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;id,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(java.util.UUID,java.lang.String,java.lang.String,it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService.DatiInvioAttivazione)" class="member-name-link">OperatoreCreato</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;id,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;nomeVisualizzato,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;email)</code></div>
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;email,
+ <a href="AttivazioneUtenzaService.DatiInvioAttivazione.html" title="class in it.unina.picus.utenze.interno.applicazione">AttivazioneUtenzaService.DatiInvioAttivazione</a>&nbsp;invito)</code></div>
 <div class="col-last even-row-color">
 <div class="block">Creates an instance of a <code>OperatoreCreato</code> record class.</div>
 </div>
@@ -126,7 +135,7 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#email()" class="member-name-link">email</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the value of the <code>email</code> record component.</div>
+<div class="block">Returns the value of the <a href="#param-email"><code>email</code></a> record component.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final boolean</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#equals(java.lang.Object)" class="member-name-link">equals</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;o)</code></div>
@@ -141,16 +150,21 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#id()" class="member-name-link">id</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the value of the <code>id</code> record component.</div>
+<div class="block">Returns the value of the <a href="#param-id"><code>id</code></a> record component.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#nomeVisualizzato()" class="member-name-link">nomeVisualizzato</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="AttivazioneUtenzaService.DatiInvioAttivazione.html" title="class in it.unina.picus.utenze.interno.applicazione">AttivazioneUtenzaService.DatiInvioAttivazione</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#invito()" class="member-name-link">invito</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the value of the <code>nomeVisualizzato</code> record component.</div>
+<div class="block">Returns the value of the <a href="#param-invito"><code>invito</code></a> record component.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#toString()" class="member-name-link">toString</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#nomeVisualizzato()" class="member-name-link">nomeVisualizzato</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the value of the <a href="#param-nomeVisualizzato"><code>nomeVisualizzato</code></a> record component.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#toString()" class="member-name-link">toString</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns a string representation of this record class.</div>
 </div>
 </div>
@@ -171,18 +185,20 @@ loadScripts(document, 'script');</script>
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(java.util.UUID,java.lang.String,java.lang.String)">
+<section class="detail" id="&lt;init&gt;(java.util.UUID,java.lang.String,java.lang.String,it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService.DatiInvioAttivazione)">
 <h3>OperatoreCreato</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">OperatoreCreato</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;id,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;nomeVisualizzato,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;email)</span></div>
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;email,
+ <a href="AttivazioneUtenzaService.DatiInvioAttivazione.html" title="class in it.unina.picus.utenze.interno.applicazione">AttivazioneUtenzaService.DatiInvioAttivazione</a>&nbsp;invito)</span></div>
 <div class="block">Creates an instance of a <code>OperatoreCreato</code> record class.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>id</code> - the value for the <code>id</code> record component</dd>
-<dd><code>nomeVisualizzato</code> - the value for the <code>nomeVisualizzato</code> record component</dd>
-<dd><code>email</code> - the value for the <code>email</code> record component</dd>
+<dd><code>id</code> - the value for the <a href="#param-id"><code>id</code></a> record component</dd>
+<dd><code>nomeVisualizzato</code> - the value for the <a href="#param-nomeVisualizzato"><code>nomeVisualizzato</code></a> record component</dd>
+<dd><code>email</code> - the value for the <a href="#param-email"><code>email</code></a> record component</dd>
+<dd><code>invito</code> - the value for the <a href="#param-invito"><code>invito</code></a> record component</dd>
 </dl>
 </div>
 </section>
@@ -247,10 +263,10 @@ loadScripts(document, 'script');</script>
 <h3>id</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a></span>&nbsp;<span class="element-name">id</span>()</div>
-<div class="block">Returns the value of the <code>id</code> record component.</div>
+<div class="block">Returns the value of the <a href="#param-id"><code>id</code></a> record component.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>the value of the <code>id</code> record component</dd>
+<dd>the value of the <a href="#param-id"><code>id</code></a> record component</dd>
 </dl>
 </div>
 </section>
@@ -260,10 +276,10 @@ loadScripts(document, 'script');</script>
 <h3>nomeVisualizzato</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">nomeVisualizzato</span>()</div>
-<div class="block">Returns the value of the <code>nomeVisualizzato</code> record component.</div>
+<div class="block">Returns the value of the <a href="#param-nomeVisualizzato"><code>nomeVisualizzato</code></a> record component.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>the value of the <code>nomeVisualizzato</code> record component</dd>
+<dd>the value of the <a href="#param-nomeVisualizzato"><code>nomeVisualizzato</code></a> record component</dd>
 </dl>
 </div>
 </section>
@@ -273,10 +289,23 @@ loadScripts(document, 'script');</script>
 <h3>email</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">email</span>()</div>
-<div class="block">Returns the value of the <code>email</code> record component.</div>
+<div class="block">Returns the value of the <a href="#param-email"><code>email</code></a> record component.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>the value of the <code>email</code> record component</dd>
+<dd>the value of the <a href="#param-email"><code>email</code></a> record component</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="invito()">
+<h3>invito</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="AttivazioneUtenzaService.DatiInvioAttivazione.html" title="class in it.unina.picus.utenze.interno.applicazione">AttivazioneUtenzaService.DatiInvioAttivazione</a></span>&nbsp;<span class="element-name">invito</span>()</div>
+<div class="block">Returns the value of the <a href="#param-invito"><code>invito</code></a> record component.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>the value of the <a href="#param-invito"><code>invito</code></a> record component</dd>
 </dl>
 </div>
 </section>

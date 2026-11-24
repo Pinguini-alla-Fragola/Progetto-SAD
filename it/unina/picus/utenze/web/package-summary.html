@@ -120,10 +120,27 @@ l'attore è sempre quello della sessione, mai un valore inviato dal client.</div
 <div class="col-last even-row-color class-summary class-summary-tab2">
 <div class="block">Endpoint Banco per confermare l'importazione di un file CSV di OPT.</div>
 </div>
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="InvitiOperatoriController.html" title="class in it.unina.picus.utenze.web">InvitiOperatoriController</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
+<div class="block">Reinvio del link di attivazione di un Operatore in attesa, a cura del Banco.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab4"><a href="InvitiOperatoriController.EsitoReinvio.html" title="class in it.unina.picus.utenze.web">InvitiOperatoriController.EsitoReinvio</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab4">
+<div class="block">Esito del reinvio, con gli stessi campi della risposta equivalente per le OPT.</div>
+</div>
 <div class="col-first odd-row-color class-summary class-summary-tab2"><a href="LimitatoreAccessi.html" title="class in it.unina.picus.utenze.web">LimitatoreAccessi</a></div>
 <div class="col-last odd-row-color class-summary class-summary-tab2">
 <div class="block">Limita i tentativi di accesso per email: dopo <a href="LimitatoreAccessi.html#MAX_FALLIMENTI">5</a> tentativi falliti in
 <code>FINESTRA</code> il tentativo successivo, se arriva entro <code>ATTESA</code> dall'ultimo, è rifiutato.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="LimitatoreReinvii.html" title="class in it.unina.picus.utenze.web">LimitatoreReinvii</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="block">Limita le richieste di un nuovo link di attivazione fatte senza sessione: al massimo
+<a href="LimitatoreReinvii.html#MAX_RICHIESTE">3</a> ogni <code>FINESTRA</code> per indirizzo.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab4"><a href="LimitatoreReinvii.Ammissione.html" title="class in it.unina.picus.utenze.web">LimitatoreReinvii.Ammissione</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab4">
+<div class="block">Prenotazione di un posto nel limite.</div>
 </div>
 <div class="col-first even-row-color class-summary class-summary-tab2"><a href="LimitatoreRichieste.html" title="class in it.unina.picus.utenze.web">LimitatoreRichieste</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab2">
@@ -134,47 +151,60 @@ l'attore è sempre quello della sessione, mai un valore inviato dal client.</div
 <div class="col-last odd-row-color class-summary class-summary-tab4">
 <div class="block">Prenotazione di un posto nel limite.</div>
 </div>
-<div class="col-first even-row-color class-summary class-summary-tab2"><a href="OperatoriController.html" title="class in it.unina.picus.utenze.web">OperatoriController</a></div>
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="MessaggiInvito.html" title="class in it.unina.picus.utenze.web">MessaggiInvito</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="block">Testi con cui il Banco legge l'esito della consegna di un link di attivazione, uguali per OPT e Operatori.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="OperatoriController.html" title="class in it.unina.picus.utenze.web">OperatoriController</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
 <div class="block">Riceve la richiesta con cui il Banco crea l'account personale di un Operatore.</div>
 </div>
-<div class="col-first odd-row-color class-summary class-summary-tab4"><a href="OperatoriController.NuovoOperatoreJson.html" title="class in it.unina.picus.utenze.web">OperatoriController.NuovoOperatoreJson</a></div>
-<div class="col-last odd-row-color class-summary class-summary-tab4">
+<div class="col-first even-row-color class-summary class-summary-tab4"><a href="OperatoriController.NuovoOperatoreJson.html" title="class in it.unina.picus.utenze.web">OperatoriController.NuovoOperatoreJson</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab4">
 <div class="block">Campi del modulo così come li invia il browser.</div>
 </div>
-<div class="col-first even-row-color class-summary class-summary-tab4"><a href="OperatoriController.OperatoreCreatoJson.html" title="class in it.unina.picus.utenze.web">OperatoriController.OperatoreCreatoJson</a></div>
-<div class="col-last even-row-color class-summary class-summary-tab4">
-<div class="block">Ciò che il browser riceve dopo la creazione.</div>
-</div>
-<div class="col-first odd-row-color class-summary class-summary-tab4"><a href="PrincipalePicus.html" title="class in it.unina.picus.utenze.web">PrincipalePicus</a></div>
+<div class="col-first odd-row-color class-summary class-summary-tab4"><a href="OperatoriController.OperatoreCreatoJson.html" title="class in it.unina.picus.utenze.web">OperatoriController.OperatoreCreatoJson</a></div>
 <div class="col-last odd-row-color class-summary class-summary-tab4">
+<div class="block">Ciò che il browser riceve dopo la creazione, con l'esito dell'invio del link: il token non esce mai dal
+server.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab4"><a href="PrincipalePicus.html" title="class in it.unina.picus.utenze.web">PrincipalePicus</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab4">
 <div class="block">Identità conservata nella sessione HTTP: solo ID e ruolo, nessun dato personale né credenziale.</div>
 </div>
-<div class="col-first even-row-color class-summary class-summary-tab2"><a href="RecuperoPasswordController.html" title="class in it.unina.picus.utenze.web">RecuperoPasswordController</a></div>
-<div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="RecuperoPasswordController.html" title="class in it.unina.picus.utenze.web">RecuperoPasswordController</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
 <div class="block">Recupero autonomo della password (US #33): pagina di richiesta e di cambio password, richiesta del link e
 scelta della nuova password con il link.</div>
 </div>
-<div class="col-first odd-row-color class-summary class-summary-tab4"><a href="RecuperoPasswordController.RichiestaCambioPassword.html" title="class in it.unina.picus.utenze.web">RecuperoPasswordController.RichiestaCambioPassword</a></div>
-<div class="col-last odd-row-color class-summary class-summary-tab4">
+<div class="col-first even-row-color class-summary class-summary-tab4"><a href="RecuperoPasswordController.RichiestaCambioPassword.html" title="class in it.unina.picus.utenze.web">RecuperoPasswordController.RichiestaCambioPassword</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab4">
 <div class="block">Corpo della scelta della nuova password.</div>
 </div>
-<div class="col-first even-row-color class-summary class-summary-tab4"><a href="RecuperoPasswordController.RichiestaRecupero.html" title="class in it.unina.picus.utenze.web">RecuperoPasswordController.RichiestaRecupero</a></div>
-<div class="col-last even-row-color class-summary class-summary-tab4">
+<div class="col-first odd-row-color class-summary class-summary-tab4"><a href="RecuperoPasswordController.RichiestaRecupero.html" title="class in it.unina.picus.utenze.web">RecuperoPasswordController.RichiestaRecupero</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab4">
 <div class="block">L'email resta un valore JSON generico fino al controllo del tipo: un numero o un booleano non diventano testo.</div>
 </div>
-<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="RegistrazioneOptController.html" title="class in it.unina.picus.utenze.web">RegistrazioneOptController</a></div>
-<div class="col-last odd-row-color class-summary class-summary-tab2">&nbsp;</div>
-<div class="col-first even-row-color class-summary class-summary-tab4"><a href="RegistrazioneOptController.RichiestaCreazioneOpt.html" title="class in it.unina.picus.utenze.web">RegistrazioneOptController.RichiestaCreazioneOpt</a></div>
-<div class="col-last even-row-color class-summary class-summary-tab4">&nbsp;</div>
-<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="RevocaOperatoriController.html" title="class in it.unina.picus.utenze.web">RevocaOperatoriController</a></div>
-<div class="col-last odd-row-color class-summary class-summary-tab2">&nbsp;</div>
-<div class="col-first even-row-color class-summary class-summary-tab2"><a href="TokenCsrfController.html" title="class in it.unina.picus.utenze.web">TokenCsrfController</a></div>
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="RegistrazioneOptController.html" title="class in it.unina.picus.utenze.web">RegistrazioneOptController</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab2">&nbsp;</div>
+<div class="col-first odd-row-color class-summary class-summary-tab4"><a href="RegistrazioneOptController.RichiestaCreazioneOpt.html" title="class in it.unina.picus.utenze.web">RegistrazioneOptController.RichiestaCreazioneOpt</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab4">&nbsp;</div>
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="ReinvioAttivazioneController.html" title="class in it.unina.picus.utenze.web">ReinvioAttivazioneController</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="block">Nuovo link di attivazione chiesto da chi possiede l'indirizzo, senza sessione (link scaduto o già usato).</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab4"><a href="ReinvioAttivazioneController.RichiestaReinvio.html" title="class in it.unina.picus.utenze.web">ReinvioAttivazioneController.RichiestaReinvio</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab4">
+<div class="block">L'email resta un valore JSON generico fino al controllo del tipo: un numero o un booleano non diventano testo.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="RevocaOperatoriController.html" title="class in it.unina.picus.utenze.web">RevocaOperatoriController</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab2">&nbsp;</div>
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="TokenCsrfController.html" title="class in it.unina.picus.utenze.web">TokenCsrfController</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
 <div class="block">Fornisce al client il token CSRF associato alla sessione per le operazioni mutative.</div>
 </div>
-<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="VerificaSessioneFilter.html" title="class in it.unina.picus.utenze.web">VerificaSessioneFilter</a></div>
-<div class="col-last odd-row-color class-summary class-summary-tab2">
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="VerificaSessioneFilter.html" title="class in it.unina.picus.utenze.web">VerificaSessioneFilter</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab2">
 <div class="block">A ogni richiesta conferma che l'account della sessione esista ancora e sia attivo: una revoca
 chiude la sessione alla richiesta successiva (302 al login per le pagine HTML, 401 per le API,
 come in <a href="../../shared/RichiestaApi.html" title="class in it.unina.picus.shared"><code>RichiestaApi</code></a>).</div>

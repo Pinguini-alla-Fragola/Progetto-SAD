@@ -97,7 +97,8 @@ loadScripts(document, 'script');</script>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#crea(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.utenze.interno.applicazione.ComandoCreaOperatore)" class="member-name-link">crea</a><wbr>(<a href="../../api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  <a href="ComandoCreaOperatore.html" title="class in it.unina.picus.utenze.interno.applicazione">ComandoCreaOperatore</a>&nbsp;comando)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Crea l'account e il profilo dell'Operatore, in attesa di attivazione.</div>
+<div class="block">Crea l'account e il profilo dell'Operatore, in attesa di attivazione, e prepara il link monouso di
+attivazione.</div>
 </div>
 </div>
 </div>
@@ -119,8 +120,9 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="return-type"><a href="OperatoreCreato.html" title="class in it.unina.picus.utenze.interno.applicazione">OperatoreCreato</a></span>&nbsp;<span class="element-name">crea</span><wbr><span class="parameters">(<a href="../../api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  <a href="ComandoCreaOperatore.html" title="class in it.unina.picus.utenze.interno.applicazione">ComandoCreaOperatore</a>&nbsp;comando)</span></div>
-<div class="block">Crea l'account e il profilo dell'Operatore, in attesa di attivazione. L'account non ha ancora una
-password che si possa usare: la sceglierà l'Operatore dal link di attivazione.</div>
+<div class="block">Crea l'account e il profilo dell'Operatore, in attesa di attivazione, e prepara il link monouso di
+attivazione. L'account non ha ancora una password che si possa usare: la sceglierà l'Operatore dal link.
+La spedizione dell'email spetta al chiamante, dopo il commit (<a href="ConsegnaLinkAttivazione.html" title="class in it.unina.picus.utenze.interno.applicazione"><code>ConsegnaLinkAttivazione</code></a>).</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>attore</code> - l'utente che fa la richiesta, ricavato dal server dalla sessione</dd>
