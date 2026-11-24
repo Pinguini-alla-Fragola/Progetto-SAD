@@ -47,8 +47,7 @@ import it.unina.picus.shared.SessioneDiProva;
  * /api/comunicazioni/{comunicazioneId}/ricezione} con login reale e PostgreSQL.
  *
  * I test riportano nel nome il criterio della user story #56 che verificano. L'apertura usa il
- * dettaglio della #197. In attesa della vista Banco della #144, i riscontri si leggono dalle
- * righe di {@code comunicazioni_destinatari}.
+ * dettaglio della #197 e il Banco consulta i riscontri tramite la rotta dedicata.
  *
  * Lo scenario nasce dal flusso dell'applicazione: il Banco invia la comunicazione con l'endpoint della #140 e
  * i destinatari confermano nella propria sessione. Account, profili e l'allegato del caso di
@@ -60,6 +59,7 @@ import it.unina.picus.shared.SessioneDiProva;
 class ConfermaRicezioneIntegrazioneTest {
 
     private static final String CONFERMA = "/api/comunicazioni/{id}/ricezione";
+    private static final String RISCONTRI = "/api/comunicazioni/{id}/riscontri";
 
     /** Destinatari possibili che provano a confermare una comunicazione indirizzata ad altri. */
     enum Estraneo {
@@ -147,16 +147,51 @@ class ConfermaRicezioneIntegrazioneTest {
     }
 
     @Test
-    @DisplayName("AC1 - nella stessa comunicazione un destinatario risulta confermato e l'altro ancora in attesa")
-    void ac1_confermatoEInAttesaNellaStessaComunicazione() throws Exception {
+    @DisplayName("AC2 - il Banco vede la conferma e il destinatario ancora in attesa")
+    void ac2_confermatoEInAttesaNellaStessaComunicazione() throws Exception {
         UUID id = inviaAGruppo("GRUPPO_OPT", optA, optB);
 
-        conferma(optA, id);
+        Instant primaConferma = conferma(optA, id);
+        come(optB).get("/api/comunicazioni/{id}", id).andExpect(status().isOk());
+        assertThat(conferma(optA, id)).isEqualTo(primaConferma);
 
-        assertThat(confermataIl(id, optA)).isNotNull();
-        assertThat(confermataIl(id, optB)).isNull();
+        come(banco).get(RISCONTRI, id)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].destinatarioId").value(optA.toString()))
+                .andExpect(jsonPath("$[0].nomeVisualizzato").value("OPT A"))
+                .andExpect(jsonPath("$[0].confermataIl").value(primaConferma.toString()))
+                .andExpect(jsonPath("$[1].destinatarioId").value(optB.toString()))
+                .andExpect(jsonPath("$[1].nomeVisualizzato").value("OPT B"))
+                .andExpect(jsonPath("$[1].confermataIl").isEmpty());
         daConfermare(optA).andExpect(jsonPath("$.daConfermare").value(0));
         daConfermare(optB).andExpect(jsonPath("$.daConfermare").value(1));
+    }
+
+    @Test
+    void riscontriRiservatiAlBanco() throws Exception {
+        UUID id = inviaAGruppo("GRUPPO_OPT", optA, optB);
+        UUID assente = UUID.randomUUID();
+
+        mvc.perform(get(RISCONTRI, id)).andExpect(status().isUnauthorized());
+        come(optA).get(RISCONTRI, id).andExpect(status().isForbidden());
+        come(optEstranea).get(RISCONTRI, id).andExpect(status().isForbidden());
+        come(operatoreA).get(RISCONTRI, assente).andExpect(status().isForbidden());
+        come(banco).get(RISCONTRI, assente).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void preservaINomiDeiDestinatariRevocati() throws Exception {
+        UUID id = inviaAGruppo("GRUPPO_OPERATORI", operatoreA, operatoreB);
+        Instant primaConferma = conferma(operatoreB, id);
+        jdbc.update("update utenze_account set stato = 'REVOCATO' where id = ?", operatoreB);
+
+        come(banco).get(RISCONTRI, id)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[1].destinatarioId").value(operatoreB.toString()))
+                .andExpect(jsonPath("$[1].nomeVisualizzato").value("Operatore B"))
+                .andExpect(jsonPath("$[1].confermataIl").value(primaConferma.toString()));
     }
 
     @Test

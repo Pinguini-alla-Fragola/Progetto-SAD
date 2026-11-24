@@ -20,11 +20,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import it.unina.picus.utenze.api.NomiAccountApi;
 import it.unina.picus.utenze.api.OperazioneUtenzaNonConsentitaException;
 import it.unina.picus.utenze.api.UtenzaNonTrovataException;
 import it.unina.picus.utenze.api.UtenzeApi;
 import it.unina.picus.utenze.interno.persistenza.AccountJpa;
 import it.unina.picus.utenze.interno.persistenza.AccountRepository;
+import it.unina.picus.utenze.interno.persistenza.AccountRepository.NomeAccount;
 import it.unina.picus.utenze.interno.persistenza.OperatoreMisuraJpa;
 import it.unina.picus.utenze.interno.persistenza.ProfiloOperatoreJpa;
 import it.unina.picus.utenze.interno.persistenza.ProfiloOperatoreRepository;
@@ -39,7 +41,7 @@ import jakarta.persistence.LockModeType;
 @Service
 @Profile("!skeleton")
 @Transactional
-class UtenzeService implements UtenzeApi {
+class UtenzeService implements UtenzeApi, NomiAccountApi {
 
     static final int LUNGHEZZA_MAX_EMAIL = 254;
     static final int LUNGHEZZA_MAX_PASSWORD_BYTE = 72;
@@ -126,6 +128,17 @@ class UtenzeService implements UtenzeApi {
         }
         // Anche un eventuale link di recupero password ancora valido non deve sopravvivere alla revoca.
         tokensRecupero.invalidaTokenAttiviPerAccount(accountId, ora);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Transactional(readOnly = true)
+    public Map<UUID, String> nomiVisualizzati(Set<UUID> accountIds) {
+        if (accountIds.isEmpty()) {
+            return Map.of();
+        }
+        return accounts.findNomiByIdIn(accountIds).stream()
+                .collect(Collectors.toUnmodifiableMap(NomeAccount::getId, NomeAccount::getNome));
     }
 
     @Override
