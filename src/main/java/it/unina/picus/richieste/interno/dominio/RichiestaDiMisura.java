@@ -23,7 +23,31 @@ import java.util.UUID;
 public record RichiestaDiMisura(
         UUID id, UUID titolareId, long misuraId, TipoDestinatario tipoDestinatario,
         String comuneCodice, String description, Instant inviataIl, StatoRichiesta stato,
-        UUID erogatoreId, DettagliAccordo accordo, UUID riferimentoInvio, AmbitoErogazione erogatoreAmbito) {
+        UUID erogatoreId, DettagliAccordo accordo, UUID riferimentoInvio, AmbitoErogazione erogatoreAmbito,
+        String motivoAnnullamento) {
+
+    /**
+     * Rappresenta una pratica priva di motivo di annullamento registrato.
+     *
+     * @param id identificativo della pratica
+     * @param titolareId account della OPT richiedente
+     * @param misuraId misura richiesta
+     * @param tipoDestinatario persona o nucleo a cui è destinata la misura
+     * @param comuneCodice comune della richiesta
+     * @param description descrizione facoltativa del bisogno
+     * @param inviataIl istante dell'invio
+     * @param stato stato della pratica
+     * @param erogatoreId eventuale assegnatario
+     * @param accordo eventuali dettagli concordati
+     * @param riferimentoInvio eventuale riferimento idempotente dell'invio
+     * @param erogatoreAmbito ambito dell'eventuale assegnazione
+     */
+    public RichiestaDiMisura(UUID id, UUID titolareId, long misuraId, TipoDestinatario tipoDestinatario,
+            String comuneCodice, String description, Instant inviataIl, StatoRichiesta stato,
+            UUID erogatoreId, DettagliAccordo accordo, UUID riferimentoInvio, AmbitoErogazione erogatoreAmbito) {
+        this(id, titolareId, misuraId, tipoDestinatario, comuneCodice, description, inviataIl, stato,
+                erogatoreId, accordo, riferimentoInvio, erogatoreAmbito, null);
+    }
 
     /** Crea la pratica nel solo stato ammesso all'invio. */
     public static RichiestaDiMisura inviata(UUID titolareId, DatiInvio dati, Instant istante, UUID riferimento) {
@@ -86,6 +110,23 @@ public record RichiestaDiMisura(
             throw new ConflittoRichiestaException("Serve una richiesta Presa in carico o In programmazione");
         }
         return transita(StatoRichiesta.RIFIUTATA, erogatoreId, erogatoreAmbito, null);
+    }
+
+    /**
+     * Applica un annullamento autorizzato conservando l'assegnazione e i dettagli dell'accordo.
+     *
+     * @param motivo testo indicato da chi annulla, facoltativo da Creata
+     * @return pratica Annullata, con il motivo originale in caso di ripetizione
+     * @throws DatiRichiestaNonValidiException se al primo annullamento il motivo è obbligatorio
+     *         e assente, oppure contiene caratteri non ammessi
+     */
+    public RichiestaDiMisura annulla(String motivo) {
+        if (RegoleAnnullamento.valuta(stato, motivo) == RegoleAnnullamento.Decisione.GIA_ANNULLATA) {
+            return this;
+        }
+        return new RichiestaDiMisura(id, titolareId, misuraId, tipoDestinatario, comuneCodice, description,
+                inviataIl, StatoRichiesta.ANNULLATA, erogatoreId, accordo, riferimentoInvio, erogatoreAmbito,
+                RegoleAnnullamento.motivoDaRegistrare(motivo));
     }
 
     private RichiestaDiMisura transita(StatoRichiesta nuovoStato, UUID accountId,

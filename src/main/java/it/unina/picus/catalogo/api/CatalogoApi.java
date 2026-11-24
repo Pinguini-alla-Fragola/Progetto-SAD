@@ -12,7 +12,7 @@ import java.util.UUID;
  * Fornisce i riferimenti alle misure, ai comuni e all'offerta territoriale.
  * I comandi di modifica devono verificare sul server il ruolo e, per l'offerta, la titolarità.
  */
-public interface CatalogoApi extends ConsultazioneCatalogoApi, RicercaErogatoriApi {
+public interface CatalogoApi extends ConsultazioneCatalogoApi, RicercaErogatoriApi, GestioneOffertaOptApi {
 
     /**
      * Elenca le misure selezionabili per una nuova richiesta o dichiarazione di offerta.
@@ -91,36 +91,16 @@ public interface CatalogoApi extends ConsultazioneCatalogoApi, RicercaErogatoriA
      */
     Misura aggiornaMisura(IdentitaAutenticata attore, long misuraId, DatiMisura dati, boolean attiva);
 
-    /**
-     * Consulta l'offerta corrente di una OPT come titolare o Banco.
-     *
-     * @param attore identità verificata della OPT titolare o del Banco di coordinamento
-     * @param optId account dell'OPT di cui consultare l'offerta
-     * @return misure e caratteristiche dell'offerta, eventualmente nessuna
-     * @throws SecurityException se l'attore non è autorizzato
-     * @throws NoSuchElementException se l'account OPT è sconosciuto
-     */
+    /** {@inheritDoc} */
+    @Override
     List<OffertaOpt> elencoOffertaOpt(IdentitaAutenticata attore, UUID optId);
 
-    /**
-     * Dichiara o aggiorna l'offerta della OPT autenticata per una misura attiva.
-     *
-     * @param attore identità verificata dell'account organizzativo titolare
-     * @param misuraId identificativo della misura offerta
-     * @param tramiteProfessionista indica se la OPT si avvale di un professionista esterno
-     * @throws SecurityException se l'attore non è una OPT autorizzata
-     * @throws IllegalArgumentException se la misura è sconosciuta o non è attiva
-     */
+    /** {@inheritDoc} */
+    @Override
     void registraOffertaOpt(IdentitaAutenticata attore, long misuraId, boolean tramiteProfessionista);
 
-    /**
-     * Ritira l'offerta della OPT autenticata per la misura, conservando i riferimenti storici.
-     *
-     * @param attore identità verificata dell'account organizzativo titolare
-     * @param misuraId identificativo della misura da ritirare
-     * @throws SecurityException se l'attore non è una OPT autorizzata
-     * @throws NoSuchElementException se la OPT non ha un'offerta corrente per la misura
-     */
+    /** {@inheritDoc} */
+    @Override
     void ritiraOffertaOpt(IdentitaAutenticata attore, long misuraId);
 
     /**
