@@ -8,13 +8,12 @@ import static it.unina.picus.utenze.web.OperatoriDiProva.MESSAGGIO_NUOVO_LINK;
 import static it.unina.picus.utenze.web.OperatoriDiProva.NOME_VISUALIZZATO;
 import static it.unina.picus.utenze.web.OperatoriDiProva.PASSWORD;
 import static it.unina.picus.utenze.web.OperatoriDiProva.attendi;
+import static it.unina.picus.utenze.web.OperatoriDiProva.attendiReinviiConclusi;
 import static it.unina.picus.utenze.web.OperatoriDiProva.impronta;
-import static it.unina.picus.utenze.web.OperatoriDiProva.linkConsegnati;
 import static it.unina.picus.utenze.web.OperatoriDiProva.ultimoLink;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -46,6 +45,7 @@ import com.jayway.jsonpath.JsonPath;
 import it.unina.picus.shared.DatiSintetici;
 import it.unina.picus.shared.IntegrazionePostgresql;
 import it.unina.picus.shared.InvioEmail;
+import it.unina.picus.utenze.interno.applicazione.ReinvioLinkSuRichiesta;
 import it.unina.picus.utenze.web.OperatoriDiProva.OperatoreDiProva;
 
 /**
@@ -54,7 +54,8 @@ import it.unina.picus.utenze.web.OperatoriDiProva.OperatoreDiProva;
  * stessa risposta senza alcun link per indirizzi non registrati o di account già attivi o revocati.
  *
  * <p>La richiesta senza sessione risponde subito e il server prepara e spedisce il link in secondo piano: i test
- * attendono l'email sullo spy di {@link InvioEmail} e poi lo stato dei link nel database. Ogni test usa indirizzi
+ * attendono l'email sullo spy di {@link InvioEmail} e poi lo stato dei link nel database; quando la richiesta non
+ * deve avere effetti, attendono che la coda del lavoro in secondo piano sia svuotata prima di verificarlo. Ogni test usa indirizzi
  * propri, perché il limite di tre richieste ogni cinque minuti per indirizzo vale per tutto il contesto. Il
  * reinvio da parte del Banco, che condivide le stesse regole sui link, è verificato insieme al criterio 7.</p>
  */
@@ -67,6 +68,9 @@ class ReinvioAttivazioneOperatoreTest {
 
     @Autowired
     private JdbcTemplate jdbc;
+
+    @Autowired
+    private ReinvioLinkSuRichiesta reinvio;
 
     @MockitoSpyBean
     private InvioEmail posta;
@@ -288,9 +292,10 @@ class ReinvioAttivazioneOperatoreTest {
         }
 
         /**
-         * Confronta la risposta per l'indirizzo con quella per un Operatore in attesa, chiesta subito dopo; attende
-         * l'email di quest'ultimo, segno che il lavoro in secondo piano è stato svolto, e verifica che all'indirizzo
-         * non sia partito nient'altro oltre alle email già ricevute.
+         * Confronta la risposta per l'indirizzo con quella per un Operatore in attesa, chiesta subito dopo. Poi
+         * attende che la coda del lavoro in secondo piano sia svuotata, cioè che anche la richiesta per l'indirizzo
+         * sotto test sia stata elaborata fino in fondo, e solo allora verifica email e link: all'indirizzo non è
+         * partito nient'altro oltre alle email già ricevute e l'unico link nuovo è quello dell'Operatore in attesa.
          */
         private void assertStessaRispostaSenzaLink(String email, int emailGiaRicevute) throws Exception {
             String inAttesa = indirizzo("riferimento");
@@ -306,8 +311,9 @@ class ReinvioAttivazioneOperatoreTest {
                     .isEqualTo(riferimento.getResponse().getContentAsString());
             assertThat(risposta.getResponse().getContentType()).isEqualTo(riferimento.getResponse().getContentType());
 
-            linkConsegnati(posta, inAttesa, 2);
-            verify(posta, after(2_000).times(emailGiaRicevute)).inviaLinkAttivazione(eq(email), anyString(), anyString());
+            attendiReinviiConclusi(reinvio);
+            verify(posta, times(emailGiaRicevute)).inviaLinkAttivazione(eq(email), anyString(), anyString());
+            verify(posta, times(2)).inviaLinkAttivazione(eq(inAttesa), anyString(), anyString());
             // L'unico link in più è quello dell'Operatore in attesa.
             assertThat(operatori.conta("select count(*) from utenze_token_attivazione")).isEqualTo(tokenPrima + 1);
         }

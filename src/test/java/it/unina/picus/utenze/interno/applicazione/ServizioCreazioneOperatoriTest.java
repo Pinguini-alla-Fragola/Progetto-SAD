@@ -20,7 +20,9 @@ import static org.mockito.Mockito.verify;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -37,6 +39,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import it.unina.picus.shared.AccessoNegatoException;
 import it.unina.picus.shared.DatiSintetici;
@@ -44,12 +47,15 @@ import it.unina.picus.shared.IntegrazionePostgresql;
 import it.unina.picus.shared.InvioEmail;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
+import it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService.DatiInvioAttivazione;
+import it.unina.picus.utenze.interno.persistenza.AccountRepository;
 import it.unina.picus.utenze.web.OperatoriDiProva;
 
 /**
  * Verifica dei servizi di creazione e attivazione degli Operatori (task #154, storia #27) su PostgreSQL 17 in
  * Docker, dove contano i vincoli di unicità e i lock pessimistici: creazioni contemporanee con la stessa email o lo
- * stesso codice fiscale (criterio 4), uso contemporaneo dello stesso link monouso (criteri 5 e 6) e controllo del
+ * stesso codice fiscale (criterio 4), uso contemporaneo dello stesso link monouso e link sostituito da un reinvio
+ * mentre l'attivazione attende il lock (criteri 5 e 6), e controllo del
  * ruolo anche quando il servizio è chiamato senza passare dal web (criterio 9).
  *
  * <p>Nelle gare due thread partono insieme da una barriera; dall'esito si ricava quale comando ha vinto e lo si
@@ -78,6 +84,15 @@ class ServizioCreazioneOperatoriTest {
 
     @Autowired
     private PasswordEncoder encoder;
+
+    @Autowired
+    private ConclusioneReinvio conclusione;
+
+    @Autowired
+    private AccountRepository accounts;
+
+    @Autowired
+    private TransactionTemplate transazioni;
 
     @MockitoSpyBean
     private InvioEmail posta;
@@ -147,7 +162,7 @@ class ServizioCreazioneOperatoriTest {
     }
 
     @Nested
-    @DisplayName("Criteri 5 e 6: il link è monouso anche con due attivazioni contemporanee")
+    @DisplayName("Criteri 5 e 6: il link è monouso e un link sostituito non attiva, anche durante un'attivazione in corso")
     class AttivazioniContemporanee {
 
         @RepeatedTest(value = 3, name = "ripetizione {currentRepetition} di {totalRepetitions}")
@@ -177,6 +192,43 @@ class ServizioCreazioneOperatoriTest {
             assertThat(operatori.stato(creato.id())).isEqualTo("ATTIVO");
             assertThat(operatori.usato(link)).isTrue();
         }
+
+        @Test
+        @DisplayName("Link sostituito da un reinvio mentre l'attivazione attende il lock: negato, account in attesa, nuovo link valido")
+        void linkSostituitoDuranteLAttivazione() throws Exception {
+            OperatoreCreato creato = creazione.crea(banco, comando("sostituito@picus.test", CF_A));
+            UUID id = creato.id();
+            String vecchio = creato.invito().tokenInChiaro();
+            DatiInvioAttivazione nuovo = attivazione.preparaReinvio(id, RuoloUtente.OPERATORE);
+
+            // Il test tiene il lock sull'account; l'attivazione con il vecchio link parte e si ferma su quel lock.
+            // Solo quando PostgreSQL la mostra in attesa il reinvio sostituisce il link, nella stessa transazione.
+            CompletableFuture<Void> tentativo = transazioni.execute(stato -> {
+                accounts.findByIdForUpdate(id).orElseThrow();
+                CompletableFuture<Void> avviato = CompletableFuture.runAsync(
+                        () -> attivazione.attivaAccount(vecchio, PRIMA_PASSWORD));
+                OperatoriDiProva.attendi("attivazione in attesa del lock sull'account",
+                        () -> avviato.isDone() || sessioniInAttesaDiLock() > 0);
+                assertThat(avviato).as("l'attivazione deve attendere il lock, non concludersi prima").isNotDone();
+                conclusione.concludi(id, nuovo, true);
+                return avviato;
+            });
+
+            assertThatThrownBy(() -> tentativo.get(30, SECONDS))
+                    .isInstanceOf(ExecutionException.class)
+                    .cause()
+                    .isExactlyInstanceOf(TokenAttivazioneNonValidoException.class)
+                    .hasMessage("Il link di attivazione è scaduto o è già stato utilizzato.");
+
+            assertThat(operatori.stato(id)).isEqualTo("IN_ATTESA_DI_ATTIVAZIONE");
+            assertThat(encoder.matches(PRIMA_PASSWORD, operatori.passwordHash(id))).isFalse();
+            assertThat(operatori.usato(vecchio)).isTrue();
+            assertThat(operatori.impronteAttive(id)).containsExactly(impronta(nuovo.tokenInChiaro()));
+
+            attivazione.attivaAccount(nuovo.tokenInChiaro(), SECONDA_PASSWORD);
+            assertThat(operatori.stato(id)).isEqualTo("ATTIVO");
+            assertThat(encoder.matches(SECONDA_PASSWORD, operatori.passwordHash(id))).isTrue();
+        }
     }
 
     @Nested
@@ -204,6 +256,14 @@ class ServizioCreazioneOperatoriTest {
             assertThat(operatori.conta("select count(*) from utenze_token_attivazione")).isZero();
             verify(posta, never()).inviaLinkAttivazione(anyString(), anyString(), anyString());
         }
+    }
+
+    /** Sessioni del database di prova ferme in attesa di un lock, esclusa quella che esegue la query. */
+    private int sessioniInAttesaDiLock() {
+        return operatori.conta("""
+                select count(*) from pg_stat_activity
+                where datname = current_database() and pid <> pg_backend_pid() and wait_event_type = 'Lock'
+                """);
     }
 
     private ComandoCreaOperatore comando(String email, String codiceFiscale) {

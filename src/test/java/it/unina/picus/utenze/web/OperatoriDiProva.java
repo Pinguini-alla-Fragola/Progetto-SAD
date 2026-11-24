@@ -25,12 +25,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.BooleanSupplier;
 
 import org.mockito.ArgumentCaptor;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.test.util.AopTestUtils;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
@@ -41,6 +44,7 @@ import com.jayway.jsonpath.JsonPath;
 import tools.jackson.databind.json.JsonMapper;
 
 import it.unina.picus.shared.InvioEmail;
+import it.unina.picus.utenze.interno.applicazione.ReinvioLinkSuRichiesta;
 
 /**
  * Strumenti comuni ai test della #154 (storia #27): modulo di creazione, chiamate HTTP, link ricevuti
@@ -220,6 +224,22 @@ public final class OperatoriDiProva {
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    /**
+     * Attende la fine del lavoro in secondo piano dei nuovi link chiesti con l'email: la coda è vuota e ogni
+     * richiesta accodata finora, compresa quella sotto test, è stata elaborata fino all'ultimo passo. Serve quando
+     * una richiesta non deve avere effetti: senza questo segnale la verifica potrebbe precedere l'elaborazione.
+     */
+    public static void attendiReinviiConclusi(ReinvioLinkSuRichiesta reinvio) {
+        // Il bersaglio va tipizzato come Object: un tipo generico farebbe scegliere getField(Class, String).
+        Object bersaglio = AopTestUtils.getUltimateTargetObject(reinvio);
+        Object esecutore = ReflectionTestUtils.getField(bersaglio, "esecutore");
+        assertThat(esecutore).isInstanceOf(ThreadPoolExecutor.class);
+        ThreadPoolExecutor coda = (ThreadPoolExecutor) esecutore;
+        // getTaskCount comprende le richieste accodate, in corso e concluse: l'uguaglianza vale solo a lavoro finito.
+        attendi("richieste di nuovo link tutte elaborate",
+                () -> coda.getQueue().isEmpty() && coda.getCompletedTaskCount() == coda.getTaskCount());
     }
 
     /** Attende che la condizione diventi vera, per il lavoro che il server svolge in secondo piano. */
