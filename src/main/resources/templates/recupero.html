@@ -44,19 +44,22 @@
             </fieldset>
         </form>
 
-        <!-- Il cambio password si attiva con il task #161: finché non esiste la conferma resta una vista inattiva. -->
-        <form id="cambio-password" method="post" action="/recupera" th:if="${cambioPassword}" data-form-anteprima>
-            <fieldset class="campi-inattivi" disabled>
+        <form id="cambio-password" method="post" action="/recupera" th:if="${cambioPassword}"
+              data-endpoint="/api/auth/recupera/conferma">
+            <fieldset>
                 <input type="hidden" name="token" th:value="${token}">
                 <div class="form-group">
                     <label class="form-label" for="password">Nuova password</label>
                     <input id="password" class="form-control" name="nuovaPassword" type="password" required
-                           minlength="12" maxlength="72" autocomplete="new-password" aria-describedby="password-help">
+                           minlength="12" maxlength="72" autocomplete="new-password"
+                           aria-describedby="password-help errore-password">
                     <p class="form-text" id="password-help">Usa almeno 12 caratteri.</p>
+                    <p id="errore-password" class="picus-errore" role="alert" hidden></p>
                 </div>
-                <span class="azione-inattiva" data-funzione-inattiva>
-                    <button type="submit" class="btn btn-primary btn-block">Salva la nuova password</button>
-                </span>
+                <button type="submit" class="btn btn-primary btn-block">Salva la nuova password</button>
+                <p id="esito" class="picus-esito" role="status"></p>
+                <p id="vai-al-login" hidden><a href="/login">Vai all’accesso</a></p>
+                <p id="nuova-richiesta" hidden><a href="/recupera">Richiedi un nuovo link</a></p>
             </fieldset>
         </form>
     </div>
