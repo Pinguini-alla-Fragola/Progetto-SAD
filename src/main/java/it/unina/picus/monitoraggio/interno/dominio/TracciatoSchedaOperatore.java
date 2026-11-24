@@ -10,8 +10,10 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
- * Tracciato provvisorio di primo invio TM-OP-01. I conteggi sono indipendenti
- * e l'elenco definitivo delle categorie e dei campi obbligatori è in raffinamento (#41).
+ * Tracciato provvisorio di primo invio TM-OP-01. La versione 0.1 ammette le categorie
+ * dichiarate con un codice da 1 a 64 caratteri, alfanumerico all'inizio e poi anche
+ * con punti, trattini e underscore. I conteggi sono indipendenti. Il catalogo definitivo
+ * delle categorie e dei campi obbligatori è in raffinamento (#41).
  */
 public final class TracciatoSchedaOperatore {
 

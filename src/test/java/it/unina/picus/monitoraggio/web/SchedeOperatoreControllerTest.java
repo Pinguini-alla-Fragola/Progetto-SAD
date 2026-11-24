@@ -17,13 +17,19 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
 
+import it.unina.picus.monitoraggio.api.MonitoraggioApi;
+import it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre;
 import it.unina.picus.shared.DatiSintetici;
+import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
+import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
 
 @SpringBootTest(properties = "spring.datasource.url=${PICUS_TEST_SCHEDE_DB:jdbc:h2:mem:schede-operatore}")
 @AutoConfigureMockMvc
@@ -31,11 +37,14 @@ import it.unina.picus.shared.DatiSintetici;
 class SchedeOperatoreControllerTest {
 
     private static final String PERCORSO = "/api/monitoraggio/schede-operatore";
+    private static final String RIEPILOGO = PERCORSO + "/ricevute/riepilogo";
 
     @Autowired
     private MockMvc mvc;
     @Autowired
     private JdbcTemplate jdbc;
+    @Autowired
+    private ApplicationContext contesto;
 
     private DatiSintetici dati;
     private UUID operatore;
@@ -82,12 +91,81 @@ class SchedeOperatoreControllerTest {
                 String.class, operatore)).isEqualTo("\uD83D\uDE00");
     }
 
+    @Test
+    void riepilogaLeSchedeSalvateConTotaliEsattiAncheDopoLaRevoca() throws Exception {
+        UUID banco = dati.banco("Banco sintetico");
+        UUID collega = dati.operatore("Collega sintetico", "ESTERNO_PAGATO_BANCO", "napoli", false);
+        invia(operatore, "1", """
+                {"ore":1,"costoOrarioLordo":1,"conteggi":{"minori":9223372036854775807,"famiglie":0}}
+                """).andExpect(status().isCreated());
+        invia(collega, "1", """
+                {"ore":1,"costoOrarioLordo":1,"conteggi":{"minori":1}}
+                """).andExpect(status().isCreated());
+        invia(collega, "2", """
+                {"ore":1,"costoOrarioLordo":1,"conteggi":{"minori":42,"persone":1}}
+                """).andExpect(status().isCreated());
+        dati.impostaStatoAccount(operatore, "REVOCATO");
+
+        mvc.perform(riepilogo("1").with(user(banco.toString()).roles("BANCO")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.schede.length()").value(2))
+                .andExpect(jsonPath("$.conteggi.minori").isString())
+                .andExpect(jsonPath("$.conteggi.minori").value("9223372036854775808"))
+                .andExpect(jsonPath("$.conteggi.famiglie").isString())
+                .andExpect(jsonPath("$.conteggi.famiglie").value("0"))
+                .andExpect(jsonPath("$.conteggi.persone").doesNotHaveJsonPath());
+        mvc.perform(get(PERCORSO + "/ricevute").param("anno", "2025").param("trimestre", "1")
+                        .with(user(banco.toString()).roles("BANCO")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(2));
+    }
+
+    @Test
+    void esponeIlRiepilogoVuotoAttraversoIlContrattoApplicativo() {
+        UUID banco = dati.banco("Banco sintetico");
+
+        var riepilogo = contesto.getBean(MonitoraggioApi.class)
+                .riepilogaSchede(new IdentitaAutenticata(banco, RuoloUtente.BANCO), new Trimestre(2025, 4));
+
+        assertThat(riepilogo.schede()).isEmpty();
+        assertThat(riepilogo.conteggi()).isEmpty();
+    }
+
+    @Test
+    void riservaIlRiepilogoAlBancoAutenticato() throws Exception {
+        UUID opt = dati.opt("OPT sintetica", "napoli");
+
+        mvc.perform(riepilogo("1")).andExpect(status().isUnauthorized());
+        mvc.perform(riepilogo("1").with(user(operatore.toString()).roles("OPERATORE")))
+                .andExpect(status().isForbidden());
+        mvc.perform(riepilogo("1").with(user(opt.toString()).roles("OPT")))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void richiedeUnPeriodoValidoPerIlRiepilogo() throws Exception {
+        UUID banco = dati.banco("Banco sintetico");
+
+        mvc.perform(get(RIEPILOGO).param("trimestre", "5").with(user(banco.toString()).roles("BANCO")))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.campi.anno").isString())
+                .andExpect(jsonPath("$.campi.trimestre").isString());
+    }
+
+    private static MockHttpServletRequestBuilder riepilogo(String trimestre) {
+        return get(RIEPILOGO).param("anno", "2025").param("trimestre", trimestre);
+    }
+
     private ResultActions invia(String campo, String valoreJson) throws Exception {
-        return mvc.perform(post(PERCORSO).param("anno", "2025").param("trimestre", "1")
-                .with(user(operatore.toString()).roles("OPERATORE")).with(csrf())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                        {"%s":"%s","ore":1,"costoOrarioLordo":1,"conteggi":{}}
-                        """.formatted(campo, valoreJson)));
+        return invia(operatore, "1", """
+                {"%s":"%s","ore":1,"costoOrarioLordo":1,"conteggi":{}}
+                """.formatted(campo, valoreJson));
+    }
+
+    private ResultActions invia(UUID titolare, String trimestre, String corpo) throws Exception {
+        return mvc.perform(post(PERCORSO).param("anno", "2025").param("trimestre", trimestre)
+                .with(user(titolare.toString()).roles("OPERATORE")).with(csrf())
+                .contentType(MediaType.APPLICATION_JSON).content(corpo));
     }
 }

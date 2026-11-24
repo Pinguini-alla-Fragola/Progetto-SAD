@@ -100,7 +100,8 @@ class SecurityConfig {
                 .with(new LoginJsonConfigurer(json), Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/api/auth/csrf", "/recupera", "/attiva").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/attiva", "/api/auth/attiva/**", "/api/auth/recupera").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/attiva", "/api/auth/attiva/**", "/api/auth/recupera",
+                                "/api/auth/recupera/conferma").permitAll()
                         .requestMatchers("/login", "/error", "/css/**", "/js/**", "/img/**", "/fonts/**", "/favicon.ico").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/opt", "/api/opt/*/revoca", "/api/opt/*/reinvia-invito", "/api/operatori/*/revoca",
                                 "/api/operatori/*/reinvia-invito").hasRole("BANCO")
@@ -138,7 +139,8 @@ class SecurityConfig {
                         .requestMatchers("/api/monitoraggio/schede-operatore",
                                 "/api/monitoraggio/schede-operatore/modulo",
                                 "/api/monitoraggio/schede-operatore/mie").hasRole("OPERATORE")
-                        .requestMatchers("/api/monitoraggio/schede-operatore/ricevute").hasRole("BANCO")
+                        .requestMatchers("/api/monitoraggio/schede-operatore/ricevute",
+                                "/api/monitoraggio/schede-operatore/ricevute/riepilogo").hasRole("BANCO")
                         .requestMatchers("/api/monitoraggio/schede-operatore/*").hasAnyRole("BANCO", "OPERATORE")
                         .anyRequest().authenticated())
                 .exceptionHandling(eccezioni -> eccezioni

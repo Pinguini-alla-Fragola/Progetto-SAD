@@ -34,4 +34,15 @@ public interface AccountRepository extends JpaRepository<AccountJpa, UUID> {
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("update AccountJpa a set a.passwordHash = :hash where a.id = :id")
     int aggiornaHash(@Param("id") UUID id, @Param("hash") String hash);
+
+    /**
+     * Sostituisce l'hash solo se è ancora quello che chi aggiorna ha letto e verificato. Serve all'aggiornamento
+     * del costo dell'hash al login: se nel frattempo la password è stata cambiata, l'hash nuovo non va sovrascritto
+     * con quello della password vecchia.
+     *
+     * @return 1 se l'hash è stato sostituito, 0 se nel frattempo è cambiato
+     */
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("update AccountJpa a set a.passwordHash = :nuovo where a.id = :id and a.passwordHash = :atteso")
+    int aggiornaHashSeInvariato(@Param("id") UUID id, @Param("atteso") String atteso, @Param("nuovo") String nuovo);
 }

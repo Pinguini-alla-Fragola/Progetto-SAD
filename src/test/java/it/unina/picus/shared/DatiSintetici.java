@@ -32,6 +32,9 @@ public final class DatiSintetici {
      * preparando o leggendo dati nello stesso momento.</p>
      */
     public void svuota() {
+        jdbc.update("delete from comunicazioni_allegati");
+        jdbc.update("delete from comunicazioni_destinatari");
+        jdbc.update("delete from comunicazioni");
         jdbc.update("delete from comunicazioni_avvisi_operativi");
         jdbc.update("delete from richieste_contatti_disponibilita");
         jdbc.update("delete from richieste");
