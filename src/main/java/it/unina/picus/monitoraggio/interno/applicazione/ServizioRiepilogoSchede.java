@@ -9,6 +9,7 @@ import it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeRendicontabili.
 import it.unina.picus.monitoraggio.interno.dominio.RegoleAccessoScheda;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 
+import java.math.BigInteger;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -51,7 +52,6 @@ public final class ServizioRiepilogoSchede {
      * @throws NullPointerException se manca il trimestre
      * @throws IllegalStateException se l'archivio restituisce un progressivo duplicato per
      *                               lo stesso operatore nel trimestre richiesto
-     * @throws ArithmeticException se un totale supera la capacità del tipo {@code long}
      * @see MonitoraggioApi#riepilogaSchede
      */
     public RiepilogoTrimestre riepilogaSchede(IdentitaAutenticata attore, Trimestre trimestre) {
@@ -74,10 +74,10 @@ public final class ServizioRiepilogoSchede {
             ultimeVersioni.merge(operatoreId, versione, VERSIONE_PIU_RECENTE);
         }
 
-        Map<String, Long> totali = new HashMap<>();
+        Map<String, BigInteger> totali = new HashMap<>();
         for (VersioneInviata versione : ultimeVersioni.values()) {
             versione.conteggiDichiarati().forEach((categoria, valore) ->
-                    totali.merge(categoria, valore, Math::addExact));
+                    totali.merge(categoria, BigInteger.valueOf(valore), BigInteger::add));
         }
 
         List<SchedaSintesi> schede = ultimeVersioni.values().stream()

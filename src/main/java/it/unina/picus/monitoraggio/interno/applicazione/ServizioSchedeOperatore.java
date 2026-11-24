@@ -1,11 +1,9 @@
 package it.unina.picus.monitoraggio.interno.applicazione;
 
-import it.unina.picus.monitoraggio.api.MonitoraggioApi.DatiSchedaOperatore;
-import it.unina.picus.monitoraggio.api.MonitoraggioApi.SchedaOperatore;
-import it.unina.picus.monitoraggio.api.MonitoraggioApi.SchedaSintesi;
-import it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre;
-import it.unina.picus.monitoraggio.api.SchedeOperatoreApi;
+import it.unina.picus.monitoraggio.api.ConteggiOptApi;
+import it.unina.picus.monitoraggio.api.MonitoraggioApi;
 import it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeOperatore;
+import it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeRendicontabili;
 import it.unina.picus.monitoraggio.interno.dominio.DatiSchedaNonValidiException;
 import it.unina.picus.monitoraggio.interno.dominio.RegoleAccessoScheda;
 import it.unina.picus.monitoraggio.interno.dominio.TracciatoSchedaOperatore;
@@ -23,26 +21,46 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
-/** Coordina il primo invio e la consultazione autorizzata delle schede personali. */
+/** Coordina l'invio, la consultazione e il riepilogo delle schede personali. */
 @Service
 @Profile("!skeleton")
 @Transactional(readOnly = true)
-public class ServizioSchedeOperatore implements SchedeOperatoreApi {
+public class ServizioSchedeOperatore implements MonitoraggioApi {
 
     private static final ZoneId FUSO_RENDICONTAZIONE = ZoneId.of("Europe/Rome");
 
     private final ArchivioSchedeOperatore archivio;
+    private final ServizioRiepilogoSchede riepilogo;
+    private final ConteggiOptApi conteggiOpt;
     private final Clock orologio;
 
     /**
      * Crea il servizio applicativo delle schede personali.
      *
      * @param archivio persistenza delle schede personali
+     * @param archivioRendicontabile sorgente delle schede accettate per il riepilogo
+     * @param conteggiOpt servizio dei conteggi trimestrali delle OPT
      * @param orologio sorgente dell'istante di invio
      */
-    public ServizioSchedeOperatore(ArchivioSchedeOperatore archivio, Clock orologio) {
+    public ServizioSchedeOperatore(ArchivioSchedeOperatore archivio, ArchivioSchedeRendicontabili archivioRendicontabile,
+                                    ConteggiOptApi conteggiOpt, Clock orologio) {
         this.archivio = archivio;
+        this.riepilogo = new ServizioRiepilogoSchede(archivioRendicontabile);
+        this.conteggiOpt = conteggiOpt;
         this.orologio = orologio;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Transactional
+    public void registraConteggiOpt(IdentitaAutenticata attore, Trimestre trimestre, List<VoceMisura> conteggi) {
+        conteggiOpt.registraConteggiOpt(attore, trimestre, conteggi);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public List<ConteggioOpt> consultaConteggiOpt(IdentitaAutenticata attore, UUID optId, Trimestre da, Trimestre a) {
+        return conteggiOpt.consultaConteggiOpt(attore, optId, da, a);
     }
 
     /** {@inheritDoc} */
@@ -80,6 +98,12 @@ public class ServizioSchedeOperatore implements SchedeOperatoreApi {
                     RegoleAccessoScheda.verificaConsultazione(attore, null);
                     return new NoSuchElementException("Scheda non trovata");
                 });
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public RiepilogoTrimestre riepilogaSchede(IdentitaAutenticata attore, Trimestre trimestre) {
+        return riepilogo.riepilogaSchede(attore, trimestre);
     }
 
     /**
