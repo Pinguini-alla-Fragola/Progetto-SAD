@@ -1,6 +1,5 @@
 package it.unina.picus.monitoraggio.interno.dominio;
 
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.BiPredicate;
@@ -33,6 +32,7 @@ public final class RegoleAccessoScheda {
 
     private static final Set<RuoloUtente> SOLO_BANCO = Set.of(RuoloUtente.BANCO);
     private static final Set<RuoloUtente> SOLO_OPERATORE = Set.of(RuoloUtente.OPERATORE);
+    private static final Set<RuoloUtente> LETTORI = Set.of(RuoloUtente.BANCO, RuoloUtente.OPERATORE);
 
     // Relazioni con la scheda. Il secondo argomento è l'account dell'operatore titolare.
     private static final BiPredicate<IdentitaAutenticata, UUID> E_BANCO =
@@ -62,12 +62,22 @@ public final class RegoleAccessoScheda {
     }
 
     /**
+     * Esclude i ruoli non ammessi prima di cercare la scheda. Dopo la ricerca
+     * {@link #verificaConsultazione} controlla anche la titolarità.
+     *
+     * @param attore identità verificata della sessione
+     * @throws SecurityException se l'identità è incompleta o il ruolo non è ammesso
+     */
+    public static void verificaRuoloConsultazione(IdentitaAutenticata attore) {
+        richiediRuolo(attore, LETTORI, "Accesso negato alla scheda");
+    }
+
+    /**
      * Consultazione di una scheda: il Banco oppure l'operatore titolare, e nessun altro.
      *
      * @param attore identità verificata della sessione
-     * @param operatoreId account dell'operatore titolare, letto dalla scheda salvata
+     * @param operatoreId account dell'operatore titolare, oppure {@code null} se la scheda è assente
      * @throws SecurityException se l'identità è incompleta o l'attore è una OPT o un altro operatore
-     * @throws NullPointerException se {@code operatoreId} manca per un attore con identità completa
      * @see MonitoraggioApi#consultaSchedaOperatore
      */
     public static void verificaConsultazione(IdentitaAutenticata attore, UUID operatoreId) {
@@ -96,14 +106,12 @@ public final class RegoleAccessoScheda {
 
     /**
      * Valuta una politica solo su un'identità completa: un attore incompleto non ha mai accesso.
-     * Il titolare della scheda è una precondizione per un attore completo.
      */
     private static boolean consente(BiPredicate<IdentitaAutenticata, UUID> politica,
                                     IdentitaAutenticata attore, UUID operatoreId) {
         if (!identitaCompleta(attore)) {
             return false;
         }
-        Objects.requireNonNull(operatoreId, "operatoreId");
         return politica.test(attore, operatoreId);
     }
 }

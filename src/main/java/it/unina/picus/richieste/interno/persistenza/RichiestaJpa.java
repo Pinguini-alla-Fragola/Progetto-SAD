@@ -22,7 +22,7 @@ import it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione;
  * Entità JPA che conserva i dati e lo stato della richiesta di misura.
  *
  * <p>La relativa riga è usata per coordinare gli aggiornamenti concorrenti dei contatti.
- * L'aggiornamento persiste stato, assegnazione e accordo sulla stessa riga già bloccata.
+ * L'aggiornamento persiste stato, assegnazione, accordo e motivo di annullamento sulla riga bloccata.
  *
  * @see RichiestaRepositoryJpa#cercaPerAggiornamento(UUID)
  */
@@ -44,6 +44,9 @@ public class RichiestaJpa {
     private StatoRichiesta stato = StatoRichiesta.CREATA;
     private UUID riferimentoInvio;
 
+    @Column(columnDefinition = "text")
+    private String motivoAnnullamento;
+
     @Embedded
     private AccordoJpa accordo;
 
@@ -61,7 +64,7 @@ public class RichiestaJpa {
     RichiestaDiMisura aDominio() {
         return new RichiestaDiMisura(id, titolareId, misuraId, tipoDestinatario,
                 comuneCodice, description, inviataIl, stato, erogatoreId,
-                accordo == null ? null : accordo.aDto(), riferimentoInvio, erogatoreAmbito);
+                accordo == null ? null : accordo.aDto(), riferimentoInvio, erogatoreAmbito, motivoAnnullamento);
     }
 
     /** {@return identificativo della richiesta} */
@@ -89,5 +92,6 @@ public class RichiestaJpa {
         erogatoreId = richiesta.erogatoreId();
         erogatoreAmbito = richiesta.erogatoreAmbito();
         accordo = AccordoJpa.daDto(richiesta.accordo());
+        motivoAnnullamento = richiesta.motivoAnnullamento();
     }
 }

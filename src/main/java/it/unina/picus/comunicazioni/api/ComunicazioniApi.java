@@ -12,7 +12,7 @@ import java.util.UUID;
  * Gestisce le comunicazioni del Banco, i riscontri dei destinatari e la consegna degli avvisi
  * operativi. Richieste rimane responsabile della pratica e delle azioni a cui puntano gli avvisi.
  */
-public interface ComunicazioniApi extends AvvisiOperativiApi {
+public interface ComunicazioniApi extends AvvisiOperativiApi, AvvisiAnnullamentoApi {
 
     /**
      * Invia una comunicazione del Banco. Il modulo risolve e registra gli account destinatari
@@ -73,8 +73,8 @@ public interface ComunicazioniApi extends AvvisiOperativiApi {
      * @param attore identità verificata dell'account destinatario
      * @param comunicazioneId identificativo della comunicazione ricevuta
      * @return istante della prima conferma
-     * @throws SecurityException se l'account non è un destinatario
-     * @throws NoSuchElementException se la comunicazione non esiste
+     * @throws SecurityException se l'account non può confermare per la comunicazione indicata,
+     *                           inclusa una comunicazione inesistente
      */
     Instant confermaRicezione(IdentitaAutenticata attore, UUID comunicazioneId);
 
@@ -98,15 +98,6 @@ public interface ComunicazioniApi extends AvvisiOperativiApi {
      * @param destinatarioId unico account interpellato, determinato da Richieste
      */
     void avvisaDisponibilita(UUID richiestaId, UUID contattoId, UUID destinatarioId);
-
-    /**
-     * Registra gli avvisi per un annullamento acquisito da Richieste. Più chiamate per la stessa
-     * richiesta producono un solo avviso di annullamento per account destinatario.
-     *
-     * @param richiestaId riferimento alla pratica annullata
-     * @param destinatari account coinvolti individuati da Richieste
-     */
-    void avvisaAnnullamento(UUID richiestaId, Set<UUID> destinatari);
 
     /**
      * Elenca gli avvisi operativi destinati all'account, senza esporre i dati della pratica.
