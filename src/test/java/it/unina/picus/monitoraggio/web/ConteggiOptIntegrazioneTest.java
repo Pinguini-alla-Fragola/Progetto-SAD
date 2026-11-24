@@ -547,8 +547,8 @@ class ConteggiOptIntegrazioneTest {
      * Per rendere la gara ripetibile, il test tiene {@code FOR UPDATE} sul profilo della OPT:
      * l'inserimento del conteggio deve controllare la chiave esterna {@code opt_id} con
      * {@code FOR KEY SHARE} e quindi si ferma. Così tutti gli invii superano la ricerca
-     * («nessuna riga») prima che il primo inserimento sia confermato. Quando tutti risultano in
-     * attesa di un lock su PostgreSQL (o dopo 10 secondi, se un'implementazione diversa non si ferma
+     * («nessuna riga») prima che il primo inserimento sia confermato. Quando tutti risultano in coda
+     * dietro a quel lock (o dopo 10 secondi, se un'implementazione diversa non si ferma
      * su quel lock) il test lo rilascia.
      *
      * @param valore valore inviato dall'i-esimo invio
@@ -612,15 +612,24 @@ class ConteggiOptIntegrazioneTest {
         }
     }
 
-    /** Attende che gli invii risultino in attesa di un lock su PostgreSQL, al più per 10 secondi. */
+    /**
+     * Attende che gli invii risultino in coda dietro al lock del test, al più per 10 secondi.
+     *
+     * Conta solo le sessioni bloccate dal processo che tiene il lock, direttamente o attraverso un altro
+     * invio in coda: un'attesa estranea nello stesso database non viene scambiata per un invio fermo.
+     */
     private void attendiInviiInAttesaDiLock(int processoDelBlocco, int attesi) throws InterruptedException {
         long limite = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
         while (System.nanoTime() < limite) {
-            Integer inAttesa = jdbc.queryForObject("""
-                    select count(*) from pg_stat_activity
-                    where datname = current_database() and wait_event_type = 'Lock' and pid <> ?
+            Integer inCoda = jdbc.queryForObject("""
+                    with recursive in_coda(pid) as (
+                        select a.pid from pg_stat_activity a where ? = any(pg_blocking_pids(a.pid))
+                        union
+                        select a.pid from pg_stat_activity a join in_coda c on c.pid = any(pg_blocking_pids(a.pid))
+                    )
+                    select count(*) from in_coda
                     """, Integer.class, processoDelBlocco);
-            if (inAttesa != null && inAttesa >= attesi) {
+            if (inCoda != null && inCoda >= attesi) {
                 return;
             }
             Thread.sleep(20);

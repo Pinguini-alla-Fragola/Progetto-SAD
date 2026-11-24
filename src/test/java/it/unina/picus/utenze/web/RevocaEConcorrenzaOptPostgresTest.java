@@ -62,6 +62,16 @@ class RevocaEConcorrenzaOptPostgresTest extends IntegrazionePostgresBase {
     private static final String PASSWORD_TEST = "Password-Test-123";
     private static final Pattern PATTERN_ACCOUNT_ID = Pattern.compile("\"accountId\"\\s*:\\s*\"([^\"]+)\"");
 
+    /** Sessioni bloccate dal processo indicato, direttamente o attraverso altre sessioni in coda. */
+    private static final String SESSIONI_IN_CODA_DIETRO_AL_BLOCCO = """
+            with recursive in_coda(pid) as (
+                select a.pid from pg_stat_activity a where ? = any(pg_blocking_pids(a.pid))
+                union
+                select a.pid from pg_stat_activity a join in_coda c on c.pid = any(pg_blocking_pids(a.pid))
+            )
+            select count(*) from in_coda
+            """;
+
     @Autowired
     private MockMvc mvc;
 
@@ -451,20 +461,23 @@ class RevocaEConcorrenzaOptPostgresTest extends IntegrazionePostgresBase {
         }
     }
 
-    /** Attende che almeno {@code attesi} sessioni PostgreSQL siano in attesa di un lock, al più 10 secondi. */
+    /**
+     * Attende che almeno {@code attesi} sessioni siano in coda dietro al lock del test, al più 10 secondi.
+     *
+     * Conta solo le sessioni bloccate, direttamente o attraverso un'altra sessione in coda, dal processo
+     * che tiene il lock: un'attesa estranea nello stesso database non fa partire l'operazione successiva
+     * prima che la precedente sia davvero in coda sull'account.
+     */
     private void attendiInAttesaDiLock(int processoDelBlocco, int attesi) throws InterruptedException {
         long limite = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
         while (System.nanoTime() < limite) {
-            Integer inAttesa = jdbc.queryForObject("""
-                    select count(*) from pg_stat_activity
-                    where datname = current_database() and wait_event_type = 'Lock' and pid <> ?
-                    """, Integer.class, processoDelBlocco);
-            if (inAttesa != null && inAttesa >= attesi) {
+            Integer inCoda = jdbc.queryForObject(SESSIONI_IN_CODA_DIETRO_AL_BLOCCO, Integer.class, processoDelBlocco);
+            if (inCoda != null && inCoda >= attesi) {
                 return;
             }
             Thread.sleep(20);
         }
-        throw new AssertionError("l'operazione " + attesi + " non risulta in attesa del lock dell'account");
+        throw new AssertionError("l'operazione " + attesi + " non risulta in coda sul lock dell'account");
     }
 
     private MockHttpSession creaEAccedi(String ruolo) throws Exception {
