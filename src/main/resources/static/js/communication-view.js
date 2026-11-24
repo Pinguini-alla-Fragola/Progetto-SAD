@@ -125,8 +125,15 @@ export function communicationCards(messages, { banco, formatDate, onConfirm, con
             status.setAttribute('role', 'status');
             confirm.addEventListener('click', async () => {
                 confirm.disabled = true;
-                try { await api('/api/comunicazioni/' + message.id + '/ricezione', { method: 'POST' }); await onConfirm(); }
-                catch (error) { status.textContent = error.message; status.classList.add('picus-errore'); confirm.disabled = false; }
+                try {
+                    await api('/api/comunicazioni/' + message.id + '/ricezione', { method: 'POST' });
+                    document.dispatchEvent(new Event('comunicazioni:ricezione-confermata'));
+                    await onConfirm();
+                } catch (error) {
+                    status.textContent = error.message;
+                    status.classList.add('picus-errore');
+                    confirm.disabled = false;
+                }
             });
             footer.append(confirm, status);
             card.append(footer);
