@@ -25,6 +25,8 @@ public enum Capacita {
 
     /** Identità verificate e dati minimi degli account (#25). */
     UTENZE(UtenzeApi.class, true),
+    /** Importazione delle OPT da CSV (#24), consegnata con la #202: solo rotta HTTP, dati riletti da Utenze. */
+    IMPORTAZIONE_OPT(UtenzeApi.class, true),
     /** Invio, elenco proprio, coda del Banco e consultazione della richiesta (#48). */
     INVIO_RICHIESTE(InvioRichiesteApi.class, true),
     /** Presa in carico, ricerca, contatto, assegnazione, conferma e rifiuto definitivo (#49, #52). */
