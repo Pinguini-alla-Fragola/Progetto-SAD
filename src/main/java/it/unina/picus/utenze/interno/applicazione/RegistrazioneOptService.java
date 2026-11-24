@@ -38,17 +38,17 @@ public class RegistrazioneOptService {
     private final AccountRepository accounts;
     private final ProfiloOptRepository profiliOpt;
     private final AttivazioneUtenzaService attivazioneService;
-    private final CodaInvitiImportazioneOpt codaInviti;
+    private final ConclusioneReinvio conclusioneReinvio;
 
     RegistrazioneOptService(
             AccountRepository accounts,
             ProfiloOptRepository profiliOpt,
             AttivazioneUtenzaService attivazioneService,
-            CodaInvitiImportazioneOpt codaInviti) {
+            ConclusioneReinvio conclusioneReinvio) {
         this.accounts = Objects.requireNonNull(accounts);
         this.profiliOpt = Objects.requireNonNull(profiliOpt);
         this.attivazioneService = Objects.requireNonNull(attivazioneService);
-        this.codaInviti = Objects.requireNonNull(codaInviti);
+        this.conclusioneReinvio = Objects.requireNonNull(conclusioneReinvio);
     }
 
     public record ComandoRegistrazioneOpt(
@@ -82,7 +82,7 @@ public class RegistrazioneOptService {
      * @return dati per l'invio dopo il commit
      */
     public DatiInvioAttivazione preparaReinvio(UUID accountId) {
-        return attivazioneService.preparaReinvioOpt(accountId);
+        return attivazioneService.preparaReinvio(accountId, RuoloUtente.OPT);
     }
 
     /**
@@ -93,11 +93,7 @@ public class RegistrazioneOptService {
      * @param riuscito consegna accettata dal server SMTP oppure completata in modalità simulata
      */
     public void concludeReinvio(UUID accountId, DatiInvioAttivazione dati, boolean riuscito) {
-        if (riuscito) {
-            // La prenotazione del job acquisisce i lock nello stesso ordine: coda, account, token.
-            codaInviti.rimuovi(accountId);
-        }
-        attivazioneService.concludeReinvioOpt(accountId, dati, riuscito);
+        conclusioneReinvio.concludi(accountId, dati, riuscito);
     }
 
     /**

@@ -103,7 +103,8 @@ class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/auth/login", "/attiva", "/api/auth/attiva/**", "/api/auth/recupera",
                                 "/api/auth/recupera/conferma").permitAll()
                         .requestMatchers("/login", "/error", "/css/**", "/js/**", "/img/**", "/fonts/**", "/favicon.ico").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/opt", "/api/opt/*/revoca", "/api/opt/*/reinvia-invito", "/api/operatori/*/revoca").hasRole("BANCO")
+                        .requestMatchers(HttpMethod.POST, "/api/opt", "/api/opt/*/revoca", "/api/opt/*/reinvia-invito", "/api/operatori/*/revoca",
+                                "/api/operatori/*/reinvia-invito").hasRole("BANCO")
                         .requestMatchers(HttpMethod.POST, "/api/richieste").hasRole("OPT")
                         .requestMatchers(HttpMethod.GET, "/api/richieste/mie").hasRole("OPT")
                         .requestMatchers(HttpMethod.POST, "/api/opt/importazioni").hasRole("BANCO")

@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,8 @@ import it.unina.picus.utenze.interno.persistenza.TokenAttivazioneRepository;
 
 /**
  * Servizio comune per la generazione dei token monouso di attivazione utenza e
- * l'impostazione iniziale della password (Task #147).
+ * l'impostazione iniziale della password (Task #147). Vale per OPT e Operatori: il link dura 72 ore
+ * (regole degli accessi) e un nuovo link rende inutilizzabile il precedente.
  */
 @Service
 @Profile("!skeleton")
@@ -46,7 +48,7 @@ public class AttivazioneUtenzaService {
             TokenAttivazioneRepository tokens,
             PasswordEncoder passwordEncoder,
             ApplicationEventPublisher eventPublisher,
-            @Value("${picus.utenze.attivazione.validita:PT48H}") Duration durataValidita) {
+            @Value("${picus.utenze.attivazione.validita:PT72H}") Duration durataValidita) {
         this(accounts, tokens, passwordEncoder, eventPublisher, durataValidita, Clock.systemUTC());
     }
 
@@ -65,10 +67,27 @@ public class AttivazioneUtenzaService {
         this.clock = Objects.requireNonNull(clock);
     }
 
+    /** Dati per consegnare il link. Il token in chiaro non compare mai nel testo del record, così non finisce nei log. */
     public record DatiInvioAttivazione(String emailDestinatario, String nomeDestinatario, String tokenInChiaro) {
+        @Override
+        public String toString() {
+            return "DatiInvioAttivazione[emailDestinatario=" + emailDestinatario + ", token=***]";
+        }
     }
 
+    /**
+     * Link appena creato, non ancora consegnato, per chi lo chiede con la propria email.
+     *
+     * @param accountId account a cui appartiene il link, per concludere il reinvio dopo l'invio
+     * @param dati dati per la consegna
+     */
+    public record LinkPreparato(UUID accountId, DatiInvioAttivazione dati) {}
+
     public record LinkAttivazioneDaInviareEvent(String emailDestinatario, String nomeDestinatario, String tokenInChiaro) {
+        @Override
+        public String toString() {
+            return "LinkAttivazioneDaInviareEvent[emailDestinatario=" + emailDestinatario + ", token=***]";
+        }
     }
 
     /**
@@ -96,7 +115,8 @@ public class AttivazioneUtenzaService {
     }
 
     /**
-     * Rigenera un token monouso per un account del ruolo atteso ancora in attesa di attivazione.
+     * Emette un token monouso per un account del ruolo atteso ancora in attesa di attivazione: vale sia per il
+     * primo link, alla creazione, sia per i reinvii, che sostituiscono il link precedente.
      *
      * <p>Mantiene lo stesso ordine dei lock di {@link #attivaAccount} e {@code UtenzeService.revocaAccount}
      * (prima l'account, poi i token pendenti) e rilegge i token attivi dopo l'acquisizione del lock
@@ -127,6 +147,48 @@ public class AttivazioneUtenzaService {
         }
 
         return account;
+    }
+
+    /**
+     * Primo passo del reinvio richiesto da chi possiede l'indirizzo, senza sessione: crea un nuovo link solo se
+     * l'email appartiene a un account in attesa di attivazione, di qualsiasi ruolo, e non tocca quelli già
+     * emessi. Per ogni altro indirizzo (sconosciuto, già attivo, revocato) non succede nulla e il chiamante non
+     * deve far capire la differenza.
+     *
+     * <p>Il link precedente si invalida solo quando la posta ha accettato l'email: l'esito si registra con
+     * {@link #concludeReinvio}, e se l'invio fallisce l'utente conserva l'ultimo link che ha ricevuto davvero. I
+     * tre passi sono transazioni separate, così durante l'invio non c'è nessun lock.</p>
+     *
+     * <p>Lo stato si controlla dopo aver preso il lock sull'account, così una attivazione o una revoca arrivata
+     * nel frattempo non lascia un link valido.</p>
+     *
+     * @param email indirizzo digitato dall'utente
+     * @return il link creato, oppure vuoto se l'indirizzo non è idoneo
+     */
+    public Optional<LinkPreparato> preparaTokenPerEmail(String email) {
+        String chiave = UtenzeService.normalizzaEmail(email);
+        if (chiave == null) {
+            return Optional.empty();
+        }
+        return accounts.findIdByEmailIgnoreCase(chiave)
+                .flatMap(accounts::findByIdForUpdate)
+                .filter(a -> StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(a.getStato()))
+                .map(a -> new LinkPreparato(a.getId(), creaToken(a, Instant.now(clock), false)));
+    }
+
+    /**
+     * Primo passo del reinvio del Banco: crea un nuovo link per l'account del ruolo atteso ancora in attesa di
+     * attivazione, senza chiudere quelli già emessi. Il link nuovo sostituisce i precedenti solo quando
+     * {@link #concludeReinvio} registra che la posta lo ha accettato; se l'invio fallisce, l'utente conserva l'ultimo
+     * link che ha ricevuto davvero.
+     *
+     * @param accountId account in attesa di attivazione
+     * @param ruoloAtteso ruolo che l'account deve avere
+     * @return dati per consegnare il nuovo link
+     */
+    public DatiInvioAttivazione preparaReinvio(UUID accountId, RuoloUtente ruoloAtteso) {
+        AccountJpa account = bloccaAccountPerReinvio(accountId, ruoloAtteso);
+        return creaToken(account, Instant.now(clock), false);
     }
 
     /**
@@ -168,7 +230,9 @@ public class AttivazioneUtenzaService {
 
         String hash = TokenMonouso.impronta(tokenInChiaro.strip());
 
-        // Legge solo l'accountId: il token entra nel contesto JPA dopo il lock dell'account.
+        // 1. Risoluzione senza lock per individuare l'account da serializzare. Si legge solo l'identificativo: se il
+        //    token fosse già caricato, la lettura con lock restituirebbe la copia in memoria con lo stato di prima e
+        //    un link appena sostituito da un reinvio attiverebbe comunque l'account.
         UUID accountId = tokens.findAccountIdByTokenHash(hash)
                 .orElseThrow(() -> new TokenAttivazioneNonValidoException("Link di attivazione non valido."));
 
@@ -205,12 +269,16 @@ public class AttivazioneUtenzaService {
         return creaToken(account, Instant.now(clock), true);
     }
 
-    DatiInvioAttivazione preparaReinvioOpt(UUID accountId) {
-        AccountJpa account = bloccaAccountPerReinvio(accountId, RuoloUtente.OPT);
-        return creaToken(account, Instant.now(clock), false);
-    }
-
-    void concludeReinvioOpt(UUID accountId, DatiInvioAttivazione dati, boolean riuscito) {
+    /**
+     * Ultimo passo del reinvio: se la posta ha accettato l'email il link nuovo sostituisce i precedenti, altrimenti
+     * viene scartato e restano validi quelli di prima. Va chiamato dopo aver tolto, se c'è, l'invito dalla coda
+     * dell'importazione CSV ({@link ConclusioneReinvio}), per tenere l'ordine dei lock coda, account, token.
+     *
+     * @param accountId account che ha ricevuto il link
+     * @param dati link preparato per questo reinvio
+     * @param riuscito consegna accettata dal server SMTP oppure completata in modalità simulata
+     */
+    void concludeReinvio(UUID accountId, DatiInvioAttivazione dati, boolean riuscito) {
         var account = accounts.findByIdForUpdate(accountId);
         if (account.isEmpty() || !StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(account.get().getStato())) {
             return;
@@ -236,6 +304,11 @@ public class AttivazioneUtenzaService {
                 .forEach(token -> token.segnaComeUsato(ora));
     }
 
+    /**
+     * Salva un nuovo token senza toccare quelli già emessi. Ogni token ha un numero di emissione strettamente
+     * maggiore dei precedenti dell'account, ed è questo ordine, e non il timestamp, che dice quale link sostituisce
+     * quale.
+     */
     private DatiInvioAttivazione creaToken(AccountJpa account, Instant ora, boolean daImportazioneOpt) {
         // L'inserimento dell'account o il suo lock serializza le emissioni anche su più istanze.
         long ordineEmissione = tokens.ultimoOrdineEmissione(account.getId()) + 1;
