@@ -73,8 +73,8 @@ public interface ComunicazioniApi extends AvvisiOperativiApi, AvvisiAnnullamento
      * @param attore identità verificata dell'account destinatario
      * @param comunicazioneId identificativo della comunicazione ricevuta
      * @return istante della prima conferma
-     * @throws SecurityException se l'account non è un destinatario
-     * @throws NoSuchElementException se la comunicazione non esiste
+     * @throws SecurityException se l'account non può confermare per la comunicazione indicata,
+     *                           inclusa una comunicazione inesistente
      */
     Instant confermaRicezione(IdentitaAutenticata attore, UUID comunicazioneId);
 

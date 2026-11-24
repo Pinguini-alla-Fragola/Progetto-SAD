@@ -2,18 +2,17 @@ package it.unina.picus.comunicazioni.web;
 
 import it.unina.picus.comunicazioni.interno.applicazione.ServizioConfermaRicezione;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 /** Espone il comando di conferma di ricezione per il destinatario in sessione. */
 @RestController
+@Profile("!skeleton")
 public class ConfermaRicezioneController {
 
     private final ServizioConfermaRicezione servizio;
@@ -37,15 +36,5 @@ public class ConfermaRicezioneController {
     @PostMapping("/api/comunicazioni/{comunicazioneId}/ricezione")
     public Instant confermaRicezione(IdentitaAutenticata attore, @PathVariable UUID comunicazioneId) {
         return servizio.confermaRicezione(attore, comunicazioneId);
-    }
-
-    /**
-     * Traduce l'assenza della comunicazione in una risposta HTTP senza corpo.
-     *
-     * @return risposta HTTP 404
-     */
-    @ExceptionHandler(NoSuchElementException.class)
-    ResponseEntity<Void> comunicazioneAssente() {
-        return ResponseEntity.notFound().build();
     }
 }
