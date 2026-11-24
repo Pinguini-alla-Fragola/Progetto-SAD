@@ -1,5 +1,6 @@
 package it.unina.picus.monitoraggio.web;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -17,8 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 import it.unina.picus.monitoraggio.api.ConteggiOptApi;
 import it.unina.picus.monitoraggio.api.ConteggiOptApi.CategoriaVoce;
 import it.unina.picus.monitoraggio.api.DatiConteggiNonValidiException;
-import it.unina.picus.monitoraggio.api.MonitoraggioApi.ConteggioOpt;
 import it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre;
+import it.unina.picus.monitoraggio.interno.applicazione.ConsultazioneConteggiOpt;
+import it.unina.picus.monitoraggio.interno.applicazione.ConsultazioneConteggiOpt.ConteggioEsatto;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 
 /** Endpoint backend per registrazione e consultazione dei conteggi trimestrali delle OPT. */
@@ -26,10 +28,15 @@ import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 @RequestMapping(value = "/api/monitoraggio", produces = MediaType.APPLICATION_JSON_VALUE)
 class ConteggiOptController {
 
-    private final ConteggiOptApi monitoraggio;
+    private static final BigInteger MASSIMO_INTERO_SICURO_JS =
+            BigInteger.valueOf(RegistrazioneConteggiJson.MASSIMO_INTERO_SICURO_JS);
 
-    ConteggiOptController(ConteggiOptApi monitoraggio) {
+    private final ConteggiOptApi monitoraggio;
+    private final ConsultazioneConteggiOpt consultazione;
+
+    ConteggiOptController(ConteggiOptApi monitoraggio, ConsultazioneConteggiOpt consultazione) {
         this.monitoraggio = monitoraggio;
+        this.consultazione = consultazione;
     }
 
     @GetMapping("/categorie")
@@ -44,6 +51,7 @@ class ConteggiOptController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+    /** Consulta il trimestre iniziale o l'intervallo inclusivo quando sono indicati entrambi i campi finali. */
     @GetMapping("/conteggi-opt")
     List<ConteggioJson> consultaConteggi(
             @RequestParam(required = false) UUID optId,
@@ -61,19 +69,18 @@ class ConteggiOptController {
         Trimestre da = new Trimestre(anno, trimestre);
         Trimestre a = annoFine == null ? da : new Trimestre(annoFine, trimestreFine);
 
-        return monitoraggio.consultaConteggiOpt(attore, optId, da, a).stream()
+        return consultazione.consultaConteggiEsatti(attore, optId, da, a).stream()
                 .map(ConteggioJson::da)
                 .toList();
     }
 
     record ConteggioJson(UUID optId, VoceJson conteggio) {
-        private static ConteggioJson da(ConteggioOpt risultato) {
-            var voce = risultato.conteggio();
-            long valore = voce.valore();
-            // Conserva i numeri JSON già esatti e trasmette gli interi più grandi come testo decimale.
-            Object valoreJson = valore > RegistrazioneConteggiJson.MASSIMO_INTERO_SICURO_JS
-                    ? Long.toString(valore) : valore;
-            return new ConteggioJson(risultato.optId(), new VoceJson(voce.misuraId(), voce.voce(), valoreJson));
+        /** Mantiene i numeri JSON esatti in JavaScript e trasmette i totali più grandi come testo decimale. */
+        private static ConteggioJson da(ConteggioEsatto risultato) {
+            BigInteger valore = risultato.valore();
+            Object valoreJson = valore.compareTo(MASSIMO_INTERO_SICURO_JS) > 0
+                    ? valore.toString() : valore.longValueExact();
+            return new ConteggioJson(risultato.optId(), new VoceJson(risultato.misuraId(), risultato.voce(), valoreJson));
         }
     }
 

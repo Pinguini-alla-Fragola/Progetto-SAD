@@ -20,7 +20,7 @@ import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 
 @Service
 @Profile("skeleton")
-public class SkeletonMonitoraggioService implements ConteggiOptApi {
+public class SkeletonMonitoraggioService implements ConteggiOptApi, ConsultazioneConteggiOpt {
 
     private record Chiave(UUID optId, Trimestre periodo, long misuraId, String voce) {}
 
@@ -75,8 +75,15 @@ public class SkeletonMonitoraggioService implements ConteggiOptApi {
         archivio.putAll(dichiarazione);
     }
 
+    /** {@inheritDoc} */
     @Override
-    public synchronized List<ConteggioOpt> consultaConteggiOpt(
+    public List<ConteggioOpt> consultaConteggiOpt(IdentitaAutenticata attore, UUID optId, Trimestre da, Trimestre a) {
+        return ConteggiTrimestrali.convertiInConteggi(consultaConteggiEsatti(attore, optId, da, a));
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public synchronized List<ConteggioEsatto> consultaConteggiEsatti(
             IdentitaAutenticata attore, UUID optId, Trimestre da, Trimestre a) {
         RegoleAccessoConteggi.verificaConsultazione(attore, optId);
         ConteggiTrimestrali.validaIntervallo(da, a);
