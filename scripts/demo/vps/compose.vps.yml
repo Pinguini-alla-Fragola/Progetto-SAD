@@ -33,9 +33,11 @@ services:
       - mail
 
   picus-smtp:
-    image: picus-demo/smtp:v1
+    image: picus-demo/smtp:v2
     restart: unless-stopped
     mem_limit: 192m
+    ports:
+      - '127.0.0.1:2525:2525'
     logging: *demo-logging
     volumes:
       - /opt/picus-demo/mail:/run/picus-mail:ro

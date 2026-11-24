@@ -1,4 +1,4 @@
-@invito path /invito /invito/riscatta /invito/script.js /invito/logo.svg /invito/inter.woff2
+@invito path /invito /invito/riscatta /invito/registra /invito/conferma /invito/login /invito/script.js /invito/logo.svg /invito/inter.woff2
 handle @invito {
 	request_body {
 		max_size 1KB

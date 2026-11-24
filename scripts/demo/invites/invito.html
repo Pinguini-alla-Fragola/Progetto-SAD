@@ -64,7 +64,7 @@
             letter-spacing: -0.035em;
         }
 
-        #stato, #rientro p, noscript { color: var(--text-secondary); }
+        #stato, .aiuto, noscript { color: var(--text-secondary); }
         #stato { margin: 0.9rem 0 1.6rem; }
         #stato a {
             color: var(--accent-color);
@@ -72,8 +72,8 @@
             text-underline-offset: 0.2em;
             white-space: nowrap;
         }
-        #rientro h2 { margin: 0; font-size: 1.3rem; font-weight: 600; }
-        #rientro p { margin: 0.5rem 0 1.25rem; }
+        .aiuto { margin: -0.45rem 0 1.15rem; }
+        .secondaria { margin-inline-start: 1rem; border-bottom-width: 1px; font-size: 0.95rem; }
 
         label { display: block; font-weight: 600; }
 
@@ -124,10 +124,11 @@
             .logo-link { justify-self: center; width: min(54vw, 13rem); }
             h1, #stato { text-align: center; }
 
-            #accesso button {
+            form button {
                 display: block;
                 inline-size: fit-content;
                 margin-inline: auto;
+                margin-block-end: 0.5rem;
             }
         }
     </style>
@@ -145,20 +146,36 @@
             </p>
             <form id="accesso" hidden>
                 <div id="campo-codice">
-                    <label for="codice">Codice d’invito o di rientro</label>
+                    <label for="codice">Codice d’invito</label>
                     <input id="codice" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" required>
                 </div>
                 <button type="submit">Entra nella demo</button>
+                <button class="secondaria" type="button" data-apri="login">Ho già un account</button>
             </form>
-            <section id="rientro" aria-labelledby="titolo-rientro" hidden>
-                <h2 id="titolo-rientro">Salva il codice di rientro</h2>
-                <p>Puoi riutilizzarlo fino al <time id="scadenza"></time>.</p>
-                <label for="codice-rientro">Codice di rientro</label>
-                <input id="codice-rientro" type="text" readonly spellcheck="false">
-                <label for="link-rientro">Link di rientro</label>
-                <input id="link-rientro" type="text" readonly spellcheck="false">
-                <a id="vai-al-login" class="azione" href="/login">Vai al login PICUS</a>
-            </section>
+            <form id="registrazione" hidden>
+                <label for="email-nuova">Email</label>
+                <input id="email-nuova" type="email" autocomplete="username" maxlength="254" required>
+                <label for="password-nuova">Password</label>
+                <input id="password-nuova" type="password" autocomplete="new-password" aria-describedby="criteri" required>
+                <p class="aiuto" id="criteri">Almeno 12 caratteri e al massimo 72 byte.</p>
+                <button type="submit">Invia il codice via email</button>
+                <button class="secondaria" type="button" data-apri="invito">Cambia invito</button>
+            </form>
+            <form id="conferma" hidden>
+                <label for="otp">Codice di verifica</label>
+                <input id="otp" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}"
+                       maxlength="6" required>
+                <button type="submit">Verifica ed entra</button>
+                <button class="secondaria" type="button" data-apri="registrazione">Richiedi un altro codice</button>
+            </form>
+            <form id="login-demo" hidden>
+                <label for="email-login">Email</label>
+                <input id="email-login" type="email" autocomplete="username" maxlength="254" required>
+                <label for="password-login">Password</label>
+                <input id="password-login" type="password" autocomplete="current-password" required>
+                <button type="submit">Entra nella demo</button>
+                <button class="secondaria" type="button" data-apri="invito">Ho un invito</button>
+            </form>
             <noscript>Per usare un invito, abilita JavaScript e riapri il link.</noscript>
         </div>
     </main>

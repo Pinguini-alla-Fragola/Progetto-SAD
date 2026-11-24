@@ -67,13 +67,14 @@ picus-inviti revoca ID_INVITO
 
 Per generare gli inviti tramite uno script, aggiungi `--json` a `crea` e leggi i campi `id`, `durata_ore`, `attiva_entro`, `codice` e `url`. Alla creazione `scadenza` è `null`. `--ore` accetta un numero intero positivo e il valore predefinito è 24. Condividi privatamente il link o il codice. `elenca` mostra identificativo, etichetta, stato e il termine di attivazione o la scadenza dell'accesso, in UTC.
 
-L'invito va confermato per la prima volta entro 48 ore dalla creazione. Da quella conferma decorrono le ore impostate con `--ore` e appare il codice di rientro con il relativo link. I due codici funzionano anche in altri browser, con la stessa scadenza. `revoca` blocca entrambi i codici e tutte le relative sessioni. Chi riceve uno dei codici inoltrati può usarlo finché è valido. Gli inviti riutilizzabili già in attesa all'aggiornamento hanno 48 ore dall'aggiornamento per essere attivati. Gli inviti già attivati e gli inviti monouso precedenti conservano le loro scadenze.
+Il visitatore conferma l’invito entro 48 ore, sceglie email e password e inserisce il codice a sei cifre ricevuto via email. Alla verifica dell’email decorrono le ore impostate con `--ore`. Per gli accessi successivi seleziona **Ho già un account** e usa email e password fino alla scadenza dell’invito. Gli inviti e le sessioni precedenti conservano la loro scadenza. `revoca` chiude le sessioni dell’invito.
 
-Il riscatto accetta fino a 30 richieste per IP e 300 complessive in una finestra di 60 secondi. Quando il limite è raggiunto, la pagina indica quanto attendere. Il limite riguarda il riscatto e lascia accessibili le sessioni già attive.
+La password segue la regola di PICUS. Deve contenere almeno 12 caratteri e occupare al massimo 72 byte UTF-8. Il servizio la salva con BCrypt, costo 12. Il codice email vale 10 minuti e consente al massimo cinque tentativi. Un altro codice può essere richiesto dopo un minuto. Il gateway limita le richieste e l’invio ripetuto allo stesso indirizzo.
 
-Dopo il riscatto serve la password di PICUS. Leggila sul VPS con `sed -n 's/^PICUS_DEMO_PASSWORD=//p' /opt/picus-demo/runtime.env`. Gli account sintetici sono `banco@picus.test`, `opt-a@picus.test`, `opt-b@picus.test` e `operatore@picus.test`.
+Dopo la verifica, entra in PICUS con uno degli account sintetici `banco@picus.test`, `opt-a@picus.test`, `opt-b@picus.test` e `operatore@picus.test`. Leggi la loro password dal VPS con `sed -n 's/^PICUS_DEMO_PASSWORD=//p' /opt/picus-demo/runtime.env`.
 
-Il servizio di invito ascolta solo su `127.0.0.1:8787`. Il database degli inviti è separato da PICUS e contiene gli hash dei token e delle sessioni. I sorgenti del servizio e le regole Caddy si trovano in [scripts/demo/invites](../../scripts/demo/invites/).
+Il gateway ascolta su `127.0.0.1:8787` e usa SQLite per gli account demo e gli hash di token, codici e sessioni. Per collaudare un OTP usa un indirizzo `@picus.test` e leggi il messaggio nella Maildir locale come descritto sotto. I sorgenti del servizio e le regole Caddy si trovano in [scripts/demo/invites](../../scripts/demo/invites/).
+
 
 ### Collaudare le e-mail di attivazione
 
@@ -103,14 +104,14 @@ Postfix usa `noreply@mail.picus.strawberrypenguin.it`. Nella zona Cloudflare `st
 cat /opt/picus-demo/mail/dkim-public.txt
 ```
 
-Nel pannello del provider VPS imposta anche il PTR dell'IPv4 a `mail.picus.strawberrypenguin.it`, dopo aver pubblicato il record A. Per questo servizio di solo invio bastano i record elencati. Dopo la propagazione, inserisci in `/opt/picus-demo/mail/destinatari.txt` un indirizzo esterno di collaudo autorizzato per riga e riavvia il solo SMTP. [Record e-mail Cloudflare](https://developers.cloudflare.com/dns/manage-dns-records/how-to/email-records/) · [Reverse DNS su Hostinger](https://www.hostinger.com/support/4805528-how-to-setup-reverse-dns-on-vps/)
+Nel pannello del provider VPS imposta anche il PTR dell'IPv4 a `mail.picus.strawberrypenguin.it`, dopo aver pubblicato il record A. Per questo servizio di solo invio bastano i record elencati. Per collaudare il recapito esterno delle email di attivazione inviate dall’app PICUS, inserisci in `/opt/picus-demo/mail/destinatari.txt` un indirizzo esterno di collaudo autorizzato per riga e riavvia il solo SMTP. [Record e-mail Cloudflare](https://developers.cloudflare.com/dns/manage-dns-records/how-to/email-records/) · [Reverse DNS su Hostinger](https://www.hostinger.com/support/4805528-how-to-setup-reverse-dns-on-vps/)
 
 ```sh
 vi /opt/picus-demo/mail/destinatari.txt
 /opt/picus-demo/compose restart picus-smtp
 ```
 
-Dopo il riavvio, registra l'account di prova o reinvia il suo invito dal Banco. Controlla la ricezione e gli esiti di SPF, DKIM e DMARC nelle intestazioni del messaggio. La chiave privata, l'elenco reale e le credenziali restano nei file del VPS. Postfix ascolta sulla rete Docker dedicata e accetta solo i destinatari di collaudo configurati.
+Dopo il riavvio, registra l'account di prova o reinvia il suo invito dal Banco. Controlla la ricezione e gli esiti di SPF, DKIM e DMARC nelle intestazioni del messaggio. La chiave privata, l'elenco reale e le credenziali restano nei file del VPS. Sulla rete Docker dedicata, la porta 25 di Postfix accetta i destinatari di collaudo configurati. Il gateway invia gli OTP dall’endpoint SMTP autenticato su 127.0.0.1:2525, utilizzabile solo con la credenziale locale del servizio.
 
 ### File di deploy versionati
 
@@ -126,7 +127,11 @@ test -s /opt/picus-demo/mail/dkim-private.pem || openssl genpkey \
 test -f /opt/picus-demo/mail/destinatari.txt || touch /opt/picus-demo/mail/destinatari.txt
 chiave=$(openssl pkey -in /opt/picus-demo/mail/dkim-private.pem -pubout -outform DER | openssl base64 -A)
 printf 'v=DKIM1; k=rsa; p=%s\n' "$chiave" > /opt/picus-demo/mail/dkim-public.txt
-docker build -t picus-demo/smtp:v1 scripts/demo/vps/mail
+apk add py3-bcrypt
+test -s /opt/picus-demo/mail/otp-smtp.password ||   openssl rand -hex 32 > /opt/picus-demo/mail/otp-smtp.password
+chmod 0400 /opt/picus-demo/mail/otp-smtp.password
+install -m 0400 -o picus-invites -g picus-invites /opt/picus-demo/mail/otp-smtp.password   /var/lib/picus-demo-invites/otp-smtp.password
+docker build -t picus-demo/smtp:v2 scripts/demo/vps/mail
 /opt/picus-demo/compose up -d --no-deps --no-build --pull never picus-smtp
 ```
 

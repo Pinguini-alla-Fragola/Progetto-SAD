@@ -1,84 +1,128 @@
 let token = window.location.hash.slice(1);
-if (window.location.hash) {
-    history.replaceState(null, "", "/invito");
-}
+let verifica = "";
+const codiceValido = (value) => /^[a-zA-Z0-9_-]{43}$/.test(value);
+if (window.location.hash) history.replaceState(null, "", "/invito");
 window.addEventListener("hashchange", () => {
     if (window.location.hash) window.location.reload();
 });
 
 const status = document.querySelector("#stato");
-const form = document.querySelector("#accesso");
-const button = form.querySelector("button");
-const field = document.querySelector("#campo-codice");
-const input = document.querySelector("#codice");
-const isCode = (value) => /^[a-zA-Z0-9_-]{43}$/.test(value);
+const testoInvito = Array.from(status.childNodes, (node) => node.cloneNode(true));
+const formInvito = document.querySelector("#accesso");
+const codice = document.querySelector("#codice");
+const campoCodice = document.querySelector("#campo-codice");
+const email = document.querySelector("#email-nuova");
+const password = document.querySelector("#password-nuova");
+const forms = {
+    invito: formInvito,
+    registrazione: document.querySelector("#registrazione"),
+    conferma: document.querySelector("#conferma"),
+    login: document.querySelector("#login-demo"),
+};
 
-if (isCode(token)) {
-    status.textContent = "Conferma l’invito per proseguire al login di PICUS.";
-    field.hidden = true;
-    input.disabled = true;
-} else if (token) {
-    status.textContent = "Link d’invito non valido. Puoi inserire un altro codice.";
-    token = "";
-}
-form.hidden = false;
-
-function showReturnCode(access) {
-    const expires = document.querySelector("#scadenza");
-    const date = new Date(access.scadenza);
-    expires.dateTime = access.scadenza;
-    expires.textContent = date.toLocaleString("it-IT", { dateStyle: "long", timeStyle: "short" });
-    document.querySelector("#codice-rientro").value = access.codice;
-    document.querySelector("#link-rientro").value = access.url;
-    form.hidden = true;
-    document.querySelector("#rientro").hidden = false;
-    status.textContent = "Invito attivato.";
-    document.querySelector("#vai-al-login").focus();
+function apri(pagina, messaggio, focus = true) {
+    for (const [id, form] of Object.entries(forms)) form.hidden = id !== pagina;
+    campoCodice.hidden = pagina === "invito" && codiceValido(token);
+    codice.disabled = campoCodice.hidden;
+    if (messaggio) status.textContent = messaggio;
+    else status.replaceChildren(...testoInvito.map((node) => node.cloneNode(true)));
+    if (focus) forms[pagina].querySelector("input:not(:disabled), button[type=submit]").focus();
 }
 
-form.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const submittedCode = token || input.value.trim();
-    if (!isCode(submittedCode)) {
-        status.textContent = "Il codice inserito non è valido.";
-        input.focus();
-        return;
-    }
-    button.disabled = true;
-    status.textContent = "Verifica dell’invito in corso…";
+document.querySelectorAll("[data-apri]").forEach((button) => {
+    button.addEventListener("click", () => {
+        const pagina = button.dataset.apri;
+        if (pagina === "invito") {
+            token = "";
+            verifica = "";
+            codice.value = "";
+            password.value = "";
+            apri("invito");
+        } else if (pagina === "registrazione") {
+            apri(pagina, "Conferma email e password per richiedere un nuovo codice.");
+        } else {
+            apri(pagina, "Accedi con le credenziali che hai scelto per la demo.");
+        }
+    });
+});
 
+async function invia(form, endpoint, body) {
+    const controls = Array.from(form.querySelectorAll("button"));
+    for (const button of controls) button.disabled = true;
+    status.textContent = "Verifica in corso…";
     try {
-        const response = await fetch("/invito/riscatta", {
+        const response = await fetch(endpoint, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ token: submittedCode }),
+            body: JSON.stringify(body),
         });
-        if (response.status === 200) {
-            showReturnCode(await response.json());
-            return;
-        }
-        if (response.status === 204) {
-            window.location.replace("/login");
-            return;
-        }
-        if (response.status === 410) {
+        if (response.status === 204) return {};
+        const result = (response.headers.get("Content-Type") || "").includes("application/json")
+            ? await response.json()
+            : {};
+        if (response.ok) return result;
+        const retry = Number(response.headers.get("Retry-After"));
+        if (response.status === 410 && form !== forms.login) {
             token = "";
-            field.hidden = false;
-            input.disabled = false;
-            button.disabled = false;
-            status.textContent = "Codice non disponibile. Verificalo o chiedi un nuovo invito.";
-            input.focus();
-            return;
-        }
-        if (response.status === 429) {
-            const wait = Number(response.headers.get("Retry-After"));
-            status.textContent = wait > 0 ? `Troppi tentativi. Riprova tra ${wait} secondi.` : "Troppi tentativi. Riprova tra poco.";
-            button.disabled = false;
-            return;
+            verifica = "";
+            codice.value = "";
+            password.value = "";
+            apri("invito", result.errore || "L’invito non è disponibile.");
+        } else {
+            status.textContent = result.errore || (response.status === 429 ? "Troppi tentativi." : "Verifica temporaneamente indisponibile.");
+            if (retry > 0) status.textContent += " Riprova tra " + retry + " secondi.";
         }
     } catch {
-        // Anche dopo un errore di rete, verifica lo stato dell'invito al prossimo tentativo.
+        status.textContent = "Connessione interrotta. Riprova.";
+    } finally {
+        for (const button of controls) button.disabled = false;
     }
-    status.textContent = "Verifica temporaneamente indisponibile. Riprova.";
-    button.disabled = false;
+    return null;
+}
+
+formInvito.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const valore = codiceValido(token) ? token : codice.value.trim();
+    if (!codiceValido(valore)) {
+        status.textContent = "Il codice inserito non è valido.";
+        codice.focus();
+        return;
+    }
+    if (await invia(formInvito, "/invito/riscatta", { token: valore })) {
+        token = valore;
+        apri("registrazione", "Invito valido. Inserisci email e password per accedere alla demo.");
+    }
 });
+
+forms.registrazione.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const result = await invia(forms.registrazione, "/invito/registra", { token, email: email.value, password: password.value });
+    if (result) {
+        verifica = result.verifica;
+        password.value = "";
+        document.querySelector("#otp").value = "";
+        apri("conferma", "Abbiamo inviato un codice di 6 cifre a " + email.value + ". Controlla anche la posta indesiderata.");
+    }
+});
+
+forms.conferma.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const otp = document.querySelector("#otp").value;
+    if (await invia(forms.conferma, "/invito/conferma", { verifica, otp })) window.location.replace("/login");
+});
+
+forms.login.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const email = document.querySelector("#email-login").value;
+    const password = document.querySelector("#password-login").value;
+    if (await invia(forms.login, "/invito/login", { email, password })) window.location.replace("/login");
+});
+
+if (codiceValido(token)) {
+    apri("invito", "Conferma l’invito per accedere alla demo.", false);
+} else if (token) {
+    token = "";
+    apri("invito", "Link d’invito non valido. Puoi inserire un altro codice.", false);
+} else {
+    apri("invito", "", false);
+}

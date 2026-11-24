@@ -6,7 +6,10 @@ from collections import deque
 from contextlib import closing, contextmanager
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from email.message import EmailMessage
+from email.utils import formatdate, make_msgid
 from hashlib import sha256
+import hmac
 from http.cookies import CookieError, SimpleCookie
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from ipaddress import ip_address
@@ -18,8 +21,11 @@ from pathlib import Path
 import re
 import secrets
 import sqlite3
+import smtplib
 from threading import BoundedSemaphore, Lock
 import time
+
+import bcrypt
 
 
 ORIGIN = "https://demo.picus.strawberrypenguin.it"
@@ -40,13 +46,20 @@ ATTEMPTS_PER_IP = 30
 TOTAL_ATTEMPTS = 300
 TOKEN_PATTERN = re.compile(r"[a-zA-Z0-9_-]{43}")
 LAST_TIMESTAMP = 253402300799
+OTP_SECONDS = 10 * 60
+MAIL_DOMAIN = "mail.picus.strawberrypenguin.it"
+MAIL_FROM = f"noreply@{MAIL_DOMAIN}"
+OTP_PASSWORD = DATABASE.parent / "otp-smtp.password"
+EMAIL_PATTERN = re.compile(r"[a-z0-9_+%-]+(?:[.][a-z0-9_+%-]+)*@"
+                           r"(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?[.])+[a-z0-9-]{2,63}")
+DUMMY_HASH = bcrypt.hashpw(b"segnaposto per login PICUS", bcrypt.gensalt(rounds=12))
+
 
 
 @dataclass(frozen=True)
 class Access:
     session: str
     expires: int
-    return_code: str | None = None
 
 
 @contextmanager
@@ -91,6 +104,38 @@ def initialize(path):
             )
         """)
         connection.execute("CREATE INDEX IF NOT EXISTS sessioni_invito_id ON sessioni_invito(invito_id)")
+        connection.execute("""
+            CREATE TABLE IF NOT EXISTS visitatori (
+                email TEXT PRIMARY KEY NOT NULL,
+                hash_password BLOB NOT NULL
+            )
+        """)
+        connection.execute("""
+            CREATE TABLE IF NOT EXISTS accessi_personali (
+                invito_id TEXT PRIMARY KEY REFERENCES inviti(id) ON DELETE CASCADE,
+                email TEXT NOT NULL REFERENCES visitatori(email)
+            )
+        """)
+        connection.execute("CREATE INDEX IF NOT EXISTS accessi_personali_email ON accessi_personali(email)")
+        connection.execute("""
+            CREATE TABLE IF NOT EXISTS registrazioni_demo (
+                invito_id TEXT PRIMARY KEY REFERENCES inviti(id) ON DELETE CASCADE,
+                hash_verifica BLOB NOT NULL UNIQUE,
+                email TEXT NOT NULL,
+                hash_password BLOB NOT NULL,
+                hash_otp BLOB NOT NULL,
+                scadenza INTEGER NOT NULL,
+                tentativi INTEGER NOT NULL
+            )
+        """)
+        connection.execute("""
+            CREATE TABLE IF NOT EXISTS invii_otp (
+                invito_id TEXT NOT NULL REFERENCES inviti(id) ON DELETE CASCADE,
+                email TEXT NOT NULL,
+                inviato INTEGER NOT NULL
+            )
+        """)
+
 
 
 def digest(value):
@@ -116,45 +161,202 @@ def new_invite(path, label, hours, now):
             "scadenza": None, "codice": token, "url": invite_url(token)}
 
 
-def redeem_legacy(connection, invite, session, now):
-    if invite["riscattato"] is not None or invite["scadenza"] <= now:
-        return None
-    expires = now + LEGACY_SESSION_SECONDS
-    connection.execute("""
-        UPDATE inviti SET riscattato = ?, hash_sessione = ?, scadenza_sessione = ? WHERE id = ?
-    """, (now, digest(session), expires, invite["id"]))
+
+class AccessError(Exception):
+    def __init__(self, status, message, retry=0):
+        super().__init__(message)
+        self.status = status
+        self.retry = retry
+
+
+INVITE_UNAVAILABLE = "Codice scaduto, revocato o già associato a un account."
+INVALID_LOGIN = "Email o password errata, oppure accesso scaduto."
+INVALID_OTP = "Codice errato o scaduto. Se necessario, richiedine un altro."
+
+
+def unbound_invite(connection, now, token_hash=None, identifier=None):
+    invite = connection.execute("""
+        SELECT i.* FROM inviti i LEFT JOIN accessi_personali p ON p.invito_id = i.id
+        WHERE i.revocato IS NULL AND p.invito_id IS NULL
+          AND (i.id = ? OR i.hash_token = ? OR i.hash_rientro = ?)
+    """, (identifier, token_hash, token_hash)).fetchone()
+    if invite is None:
+        raise AccessError(410, INVITE_UNAVAILABLE)
+    if invite["durata_ore"] is None:
+        expires = invite["scadenza_sessione"] if invite["riscattato"] else invite["scadenza"]
+    else:
+        expires = invite["scadenza"] if invite["riscattato"] else invite["attiva_entro"]
+    if expires <= now:
+        raise AccessError(410, INVITE_UNAVAILABLE)
+    return invite
+
+
+def validate_invite(path, token, now):
+    with database(path) as connection:
+        unbound_invite(connection, now, token_hash=token_digest(token))
+
+
+def token_digest(token):
+    if not isinstance(token, str) or not TOKEN_PATTERN.fullmatch(token):
+        raise AccessError(410, INVITE_UNAVAILABLE)
+    return digest(token)
+
+
+def email_address(value):
+    if isinstance(value, str) and len(value) <= 254:
+        value = value.strip().lower()
+        if EMAIL_PATTERN.fullmatch(value) and len(value.split("@")[0]) <= 64:
+            return value
+    raise AccessError(400, "Inserisci un indirizzo email valido.")
+
+
+def password_bytes(value):
+    # Stessi criteri di PoliticaPassword e SecurityConfig in PICUS.
+    java_spaces = {"\u0085", "\u00a0", "\u2007", "\u202f"}
+    if not isinstance(value, str) or all(c.isspace() and c not in java_spaces for c in value):
+        raise AccessError(400, "La password è obbligatoria.")
+    if len(value) < 12:
+        raise AccessError(400, "La password deve contenere almeno 12 caratteri.")
+    try:
+        data = value.encode("utf-8")
+    except UnicodeError:
+        raise AccessError(400, "La password contiene caratteri non validi.") from None
+    if len(data) > 72:
+        raise AccessError(400, "La password può occupare al massimo 72 byte.")
+    return data
+
+
+def otp_digest(challenge, code):
+    return hmac.digest(challenge.encode("ascii"), code.encode("ascii"), "sha256")
+
+
+def start_registration(path, token, email, password, now, deliver):
+    email = email_address(email)
+    password = password_bytes(password)
+    token_hash = token_digest(token)
+    with database(path) as connection:
+        unbound_invite(connection, now, token_hash=token_hash)
+        existing = connection.execute("SELECT hash_password FROM visitatori WHERE email = ?", (email,)).fetchone()
+    if existing and bcrypt.checkpw(password, existing["hash_password"]):
+        password_hash = existing["hash_password"]
+    else:
+        password_hash = bcrypt.hashpw(password, bcrypt.gensalt(rounds=12))
+
+    challenge = secrets.token_urlsafe(32)
+    challenge_hash = digest(challenge)
+    code = f"{secrets.randbelow(1_000_000):06d}"
+    with database(path) as connection:
+        connection.execute("BEGIN IMMEDIATE")
+        invite = unbound_invite(connection, now, token_hash=token_hash)
+        identifier = invite["id"]
+        connection.execute("DELETE FROM registrazioni_demo WHERE scadenza <= ?", (now,))
+        connection.execute("DELETE FROM invii_otp WHERE inviato <= ?", (now - 3600,))
+        sends = list(connection.execute("SELECT * FROM invii_otp ORDER BY inviato"))
+        recent = [row["inviato"] for row in sends if row["invito_id"] == identifier]
+        recipient = [row["inviato"] for row in sends if row["email"] == email]
+        limit = max(recent[-1] + 60 - now if recent else 0,
+                    recipient[0] + 3600 - now if len(recipient) >= 5 else 0,
+                    sends[0]["inviato"] + 3600 - now if len(sends) >= 60 else 0)
+        if limit > 0:
+            raise AccessError(429, "Attendi prima di richiedere un altro codice.", limit)
+        connection.execute("INSERT INTO invii_otp VALUES (?, ?, ?)", (identifier, email, now))
+        connection.execute("""
+            INSERT OR REPLACE INTO registrazioni_demo
+                (invito_id, hash_verifica, email, hash_password, hash_otp, scadenza, tentativi)
+            VALUES (?, ?, ?, ?, ?, ?, 0)
+        """, (identifier, challenge_hash, email, password_hash, otp_digest(challenge, code), now + OTP_SECONDS))
+
+    try:
+        deliver(email, code)
+    except (OSError, smtplib.SMTPException):
+        with database(path) as connection:
+            connection.execute("DELETE FROM registrazioni_demo WHERE hash_verifica = ?", (challenge_hash,))
+        raise AccessError(503, "Invio del codice temporaneamente indisponibile. Riprova tra un minuto.") from None
+    return challenge
+
+
+def complete_registration(path, challenge, code, now):
+    if not isinstance(challenge, str) or not TOKEN_PATTERN.fullmatch(challenge):
+        raise AccessError(400, INVALID_OTP)
+    if not isinstance(code, str) or not re.fullmatch(r"[0-9]{6}", code):
+        raise AccessError(400, "Inserisci il codice di 6 cifre.")
+    with database(path) as connection:
+        connection.execute("BEGIN IMMEDIATE")
+        pending = connection.execute("""
+            SELECT * FROM registrazioni_demo WHERE hash_verifica = ? AND scadenza > ? AND tentativi < 5
+        """, (digest(challenge), now)).fetchone()
+        if pending is None:
+            raise AccessError(400, INVALID_OTP)
+        if not hmac.compare_digest(pending["hash_otp"], otp_digest(challenge, code)):
+            connection.execute("UPDATE registrazioni_demo SET tentativi = tentativi + 1 WHERE invito_id = ?",
+                               (pending["invito_id"],))
+            connection.commit()
+            raise AccessError(400, INVALID_OTP)
+
+        invite = unbound_invite(connection, now, identifier=pending["invito_id"])
+        email = pending["email"]
+        password_hash = pending["hash_password"]
+        connection.execute("INSERT OR IGNORE INTO visitatori VALUES (?, ?)", (email, password_hash))
+        stored = connection.execute("SELECT hash_password FROM visitatori WHERE email = ?", (email,)).fetchone()
+        connection.execute("DELETE FROM registrazioni_demo WHERE invito_id = ?", (invite["id"],))
+        if not hmac.compare_digest(stored["hash_password"], password_hash):
+            connection.commit()
+            raise AccessError(403, "Per un indirizzo già registrato, usa la password che hai scelto in precedenza.")
+
+        if invite["riscattato"] is None:
+            seconds = LEGACY_SESSION_SECONDS if invite["durata_ore"] is None else invite["durata_ore"] * 3600
+            expires = now + seconds
+        else:
+            expires = invite["scadenza_sessione"] if invite["durata_ore"] is None else invite["scadenza"]
+        connection.execute("""
+            UPDATE inviti SET riscattato = coalesce(riscattato, ?), scadenza = ?, hash_rientro = NULL
+            WHERE id = ?
+        """, (now, expires, invite["id"]))
+        connection.execute("INSERT INTO accessi_personali VALUES (?, ?)", (invite["id"], email))
+        return issue_session(connection, invite["id"], expires)
+
+
+def issue_session(connection, identifier, expires):
+    session = secrets.token_urlsafe(32)
+    connection.execute("INSERT INTO sessioni_invito VALUES (?, ?)", (digest(session), identifier))
     return Access(session, expires)
 
 
-def redeem(path, token, now):
-    if not TOKEN_PATTERN.fullmatch(token):
-        return None
-    session = secrets.token_urlsafe(32)
-    token_hash = digest(token)
+def login(path, email, password, now):
+    email = email_address(email)
+    password = password_bytes(password)
+    with database(path) as connection:
+        visitor = connection.execute("SELECT hash_password FROM visitatori WHERE email = ?", (email,)).fetchone()
+    if not bcrypt.checkpw(password, visitor["hash_password"] if visitor else DUMMY_HASH) or visitor is None:
+        raise AccessError(401, INVALID_LOGIN)
     with database(path) as connection:
         connection.execute("BEGIN IMMEDIATE")
         invite = connection.execute("""
-            SELECT * FROM inviti WHERE (hash_token = ? OR hash_rientro = ?) AND revocato IS NULL
-        """, (token_hash, token_hash)).fetchone()
+            SELECT i.id, i.scadenza FROM accessi_personali p JOIN inviti i ON i.id = p.invito_id
+            WHERE p.email = ? AND i.revocato IS NULL AND i.scadenza > ?
+            ORDER BY i.scadenza DESC LIMIT 1
+        """, (email, now)).fetchone()
         if invite is None:
-            return None
-        if invite["durata_ore"] is None:
-            return redeem_legacy(connection, invite, session, now)
+            raise AccessError(401, INVALID_LOGIN)
+        return issue_session(connection, invite["id"], invite["scadenza"])
 
-        return_code = None
-        expires = invite["scadenza"]
-        if invite["riscattato"] is None:
-            if invite["attiva_entro"] <= now:
-                return None
-            expires = now + invite["durata_ore"] * 60 * 60
-            return_code = secrets.token_urlsafe(32)
-            connection.execute("""
-                UPDATE inviti SET riscattato = ?, scadenza = ?, hash_rientro = ? WHERE id = ?
-            """, (now, expires, digest(return_code), invite["id"]))
-        if expires <= now:
-            return None
-        connection.execute("INSERT INTO sessioni_invito VALUES (?, ?)", (digest(session), invite["id"]))
-        return Access(session, expires, return_code)
+
+def send_otp(email, code):
+    password = OTP_PASSWORD.read_text(encoding="ascii").strip()
+    if not password:
+        raise OSError("Credenziale SMTP mancante")
+    message = EmailMessage()
+    message["From"] = f"Demo PICUS <{MAIL_FROM}>"
+    message["To"] = email
+    message["Subject"] = "PICUS | Codice di accesso alla demo"
+    message["Date"] = formatdate()
+    message["Message-ID"] = make_msgid(domain=MAIL_DOMAIN)
+    message.set_content(f"Il tuo codice per confermare l’indirizzo email della demo PICUS è {code}.\n"
+                        "Il codice scade tra 10 minuti e può essere usato una sola volta.\n"
+                        "Se non hai richiesto un accesso, puoi ignorare questa email.\n")
+    with smtplib.SMTP("127.0.0.1", 2525, timeout=4) as client:
+        client.login(f"picus-otp@{MAIL_DOMAIN}", password)
+        client.send_message(message, from_addr=MAIL_FROM, to_addrs=[email])
 
 
 def valid_session(path, session, now):
@@ -235,9 +437,11 @@ class RedemptionLimit:
 
 
 class Gateway(ThreadingHTTPServer):
-    def __init__(self, address, path):
+    def __init__(self, address, path, deliver=send_otp):
         self.database_path = path
         self.redemption_limit = RedemptionLimit()
+        self.login_limit = RedemptionLimit(per_ip=8, total=200, window=300)
+        self.deliver = deliver
         self.workers = BoundedSemaphore(12)
         super().__init__(address, InviteRequest)
 
@@ -321,7 +525,7 @@ class InviteRequest(BaseHTTPRequestHandler):
             self.respond(401, b'{"errore":"Invito richiesto o sessione scaduta"}', "application/json")
 
     def do_POST(self):
-        if self.path != "/invito/riscatta":
+        if self.path not in {"/invito/riscatta", "/invito/registra", "/invito/conferma", "/invito/login"}:
             self.respond(404)
             return
         # Caddy sovrascrive questa intestazione prima di inoltrare al servizio locale.
@@ -347,7 +551,7 @@ class InviteRequest(BaseHTTPRequestHandler):
                 self.respond(413)
                 return
             body = json.loads(self.rfile.read(length))
-            if not isinstance(body, dict) or not isinstance(body.get("token"), str):
+            if not isinstance(body, dict):
                 self.respond(400)
                 return
         except (ValueError, UnicodeError):
@@ -355,22 +559,37 @@ class InviteRequest(BaseHTTPRequestHandler):
             return
         now = int(time.time())
         try:
-            access = redeem(self.server.database_path, body["token"], now)
+            path = self.server.database_path
+            if self.path == "/invito/riscatta":
+                validate_invite(path, body.get("token"), now)
+                self.respond(204)
+            elif self.path == "/invito/registra":
+                challenge = start_registration(path, body.get("token"), body.get("email"),
+                                               body.get("password"), now, self.server.deliver)
+                self.json_response(202, {"verifica": challenge})
+            elif self.path == "/invito/conferma":
+                self.set_access(complete_registration(path, body.get("verifica"), body.get("otp"), now), now)
+            else:
+                email = email_address(body.get("email"))
+                delay = self.server.login_limit.retry_after(email)
+                if delay:
+                    raise AccessError(429, "Troppi tentativi. Riprova più tardi.", delay)
+                self.set_access(login(path, email, body.get("password"), now), now)
+        except AccessError as error:
+            headers = {"Retry_After": str(error.retry)} if error.retry else {}
+            self.json_response(error.status, {"errore": str(error)}, **headers)
         except sqlite3.Error:
-            logging.exception("Riscatto dell'invito non riuscito")
+            logging.exception("Operazione sull’accesso demo non riuscita")
             self.respond(503)
-            return
-        if access is None:
-            self.respond(410)
-            return
+
+    def json_response(self, code, body, **headers):
+        self.respond(code, json.dumps(body).encode("utf-8"), "application/json", **headers)
+
+    def set_access(self, access, now):
         cookie = (f"{COOKIE}={access.session}; Path=/; Max-Age={access.expires - now}; "
                   "Secure; HttpOnly; SameSite=Lax")
-        if access.return_code is None:
-            self.respond(204, Set_Cookie=cookie)
-            return
-        body = json.dumps({"codice": access.return_code, "url": invite_url(access.return_code),
-                           "scadenza": timestamp(access.expires)}).encode("utf-8")
-        self.respond(200, body, "application/json", Set_Cookie=cookie)
+        self.respond(204, Set_Cookie=cookie)
+
 
 
 def drop_root():

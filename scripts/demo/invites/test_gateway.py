@@ -9,6 +9,8 @@ import gateway
 
 class InvitiTest(unittest.TestCase):
     NOW = 1_800_000_000
+    EMAIL = "collaudo@picus.test"
+    PASSWORD = "password visita 🐧"
 
     def setUp(self):
         directory = TemporaryDirectory()
@@ -17,100 +19,154 @@ class InvitiTest(unittest.TestCase):
         gateway.initialize(self.path)
         self.invite = gateway.new_invite(self.path, "revisore test", 1, self.NOW)
         self.token = self.invite["codice"]
+        self.mail = []
 
-    def test_solo_un_codice_di_rientro_con_accessi_in_parallelo(self):
+    def send(self, email, code):
+        self.mail.append((email, code))
+
+    def start(self, *, now=None, token=None, password=None):
+        return gateway.start_registration(self.path, token or self.token, self.EMAIL,
+                                          password or self.PASSWORD, self.NOW if now is None else now, self.send)
+
+    def check(self, challenge, elapsed=0, code=None):
+        return gateway.complete_registration(self.path, challenge, self.mail[-1][1] if code is None else code,
+                                             self.NOW + elapsed)
+
+    def test_invio_e_conferma_concorrente_con_codice_monouso(self):
+        gateway.validate_invite(self.path, self.token, self.NOW)
+        challenge = self.start()
+        self.assertEqual(self.mail[0][0], self.EMAIL)
+        self.assertRegex(self.mail[0][1], r"^[0-9]{6}$")
+
+        def redeem(_):
+            try:
+                return self.check(challenge, 180)
+            except gateway.AccessError:
+                return None
+
         with ThreadPoolExecutor(max_workers=6) as pool:
-            accesses = list(pool.map(lambda _: gateway.redeem(self.path, self.token, self.NOW), range(6)))
-        self.assertEqual(sum(access.return_code is not None for access in accesses), 1)
-        self.assertEqual({access.expires for access in accesses}, {self.NOW + 3600})
-        self.assertEqual(len({access.session for access in accesses}), 6)
+            results = list(pool.map(redeem, range(6)))
+        sessions = [access for access in results if access is not None]
+        self.assertEqual(len(sessions), 1)
+        [access] = sessions
+        self.assertEqual(access.expires, self.NOW + 180 + 3600)
+        self.assertTrue(gateway.valid_session(self.path, access.session, self.NOW + 181))
+        self.assertFalse(gateway.valid_session(self.path, access.session, access.expires))
+        with self.assertRaises(gateway.AccessError):
+            gateway.validate_invite(self.path, self.token, self.NOW + 181)
+        with gateway.database(self.path) as connection:
+            row = connection.execute("SELECT hash_password FROM visitatori").fetchone()
+            self.assertTrue(row[0].startswith(b"$2b$12$"))
+            self.assertIsNone(connection.execute("SELECT 1 FROM registrazioni_demo").fetchone())
 
-    def test_durata_dal_primo_accesso_e_scadenza_condivisa(self):
-        self.assertIsNone(self.invite["scadenza"])
-        first = gateway.redeem(self.path, self.token, self.NOW)
-        self.assertNotEqual(first.return_code, self.token)
-        self.assertEqual(first.expires, self.NOW + 3600)
-        second = gateway.redeem(self.path, first.return_code, self.NOW + 1800)
-        third = gateway.redeem(self.path, self.token, self.NOW + 2000)
-        self.assertEqual(second.expires, first.expires)
-        self.assertEqual(third.expires, first.expires)
-        self.assertIsNone(second.return_code)
+    def test_email_password_login_e_revoca(self):
+        challenge = self.start()
+        with self.assertRaises(gateway.AccessError):
+            gateway.login(self.path, self.EMAIL, self.PASSWORD, self.NOW)
+        first = self.check(challenge, 5)
+        self.assertTrue(gateway.valid_session(self.path, first.session, self.NOW + 6))
+        second = gateway.login(self.path, self.EMAIL.upper(), self.PASSWORD, self.NOW + 6)
+        self.assertEqual(first.expires, second.expires)
+        with self.assertRaises(gateway.AccessError):
+            gateway.login(self.path, self.EMAIL, "password errata", self.NOW + 7)
+        self.assertTrue(gateway.revoke(self.path, self.invite["id"], self.NOW + 8))
+        self.assertFalse(gateway.valid_session(self.path, second.session, self.NOW + 8))
+        with self.assertRaises(gateway.AccessError):
+            gateway.login(self.path, self.EMAIL, self.PASSWORD, self.NOW + 8)
 
-        for access in (first, second, third):
-            self.assertTrue(gateway.valid_session(self.path, access.session, first.expires - 1))
-            self.assertFalse(gateway.valid_session(self.path, access.session, first.expires))
-        for code in (self.token, first.return_code):
-            self.assertIsNone(gateway.redeem(self.path, code, first.expires))
+    def test_otp_scadenza_tentativi_e_nuovo_invio(self):
+        first = self.start()
+        with self.assertRaises(gateway.AccessError) as cooldown:
+            self.start(now=self.NOW + 5)
+        self.assertEqual(cooldown.exception.retry, 55)
+        wrong = "000000" if self.mail[-1][1] != "000000" else "000001"
+        for _ in range(5):
+            with self.assertRaises(gateway.AccessError):
+                self.check(first, 11, wrong)
+        with self.assertRaises(gateway.AccessError):
+            self.check(first, 12)
+        second = self.start(now=self.NOW + 61)
+        with self.assertRaises(gateway.AccessError):
+            self.check(second, 61 + gateway.OTP_SECONDS)
+        self.assertEqual(len(self.mail), 2)
 
-    def test_revoca_invito_non_usato(self):
-        self.assertTrue(gateway.revoke(self.path, self.invite["id"], self.NOW))
-        self.assertIsNone(gateway.redeem(self.path, self.token, self.NOW))
+    def test_email_verificata_non_sovrascrive_la_password_di_un_account(self):
+        self.check(self.start(), 1)
+        renewed = gateway.new_invite(self.path, "rinnovo", 2, self.NOW + 2)
+        different = self.start(now=self.NOW + 2, token=renewed["codice"], password="password diversa")
+        with self.assertRaises(gateway.AccessError):
+            self.check(different, 3)
+        same = self.start(now=self.NOW + 63, token=renewed["codice"])
+        later_access = self.check(same, 64)
+        self.assertEqual(later_access.expires, self.NOW + 64 + 7200)
 
-    def test_scadenza_dell_attivazione_e_indipendente_dalla_durata(self):
-        deadline = self.NOW + 48 * 3600
+    def test_scadenza_e_revoca_valgono_anche_dopo_invio_otp(self):
+        deadline = self.NOW + gateway.ACTIVATION_SECONDS
         self.assertEqual(self.invite["attiva_entro"], gateway.timestamp(deadline))
-        self.assertIsNone(gateway.redeem(self.path, self.token, deadline))
+        challenge = self.start(now=deadline - 1)
+        with self.assertRaises(gateway.AccessError):
+            self.check(challenge, gateway.ACTIVATION_SECONDS)
+        another = gateway.new_invite(self.path, "da revocare", 1, self.NOW)
+        challenge = self.start(token=another["codice"])
+        self.assertTrue(gateway.revoke(self.path, another["id"], self.NOW + 20))
+        with self.assertRaises(gateway.AccessError):
+            self.check(challenge, 21)
 
-        late = gateway.new_invite(self.path, "attivazione al limite", 36, self.NOW)
-        access = gateway.redeem(self.path, late["codice"], deadline - 1)
-        self.assertEqual(access.expires, deadline - 1 + 36 * 3600)
-        self.assertIsNotNone(gateway.redeem(self.path, access.return_code, deadline + 60))
+    def test_criteri_password_unicode(self):
+        self.assertEqual(gateway.password_bytes("🐧" * 18), ("🐧" * 18).encode("utf-8"))
+        for value in ("a" * 11, "🐧" * 19, " " * 13):
+            with self.subTest(value=value), self.assertRaises(gateway.AccessError):
+                gateway.password_bytes(value)
 
-    def test_migrazione_non_rinnova_la_finestra_degli_inviti_in_attesa(self):
-        with gateway.database(self.path) as database:
-            database.execute("ALTER TABLE inviti DROP COLUMN attiva_entro")
-        with patch("gateway.time.time", return_value=self.NOW + 3600) as clock:
-            gateway.initialize(self.path)
-            clock.return_value += 3600
-            gateway.initialize(self.path)
-        with gateway.database(self.path) as database:
-            row = database.execute("SELECT * FROM inviti").fetchone()
-        deadline = self.NOW + 49 * 3600
-        self.assertEqual(row["attiva_entro"], deadline)
-        self.assertEqual(gateway.invite_status(row, deadline - 1), "da attivare")
-        self.assertEqual(gateway.invite_status(row, deadline), "scaduto")
+    def test_errore_email_non_riscatta_invito(self):
+        with self.assertRaises(gateway.AccessError) as failed:
+            gateway.start_registration(self.path, self.token, self.EMAIL, self.PASSWORD,
+                                       self.NOW, lambda *_: (_ for _ in ()).throw(OSError()))
+        self.assertEqual(failed.exception.status, 503)
+        gateway.validate_invite(self.path, self.token, self.NOW + 1)
+        with gateway.database(self.path) as connection:
+            self.assertIsNone(connection.execute("SELECT 1 FROM registrazioni_demo").fetchone())
 
-    def test_revoca_sessione_e_archiviazione_degli_hash(self):
-        first = gateway.redeem(self.path, self.token, self.NOW)
-        second = gateway.redeem(self.path, first.return_code, self.NOW + 1)
-        with gateway.database(self.path) as database:
-            row = database.execute("SELECT hash_token, hash_rientro FROM inviti").fetchone()
-            hashes = {row[0] for row in database.execute("SELECT hash_sessione FROM sessioni_invito")}
-        self.assertEqual(tuple(row), (gateway.digest(self.token), gateway.digest(first.return_code)))
-        self.assertEqual(hashes, {gateway.digest(first.session), gateway.digest(second.session)})
-
-        self.assertTrue(gateway.revoke(self.path, self.invite["id"], self.NOW + 2))
-        self.assertFalse(gateway.valid_session(self.path, first.session, self.NOW + 2))
-        self.assertFalse(gateway.valid_session(self.path, second.session, self.NOW + 2))
-        self.assertIsNone(gateway.redeem(self.path, first.return_code, self.NOW + 2))
-
-    def test_migrazione_conserva_la_sessione_e_gli_inviti_precedenti(self):
+    def test_migrazione_conserva_sessioni_e_inviti_attivi_senza_prolungarli(self):
         legacy = self.path.with_name("legacy.db")
         old_token, old_session, unused_token = (letter * 43 for letter in "abc")
-        with gateway.database(legacy) as database:
-            database.execute("""
+        with gateway.database(legacy) as connection:
+            connection.execute("""
                 CREATE TABLE inviti (
                     id TEXT PRIMARY KEY, etichetta TEXT NOT NULL, hash_token BLOB NOT NULL UNIQUE,
                     scadenza INTEGER NOT NULL, riscattato INTEGER, revocato INTEGER,
                     hash_sessione BLOB UNIQUE, scadenza_sessione INTEGER
                 )
             """)
-            database.execute("INSERT INTO inviti VALUES (?, ?, ?, ?, ?, NULL, ?, ?)", (
+            connection.execute("INSERT INTO inviti VALUES (?, ?, ?, ?, ?, NULL, ?, ?)", (
                 "gia-attivo", "precedente", gateway.digest(old_token), self.NOW + 3600,
-                self.NOW - 10, gateway.digest(old_session), self.NOW + 30,
+                self.NOW - 10, gateway.digest(old_session), self.NOW + 300,
             ))
-            database.execute("INSERT INTO inviti (id, etichetta, hash_token, scadenza) VALUES (?, ?, ?, ?)", (
+            connection.execute("INSERT INTO inviti (id, etichetta, hash_token, scadenza) VALUES (?, ?, ?, ?)", (
                 "non-usato", "precedente", gateway.digest(unused_token), self.NOW + 3600,
             ))
         gateway.initialize(legacy)
         gateway.initialize(legacy)
         self.assertTrue(gateway.valid_session(legacy, old_session, self.NOW))
-        self.assertFalse(gateway.valid_session(legacy, old_session, self.NOW + 30))
-        self.assertIsNone(gateway.redeem(legacy, old_token, self.NOW))
-        previous = gateway.redeem(legacy, unused_token, self.NOW)
-        self.assertIsNone(previous.return_code)
-        self.assertIsNone(gateway.redeem(legacy, unused_token, self.NOW))
-        self.assertEqual(previous.expires, self.NOW + gateway.LEGACY_SESSION_SECONDS)
+        self.assertFalse(gateway.valid_session(legacy, old_session, self.NOW + 300))
+        gateway.validate_invite(legacy, unused_token, self.NOW)
+        challenge = gateway.start_registration(legacy, old_token, self.EMAIL, self.PASSWORD, self.NOW, self.send)
+        access = gateway.complete_registration(legacy, challenge, self.mail[-1][1], self.NOW + 1)
+        self.assertEqual(access.expires, self.NOW + 300)
+
+    def test_migrazione_non_rinnova_la_finestra_degli_inviti_in_attesa(self):
+        with gateway.database(self.path) as connection:
+            connection.execute("ALTER TABLE inviti DROP COLUMN attiva_entro")
+        with patch("gateway.time.time", return_value=self.NOW + 3600) as clock:
+            gateway.initialize(self.path)
+            clock.return_value += 3600
+            gateway.initialize(self.path)
+        with gateway.database(self.path) as connection:
+            row = connection.execute("SELECT * FROM inviti").fetchone()
+        deadline = self.NOW + 49 * 3600
+        self.assertEqual(row["attiva_entro"], deadline)
+        self.assertEqual(gateway.invite_status(row, deadline - 1), "da attivare")
+        self.assertEqual(gateway.invite_status(row, deadline), "scaduto")
 
 
 class LimiteRiscattoTest(unittest.TestCase):
