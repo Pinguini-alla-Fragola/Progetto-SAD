@@ -3,6 +3,7 @@ package it.unina.picus.monitoraggio.web;
 import static it.unina.picus.shared.ClientHttp.assertDiniegoSenzaCorpo;
 import static it.unina.picus.shared.ClientHttp.assertNonAutenticatoSenzaDati;
 import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -710,17 +711,22 @@ class ConteggiOptIntegrazioneTest {
     }
 
     @Test
-    @DisplayName("Robustezza - un cumulativo oltre il massimo rappresentabile riceve 409, mai un errore non gestito")
-    void cumulativoOltreIlMassimoSenzaErroreNonGestito() throws Exception {
+    @DisplayName("Robustezza - un cumulativo oltre Long.MAX_VALUE è restituito esatto, come testo, senza errori")
+    void cumulativoOltreLongRestituitoEsatto() throws Exception {
         registra(optA, ANNO, 1, voce(m01, "PERSONE_RAGGIUNTE", Long.MAX_VALUE)).andExpect(status().isNoContent());
         registra(optA, ANNO, 2, voce(m01, "PERSONE_RAGGIUNTE", 1)).andExpect(status().isNoContent());
         SessioneDiProva sessione = sessione(banco);
         String intervallo = CONTEGGI + "?optId=" + optA + "&anno=" + ANNO + "&trimestre=1&annoFine=" + ANNO
                 + "&trimestreFine=2";
 
-        assertEquals(409, statoDi(() -> sessione.get(intervallo)), "somma dei due trimestri oltre Long.MAX_VALUE");
+        assertEquals(200, statoDi(() -> sessione.get(intervallo)), "somma dei due trimestri oltre Long.MAX_VALUE");
+        sessione.get(intervallo)
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].optId").value(optA.toString()))
+                .andExpect(jsonPath("$[0].conteggio.valore").value("9223372036854775808"));
         assertEquals(Map.of(chiave(optA, m01, "PERSONE_RAGGIUNTE"), Long.MAX_VALUE), consulta(banco, optA, ANNO, 1),
                 "il singolo trimestre resta consultabile");
+        assertEquals(2, righe(), "la consultazione cumulativa non scrive righe");
     }
 
     /** Una richiesta HTTP da eseguire; può lanciare l'eccezione che nessun gestore ha convertito. */
