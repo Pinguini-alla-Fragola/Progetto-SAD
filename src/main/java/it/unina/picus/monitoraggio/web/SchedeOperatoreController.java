@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /** API HTTP del primo invio e della consultazione della scheda personale TM-OP-01. */
 @RestController
@@ -79,6 +80,16 @@ class SchedeOperatoreController {
     List<SchedaSintesi> ricevute(IdentitaAutenticata attore, @RequestParam(required = false) Integer anno,
                                 @RequestParam(required = false) Integer trimestre) {
         return schede.elencoSchedeRicevute(attore, periodo(anno, trimestre));
+    }
+
+    /** Riepiloga per il Banco le schede ricevute e i conteggi dichiarati per categoria. */
+    @GetMapping("/ricevute/riepilogo")
+    RiepilogoRicevute riepilogo(IdentitaAutenticata attore, @RequestParam(required = false) Integer anno,
+                              @RequestParam(required = false) Integer trimestre) {
+        var riepilogo = schede.riepilogaSchede(attore, periodo(anno, trimestre));
+        var totali = riepilogo.conteggi().entrySet().stream()
+                .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, voce -> voce.getValue().toString()));
+        return new RiepilogoRicevute(riepilogo.schede(), totali);
     }
 
     /** Restituisce la scheda al titolare o al Banco autorizzato. */
@@ -136,6 +147,9 @@ class SchedeOperatoreController {
 
     /** Conferma del primo invio accettato. */
     record Ricevuta(UUID id, Trimestre trimestre) {}
+
+    /** Totali in stringhe decimali per preservarne la precisione anche nei client JavaScript. */
+    record RiepilogoRicevute(List<SchedaSintesi> schede, Map<String, String> conteggi) {}
 
     /** Errore HTTP senza valori dichiarati dal compilatore. */
     record Errore(String codice, String messaggio, Map<String, String> campi) {}

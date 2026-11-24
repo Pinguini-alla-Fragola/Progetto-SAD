@@ -98,9 +98,9 @@ class BancoCoordinamentoAccessiTest extends AccessiBlackBoxTest {
     }
 
     /**
-     * Codice sintetico della voce di conteggio; da allineare al tracciato della #41 quando sarà definito.
+     * Voce attiva del tracciato OPT inizializzata dalla migrazione V24.
      */
-    private static final String VOCE_DI_PROVA = "VOCE_PROVA_28";
+    private static final String VOCE_DI_PROVA = "PERSONE_RAGGIUNTE";
 
     @Test
     @DisplayName("CA-05 · il Banco consulta i conteggi di una OPT e di tutte le OPT, ciascuna con i propri valori")

@@ -138,7 +138,8 @@ class SecurityConfig {
                         .requestMatchers("/api/monitoraggio/schede-operatore",
                                 "/api/monitoraggio/schede-operatore/modulo",
                                 "/api/monitoraggio/schede-operatore/mie").hasRole("OPERATORE")
-                        .requestMatchers("/api/monitoraggio/schede-operatore/ricevute").hasRole("BANCO")
+                        .requestMatchers("/api/monitoraggio/schede-operatore/ricevute",
+                                "/api/monitoraggio/schede-operatore/ricevute/riepilogo").hasRole("BANCO")
                         .requestMatchers("/api/monitoraggio/schede-operatore/*").hasAnyRole("BANCO", "OPERATORE")
                         .anyRequest().authenticated())
                 .exceptionHandling(eccezioni -> eccezioni

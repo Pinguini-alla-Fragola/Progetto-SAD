@@ -3,6 +3,7 @@ package it.unina.picus.monitoraggio.api;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -61,11 +62,13 @@ public interface MonitoraggioApi extends SchedeOperatoreApi {
     /**
      * Riepiloga per il Banco le schede ricevute nel trimestre selezionato. Le voci aggregate
      * rappresentano conteggi dichiarati e conservano distinte le categorie sovrapponibili.
+     * Per ogni operatore si usa l'ultima versione accettata nel periodo.
      *
      * @param attore identità verificata del Banco autorizzato alla rendicontazione
      * @param trimestre singolo trimestre da riepilogare
      * @return riferimenti alle schede ricevute e totali per voce, anche in assenza di invii
      * @throws SecurityException se l'attore non è autorizzato al riepilogo
+     * @throws NullPointerException se manca il trimestre
      */
     RiepilogoTrimestre riepilogaSchede(IdentitaAutenticata attore, Trimestre trimestre);
 
@@ -162,9 +165,10 @@ public interface MonitoraggioApi extends SchedeOperatoreApi {
      * Dati usati dal Banco per la rendicontazione trimestrale.
      *
      * @param schede riferimenti alle schede ricevute usate per il riepilogo
-     * @param conteggi totali dichiarati per voce, senza stima di persone uniche
+     * @param conteggi totali esatti per voce, senza stima di persone uniche. Uno zero
+     *                 dichiarato è incluso e una voce mai dichiarata è assente
      */
-    record RiepilogoTrimestre(List<SchedaSintesi> schede, Map<String, Long> conteggi) {
+    record RiepilogoTrimestre(List<SchedaSintesi> schede, Map<String, BigInteger> conteggi) {
         /** Crea copie immutabili dell'elenco delle schede e dei totali. */
         public RiepilogoTrimestre {
             schede = List.copyOf(schede);
