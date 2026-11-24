@@ -356,6 +356,33 @@ final class ComunicazioniHttp {
         return esegui(attore, get(ALLEGATO, allegatoId).accept(MediaType.ALL));
     }
 
+    // ------------------------------------------------------------------ pagine e script
+
+    /**
+     * Pagina HTML chiesta come il browser, con la sessione dell'account.
+     *
+     * @param attore account che apre la pagina
+     * @param percorso rotta della pagina
+     * @return risposta con il markup renderizzato
+     * @throws Exception se la richiesta non riesce
+     */
+    MockHttpServletResponse paginaHtml(Account attore, String percorso) throws Exception {
+        return esegui(attore, get(percorso).accept(MediaType.TEXT_HTML));
+    }
+
+    /**
+     * Risorsa statica caricata dalla pagina. Non ha un controller, quindi non si verifica il mapping delle rotte:
+     * se il file manca la risposta non è {@code 200}.
+     *
+     * @param attore account che ha aperto la pagina
+     * @param percorso percorso della risorsa
+     * @return risposta del server
+     * @throws Exception se la richiesta non riesce
+     */
+    MockHttpServletResponse risorsaStatica(Account attore, String percorso) throws Exception {
+        return http.esegui(get(percorso).session(sessione(attore)).accept(MediaType.ALL));
+    }
+
     // ------------------------------------------------------------------ errori
 
     /**

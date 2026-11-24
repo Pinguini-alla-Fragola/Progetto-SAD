@@ -6,18 +6,24 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.MatchResult;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
 
 import it.unina.picus.comunicazioni.api.ComunicazioniApi.TipoDestinatari;
 import it.unina.picus.comunicazioni.web.ComunicazioniHttp.Inviata;
@@ -46,7 +52,8 @@ import it.unina.picus.utenze.api.UtenzeApi.TipoErogatore;
  * il modello della pagina usa {@code TUTTI_GLI_OPERATORI}. Il test verifica solo il canale, non la platea.</p>
  *
  * <p>Il collegamento tra il pulsante del modello di scadenza e l'invio del Banco (payload della POST normale) è
- * verificato in {@code src/test/js/comunicazioni.test.mjs}; qui si verifica la ricezione via HTTP.</p>
+ * verificato in {@code src/test/js/comunicazioni.test.mjs}; qui si verificano la ricezione via HTTP e che la
+ * dashboard renderizzata carichi il modulo e contenga il pulsante.</p>
  */
 @DisplayName("#55 CA-01, CA-02, CA-06 · Invio a OPT e operatori e avviso di scadenza")
 class InvioComunicazioniTest extends ComunicazioniBlackBoxTest {
@@ -56,6 +63,15 @@ class InvioComunicazioniTest extends ComunicazioniBlackBoxTest {
     static final String CONTENUTO_SCADENZA =
             "Vi ricordiamo di compilare e inviare la scheda trimestrale entro la scadenza prevista.\n"
                     + "Per qualsiasi dubbio potete rispondere a questa comunicazione contattando il Banco.";
+
+    private static final String DASHBOARD_BANCO = "/banco/dashboard";
+    private static final String MODULO_COMUNICAZIONI = "/js/comunicazioni.js";
+
+    // Lettura del markup renderizzato, senza i commenti HTML: tag di apertura, attributi e form delle comunicazioni.
+    private static final Pattern COMMENTO = Pattern.compile("<!--.*?-->", Pattern.DOTALL);
+    private static final Pattern ATTRIBUTO = Pattern.compile("([\\w:-]+)(?:\\s*=\\s*(?:\"([^\"]*)\"|'([^']*)'))?");
+    private static final Pattern FORM = Pattern.compile("<form\\b([^>]*)>(.*?)</form>",
+            Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
     private ComunicazioniHttp comunicazioni;
 
@@ -190,6 +206,51 @@ class InvioComunicazioniTest extends ComunicazioniBlackBoxTest {
         }
         verificaNonRicevuta(opt, inviata.id(), prima.get(opt));
         assertTrue(comunicazioni.inviate(banco).contiene(inviata.id()), "il Banco vede l'avviso tra le inviate");
+    }
+
+    @Test
+    @DisplayName("CA-06 · la dashboard del Banco renderizzata carica comunicazioni.js e contiene il pulsante del modello")
+    void dashboardConModuloEPulsante() throws Exception {
+        Account banco = scenario.banco();
+
+        MockHttpServletResponse pagina = comunicazioni.paginaHtml(banco, DASHBOARD_BANCO);
+
+        assertEquals(200, pagina.getStatus());
+        assertTrue(MediaType.TEXT_HTML.isCompatibleWith(MediaType.parseMediaType(pagina.getContentType())),
+                "la dashboard è una pagina HTML");
+        String markup = COMMENTO.matcher(pagina.getContentAsString(StandardCharsets.UTF_8)).replaceAll("");
+
+        List<Map<String, String>> script = tag(markup, "script").stream()
+                .filter(attributi -> MODULO_COMUNICAZIONI.equals(attributi.get("src"))).toList();
+        assertEquals(1, script.size(), "un solo script della dashboard carica " + MODULO_COMUNICAZIONI);
+        assertEquals("module", script.get(0).get("type"), "lo script è un modulo JavaScript");
+
+        List<MatchResult> form = FORM.matcher(markup).results()
+                .filter(trovato -> "comunicazione".equals(attributi(trovato.group(1)).get("id"))).toList();
+        assertEquals(1, form.size(), "un solo form id=comunicazione");
+        assertEquals(1, tag(form.get(0).group(2), "button").stream()
+                .filter(attributi -> attributi.containsKey("data-modello-scadenza")).count(),
+                "un pulsante del modello nel form delle comunicazioni");
+
+        MockHttpServletResponse modulo = comunicazioni.risorsaStatica(banco, MODULO_COMUNICAZIONI);
+        assertEquals(200, modulo.getStatus(), "il modulo caricato dalla pagina è disponibile");
+        MediaType tipo = MediaType.parseMediaType(modulo.getContentType());
+        assertTrue(List.of("text/javascript", "application/javascript").contains(tipo.getType() + "/" + tipo.getSubtype()),
+                () -> "content type JavaScript, ottenuto " + tipo);
+    }
+
+    /** Attributi di ogni tag di apertura con quel nome. */
+    private static List<Map<String, String>> tag(String markup, String nome) {
+        return Pattern.compile("<" + nome + "\\b([^>]*)>", Pattern.CASE_INSENSITIVE).matcher(markup).results()
+                .map(trovato -> attributi(trovato.group(1))).toList();
+    }
+
+    /** Attributi in qualsiasi ordine; quelli senza valore hanno valore vuoto. */
+    private static Map<String, String> attributi(String testo) {
+        Map<String, String> attributi = new HashMap<>();
+        ATTRIBUTO.matcher(testo).results().forEach(trovato -> attributi.put(trovato.group(1),
+                trovato.group(2) != null ? trovato.group(2) : trovato.group(3) != null ? trovato.group(3) : ""));
+        return attributi;
     }
 
     /**
