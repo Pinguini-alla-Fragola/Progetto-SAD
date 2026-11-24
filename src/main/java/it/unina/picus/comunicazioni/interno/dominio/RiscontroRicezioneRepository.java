@@ -2,23 +2,14 @@ package it.unina.picus.comunicazioni.interno.dominio;
 
 import java.time.Instant;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 /** Porta di persistenza dei destinatari registrati all'invio e dei loro riscontri di ricezione. */
 public interface RiscontroRicezioneRepository {
 
     /**
-     * Legge gli account destinatari registrati al momento dell'invio della comunicazione.
-     *
-     * @param comunicazioneId identificativo della comunicazione
-     * @return {@code Optional.empty()} se la comunicazione manca, altrimenti l'insieme dei
-     *         destinatari, che può essere vuoto
-     */
-    Optional<Set<UUID>> cercaDestinatari(UUID comunicazioneId);
-
-    /**
-     * Registra atomicamente l'istante della prima conferma su una riga di destinazione esistente.
+     * Registra atomicamente l'istante della prima conferma per la coppia comunicazione e account
+     * registrata all'invio.
      * Una conferma ripetuta o concorrente restituisce l'istante già persistito.
      * L'operazione richiede una transazione di scrittura aperta dal chiamante.
      *

@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.jayway.jsonpath.JsonPath;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
@@ -33,6 +34,8 @@ import org.springframework.security.test.context.TestSecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import it.unina.picus.shared.AccessoDiProva;
 import it.unina.picus.shared.DatiSintetici;
@@ -43,13 +46,13 @@ import it.unina.picus.shared.SessioneDiProva;
  * Test di integrazione della #145 sul codice della #143: comando {@code POST
  * /api/comunicazioni/{comunicazioneId}/ricezione} con login reale e PostgreSQL.
  *
- * I test riportano nel nome il criterio della user story #56 che verificano (AC1, AC4, AC5, AC6). La
- * consultazione dei riscontri da parte del Banco (AC2) e l'apertura della comunicazione (AC3) arriveranno con
- * la #144: qui la persistenza si legge dalla riga di {@code comunicazioni_destinatari}.
+ * I test riportano nel nome il criterio della user story #56 che verificano. L'apertura usa il
+ * dettaglio della #197. In attesa della vista Banco della #144, i riscontri si leggono dalle
+ * righe di {@code comunicazioni_destinatari}.
  *
  * Lo scenario nasce dal flusso dell'applicazione: il Banco invia la comunicazione con l'endpoint della #140 e
- * i destinatari confermano nella propria sessione. Nel database si inseriscono con {@link DatiSintetici}
- * soltanto gli account e i profili, che l'applicazione non permette ancora di creare.
+ * i destinatari confermano nella propria sessione. Account, profili e l'allegato del caso di
+ * apertura sono dati di prova preparati direttamente nel database.
  */
 @IntegrazionePostgresql
 @Tag("issue-145")
@@ -79,6 +82,9 @@ class ConfermaRicezioneIntegrazioneTest {
     @Autowired
     private PasswordEncoder encoder;
 
+    @Autowired
+    private PlatformTransactionManager transazioni;
+
     private DatiSintetici dati;
     private AccessoDiProva accesso;
     private final Map<UUID, SessioneDiProva> sessioni = new HashMap<>();
@@ -92,9 +98,8 @@ class ConfermaRicezioneIntegrazioneTest {
 
     @BeforeEach
     void prepara() {
-        svuotaComunicazioni();
+        svuotaDati();
         dati = new DatiSintetici(jdbc);
-        dati.svuota();
         accesso = new AccessoDiProva(mvc, jdbc, encoder);
         sessioni.clear();
 
@@ -106,11 +111,9 @@ class ConfermaRicezioneIntegrazioneTest {
         operatoreB = dati.operatore("Operatore B", "ESTERNO_PAGATO_BANCO", "napoli", false);
     }
 
-    /** {@link DatiSintetici#svuota()} non conosce ancora le tabelle della V18: senza pulizia fallirebbe sulle FK. */
     @AfterEach
-    void svuotaComunicazioni() {
-        jdbc.update("delete from comunicazioni_destinatari");
-        jdbc.update("delete from comunicazioni");
+    void svuotaDati() {
+        new TransactionTemplate(transazioni).executeWithoutResult(stato -> new DatiSintetici(jdbc).svuota());
     }
 
     // ------------------------------------------------------------------ AC1 e AC5
@@ -169,10 +172,23 @@ class ConfermaRicezioneIntegrazioneTest {
     }
 
     @Test
-    @DisplayName("AC1 - senza il comando esplicito l'invio non registra alcun riscontro")
-    void ac1_senzaComandoNessunRiscontro() throws Exception {
+    @DisplayName("AC3 - aprire il dettaglio non registra alcun riscontro")
+    void ac3_aperturaSenzaConferma() throws Exception {
         UUID id = inviaAGruppo("GRUPPO_OPT", optA, optB);
 
+        UUID allegato = UUID.randomUUID();
+        byte[] contenuto = "Nota sintetica".getBytes(StandardCharsets.UTF_8);
+        jdbc.update("""
+                insert into comunicazioni_allegati
+                  (id, comunicazione_id, nome_file, tipo_mime, dimensione_byte, contenuto)
+                values (?, ?, 'nota.txt', 'text/plain', ?, ?)
+                """, allegato, id, contenuto.length, contenuto);
+
+        come(optA).get("/api/comunicazioni/{id}", id)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(id.toString()))
+                .andExpect(jsonPath("$.allegati[0]").value(allegato.toString()))
+                .andExpect(jsonPath("$.confermataIl").isEmpty());
         daConfermare(optA).andExpect(jsonPath("$.daConfermare").value(1));
 
         assertThat(confermati(id)).isEmpty();
@@ -273,11 +289,20 @@ class ConfermaRicezioneIntegrazioneTest {
     // ------------------------------------------------------------------ casi limite della #143
 
     @Test
-    @DisplayName("#143 - comunicazione inesistente: 404 senza corpo")
-    void comunicazioneInesistente() throws Exception {
-        come(optA).post(CONFERMA, null, UUID.randomUUID())
-                .andExpect(status().isNotFound())
+    @DisplayName("AC6 - comunicazione altrui o inesistente: stesso diniego senza riscontri")
+    void comunicazioneNonAccessibile() throws Exception {
+        UUID id = inviaAGruppo("GRUPPO_OPT", optB);
+        var estranea = come(optA);
+
+        estranea.post(CONFERMA, null, id)
+                .andExpect(status().isForbidden())
                 .andExpect(result -> assertThat(result.getResponse().getContentAsString()).isEmpty());
+        estranea.post(CONFERMA, null, UUID.randomUUID())
+                .andExpect(status().isForbidden())
+                .andExpect(result -> assertThat(result.getResponse().getContentAsString()).isEmpty());
+
+        assertThat(confermati(id)).isEmpty();
+        assertThat(righe(id)).isEqualTo(1);
     }
 
     @Test

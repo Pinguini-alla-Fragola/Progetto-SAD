@@ -1,6 +1,7 @@
 package it.unina.picus.comunicazioni.interno.persistenza;
 
 import it.unina.picus.comunicazioni.interno.dominio.RiscontroRicezioneRepository;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
@@ -9,14 +10,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /** Adattatore JDBC per i destinatari e le conferme delle comunicazioni del Banco. */
 @Repository
+@Profile("!skeleton")
 public class RiscontroRicezioneRepositoryJdbc implements RiscontroRicezioneRepository {
 
     private final JdbcTemplate jdbc;
@@ -28,20 +27,6 @@ public class RiscontroRicezioneRepositoryJdbc implements RiscontroRicezioneRepos
      */
     public RiscontroRicezioneRepositoryJdbc(JdbcTemplate jdbc) {
         this.jdbc = jdbc;
-    }
-
-    @Override
-    public Optional<Set<UUID>> cercaDestinatari(UUID comunicazioneId) {
-        var righe = jdbc.query("""
-                select d.destinatario_id
-                from comunicazioni m
-                left join comunicazioni_destinatari d on d.comunicazione_id = m.id
-                where m.id = ?
-                """, (rs, numeroRiga) -> rs.getObject("destinatario_id", UUID.class), comunicazioneId);
-        if (righe.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(righe.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableSet()));
     }
 
     /**

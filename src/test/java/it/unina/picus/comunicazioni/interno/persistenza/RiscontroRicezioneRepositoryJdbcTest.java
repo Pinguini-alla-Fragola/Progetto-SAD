@@ -10,7 +10,6 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CyclicBarrier;
@@ -39,10 +38,9 @@ import it.unina.picus.shared.IntegrazionePostgresql;
  * Test black box della porta {@link RiscontroRicezioneRepository} nell'adattatore JDBC su PostgreSQL
  * (#145, codice della #143), ricavati dal Javadoc della porta e dell'adattatore.
  *
- * {@code cercaDestinatari}: vuoto se la comunicazione manca, altrimenti l'insieme dei destinatari, anche
- * vuoto. {@code registraPrimaConferma}: richiede una transazione del chiamante, registra l'istante della prima
- * conferma con la precisione del database, restituisce quello già salvato a ritenti e conferme concorrenti e
- * restituisce vuoto se l'account non ha una riga di destinazione.
+ * La conferma richiede una transazione del chiamante. Salva l'istante della prima conferma con
+ * la precisione del database, restituisce quello già salvato ai ritenti e restituisce vuoto
+ * se la coppia comunicazione e destinatario non è registrata.
  *
  * Le comunicazioni sono scritte direttamente nelle tabelle della V18, perché l'oggetto del test è la sola
  * persistenza del riscontro.
@@ -68,7 +66,6 @@ class RiscontroRicezioneRepositoryJdbcTest {
     private PlatformTransactionManager transazioni;
 
     private TransactionTemplate inTransazione;
-    private DatiSintetici dati;
     private UUID banco;
     private UUID optA;
     private UUID optB;
@@ -76,9 +73,8 @@ class RiscontroRicezioneRepositoryJdbcTest {
 
     @BeforeEach
     void prepara() {
-        svuotaComunicazioni();
-        dati = new DatiSintetici(jdbc);
-        dati.svuota();
+        svuotaDati();
+        var dati = new DatiSintetici(jdbc);
         inTransazione = new TransactionTemplate(transazioni);
         banco = dati.banco("Banco di prova");
         optA = dati.opt("OPT A", "napoli");
@@ -86,48 +82,10 @@ class RiscontroRicezioneRepositoryJdbcTest {
         operatore = dati.operatore("Operatore", "INTERNO_BANCO", "napoli", false);
     }
 
-    /** {@link DatiSintetici#svuota()} non conosce ancora le tabelle della V18: senza pulizia fallirebbe sulle FK. */
     @AfterEach
-    void svuotaComunicazioni() {
-        jdbc.update("delete from comunicazioni_destinatari");
-        jdbc.update("delete from comunicazioni");
+    void svuotaDati() {
+        new TransactionTemplate(transazioni).executeWithoutResult(stato -> new DatiSintetici(jdbc).svuota());
     }
-
-    // ------------------------------------------------------------------ cercaDestinatari
-
-    @Test
-    @DisplayName("cercaDestinatari: comunicazione inesistente, risultato vuoto")
-    void destinatariDiComunicazioneInesistente() {
-        assertThat(repository.cercaDestinatari(UUID.randomUUID())).isEmpty();
-    }
-
-    @Test
-    @DisplayName("cercaDestinatari: restituisce esattamente gli account registrati all'invio")
-    void destinatariRegistrati() {
-        UUID comunicazione = comunicazione(optA, optB);
-        comunicazione(operatore);
-
-        assertThat(repository.cercaDestinatari(comunicazione)).contains(Set.of(optA, optB));
-    }
-
-    @Test
-    @DisplayName("cercaDestinatari: comunicazione senza destinatari, insieme presente ma vuoto")
-    void comunicazioneSenzaDestinatari() {
-        UUID comunicazione = comunicazione();
-
-        assertThat(repository.cercaDestinatari(comunicazione)).contains(Set.of());
-    }
-
-    @Test
-    @DisplayName("cercaDestinatari: le conferme già registrate non cambiano l'elenco")
-    void destinatariDopoUnaConferma() {
-        UUID comunicazione = comunicazione(optA, optB);
-        conferma(comunicazione, optA, Instant.parse("2026-11-22T09:00:00Z"));
-
-        assertThat(repository.cercaDestinatari(comunicazione)).contains(Set.of(optA, optB));
-    }
-
-    // ------------------------------------------------------------------ registraPrimaConferma
 
     @Test
     @DisplayName("registraPrimaConferma: la prima conferma salva e restituisce l'istante con la precisione del database")

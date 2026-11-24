@@ -5,17 +5,18 @@ import it.unina.picus.comunicazioni.interno.dominio.RegoleAccessoComunicazione;
 import it.unina.picus.comunicazioni.interno.dominio.RiscontroRicezioneRepository;
 import it.unina.picus.shared.AccessoNegatoException;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.UUID;
 
 /** Registra il riscontro esplicito di un destinatario sulla comunicazione del Banco. */
 @Service
+@Profile("!skeleton")
 public class ServizioConfermaRicezione {
 
     private final RiscontroRicezioneRepository riscontri;
@@ -40,16 +41,14 @@ public class ServizioConfermaRicezione {
      * @param attore identità verificata della sessione
      * @param comunicazioneId identificativo della comunicazione ricevuta
      * @return istante persistito del primo riscontro
-     * @throws AccessoNegatoException se l'attore non è un destinatario autorizzato
-     * @throws NoSuchElementException se la comunicazione non esiste
+     * @throws AccessoNegatoException se l'attore non può confermare per la comunicazione indicata
+     * @throws NullPointerException se manca l'identificativo della comunicazione
      * @see ComunicazioniApi#confermaRicezione
      */
     @Transactional
     public Instant confermaRicezione(IdentitaAutenticata attore, UUID comunicazioneId) {
+        RegoleAccessoComunicazione.verificaPossibileDestinatario(attore);
         Objects.requireNonNull(comunicazioneId, "comunicazioneId");
-        var destinatari = riscontri.cercaDestinatari(comunicazioneId)
-                .orElseThrow(() -> new NoSuchElementException("Comunicazione non trovata"));
-        RegoleAccessoComunicazione.verificaConfermaRicezione(attore, destinatari);
 
         return riscontri.registraPrimaConferma(comunicazioneId, attore.accountId(), clock.instant())
                 .orElseThrow(() -> new AccessoNegatoException("Conferma riservata ai destinatari"));
