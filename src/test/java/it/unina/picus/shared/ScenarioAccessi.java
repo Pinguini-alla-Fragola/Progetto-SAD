@@ -26,6 +26,7 @@ import it.unina.picus.catalogo.api.ConsultazioneCatalogoApi;
 import it.unina.picus.catalogo.api.RicercaErogatoriApi;
 import it.unina.picus.comunicazioni.api.AvvisiOperativiApi;
 import it.unina.picus.comunicazioni.api.ComunicazioniApi;
+import it.unina.picus.monitoraggio.api.ConteggiOptApi;
 import it.unina.picus.monitoraggio.api.MonitoraggioApi;
 import it.unina.picus.monitoraggio.api.MonitoraggioApi.DatiSchedaOperatore;
 import it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre;
@@ -52,13 +53,13 @@ import it.unina.picus.utenze.api.UtenzeApi.TipoErogatore;
  * pubbliche già consegnate ({@link Capacita}) e con gli endpoint HTTP reali dei contatti
  * ({@link ContattiDisponibilitaHttp}), come farebbero gli utenti.
  *
- * <p>Il database si usa solo per preparare ciò che nessuna capacità consegnata permette ancora di creare,
+ * Il database si usa solo per preparare ciò che nessuna capacità consegnata permette ancora di creare,
  * sempre con dati sintetici: account e profili, una misura dedicata al singolo test, l'offerta delle OPT
  * erogatrici, l'abilitazione degli operatori alla misura e la revoca di un account. La misura dedicata isola
- * i candidati del test: compaiono soltanto gli erogatori che il test ha abilitato.</p>
+ * i candidati del test: compaiono soltanto gli erogatori che il test ha abilitato.
  *
- * <p>Se una capacità non è ancora consegnata il caso viene <em>sospeso</em>; se una capacità consegnata
- * manca, o se un erogatore abilitato dalla fixture non compare tra i candidati, il caso <em>fallisce</em>.</p>
+ * Se una capacità non è ancora consegnata il caso viene sospeso; se una capacità consegnata
+ * manca, o se un erogatore abilitato dalla fixture non compare tra i candidati, il caso fallisce.
  */
 public final class ScenarioAccessi {
 
@@ -212,6 +213,15 @@ public final class ScenarioAccessi {
      */
     public MonitoraggioApi monitoraggio() {
         return capacita(Capacita.MONITORAGGIO, MonitoraggioApi.class);
+    }
+
+    /**
+     * Registrazione e consultazione dei conteggi trimestrali delle OPT.
+     *
+     * @return implementazione consegnata
+     */
+    public ConteggiOptApi conteggiOpt() {
+        return capacita(Capacita.CONTEGGI_OPT, ConteggiOptApi.class);
     }
 
     /**

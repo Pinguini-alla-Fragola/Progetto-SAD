@@ -588,15 +588,10 @@ class ConteggiOptIntegrazioneTest {
     }
 
     /**
-     * Stato HTTP dell'invio. MockMvc rilancia le eccezioni che nessun gestore ha convertito: in
-     * esercizio diventerebbero un {@code 500}, e come tale vengono contate.
+     * Stato HTTP dell'invio, contato come {@link #statoDi(Richiesta)}.
      */
     private static int statoDellInvio(SessioneDiProva sessione, String json) {
-        try {
-            return sessione.post(CONTEGGI, json).andReturn().getResponse().getStatus();
-        } catch (Exception nonGestita) {
-            return 500;
-        }
+        return statoDi(() -> sessione.post(CONTEGGI, json));
     }
 
     private static void assertSoloEsitiPrevisti(List<Integer> stati) {
@@ -629,6 +624,120 @@ class ConteggiOptIntegrazioneTest {
                 return;
             }
             Thread.sleep(20);
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // Richieste anomale: mai un errore non gestito
+    // ---------------------------------------------------------------------------------------
+
+    /**
+     * Corpi di registrazione malformati nella struttura o nei tipi. {@code {misura}} è sostituito con
+     * l'id di una misura esistente, {@code {opt}} con quello della prima OPT.
+     */
+    static Stream<Arguments> corpiAnomali() {
+        String voce = "{\"misuraId\": {misura}, \"voce\": \"MINORI\", \"valore\": 3}";
+        String radice = "\"anno\": 2026, \"trimestre\": 1";
+        return Stream.of(
+                Arguments.of("corpo JSON null", "null"),
+                Arguments.of("corpo vuoto", ""),
+                Arguments.of("elenco al posto dell'oggetto", "[" + voce + "]"),
+                Arguments.of("testo al posto dell'oggetto", "\"conteggi\""),
+                Arguments.of("voci come oggetto e non come elenco", "{" + radice + ", \"voci\": " + voce + "}"),
+                Arguments.of("voce nulla nell'elenco", "{" + radice + ", \"voci\": [null]}"),
+                Arguments.of("voce che non è un oggetto", "{" + radice + ", \"voci\": [42]}"),
+                Arguments.of("campo sconosciuto nella radice",
+                        "{" + radice + ", \"optId\": \"{opt}\", \"voci\": [" + voce + "]}"),
+                Arguments.of("campo sconosciuto nella voce", "{" + radice
+                        + ", \"voci\": [{\"misuraId\": {misura}, \"voce\": \"MINORI\", \"valore\": 3, \"nota\": \"x\"}]}"),
+                Arguments.of("anno come testo", "{\"anno\": \"2026\", \"trimestre\": 1, \"voci\": [" + voce + "]}"),
+                Arguments.of("anno oltre il limite di int", "{\"anno\": 3000000000, \"trimestre\": 1, \"voci\": [" + voce + "]}"),
+                Arguments.of("anno fuori dall'intervallo ammesso", "{\"anno\": 99999, \"trimestre\": 1, \"voci\": [" + voce + "]}"),
+                Arguments.of("trimestre decimale", "{\"anno\": 2026, \"trimestre\": 1.5, \"voci\": [" + voce + "]}"),
+                Arguments.of("misuraId zero", "{" + radice
+                        + ", \"voci\": [{\"misuraId\": 0, \"voce\": \"MINORI\", \"valore\": 3}]}"),
+                Arguments.of("misuraId negativo", "{" + radice
+                        + ", \"voci\": [{\"misuraId\": -5, \"voce\": \"MINORI\", \"valore\": 3}]}"),
+                Arguments.of("misuraId oltre il limite di long", "{" + radice
+                        + ", \"voci\": [{\"misuraId\": 9223372036854775808, \"voce\": \"MINORI\", \"valore\": 3}]}"),
+                Arguments.of("misuraId come testo", "{" + radice
+                        + ", \"voci\": [{\"misuraId\": \"{misura}\", \"voce\": \"MINORI\", \"valore\": 3}]}"),
+                Arguments.of("voce numerica", "{" + radice
+                        + ", \"voci\": [{\"misuraId\": {misura}, \"voce\": 7, \"valore\": 3}]}"),
+                Arguments.of("codice voce molto lungo", "{" + radice
+                        + ", \"voci\": [{\"misuraId\": {misura}, \"voce\": \"" + "X".repeat(300) + "\", \"valore\": 3}]}"),
+                Arguments.of("valore booleano", "{" + radice
+                        + ", \"voci\": [{\"misuraId\": {misura}, \"voce\": \"MINORI\", \"valore\": true}]}"),
+                Arguments.of("valore oltre il limite di long", "{" + radice
+                        + ", \"voci\": [{\"misuraId\": {misura}, \"voce\": \"MINORI\", \"valore\": 9223372036854775808}]}"));
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("corpiAnomali")
+    @DisplayName("Robustezza - una registrazione malformata riceve 400, mai un errore non gestito, e non scrive nulla")
+    void registrazioneAnomalaSenzaErroreNonGestito(String caso, String modello) throws Exception {
+        String json = modello.replace("{misura}", Long.toString(m01)).replace("{opt}", optA.toString());
+        SessioneDiProva sessione = sessione(optA);
+
+        assertEquals(400, statoDi(() -> sessione.post(CONTEGGI, json)), caso);
+        assertEquals(0, righe(), caso);
+    }
+
+    /** Consultazioni del Banco con parametri anomali; {@code {opt}} e {@code {banco}} sono sostituiti. */
+    static Stream<Arguments> consultazioniAnomale() {
+        return Stream.of(
+                Arguments.of("anno non numerico", "?optId={opt}&anno=abc&trimestre=1", 400),
+                Arguments.of("anno assente", "?optId={opt}&trimestre=1", 400),
+                Arguments.of("anno oltre il limite di int", "?optId={opt}&anno=3000000000&trimestre=1", 400),
+                Arguments.of("anno fuori dall'intervallo ammesso", "?optId={opt}&anno=99999&trimestre=1", 400),
+                Arguments.of("trimestre fuori intervallo", "?optId={opt}&anno=2026&trimestre=5", 400),
+                Arguments.of("trimestre finale fuori intervallo",
+                        "?optId={opt}&anno=2026&trimestre=1&annoFine=2026&trimestreFine=0", 400),
+                Arguments.of("intervallo rovesciato", "?optId={opt}&anno=2026&trimestre=3&annoFine=2026&trimestreFine=1", 400),
+                Arguments.of("optId che non è un UUID", "?optId=abc&anno=2026&trimestre=1", 400),
+                Arguments.of("optId inesistente", "?optId=" + UUID.randomUUID() + "&anno=2026&trimestre=1", 404),
+                Arguments.of("optId di un account che non è una OPT", "?optId={banco}&anno=2026&trimestre=1", 404));
+    }
+
+    @ParameterizedTest(name = "{0} -> {2}")
+    @MethodSource("consultazioniAnomale")
+    @DisplayName("Robustezza - una consultazione con parametri anomali riceve un errore previsto, mai un errore non gestito")
+    void consultazioneAnomalaSenzaErroreNonGestito(String caso, String query, int atteso) throws Exception {
+        String percorso = CONTEGGI + query.replace("{opt}", optA.toString()).replace("{banco}", banco.toString());
+        SessioneDiProva sessione = sessione(banco);
+
+        assertEquals(atteso, statoDi(() -> sessione.get(percorso)), caso);
+    }
+
+    @Test
+    @DisplayName("Robustezza - un cumulativo oltre il massimo rappresentabile riceve 409, mai un errore non gestito")
+    void cumulativoOltreIlMassimoSenzaErroreNonGestito() throws Exception {
+        registra(optA, ANNO, 1, voce(m01, "PERSONE_RAGGIUNTE", Long.MAX_VALUE)).andExpect(status().isNoContent());
+        registra(optA, ANNO, 2, voce(m01, "PERSONE_RAGGIUNTE", 1)).andExpect(status().isNoContent());
+        SessioneDiProva sessione = sessione(banco);
+        String intervallo = CONTEGGI + "?optId=" + optA + "&anno=" + ANNO + "&trimestre=1&annoFine=" + ANNO
+                + "&trimestreFine=2";
+
+        assertEquals(409, statoDi(() -> sessione.get(intervallo)), "somma dei due trimestri oltre Long.MAX_VALUE");
+        assertEquals(Map.of(chiave(optA, m01, "PERSONE_RAGGIUNTE"), Long.MAX_VALUE), consulta(banco, optA, ANNO, 1),
+                "il singolo trimestre resta consultabile");
+    }
+
+    /** Una richiesta HTTP da eseguire; può lanciare l'eccezione che nessun gestore ha convertito. */
+    @FunctionalInterface
+    private interface Richiesta {
+        ResultActions esegui() throws Exception;
+    }
+
+    /**
+     * Stato HTTP della risposta. MockMvc rilancia le eccezioni che nessun gestore ha convertito: in
+     * esercizio diventerebbero un {@code 500}, e come tale vengono contate.
+     */
+    private static int statoDi(Richiesta richiesta) {
+        try {
+            return richiesta.esegui().andReturn().getResponse().getStatus();
+        } catch (Exception nonGestita) {
+            return 500;
         }
     }
 
@@ -679,10 +788,18 @@ class ConteggiOptIntegrazioneTest {
             Map<String, Object> voce = asMappa(conteggio.get("conteggio"));
             String chiave = chiave(UUID.fromString((String) conteggio.get("optId")),
                     ((Number) voce.get("misuraId")).longValue(), (String) voce.get("voce"));
-            Long precedente = valori.put(chiave, ((Number) voce.get("valore")).longValue());
+            Long precedente = valori.put(chiave, valore(voce.get("valore")));
             assertNull(precedente, () -> "chiave ripetuta nella consultazione: " + chiave);
         }
         return valori;
+    }
+
+    /**
+     * Valore di un conteggio nella risposta: numero JSON fino al massimo intero esatto in JavaScript,
+     * testo decimale oltre quel limite.
+     */
+    private static long valore(Object json) {
+        return json instanceof Number numero ? numero.longValue() : Long.parseLong((String) json);
     }
 
     @SuppressWarnings("unchecked")
