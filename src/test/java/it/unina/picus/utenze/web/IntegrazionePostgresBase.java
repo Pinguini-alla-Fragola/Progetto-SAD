@@ -1,5 +1,7 @@
 package it.unina.picus.utenze.web;
 
+import java.util.UUID;
+
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -30,5 +32,22 @@ public abstract class IntegrazionePostgresBase {
                     "I test di integrazione richiedono Docker: avvia Docker Desktop e rilancia la build.");
         }
         POSTGRES.start();
+    }
+
+    /** Valore massimo, escluso, di un codice fiscale numerico di undici cifre. */
+    private static final long LIMITE_CODICE_FISCALE_NUMERICO = 100_000_000_000L;
+
+    /**
+     * Codice fiscale sintetico per un profilo OPT di prova (colonna aggiunta dalla V17, #44).
+     * Nel database resta facoltativo, ma la registrazione lo richiede: le fixture lo valorizzano
+     * così da rappresentare una OPT come quelle create oggi. Una OPT è un'organizzazione, quindi il
+     * codice è nella forma numerica di undici cifre accettata dalla registrazione. È ricavato da un UUID casuale: oggi la colonna non è unica, ma così i test
+     * restano indipendenti anche se in futuro lo diventasse.
+     *
+     * @return codice fiscale numerico di undici cifre
+     */
+    public static String codiceFiscaleDiProva() {
+        long cifre = Math.floorMod(UUID.randomUUID().getMostSignificantBits(), LIMITE_CODICE_FISCALE_NUMERICO);
+        return String.format("%011d", cifre);
     }
 }

@@ -419,7 +419,10 @@ class AccessoLoginPostgresTest extends IntegrazionePostgresBase {
 
     //helper
 
-    /** Account di prova; per una OPT crea anche il profilo, necessario per salvare richieste. */
+    /**
+     * Account di prova; per una OPT crea anche il profilo, necessario per salvare richieste, con un
+     * codice fiscale sintetico come una OPT registrata dopo la V17 (#44).
+     */
     private Account nuovoAccount(String ruolo, String stato) {
         UUID id = UUID.randomUUID();
         String email = "t-" + id + "@picus.test";
@@ -429,8 +432,10 @@ class AccessoLoginPostgresTest extends IntegrazionePostgresBase {
                 """, id, email, hash, "Account di prova", ruolo, stato);
         if ("OPT".equals(ruolo)) {
             String codiceStruttura = "T-" + id.toString().replace("-", "").substring(0, 26);
-            jdbc.update("insert into utenze_profili_opt (account_id, codice_struttura, comune_codice) values (?, ?, 'napoli')",
-                    id, codiceStruttura);
+            jdbc.update("""
+                    insert into utenze_profili_opt (account_id, codice_struttura, comune_codice, codice_fiscale)
+                    values (?, ?, 'napoli', ?)
+                    """, id, codiceStruttura, codiceFiscaleDiProva());
         }
         return new Account(id, email);
     }
