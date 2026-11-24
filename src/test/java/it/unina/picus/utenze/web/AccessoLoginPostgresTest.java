@@ -36,7 +36,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpSession;
@@ -47,6 +46,10 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import com.jayway.jsonpath.JsonPath;
+
+import it.unina.picus.utenze.interno.applicazione.DatiOptNonValidiException;
+import it.unina.picus.utenze.interno.applicazione.RegistrazioneOptService;
+import it.unina.picus.utenze.interno.applicazione.RegistrazioneOptService.ComandoRegistrazioneOpt;
 
 /*
 Backend del login (#25) e casi di sicurezza collegati, con la catena di Spring Security reale e
@@ -89,6 +92,8 @@ class AccessoLoginPostgresTest extends IntegrazionePostgresBase {
     private PasswordEncoder encoder;
     @Autowired
     private LimitatoreAccessi limitatore;
+    @Autowired
+    private RegistrazioneOptService registrazione;
 
     private String hash;
 
@@ -115,19 +120,19 @@ class AccessoLoginPostgresTest extends IntegrazionePostgresBase {
     }
 
     @Test
-    @DisplayName("Il profilo OPT richiede il codice fiscale (V15, #44)")
-    void profiloOptSenzaCodiceFiscaleRifiutato() {
-        // Un account BANCO non riceve il profilo da nuovoAccount: lo inseriamo qui senza codice fiscale.
-        UUID id = nuovoAccount("BANCO", "ATTIVO").id();
-        String codiceStruttura = "T-" + id.toString().replace("-", "").substring(0, 26);
+    @DisplayName("La registrazione di una OPT senza codice fiscale è rifiutata e non crea l'account (#44)")
+    void registrazioneOptSenzaCodiceFiscaleRifiutata() {
+        // La V17 lascia la colonna nullable: l'obbligo è applicato da RegistrazioneOptService.
+        String email = "senza-cf-" + UUID.randomUUID() + "@picus.test";
 
-        DataIntegrityViolationException errore = assertThrows(DataIntegrityViolationException.class, () -> jdbc.update(
-                "insert into utenze_profili_opt (account_id, codice_struttura, comune_codice) values (?, ?, 'napoli')",
-                id, codiceStruttura));
-        assertTrue(errore.getMostSpecificCause().getMessage().contains("codice_fiscale"),
-                "il rifiuto deve dipendere dal codice fiscale mancante");
+        DatiOptNonValidiException errore = assertThrows(DatiOptNonValidiException.class,
+                () -> registrazione.registraOpt(new ComandoRegistrazioneOpt(
+                        "T-CF-" + UUID.randomUUID().toString().substring(0, 8),
+                        "OPT senza codice fiscale", "napoli", null, email)));
+
+        assertEquals("codiceFiscale", errore.getCampo());
         assertEquals(0, jdbc.queryForObject(
-                "select count(*) from utenze_profili_opt where account_id = ?", Integer.class, id));
+                "select count(*) from utenze_account where email = ?", Integer.class, email));
     }
 
     //login per ruolo e aree
@@ -439,7 +444,7 @@ class AccessoLoginPostgresTest extends IntegrazionePostgresBase {
 
     /**
      * Account di prova; per una OPT crea anche il profilo, necessario per salvare richieste, con il
-     * codice fiscale obbligatorio dalla V15 (#44).
+     * codice fiscale richiesto dalla registrazione (#44).
      */
     private Account nuovoAccount(String ruolo, String stato) {
         UUID id = UUID.randomUUID();

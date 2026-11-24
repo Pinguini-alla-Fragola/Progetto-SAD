@@ -38,7 +38,7 @@ public abstract class IntegrazionePostgresBase {
     private static final long LIMITE_CODICE_FISCALE_NUMERICO = 100_000_000_000L;
 
     /**
-     * Codice fiscale sintetico per un profilo OPT di prova, obbligatorio dalla V15 (#44).
+     * Codice fiscale sintetico per un profilo OPT di prova, richiesto dalla registrazione (#44).
      * Una OPT è un'organizzazione, quindi il codice è nella forma numerica di undici cifre accettata
      * dalla registrazione. È ricavato da un UUID casuale: oggi la colonna non è unica, ma così i test
      * restano indipendenti anche se in futuro lo diventasse.
