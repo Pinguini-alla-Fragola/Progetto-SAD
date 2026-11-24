@@ -19,7 +19,6 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -34,10 +33,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import org.attoparser.ParseException;
+import org.attoparser.config.ParseConfiguration;
+import org.attoparser.dom.DOMMarkupParser;
+import org.attoparser.dom.Document;
+import org.attoparser.dom.Element;
+import org.attoparser.dom.INestableNode;
+import org.attoparser.dom.INode;
+import org.attoparser.dom.Text;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -519,27 +524,31 @@ class RecuperoPasswordPostgresTest extends IntegrazionePostgresBase {
         assertEquals(Boolean.TRUE, paginaRecupero(token).getModel().get("cambioPassword"));
     }
 
-    // pagina /recupera: messaggi, collegamento con recupero.js e con le API
+    // pagina /recupera: elementi del documento renderizzato che recupero.js usa
 
-    /** Id che recupero.js cerca nella pagina di richiesta e in quella di cambio password. */
+    /*
+    I test JavaScript (src/test/js/recupero.test.mjs) verificano il comportamento dello script su un DOM finto. Qui si
+    verifica l'altra metà del collegamento, sul documento che il server invia davvero, letto con il parser HTML che
+    Thymeleaf usa per i template (AttoParser): i commenti restano fuori dagli elementi e gli attributi valgono con
+    qualunque tipo di apici. La pagina deve caricare lo script come modulo e i form devono esporre l'endpoint, gli
+    elementi e i campi che lo script usa; l'invio parte dall'endpoint e dai campi letti dal documento.
+    */
+
+    private static final String SCRIPT_RECUPERO = "/js/recupero.js";
+    /** Form ed elementi che recupero.js cerca per id nella pagina di richiesta e in quella di cambio password. */
     private static final List<String> ID_PAGINA_RICHIESTA = List.of("richiesta-recupero", "esito");
     private static final List<String> ID_PAGINA_CAMBIO =
             List.of("cambio-password", "esito", "errore-password", "vai-al-login", "nuova-richiesta");
-    private static final String SCRIPT_RECUPERO = "/js/recupero.js";
 
     @Test
-    @DisplayName("recupero.js è servito come JavaScript e cerca proprio gli elementi e i campi che la pagina espone")
-    void scriptCoerenteConLaPagina() throws Exception {
+    @DisplayName("recupero.js è servito come JavaScript, come richiede il browser per un modulo")
+    void scriptServitoComeJavaScript() throws Exception {
         MvcResult esito = mvc.perform(get(SCRIPT_RECUPERO)).andReturn();
 
         assertEquals(200, esito.getResponse().getStatus());
-        assertTrue(esito.getResponse().getContentType().contains("javascript"), esito.getResponse().getContentType());
-        String script = esito.getResponse().getContentAsString(StandardCharsets.UTF_8);
-        Set<String> esposti = new HashSet<>(ID_PAGINA_RICHIESTA);
-        esposti.addAll(ID_PAGINA_CAMBIO);
-        assertEquals(esposti, trova(script, "getElementById\\('([^']+)'\\)"));
-        assertEquals(Set.of("nuovaPassword", "token"), trova(script, "\\.elements\\.(\\w+)"));
-        assertTrue(script.contains("dataset.endpoint"), "lo script non legge più l'endpoint dal modulo");
+        String tipo = esito.getResponse().getContentType();
+        assertNotNull(tipo);
+        assertTrue(tipo.contains("javascript"), tipo);
     }
 
     @Test
@@ -547,18 +556,18 @@ class RecuperoPasswordPostgresTest extends IntegrazionePostgresBase {
     void paginaDiRichiesta() throws Exception {
         Account account = nuovoAccount("OPERATORE", "ATTIVO");
 
-        String html = htmlRecupero(null);
+        Document pagina = documento(htmlRecupero(null));
 
-        assertCaricaLoScript(html);
-        assertTrue(html.contains("Il link vale 15 minuti."));
-        assertFalse(html.contains("id=\"cambio-password\""));
-        String modulo = modulo(html, "richiesta-recupero");
-        assertEspone(modulo, ID_PAGINA_RICHIESTA);
-        assertTrue(modulo.contains("type=\"submit\""));
+        assertCaricaLoScript(pagina);
+        assertTrue(testo(pagina).contains("Il link vale 15 minuti."));
+        assertTrue(conId(pagina, "cambio-password").isEmpty());
+        Element modulo = modulo(pagina, "richiesta-recupero");
+        assertContiene(modulo, ID_PAGINA_RICHIESTA);
+        assertPulsanteDiInvio(modulo);
         assertEquals(List.of("email"), nomiDeiCampi(modulo));
 
-        // Invio come fa lo script: endpoint e nome del campo letti dalla pagina
-        MvcResult invio = mvc.perform(post(attributo(apertura(modulo), "data-endpoint")).with(csrf())
+        // Invio come fa lo script: endpoint e nome del campo letti dal documento
+        MvcResult invio = mvc.perform(post(endpoint(modulo)).with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"" + nomiDeiCampi(modulo).get(0) + "\":\"" + account.email() + "\"}"))
                 .andReturn();
@@ -573,22 +582,23 @@ class RecuperoPasswordPostgresTest extends IntegrazionePostgresBase {
         Account account = nuovoAccount("OPT", "ATTIVO");
         String token = richiediLinkValido(account);
 
-        String html = htmlRecupero(token);
+        Document pagina = documento(htmlRecupero(token));
 
-        assertCaricaLoScript(html);
-        assertFalse(html.contains("id=\"richiesta-recupero\""));
-        assertTrue(html.contains("Usa almeno 12 caratteri."));
-        String modulo = modulo(html, "cambio-password");
-        assertEspone(modulo, ID_PAGINA_CAMBIO);
-        assertTrue(modulo.contains("<fieldset"));
-        assertTrue(modulo.contains("type=\"submit\""));
+        assertCaricaLoScript(pagina);
+        assertTrue(conId(pagina, "richiesta-recupero").isEmpty());
+        assertTrue(testo(pagina).contains("Usa almeno 12 caratteri."));
+        Element modulo = modulo(pagina, "cambio-password");
+        assertContiene(modulo, ID_PAGINA_CAMBIO);
+        assertEquals(1, elementi(modulo, "fieldset").size(), "lo script disattiva il fieldset del modulo");
+        assertPulsanteDiInvio(modulo);
         assertEquals(Set.of("token", "nuovaPassword"), Set.copyOf(nomiDeiCampi(modulo)));
-        assertEquals(token, valoreDelCampo(modulo, "token"));
+        assertEquals("hidden", campo(modulo, "token").getAttributeValue("type"));
+        assertEquals(token, campo(modulo, "token").getAttributeValue("value"));
 
-        // Invio come fa lo script: endpoint e token letti dalla pagina
-        MvcResult invio = mvc.perform(post(attributo(apertura(modulo), "data-endpoint")).with(csrf())
+        // Invio come fa lo script: endpoint e token letti dal documento
+        MvcResult invio = mvc.perform(post(endpoint(modulo)).with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"token\":\"" + valoreDelCampo(modulo, "token")
+                        .content("{\"token\":\"" + campo(modulo, "token").getAttributeValue("value")
                                 + "\",\"nuovaPassword\":\"" + PASSWORD_NUOVA + "\"}"))
                 .andReturn();
         assertEquals(200, invio.getResponse().getStatus());
@@ -603,13 +613,14 @@ class RecuperoPasswordPostgresTest extends IntegrazionePostgresBase {
         assertEquals(200, conferma(token, PASSWORD_NUOVA).getResponse().getStatus());
 
         String html = htmlRecupero(token);
+        Document pagina = documento(html);
 
-        assertCaricaLoScript(html);
-        assertTrue(html.contains("Il link di recupero non è valido, è scaduto oppure è già stato utilizzato."));
-        String modulo = modulo(html, "richiesta-recupero");
-        assertEspone(modulo, ID_PAGINA_RICHIESTA);
-        assertEquals("/api/auth/recupera", attributo(apertura(modulo), "data-endpoint"));
-        assertFalse(html.contains("id=\"cambio-password\""));
+        assertCaricaLoScript(pagina);
+        assertTrue(testo(pagina).contains("Il link di recupero non è valido, è scaduto oppure è già stato utilizzato."));
+        Element modulo = modulo(pagina, "richiesta-recupero");
+        assertContiene(modulo, ID_PAGINA_RICHIESTA);
+        assertEquals("/api/auth/recupera", endpoint(modulo));
+        assertTrue(conId(pagina, "cambio-password").isEmpty());
         assertFalse(html.contains(token));
     }
 
@@ -627,12 +638,10 @@ class RecuperoPasswordPostgresTest extends IntegrazionePostgresBase {
                 """, id, email, hash, nome, ruolo, stato);
         if ("OPT".equals(ruolo)) {
             String codiceStruttura = "R-" + id.toString().replace("-", "").substring(0, 26);
-            // 11 cifre, mai tutte zero: formato accettato da RegistrazioneOptService
-            String codiceFiscale = String.format("%011d", 1 + Math.floorMod(id.getLeastSignificantBits(), 99_999_999_999L));
             jdbc.update("""
                     insert into utenze_profili_opt (account_id, codice_struttura, comune_codice, codice_fiscale)
                     values (?, ?, 'napoli', ?)
-                    """, id, codiceStruttura, codiceFiscale);
+                    """, id, codiceStruttura, codiceFiscaleDiProva());
         }
         return new Account(id, email, nome);
     }
@@ -712,59 +721,89 @@ class RecuperoPasswordPostgresTest extends IntegrazionePostgresBase {
                 Integer.class, account.id());
     }
 
-    private static void assertCaricaLoScript(String html) {
-        Matcher script = Pattern.compile("<script\\b[^>]*\\ssrc=\"" + Pattern.quote(SCRIPT_RECUPERO) + "\"[^>]*>").matcher(html);
-        assertTrue(script.find(), "la pagina non carica " + SCRIPT_RECUPERO);
-        assertEquals("module", attributo(script.group(), "type"), "recupero.js usa import: va caricato come modulo");
+    /** Documento HTML letto con il parser dei template Thymeleaf. */
+    private static Document documento(String html) throws ParseException {
+        return new DOMMarkupParser(ParseConfiguration.htmlConfiguration()).parse("recupero", html);
     }
 
-    private static void assertEspone(String frammento, List<String> id) {
-        for (String atteso : id) {
-            assertTrue(frammento.contains("id=\"" + atteso + "\""), "elemento #" + atteso + " assente");
+    /** Il nodo, se è un elemento, e tutti gli elementi che contiene, in ordine: commenti e testo esclusi. */
+    private static List<Element> elementi(INestableNode radice) {
+        List<Element> trovati = new ArrayList<>();
+        if (radice instanceof Element elemento) {
+            trovati.add(elemento);
         }
-    }
-
-    /** Il form con quell'id, dal tag di apertura a {@code </form>}. */
-    private static String modulo(String html, String id) {
-        Matcher modulo = Pattern.compile("<form\\b[^>]*\\sid=\"" + Pattern.quote(id) + "\"[^>]*>.*?</form>", Pattern.DOTALL)
-                .matcher(html);
-        assertTrue(modulo.find(), "modulo #" + id + " assente");
-        return modulo.group();
-    }
-
-    private static String apertura(String elemento) {
-        return elemento.substring(0, elemento.indexOf('>') + 1);
-    }
-
-    private static String attributo(String tag, String nome) {
-        Matcher valore = Pattern.compile("\\s" + Pattern.quote(nome) + "=\"([^\"]*)\"").matcher(tag);
-        assertTrue(valore.find(), "attributo " + nome + " assente in " + tag);
-        return valore.group(1);
-    }
-
-    /** Nomi dei campi del modulo, nell'ordine della pagina: sono le chiavi del JSON che lo script invia. */
-    private static List<String> nomiDeiCampi(String modulo) {
-        List<String> nomi = new ArrayList<>();
-        Matcher campo = Pattern.compile("<input\\b[^>]*>").matcher(modulo);
-        while (campo.find()) {
-            nomi.add(attributo(campo.group(), "name"));
-        }
-        return nomi;
-    }
-
-    private static String valoreDelCampo(String modulo, String nome) {
-        Matcher campo = Pattern.compile("<input\\b[^>]*\\sname=\"" + Pattern.quote(nome) + "\"[^>]*>").matcher(modulo);
-        assertTrue(campo.find(), "campo " + nome + " assente");
-        return attributo(campo.group(), "value");
-    }
-
-    private static Set<String> trova(String testo, String espressione) {
-        Set<String> trovati = new HashSet<>();
-        Matcher corrispondenza = Pattern.compile(espressione).matcher(testo);
-        while (corrispondenza.find()) {
-            trovati.add(corrispondenza.group(1));
+        for (INode figlio : radice.getChildren()) {
+            if (figlio instanceof INestableNode annidato) {
+                trovati.addAll(elementi(annidato));
+            }
         }
         return trovati;
+    }
+
+    private static List<Element> elementi(INestableNode radice, String nome) {
+        return elementi(radice).stream().filter(e -> e.elementNameMatches(nome)).toList();
+    }
+
+    private static List<Element> conId(INestableNode radice, String id) {
+        return elementi(radice).stream().filter(e -> id.equals(e.getAttributeValue("id"))).toList();
+    }
+
+    /** Testo visibile del documento: i commenti non contano. */
+    private static String testo(INestableNode radice) {
+        StringBuilder testo = new StringBuilder();
+        for (INode figlio : radice.getChildren()) {
+            if (figlio instanceof Text parte) {
+                testo.append(parte.getContent()).append(' ');
+            } else if (figlio instanceof INestableNode annidato) {
+                testo.append(testo(annidato)).append(' ');
+            }
+        }
+        return testo.toString().replaceAll("\\s+", " ");
+    }
+
+    private static void assertCaricaLoScript(Document pagina) {
+        List<Element> script = elementi(pagina, "script").stream()
+                .filter(e -> SCRIPT_RECUPERO.equals(e.getAttributeValue("src")))
+                .toList();
+        assertEquals(1, script.size(), "la pagina deve caricare " + SCRIPT_RECUPERO + " una volta");
+        assertEquals("module", script.get(0).getAttributeValue("type"), "recupero.js usa import: va caricato come modulo");
+    }
+
+    private static Element modulo(Document pagina, String id) {
+        List<Element> trovati = conId(pagina, id);
+        assertEquals(1, trovati.size(), "modulo #" + id);
+        assertTrue(trovati.get(0).elementNameMatches("form"), "#" + id + " non è un form");
+        return trovati.get(0);
+    }
+
+    private static void assertContiene(Element modulo, List<String> id) {
+        for (String atteso : id) {
+            assertEquals(1, conId(modulo, atteso).size(), "#" + atteso + " nel modulo #" + modulo.getAttributeValue("id"));
+        }
+    }
+
+    private static void assertPulsanteDiInvio(Element modulo) {
+        assertTrue(elementi(modulo, "button").stream().anyMatch(b -> "submit".equals(b.getAttributeValue("type"))),
+                "pulsante di invio assente nel modulo #" + modulo.getAttributeValue("id"));
+    }
+
+    private static String endpoint(Element modulo) {
+        String endpoint = modulo.getAttributeValue("data-endpoint");
+        assertNotNull(endpoint, "data-endpoint assente nel modulo #" + modulo.getAttributeValue("id"));
+        return endpoint;
+    }
+
+    /** Nomi dei campi del modulo, in ordine: sono le chiavi del JSON che lo script invia. */
+    private static List<String> nomiDeiCampi(Element modulo) {
+        return elementi(modulo, "input").stream().map(e -> e.getAttributeValue("name")).toList();
+    }
+
+    private static Element campo(Element modulo, String nome) {
+        List<Element> trovati = elementi(modulo, "input").stream()
+                .filter(e -> nome.equals(e.getAttributeValue("name")))
+                .toList();
+        assertEquals(1, trovati.size(), "campo " + nome);
+        return trovati.get(0);
     }
 
     private static String sha256(String testo) throws Exception {
