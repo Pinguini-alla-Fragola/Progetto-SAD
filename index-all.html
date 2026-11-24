@@ -221,6 +221,10 @@ oppure restituisce vuoto se il database rileva un conflitto concorrente di unici
 </dd>
 <dt><a href="it/unina/picus/utenze/interno/persistenza/AccountRepository.html#aggiornaHash(java.util.UUID,java.lang.String)" class="member-name-link">aggiornaHash(UUID, String)</a> - Method in interface it.unina.picus.utenze.interno.persistenza.<a href="it/unina/picus/utenze/interno/persistenza/AccountRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">AccountRepository</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/utenze/interno/persistenza/AccountRepository.html#aggiornaHashSeInvariato(java.util.UUID,java.lang.String,java.lang.String)" class="member-name-link">aggiornaHashSeInvariato(UUID, String, String)</a> - Method in interface it.unina.picus.utenze.interno.persistenza.<a href="it/unina/picus/utenze/interno/persistenza/AccountRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">AccountRepository</a></dt>
+<dd>
+<div class="block">Sostituisce l'hash solo se è ancora quello che chi aggiorna ha letto e verificato.</div>
+</dd>
 <dt><a href="it/unina/picus/catalogo/api/CatalogoApi.html#aggiornaMisura(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,long,it.unina.picus.catalogo.api.CatalogoApi.DatiMisura,boolean)" class="member-name-link">aggiornaMisura(UtenzeApi.IdentitaAutenticata, long, CatalogoApi.DatiMisura, boolean)</a> - Method in interface it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/CatalogoApi.html" title="interface in it.unina.picus.catalogo.api">CatalogoApi</a></dt>
 <dd>
 <div class="block">Aggiorna i dati o lo stato di una misura mantenendo il riferimento usato nello storico.</div>
@@ -624,6 +628,14 @@ sui tentativi.</div>
 </dl>
 <h2 class="title" id="I:C">C</h2>
 <dl class="index">
+<dt><a href="it/unina/picus/utenze/web/RecuperoPasswordController.html#cambiaPassword(it.unina.picus.utenze.web.RecuperoPasswordController.RichiestaCambioPassword)" class="member-name-link">cambiaPassword(RecuperoPasswordController.RichiestaCambioPassword)</a> - Method in class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/RecuperoPasswordController.html" title="class in it.unina.picus.utenze.web">RecuperoPasswordController</a></dt>
+<dd>
+<div class="block">Sceglie la nuova password con il link di recupero.</div>
+</dd>
+<dt><a href="it/unina/picus/utenze/interno/applicazione/RecuperoPasswordService.html#cambiaPassword(java.lang.String,java.lang.String)" class="member-name-link">cambiaPassword(String, String)</a> - Method in class it.unina.picus.utenze.interno.applicazione.<a href="it/unina/picus/utenze/interno/applicazione/RecuperoPasswordService.html" title="class in it.unina.picus.utenze.interno.applicazione">RecuperoPasswordService</a></dt>
+<dd>
+<div class="block">Sceglie la nuova password con il link di recupero.</div>
+</dd>
 <dt><a href="it/unina/picus/catalogo/interno/dominio/DatiMisuraNonValidiException.html#campi()" class="member-name-link">campi()</a> - Method in exception class it.unina.picus.catalogo.interno.dominio.<a href="it/unina/picus/catalogo/interno/dominio/DatiMisuraNonValidiException.html" title="class in it.unina.picus.catalogo.interno.dominio">DatiMisuraNonValidiException</a></dt>
 <dd>
 <div class="block">Restituisce una vista immutabile degli errori per campo.</div>
@@ -3023,6 +3035,10 @@ recente, ciascuna con la conferma di quell'account.</div>
 <dd>
 <div class="block">Indicates whether some other object is "equal to" this one.</div>
 </dd>
+<dt><a href="it/unina/picus/utenze/web/RecuperoPasswordController.RichiestaCambioPassword.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/RecuperoPasswordController.RichiestaCambioPassword.html" title="class in it.unina.picus.utenze.web">RecuperoPasswordController.RichiestaCambioPassword</a></dt>
+<dd>
+<div class="block">Indicates whether some other object is "equal to" this one.</div>
+</dd>
 <dt><a href="it/unina/picus/utenze/web/RecuperoPasswordController.RichiestaRecupero.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/RecuperoPasswordController.RichiestaRecupero.html" title="class in it.unina.picus.utenze.web">RecuperoPasswordController.RichiestaRecupero</a></dt>
 <dd>
 <div class="block">Indicates whether some other object is "equal to" this one.</div>
@@ -3247,6 +3263,10 @@ senza esporre valori ricevuti dal client o dettagli interni.</div>
 </dd>
 <dt><a href="it/unina/picus/utenze/interno/persistenza/TokenAttivazioneRepository.html#findAccountIdByTokenHash(java.lang.String)" class="member-name-link">findAccountIdByTokenHash(String)</a> - Method in interface it.unina.picus.utenze.interno.persistenza.<a href="it/unina/picus/utenze/interno/persistenza/TokenAttivazioneRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">TokenAttivazioneRepository</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/utenze/interno/persistenza/TokenRecuperoPasswordRepository.html#findAccountIdByTokenHash(java.lang.String)" class="member-name-link">findAccountIdByTokenHash(String)</a> - Method in interface it.unina.picus.utenze.interno.persistenza.<a href="it/unina/picus/utenze/interno/persistenza/TokenRecuperoPasswordRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">TokenRecuperoPasswordRepository</a></dt>
+<dd>
+<div class="block">Cerca solo l'account del link, senza caricare il link nel contesto di persistenza.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/interno/persistenza/ContattoDisponibilitaRepository.html#findAllByRichiesta_IdOrderByOrdineInvioAsc(java.util.UUID)" class="member-name-link">findAllByRichiesta_IdOrderByOrdineInvioAsc(UUID)</a> - Method in interface it.unina.picus.richieste.interno.persistenza.<a href="it/unina/picus/richieste/interno/persistenza/ContattoDisponibilitaRepository.html" title="interface in it.unina.picus.richieste.interno.persistenza">ContattoDisponibilitaRepository</a></dt>
 <dd>
 <div class="block">Ordine persistente dei tentativi, anche quando due invii hanno lo stesso istante.</div>
@@ -3271,6 +3291,10 @@ senza esporre valori ricevuti dal client o dettagli interni.</div>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/utenze/interno/persistenza/TokenAttivazioneRepository.html#findByTokenHashForUpdate(java.lang.String)" class="member-name-link">findByTokenHashForUpdate(String)</a> - Method in interface it.unina.picus.utenze.interno.persistenza.<a href="it/unina/picus/utenze/interno/persistenza/TokenAttivazioneRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">TokenAttivazioneRepository</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/utenze/interno/persistenza/TokenRecuperoPasswordRepository.html#findByTokenHashForUpdate(java.lang.String)" class="member-name-link">findByTokenHashForUpdate(String)</a> - Method in interface it.unina.picus.utenze.interno.persistenza.<a href="it/unina/picus/utenze/interno/persistenza/TokenRecuperoPasswordRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">TokenRecuperoPasswordRepository</a></dt>
+<dd>
+<div class="block">Legge il link con il lock di scrittura; l'account va bloccato prima.</div>
+</dd>
 <dt><a href="it/unina/picus/utenze/interno/persistenza/AccountRepository.html#findIdByEmailIgnoreCase(java.lang.String)" class="member-name-link">findIdByEmailIgnoreCase(String)</a> - Method in interface it.unina.picus.utenze.interno.persistenza.<a href="it/unina/picus/utenze/interno/persistenza/AccountRepository.html" title="interface in it.unina.picus.utenze.interno.persistenza">AccountRepository</a></dt>
 <dd>
 <div class="block">Cerca solo l'identificativo, senza caricare l'account nel contesto di persistenza.</div>
@@ -3911,6 +3935,10 @@ senza esporre valori ricevuti dal client o dettagli interni.</div>
 <dd>
 <div class="block">Returns a hash code value for this object.</div>
 </dd>
+<dt><a href="it/unina/picus/utenze/web/RecuperoPasswordController.RichiestaCambioPassword.html#hashCode()" class="member-name-link">hashCode()</a> - Method in record class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/RecuperoPasswordController.RichiestaCambioPassword.html" title="class in it.unina.picus.utenze.web">RecuperoPasswordController.RichiestaCambioPassword</a></dt>
+<dd>
+<div class="block">Returns a hash code value for this object.</div>
+</dd>
 <dt><a href="it/unina/picus/utenze/web/RecuperoPasswordController.RichiestaRecupero.html#hashCode()" class="member-name-link">hashCode()</a> - Method in record class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/RecuperoPasswordController.RichiestaRecupero.html" title="class in it.unina.picus.utenze.web">RecuperoPasswordController.RichiestaRecupero</a></dt>
 <dd>
 <div class="block">Returns a hash code value for this object.</div>
@@ -4543,6 +4571,16 @@ operativi di Richieste.</div>
 <dd>
 <div class="block">Creates an instance of a <code>LinkAttivazioneDaInviareEvent</code> record class.</div>
 </dd>
+<dt><a href="it/unina/picus/utenze/web/RecuperoPasswordController.html#linkNonValido(it.unina.picus.utenze.interno.applicazione.LinkRecuperoNonValidoException)" class="member-name-link">linkNonValido(LinkRecuperoNonValidoException)</a> - Method in class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/RecuperoPasswordController.html" title="class in it.unina.picus.utenze.web">RecuperoPasswordController</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/utenze/interno/applicazione/LinkRecuperoNonValidoException.html" class="type-name-link" title="class in it.unina.picus.utenze.interno.applicazione">LinkRecuperoNonValidoException</a> - Exception Class in <a href="it/unina/picus/utenze/interno/applicazione/package-summary.html">it.unina.picus.utenze.interno.applicazione</a></dt>
+<dd>
+<div class="block">Il link di recupero non si può usare: non esiste, è scaduto, è già stato usato oppure l'account non è più attivo.</div>
+</dd>
+<dt><a href="it/unina/picus/utenze/interno/applicazione/LinkRecuperoNonValidoException.html#%3Cinit%3E()" class="member-name-link">LinkRecuperoNonValidoException()</a> - Constructor for exception class it.unina.picus.utenze.interno.applicazione.<a href="it/unina/picus/utenze/interno/applicazione/LinkRecuperoNonValidoException.html" title="class in it.unina.picus.utenze.interno.applicazione">LinkRecuperoNonValidoException</a></dt>
+<dd>
+<div class="block">Crea l'eccezione con il testo da mostrare all'utente, che invita a ripetere la richiesta.</div>
+</dd>
 <dt><a href="it/unina/picus/utenze/web/AreaController.html#login(it.unina.picus.utenze.web.PrincipalePicus,org.springframework.ui.Model)" class="member-name-link">login(PrincipalePicus, Model)</a> - Method in class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/AreaController.html" title="class in it.unina.picus.utenze.web">AreaController</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/shared/LoginJsonConfigurer.html" class="type-name-link" title="class in it.unina.picus.shared">LoginJsonConfigurer</a> - Class in <a href="it/unina/picus/shared/package-summary.html">it.unina.picus.shared</a></dt>
@@ -4577,7 +4615,7 @@ operativi di Richieste.</div>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/comunicazioni/interno/dominio/RegolaContenuto.html#LUNGHEZZA_MAX_TITOLO" class="member-name-link">LUNGHEZZA_MAX_TITOLO</a> - Static variable in class it.unina.picus.comunicazioni.interno.dominio.<a href="it/unina/picus/comunicazioni/interno/dominio/RegolaContenuto.html" title="class in it.unina.picus.comunicazioni.interno.dominio">RegolaContenuto</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="it/unina/picus/utenze/interno/applicazione/AttivazioneUtenzaService.html#LUNGHEZZA_MIN_PASSWORD" class="member-name-link">LUNGHEZZA_MIN_PASSWORD</a> - Static variable in class it.unina.picus.utenze.interno.applicazione.<a href="it/unina/picus/utenze/interno/applicazione/AttivazioneUtenzaService.html" title="class in it.unina.picus.utenze.interno.applicazione">AttivazioneUtenzaService</a></dt>
+<dt><a href="it/unina/picus/utenze/interno/applicazione/PoliticaPassword.html#LUNGHEZZA_MIN" class="member-name-link">LUNGHEZZA_MIN</a> - Static variable in class it.unina.picus.utenze.interno.applicazione.<a href="it/unina/picus/utenze/interno/applicazione/PoliticaPassword.html" title="class in it.unina.picus.utenze.interno.applicazione">PoliticaPassword</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/richieste/api/RichiesteApi.AccordoInPresenza.html#luogo()" class="member-name-link">luogo()</a> - Method in record class it.unina.picus.richieste.api.<a href="it/unina/picus/richieste/api/RichiesteApi.AccordoInPresenza.html" title="class in it.unina.picus.richieste.api">RichiesteApi.AccordoInPresenza</a></dt>
 <dd>
@@ -4660,9 +4698,13 @@ con migliaia di misure appesantirebbe il database.</div>
 </dd>
 <dt><a href="it/unina/picus/utenze/web/RecuperoPasswordController.html#MESSAGGIO_CONFERMA" class="member-name-link">MESSAGGIO_CONFERMA</a> - Static variable in class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/RecuperoPasswordController.html" title="class in it.unina.picus.utenze.web">RecuperoPasswordController</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/utenze/web/RecuperoPasswordController.html#MESSAGGIO_FORMATO_NON_VALIDO" class="member-name-link">MESSAGGIO_FORMATO_NON_VALIDO</a> - Static variable in class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/RecuperoPasswordController.html" title="class in it.unina.picus.utenze.web">RecuperoPasswordController</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/utenze/web/RecuperoPasswordController.html#MESSAGGIO_NON_DISPONIBILE" class="member-name-link">MESSAGGIO_NON_DISPONIBILE</a> - Static variable in class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/RecuperoPasswordController.html" title="class in it.unina.picus.utenze.web">RecuperoPasswordController</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/utenze/web/EmailDigitata.html#MESSAGGIO_NON_VALIDA" class="member-name-link">MESSAGGIO_NON_VALIDA</a> - Static variable in class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/EmailDigitata.html" title="class in it.unina.picus.utenze.web">EmailDigitata</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/utenze/web/RecuperoPasswordController.html#MESSAGGIO_PASSWORD_CAMBIATA" class="member-name-link">MESSAGGIO_PASSWORD_CAMBIATA</a> - Static variable in class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/RecuperoPasswordController.html" title="class in it.unina.picus.utenze.web">RecuperoPasswordController</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/utenze/web/RecuperoPasswordController.html#MESSAGGIO_SERVIZIO_OCCUPATO" class="member-name-link">MESSAGGIO_SERVIZIO_OCCUPATO</a> - Static variable in class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/RecuperoPasswordController.html" title="class in it.unina.picus.utenze.web">RecuperoPasswordController</a></dt>
 <dd>&nbsp;</dd>
@@ -5134,6 +5176,10 @@ applicando allow-list esplicite sui campi e controlli di tipo prima del dominio.
 <dd>
 <div class="block">Returns the value of the <code>nuovaPassword</code> record component.</div>
 </dd>
+<dt><a href="it/unina/picus/utenze/web/RecuperoPasswordController.RichiestaCambioPassword.html#nuovaPassword()" class="member-name-link">nuovaPassword()</a> - Method in record class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/RecuperoPasswordController.RichiestaCambioPassword.html" title="class in it.unina.picus.utenze.web">RecuperoPasswordController.RichiestaCambioPassword</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>nuovaPassword</code> record component.</div>
+</dd>
 <dt><a href="it/unina/picus/comunicazioni/interno/dominio/NuovoAllegato.html" class="type-name-link" title="class in it.unina.picus.comunicazioni.interno.dominio">NuovoAllegato</a> - Record Class in <a href="it/unina/picus/comunicazioni/interno/dominio/package-summary.html">it.unina.picus.comunicazioni.interno.dominio</a></dt>
 <dd>
 <div class="block">Allegato già controllato, pronto da salvare insieme alla comunicazione.</div>
@@ -5358,6 +5404,16 @@ applicando allow-list esplicite sui campi e controlli di tipo prima del dominio.
 </dd>
 <dt><a href="it/unina/picus/shared/SecurityConfig.html#passwordEncoder()" class="member-name-link">passwordEncoder()</a> - Method in class it.unina.picus.shared.<a href="it/unina/picus/shared/SecurityConfig.html" title="class in it.unina.picus.shared">SecurityConfig</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/utenze/web/RecuperoPasswordController.html#passwordNonValida(it.unina.picus.utenze.interno.applicazione.PasswordNonValidaException)" class="member-name-link">passwordNonValida(PasswordNonValidaException)</a> - Method in class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/RecuperoPasswordController.html" title="class in it.unina.picus.utenze.web">RecuperoPasswordController</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/utenze/interno/applicazione/PasswordNonValidaException.html" class="type-name-link" title="class in it.unina.picus.utenze.interno.applicazione">PasswordNonValidaException</a> - Exception Class in <a href="it/unina/picus/utenze/interno/applicazione/package-summary.html">it.unina.picus.utenze.interno.applicazione</a></dt>
+<dd>
+<div class="block">La nuova password non rispetta la regola concordata.</div>
+</dd>
+<dt><a href="it/unina/picus/utenze/interno/applicazione/PasswordNonValidaException.html#%3Cinit%3E(java.lang.String)" class="member-name-link">PasswordNonValidaException(String)</a> - Constructor for exception class it.unina.picus.utenze.interno.applicazione.<a href="it/unina/picus/utenze/interno/applicazione/PasswordNonValidaException.html" title="class in it.unina.picus.utenze.interno.applicazione">PasswordNonValidaException</a></dt>
+<dd>
+<div class="block">Crea l'eccezione con il testo da mostrare all'utente.</div>
+</dd>
 <dt><a href="it/unina/picus/comunicazioni/interno/dominio/TipoAllegato.html#PDF" class="member-name-link">PDF</a> - Enum constant in enum class it.unina.picus.comunicazioni.interno.dominio.<a href="it/unina/picus/comunicazioni/interno/dominio/TipoAllegato.html" title="enum class in it.unina.picus.comunicazioni.interno.dominio">TipoAllegato</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/comunicazioni/interno/dominio/StrutturaAllegato.html#pdfApribile(byte%5B%5D)" class="member-name-link">pdfApribile(byte[])</a> - Static method in class it.unina.picus.comunicazioni.interno.dominio.<a href="it/unina/picus/comunicazioni/interno/dominio/StrutturaAllegato.html" title="class in it.unina.picus.comunicazioni.interno.dominio">StrutturaAllegato</a></dt>
@@ -5421,6 +5477,11 @@ caratteri o codice.</div>
 </dd>
 <dt><a href="it/unina/picus/comunicazioni/interno/dominio/TipoAllegato.html#PNG" class="member-name-link">PNG</a> - Enum constant in enum class it.unina.picus.comunicazioni.interno.dominio.<a href="it/unina/picus/comunicazioni/interno/dominio/TipoAllegato.html" title="enum class in it.unina.picus.comunicazioni.interno.dominio">TipoAllegato</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/utenze/interno/applicazione/PoliticaPassword.html" class="type-name-link" title="class in it.unina.picus.utenze.interno.applicazione">PoliticaPassword</a> - Class in <a href="it/unina/picus/utenze/interno/applicazione/package-summary.html">it.unina.picus.utenze.interno.applicazione</a></dt>
+<dd>
+<div class="block">Regola concordata per le password: la stessa all'attivazione e al recupero, così una password accettata in un
+caso non viene rifiutata nell'altro.</div>
+</dd>
 <dt><a href="it/unina/picus/shared/RichiestaApi.html#preferisceJson(java.lang.String)" class="member-name-link">preferisceJson(String)</a> - Static method in class it.unina.picus.shared.<a href="it/unina/picus/shared/RichiestaApi.html" title="class in it.unina.picus.shared">RichiestaApi</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/richieste/interno/persistenza/PreflightMigrazioniRichieste.html" class="type-name-link" title="class in it.unina.picus.richieste.interno.persistenza">PreflightMigrazioniRichieste</a> - Class in <a href="it/unina/picus/richieste/interno/persistenza/package-summary.html">it.unina.picus.richieste.interno.persistenza</a></dt>
@@ -5533,10 +5594,15 @@ i dati per la consegna post-commit.</div>
 </dd>
 <dt><a href="it/unina/picus/utenze/web/RecuperoPasswordController.html" class="type-name-link" title="class in it.unina.picus.utenze.web">RecuperoPasswordController</a> - Class in <a href="it/unina/picus/utenze/web/package-summary.html">it.unina.picus.utenze.web</a></dt>
 <dd>
-<div class="block">Recupero autonomo della password (US #33): pagina di richiesta e di cambio password, e richiesta del link.</div>
+<div class="block">Recupero autonomo della password (US #33): pagina di richiesta e di cambio password, richiesta del link e
+scelta della nuova password con il link.</div>
 </dd>
 <dt><a href="it/unina/picus/utenze/web/RecuperoPasswordController.html#%3Cinit%3E(java.util.Optional,java.util.Optional,it.unina.picus.utenze.web.LimitatoreRichieste)" class="member-name-link">RecuperoPasswordController(Optional, Optional, LimitatoreRichieste)</a> - Constructor for class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/RecuperoPasswordController.html" title="class in it.unina.picus.utenze.web">RecuperoPasswordController</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/utenze/web/RecuperoPasswordController.RichiestaCambioPassword.html" class="type-name-link" title="class in it.unina.picus.utenze.web">RecuperoPasswordController.RichiestaCambioPassword</a> - Record Class in <a href="it/unina/picus/utenze/web/package-summary.html">it.unina.picus.utenze.web</a></dt>
+<dd>
+<div class="block">Corpo della scelta della nuova password.</div>
+</dd>
 <dt><a href="it/unina/picus/utenze/web/RecuperoPasswordController.RichiestaRecupero.html" class="type-name-link" title="class in it.unina.picus.utenze.web">RecuperoPasswordController.RichiestaRecupero</a> - Record Class in <a href="it/unina/picus/utenze/web/package-summary.html">it.unina.picus.utenze.web</a></dt>
 <dd>
 <div class="block">L'email resta un valore JSON generico fino al controllo del tipo: un numero o un booleano non diventano testo.</div>
@@ -5545,7 +5611,7 @@ i dati per la consegna post-commit.</div>
 <dd>
 <div class="block">Link monouso per il recupero autonomo della password (US #33).</div>
 </dd>
-<dt><a href="it/unina/picus/utenze/interno/applicazione/RecuperoPasswordService.html#%3Cinit%3E(it.unina.picus.utenze.interno.persistenza.AccountRepository,it.unina.picus.utenze.interno.persistenza.TokenRecuperoPasswordRepository,java.time.Clock)" class="member-name-link">RecuperoPasswordService(AccountRepository, TokenRecuperoPasswordRepository, Clock)</a> - Constructor for class it.unina.picus.utenze.interno.applicazione.<a href="it/unina/picus/utenze/interno/applicazione/RecuperoPasswordService.html" title="class in it.unina.picus.utenze.interno.applicazione">RecuperoPasswordService</a></dt>
+<dt><a href="it/unina/picus/utenze/interno/applicazione/RecuperoPasswordService.html#%3Cinit%3E(it.unina.picus.utenze.interno.persistenza.AccountRepository,it.unina.picus.utenze.interno.persistenza.TokenRecuperoPasswordRepository,org.springframework.security.crypto.password.PasswordEncoder,java.time.Clock)" class="member-name-link">RecuperoPasswordService(AccountRepository, TokenRecuperoPasswordRepository, PasswordEncoder, Clock)</a> - Constructor for class it.unina.picus.utenze.interno.applicazione.<a href="it/unina/picus/utenze/interno/applicazione/RecuperoPasswordService.html" title="class in it.unina.picus.utenze.interno.applicazione">RecuperoPasswordService</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/utenze/interno/applicazione/RecuperoPasswordService.DatiInvioRecupero.html" class="type-name-link" title="class in it.unina.picus.utenze.interno.applicazione">RecuperoPasswordService.DatiInvioRecupero</a> - Record Class in <a href="it/unina/picus/utenze/interno/applicazione/package-summary.html">it.unina.picus.utenze.interno.applicazione</a></dt>
 <dd>
@@ -5927,6 +5993,10 @@ nel modo giusto: le pagine HTML rimandano al login (302), le API ricevono <code>
 <dt><a href="it/unina/picus/utenze/web/AttivazioneController.RichiestaAttivazione.html#%3Cinit%3E(java.lang.String,java.lang.String)" class="member-name-link">RichiestaAttivazione(String, String)</a> - Constructor for record class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/AttivazioneController.RichiestaAttivazione.html" title="class in it.unina.picus.utenze.web">AttivazioneController.RichiestaAttivazione</a></dt>
 <dd>
 <div class="block">Creates an instance of a <code>RichiestaAttivazione</code> record class.</div>
+</dd>
+<dt><a href="it/unina/picus/utenze/web/RecuperoPasswordController.RichiestaCambioPassword.html#%3Cinit%3E(java.lang.Object,java.lang.Object)" class="member-name-link">RichiestaCambioPassword(Object, Object)</a> - Constructor for record class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/RecuperoPasswordController.RichiestaCambioPassword.html" title="class in it.unina.picus.utenze.web">RecuperoPasswordController.RichiestaCambioPassword</a></dt>
+<dd>
+<div class="block">Creates an instance of a <code>RichiestaCambioPassword</code> record class.</div>
 </dd>
 <dt><a href="it/unina/picus/utenze/web/RegistrazioneOptController.RichiestaCreazioneOpt.html#%3Cinit%3E(java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object)" class="member-name-link">RichiestaCreazioneOpt(Object, Object, Object, Object, Object, Object)</a> - Constructor for record class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/RegistrazioneOptController.RichiestaCreazioneOpt.html" title="class in it.unina.picus.utenze.web">RegistrazioneOptController.RichiestaCreazioneOpt</a></dt>
 <dd>
@@ -6765,6 +6835,10 @@ capo a coda (login, area per ruolo, logout) senza database.</div>
 <dd>
 <div class="block">Returns the value of the <code>token</code> record component.</div>
 </dd>
+<dt><a href="it/unina/picus/utenze/web/RecuperoPasswordController.RichiestaCambioPassword.html#token()" class="member-name-link">token()</a> - Method in record class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/RecuperoPasswordController.RichiestaCambioPassword.html" title="class in it.unina.picus.utenze.web">RecuperoPasswordController.RichiestaCambioPassword</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>token</code> record component.</div>
+</dd>
 <dt><a href="it/unina/picus/utenze/web/TokenCsrfController.html#token(org.springframework.security.web.csrf.CsrfToken)" class="member-name-link">token(CsrfToken)</a> - Method in class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/TokenCsrfController.html" title="class in it.unina.picus.utenze.web">TokenCsrfController</a></dt>
 <dd>
 <div class="block">Espone il token CSRF nello stesso sito.</div>
@@ -7210,6 +7284,10 @@ da salvare.</div>
 <dd>
 <div class="block">Returns a string representation of this record class.</div>
 </dd>
+<dt><a href="it/unina/picus/utenze/web/RecuperoPasswordController.RichiestaCambioPassword.html#toString()" class="member-name-link">toString()</a> - Method in record class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/RecuperoPasswordController.RichiestaCambioPassword.html" title="class in it.unina.picus.utenze.web">RecuperoPasswordController.RichiestaCambioPassword</a></dt>
+<dd>
+<div class="block">Returns a string representation of this record class.</div>
+</dd>
 <dt><a href="it/unina/picus/utenze/web/RecuperoPasswordController.RichiestaRecupero.html#toString()" class="member-name-link">toString()</a> - Method in record class it.unina.picus.utenze.web.<a href="it/unina/picus/utenze/web/RecuperoPasswordController.RichiestaRecupero.html" title="class in it.unina.picus.utenze.web">RecuperoPasswordController.RichiestaRecupero</a></dt>
 <dd>
 <div class="block">Returns a string representation of this record class.</div>
@@ -7612,6 +7690,10 @@ the order they are declared.</div>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/utenze/interno/dominio/RegolaUnicita.html#verifica(it.unina.picus.utenze.interno.dominio.DatiOperatore,it.unina.picus.utenze.interno.dominio.Errori)" class="member-name-link">verifica(DatiOperatore, Errori)</a> - Method in class it.unina.picus.utenze.interno.dominio.<a href="it/unina/picus/utenze/interno/dominio/RegolaUnicita.html" title="class in it.unina.picus.utenze.interno.dominio">RegolaUnicita</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/utenze/interno/applicazione/PoliticaPassword.html#verifica(java.lang.String)" class="member-name-link">verifica(String)</a> - Static method in class it.unina.picus.utenze.interno.applicazione.<a href="it/unina/picus/utenze/interno/applicazione/PoliticaPassword.html" title="class in it.unina.picus.utenze.interno.applicazione">PoliticaPassword</a></dt>
+<dd>
+<div class="block">Controlla la password scelta dall'utente.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/interno/applicazione/ServizioAnnullamentoRichieste.html#verificaAccesso(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">verificaAccesso(UtenzeApi.IdentitaAutenticata, UUID)</a> - Method in class it.unina.picus.richieste.interno.applicazione.<a href="it/unina/picus/richieste/interno/applicazione/ServizioAnnullamentoRichieste.html" title="class in it.unina.picus.richieste.interno.applicazione">ServizioAnnullamentoRichieste</a></dt>
 <dd>
 <div class="block">Controlla l'accesso prima che il controller legga il corpo del comando.</div>

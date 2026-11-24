@@ -258,17 +258,6 @@ loadScripts(document, 'script');</script>
 </ul>
 <ul class="block-list">
 <li>
-<div class="caption"><span>it.unina.picus.utenze.interno.applicazione.<a href="it/unina/picus/utenze/interno/applicazione/AttivazioneUtenzaService.html" title="class in it.unina.picus.utenze.interno.applicazione">AttivazioneUtenzaService</a></span></div>
-<div class="summary-table three-column-summary">
-<div class="table-header col-first">Modifier and Type</div>
-<div class="table-header col-second">Constant Field</div>
-<div class="table-header col-last">Value</div>
-<div class="col-first even-row-color"><code id="it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService.LUNGHEZZA_MIN_PASSWORD">static&nbsp;final&nbsp;int</code></div>
-<div class="col-second even-row-color"><code><a href="it/unina/picus/utenze/interno/applicazione/AttivazioneUtenzaService.html#LUNGHEZZA_MIN_PASSWORD">LUNGHEZZA_MIN_PASSWORD</a></code></div>
-<div class="col-last even-row-color"><code>12</code></div>
-</div>
-</li>
-<li>
 <div class="caption"><span>it.unina.picus.utenze.interno.applicazione.it.unina.picus.utenze.interno.applicazione.CodaInvitiImportazioneOpt</span></div>
 <div class="summary-table three-column-summary">
 <div class="table-header col-first">Modifier and Type</div>
@@ -277,6 +266,17 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color"><code id="it.unina.picus.utenze.interno.applicazione.CodaInvitiImportazioneOpt.MASSIMO_TENTATIVI">static&nbsp;final&nbsp;int</code></div>
 <div class="col-second even-row-color"><code><a href="it/unina/picus/utenze/interno/applicazione/CodaInvitiImportazioneOpt.html#MASSIMO_TENTATIVI">MASSIMO_TENTATIVI</a></code></div>
 <div class="col-last even-row-color"><code>5</code></div>
+</div>
+</li>
+<li>
+<div class="caption"><span>it.unina.picus.utenze.interno.applicazione.it.unina.picus.utenze.interno.applicazione.PoliticaPassword</span></div>
+<div class="summary-table three-column-summary">
+<div class="table-header col-first">Modifier and Type</div>
+<div class="table-header col-second">Constant Field</div>
+<div class="table-header col-last">Value</div>
+<div class="col-first even-row-color"><code id="it.unina.picus.utenze.interno.applicazione.PoliticaPassword.LUNGHEZZA_MIN">static&nbsp;final&nbsp;int</code></div>
+<div class="col-second even-row-color"><code><a href="it/unina/picus/utenze/interno/applicazione/PoliticaPassword.html#LUNGHEZZA_MIN">LUNGHEZZA_MIN</a></code></div>
+<div class="col-last even-row-color"><code>12</code></div>
 </div>
 </li>
 <li>
@@ -494,9 +494,15 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color"><code id="it.unina.picus.utenze.web.RecuperoPasswordController.MESSAGGIO_CONFERMA">static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second even-row-color"><code><a href="it/unina/picus/utenze/web/RecuperoPasswordController.html#MESSAGGIO_CONFERMA">MESSAGGIO_CONFERMA</a></code></div>
 <div class="col-last even-row-color"><code>"Se l\'indirizzo corrisponde a un account attivo, riceverai un link per scegliere una nuova password. Il link vale 15 minuti."</code></div>
-<div class="col-first odd-row-color"><code id="it.unina.picus.utenze.web.RecuperoPasswordController.MESSAGGIO_NON_DISPONIBILE">static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color"><code><a href="it/unina/picus/utenze/web/RecuperoPasswordController.html#MESSAGGIO_NON_DISPONIBILE">MESSAGGIO_NON_DISPONIBILE</a></code></div>
-<div class="col-last odd-row-color"><code>"Funzionalit\u00e0 non disponibile nel profilo skeleton"</code></div>
+<div class="col-first odd-row-color"><code id="it.unina.picus.utenze.web.RecuperoPasswordController.MESSAGGIO_FORMATO_NON_VALIDO">static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="it/unina/picus/utenze/web/RecuperoPasswordController.html#MESSAGGIO_FORMATO_NON_VALIDO">MESSAGGIO_FORMATO_NON_VALIDO</a></code></div>
+<div class="col-last odd-row-color"><code>"Formato dei dati non valido."</code></div>
+<div class="col-first even-row-color"><code id="it.unina.picus.utenze.web.RecuperoPasswordController.MESSAGGIO_NON_DISPONIBILE">static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="it/unina/picus/utenze/web/RecuperoPasswordController.html#MESSAGGIO_NON_DISPONIBILE">MESSAGGIO_NON_DISPONIBILE</a></code></div>
+<div class="col-last even-row-color"><code>"Funzionalit\u00e0 non disponibile nel profilo skeleton"</code></div>
+<div class="col-first odd-row-color"><code id="it.unina.picus.utenze.web.RecuperoPasswordController.MESSAGGIO_PASSWORD_CAMBIATA">static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="it/unina/picus/utenze/web/RecuperoPasswordController.html#MESSAGGIO_PASSWORD_CAMBIATA">MESSAGGIO_PASSWORD_CAMBIATA</a></code></div>
+<div class="col-last odd-row-color"><code>"Password cambiata. Ora puoi accedere con la nuova password."</code></div>
 <div class="col-first even-row-color"><code id="it.unina.picus.utenze.web.RecuperoPasswordController.MESSAGGIO_SERVIZIO_OCCUPATO">static&nbsp;final&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second even-row-color"><code><a href="it/unina/picus/utenze/web/RecuperoPasswordController.html#MESSAGGIO_SERVIZIO_OCCUPATO">MESSAGGIO_SERVIZIO_OCCUPATO</a></code></div>
 <div class="col-last even-row-color"><code>"Il servizio \u00e8 momentaneamente occupato. Riprova tra qualche minuto."</code></div>
