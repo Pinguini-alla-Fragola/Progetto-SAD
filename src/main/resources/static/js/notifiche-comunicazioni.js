@@ -53,6 +53,7 @@ function avvia(voce) {
         }
     }
     voce.addEventListener('click', aggiorna);
+    document.addEventListener('comunicazioni:ricezione-confermata', aggiorna);
     window.addEventListener('hashchange', () => {
         if (location.hash === voce.hash) aggiorna();
     });
