@@ -21,6 +21,7 @@ import it.unina.picus.utenze.interno.applicazione.ConsegnaLinkAttivazione;
 import it.unina.picus.utenze.interno.applicazione.ConsegnaLinkAttivazione.Esito;
 import it.unina.picus.utenze.interno.applicazione.DatiOptNonValidiException;
 import it.unina.picus.utenze.interno.applicazione.RegistrazioneOptService;
+import it.unina.picus.utenze.interno.applicazione.RiprovaTransitoria;
 import it.unina.picus.utenze.interno.applicazione.RegistrazioneOptService.ComandoRegistrazioneOpt;
 import it.unina.picus.utenze.interno.applicazione.RegistrazioneOptService.EsitoRegistrazioneOpt;
 
@@ -112,7 +113,8 @@ class RegistrazioneOptController {
             var servizio = registrazioneService.get();
             DatiInvioAttivazione datiInvio = servizio.preparaReinvio(id);
             Esito esito = consegnaLink(datiInvio);
-            servizio.concludeReinvio(id, datiInvio, esito != Esito.NON_RIUSCITO);
+            // la email è già partita: se la registrazione dell'esito ha un errore transitorio si ripete solo quella
+            RiprovaTransitoria.esegui(() -> servizio.concludeReinvio(id, datiInvio, esito != Esito.NON_RIUSCITO));
             if (esito == Esito.NON_RIUSCITO) {
                 return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(Map.of(
                         "accountId", id,

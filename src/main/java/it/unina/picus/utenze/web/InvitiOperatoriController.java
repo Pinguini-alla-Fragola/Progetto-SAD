@@ -16,6 +16,7 @@ import it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService.DatiI
 import it.unina.picus.utenze.interno.applicazione.ConsegnaLinkAttivazione;
 import it.unina.picus.utenze.interno.applicazione.ConsegnaLinkAttivazione.Esito;
 import it.unina.picus.utenze.interno.applicazione.ConclusioneReinvio;
+import it.unina.picus.utenze.interno.applicazione.RiprovaTransitoria;
 
 /** Reinvio del link di attivazione di un Operatore in attesa, a cura del Banco. */
 @RestController
@@ -47,7 +48,8 @@ class InvitiOperatoriController {
     ResponseEntity<EsitoReinvio> reinvia(@PathVariable UUID id) {
         DatiInvioAttivazione invito = attivazione.preparaReinvio(id, RuoloUtente.OPERATORE);
         Esito esito = consegna.consegna(invito);
-        conclusione.concludi(id, invito, esito != Esito.NON_RIUSCITO);
+        // la email è già partita: se la registrazione dell'esito ha un errore transitorio si ripete solo quella
+        RiprovaTransitoria.esegui(() -> conclusione.concludi(id, invito, esito != Esito.NON_RIUSCITO));
         if (esito == Esito.NON_RIUSCITO) {
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
                     .body(new EsitoReinvio(id, false, true, MessaggiInvito.REINVIO_NON_RIUSCITO));
