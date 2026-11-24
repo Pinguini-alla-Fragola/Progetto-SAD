@@ -16,6 +16,12 @@ public interface TokenAttivazioneRepository extends JpaRepository<TokenAttivazio
 
     Optional<TokenAttivazioneJpa> findByTokenHash(String tokenHash);
 
+    @Query("select t.accountId from TokenAttivazioneJpa t where t.tokenHash = :hash")
+    Optional<UUID> findAccountIdByTokenHash(@Param("hash") String hash);
+
+    @Query("select coalesce(max(t.ordineEmissione), 0) from TokenAttivazioneJpa t where t.accountId = :accountId")
+    long ultimoOrdineEmissione(@Param("accountId") UUID accountId);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select t from TokenAttivazioneJpa t where t.tokenHash = :hash")
     Optional<TokenAttivazioneJpa> findByTokenHashForUpdate(@Param("hash") String hash);

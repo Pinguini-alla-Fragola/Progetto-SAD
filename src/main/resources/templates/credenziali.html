@@ -24,7 +24,7 @@
     <div class="mobile-body">
         <p class="page-description" th:if="${attivazione and !valido}">
             Il link di attivazione non è valido, è scaduto oppure è già stato utilizzato.
-            Contatta l’amministratore del Banco per richiedere un nuovo invito, oppure <a href="/login">torna all’accesso</a>.
+            Richiedine uno nuovo indicando l’email del tuo account, oppure <a href="/login">torna all’accesso</a>.
         </p>
         <p class="page-description" th:if="${!attivazione and !valido}">
             Per continuare richiedi un nuovo link usando l’email associata all’account.
@@ -32,7 +32,6 @@
         <form id="credenziali"
               method="post"
               action="/attiva"
-              th:if="${valido or !attivazione}"
               th:data-endpoint="${endpoint}"
               th:attr="data-form-anteprima=${!attivazione ? '' : null}">
             <fieldset th:classappend="${!attivazione} ? 'campi-inattivi'" th:disabled="${!attivazione}">
@@ -50,9 +49,10 @@
                 <span th:classappend="${!attivazione} ? 'azione-inattiva'"
                       th:attr="data-funzione-inattiva=${!attivazione ? '' : null}">
                     <button type="submit" class="btn btn-primary btn-block"
-                            th:text="${valido ? 'Salva password' : 'Richiedi un link'}"></button>
+                            th:text="${valido ? 'Salva password' : (attivazione ? 'Richiedi un nuovo link' : 'Richiedi un link')}"></button>
                 </span>
                 <p id="esito" class="picus-esito" role="status"></p>
+                <p id="vai-al-login" th:if="${valido}" hidden><a href="/login">Vai all’accesso</a></p>
             </fieldset>
         </form>
     </div>

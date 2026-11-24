@@ -3,6 +3,7 @@ import { setupWorkspace } from './workspace.js';
 import { renderList } from './list-view.js';
 import { caricaRichieste, caricaAvvisi, caricaCatalogo } from './richieste-area.js';
 import { segnalaFunzioniInattive } from './funzioni-inattive.js';
+import { initConteggiOpt } from './conteggi-opt.js';
 
 const byId = id => document.getElementById(id);
 const area = document.body.dataset.area;
@@ -71,10 +72,12 @@ if (utenti) {
             btnReinvia.disabled = true;
             esito.textContent = '';
             try {
-                const risultato = await api(`/api/opt/${encodeURIComponent(id)}/reinvia-invito`, { method: 'POST' });
+                const risorsa = riga.dataset.ruolo === 'OPERATORE' ? 'operatori' : 'opt';
+                const risultato = await api(`/api/${risorsa}/${encodeURIComponent(id)}/reinvia-invito`, { method: 'POST' });
                 esito.textContent = risultato?.messaggio || `Invito reinviato a ${email || nome}.`;
             } catch (causa) {
-                esito.textContent = causa?.message || 'Impossibile reinviare l\'invito. Riprova.';
+                // 404 e 409 hanno un motivo preciso (account inesistente, già attivo, ruolo diverso): meglio il testo del server
+                esito.textContent = causa?.messaggioServer || causa?.message || 'Impossibile reinviare l\'invito. Riprova.';
             } finally {
                 btnReinvia.disabled = false;
             }
@@ -127,7 +130,7 @@ if (utenti) {
     renderList(utenti, righeUtenti, opzioniUtenti);
 }
 
-for (const contenitore of document.querySelectorAll('#voci-conteggi, #voci-scheda')) {
+for (const contenitore of document.querySelectorAll('#voci-scheda')) {
     const riga = document.createElement('div');
     riga.className = 'count-row';
     for (const [label, type] of [['Voce', 'text'], ['Conteggio', 'number']]) {
@@ -184,7 +187,7 @@ if (formNuovaOpt) {
     });
 }
 
-const lavori = [];
+const lavori = [initConteggiOpt(area)];
 if (area === 'banco') lavori.push(caricaRichieste(area), caricaCatalogo());
 else {
     lavori.push(caricaAvvisi());

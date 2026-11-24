@@ -26,6 +26,15 @@ public class ProfiloOptJpa {
         this.codiceFiscale = Objects.requireNonNull(codiceFiscale, "codiceFiscale obbligatorio");
     }
 
+    /**
+     * Aggiorna il comune del profilo OPT.
+     *
+     * @param nuovoComune codice del comune nel catalogo
+     */
+    public void aggiornaComune(String nuovoComune) {
+        this.comuneCodice = Objects.requireNonNull(nuovoComune, "comuneCodice obbligatorio");
+    }
+
     public UUID getAccountId() { return accountId; }
     public String getCodiceStruttura() { return codiceStruttura; }
     public String getComuneCodice() { return comuneCodice; }

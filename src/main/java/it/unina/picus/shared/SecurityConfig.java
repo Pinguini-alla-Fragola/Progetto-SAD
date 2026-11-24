@@ -100,11 +100,14 @@ class SecurityConfig {
                 .with(new LoginJsonConfigurer(json), Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/api/auth/csrf", "/recupera", "/attiva").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/attiva", "/api/auth/attiva/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/attiva", "/api/auth/attiva/**", "/api/auth/recupera",
+                                "/api/auth/recupera/conferma").permitAll()
                         .requestMatchers("/login", "/error", "/css/**", "/js/**", "/img/**", "/fonts/**", "/favicon.ico").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/opt", "/api/opt/*/revoca", "/api/opt/*/reinvia-invito", "/api/operatori/*/revoca").hasRole("BANCO")
+                        .requestMatchers(HttpMethod.POST, "/api/opt", "/api/opt/*/revoca", "/api/opt/*/reinvia-invito", "/api/operatori/*/revoca",
+                                "/api/operatori/*/reinvia-invito").hasRole("BANCO")
                         .requestMatchers(HttpMethod.POST, "/api/richieste").hasRole("OPT")
                         .requestMatchers(HttpMethod.GET, "/api/richieste/mie").hasRole("OPT")
+                        .requestMatchers(HttpMethod.POST, "/api/opt/importazioni").hasRole("BANCO")
                         .requestMatchers(HttpMethod.GET, "/api/contatti-disponibilita/*").hasAnyRole("OPT", "OPERATORE")
                         .requestMatchers(HttpMethod.POST, "/api/contatti-disponibilita/*/risposta").hasAnyRole("OPT", "OPERATORE")
                         .requestMatchers(HttpMethod.POST, "/api/richieste/*/presa-in-carico",
@@ -112,6 +115,10 @@ class SecurityConfig {
                                 "/api/richieste/*/conferma", "/api/richieste/*/rifiuta").hasRole("BANCO")
                         .requestMatchers(HttpMethod.GET, "/api/richieste/coda", "/api/richieste/*/candidati",
                                 "/api/richieste/*/contatti", "/api/richieste/*/contatti/*").hasRole("BANCO")
+                        // Monitoraggio conteggi trimestrali OPT (#43)
+                        .requestMatchers(HttpMethod.POST, "/api/monitoraggio/conteggi-opt").hasRole("OPT")
+                        .requestMatchers(HttpMethod.GET, "/api/monitoraggio/conteggi-opt").hasAnyRole("OPT", "BANCO")
+                        .requestMatchers(HttpMethod.GET, "/api/monitoraggio/categorie").hasAnyRole("OPT", "BANCO")
                         .requestMatchers(HttpMethod.POST, "/api/utenze/operatori").hasRole("BANCO")
                         .requestMatchers(HttpMethod.GET, "/api/catalogo/offerte-opt/*").hasAnyRole("OPT", "BANCO")
                         .requestMatchers(HttpMethod.HEAD, "/api/catalogo/offerte-opt/*").hasAnyRole("OPT", "BANCO")
@@ -129,6 +136,12 @@ class SecurityConfig {
                         .requestMatchers("/banco/**").hasRole("BANCO")
                         .requestMatchers("/opt/**").hasRole("OPT")
                         .requestMatchers("/operatore/**").hasRole("OPERATORE")
+                        .requestMatchers("/api/monitoraggio/schede-operatore",
+                                "/api/monitoraggio/schede-operatore/modulo",
+                                "/api/monitoraggio/schede-operatore/mie").hasRole("OPERATORE")
+                        .requestMatchers("/api/monitoraggio/schede-operatore/ricevute",
+                                "/api/monitoraggio/schede-operatore/ricevute/riepilogo").hasRole("BANCO")
+                        .requestMatchers("/api/monitoraggio/schede-operatore/*").hasAnyRole("BANCO", "OPERATORE")
                         .anyRequest().authenticated())
                 .exceptionHandling(eccezioni -> eccezioni
                         .authenticationEntryPoint(NON_AUTENTICATO)
