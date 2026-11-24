@@ -470,14 +470,16 @@ class RevocaEConcorrenzaOptPostgresTest extends IntegrazionePostgresBase {
      */
     private void attendiInAttesaDiLock(int processoDelBlocco, int attesi) throws InterruptedException {
         long limite = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
+        int inCoda = 0;
         while (System.nanoTime() < limite) {
-            Integer inCoda = jdbc.queryForObject(SESSIONI_IN_CODA_DIETRO_AL_BLOCCO, Integer.class, processoDelBlocco);
-            if (inCoda != null && inCoda >= attesi) {
+            inCoda = jdbc.queryForObject(SESSIONI_IN_CODA_DIETRO_AL_BLOCCO, Integer.class, processoDelBlocco);
+            if (inCoda >= attesi) {
                 return;
             }
             Thread.sleep(20);
         }
-        throw new AssertionError("l'operazione " + attesi + " non risulta in coda sul lock dell'account");
+        throw new AssertionError("dopo 10 secondi solo " + inCoda + " operazioni su " + attesi
+                + " risultano in coda sul lock dell'account");
     }
 
     private MockHttpSession creaEAccedi(String ruolo) throws Exception {

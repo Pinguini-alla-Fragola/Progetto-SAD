@@ -548,8 +548,8 @@ class ConteggiOptIntegrazioneTest {
      * l'inserimento del conteggio deve controllare la chiave esterna {@code opt_id} con
      * {@code FOR KEY SHARE} e quindi si ferma. Così tutti gli invii superano la ricerca
      * («nessuna riga») prima che il primo inserimento sia confermato. Quando tutti risultano in coda
-     * dietro a quel lock (o dopo 10 secondi, se un'implementazione diversa non si ferma
-     * su quel lock) il test lo rilascia.
+     * dietro a quel lock il test lo rilascia; se entro 10 secondi non ci arrivano, il test fallisce
+     * indicando quanti invii erano in coda, perché la gara non sarebbe avvenuta.
      *
      * @param valore valore inviato dall'i-esimo invio
      * @return stato HTTP di ogni invio, nell'ordine; {@code 500} se l'eccezione non è stata convertita
@@ -617,11 +617,14 @@ class ConteggiOptIntegrazioneTest {
      *
      * Conta solo le sessioni bloccate dal processo che tiene il lock, direttamente o attraverso un altro
      * invio in coda: un'attesa estranea nello stesso database non viene scambiata per un invio fermo.
+     * Se allo scadere gli invii in coda sono meno di quelli attesi il test fallisce: con invii di fatto
+     * seriali le asserzioni sugli esiti passerebbero senza aver verificato la concorrenza.
      */
     private void attendiInviiInAttesaDiLock(int processoDelBlocco, int attesi) throws InterruptedException {
         long limite = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
+        int inCoda = 0;
         while (System.nanoTime() < limite) {
-            Integer inCoda = jdbc.queryForObject("""
+            inCoda = jdbc.queryForObject("""
                     with recursive in_coda(pid) as (
                         select a.pid from pg_stat_activity a where ? = any(pg_blocking_pids(a.pid))
                         union
@@ -629,11 +632,13 @@ class ConteggiOptIntegrazioneTest {
                     )
                     select count(*) from in_coda
                     """, Integer.class, processoDelBlocco);
-            if (inCoda != null && inCoda >= attesi) {
+            if (inCoda >= attesi) {
                 return;
             }
             Thread.sleep(20);
         }
+        throw new AssertionError("dopo 10 secondi solo " + inCoda + " invii su " + attesi
+                + " risultano in coda dietro al lock del profilo OPT: la gara non è avvenuta");
     }
 
     // ---------------------------------------------------------------------------------------
@@ -731,6 +736,7 @@ class ConteggiOptIntegrazioneTest {
         sessione.get(intervallo)
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].optId").value(optA.toString()))
+                .andExpect(jsonPath("$[0].conteggio.valore").isString())
                 .andExpect(jsonPath("$[0].conteggio.valore").value("9223372036854775808"));
         assertEquals(Map.of(chiave(optA, m01, "PERSONE_RAGGIUNTE"), Long.MAX_VALUE), consulta(banco, optA, ANNO, 1),
                 "il singolo trimestre resta consultabile");
