@@ -87,6 +87,52 @@ class ConteggiOptControllerTest {
     }
 
     @Test
+    void consultaIConteggiDiTutteLeOptNelTrimestreScelto() throws Exception {
+        invia(1, "7").andExpect(status().isNoContent());
+        invia(2, "8").andExpect(status().isNoContent());
+
+        mvc.perform(get(PERCORSO).with(user(banco.toString()).roles("BANCO"))
+                        .param("anno", "2025").param("trimestre", "2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].optId").value(opt.toString()))
+                .andExpect(jsonPath("$[0].conteggio.valore").value(8));
+    }
+
+    @Test
+    void sommaEsattamenteITrimestriInclusiAncheOltreIlLimiteDiLong() throws Exception {
+        invia(3, "12").andExpect(status().isNoContent());
+        invia(4, "9223372036854775807").andExpect(status().isNoContent());
+        inviaVoci(2026, 1, voce("MINORI", "2")).andExpect(status().isNoContent());
+        inviaVoci(2026, 2, voce("MINORI", "9")).andExpect(status().isNoContent());
+
+        mvc.perform(consulta("4").param("annoFine", "2026").param("trimestreFine", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].conteggio.valore").value("9223372036854775809"));
+    }
+
+    @Test
+    void cumulaLaCorrezioneUnaSolaVoltaEMantieneLoZeroDichiarato() throws Exception {
+        inviaVoci(1, voce("MINORI", "7") + "," + voce("ANZIANI", "0")).andExpect(status().isNoContent());
+        invia(2, "8").andExpect(status().isNoContent());
+        jdbc.update("update monitoraggio_configurazione set correzioni_abilitate = true where id = 1");
+        try {
+            invia(1, "2").andExpect(status().isNoContent());
+            invia(1, "2").andExpect(status().isNoContent());
+        } finally {
+            jdbc.update("update monitoraggio_configurazione set correzioni_abilitate = false where id = 1");
+        }
+
+        mvc.perform(consulta("1").param("annoFine", "2025").param("trimestreFine", "2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].conteggio.voce").value("ANZIANI"))
+                .andExpect(jsonPath("$[0].conteggio.valore").value(0))
+                .andExpect(jsonPath("$[1].conteggio.voce").value("MINORI"))
+                .andExpect(jsonPath("$[1].conteggio.valore").value(10));
+    }
+
+    @Test
     void accettaDueInviiConcorrentiConLeStesseVociInOrdineOpposto() throws Exception {
         String minori = voce("MINORI", "7");
         String anziani = voce("ANZIANI", "8");
@@ -120,9 +166,13 @@ class ConteggiOptControllerTest {
     }
 
     private ResultActions inviaVoci(int trimestre, String voci) throws Exception {
+        return inviaVoci(2025, trimestre, voci);
+    }
+
+    private ResultActions inviaVoci(int anno, int trimestre, String voci) throws Exception {
         String corpo = """
-                {"anno":2025,"trimestre":%d,"voci":[%s]}
-                """.formatted(trimestre, voci);
+                {"anno":%d,"trimestre":%d,"voci":[%s]}
+                """.formatted(anno, trimestre, voci);
         return mvc.perform(post(PERCORSO).with(user(opt.toString()).roles("OPT")).with(csrf())
                 .contentType(MediaType.APPLICATION_JSON).content(corpo));
     }
