@@ -7,8 +7,11 @@
  * manuale senza modello) distingue il modello dal semplice invio.
  *
  * comunicazioni.js non esporta nulla e si avvia all'import: per ogni caso si prepara in globalThis un DOM finto
- * ricavato dal markup di templates/banco/dashboard.html (#messaggi e form#comunicazione), si simula fetch e si
- * importa il modulo con un parametro di query diverso, così ogni caso ha un'istanza nuova.
+ * con form#comunicazione costruito leggendo il template reale templates/banco/dashboard.html, si simula fetch e si
+ * importa il modulo con un parametro di query diverso, così ogni caso ha un'istanza nuova. Pulsante del modello,
+ * campi, opzioni e gruppo sono quindi quelli della dashboard: nessun controllo del form è scritto nel test. Solo
+ * #messaggi e body[data-area] sono ricreati. Il lettore del template copre il solo HTML del form (tag bilanciati,
+ * attributi tra virgolette doppie o senza valore) e fallisce se il markup non è di questa forma.
  *
  * Il DOM finto copre solo ciò che usano comunicazioni.js, elenco-comunicazioni.js e communication-view.js
  * all'avvio e nell'invio: createElement, Option, append, replaceChildren, remove, textContent, classList,
@@ -18,6 +21,7 @@
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 
 /** Stessi titolo e testo delle costanti TITOLO_SCADENZA e CONTENUTO_SCADENZA di InvioComunicazioniTest. */
 const TITOLO_SCADENZA = 'Scadenza della scheda trimestrale';
@@ -31,6 +35,7 @@ const ACCOUNT = [
 ];
 const PAGINA_VUOTA = { elementi: [], pagina: 0, dimensione: 20, totale: 0 };
 const MODULO = new URL('../../main/resources/static/js/comunicazioni.js', import.meta.url);
+const DASHBOARD = new URL('../../main/resources/templates/banco/dashboard.html', import.meta.url);
 
 /* ---------------------------------------------------------------- DOM finto minimo */
 
@@ -255,29 +260,58 @@ function crea(tag, { attributi = {}, ...proprieta } = {}, ...figli) {
     return elemento;
 }
 
-/** La sezione Comunicazioni di templates/banco/dashboard.html, ridotta agli elementi usati dagli script. */
+/* ---------------------------------------------------------------- form della dashboard reale */
+
+const SENZA_CHIUSURA = new Set(['input', 'br', 'hr', 'img']);
+const PROPRIETA_BOOLEANE = ['hidden', 'disabled', 'checked'];
+
+/** Markup del solo form id="comunicazione" della dashboard del Banco, esclusi i commenti HTML. */
+function markupForm() {
+    const pagina = readFileSync(DASHBOARD, 'utf8').replace(/<!--[\s\S]*?-->/g, '');
+    const form = pagina.match(/<form\s(?:[^>]*\s)?id="comunicazione"[^>]*>[\s\S]*?<\/form>/g) ?? [];
+    assert.equal(form.length, 1, 'la dashboard deve avere un solo form id="comunicazione"');
+    return form[0];
+}
+
+/** Elemento finto con gli attributi del tag; quelli letti come proprietà dagli script diventano proprietà. */
+function creaDalTag(tag, testoAttributi) {
+    const attributi = {};
+    const proprieta = tag === 'input' ? { files: [] } : {};
+    for (const [, nome, valore = ''] of testoAttributi.matchAll(/([\w:-]+)(?:="([^"]*)")?/g)) {
+        if (PROPRIETA_BOOLEANE.includes(nome)) proprieta[nome] = true;
+        else if (nome === 'value' || PROPRIETA_ATTRIBUTO.includes(nome)) proprieta[nome] = valore;
+        else attributi[nome] = valore;
+    }
+    return crea(tag, { attributi, ...proprieta });
+}
+
+/** Albero del DOM finto corrispondente al form del template. */
+function formDellaDashboard() {
+    const radice = new Elemento('template');
+    let corrente = radice;
+    for (const [intero, chiuso, aperto, attributi] of
+        markupForm().matchAll(/<\/([a-z]\w*)\s*>|<([a-z]\w*)((?:\s+[\w:-]+(?:="[^"]*")?)*)\s*\/?>|[^<]+|</g)) {
+        assert.notEqual(intero, '<', 'markup del form non supportato dal lettore del test');
+        if (chiuso) {
+            assert.equal(chiuso, corrente.tagName, 'tag non bilanciati nel form della dashboard');
+            corrente = corrente.parentNode;
+        } else if (aperto) {
+            const elemento = creaDalTag(aperto, attributi);
+            corrente.append(elemento);
+            if (!SENZA_CHIUSURA.has(aperto)) corrente = elemento;
+        } else {
+            corrente.append(intero);
+        }
+    }
+    assert.equal(corrente, radice, 'tag non bilanciati nel form della dashboard');
+    const [form] = radice.figli();
+    form.remove();
+    return form;
+}
+
+/** Pagina del Banco con il form reale della dashboard. */
 function preparaPagina() {
-    const opzioni = [['TUTTE_LE_OPT', 'Tutte le OPT'], ['GRUPPO_OPT', 'Un gruppo di OPT'],
-        ['TUTTI_GLI_OPERATORI', 'Tutti gli operatori del Banco'], ['GRUPPO_OPERATORI', 'Un gruppo di operatori']]
-        .map(([valore, testo]) => crea('option', { value: valore }, testo));
-    const form = crea('form', { id: 'comunicazione', attributi: { class: 'picus-form form-layout' } },
-        crea('fieldset', { disabled: true, attributi: { class: 'campi-form' } },
-            crea('label', { attributi: { class: 'campo' } }, 'Oggetto (facoltativo)',
-                crea('input', { name: 'titolo', type: 'text' })),
-            crea('label', { attributi: { class: 'campo' } }, 'Testo', crea('textarea', { name: 'contenuto' })),
-            crea('div', { attributi: { class: 'campo' } },
-                crea('button', { type: 'button', attributi: { 'data-modello-scadenza': '' } },
-                    'Usa il modello «Scadenza della scheda trimestrale»')),
-            crea('label', { attributi: { class: 'campo' } }, 'Invia a',
-                crea('select', { name: 'destinatariTipo' }, ...opzioni)),
-            crea('fieldset', { hidden: true, disabled: true,
-                attributi: { class: 'campo-scelte', 'data-destinatari': '', 'data-gruppo': '' } },
-                crea('legend', {}, 'Account del gruppo'), crea('div', { attributi: { class: 'picus-choices' } })),
-            crea('label', { attributi: { class: 'campo' } }, 'PDF, PNG, JPEG o testo',
-                crea('input', { name: 'files', type: 'file', files: [] })),
-            crea('div', { attributi: { class: 'form-submit' } },
-                crea('button', { type: 'submit' }, 'Invia comunicazione'),
-                crea('p', { attributi: { class: 'picus-esito', role: 'status' } }, 'Il modulo si attiva dopo il caricamento della pagina.'))));
+    const form = formDellaDashboard();
     const messaggi = crea('div', { id: 'messaggi', attributi: { class: 'picus-list', 'aria-live': 'polite' } });
     const body = crea('body', { attributi: { 'data-area': 'banco' } }, messaggi, form);
     globalThis.document = {
@@ -370,6 +404,13 @@ async function scegliGruppoOpt(form) {
 }
 
 /* ---------------------------------------------------------------- casi */
+
+test('CA-06 · il form #comunicazione della dashboard contiene il pulsante del modello usato dal modulo', () => {
+    const pulsanti = formDellaDashboard().querySelectorAll('button[data-modello-scadenza]');
+
+    assert.equal(pulsanti.length, 1, 'un pulsante con data-modello-scadenza nel form della dashboard');
+    assert.equal(pulsanti[0].type, 'button', 'il pulsante del modello non invia il form');
+});
 
 test('CA-06 · il modello di scadenza si invia con la POST normale delle comunicazioni', async t => {
     const { form, chiamate } = await moduloPronto(t);
