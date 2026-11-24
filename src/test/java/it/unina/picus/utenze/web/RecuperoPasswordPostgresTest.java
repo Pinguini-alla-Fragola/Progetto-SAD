@@ -19,6 +19,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -33,8 +34,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -76,7 +80,11 @@ sullo stesso container.
 
 La richiesta del link lavora in secondo piano su un esecutore proprio. Qui ha un solo thread, quindi le richieste
 sono elaborate in ordine: per sapere che tutte quelle precedenti sono finite (email, conferma o scarto del link) si
-accoda una richiesta «sentinella» per un account attivo e si aspetta la sua email (attendiElaborazioni).
+accoda una richiesta «sentinella» per un account attivo e si aspetta la sua email (attendiElaborazioni). Lo stesso
+accade dopo ogni test, così nessun invio in ritardo finisce nella posta del test successivo.
+
+Le fixture riproducono i dati della registrazione: le OPT hanno il codice fiscale e gli account in attesa di
+attivazione non hanno ancora una password.
 
 La durata di 15 minuti è scritta qui come valore della storia e non letta dal codice di produzione: se cambiasse,
 questi test devono fallire.
@@ -123,6 +131,12 @@ class RecuperoPasswordPostgresTest extends IntegrazionePostgresBase {
         orologio.imposta(T0);
         posta.azzera();
         limitatoreAccessi.azzeraTutto();
+    }
+
+    /** Nessuna richiesta di recupero resta in coda quando parte il test successivo. */
+    @AfterEach
+    void completaElaborazioni() throws InterruptedException {
+        attendiElaborazioni();
     }
 
     // AC1, AC3, AC4: percorso completo per i tre ruoli
@@ -205,6 +219,7 @@ class RecuperoPasswordPostgresTest extends IntegrazionePostgresBase {
         Account revocato = nuovoAccount("OPT", "REVOCATO");
         Account inAttesa = nuovoAccount("OPERATORE", "IN_ATTESA_DI_ATTIVAZIONE");
         String sconosciuta = "sconosciuta-" + UUID.randomUUID() + "@picus.test";
+        assertNull(hashDi(inAttesa), "un account in attesa di attivazione non ha ancora una password");
 
         Map<String, MvcResult> casi = new LinkedHashMap<>();
         casi.put("account attivo", richiediRecupero(attivo.email()));
@@ -481,6 +496,8 @@ class RecuperoPasswordPostgresTest extends IntegrazionePostgresBase {
 
         orologio.imposta(T0.plus(Duration.ofMinutes(5)).plus(UN_MS));
         assertEquals(200, richiediRecupero(account.email()).getResponse().getStatus());
+        attendiElaborazioni();
+        assertEquals(4, posta.inviateA(account.email()).size());
     }
 
     @Test
@@ -502,29 +519,80 @@ class RecuperoPasswordPostgresTest extends IntegrazionePostgresBase {
         assertEquals(Boolean.TRUE, paginaRecupero(token).getModel().get("cambioPassword"));
     }
 
-    // messaggi visibili nella pagina /recupera
+    // pagina /recupera: messaggi, collegamento con recupero.js e con le API
+
+    /** Id che recupero.js cerca nella pagina di richiesta e in quella di cambio password. */
+    private static final List<String> ID_PAGINA_RICHIESTA = List.of("richiesta-recupero", "esito");
+    private static final List<String> ID_PAGINA_CAMBIO =
+            List.of("cambio-password", "esito", "errore-password", "vai-al-login", "nuova-richiesta");
+    private static final String SCRIPT_RECUPERO = "/js/recupero.js";
 
     @Test
-    @DisplayName("Pagina senza link: modulo di richiesta con la durata di 15 minuti")
-    void paginaDiRichiesta() throws Exception {
-        String html = htmlRecupero(null);
+    @DisplayName("recupero.js è servito come JavaScript e cerca proprio gli elementi e i campi che la pagina espone")
+    void scriptCoerenteConLaPagina() throws Exception {
+        MvcResult esito = mvc.perform(get(SCRIPT_RECUPERO)).andReturn();
 
-        assertTrue(html.contains("id=\"richiesta-recupero\""));
-        assertFalse(html.contains("id=\"cambio-password\""));
-        assertTrue(html.contains("Il link vale 15 minuti."));
+        assertEquals(200, esito.getResponse().getStatus());
+        assertTrue(esito.getResponse().getContentType().contains("javascript"), esito.getResponse().getContentType());
+        String script = esito.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        Set<String> esposti = new HashSet<>(ID_PAGINA_RICHIESTA);
+        esposti.addAll(ID_PAGINA_CAMBIO);
+        assertEquals(esposti, trova(script, "getElementById\\('([^']+)'\\)"));
+        assertEquals(Set.of("nuovaPassword", "token"), trova(script, "\\.elements\\.(\\w+)"));
+        assertTrue(script.contains("dataset.endpoint"), "lo script non legge più l'endpoint dal modulo");
     }
 
     @Test
-    @DisplayName("Pagina con link valido: modulo di cambio password con il token nascosto e la regola dei 12 caratteri")
+    @DisplayName("Pagina senza link: carica lo script e il modulo di richiesta porta all'API che invia il link")
+    void paginaDiRichiesta() throws Exception {
+        Account account = nuovoAccount("OPERATORE", "ATTIVO");
+
+        String html = htmlRecupero(null);
+
+        assertCaricaLoScript(html);
+        assertTrue(html.contains("Il link vale 15 minuti."));
+        assertFalse(html.contains("id=\"cambio-password\""));
+        String modulo = modulo(html, "richiesta-recupero");
+        assertEspone(modulo, ID_PAGINA_RICHIESTA);
+        assertTrue(modulo.contains("type=\"submit\""));
+        assertEquals(List.of("email"), nomiDeiCampi(modulo));
+
+        // Invio come fa lo script: endpoint e nome del campo letti dalla pagina
+        MvcResult invio = mvc.perform(post(attributo(apertura(modulo), "data-endpoint")).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"" + nomiDeiCampi(modulo).get(0) + "\":\"" + account.email() + "\"}"))
+                .andReturn();
+        assertEquals(200, invio.getResponse().getStatus());
+        attendiElaborazioni();
+        assertEquals(1, posta.inviateA(account.email()).size());
+    }
+
+    @Test
+    @DisplayName("Pagina con link valido: carica lo script e il modulo, con il token nascosto, cambia la password")
     void paginaConLinkValido() throws Exception {
-        String token = richiediLinkValido(nuovoAccount("OPT", "ATTIVO"));
+        Account account = nuovoAccount("OPT", "ATTIVO");
+        String token = richiediLinkValido(account);
 
         String html = htmlRecupero(token);
 
-        assertTrue(html.contains("id=\"cambio-password\""));
+        assertCaricaLoScript(html);
         assertFalse(html.contains("id=\"richiesta-recupero\""));
-        assertTrue(html.contains("type=\"hidden\" name=\"token\" value=\"" + token + "\""));
         assertTrue(html.contains("Usa almeno 12 caratteri."));
+        String modulo = modulo(html, "cambio-password");
+        assertEspone(modulo, ID_PAGINA_CAMBIO);
+        assertTrue(modulo.contains("<fieldset"));
+        assertTrue(modulo.contains("type=\"submit\""));
+        assertEquals(Set.of("token", "nuovaPassword"), Set.copyOf(nomiDeiCampi(modulo)));
+        assertEquals(token, valoreDelCampo(modulo, "token"));
+
+        // Invio come fa lo script: endpoint e token letti dalla pagina
+        MvcResult invio = mvc.perform(post(attributo(apertura(modulo), "data-endpoint")).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"token\":\"" + valoreDelCampo(modulo, "token")
+                                + "\",\"nuovaPassword\":\"" + PASSWORD_NUOVA + "\"}"))
+                .andReturn();
+        assertEquals(200, invio.getResponse().getStatus());
+        assertEquals(204, statoLogin(account.email(), PASSWORD_NUOVA));
     }
 
     @Test
@@ -536,8 +604,11 @@ class RecuperoPasswordPostgresTest extends IntegrazionePostgresBase {
 
         String html = htmlRecupero(token);
 
+        assertCaricaLoScript(html);
         assertTrue(html.contains("Il link di recupero non è valido, è scaduto oppure è già stato utilizzato."));
-        assertTrue(html.contains("id=\"richiesta-recupero\""));
+        String modulo = modulo(html, "richiesta-recupero");
+        assertEspone(modulo, ID_PAGINA_RICHIESTA);
+        assertEquals("/api/auth/recupera", attributo(apertura(modulo), "data-endpoint"));
         assertFalse(html.contains("id=\"cambio-password\""));
         assertFalse(html.contains(token));
     }
@@ -548,14 +619,20 @@ class RecuperoPasswordPostgresTest extends IntegrazionePostgresBase {
         UUID id = UUID.randomUUID();
         String email = "rec-" + id + "@picus.test";
         String nome = "Utente di prova " + ruolo;
+        // Come dopo la registrazione: chi è in attesa di attivazione non ha ancora scelto una password
+        String hash = "IN_ATTESA_DI_ATTIVAZIONE".equals(stato) ? null : BCRYPT_VELOCE.encode(PASSWORD_VECCHIA);
         jdbc.update("""
                 insert into utenze_account (id, email, password_hash, nome, ruolo, stato)
                 values (?, ?, ?, ?, ?, ?)
-                """, id, email, BCRYPT_VELOCE.encode(PASSWORD_VECCHIA), nome, ruolo, stato);
+                """, id, email, hash, nome, ruolo, stato);
         if ("OPT".equals(ruolo)) {
             String codiceStruttura = "R-" + id.toString().replace("-", "").substring(0, 26);
-            jdbc.update("insert into utenze_profili_opt (account_id, codice_struttura, comune_codice) values (?, ?, 'napoli')",
-                    id, codiceStruttura);
+            // 11 cifre, mai tutte zero: formato accettato da RegistrazioneOptService
+            String codiceFiscale = String.format("%011d", 1 + Math.floorMod(id.getLeastSignificantBits(), 99_999_999_999L));
+            jdbc.update("""
+                    insert into utenze_profili_opt (account_id, codice_struttura, comune_codice, codice_fiscale)
+                    values (?, ?, 'napoli', ?)
+                    """, id, codiceStruttura, codiceFiscale);
         }
         return new Account(id, email, nome);
     }
@@ -633,6 +710,61 @@ class RecuperoPasswordPostgresTest extends IntegrazionePostgresBase {
     private int linkAperti(Account account) {
         return jdbc.queryForObject("select count(*) from utenze_token_recupero_password where account_id = ? and usato_il is null",
                 Integer.class, account.id());
+    }
+
+    private static void assertCaricaLoScript(String html) {
+        Matcher script = Pattern.compile("<script\\b[^>]*\\ssrc=\"" + Pattern.quote(SCRIPT_RECUPERO) + "\"[^>]*>").matcher(html);
+        assertTrue(script.find(), "la pagina non carica " + SCRIPT_RECUPERO);
+        assertEquals("module", attributo(script.group(), "type"), "recupero.js usa import: va caricato come modulo");
+    }
+
+    private static void assertEspone(String frammento, List<String> id) {
+        for (String atteso : id) {
+            assertTrue(frammento.contains("id=\"" + atteso + "\""), "elemento #" + atteso + " assente");
+        }
+    }
+
+    /** Il form con quell'id, dal tag di apertura a {@code </form>}. */
+    private static String modulo(String html, String id) {
+        Matcher modulo = Pattern.compile("<form\\b[^>]*\\sid=\"" + Pattern.quote(id) + "\"[^>]*>.*?</form>", Pattern.DOTALL)
+                .matcher(html);
+        assertTrue(modulo.find(), "modulo #" + id + " assente");
+        return modulo.group();
+    }
+
+    private static String apertura(String elemento) {
+        return elemento.substring(0, elemento.indexOf('>') + 1);
+    }
+
+    private static String attributo(String tag, String nome) {
+        Matcher valore = Pattern.compile("\\s" + Pattern.quote(nome) + "=\"([^\"]*)\"").matcher(tag);
+        assertTrue(valore.find(), "attributo " + nome + " assente in " + tag);
+        return valore.group(1);
+    }
+
+    /** Nomi dei campi del modulo, nell'ordine della pagina: sono le chiavi del JSON che lo script invia. */
+    private static List<String> nomiDeiCampi(String modulo) {
+        List<String> nomi = new ArrayList<>();
+        Matcher campo = Pattern.compile("<input\\b[^>]*>").matcher(modulo);
+        while (campo.find()) {
+            nomi.add(attributo(campo.group(), "name"));
+        }
+        return nomi;
+    }
+
+    private static String valoreDelCampo(String modulo, String nome) {
+        Matcher campo = Pattern.compile("<input\\b[^>]*\\sname=\"" + Pattern.quote(nome) + "\"[^>]*>").matcher(modulo);
+        assertTrue(campo.find(), "campo " + nome + " assente");
+        return attributo(campo.group(), "value");
+    }
+
+    private static Set<String> trova(String testo, String espressione) {
+        Set<String> trovati = new HashSet<>();
+        Matcher corrispondenza = Pattern.compile(espressione).matcher(testo);
+        while (corrispondenza.find()) {
+            trovati.add(corrispondenza.group(1));
+        }
+        return trovati;
     }
 
     private static String sha256(String testo) throws Exception {
