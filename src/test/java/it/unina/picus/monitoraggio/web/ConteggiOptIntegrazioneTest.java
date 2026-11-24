@@ -583,7 +583,25 @@ class ConteggiOptIntegrazioneTest {
             }
             return stati;
         } finally {
+            attendiFineInvii(esecutore);
+        }
+    }
+
+    /**
+     * Attende che gli invii già partiti terminino, anche quando il metodo esce per un errore. Il lock
+     * del test a quel punto è già rilasciato, quindi gli invii proseguono e si chiudono: senza questa
+     * attesa {@code @AfterEach} potrebbe svuotare il database condiviso mentre stanno ancora scrivendo.
+     * Non lancia eccezioni, così resta visibile l'errore che ha interrotto il test.
+     */
+    private static void attendiFineInvii(ExecutorService esecutore) {
+        esecutore.shutdown();
+        try {
+            if (!esecutore.awaitTermination(30, TimeUnit.SECONDS)) {
+                esecutore.shutdownNow();
+            }
+        } catch (InterruptedException interruzione) {
             esecutore.shutdownNow();
+            Thread.currentThread().interrupt();
         }
     }
 
