@@ -91,34 +91,49 @@ class LimitatoreRichiesteTest {
     }
 
     @Test
-    @DisplayName("Rilasciare un'ammissione libera esattamente quel posto, non quelli ammessi dopo")
+    @DisplayName("Rilasciare un'ammissione libera esattamente quella: le altre contano fino alla loro scadenza")
     void rilascioEsatto() {
-        Optional<LimitatoreRichieste.Ammissione> prima = limitatore.ammetti(EMAIL);
-        limitatore.ammetti(EMAIL);
-        limitatore.ammetti(EMAIL);
+        // Tre prenotazioni a istanti diversi, così si vede quale resta in coda
+        Optional<LimitatoreRichieste.Ammissione> prima = limitatore.ammetti(EMAIL); // T0
+        orologio.imposta(T0.plus(Duration.ofMinutes(1)));
+        assertTrue(limitatore.ammetti(EMAIL).isPresent()); // seconda, T0 + 1 min
+        orologio.imposta(T0.plus(Duration.ofMinutes(2)));
+        assertTrue(limitatore.ammetti(EMAIL).isPresent()); // terza, T0 + 2 min
         assertTrue(limitatore.ammetti(EMAIL).isEmpty());
 
         limitatore.rilascia(prima.orElseThrow());
-        limitatore.rilascia(prima.orElseThrow()); // un secondo rilascio della stessa non libera altro
+        limitatore.rilascia(prima.orElseThrow()); // un secondo rilascio della stessa resta senza effetto
 
+        // Si libera un solo posto: in coda seconda, terza e quarta
+        assertTrue(limitatore.ammetti(EMAIL).isPresent()); // quarta, T0 + 2 min
+        assertTrue(limitatore.ammetti(EMAIL).isEmpty());
+
+        // Quando sarebbe scaduta la prima non si libera nulla: era lei quella rilasciata
+        orologio.imposta(T0.plus(FINESTRA).plus(UN_MS));
+        assertTrue(limitatore.ammetti(EMAIL).isEmpty(), "è stata rilasciata un'altra prenotazione");
+
+        // La seconda conta fino alla sua scadenza
+        orologio.imposta(T0.plus(Duration.ofMinutes(1)).plus(FINESTRA).plus(UN_MS));
         assertTrue(limitatore.ammetti(EMAIL).isPresent());
         assertTrue(limitatore.ammetti(EMAIL).isEmpty());
     }
 
     @Test
-    @DisplayName("A mappa piena dimentica l'indirizzo usato meno di recente e non rifiuta mai un indirizzo nuovo")
+    @DisplayName("A mappa piena dimentica l'indirizzo usato meno di recente, non il primo inserito")
     void mappaPiena() {
         LimitatoreRichieste piccolo = new LimitatoreRichieste(orologio, MAX, FINESTRA, 2);
         for (int i = 0; i < MAX; i++) {
             piccolo.ammetti(EMAIL);
+            piccolo.ammetti("b@picus.test");
         }
+        // EMAIL è il primo inserito ma, usato di nuovo, diventa il più recente
         assertTrue(piccolo.ammetti(EMAIL).isEmpty());
 
-        assertTrue(piccolo.ammetti("b@picus.test").isPresent());
         assertTrue(piccolo.ammetti("c@picus.test").isPresent(), "indirizzo nuovo a mappa piena");
 
-        // EMAIL era il meno recente: è stato dimenticato e riparte da zero
-        assertTrue(piccolo.ammetti(EMAIL).isPresent());
+        // Dimenticato b, il meno recente; EMAIL ricorda ancora le sue tre richieste
+        assertTrue(piccolo.ammetti(EMAIL).isEmpty(), "dimenticato il primo inserito invece del meno recente");
+        assertTrue(piccolo.ammetti("b@picus.test").isPresent(), "b doveva ripartire da zero");
     }
 
     @Test
