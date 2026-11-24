@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -64,7 +65,6 @@ class OffertaOptIntegrazioneTest {
     private static final String CONTATTI = "/api/richieste/{id}/contatti";
     private static final String CONTATTO = "/api/contatti-disponibilita/{id}";
     private static final String RISPOSTA = "/api/contatti-disponibilita/{id}/risposta";
-    private static final String ASSEGNAZIONE = "/api/contatti-disponibilita/{id}/assegnazione";
 
     private static final long MISURA_INESISTENTE = 999_999L;
     private static final String MISURA_NON_SELEZIONABILE = "Misura non selezionabile";
@@ -287,27 +287,28 @@ class OffertaOptIntegrazioneTest {
     class OffertaNellaRicerca {
 
         @Test
-        @DisplayName("La OPT con offerta è candidata e la risposta non contiene giorni o fasce orarie")
+        @DisplayName("La OPT con offerta è candidata con i dati usati dal Banco e senza giorni o fasce orarie")
         void candidatoSenzaDisponibilitaPreventive() throws Exception {
             dichiara(optA, m01, true).andExpect(status().isNoContent());
             UUID richiesta = dati.richiesta(titolare, m01, "napoli", "PRESA_IN_CARICO", INVIATA_IL);
 
             MvcResult esito = mvc.perform(get(CANDIDATI, richiesta).with(user(banco.toString()).roles("BANCO")))
                     .andExpect(status().isOk())
+                    .andExpect(jsonPath("$[0].erogatore.accountId").value(optA.toString()))
+                    .andExpect(jsonPath("$[0].erogatore.nomeVisualizzato").value("OPT alfa"))
                     .andExpect(jsonPath("$[0].erogatore.tipo").value("OPT"))
+                    .andExpect(jsonPath("$[0].erogatore.comuneCodice").value("napoli"))
                     .andExpect(jsonPath("$[0].erogatore.ambito").value("STESSO_COMUNE"))
+                    .andExpect(jsonPath("$[0].caricoAppuntamenti").value(0))
                     .andReturn();
 
             assertThat(candidati(esito)).containsExactly(optA);
-            Map<String, Object> candidato = JsonPath.read(testo(esito), "$[0]");
-            assertThat(candidato).containsOnlyKeys("erogatore", "caricoAppuntamenti");
-            Map<String, Object> erogatore = JsonPath.read(testo(esito), "$[0].erogatore");
-            assertThat(erogatore).containsOnlyKeys("accountId", "nomeVisualizzato", "tipo", "comuneCodice", "ambito");
+            assertThat(chiaviDiDisponibilitaPreventiva(JsonPath.read(testo(esito), "$"))).isEmpty();
 
             MvcResult offerta = mvc.perform(get(OFFERTA, optA).with(user(banco.toString()).roles("BANCO")))
                     .andExpect(status().isOk()).andReturn();
-            Map<String, Object> dichiarazione = JsonPath.read(testo(offerta), "$[0]");
-            assertThat(dichiarazione).containsOnlyKeys("misuraId", "tramiteProfessionista");
+            assertThat(offertaVistaDa(banco, "BANCO", optA)).containsExactly(m01 + ":true");
+            assertThat(chiaviDiDisponibilitaPreventiva(JsonPath.read(testo(offerta), "$"))).isEmpty();
         }
 
         @Test
@@ -440,7 +441,7 @@ class OffertaOptIntegrazioneTest {
         }
 
         @Test
-        @DisplayName("Il contatto inviato prima del ritiro si consulta e riceve risposta; l'assegnazione è rifiutata")
+        @DisplayName("Il contatto inviato prima del ritiro si consulta e riceve risposta; la ricerca prosegue")
         void richiestaDiDisponibilitaDopoIlRitiro() throws Exception {
             dichiara(optA, m01, false).andExpect(status().isNoContent());
             dichiara(optB, m01, false).andExpect(status().isNoContent());
@@ -464,14 +465,11 @@ class OffertaOptIntegrazioneTest {
                     .andExpect(jsonPath("$[0].erogatoreId").value(optA.toString()))
                     .andExpect(jsonPath("$[0].esito").value("DISPONIBILE"));
 
-            // L'erogatore non offre più la misura: il Banco non può assegnargli la pratica.
-            mvc.perform(post(ASSEGNAZIONE, contatto).with(user(banco.toString()).roles("BANCO")).with(csrf()))
-                    .andExpect(status().isConflict());
-            assertThat(dati.stato(richiesta)).isEqualTo("PRESA_IN_CARICO");
-            assertThat(dati.erogatoreAssegnato(richiesta)).isNull();
+            // L'esito dell'assegnazione a una OPT che ha ritirato la misura dipende dalla Q-20:
+            // sarà fissato in un test separato dopo la decisione, non qui.
 
-            // La ricerca prosegue: la OPT ritirata non è più interpellabile, l'altra sì.
-            interpella(richiesta, optA).andExpect(status().isBadRequest());
+            // La ricerca prosegue con il prossimo candidato, che offre ancora la misura.
+            assertThat(candidatiPer(richiesta)).containsExactly(optB);
             interpella(richiesta, optB).andExpect(status().isCreated());
             assertThat(dati.contatti(richiesta)).isEqualTo(2);
             assertThat(dati.contattiInAttesa(richiesta)).isEqualTo(1);
@@ -545,6 +543,29 @@ class OffertaOptIntegrazioneTest {
     private static List<UUID> candidati(MvcResult esito) throws Exception {
         List<String> id = JsonPath.read(testo(esito), "$[*].erogatore.accountId");
         return id.stream().map(UUID::fromString).toList();
+    }
+
+    /**
+     * Chiavi del JSON, a ogni livello, che descriverebbero una disponibilità preventiva (giorni,
+     * fasce orarie, calendari). Le altre chiavi restano libere, così il test non fissa la forma dei DTO.
+     */
+    private static List<String> chiaviDiDisponibilitaPreventiva(Object json) {
+        var trovate = new ArrayList<String>();
+        raccogliChiavi(json, trovate);
+        return trovate.stream()
+                .filter(chiave -> chiave.matches("(?i).*(disponib|giorn|fasc|orari|calendar|slot|agenda).*"))
+                .toList();
+    }
+
+    private static void raccogliChiavi(Object nodo, List<String> chiavi) {
+        if (nodo instanceof Map<?, ?> mappa) {
+            mappa.forEach((chiave, valore) -> {
+                chiavi.add(String.valueOf(chiave));
+                raccogliChiavi(valore, chiavi);
+            });
+        } else if (nodo instanceof List<?> elenco) {
+            elenco.forEach(elemento -> raccogliChiavi(elemento, chiavi));
+        }
     }
 
     private static String testo(MvcResult esito) throws Exception {
