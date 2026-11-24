@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -57,7 +58,8 @@ import jakarta.servlet.Filter;
  * preparare i dati.</p>
  *
  * <p>Le importazioni passano solo dalla rotta HTTP. Il database riceve direttamente i soli dati preparatori e
- * si legge soltanto per ciò che {@link UtenzeApi} non espone: conteggi, codice fiscale e hash della password.</p>
+ * si legge soltanto per ciò che nessuna API espone: conteggi, codice fiscale, hash della password e inviti ancora
+ * in coda ({@code utenze_inviti_importazione_opt}, la cui riga è rimossa a consegna riuscita).</p>
  *
  * <p>Non si estende {@code AccessiBlackBoxTest}: il suo tag US-28 è ereditato e il suo database è condiviso con
  * altri contesti, i cui job potrebbero consegnare gli inviti al posto del doppio di {@link InvioEmail}. Il
@@ -308,6 +310,31 @@ abstract class ImportazioneOptBlackBox {
         }
     }
 
+    /**
+     * Attende che la consegna degli inviti di queste OPT sia conclusa: l'email parte prima che la riga esca dalla
+     * coda, quindi l'invio osservato non basta.
+     */
+    void attendiCodaConclusa(Riga... importate) throws InterruptedException {
+        List<String> destinatari = Stream.of(importate).map(Riga::email).toList();
+        long scadenza = System.nanoTime() + ATTESA_INVIO.toNanos();
+        while (!invitiPendenti(destinatari).isEmpty() && System.nanoTime() < scadenza) {
+            Thread.sleep(100);
+        }
+        assertNessunInvitoPendente(destinatari);
+    }
+
+    /** Email, tra quelle indicate, il cui account ha un invito in coda; la coda di altri account è ignorata. */
+    private List<String> invitiPendenti(List<String> destinatari) {
+        return destinatari.stream().filter(email -> jdbc.queryForObject("""
+                select count(*) from utenze_inviti_importazione_opt i
+                  join utenze_account a on a.id = i.account_id where lower(a.email) = lower(?)
+                """, Long.class, email) > 0).toList();
+    }
+
+    private void assertNessunInvitoPendente(List<String> destinatari) {
+        assertEquals(List.of(), invitiPendenti(destinatari), "nessun invito atteso in coda");
+    }
+
     /** Conteggio degli invii per destinatario. */
     Map<String, Integer> invii(List<String> destinatari) {
         Map<String, Integer> conteggio = new HashMap<>();
@@ -315,9 +342,15 @@ abstract class ImportazioneOptBlackBox {
         return conteggio;
     }
 
-    /** Verifica che entro la finestra di quiete nessun altro invio raggiunga i destinatari. */
+    /**
+     * Verifica che nessun nuovo invito sia in coda per i destinatari né li raggiunga entro la finestra di quiete.
+     * La coda si legge prima degli invii: un invito che ne esce nel frattempo risulta già inviato.
+     */
     void assertInviiInvariati(Map<String, Integer> prima) throws InterruptedException {
+        List<String> destinatari = List.copyOf(prima.keySet());
+        assertNessunInvitoPendente(destinatari);
         Thread.sleep(FINESTRA_DI_QUIETE);
-        assertEquals(prima, invii(List.copyOf(prima.keySet())), "nessun nuovo invio email atteso");
+        assertNessunInvitoPendente(destinatari);
+        assertEquals(prima, invii(destinatari), "nessun nuovo invio email atteso");
     }
 }

@@ -148,6 +148,7 @@ class ImportazioneOptAggiornamentoTest extends ImportazioneOptBlackBox {
         String file = csv(prima, seconda);
         importa(file);
         attendiUnInvito(prima, seconda);
+        attendiCodaConclusa(prima, seconda);
         Istantanea dopoIlPrimo = istantanea();
         Map<String, Integer> invii = invii(List.of(prima.email(), seconda.email()));
 
@@ -168,6 +169,7 @@ class ImportazioneOptAggiornamentoTest extends ImportazioneOptBlackBox {
         Riga daAggiornare = nuovaRiga();
         importa(csv(registrata, daAggiornare));
         attendiUnInvito(registrata, daAggiornare);
+        attendiCodaConclusa(registrata, daAggiornare);
         Riga aggiornata = daAggiornare.conNome("OPT rinominata").conComune(ALTRO_COMUNE);
         Riga nuova = nuovaRiga();
         Istantanea prima = istantanea();
@@ -229,6 +231,7 @@ class ImportazioneOptAggiornamentoTest extends ImportazioneOptBlackBox {
         Riga presente = nuovaRiga();
         importa(csv(assente, presente));
         attendiUnInvito(assente, presente);
+        attendiCodaConclusa(assente, presente);
         Istantanea prima = istantanea();
         Map<String, Integer> invii = invii(List.of(assente.email(), presente.email()));
 
@@ -281,6 +284,7 @@ class ImportazioneOptAggiornamentoTest extends ImportazioneOptBlackBox {
         Riga riga = nuovaRiga();
         importa(csv(riga));
         attendiUnInvito(riga);
+        attendiCodaConclusa(riga);
         utenze.revocaUtenzaOpt(optConCodice(riga.codice()).id());
         Istantanea prima = istantanea();
         Map<String, Integer> invii = invii(List.of(riga.email()));

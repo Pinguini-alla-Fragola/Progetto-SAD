@@ -67,6 +67,7 @@ class ImportazioneOptCreazioneTest extends ImportazioneOptBlackBox {
             assertEquals(riga.codiceFiscale(), istantanea().utenze().get(opt.id()).codiceFiscale());
         }
         attendiUnInvito(prima, seconda);
+        attendiCodaConclusa(prima, seconda);
         assertNotEquals(tokenInviati(prima.email()), tokenInviati(seconda.email()), "link distinti");
         assertInviiInvariati(invii(List.of(prima.email(), seconda.email())));
     }
