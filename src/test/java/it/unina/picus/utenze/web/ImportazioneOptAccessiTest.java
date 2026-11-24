@@ -91,7 +91,7 @@ class ImportazioneOptAccessiTest extends ImportazioneOptBlackBox {
             sessione = http.accedi(banco);
             csrf = http.csrf(sessione);
             // la sessione del Banco era valida: il file è rifiutato nel merito, non per l'accesso
-            assertEquals(400, http.esegui(caricamento(sessione, csrf, new byte[0])).getStatus());
+            assertEquals(400, esegui(caricamento(sessione, csrf, new byte[0])).getStatus());
             if (tipo == Sessione.SCADUTA) {
                 sessione.invalidate();
             } else {
@@ -101,7 +101,7 @@ class ImportazioneOptAccessiTest extends ImportazioneOptBlackBox {
         Istantanea prima = istantanea();
         Map<String, Integer> invii = invii(List.of(registrata.email(), nuova.email()));
 
-        MockHttpServletResponse risposta = http.esegui(caricamento(sessione, csrf, contenuto));
+        MockHttpServletResponse risposta = esegui(caricamento(sessione, csrf, contenuto));
 
         ClientHttp.assertNonAutenticatoSenzaDati(risposta);
         assertEquals(prima, istantanea(), "nessun dato creato o modificato");

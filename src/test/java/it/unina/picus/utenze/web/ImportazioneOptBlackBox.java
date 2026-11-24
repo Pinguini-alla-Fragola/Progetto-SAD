@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 import java.nio.charset.StandardCharsets;
@@ -26,9 +27,11 @@ import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
-import org.springframework.mock.web.MockPart;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.RequestBuilder;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.jayway.jsonpath.JsonPath;
@@ -44,11 +47,14 @@ import it.unina.picus.utenze.api.UtenzeApi;
 import it.unina.picus.utenze.api.UtenzeApi.AccountAmministrativo;
 import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
 
+import jakarta.servlet.Filter;
+
 /**
  * Base dei test black box della User Story #24 "Importazione delle OPT da CSV" (task #151).
  *
- * <p>{@code CA-nn} è l'n-esimo criterio di accettazione della #24. Finché la capacità
- * {@link Capacita#IMPORTAZIONE_OPT} non è consegnata i casi sono sospesi prima di preparare i dati.</p>
+ * <p>{@code CA-nn} è l'n-esimo criterio di accettazione della #24. La capacità
+ * {@link Capacita#IMPORTAZIONE_OPT} è consegnata con la #202: se la rotta manca, i casi falliscono prima di
+ * preparare i dati.</p>
  *
  * <p>Le importazioni passano solo dalla rotta HTTP. Il database riceve direttamente i soli dati preparatori e
  * si legge soltanto per ciò che {@link UtenzeApi} non espone: conteggi, codice fiscale e hash della password.</p>
@@ -120,13 +126,18 @@ abstract class ImportazioneOptBlackBox {
     @MockitoBean
     InvioEmail posta;
 
+    /** Esegue i soli caricamenti: il builder multipart non è del tipo accettato da {@link ClientHttp#esegui}. */
+    private MockMvc mvc;
+
     ClientHttp http;
     ScenarioAccessi scenario;
 
-    /** La sospensione precede qualunque dato preparatorio. */
+    /** Il controllo su capacità e rotta precede qualunque dato preparatorio. */
     @BeforeEach
     void preparaImportazione() throws Exception {
         http = new ClientHttp(web);
+        mvc = MockMvcBuilders.webAppContextSetup(web)
+                .addFilters(web.getBean("springSecurityFilterChain", Filter.class)).build();
         http.richiediEndpointDellaCapacita(Capacita.IMPORTAZIONE_OPT,
                 post(IMPORTAZIONI).contentType(MediaType.MULTIPART_FORM_DATA).accept(MediaType.APPLICATION_JSON));
         scenario = new ScenarioAccessi(web);
@@ -185,22 +196,19 @@ abstract class ImportazioneOptBlackBox {
     // ------------------------------------------------------------------ importazione
 
     /** Caricamento multipart del file nella sessione indicata. */
-    static MockHttpServletRequestBuilder caricamento(MockHttpSession sessione, Csrf csrf, byte[] contenuto) {
-        MockHttpServletRequestBuilder richiesta = post(IMPORTAZIONI);
-        richiesta.session(sessione).header(csrf.header(), csrf.token())
-                .contentType(MediaType.MULTIPART_FORM_DATA).accept(MediaType.APPLICATION_JSON)
-                .with(costruita -> {
-                    MockPart parte = new MockPart("file", "opt.csv", contenuto);
-                    parte.getHeaders().setContentType(MediaType.parseMediaType("text/csv"));
-                    costruita.addPart(parte);
-                    return costruita;
-                });
-        return richiesta;
+    static RequestBuilder caricamento(MockHttpSession sessione, Csrf csrf, byte[] contenuto) {
+        return multipart(IMPORTAZIONI).file(new MockMultipartFile("file", "opt.csv", "text/csv", contenuto))
+                .session(sessione).header(csrf.header(), csrf.token()).accept(MediaType.APPLICATION_JSON);
+    }
+
+    /** Esegue un caricamento con la catena di Spring Security attiva. */
+    MockHttpServletResponse esegui(RequestBuilder caricamento) throws Exception {
+        return mvc.perform(caricamento).andReturn().getResponse();
     }
 
     MockHttpServletResponse carica(Account attore, byte[] contenuto) throws Exception {
         MockHttpSession sessione = http.accedi(attore);
-        return http.esegui(caricamento(sessione, http.csrf(sessione), contenuto));
+        return esegui(caricamento(sessione, http.csrf(sessione), contenuto));
     }
 
     /** Importazione riuscita del Banco: report per numero di riga (l'intestazione è la 1). */
