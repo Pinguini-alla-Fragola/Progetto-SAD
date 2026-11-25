@@ -2,9 +2,11 @@
  * #145 · Vista dei riscontri del Banco (codice della #144, PR #193), lato pagina.
  *
  * I test Java verificano via HTTP che la rotta /api/comunicazioni/{id}/riscontri distingua le conferme dalle
- * attese. Questi casi verificano che la scheda del Banco costruita da communicationCards mostri quella
- * distinzione: pulsante «Mostra riscontri», riepilogo, stato e data di ogni destinatario, omonimi, filtro per
- * stato ed errori. È il controllo automatico del criterio «in browser» della #145.
+ * attese. Questi casi verificano che la pagina mostri quella distinzione. I primi partono dall'elenco reale
+ * (ElencoComunicazioni), come la pagina delle comunicazioni: così si verifica anche che l'elenco del Banco
+ * attivi il pannello dei riscontri. Gli altri lavorano sulla singola scheda costruita da communicationCards:
+ * riepilogo, stato e data di ogni destinatario, omonimi, filtro per stato ed errori. È il controllo automatico
+ * del criterio «in browser» della #145.
  *
  * Il DOM finto copre solo ciò che usano communication-view.js e list-view.js per questa scheda: createElement,
  * Option, append, replaceChildren, remove, textContent, classList, dataset, attributi, eventi e focus. fetch è
@@ -173,7 +175,13 @@ function simulaServer(t, ...risposte) {
         chiamate.push({ url, opzioni });
         const risposta = risposte.shift();
         assert.ok(risposta, 'richiesta non prevista: ' + url);
-        return typeof risposta === 'number' ? new Response(null, { status: risposta }) : Response.json(risposta);
+        if (typeof risposta === 'number') return new Response(null, { status: risposta });
+        // una risposta può indicare la rotta attesa: { url, corpo }
+        if (risposta.url !== undefined && risposta.corpo !== undefined) {
+            assert.equal(url, risposta.url);
+            return Response.json(risposta.corpo);
+        }
+        return Response.json(risposta);
     });
     return chiamate;
 }
@@ -181,6 +189,19 @@ function simulaServer(t, ...risposte) {
 async function moduloVista(t) {
     preparaPagina(t);
     return import('../../main/resources/static/js/communication-view.js');
+}
+
+async function moduloElenco(t) {
+    preparaPagina(t);
+    return import('../../main/resources/static/js/elenco-comunicazioni.js');
+}
+
+/** Stessa formattazione della pagina delle comunicazioni, per confrontare il testo mostrato. */
+const formatoPagina = valore => new Date(valore).toLocaleString('it-IT',
+    { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Rome' });
+
+function paginaDi(...elementi) {
+    return { elementi, pagina: 0, dimensione: 20, totale: elementi.length };
 }
 
 function schedaBanco(communicationCards, opzioni = {}) {
@@ -224,7 +245,51 @@ async function apri(pulsante) {
     await setImmediate();
 }
 
-/* ---------------------------------------------------------------- casi */
+/* ---------------------------------------------------------------- casi: dall'elenco reale */
+
+test('AC2 · dall\'elenco del Banco «Mostra riscontri» distingue una conferma datata da un destinatario in attesa', async t => {
+    const { ElencoComunicazioni } = await moduloElenco(t);
+    const chiamate = simulaServer(t,
+        { url: '/api/comunicazioni/inviate?pagina=0', corpo: paginaDi(COMUNICAZIONE) },
+        { url: '/api/comunicazioni/comunicazione-sintetica/riscontri', corpo: [
+                { destinatarioId: OPT_A, nomeVisualizzato: 'OPT A', confermataIl: CONFERMA_A },
+                { destinatarioId: OPT_B, nomeVisualizzato: 'OPT B', confermataIl: null }
+            ] });
+    const contenitore = new Elemento('div');
+
+    await new ElencoComunicazioni(contenitore, { banco: true }).carica();
+    const [scheda] = contenitore.tutti('article');
+    assert.ok(scheda, 'l\'elenco del Banco deve mostrare la comunicazione inviata');
+    assert.equal(scheda.trova('button', 'Confermo la ricezione'), undefined);
+    const pulsante = scheda.trova('button', 'Mostra riscontri');
+    assert.ok(pulsante, 'l\'elenco del Banco deve attivare il pannello dei riscontri');
+    await apri(pulsante);
+
+    assert.equal(chiamate.length, 2);
+    assert.equal(riepilogo(scheda), '1 di 2 ricezioni confermate');
+    assert.deepEqual(righe(scheda).map(leggiRiga), [
+        { nome: 'OPT A', idAccount: null, stato: 'Confermata',
+            data: { testo: formatoPagina(CONFERMA_A), dateTime: CONFERMA_A }, visibile: true },
+        { nome: 'OPT B', idAccount: null, stato: 'In attesa di conferma', data: null, visibile: true }
+    ]);
+});
+
+test('#145 · dall\'elenco del destinatario niente riscontri: solo il pulsante di conferma', async t => {
+    const { ElencoComunicazioni } = await moduloElenco(t);
+    const chiamate = simulaServer(t,
+        { url: '/api/comunicazioni/ricevute?pagina=0', corpo: paginaDi({ ...COMUNICAZIONE, confermataIl: null }) });
+    const contenitore = new Elemento('div');
+
+    await new ElencoComunicazioni(contenitore, { banco: false }).carica();
+
+    const [scheda] = contenitore.tutti('article');
+    assert.ok(scheda.trova('button', 'Confermo la ricezione'));
+    assert.equal(scheda.trova('button', 'Mostra riscontri'), undefined);
+    assert.equal(scheda.tutti('section', 'receipt-panel').length, 0);
+    assert.equal(chiamate.length, 1);
+});
+
+/* ---------------------------------------------------------------- casi: singola scheda */
 
 test('#145 · il Banco vede «Mostra riscontri» e non il pulsante di conferma; il destinatario il contrario', async t => {
     const { communicationCards } = await moduloVista(t);
