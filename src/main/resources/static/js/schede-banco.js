@@ -8,6 +8,14 @@ const TIPOLOGIE = {
 
 let prossimoDettaglio = 0;
 
+/** Nel dettaglio di sola lettura i numeri vanno mostrati con le cifre emesse dal server. */
+function decodificaDettaglio(testo) {
+    const tokenNumericiOStringhe = /"(?:[^"\\]|\\[\s\S])*"|-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/g;
+    return JSON.parse(testo.replace(tokenNumericiOStringhe, token =>
+        token.startsWith('"') ? token : '"' + token + '"'
+    ));
+}
+
 function el(tag, text, className) {
     const node = document.createElement(tag);
     if (text != null) node.textContent = String(text);
@@ -24,21 +32,28 @@ function formattaIstante(istante) {
     });
 }
 
-function leggiOperatoriDaRubrica() {
+function leggiOperatoriDaRubrica(vociServer) {
+    const voci = Array.isArray(vociServer) ? vociServer : Array.from(
+        document.querySelectorAll('#account .account-row[data-ruolo="OPERATORE"]'),
+        riga => riga.dataset
+    );
     const mappa = new Map();
+    for (const voce of voci) {
+        if (!voce?.id) continue;
+        const id = String(voce.id);
+        mappa.set(id, {
+            id,
+            nome: String(voce.nome || '').trim(),
+            riferimento: String(voce.riferimento || '').trim(),
+            stato: String(voce.stato || '').trim()
+        });
+    }
     const conteggioNomi = new Map();
-    const righe = document.querySelectorAll('#account .account-row[data-ruolo="OPERATORE"]');
-    for (const riga of righe) {
-        const id = riga.dataset.id;
-        if (!id) continue;
-        const nome = (riga.dataset.nome || '').trim();
-        const riferimento = (riga.dataset.riferimento || '').trim();
-        const stato = (riga.dataset.stato || '').trim();
-        const chiaveNome = nome.toLocaleLowerCase('it-IT');
+    for (const op of mappa.values()) {
+        const chiaveNome = op.nome.toLocaleLowerCase('it-IT');
         if (chiaveNome) {
             conteggioNomi.set(chiaveNome, (conteggioNomi.get(chiaveNome) || 0) + 1);
         }
-        mappa.set(id, { id, nome, riferimento, stato });
     }
     for (const op of mappa.values()) {
         const chiaveNome = op.nome.toLocaleLowerCase('it-IT');
@@ -113,7 +128,7 @@ export function initSchedeBanco() {
     if (form.dataset?.schedeBancoAttivo === 'true') return;
     if (form.dataset) form.dataset.schedeBancoAttivo = 'true';
 
-    const operatori = leggiOperatoriDaRubrica();
+    const submitBtn = form.querySelector('button[type="submit"]');
     const dettagliCache = new Map();
     let progressivo = 0;
     let ultimoPeriodo;
@@ -144,7 +159,7 @@ export function initSchedeBanco() {
         pulisciCampiErrati();
     };
 
-    const renderRisultato = (anno, trimestre, riepilogo, richiestaCorrente) => {
+    const renderRisultato = (anno, trimestre, riepilogo, richiestaCorrente, operatori) => {
         const schede = Array.isArray(riepilogo?.schede) ? riepilogo.schede : [];
         const conteggi = riepilogo?.conteggi && typeof riepilogo.conteggi === 'object' ? riepilogo.conteggi : {};
 
@@ -202,7 +217,10 @@ export function initSchedeBanco() {
                 detail.setAttribute('aria-busy', 'true');
                 detail.replaceChildren(el('p', 'Caricamento dettaglio scheda…', 'picus-meta'));
                 try {
-                    const dettaglio = await api(`/api/monitoraggio/schede-operatore/${encodeURIComponent(sintesi.id)}`);
+                    const dettaglio = await api(
+                        `/api/monitoraggio/schede-operatore/${encodeURIComponent(sintesi.id)}`,
+                        { decodificaJson: decodificaDettaglio }
+                    );
                     if (richiestaCorrente !== progressivo) return;
                     dettagliCache.set(sintesi.id, dettaglio);
                     renderDettaglioScheda(detail, dettaglio);
@@ -230,7 +248,7 @@ export function initSchedeBanco() {
                 toggle.textContent = detail.hidden ? 'Apri scheda' : 'Chiudi scheda';
                 toggle.setAttribute('aria-expanded', String(!detail.hidden));
                 if (!detail.hidden && !dettagliCache.has(sintesi.id)) {
-                    caricaDettaglio();
+                    return caricaDettaglio();
                 }
             });
 
@@ -239,7 +257,6 @@ export function initSchedeBanco() {
 
             return listRow(articolo, {
                 text: [nomeOperatore, ...metaParti, sintesi.id].join(' '),
-                filters: { stato: op?.stato || '' },
                 data: sintesi
             });
         });
@@ -283,7 +300,6 @@ export function initSchedeBanco() {
         ultimoPeriodo = periodo;
         pulisciRisultati();
 
-        const submitBtn = form.querySelector('button[type="submit"]');
         if (submitBtn) submitBtn.disabled = true;
         mostraEsito('Caricamento schede e riepilogo…');
 
@@ -292,10 +308,14 @@ export function initSchedeBanco() {
                 anno: String(periodo.anno),
                 trimestre: String(periodo.trimestre)
             });
-            const dati = await api(`/api/monitoraggio/schede-operatore/ricevute/riepilogo?${params}`);
+            const dati = await api('/api/monitoraggio/schede-operatore/ricevute/riepilogo?' + params);
+            if (richiesta !== progressivo) return;
+            const vociRubrica = dati.schede?.length
+                ? await api('/api/utenze/rubrica?ruolo=OPERATORE').catch(() => null)
+                : [];
             if (richiesta !== progressivo) return;
             mostraEsito('');
-            renderRisultato(periodo.anno, periodo.trimestre, dati, richiesta);
+            renderRisultato(periodo.anno, periodo.trimestre, dati, richiesta, leggiOperatoriDaRubrica(vociRubrica));
         } catch (err) {
             if (richiesta !== progressivo) return;
             mostraEsito(err.message || 'Impossibile consultare il riepilogo.', {
@@ -312,7 +332,7 @@ export function initSchedeBanco() {
                 riprova.hidden = false;
             }
         } finally {
-            if (submitBtn) submitBtn.disabled = false;
+            if (submitBtn && richiesta === progressivo) submitBtn.disabled = false;
         }
     };
 
@@ -327,6 +347,7 @@ export function initSchedeBanco() {
     form.addEventListener('input', () => {
         progressivo++;
         ultimoPeriodo = undefined;
+        if (submitBtn) submitBtn.disabled = false;
         pulisciRisultati();
     });
 
