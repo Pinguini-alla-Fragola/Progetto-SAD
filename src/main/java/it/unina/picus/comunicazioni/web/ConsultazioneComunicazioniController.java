@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import it.unina.picus.comunicazioni.api.ComunicazioniApi.Riscontro;
 import it.unina.picus.comunicazioni.interno.applicazione.ConsultazioneComunicazioni;
 import it.unina.picus.comunicazioni.interno.applicazione.RichiestaElenco;
 import it.unina.picus.comunicazioni.interno.dominio.ComunicazioneSalvata;
@@ -122,6 +123,18 @@ public class ConsultazioneComunicazioniController {
     @GetMapping("/{comunicazioneId}")
     public ComunicazioneJson consulta(IdentitaAutenticata attore, @PathVariable UUID comunicazioneId) {
         return ComunicazioneJson.da(consultazione.consulta(attore, comunicazioneId));
+    }
+
+    /**
+     * Restituisce al Banco lo stato di ricezione per ciascun account destinatario dell'invio.
+     *
+     * @param attore identità verificata della sessione
+     * @param comunicazioneId identificativo della comunicazione inviata
+     * @return elenco con l'istante della prima conferma oppure il riscontro in attesa per ogni destinatario
+     */
+    @GetMapping("/{comunicazioneId}/riscontri")
+    public List<Riscontro> riscontri(IdentitaAutenticata attore, @PathVariable UUID comunicazioneId) {
+        return consultazione.elencoRiscontri(attore, comunicazioneId);
     }
 
     /**

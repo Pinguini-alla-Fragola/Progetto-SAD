@@ -79,13 +79,14 @@ public interface ComunicazioniApi extends AvvisiOperativiApi, AvvisiAnnullamento
     Instant confermaRicezione(IdentitaAutenticata attore, UUID comunicazioneId);
 
     /**
-     * Elenca i riscontri per il Banco, inclusi i destinatari che devono ancora confermare.
+     * Elenca per il Banco i destinatari registrati all'invio, con l'istante del primo riscontro
+     * se hanno confermato e lo stato di attesa negli altri casi.
      *
      * @param attore identità verificata del Banco di coordinamento
      * @param comunicazioneId identificativo della comunicazione inviata
      * @return una voce per account destinatario
      * @throws SecurityException se l'attore non è il Banco
-     * @throws NoSuchElementException se la comunicazione non esiste
+     * @throws NoSuchElementException se la comunicazione indicata non è in archivio
      */
     List<Riscontro> elencoRiscontri(IdentitaAutenticata attore, UUID comunicazioneId);
 

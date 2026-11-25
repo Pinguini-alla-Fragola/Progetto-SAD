@@ -1,7 +1,10 @@
 package it.unina.picus.comunicazioni.interno.applicazione;
 
+import java.util.List;
 import java.util.UUID;
 
+import it.unina.picus.comunicazioni.api.ComunicazioniApi;
+import it.unina.picus.comunicazioni.api.ComunicazioniApi.Riscontro;
 import it.unina.picus.comunicazioni.interno.dominio.ComunicazioneSalvata;
 import it.unina.picus.comunicazioni.interno.dominio.FileSalvato;
 import it.unina.picus.comunicazioni.interno.dominio.PaginaComunicazioni;
@@ -46,6 +49,18 @@ public interface ConsultazioneComunicazioni {
      * @throws RisorsaComunicazioniNonTrovataException se la comunicazione non esiste
      */
     ComunicazioneSalvata consulta(IdentitaAutenticata attore, UUID comunicazioneId);
+
+    /**
+     * Mostra al Banco il primo riscontro o l'attesa di ogni destinatario registrato all'invio.
+     *
+     * @param attore identità verificata della sessione
+     * @param comunicazioneId identificativo della comunicazione inviata
+     * @return destinatari ordinati per nome, con l'eventuale istante di conferma
+     * @throws SecurityException se l'attore non è il Banco
+     * @throws RisorsaComunicazioniNonTrovataException se la comunicazione non esiste
+     * @see ComunicazioniApi#elencoRiscontri
+     */
+    List<Riscontro> elencoRiscontri(IdentitaAutenticata attore, UUID comunicazioneId);
 
     /**
      * Scarica un allegato, con gli stessi permessi della comunicazione a cui appartiene.
