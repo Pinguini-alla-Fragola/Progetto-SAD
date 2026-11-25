@@ -98,9 +98,9 @@ public class SchedaOperatoreJpa {
         return new SchedaOperatore(sintesi(), dati);
     }
 
-    /** Proietta il primo invio. La bozza TM-OP-01 ammette i codici validi dichiarati. */
+    /** Proietta il primo invio conservando tutti i conteggi originariamente dichiarati. */
     VersioneInviata aVersioneInviata() {
-        return new VersioneInviata(sintesi(), 1, conteggi, conteggi.keySet());
+        return new VersioneInviata(sintesi(), 1, conteggi);
     }
 
     private SchedaSintesi sintesi() {

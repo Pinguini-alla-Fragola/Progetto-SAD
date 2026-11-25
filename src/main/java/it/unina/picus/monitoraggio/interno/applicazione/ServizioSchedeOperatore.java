@@ -4,6 +4,7 @@ import it.unina.picus.monitoraggio.api.ConteggiOptApi;
 import it.unina.picus.monitoraggio.api.MonitoraggioApi;
 import it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeOperatore;
 import it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeRendicontabili;
+import it.unina.picus.monitoraggio.interno.dominio.CategorieSchedeRendicontabili;
 import it.unina.picus.monitoraggio.interno.dominio.DatiSchedaNonValidiException;
 import it.unina.picus.monitoraggio.interno.dominio.RegoleAccessoScheda;
 import it.unina.picus.monitoraggio.interno.dominio.TracciatoSchedaOperatore;
@@ -39,13 +40,15 @@ public class ServizioSchedeOperatore implements MonitoraggioApi {
      *
      * @param archivio persistenza delle schede personali
      * @param archivioRendicontabile sorgente delle schede accettate per il riepilogo
+     * @param categorieSchede fonte delle categorie ammesse dal Banco per il riepilogo
      * @param conteggiOpt servizio dei conteggi trimestrali delle OPT
      * @param orologio sorgente dell'istante di invio
      */
     public ServizioSchedeOperatore(ArchivioSchedeOperatore archivio, ArchivioSchedeRendicontabili archivioRendicontabile,
-                                    ConteggiOptApi conteggiOpt, Clock orologio) {
+                                    CategorieSchedeRendicontabili categorieSchede, ConteggiOptApi conteggiOpt,
+                                    Clock orologio) {
         this.archivio = archivio;
-        this.riepilogo = new ServizioRiepilogoSchede(archivioRendicontabile);
+        this.riepilogo = new ServizioRiepilogoSchede(archivioRendicontabile, categorieSchede);
         this.conteggiOpt = conteggiOpt;
         this.orologio = orologio;
     }

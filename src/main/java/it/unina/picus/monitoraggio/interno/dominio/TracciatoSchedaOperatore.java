@@ -45,6 +45,16 @@ public final class TracciatoSchedaOperatore {
     }
 
     /**
+     * Verifica la validità sintattica di un codice di categoria del tracciato TM-OP-01.
+     *
+     * @param codice codice da verificare
+     * @return {@code true} se rispetta il formato del tracciato
+     */
+    public static boolean codiceCategoriaValido(String codice) {
+        return codice != null && CODICE_CATEGORIA.matcher(codice).matches();
+    }
+
+    /**
      * Controlla i dati minimi richiesti e i limiti di rappresentazione del tracciato.
      *
      * @param trimestre periodo dichiarato
