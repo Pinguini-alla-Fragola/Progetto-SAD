@@ -56,6 +56,7 @@ loadScripts(document, 'script');</script>
 <div class="toc-header">Contents&nbsp;<input type="text" class="filter-input" disabled placeholder="Filter contents (type .)" aria-label="Filter table of contents" autocomplete="off" spellcheck="false"><input type="reset" class="reset-filter" disabled tabindex="-1" value="Reset"></div>
 <ol class="toc-list" tabindex="-1">
 <li><a href="#" tabindex="0">Description</a></li>
+<li><a href="#nested-class-summary" tabindex="0">Nested Class Summary</a></li>
 <li><a href="#method-summary" tabindex="0">Method Summary</a></li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
@@ -65,6 +66,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#elencoRicevute(java.util.UUID,it.unina.picus.comunicazioni.interno.dominio.FiltroComunicazioni)" tabindex="0">elencoRicevute(UUID, FiltroComunicazioni)</a></li>
 <li><a href="#cerca(java.util.UUID,java.util.UUID)" tabindex="0">cerca(UUID, UUID)</a></li>
 <li><a href="#destinatari(java.util.UUID)" tabindex="0">destinatari(UUID)</a></li>
+<li><a href="#ricezioni(java.util.UUID)" tabindex="0">ricezioni(UUID)</a></li>
 <li><a href="#comunicazioneDellAllegato(java.util.UUID)" tabindex="0">comunicazioneDellAllegato(UUID)</a></li>
 <li><a href="#allegato(java.util.UUID)" tabindex="0">allegato(UUID)</a></li>
 </ol>
@@ -90,6 +92,23 @@ loadScripts(document, 'script');</script>
 </section>
 <section class="summary">
 <ul class="summary-list">
+<!-- ======== NESTED CLASS SUMMARY ======== -->
+<li>
+<section class="nested-class-summary" id="nested-class-summary">
+<h2>Nested Class Summary</h2>
+<div class="caption"><span>Nested Classes</span></div>
+<div class="summary-table three-column-summary">
+<div class="table-header col-first">Modifier and Type</div>
+<div class="table-header col-second">Interface</div>
+<div class="table-header col-last">Description</div>
+<div class="col-first even-row-color"><code>static final record&nbsp;</code></div>
+<div class="col-second even-row-color"><code><a href="ArchivioComunicazioni.RicezioneDestinatario.html" class="type-name-link" title="class in it.unina.picus.comunicazioni.interno.dominio">ArchivioComunicazioni.RicezioneDestinatario</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Stato del riscontro per un account destinatario.</div>
+</div>
+</div>
+</section>
+</li>
 <!-- ========== METHOD SUMMARY =========== -->
 <li>
 <section class="method-summary" id="method-summary">
@@ -143,6 +162,11 @@ recente, ciascuna con la conferma di quell'account.</div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#registra(it.unina.picus.comunicazioni.interno.dominio.NuovaComunicazione)" class="member-name-link">registra</a><wbr>(<a href="NuovaComunicazione.html" title="class in it.unina.picus.comunicazioni.interno.dominio">NuovaComunicazione</a>&nbsp;comunicazione)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Salva la comunicazione, i suoi destinatari e i suoi allegati, tutti insieme.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="ArchivioComunicazioni.RicezioneDestinatario.html" title="class in it.unina.picus.comunicazioni.interno.dominio">ArchivioComunicazioni.RicezioneDestinatario</a>&gt;&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#ricezioni(java.util.UUID)" class="member-name-link">ricezioni</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;comunicazioneId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Legge lo stato di ricezione di tutti i destinatari registrati all'invio.</div>
 </div>
 </div>
 </div>
@@ -248,6 +272,21 @@ recente, ciascuna con la conferma di quell'account.</div>
 <dd><code>comunicazioneId</code> - comunicazione</dd>
 <dt>Returns:</dt>
 <dd>gli account destinatari; vuoto se la comunicazione non esiste</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="ricezioni(java.util.UUID)">
+<h3>ricezioni</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="ArchivioComunicazioni.RicezioneDestinatario.html" title="class in it.unina.picus.comunicazioni.interno.dominio">ArchivioComunicazioni.RicezioneDestinatario</a>&gt;&gt;</span>&nbsp;<span class="element-name">ricezioni</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;comunicazioneId)</span></div>
+<div class="block">Legge lo stato di ricezione di tutti i destinatari registrati all'invio.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>comunicazioneId</code> - identificativo della comunicazione</dd>
+<dt>Returns:</dt>
+<dd>elenco dei destinatari, eventualmente vuoto; <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html#empty()" title="class or interface in java.util" class="external-link"><code>Optional.empty()</code></a> se la comunicazione manca</dd>
 </dl>
 </div>
 </section>

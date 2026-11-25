@@ -83,6 +83,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#verificaCredenziali(java.lang.String,java.lang.String)" tabindex="0">verificaCredenziali(String, String)</a></li>
 <li><a href="#verificaAccountSessione(java.util.UUID)" tabindex="0">verificaAccountSessione(UUID)</a></li>
 <li><a href="#cercaAccount(java.util.UUID)" tabindex="0">cercaAccount(UUID)</a></li>
+<li><a href="#nomiVisualizzati(java.util.Set)" tabindex="0">nomiVisualizzati(Set)</a></li>
 <li><a href="#elencoAccountPerRuolo(it.unina.picus.utenze.api.UtenzeApi.RuoloUtente)" tabindex="0">elencoAccountPerRuolo(UtenzeApi.RuoloUtente)</a></li>
 <li><a href="#elencoAccountAttivi(it.unina.picus.utenze.api.UtenzeApi.RuoloUtente)" tabindex="0">elencoAccountAttivi(UtenzeApi.RuoloUtente)</a></li>
 <li><a href="#cercaProfiloErogatoreAttivo(java.util.UUID)" tabindex="0">cercaProfiloErogatoreAttivo(UUID)</a></li>
@@ -104,7 +105,7 @@ loadScripts(document, 'script');</script>
 <section class="class-description" id="class-description">
 <dl class="notes">
 <dt>All Implemented Interfaces:</dt>
-<dd><code><a href="../../api/UtenzeApi.html" title="interface in it.unina.picus.utenze.api">UtenzeApi</a></code></dd>
+<dd><code><a href="../../api/NomiAccountApi.html" title="interface in it.unina.picus.utenze.api">NomiAccountApi</a>, <a href="../../api/UtenzeApi.html" title="interface in it.unina.picus.utenze.api">UtenzeApi</a></code></dd>
 </dl>
 <hr>
 <div class="horizontal-scroll">
@@ -112,7 +113,7 @@ loadScripts(document, 'script');</script>
 @Profile("skeleton")
 </span><span class="modifiers">public class </span><span class="element-name type-name-label">StubUtenzeApi</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>
-implements <a href="../../api/UtenzeApi.html" title="interface in it.unina.picus.utenze.api">UtenzeApi</a></span></div>
+implements <a href="../../api/UtenzeApi.html" title="interface in it.unina.picus.utenze.api">UtenzeApi</a>, <a href="../../api/NomiAccountApi.html" title="interface in it.unina.picus.utenze.api">NomiAccountApi</a></span></div>
 <div class="block">Stub in memoria di <a href="../../api/UtenzeApi.html" title="interface in it.unina.picus.utenze.api"><code>UtenzeApi</code></a> per il walking skeleton: l'applicazione parte e si usa da
 capo a coda (login, area per ruolo, logout) senza database. Attivo solo con il profilo
 <code>skeleton</code>; sostituisce <code>UtenzeService</code>. Non usare in produzione.</div>
@@ -224,30 +225,35 @@ capo a coda (login, area per ruolo, logout) senza database. Attivo solo con il p
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Legge in blocco i profili delle OPT attive appartenenti alla selezione.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#revoca(java.lang.String)" class="member-name-link">revoca</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;email)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#nomiVisualizzati(java.util.Set)" class="member-name-link">nomiVisualizzati</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html" title="class or interface in java.util" class="external-link">Set</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&gt;&nbsp;accountIds)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Simula la revoca di un account mentre ha una sessione aperta.</div>
+<div class="block">Legge in blocco il nome visualizzato degli account indicati, anche se revocati.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#revocaUtenzaOperatore(java.util.UUID)" class="member-name-link">revocaUtenzaOperatore</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;operatoreAccountId)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#revoca(java.lang.String)" class="member-name-link">revoca</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;email)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Revoca l'accesso di un operatore attivo o in attesa di attivazione e invalida gli inviti pendenti.</div>
+<div class="block">Simula la revoca di un account mentre ha una sessione aperta.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#revocaUtenzaOpt(java.util.UUID)" class="member-name-link">revocaUtenzaOpt</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;optAccountId)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#revocaUtenzaOperatore(java.util.UUID)" class="member-name-link">revocaUtenzaOperatore</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;operatoreAccountId)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Revoca l'accesso di un operatore attivo o in attesa di attivazione e invalida gli inviti pendenti.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#revocaUtenzaOpt(java.util.UUID)" class="member-name-link">revocaUtenzaOpt</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;optAccountId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Revoca l'accesso di una OPT attiva o in attesa di attivazione e invalida gli inviti pendenti.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="../../api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#verificaAccountSessione(java.util.UUID)" class="member-name-link">verificaAccountSessione</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;accountId)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="../../api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#verificaAccountSessione(java.util.UUID)" class="member-name-link">verificaAccountSessione</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;accountId)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Conferma l'identità associata a una sessione valida, verificando lo stato corrente dell'account.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="../../api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#verificaCredenziali(java.lang.String,java.lang.String)" class="member-name-link">verificaCredenziali</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;email,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="../../api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#verificaCredenziali(java.lang.String,java.lang.String)" class="member-name-link">verificaCredenziali</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;email,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;password)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Verifica le credenziali per l'apertura di una sessione di un account attivo.</div>
 </div>
 </div>
@@ -484,6 +490,23 @@ capo a coda (login, area per ruolo, logout) senza database. Attivo solo con il p
 <dd><code>accountId</code> - identificativo dell'account da consultare</dd>
 <dt>Returns:</dt>
 <dd>account sintetico, oppure vuoto se l'identificativo è sconosciuto</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="nomiVisualizzati(java.util.Set)">
+<h3>nomiVisualizzati</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</span>&nbsp;<span class="element-name">nomiVisualizzati</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html" title="class or interface in java.util" class="external-link">Set</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&gt;&nbsp;accountIds)</span></div>
+<div class="block">Legge in blocco il nome visualizzato degli account indicati, anche se revocati.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="../../api/NomiAccountApi.html#nomiVisualizzati(java.util.Set)">nomiVisualizzati</a></code>&nbsp;in interface&nbsp;<code><a href="../../api/NomiAccountApi.html" title="interface in it.unina.picus.utenze.api">NomiAccountApi</a></code></dd>
+<dt>Parameters:</dt>
+<dd><code>accountIds</code> - identificativi degli account da consultare</dd>
+<dt>Returns:</dt>
+<dd>nomi per identificativo, senza voci per gli account sconosciuti</dd>
 </dl>
 </div>
 </section>

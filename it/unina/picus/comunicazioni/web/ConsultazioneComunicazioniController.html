@@ -69,6 +69,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#inviate(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.lang.String,java.lang.String,java.lang.String,java.lang.String)" tabindex="0">inviate(UtenzeApi.IdentitaAutenticata, String, String, String, String)</a></li>
 <li><a href="#ricevute(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)" tabindex="0">ricevute(UtenzeApi.IdentitaAutenticata, String, String, String, String, String)</a></li>
 <li><a href="#consulta(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" tabindex="0">consulta(UtenzeApi.IdentitaAutenticata, UUID)</a></li>
+<li><a href="#riscontri(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" tabindex="0">riscontri(UtenzeApi.IdentitaAutenticata, UUID)</a></li>
 <li><a href="#scarica(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" tabindex="0">scarica(UtenzeApi.IdentitaAutenticata, UUID)</a></li>
 </ol>
 </li>
@@ -170,10 +171,16 @@ suoi allegati a chi ha il permesso di vederli.</div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Pagina delle comunicazioni ricevute, con gli stessi parametri delle inviate più lo stato di ricezione.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.springframework.http.ResponseEntity<wbr>&lt;byte[]&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#scarica(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">scarica</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;allegatoId)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../api/ComunicazioniApi.Riscontro.html" title="class in it.unina.picus.comunicazioni.api">ComunicazioniApi.Riscontro</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#riscontri(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">riscontri</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;comunicazioneId)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Restituisce al Banco lo stato di ricezione per ciascun account destinatario dell'invio.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.springframework.http.ResponseEntity<wbr>&lt;byte[]&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#scarica(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">scarica</a><wbr>(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;allegatoId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Scarica un allegato.</div>
 </div>
 </div>
@@ -256,6 +263,25 @@ facoltativo e un valore non ammesso riceve <code>400</code> sul suo campo.</div>
 </span><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ConsultazioneComunicazioniController.ComunicazioneJson.html" title="class in it.unina.picus.comunicazioni.web">ConsultazioneComunicazioniController.ComunicazioneJson</a></span>&nbsp;<span class="element-name">consulta</span><wbr><span class="parameters">(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  @PathVariable
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;comunicazioneId)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="riscontri(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)">
+<h3>riscontri</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="annotations">@GetMapping("/{comunicazioneId}/riscontri")
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../api/ComunicazioniApi.Riscontro.html" title="class in it.unina.picus.comunicazioni.api">ComunicazioniApi.Riscontro</a>&gt;</span>&nbsp;<span class="element-name">riscontri</span><wbr><span class="parameters">(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+ @PathVariable
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;comunicazioneId)</span></div>
+<div class="block">Restituisce al Banco lo stato di ricezione per ciascun account destinatario dell'invio.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>attore</code> - identità verificata della sessione</dd>
+<dd><code>comunicazioneId</code> - identificativo della comunicazione inviata</dd>
+<dt>Returns:</dt>
+<dd>elenco con l'istante della prima conferma oppure il riscontro in attesa per ogni destinatario</dd>
+</dl>
 </div>
 </section>
 </li>

@@ -60,7 +60,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-summary" tabindex="0">Method Summary</a></li>
 <li><a href="#constructor-detail" tabindex="0">Constructor Details</a>
 <ol class="toc-list">
-<li><a href="#%3Cinit%3E(it.unina.picus.comunicazioni.interno.dominio.ArchivioComunicazioni)" tabindex="0">ServizioConsultazioneComunicazioni(ArchivioComunicazioni)</a></li>
+<li><a href="#%3Cinit%3E(it.unina.picus.comunicazioni.interno.dominio.ArchivioComunicazioni,it.unina.picus.utenze.api.NomiAccountApi)" tabindex="0">ServizioConsultazioneComunicazioni(ArchivioComunicazioni, NomiAccountApi)</a></li>
 </ol>
 </li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
@@ -68,6 +68,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#inviate(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.comunicazioni.interno.applicazione.RichiestaElenco)" tabindex="0">inviate(UtenzeApi.IdentitaAutenticata, RichiestaElenco)</a></li>
 <li><a href="#ricevute(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.comunicazioni.interno.applicazione.RichiestaElenco)" tabindex="0">ricevute(UtenzeApi.IdentitaAutenticata, RichiestaElenco)</a></li>
 <li><a href="#consulta(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" tabindex="0">consulta(UtenzeApi.IdentitaAutenticata, UUID)</a></li>
+<li><a href="#elencoRiscontri(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" tabindex="0">elencoRiscontri(UtenzeApi.IdentitaAutenticata, UUID)</a></li>
 <li><a href="#scarica(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" tabindex="0">scarica(UtenzeApi.IdentitaAutenticata, UUID)</a></li>
 </ol>
 </li>
@@ -107,7 +108,8 @@ chi non è autorizzato riceve sempre lo stesso diniego, così non scopre se una 
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(it.unina.picus.comunicazioni.interno.dominio.ArchivioComunicazioni)" class="member-name-link">ServizioConsultazioneComunicazioni</a><wbr>(<a href="../dominio/ArchivioComunicazioni.html" title="interface in it.unina.picus.comunicazioni.interno.dominio">ArchivioComunicazioni</a>&nbsp;archivio)</code></div>
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(it.unina.picus.comunicazioni.interno.dominio.ArchivioComunicazioni,it.unina.picus.utenze.api.NomiAccountApi)" class="member-name-link">ServizioConsultazioneComunicazioni</a><wbr>(<a href="../dominio/ArchivioComunicazioni.html" title="interface in it.unina.picus.comunicazioni.interno.dominio">ArchivioComunicazioni</a>&nbsp;archivio,
+ <a href="../../../utenze/api/NomiAccountApi.html" title="interface in it.unina.picus.utenze.api">NomiAccountApi</a>&nbsp;nomiAccount)</code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 </div>
 </section>
@@ -129,23 +131,29 @@ chi non è autorizzato riceve sempre lo stesso diniego, così non scopre se una 
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Apre una comunicazione.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../dominio/PaginaComunicazioni.html" title="class in it.unina.picus.comunicazioni.interno.dominio">PaginaComunicazioni</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#inviate(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.comunicazioni.interno.applicazione.RichiestaElenco)" class="member-name-link">inviate</a><wbr>(<a href="../../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
- <a href="RichiestaElenco.html" title="class in it.unina.picus.comunicazioni.interno.applicazione">RichiestaElenco</a>&nbsp;richiesta)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../../api/ComunicazioniApi.Riscontro.html" title="class in it.unina.picus.comunicazioni.api">ComunicazioniApi.Riscontro</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#elencoRiscontri(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">elencoRiscontri</a><wbr>(<a href="../../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;comunicazioneId)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Restituisce una pagina delle comunicazioni inviate, con ricerca e filtri su tutto lo storico.</div>
+<div class="block">Mostra al Banco il primo riscontro o l'attesa di ogni destinatario registrato all'invio.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../dominio/PaginaComunicazioni.html" title="class in it.unina.picus.comunicazioni.interno.dominio">PaginaComunicazioni</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#ricevute(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.comunicazioni.interno.applicazione.RichiestaElenco)" class="member-name-link">ricevute</a><wbr>(<a href="../../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#inviate(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.comunicazioni.interno.applicazione.RichiestaElenco)" class="member-name-link">inviate</a><wbr>(<a href="../../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  <a href="RichiestaElenco.html" title="class in it.unina.picus.comunicazioni.interno.applicazione">RichiestaElenco</a>&nbsp;richiesta)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Restituisce una pagina delle comunicazioni inviate, con ricerca e filtri su tutto lo storico.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../dominio/PaginaComunicazioni.html" title="class in it.unina.picus.comunicazioni.interno.dominio">PaginaComunicazioni</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#ricevute(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.comunicazioni.interno.applicazione.RichiestaElenco)" class="member-name-link">ricevute</a><wbr>(<a href="../../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+ <a href="RichiestaElenco.html" title="class in it.unina.picus.comunicazioni.interno.applicazione">RichiestaElenco</a>&nbsp;richiesta)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Restituisce una pagina delle comunicazioni ricevute dall'account della sessione, con ricerca e filtri su
 tutto lo storico.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../dominio/FileSalvato.html" title="class in it.unina.picus.comunicazioni.interno.dominio">FileSalvato</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#scarica(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">scarica</a><wbr>(<a href="../../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../dominio/FileSalvato.html" title="class in it.unina.picus.comunicazioni.interno.dominio">FileSalvato</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#scarica(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" class="member-name-link">scarica</a><wbr>(<a href="../../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;allegatoId)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Scarica un allegato, con gli stessi permessi della comunicazione a cui appartiene.</div>
 </div>
 </div>
@@ -166,10 +174,11 @@ tutto lo storico.</div>
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(it.unina.picus.comunicazioni.interno.dominio.ArchivioComunicazioni)">
+<section class="detail" id="&lt;init&gt;(it.unina.picus.comunicazioni.interno.dominio.ArchivioComunicazioni,it.unina.picus.utenze.api.NomiAccountApi)">
 <h3>ServizioConsultazioneComunicazioni</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="element-name">ServizioConsultazioneComunicazioni</span><wbr><span class="parameters">(<a href="../dominio/ArchivioComunicazioni.html" title="interface in it.unina.picus.comunicazioni.interno.dominio">ArchivioComunicazioni</a>&nbsp;archivio)</span></div>
+<div class="member-signature"><span class="element-name">ServizioConsultazioneComunicazioni</span><wbr><span class="parameters">(<a href="../dominio/ArchivioComunicazioni.html" title="interface in it.unina.picus.comunicazioni.interno.dominio">ArchivioComunicazioni</a>&nbsp;archivio,
+ <a href="../../../utenze/api/NomiAccountApi.html" title="interface in it.unina.picus.utenze.api">NomiAccountApi</a>&nbsp;nomiAccount)</span></div>
 </div>
 </section>
 </li>
@@ -238,6 +247,31 @@ tutto lo storico.</div>
 <dd><code>comunicazioneId</code> - comunicazione da aprire</dd>
 <dt>Returns:</dt>
 <dd>la comunicazione</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="elencoRiscontri(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)">
+<h3>elencoRiscontri</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../../api/ComunicazioniApi.Riscontro.html" title="class in it.unina.picus.comunicazioni.api">ComunicazioniApi.Riscontro</a>&gt;</span>&nbsp;<span class="element-name">elencoRiscontri</span><wbr><span class="parameters">(<a href="../../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;comunicazioneId)</span></div>
+<div class="block">Mostra al Banco il primo riscontro o l'attesa di ogni destinatario registrato all'invio.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="ConsultazioneComunicazioni.html#elencoRiscontri(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)">elencoRiscontri</a></code>&nbsp;in interface&nbsp;<code><a href="ConsultazioneComunicazioni.html" title="interface in it.unina.picus.comunicazioni.interno.applicazione">ConsultazioneComunicazioni</a></code></dd>
+<dt>Parameters:</dt>
+<dd><code>attore</code> - identità verificata della sessione</dd>
+<dd><code>comunicazioneId</code> - identificativo della comunicazione inviata</dd>
+<dt>Returns:</dt>
+<dd>destinatari ordinati per nome, con l'eventuale istante di conferma</dd>
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list-long">
+<li><a href="../../api/ComunicazioniApi.html#elencoRiscontri(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)"><code>ComunicazioniApi.elencoRiscontri(UtenzeApi.IdentitaAutenticata, UUID)</code></a></li>
+</ul>
+</dd>
 </dl>
 </div>
 </section>
