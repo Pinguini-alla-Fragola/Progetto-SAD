@@ -1,7 +1,8 @@
 import { esci, api } from './area-client.js';
 import { setupWorkspace } from './workspace.js';
 import { renderList } from './list-view.js';
-import { caricaRichieste, caricaAvvisi, caricaCatalogo } from './richieste-area.js';
+import { caricaRichieste, caricaAvvisi } from './richieste-area.js';
+import { initCatalogoBanco } from './catalogo-banco.js';
 import { segnalaFunzioniInattive } from './funzioni-inattive.js';
 import { initConteggiOpt } from './conteggi-opt.js';
 
@@ -188,7 +189,7 @@ if (formNuovaOpt) {
 }
 
 const lavori = [initConteggiOpt(area)];
-if (area === 'banco') lavori.push(caricaRichieste(area));
+if (area === 'banco') lavori.push(caricaRichieste(area), initCatalogoBanco());
 else {
     lavori.push(caricaAvvisi());
     if (area === 'opt') lavori.push(caricaRichieste(area));

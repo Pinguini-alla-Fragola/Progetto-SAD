@@ -10,7 +10,6 @@
     <script src="/js/operatori.js" type="module"></script>
     <link rel="stylesheet" href="/css/integrazione-ui.css">
     <script src="/js/comunicazioni.js" type="module"></script>
-    <script src="/js/catalogo-banco.js" type="module"></script>
 </head>
 <body data-area="banco" th:attr="data-utente=${utente.id}">
 <a th:replace="~{fragments/layout :: skip}" href="#contenuto">Vai al contenuto</a>
@@ -152,7 +151,7 @@
                     <div class="picus-list" id="catalogo-lista" aria-live="polite"></div>
                 </div>
                 <div role="tabpanel" id="catalogo-view-nuova" aria-labelledby="catalogo-tab-nuova" tabindex="0" hidden>
-                    <h2 class="sr-only">Aggiungi una misura</h2><form id="nuova-misura" class="picus-form form-layout" method="post" novalidate><fieldset class="campi-form">
+                    <h2 class="sr-only">Aggiungi una misura</h2><form id="nuova-misura" class="picus-form form-layout" novalidate><fieldset class="campi-form">
                     <fieldset class="form-section"><legend>Misura</legend><div class="form-section-content"><div class="picus-fields fields-two">
                         <label class="campo ">Codice misura<input class="form-control" name="codice" type="text" required ></label>
                         <label class="campo ">Titolo<input class="form-control" name="titolo" type="text" required ></label>

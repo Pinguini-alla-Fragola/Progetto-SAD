@@ -1,5 +1,6 @@
 import { api, ErroreHttp } from './area-client.js';
 import { renderList, listRow } from './list-view.js';
+import { aggiornaScelteMisureOperatore } from './operatori.js';
 
 const MAPPA_CAMPI_NUOVA = {
     codice: 'codice',
@@ -23,7 +24,7 @@ function messaggioErrore(causa, predefinito) {
 }
 
 function pulisciErroriForm(form) {
-    for (const err of form.querySelectorAll('.picus-errore')) err.remove();
+    for (const err of form.querySelectorAll('.picus-errore:not(.picus-esito)')) err.remove();
     for (const inv of form.querySelectorAll('[aria-invalid]')) inv.removeAttribute('aria-invalid');
 }
 
@@ -72,23 +73,9 @@ function creaCheckbox(etichetta, nome, checked) {
     return { label, input };
 }
 
-function aggiornaScelteOperatore(misure) {
-    const scelte = document.querySelector('#nuovo-operatore [data-misure] .picus-choices');
-    if (!scelte) return;
-    const selezionate = new Set(
-        Array.from(scelte.querySelectorAll('input[name="misure"]:checked'), input => input.value)
-    );
-    scelte.replaceChildren();
-    for (const misura of misure.filter(m => m.attiva)) {
-        const etichetta = el('label', null, 'picus-check');
-        const input = document.createElement('input');
-        input.type = 'checkbox';
-        input.name = 'misure';
-        input.value = String(misura.id);
-        input.checked = selezionate.has(input.value);
-        etichetta.append(input, ` ${misura.dati.codice} · ${misura.dati.nome}`);
-        scelte.append(etichetta);
-    }
+function confermaDisattivazione(codice) {
+    const messaggio = `Disattivare la misura ${codice}? Non sarà più selezionabile per nuove richieste o nuovi operatori.`;
+    return typeof globalThis.confirm === 'function' ? globalThis.confirm(messaggio) : true;
 }
 
 export function initCatalogoBanco() {
@@ -97,14 +84,54 @@ export function initCatalogoBanco() {
     const btnAggiorna = document.getElementById('catalogo-aggiorna');
     const formNuova = document.getElementById('nuova-misura');
     if (!lista || !esitoLista || !formNuova) return;
-    if (lista.dataset?.catalogoBancoAttivo === 'true') return;
-    if (lista.dataset) lista.dataset.catalogoBancoAttivo = 'true';
 
     const esitoNuova = document.getElementById('nuova-misura-esito') || formNuova.querySelector('.picus-esito');
     let misureCorrenti = [];
     let progressivoLista = 0;
     let modificaApertaId = null;
     const bozzeModifica = new Map();
+
+    const isFocusabile = nodo => Boolean(nodo && !nodo.hidden && !nodo.disabled && !nodo.closest?.('[hidden]'));
+
+    const catturaTargetFocus = () => {
+        const attivo = document.activeElement;
+        if (!attivo || !lista.contains(attivo)) return null;
+        if (attivo.id === 'catalogo-lista-search') return { search: true };
+        const riga = attivo.closest?.('[data-misura-id]');
+        if (!riga) return null;
+        const misuraId = Number(riga.dataset.misuraId);
+        if (attivo.dataset?.azione) return { misuraId, azione: attivo.dataset.azione };
+        if (attivo.name) return { misuraId, campo: attivo.name };
+        return { misuraId, azione: 'modifica' };
+    };
+
+    const ripristinaTargetFocus = target => {
+        if (!target) return;
+        let destinazione = null;
+        if (target.search) {
+            destinazione = document.getElementById('catalogo-lista-search');
+        } else if (target.misuraId != null) {
+            const righe = lista.querySelectorAll('[data-misura-id]');
+            const riga = Array.from(righe).find(r => String(r.dataset?.misuraId) === String(target.misuraId));
+            if (riga && !riga.hidden && !riga.closest?.('[hidden]')) {
+                if (target.campo) {
+                    destinazione = riga.querySelector(`[name="${target.campo}"]`);
+                } else if (target.azione) {
+                    destinazione = riga.querySelector(`[data-azione="${target.azione}"]`);
+                }
+            }
+        }
+        if (!isFocusabile(destinazione)) {
+            const ricerca = document.getElementById('catalogo-lista-search');
+            destinazione = isFocusabile(ricerca) ? ricerca : btnAggiorna;
+        }
+        if (isFocusabile(destinazione)) destinazione.focus({ preventScroll: true });
+    };
+
+    const focusInternoOPage = () => {
+        const attivo = document.activeElement;
+        return !attivo || attivo === document.body || lista.contains(attivo);
+    };
 
     const mostraEsitoLista = (testo, { errore = false, mostraLogin = false, azioneRiprova = null } = {}) => {
         esitoLista.classList.toggle('picus-errore', errore);
@@ -158,6 +185,7 @@ export function initCatalogoBanco() {
         const azioni = el('div', null, 'picus-actions');
         const btnModifica = el('button', modificaApertaId === misura.id ? 'Chiudi modifica' : 'Modifica', 'btn btn-secondary btn-sm');
         btnModifica.type = 'button';
+        btnModifica.dataset.azione = 'modifica';
         btnModifica.setAttribute('aria-expanded', String(modificaApertaId === misura.id));
 
         const editor = el('form', null, 'catalog-editor picus-form');
@@ -182,8 +210,10 @@ export function initCatalogoBanco() {
         const editorAzioni = el('div', null, 'picus-actions');
         const btnSalva = el('button', 'Salva modifiche', 'btn btn-primary btn-sm');
         btnSalva.type = 'submit';
+        btnSalva.dataset.azione = 'salva';
         const btnAnnulla = el('button', 'Annulla', 'btn btn-secondary btn-sm');
         btnAnnulla.type = 'button';
+        btnAnnulla.dataset.azione = 'annulla';
         const esitoEditor = el('p', '', 'picus-esito');
         esitoEditor.setAttribute('role', 'status');
         editorAzioni.append(btnSalva, btnAnnulla, esitoEditor);
@@ -196,25 +226,19 @@ export function initCatalogoBanco() {
             const apri = editor.hidden;
             modificaApertaId = apri ? misura.id : null;
             if (!apri) bozzeModifica.delete(misura.id);
-            renderMisure();
+            renderMisure(apri ? { misuraId: misura.id, campo: 'codice' } : { misuraId: misura.id, azione: 'modifica' });
         });
 
         btnAnnulla.addEventListener('click', () => {
             modificaApertaId = null;
             bozzeModifica.delete(misura.id);
-            renderMisure();
+            renderMisure({ misuraId: misura.id, azione: 'modifica' });
         });
 
         let salvataggioInCorso = false;
         editor.addEventListener('submit', async event => {
             event.preventDefault();
             if (salvataggioInCorso) return;
-            salvataggioInCorso = true;
-            btnSalva.disabled = true;
-            btnAnnulla.disabled = true;
-            pulisciErroriForm(editor);
-            esitoEditor.classList.remove('picus-errore');
-            esitoEditor.textContent = 'Salvataggio in corso…';
 
             const payload = {
                 codice: editor.elements.codice.value,
@@ -223,6 +247,16 @@ export function initCatalogoBanco() {
                 erogabileADistanza: Boolean(editor.elements.erogabileADistanza.checked),
                 attiva: Boolean(editor.elements.attiva.checked)
             };
+            if (misura.attiva && !payload.attiva && !confermaDisattivazione(misura.dati.codice)) {
+                return;
+            }
+
+            salvataggioInCorso = true;
+            btnSalva.disabled = true;
+            btnAnnulla.disabled = true;
+            pulisciErroriForm(editor);
+            esitoEditor.classList.remove('picus-errore');
+            esitoEditor.textContent = 'Salvataggio in corso…';
 
             try {
                 const aggiornata = await api(`/api/catalogo/misure/${encodeURIComponent(misura.id)}`, {
@@ -231,7 +265,7 @@ export function initCatalogoBanco() {
                 });
                 bozzeModifica.delete(misura.id);
                 modificaApertaId = null;
-                applicaAggiornamentoLocale(aggiornata);
+                applicaAggiornamentoLocale(aggiornata, focusInternoOPage() ? { misuraId: aggiornata.id, azione: 'modifica' } : null);
                 await aggiornaDopoSalvataggio(`Misura ${aggiornata.dati.codice} aggiornata (ID ${aggiornata.id}).`);
             } catch (causa) {
                 salvaBozza(misura.id, editor);
@@ -249,9 +283,11 @@ export function initCatalogoBanco() {
         if (misura.attiva) {
             const btnDisattiva = el('button', 'Disattiva', 'btn btn-danger btn-sm');
             btnDisattiva.type = 'button';
+            btnDisattiva.dataset.azione = 'disattiva';
             let disattivazioneInCorso = false;
             btnDisattiva.addEventListener('click', async () => {
                 if (disattivazioneInCorso) return;
+                if (!confermaDisattivazione(misura.dati.codice)) return;
                 disattivazioneInCorso = true;
                 btnDisattiva.disabled = true;
                 btnModifica.disabled = true;
@@ -264,7 +300,7 @@ export function initCatalogoBanco() {
                         bozzeModifica.delete(misura.id);
                         modificaApertaId = null;
                     }
-                    applicaAggiornamentoLocale(disattivata);
+                    applicaAggiornamentoLocale(disattivata, focusInternoOPage() ? { misuraId: disattivata.id, azione: 'modifica' } : null);
                     await aggiornaDopoSalvataggio(`Misura ${disattivata.dati.codice} disattivata per le nuove selezioni.`);
                 } catch (causa) {
                     mostraEsitoLista(messaggioErrore(causa, 'Impossibile disattivare la misura. Riprova.'), {
@@ -291,7 +327,7 @@ export function initCatalogoBanco() {
         });
     };
 
-    const renderMisure = () => {
+    const renderMisure = (targetFocus = catturaTargetFocus()) => {
         const ordinate = [...misureCorrenti].sort((a, b) =>
             String(a.dati.codice).localeCompare(String(b.dati.codice), 'it', { sensitivity: 'base' })
             || a.id - b.id
@@ -302,13 +338,14 @@ export function initCatalogoBanco() {
             filters: [{ key: 'stato', label: 'Stato' }],
             empty: 'Nessuna misura presente in catalogo.'
         });
+        ripristinaTargetFocus(targetFocus);
     };
 
-    const applicaAggiornamentoLocale = misura => {
+    const applicaAggiornamentoLocale = (misura, targetFocus = undefined) => {
         const idx = misureCorrenti.findIndex(m => m.id === misura.id);
         if (idx >= 0) misureCorrenti[idx] = misura;
         else misureCorrenti.push(misura);
-        renderMisure();
+        renderMisure(targetFocus);
     };
 
     const caricaMisure = async ({ messaggioSuccesso = '' } = {}) => {
@@ -343,7 +380,7 @@ export function initCatalogoBanco() {
     };
 
     const aggiornaDopoSalvataggio = async messaggioSalvataggio => {
-        aggiornaScelteOperatore(misureCorrenti);
+        aggiornaScelteMisureOperatore(misureCorrenti);
         const ok = await caricaMisure({ messaggioSuccesso: messaggioSalvataggio });
         if (!ok) {
             mostraEsitoLista(
@@ -354,7 +391,7 @@ export function initCatalogoBanco() {
                 }
             );
         } else {
-            aggiornaScelteOperatore(misureCorrenti);
+            aggiornaScelteMisureOperatore(misureCorrenti);
         }
     };
 
@@ -403,8 +440,4 @@ export function initCatalogoBanco() {
     });
 
     return caricaMisure();
-}
-
-if (typeof document !== 'undefined' && document.getElementById('catalogo-lista')) {
-    initCatalogoBanco();
 }
