@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
@@ -32,7 +31,6 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.web.context.WebApplicationContext;
 
 import it.unina.picus.shared.BlackBoxPostgresTest;
-import it.unina.picus.shared.Capacita;
 import it.unina.picus.shared.ClientHttp;
 import it.unina.picus.shared.ClientHttp.Csrf;
 import it.unina.picus.shared.ScenarioAccessi.Account;
@@ -80,10 +78,8 @@ class RiepilogoSchedeBlackBoxTest extends BlackBoxPostgresTest {
 
     private ClientHttp http;
 
-    /** La sospensione precede la preparazione dei dati di ogni caso. */
     @BeforeEach
     void preparaClient() {
-        assumeTrue(Capacita.MONITORAGGIO.consegnata(), "capacità MONITORAGGIO non ancora consegnata: caso sospeso");
         http = new ClientHttp(web);
     }
 
