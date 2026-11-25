@@ -2,6 +2,7 @@ package it.unina.picus.richieste.interno.applicazione;
 
 import it.unina.picus.catalogo.api.CatalogoApi.Misura;
 import it.unina.picus.catalogo.api.ConsultazioneCatalogoApi;
+import it.unina.picus.catalogo.api.SelezioneMisureApi;
 import it.unina.picus.richieste.api.DatiRichiestaNonValidiException;
 import it.unina.picus.richieste.api.InvioRichiesteApi;
 import it.unina.picus.richieste.api.RichiesteApi.DatiInvio;
@@ -9,7 +10,6 @@ import it.unina.picus.richieste.api.RichiesteApi.RichiestaDettaglio;
 import it.unina.picus.richieste.api.RichiesteApi.RichiestaSintesi;
 import it.unina.picus.richieste.interno.dominio.RichiestaDiMisura;
 import it.unina.picus.richieste.interno.dominio.RichiestaRepository;
-import it.unina.picus.richieste.interno.dominio.RichiestaRepository.MisuraNonSelezionabileException;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
 import org.springframework.stereotype.Service;
@@ -34,17 +34,41 @@ public class ServizioInvioRichieste implements InvioRichiesteApi {
 
     private final RichiestaRepository repository;
     private final ConsultazioneCatalogoApi catalogo;
+    private final SelezioneMisureApi selezioneMisure;
     private final Clock clock;
 
-    public ServizioInvioRichieste(RichiestaRepository repository, ConsultazioneCatalogoApi catalogo, Clock clock) {
+    /**
+     * Crea il caso d'uso di invio e consultazione delle richieste.
+     *
+     * @param repository persistenza delle richieste
+     * @param catalogo consultazione storica e attiva di misure e comuni
+     * @param selezioneMisure verifica transazionale sotto lock condiviso della misura selezionata
+     * @param clock sorgente dell'istante di invio
+     */
+    public ServizioInvioRichieste(
+            RichiestaRepository repository,
+            ConsultazioneCatalogoApi catalogo,
+            SelezioneMisureApi selezioneMisure,
+            Clock clock) {
         this.repository = repository;
         this.catalogo = catalogo;
+        this.selezioneMisure = selezioneMisure;
         this.clock = clock;
     }
 
     /**
-     * Convalida i riferimenti del nuovo invio e registra la richiesta nella stessa transazione.
-     * Un ritento di un invio già registrato può ancora leggere la misura dallo storico.
+     * Convalida i riferimenti del nuovo invio, acquisisce un lock condiviso sulla misura fino al
+     * termine della transazione tramite {@link SelezioneMisureApi#bloccaMisuraAttiva(long)} e
+     * registra la richiesta. Un ritento con la stessa chiave di idempotenza restituisce l'invio
+     * originario anche se la misura è stata successivamente disattivata.
+     *
+     * @param attore identità verificata della OPT richiedente
+     * @param dati dati della richiesta da registrare
+     * @param riferimentoInvio chiave opzionale di idempotenza
+     * @return sintesi della richiesta registrata o recuperata
+     * @throws it.unina.picus.shared.AccessoNegatoException se l'attore non è una OPT autorizzata
+     * @throws DatiRichiestaNonValidiException se i dati non sono validi o la misura non è attiva
+     * @throws ConflittoRichiestaException se la chiave di idempotenza è già associata a dati diversi
      */
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
@@ -74,12 +98,18 @@ public class ServizioInvioRichieste implements InvioRichiesteApi {
             throw new DatiRichiestaNonValidiException(errori);
         }
 
-        var nuova = RichiestaDiMisura.inviata(attore.accountId(), normalizzati, clock.instant(), riferimentoInvio);
-        try {
-            return confermaInvio(repository.registra(nuova), normalizzati);
-        } catch (MisuraNonSelezionabileException e) {
+        if (!selezioneMisure.bloccaMisuraAttiva(normalizzati.misuraId())) {
+            if (riferimentoInvio != null) {
+                var concorrente = repository.cercaPerInvio(attore.accountId(), riferimentoInvio);
+                if (concorrente.isPresent()) {
+                    return confermaInvio(concorrente.get(), normalizzati);
+                }
+            }
             throw new DatiRichiestaNonValidiException(Map.of("misuraId", ERRORE_MISURA));
         }
+
+        var nuova = RichiestaDiMisura.inviata(attore.accountId(), normalizzati, clock.instant(), riferimentoInvio);
+        return confermaInvio(repository.registra(nuova), normalizzati);
     }
 
     private RichiestaSintesi confermaInvio(RichiestaDiMisura richiesta, DatiInvio dati) {

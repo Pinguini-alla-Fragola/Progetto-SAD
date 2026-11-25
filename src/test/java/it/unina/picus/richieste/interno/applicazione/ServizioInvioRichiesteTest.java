@@ -32,6 +32,7 @@ import it.unina.picus.catalogo.api.CatalogoApi.Comune;
 import it.unina.picus.catalogo.api.CatalogoApi.DatiMisura;
 import it.unina.picus.catalogo.api.CatalogoApi.Misura;
 import it.unina.picus.catalogo.api.ConsultazioneCatalogoApi;
+import it.unina.picus.catalogo.api.SelezioneMisureApi;
 import it.unina.picus.richieste.api.ConflittoRichiestaException;
 import it.unina.picus.richieste.api.DatiRichiestaNonValidiException;
 import it.unina.picus.richieste.api.RichiesteApi.AccordoInPresenza;
@@ -61,6 +62,8 @@ class ServizioInvioRichiesteTest {
     private RichiestaRepository repository;
     @Mock
     private ConsultazioneCatalogoApi catalogo;
+    @Mock
+    private SelezioneMisureApi selezioneMisure;
 
     private final IdentitaAutenticata opt = new IdentitaAutenticata(UUID.randomUUID(), RuoloUtente.OPT);
     private final IdentitaAutenticata banco = new IdentitaAutenticata(UUID.randomUUID(), RuoloUtente.BANCO);
@@ -68,7 +71,7 @@ class ServizioInvioRichiesteTest {
 
     @BeforeEach
     void crea() {
-        servizio = new ServizioInvioRichieste(repository, catalogo, Clock.fixed(ORA, ZoneOffset.UTC));
+        servizio = new ServizioInvioRichieste(repository, catalogo, selezioneMisure, Clock.fixed(ORA, ZoneOffset.UTC));
     }
 
     @Nested
@@ -214,10 +217,30 @@ class ServizioInvioRichiesteTest {
             verify(repository, never()).registra(any());
         }
 
+        @Test
+        @DisplayName("Una misura disattivata al momento del lock rifiuta il nuovo invio e restituisce il ritento già salvato")
+        void misuraDisattivataAlLock() {
+            UUID riferimento = UUID.randomUUID();
+            var dati = new DatiInvio(MISURA, TipoDestinatario.PERSONA, "napoli", null);
+            var esistente = RichiestaDiMisura.inviata(opt.accountId(), dati, ORA.minusSeconds(10), riferimento);
+            when(repository.cercaPerInvio(opt.accountId(), null)).thenReturn(Optional.empty());
+            when(repository.cercaPerInvio(opt.accountId(), riferimento)).thenReturn(Optional.empty(), Optional.of(esistente));
+            when(catalogo.cercaMisura(MISURA)).thenReturn(Optional.of(misura(true)));
+            when(catalogo.cercaComune("napoli")).thenReturn(Optional.of(new Comune("napoli", "Napoli")));
+            when(selezioneMisure.bloccaMisuraAttiva(MISURA)).thenReturn(false);
+
+            assertThatThrownBy(() -> servizio.invia(opt, dati, null))
+                    .isInstanceOfSatisfying(DatiRichiestaNonValidiException.class,
+                            ex -> assertThat(ex.campi()).containsOnlyKeys("misuraId"));
+            assertThat(servizio.invia(opt, dati, riferimento).id()).isEqualTo(esistente.id());
+            verify(repository, never()).registra(any());
+        }
+
         private void catalogoValido() {
             when(repository.cercaPerInvio(opt.accountId(), null)).thenReturn(Optional.empty());
             when(catalogo.cercaMisura(MISURA)).thenReturn(Optional.of(misura(true)));
             when(catalogo.cercaComune("napoli")).thenReturn(Optional.of(new Comune("napoli", "Napoli")));
+            when(selezioneMisure.bloccaMisuraAttiva(MISURA)).thenReturn(true);
         }
     }
 

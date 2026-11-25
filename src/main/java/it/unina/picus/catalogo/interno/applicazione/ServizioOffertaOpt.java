@@ -1,5 +1,6 @@
 package it.unina.picus.catalogo.interno.applicazione;
 
+import it.unina.picus.catalogo.api.CatalogoApi.Misura;
 import it.unina.picus.catalogo.api.CatalogoApi.OffertaOpt;
 import it.unina.picus.catalogo.api.GestioneOffertaOptApi;
 import it.unina.picus.catalogo.interno.persistenza.OffertaTerritorialeJpa;
@@ -49,16 +50,14 @@ public class ServizioOffertaOpt implements GestioneOffertaOptApi {
     /**
      * {@inheritDoc}
      *
-     * <p>Mantiene il lock della misura durante la scrittura seguendo l'ordine dei lock
-     * della verifica di compatibilità usata dal Banco.
+     * <p>Mantiene il lock condiviso ({@code PESSIMISTIC_READ}) della misura fino al termine della
+     * transazione e blocca poi il profilo OPT, seguendo l'ordine della ricerca erogatori.</p>
      */
     @Override
     @Transactional
     public void registraOffertaOpt(IdentitaAutenticata attore, long misuraId, boolean tramiteProfessionista) {
         UUID optId = verificaOpt(attore);
-        if (!offerta.bloccaMisuraAttiva(misuraId)) {
-            throw new MisuraNonOffribileException();
-        }
+        offerta.bloccaMisura(misuraId).filter(Misura::attiva).orElseThrow(MisuraNonOffribileException::new);
         bloccaProfiloOpt(optId, misuraId);
         offerta.registraOffertaOpt(optId, misuraId, tramiteProfessionista);
     }

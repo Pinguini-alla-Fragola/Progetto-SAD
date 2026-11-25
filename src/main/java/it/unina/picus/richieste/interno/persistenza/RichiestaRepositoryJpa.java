@@ -1,6 +1,5 @@
 package it.unina.picus.richieste.interno.persistenza;
 
-import it.unina.picus.catalogo.api.SelezioneMisureApi;
 import it.unina.picus.richieste.api.RichiesteApi.StatoRichiesta;
 import it.unina.picus.richieste.interno.dominio.RichiestaDiMisura;
 import it.unina.picus.richieste.interno.dominio.RichiestaRepository;
@@ -19,26 +18,13 @@ import java.util.HashMap;
 @Repository
 public class RichiestaRepositoryJpa implements RichiestaRepository {
     private final EntityManager entityManager;
-    private final SelezioneMisureApi selezioneMisure;
 
-    /**
-     * Collega la persistenza delle richieste al controllo transazionale del catalogo.
-     *
-     * @param entityManager gestore delle entità delle richieste
-     * @param selezioneMisure controllo della misura fino al termine dell'invio
-     */
-    public RichiestaRepositoryJpa(EntityManager entityManager, SelezioneMisureApi selezioneMisure) {
+    public RichiestaRepositoryJpa(EntityManager entityManager) {
         this.entityManager = entityManager;
-        this.selezioneMisure = selezioneMisure;
     }
 
-    /** {@inheritDoc} */
     @Override
     public RichiestaDiMisura registra(RichiestaDiMisura richiesta) {
-        if (!selezioneMisure.bloccaMisuraAttiva(richiesta.misuraId())) {
-            return cercaPerInvio(richiesta.titolareId(), richiesta.riferimentoInvio())
-                    .orElseThrow(MisuraNonSelezionabileException::new);
-        }
         int inserite = entityManager.createNativeQuery("""
                 insert into richieste
                     (id, titolare_id, misura_id, tipo_destinatario, comune_codice,
