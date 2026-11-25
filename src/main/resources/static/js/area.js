@@ -188,7 +188,7 @@ if (formNuovaOpt) {
 }
 
 const lavori = [initConteggiOpt(area)];
-if (area === 'banco') lavori.push(caricaRichieste(area), caricaCatalogo());
+if (area === 'banco') lavori.push(caricaRichieste(area));
 else {
     lavori.push(caricaAvvisi());
     if (area === 'opt') lavori.push(caricaRichieste(area));
