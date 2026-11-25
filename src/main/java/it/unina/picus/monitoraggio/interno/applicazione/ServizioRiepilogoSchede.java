@@ -50,11 +50,12 @@ public final class ServizioRiepilogoSchede {
 
     /**
      * Usa l'ultima versione accettata per operatore e somma i conteggi dichiarati per le sole
-     * categorie ammesse dalla fonte configurata dal Banco per il trimestre (o per formato valido
-     * finché nessuna configurazione TM-OP-01 è stata registrata). Le categorie sovrapponibili
-     * restano distinte e una correzione sostituisce l'intero invio precedente. Uno zero dichiarato
-     * su una categoria ammessa compare fra i totali, mentre una categoria mai dichiarata o non
-     * ammessa è assente. Le schede ricevute nel periodo restano comunque incluse nell'elenco.
+     * categorie ammesse dalla configurazione globale corrente del Banco (o per formato valido
+     * finché nessuna configurazione TM-OP-01 è stata registrata). La configurazione corrente si
+     * applica anche ai totali dei trimestri passati e lascia intatte le schede inviate. Le categorie
+     * sovrapponibili restano distinte e una correzione sostituisce l'intero invio precedente. Uno
+     * zero dichiarato su una categoria ammessa compare fra i totali, mentre una categoria mai
+     * dichiarata o non ammessa è assente. Le schede ricevute nel periodo restano nell'elenco.
      *
      * @param attore identità verificata del Banco
      * @param trimestre singolo periodo da riepilogare
@@ -69,7 +70,7 @@ public final class ServizioRiepilogoSchede {
         RegoleAccessoScheda.verificaRiepilogo(attore);
         Objects.requireNonNull(trimestre, "trimestre");
 
-        Optional<Set<String>> configurate = categorie.codiciAmmessi(trimestre);
+        Optional<Set<String>> configurate = categorie.codiciAmmessi();
         Predicate<String> ammessa = configurate
                 .<Predicate<String>>map(ammesse ->
                         codice -> ammesse.contains(codice) && TracciatoSchedaOperatore.codiceCategoriaValido(codice))

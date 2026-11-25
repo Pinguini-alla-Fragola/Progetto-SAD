@@ -1,6 +1,5 @@
 package it.unina.picus.monitoraggio.interno.persistenza;
 
-import it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre;
 import it.unina.picus.monitoraggio.interno.dominio.CategorieSchedeRendicontabili;
 import it.unina.picus.monitoraggio.interno.dominio.TracciatoSchedaOperatore;
 import jakarta.persistence.EntityManager;
@@ -11,12 +10,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
 /**
- * Adattatore JPA della fonte autorizzata del Banco per le categorie rendicontabili
+ * Adattatore JPA della fonte globale autorizzata del Banco per le categorie rendicontabili
  * delle schede personali TM-OP-01.
  */
 @Repository
@@ -37,8 +35,7 @@ public class CategorieSchedeJpa implements CategorieSchedeRendicontabili {
     /** {@inheritDoc} */
     @Override
     @Transactional(readOnly = true)
-    public Optional<Set<String>> codiciAmmessi(Trimestre trimestre) {
-        Objects.requireNonNull(trimestre, "trimestre");
+    public Optional<Set<String>> codiciAmmessi() {
         List<Tuple> righe = entita.createQuery(
                         "select c.codice as codice, c.attiva as attiva from CategoriaSchedaJpa c", Tuple.class)
                 .getResultList();

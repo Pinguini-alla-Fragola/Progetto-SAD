@@ -25,7 +25,7 @@ class ServizioRiepilogoSchedeTest {
     private static final Trimestre PERIODO = new Trimestre(2025, 1);
     private static final IdentitaAutenticata BANCO = new IdentitaAutenticata(UUID.randomUUID(), RuoloUtente.BANCO);
     private static final CategorieSchedeRendicontabili CONFIGURATE =
-            trimestre -> Optional.of(Set.of("minori", "famiglie", "persone", "mai_dichiarata"));
+            () -> Optional.of(Set.of("minori", "famiglie", "persone", "mai_dichiarata"));
 
     @Test
     void sommaDueInviiAccettatiOltreIlLimiteDiLong() {
@@ -79,7 +79,7 @@ class ServizioRiepilogoSchedeTest {
     @Test
     void escludeTutteLeVociSeOgniCategoriaCensitaEDisattivata() {
         var scheda = new VersioneInviata(sintesi(PERIODO, "2025-04-01T10:00:00Z"), 1, Map.of("minori", 5L));
-        var servizio = new ServizioRiepilogoSchede(trimestre -> List.of(scheda), trimestre -> Optional.of(Set.of()));
+        var servizio = new ServizioRiepilogoSchede(trimestre -> List.of(scheda), () -> Optional.of(Set.of()));
 
         var riepilogo = servizio.riepilogaSchede(BANCO, PERIODO);
 
@@ -90,7 +90,7 @@ class ServizioRiepilogoSchedeTest {
     @Test
     void applicaIlTracciatoProvvisorioSoloQuandoMancaQualsiasiConfigurazione() {
         var scheda = new VersioneInviata(sintesi(PERIODO, "2025-04-01T10:00:00Z"), 1, Map.of("donne", 4L));
-        var servizio = new ServizioRiepilogoSchede(trimestre -> List.of(scheda), trimestre -> Optional.empty());
+        var servizio = new ServizioRiepilogoSchede(trimestre -> List.of(scheda), Optional::empty);
 
         var riepilogo = servizio.riepilogaSchede(BANCO, PERIODO);
 

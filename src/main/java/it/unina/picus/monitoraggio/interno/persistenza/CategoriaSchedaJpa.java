@@ -28,11 +28,6 @@ public class CategoriaSchedaJpa {
         return codice;
     }
 
-    /** @return descrizione leggibile della categoria */
-    public String getDescrizione() {
-        return descrizione;
-    }
-
     /** @return {@code true} se la categoria è attualmente attiva per la rendicontazione */
     public boolean isAttiva() {
         return attiva;
