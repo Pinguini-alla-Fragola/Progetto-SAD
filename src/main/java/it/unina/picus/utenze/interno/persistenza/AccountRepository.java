@@ -2,6 +2,7 @@ package it.unina.picus.utenze.interno.persistenza;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import jakarta.persistence.LockModeType;
@@ -31,6 +32,25 @@ public interface AccountRepository extends JpaRepository<AccountJpa, UUID> {
 
     List<AccountJpa> findByRuoloAndStato(String ruolo, String stato);
     List<AccountJpa> findByRuolo(String ruolo);
+
+    /**
+     * Proietta i soli identificativi e nomi degli account richiesti, in qualsiasi stato.
+     *
+     * @param ids identificativi da cercare
+     * @return una proiezione per account trovato
+     */
+    List<NomeAccount> findNomiByIdIn(Set<UUID> ids);
+
+    /** Proiezione usata per risolvere i nomi negli storici degli altri moduli. */
+    interface NomeAccount {
+
+        /** @return identificativo dell'account */
+        UUID getId();
+
+        /** @return nome visualizzato dell'account */
+        String getNome();
+    }
+
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("update AccountJpa a set a.passwordHash = :hash where a.id = :id")
     int aggiornaHash(@Param("id") UUID id, @Param("hash") String hash);
