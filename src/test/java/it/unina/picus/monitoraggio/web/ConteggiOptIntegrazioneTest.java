@@ -560,9 +560,10 @@ class ConteggiOptIntegrazioneTest {
             sessioniDellaOpt.add(accesso.accedi(optA));
         }
 
-        ExecutorService esecutore = Executors.newFixedThreadPool(INVII_CONCORRENTI);
-        List<Future<Integer>> esiti = new ArrayList<>();
-        try {
+        // close() dell'ExecutorService attende la fine di tutti gli invii su ogni uscita, anche per errore
+        // o interruzione: se viene interrotto li interrompe, continua ad attendere e ripristina il flag
+        try (ExecutorService esecutore = Executors.newFixedThreadPool(INVII_CONCORRENTI)) {
+            List<Future<Integer>> esiti = new ArrayList<>();
             try (Connection blocco = dataSource.getConnection()) {
                 blocco.setAutoCommit(false);
                 int processoDelBlocco = bloccaProfiloOpt(blocco, optA);
@@ -582,26 +583,6 @@ class ConteggiOptIntegrazioneTest {
                 stati.add(esito.get(30, TimeUnit.SECONDS));
             }
             return stati;
-        } finally {
-            attendiFineInvii(esecutore);
-        }
-    }
-
-    /**
-     * Attende che gli invii già partiti terminino, anche quando il metodo esce per un errore. Il lock
-     * del test a quel punto è già rilasciato, quindi gli invii proseguono e si chiudono: senza questa
-     * attesa {@code @AfterEach} potrebbe svuotare il database condiviso mentre stanno ancora scrivendo.
-     * Non lancia eccezioni, così resta visibile l'errore che ha interrotto il test.
-     */
-    private static void attendiFineInvii(ExecutorService esecutore) {
-        esecutore.shutdown();
-        try {
-            if (!esecutore.awaitTermination(30, TimeUnit.SECONDS)) {
-                esecutore.shutdownNow();
-            }
-        } catch (InterruptedException interruzione) {
-            esecutore.shutdownNow();
-            Thread.currentThread().interrupt();
         }
     }
 
