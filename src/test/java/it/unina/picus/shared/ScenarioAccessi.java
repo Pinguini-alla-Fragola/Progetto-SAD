@@ -26,6 +26,7 @@ import it.unina.picus.catalogo.api.ConsultazioneCatalogoApi;
 import it.unina.picus.catalogo.api.RicercaErogatoriApi;
 import it.unina.picus.comunicazioni.api.AvvisiOperativiApi;
 import it.unina.picus.comunicazioni.api.ComunicazioniApi;
+import it.unina.picus.monitoraggio.api.ConteggiOptApi;
 import it.unina.picus.monitoraggio.api.MonitoraggioApi;
 import it.unina.picus.monitoraggio.api.MonitoraggioApi.DatiSchedaOperatore;
 import it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre;
@@ -212,6 +213,15 @@ public final class ScenarioAccessi {
      */
     public MonitoraggioApi monitoraggio() {
         return capacita(Capacita.MONITORAGGIO, MonitoraggioApi.class);
+    }
+
+    /**
+     * Registrazione e consultazione dei conteggi trimestrali delle OPT.
+     *
+     * @return implementazione consegnata
+     */
+    public ConteggiOptApi conteggiOpt() {
+        return capacita(Capacita.CONTEGGI_OPT, ConteggiOptApi.class);
     }
 
     /**

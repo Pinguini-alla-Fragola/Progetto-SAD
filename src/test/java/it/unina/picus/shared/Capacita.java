@@ -5,6 +5,7 @@ import it.unina.picus.catalogo.api.ConsultazioneCatalogoApi;
 import it.unina.picus.catalogo.api.RicercaErogatoriApi;
 import it.unina.picus.comunicazioni.api.AvvisiOperativiApi;
 import it.unina.picus.comunicazioni.api.ComunicazioniApi;
+import it.unina.picus.monitoraggio.api.ConteggiOptApi;
 import it.unina.picus.monitoraggio.api.MonitoraggioApi;
 import it.unina.picus.richieste.api.CoordinamentoRichiesteApi;
 import it.unina.picus.richieste.api.InvioRichiesteApi;
@@ -43,6 +44,8 @@ public enum Capacita {
     CATALOGO_COMPLETO(CatalogoApi.class, false),
     /** Schede personali e conteggi OPT. */
     MONITORAGGIO(MonitoraggioApi.class, true),
+    /** Registrazione e consultazione dei conteggi trimestrali delle OPT (#43). */
+    CONTEGGI_OPT(ConteggiOptApi.class, true),
     /** Comunicazioni del Banco e riscontri. */
     COMUNICAZIONI(ComunicazioniApi.class, false);
 

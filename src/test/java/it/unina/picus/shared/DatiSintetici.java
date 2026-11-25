@@ -32,6 +32,9 @@ public final class DatiSintetici {
      * preparando o leggendo dati nello stesso momento.</p>
      */
     public void svuota() {
+        jdbc.update("delete from monitoraggio_conteggi_opt");
+        jdbc.update("update monitoraggio_configurazione set correzioni_abilitate = false, scadenza_correzioni = null");
+        jdbc.update("update monitoraggio_categorie set attiva = true");
         jdbc.update("delete from comunicazioni_allegati");
         jdbc.update("delete from comunicazioni_destinatari");
         jdbc.update("delete from comunicazioni");
