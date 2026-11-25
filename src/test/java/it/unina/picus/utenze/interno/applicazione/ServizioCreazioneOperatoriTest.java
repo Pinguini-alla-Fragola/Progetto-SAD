@@ -55,7 +55,7 @@ import it.unina.picus.utenze.web.OperatoriDiProva;
  * Verifica dei servizi di creazione e attivazione degli Operatori (task #154, storia #27) su PostgreSQL 17 in
  * Docker, dove contano i vincoli di unicità e i lock pessimistici: creazioni contemporanee con la stessa email o lo
  * stesso codice fiscale (criterio 4), uso contemporaneo dello stesso link monouso e link sostituito da un reinvio
- * mentre l'attivazione attende il lock (criteri 5 e 6), e controllo del
+ * mentre l'attivazione attende il lock del test (criteri 5 e 6), e controllo del
  * ruolo anche quando il servizio è chiamato senza passare dal web (criterio 9).
  *
  * <p>Nelle gare due thread partono insieme da una barriera; dall'esito si ricava quale comando ha vinto e lo si
@@ -201,15 +201,20 @@ class ServizioCreazioneOperatoriTest {
             String vecchio = creato.invito().tokenInChiaro();
             DatiInvioAttivazione nuovo = attivazione.preparaReinvio(id, RuoloUtente.OPERATORE);
 
-            // Il test tiene il lock sull'account; l'attivazione con il vecchio link parte e si ferma su quel lock.
-            // Solo quando PostgreSQL la mostra in attesa il reinvio sostituisce il link, nella stessa transazione.
+            // Il test prende il lock sull'account nella propria transazione e ne ricava il processo PostgreSQL.
+            // L'attivazione con il vecchio link risolve l'account dal token e si ferma su quel lock. Si procede solo
+            // quando pg_blocking_pids mostra un backend bloccato proprio da questa transazione mentre legge l'account;
+            // allora il reinvio sostituisce il link nella stessa transazione e il lock si libera al commit.
             CompletableFuture<Void> tentativo = transazioni.execute(stato -> {
                 accounts.findByIdForUpdate(id).orElseThrow();
+                int processoDelTest = operatori.conta("select pg_backend_pid()");
                 CompletableFuture<Void> avviato = CompletableFuture.runAsync(
                         () -> attivazione.attivaAccount(vecchio, PRIMA_PASSWORD));
-                OperatoriDiProva.attendi("attivazione in attesa del lock sull'account",
-                        () -> avviato.isDone() || sessioniInAttesaDiLock() > 0);
-                assertThat(avviato).as("l'attivazione deve attendere il lock, non concludersi prima").isNotDone();
+                OperatoriDiProva.attendi("attivazione bloccata dal lock della transazione del test",
+                        () -> avviato.isDone() || !bloccatiDa(processoDelTest).isEmpty());
+                List<String> bloccati = bloccatiDa(processoDelTest);
+                assertThat(bloccati).as("backend fermi sul lock della transazione del test").hasSize(1);
+                assertThat(bloccati.get(0)).as("query in attesa").containsIgnoringCase("utenze_account");
                 conclusione.concludi(id, nuovo, true);
                 return avviato;
             });
@@ -258,12 +263,10 @@ class ServizioCreazioneOperatoriTest {
         }
     }
 
-    /** Sessioni del database di prova ferme in attesa di un lock, esclusa quella che esegue la query. */
-    private int sessioniInAttesaDiLock() {
-        return operatori.conta("""
-                select count(*) from pg_stat_activity
-                where datname = current_database() and pid <> pg_backend_pid() and wait_event_type = 'Lock'
-                """);
+    /** Query dei backend fermi in attesa di un lock tenuto dal processo PostgreSQL indicato. */
+    private List<String> bloccatiDa(int processo) {
+        return jdbc.queryForList("select query from pg_stat_activity where ? = any(pg_blocking_pids(pid))",
+                String.class, processo);
     }
 
     private ComandoCreaOperatore comando(String email, String codiceFiscale) {

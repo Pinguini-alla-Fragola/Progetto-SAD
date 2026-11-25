@@ -25,7 +25,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 
 import org.mockito.ArgumentCaptor;
@@ -227,19 +229,45 @@ public final class OperatoriDiProva {
     }
 
     /**
-     * Attende la fine del lavoro in secondo piano dei nuovi link chiesti con l'email: la coda è vuota e ogni
-     * richiesta accodata finora, compresa quella sotto test, è stata elaborata fino all'ultimo passo. Serve quando
-     * una richiesta non deve avere effetti: senza questo segnale la verifica potrebbe precedere l'elaborazione.
+     * Attende la fine del lavoro in secondo piano dei nuovi link chiesti con l'email: ogni richiesta accodata finora,
+     * compresa quella sotto test, è stata elaborata fino all'ultimo passo, tentativi della conclusione compresi.
+     *
+     * <p>Il segnale non usa i contatori dell'esecutore, che sono approssimati. Si accoda una sentinella per ogni
+     * thread dell'esecutore e si attende che siano tutte in esecuzione nello stesso momento. La coda è FIFO e ogni
+     * thread esegue un lavoro alla volta: quando tutti i thread sono occupati da una sentinella, nessuno sta più
+     * eseguendo una richiesta accodata prima, quindi tutte sono concluse. Poi le sentinelle vengono rilasciate.</p>
      */
     public static void attendiReinviiConclusi(ReinvioLinkSuRichiesta reinvio) {
         // Il bersaglio va tipizzato come Object: un tipo generico farebbe scegliere getField(Class, String).
         Object bersaglio = AopTestUtils.getUltimateTargetObject(reinvio);
-        Object esecutore = ReflectionTestUtils.getField(bersaglio, "esecutore");
-        assertThat(esecutore).isInstanceOf(ThreadPoolExecutor.class);
-        ThreadPoolExecutor coda = (ThreadPoolExecutor) esecutore;
-        // getTaskCount comprende le richieste accodate, in corso e concluse: l'uguaglianza vale solo a lavoro finito.
-        attendi("richieste di nuovo link tutte elaborate",
-                () -> coda.getQueue().isEmpty() && coda.getCompletedTaskCount() == coda.getTaskCount());
+        Object campo = ReflectionTestUtils.getField(bersaglio, "esecutore");
+        assertThat(campo).isInstanceOf(ThreadPoolExecutor.class);
+        ThreadPoolExecutor esecutore = (ThreadPoolExecutor) campo;
+        // Con un numero fisso di thread le sentinelle li occupano tutti; con un pool variabile il segnale non varrebbe.
+        assertThat(esecutore.getCorePoolSize()).isEqualTo(esecutore.getMaximumPoolSize());
+        int thread = esecutore.getMaximumPoolSize();
+        CountDownLatch sentinelleInEsecuzione = new CountDownLatch(thread);
+        CountDownLatch rilascio = new CountDownLatch(1);
+        try {
+            for (int i = 0; i < thread; i++) {
+                esecutore.execute(() -> {
+                    sentinelleInEsecuzione.countDown();
+                    try {
+                        rilascio.await();
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                });
+            }
+            assertThat(sentinelleInEsecuzione.await(ATTESA_MASSIMA.toMillis(), TimeUnit.MILLISECONDS))
+                    .as("tutti i thread del reinvio occupati dalle sentinelle entro %s", ATTESA_MASSIMA)
+                    .isTrue();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            fail("Attesa delle sentinelle interrotta");
+        } finally {
+            rilascio.countDown();
+        }
     }
 
     /** Attende che la condizione diventi vera, per il lavoro che il server svolge in secondo piano. */
