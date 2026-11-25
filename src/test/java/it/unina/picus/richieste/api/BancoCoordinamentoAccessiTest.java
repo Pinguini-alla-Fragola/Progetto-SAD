@@ -16,6 +16,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import it.unina.picus.monitoraggio.api.ConteggiOptApi;
 import it.unina.picus.monitoraggio.api.MonitoraggioApi;
 import it.unina.picus.richieste.api.RichiesteApi;
 import it.unina.picus.shared.AccessiBlackBoxTest;
@@ -105,20 +106,20 @@ class BancoCoordinamentoAccessiTest extends AccessiBlackBoxTest {
     @Test
     @DisplayName("CA-05 · il Banco consulta i conteggi di una OPT e di tutte le OPT, ciascuna con i propri valori")
     void bancoConsultaConteggi() {
-        MonitoraggioApi monitoraggio = scenario.monitoraggio(); // prima di preparare dati: sospensione immediata
+        ConteggiOptApi conteggi = scenario.conteggiOpt(); // capacità consegnata: se manca il caso fallisce
         Account optA = scenario.optRichiedente();
         Account optB = scenario.optRichiedente();
         long misura = scenario.misura();
         var trimestre = ScenarioAccessi.TRIMESTRE;
-        monitoraggio.registraConteggiOpt(optA.identita(), trimestre,
+        conteggi.registraConteggiOpt(optA.identita(), trimestre,
                 List.of(new VoceMisura(misura, VOCE_DI_PROVA, 3)));
-        monitoraggio.registraConteggiOpt(optB.identita(), trimestre,
+        conteggi.registraConteggiOpt(optB.identita(), trimestre,
                 List.of(new VoceMisura(misura, VOCE_DI_PROVA, 7)));
         IdentitaAutenticata banco = scenario.banco().identita();
 
-        List<ConteggioOpt> vistaA = monitoraggio.consultaConteggiOpt(banco, optA.id(), trimestre, trimestre);
-        List<ConteggioOpt> vistaB = monitoraggio.consultaConteggiOpt(banco, optB.id(), trimestre, trimestre);
-        List<ConteggioOpt> vistaTutte = monitoraggio.consultaConteggiOpt(banco, null, trimestre, trimestre);
+        List<ConteggioOpt> vistaA = conteggi.consultaConteggiOpt(banco, optA.id(), trimestre, trimestre);
+        List<ConteggioOpt> vistaB = conteggi.consultaConteggiOpt(banco, optB.id(), trimestre, trimestre);
+        List<ConteggioOpt> vistaTutte = conteggi.consultaConteggiOpt(banco, null, trimestre, trimestre);
 
         assertEquals(List.of(new ConteggioOpt(optA.id(), new VoceMisura(misura, VOCE_DI_PROVA, 3))), vistaA,
                 "la vista di una OPT contiene solo i suoi conteggi");

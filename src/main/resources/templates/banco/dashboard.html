@@ -88,6 +88,9 @@
                                   th:text="${account.stato.name() == 'ATTIVO' ? 'Attivo' : (account.stato.name() == 'IN_ATTESA_DI_ATTIVAZIONE' ? 'In attesa di attivazione' : 'Revocato')}">Attivo</span>
                         </div>
                         <div class="picus-actions">
+                            <button type="button" class="btn btn-secondary btn-sm"
+                                    data-reinvia-invito
+                                    th:if="${account.stato.name() == 'IN_ATTESA_DI_ATTIVAZIONE'}">Reinvia invito</button>
                             <button type="button" class="btn btn-danger btn-sm"
                                     data-revoca-operatore
                                     th:disabled="${account.stato.name() == 'REVOCATO'}"

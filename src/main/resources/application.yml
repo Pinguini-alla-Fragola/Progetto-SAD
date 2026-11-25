@@ -48,6 +48,10 @@ server:
         same-site: lax
 
 picus:
+  utenze:
+    attivazione:
+      # Validità del link monouso di attivazione di OPT e Operatori (regole degli accessi: 72 ore).
+      validita: PT72H
   app:
     base-url: "${PICUS_APP_BASE_URL:http://localhost:8080}"
   mail:

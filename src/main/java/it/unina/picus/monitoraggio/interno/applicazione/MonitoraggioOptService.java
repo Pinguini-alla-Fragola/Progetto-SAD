@@ -35,7 +35,7 @@ import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 
 @Service
 @Profile("!skeleton")
-public class MonitoraggioOptService implements ConteggiOptApi {
+public class MonitoraggioOptService implements ConteggiOptApi, ConsultazioneConteggiOpt {
 
     private final ConteggioOptRepository conteggiRepo;
     private final CategoriaMonitoraggioRepository categorieRepo;
@@ -147,14 +147,24 @@ public class MonitoraggioOptService implements ConteggiOptApi {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     @Transactional(readOnly = true)
     public List<ConteggioOpt> consultaConteggiOpt(IdentitaAutenticata attore, UUID optId, Trimestre da, Trimestre a) {
+        return ConteggiTrimestrali.convertiInConteggi(consultaConteggiEsatti(attore, optId, da, a));
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Transactional(readOnly = true)
+    public List<ConteggioEsatto> consultaConteggiEsatti(
+            IdentitaAutenticata attore, UUID optId, Trimestre da, Trimestre a) {
         RegoleAccessoConteggi.verificaConsultazione(attore, optId);
 
         ConteggiTrimestrali.validaIntervallo(da, a);
         ConteggiTrimestrali.verificaOpt(utenze, optId);
 
+        // La #43 conserva una sola riga per OPT, trimestre, misura e voce. Una correzione la aggiorna.
         var righe = conteggiRepo.cercaNelPeriodo(optId, da.anno(), da.numero(), a.anno(), a.numero()).stream()
                 .map(riga -> new ConteggioOpt(riga.getOptId(),
                         new VoceMisura(riga.getMisuraId(), riga.getVoce(), riga.getValore())))

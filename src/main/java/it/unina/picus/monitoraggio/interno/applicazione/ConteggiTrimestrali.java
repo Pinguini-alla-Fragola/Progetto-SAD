@@ -12,6 +12,7 @@ import it.unina.picus.monitoraggio.api.DatiConteggiNonValidiException;
 import it.unina.picus.monitoraggio.api.MonitoraggioApi.ConteggioOpt;
 import it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre;
 import it.unina.picus.monitoraggio.api.MonitoraggioApi.VoceMisura;
+import it.unina.picus.monitoraggio.interno.applicazione.ConsultazioneConteggiOpt.ConteggioEsatto;
 import it.unina.picus.utenze.api.UtenzeApi;
 import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
 
@@ -19,7 +20,7 @@ final class ConteggiTrimestrali {
 
     private static final int ANNO_MINIMO = 2000;
     private static final int ANNO_MASSIMO = 2100;
-    private static final BigInteger MAX_CUMULATIVO = BigInteger.valueOf(Long.MAX_VALUE);
+    private static final BigInteger MASSIMO_CONTEGGIO_LONG = BigInteger.valueOf(Long.MAX_VALUE);
     static final Comparator<Trimestre> ORDINE_PERIODI =
             Comparator.comparingInt(Trimestre::anno).thenComparingInt(Trimestre::numero);
 
@@ -59,26 +60,46 @@ final class ConteggiTrimestrali {
         }
     }
 
-    static List<ConteggioOpt> cumula(Iterable<ConteggioOpt> righe) {
+    /**
+     * Somma le dichiarazioni correnti per OPT, misura e voce. Una chiave nasce solo da una
+     * dichiarazione effettiva, perciò uno zero dichiarato compare e una voce mancante resta assente.
+     *
+     * @param righe valori correnti dei trimestri selezionati
+     * @return totali esatti nell'ordine in cui le chiavi compaiono nelle righe
+     */
+    static List<ConteggioEsatto> cumula(Iterable<ConteggioOpt> righe) {
         record Chiave(UUID optId, long misuraId, String voce) {}
         Map<Chiave, BigInteger> cumulativi = new LinkedHashMap<>();
 
         for (ConteggioOpt riga : righe) {
             VoceMisura voce = riga.conteggio();
             var chiave = new Chiave(riga.optId(), voce.misuraId(), voce.voce());
-            BigInteger totale = cumulativi.merge(chiave, BigInteger.valueOf(voce.valore()), BigInteger::add);
-            if (totale.compareTo(MAX_CUMULATIVO) > 0) {
-                throw new IllegalStateException(
-                        "Il totale cumulativo per la voce " + voce.voce() + " supera il limite massimo rappresentabile.");
-            }
+            cumulativi.merge(chiave, BigInteger.valueOf(voce.valore()), BigInteger::add);
         }
 
         return cumulativi.entrySet().stream()
                 .map(entry -> {
                     var chiave = entry.getKey();
-                    return new ConteggioOpt(chiave.optId(),
-                            new VoceMisura(chiave.misuraId(), chiave.voce(), entry.getValue().longValueExact()));
+                    return new ConteggioEsatto(chiave.optId(), chiave.misuraId(), chiave.voce(), entry.getValue());
                 })
                 .toList();
+    }
+
+    /**
+     * Converte i totali nel tipo con valore {@code long} del contratto applicativo esistente.
+     *
+     * @param totali conteggi esatti del periodo
+     * @return conteggi rappresentabili nel contratto applicativo
+     * @throws IllegalStateException se un totale supera il limite del tipo restituito
+     */
+    static List<ConteggioOpt> convertiInConteggi(List<ConteggioEsatto> totali) {
+        return totali.stream().map(totale -> {
+            if (totale.valore().compareTo(MASSIMO_CONTEGGIO_LONG) > 0) {
+                throw new IllegalStateException(
+                        "Il totale cumulativo per la voce " + totale.voce() + " supera il limite massimo rappresentabile.");
+            }
+            return new ConteggioOpt(totale.optId(),
+                    new VoceMisura(totale.misuraId(), totale.voce(), totale.valore().longValueExact()));
+        }).toList();
     }
 }
