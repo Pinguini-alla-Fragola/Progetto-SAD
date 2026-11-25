@@ -4,13 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.after;
-import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -21,25 +14,31 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
@@ -52,6 +51,9 @@ import it.unina.picus.utenze.api.UtenzeApi.AccountAmministrativo;
 import it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService;
 import it.unina.picus.utenze.interno.applicazione.RecuperoPasswordService;
 import it.unina.picus.utenze.interno.applicazione.RecuperoPasswordService.DatiInvioRecupero;
+import it.unina.picus.utenze.interno.applicazione.RegistrazioneOptService;
+import it.unina.picus.utenze.interno.applicazione.RegistrazioneOptService.ComandoRegistrazioneOpt;
+import it.unina.picus.utenze.interno.applicazione.RegistrazioneOptService.EsitoRegistrazioneOpt;
 import it.unina.picus.utenze.interno.dominio.CodiceFiscale;
 
 /*
@@ -61,13 +63,26 @@ non da un update diretto sul database.
 
 Gli Operatori nascono con il percorso di produzione: il Banco li crea con POST /api/utenze/operatori,
 nelle due tipologie INTERNO_BANCO ed ESTERNO_PAGATO_BANCO, e il token di attivazione si legge dall'email
-consegnata al doppio di InvioEmail (il token non esce mai nella risposta HTTP). Gli Operatori attivi
+consegnata alla posta finta (il token non esce mai nella risposta HTTP). Gli Operatori attivi
 scelgono la password con quel token. I link di recupero si emettono con RecuperoPasswordService, come
 farebbe l'elaborazione asincrona di /api/auth/recupera.
 
-Il doppio di InvioEmail serve anche a dimostrare che dopo la revoca non parte nessuna email. Il campo
-@MockitoBean è identico a quello di RevocaEConcorrenzaOptPostgresTest, quindi la classe riusa dalla cache
-lo stesso contesto Spring invece di avviarne uno nuovo.
+PostaDiProva sostituisce InvioEmail e serve anche a dimostrare che dopo la revoca non parte nessuna email. È un
+fake scritto a mano e non un mock di Mockito: registrare e verificare invocazioni sullo stesso mock da più thread
+non è affidabile, mentre qui le email arrivano anche dagli esecutori in secondo piano e i test possono girare in
+parallelo. Per lo stesso motivo la posta non viene mai azzerata: ogni verifica riguarda solo l'indirizzo, unico,
+del proprio account.
+
+Le richieste pubbliche di recupero e di nuovo link lavorano in secondo piano, ciascuna su un esecutore proprio.
+Qui entrambi gli esecutori hanno un solo thread, quindi le richieste sono elaborate nell'ordine in cui arrivano:
+quando arriva l'email della richiesta di controllo, accodata dopo quella per l'account revocato, anche
+quest'ultima è finita e le verifiche sull'assenza di email non hanno bisogno di attese fisse. Con la posta finta
+e questa proprietà il contesto è diverso da quello degli altri test di integrazione e Spring ne avvia uno in
+più, sullo stesso container.
+
+Gli attori dei dinieghi sono utenti registrati come in produzione: le OPT con RegistrazioneOptService, quindi
+con profilo e codice fiscale, e gli Operatori con la creazione del Banco. Solo il Banco nasce direttamente sul
+database, perché non ha un flusso di registrazione.
 
 Un link "invalidato" si controlla sulla colonna usato_il e non solo con isTokenValido/isLinkValido, che
 rifiutano già qualunque account non nello stato atteso.
@@ -79,6 +94,10 @@ Ogni test usa email e codici fiscali unici e azzera il limitatore dei login: i t
 dall'ordine di esecuzione.
 */
 @DisplayName("Revoca manuale dell'account di un Operatore su PostgreSQL (#30)")
+@Import(RevocaManualeAccountPostgresTest.PostaDiProvaConfig.class)
+@TestPropertySource(properties = {
+        "picus.utenze.recupero.esecutore.thread=1",
+        "picus.utenze.attivazione.reinvio.esecutore.thread=1"})
 class RevocaManualeAccountPostgresTest extends IntegrazionePostgresBase {
 
     private static final String PASSWORD = "Password-di-prova-30";
@@ -87,6 +106,7 @@ class RevocaManualeAccountPostgresTest extends IntegrazionePostgresBase {
     private static final String SCHEDE = "/api/monitoraggio/schede-operatore";
     private static final String ANNO = "2024";
     private static final String TRIMESTRE = "4";
+    private static final Duration ATTESA_MASSIMA = Duration.ofSeconds(20);
 
     /** Scheda TM-OP-01 sintetica: i campi obbligatori del tracciato più qualche dato facoltativo. */
     private static final String SCHEDA_VALIDA = """
@@ -106,9 +126,11 @@ class RevocaManualeAccountPostgresTest extends IntegrazionePostgresBase {
     private AttivazioneUtenzaService attivazione;
     @Autowired
     private RecuperoPasswordService recupero;
+    @Autowired
+    private RegistrazioneOptService registrazioneOpt;
 
-    @MockitoBean
-    private InvioEmail invioEmail;
+    @Autowired
+    private PostaDiProva posta;
 
     private MockHttpSession sessioneBanco;
 
@@ -120,7 +142,7 @@ class RevocaManualeAccountPostgresTest extends IntegrazionePostgresBase {
     @BeforeEach
     void prepara() throws Exception {
         limitatore.azzeraTutto();
-        sessioneBanco = accedi(nuovoAccountDiretto("BANCO").email());
+        sessioneBanco = accedi(nuovoBanco().email());
     }
 
     //AC1 – revoca di un account attivo o in attesa di attivazione
@@ -273,7 +295,6 @@ class RevocaManualeAccountPostgresTest extends IntegrazionePostgresBase {
         Operatore operatore = operatoreInAttesa("ESTERNO_PAGATO_BANCO");
         revocaDalBanco(operatore.id()).andExpect(status().isOk());
         int tokenPrima = linkDiAttivazioneTotali(operatore.id());
-        clearInvocations(invioEmail);
 
         mvc.perform(post("/api/operatori/" + operatore.id() + "/reinvia-invito").session(sessioneBanco).with(csrf()))
                 .andExpect(status().isConflict());
@@ -281,7 +302,8 @@ class RevocaManualeAccountPostgresTest extends IntegrazionePostgresBase {
         assertEquals(tokenPrima, linkDiAttivazioneTotali(operatore.id()));
         assertEquals(0, linkDiAttivazioneAperti(operatore.id()));
         assertEquals("REVOCATO", statoAccount(operatore.id()));
-        verify(invioEmail, never()).inviaLinkAttivazione(anyString(), anyString(), anyString());
+        // L'unica email di attivazione resta quella della creazione.
+        assertEquals(1, posta.inviateA(operatore.email(), Tipo.ATTIVAZIONE).size());
     }
 
     @ParameterizedTest(name = "revocato da {0}")
@@ -291,27 +313,29 @@ class RevocaManualeAccountPostgresTest extends IntegrazionePostgresBase {
         Operatore revocato = "ATTIVO".equals(statoPrimaDellaRevoca)
                 ? operatoreAttivo("INTERNO_BANCO")
                 : operatoreInAttesa("ESTERNO_PAGATO_BANCO");
-        // Account di controllo: dimostrano che le richieste in secondo piano sono state davvero elaborate.
+        // Account di controllo: le loro richieste, accodate dopo quelle per l'account revocato, segnalano che
+        // l'esecutore a un solo thread ha già finito di elaborare anche le precedenti.
         Operatore controlloAttivo = operatoreAttivo("INTERNO_BANCO");
         Operatore controlloInAttesa = operatoreInAttesa("INTERNO_BANCO");
         revocaDalBanco(revocato.id()).andExpect(status().isOk());
         int attivazionePrima = linkDiAttivazioneTotali(revocato.id());
         int recuperoPrima = linkDiRecuperoTotali(revocato.id());
-        clearInvocations(invioEmail);
+        // Il controllo in attesa ha già l'email della creazione: si aspetta quella successiva.
+        int recuperoControllo = posta.inviateA(controlloAttivo.email(), Tipo.RECUPERO).size();
+        int attivazioneControllo = posta.inviateA(controlloInAttesa.email(), Tipo.ATTIVAZIONE).size();
 
-        // La risposta pubblica è la stessa per l'account revocato e per quelli idonei.
+        // La risposta pubblica è la stessa per l'account revocato e per quelli idonei. L'ordine conta: prima la
+        // richiesta per l'account revocato, poi quella di controllo sullo stesso esecutore.
         String rispostaRecupero = richiestaPubblica("/api/auth/recupera", revocato.email());
         assertEquals(rispostaRecupero, richiestaPubblica("/api/auth/recupera", controlloAttivo.email()));
         String rispostaReinvio = richiestaPubblica("/api/auth/attiva/reinvio", revocato.email());
         assertEquals(rispostaReinvio, richiestaPubblica("/api/auth/attiva/reinvio", controlloInAttesa.email()));
 
-        verify(invioEmail, timeout(10_000))
-                .inviaLinkResetPassword(eq(controlloAttivo.email()), anyString(), anyString());
-        verify(invioEmail, timeout(10_000))
-                .inviaLinkAttivazione(eq(controlloInAttesa.email()), anyString(), anyString());
-        verify(invioEmail, after(1_000).never())
-                .inviaLinkResetPassword(eq(revocato.email()), anyString(), anyString());
-        verify(invioEmail, never()).inviaLinkAttivazione(eq(revocato.email()), anyString(), anyString());
+        posta.attendi(controlloAttivo.email(), Tipo.RECUPERO, recuperoControllo + 1, ATTESA_MASSIMA);
+        posta.attendi(controlloInAttesa.email(), Tipo.ATTIVAZIONE, attivazioneControllo + 1, ATTESA_MASSIMA);
+        assertEquals(List.of(), posta.inviateA(revocato.email(), Tipo.RECUPERO));
+        // L'unica email di attivazione resta quella della creazione.
+        assertEquals(1, posta.inviateA(revocato.email(), Tipo.ATTIVAZIONE).size());
 
         // Nessun link creato, neanche chiedendolo direttamente ai servizi che quelle richieste usano.
         assertTrue(recupero.preparaLink(revocato.email()).isEmpty());
@@ -402,15 +426,15 @@ class RevocaManualeAccountPostgresTest extends IntegrazionePostgresBase {
 
         Map<String, MockHttpServletRequestBuilder> tentativi = new LinkedHashMap<>();
         tentativi.put("senza sessione", post(revoca).with(csrf()));
-        tentativi.put("OPT", post(revoca).session(accedi(nuovoAccountDiretto("OPT").email())).with(csrf()));
+        tentativi.put("OPT", post(revoca).session(accedi(optAttiva().email())).with(csrf()));
         tentativi.put("Operatore stesso", post(revoca).session(accedi(bersaglio.email())).with(csrf()));
         tentativi.put("altro Operatore",
                 post(revoca).session(accedi(operatoreAttivo("ESTERNO_PAGATO_BANCO").email())).with(csrf()));
         tentativi.put("Banco senza token CSRF", post(revoca).session(sessioneBanco));
         tentativi.put("OPT su Operatore in attesa", post("/api/operatori/" + inAttesa.id() + "/revoca")
-                .session(accedi(nuovoAccountDiretto("OPT").email())).with(csrf()));
+                .session(accedi(optAttiva().email())).with(csrf()));
         tentativi.put("Operatore su Operatore in attesa", post("/api/operatori/" + inAttesa.id() + "/revoca")
-                .session(accedi(nuovoAccountDiretto("OPERATORE").email())).with(csrf()));
+                .session(accedi(operatoreAttivo("INTERNO_BANCO").email())).with(csrf()));
 
         Map<String, Integer> attesi = Map.of(
                 "senza sessione", 401,
@@ -439,8 +463,8 @@ class RevocaManualeAccountPostgresTest extends IntegrazionePostgresBase {
     @Test
     @DisplayName("Il Banco non può revocare come Operatore un account di altro ruolo, inesistente o già revocato")
     void revocaDelBancoSuBersaglioNonValido_rifiutataSenzaModifiche() throws Exception {
-        Account opt = nuovoAccountDiretto("OPT");
-        Account banco = nuovoAccountDiretto("BANCO");
+        Account opt = optAttiva();
+        Account banco = nuovoBanco();
         Operatore giaRevocato = operatoreAttivo("INTERNO_BANCO");
         revocaDalBanco(giaRevocato.id()).andExpect(status().isOk());
 
@@ -474,9 +498,10 @@ class RevocaManualeAccountPostgresTest extends IntegrazionePostgresBase {
                 .andReturn().getResponse().getContentAsString();
         UUID id = UUID.fromString(JsonPath.read(risposta, "$.id"));
 
-        ArgumentCaptor<String> token = ArgumentCaptor.forClass(String.class);
-        verify(invioEmail).inviaLinkAttivazione(eq(email), anyString(), token.capture());
-        return new Operatore(id, email, token.getValue());
+        // La creazione consegna il link prima di rispondere: l'email è già nella posta.
+        List<PostaDiProva.Email> inviate = posta.inviateA(email, Tipo.ATTIVAZIONE);
+        assertEquals(1, inviate.size(), "email di attivazione per " + email);
+        return new Operatore(id, email, inviate.get(0).token());
     }
 
     /* Operatore creato dal Banco e attivato con il proprio link, con password {@link #PASSWORD}. */
@@ -487,14 +512,25 @@ class RevocaManualeAccountPostgresTest extends IntegrazionePostgresBase {
         return operatore;
     }
 
-    /* Account attivo creato direttamente sul database, per i ruoli che fanno solo da attore nei test. */
-    private Account nuovoAccountDiretto(String ruolo) {
+    /* OPT registrata come in produzione, con profilo e codice fiscale, e attivata con password {@link #PASSWORD}. */
+    private Account optAttiva() {
+        String suffisso = UUID.randomUUID().toString().replace("-", "").substring(0, 10).toUpperCase(Locale.ROOT);
+        String email = "opt-rev30-" + UUID.randomUUID() + "@picus.test";
+        EsitoRegistrazioneOpt esito = registrazioneOpt.registraOpt(new ComandoRegistrazioneOpt(
+                "OPT30-" + suffisso, "OPT Revoca " + suffisso, "napoli", codiceFiscaleDiProva(), email));
+        attivazione.attivaAccount(esito.datiInvio().tokenInChiaro(), PASSWORD);
+        assertEquals("ATTIVO", statoAccount(esito.accountId()));
+        return new Account(esito.accountId(), email);
+    }
+
+    /* Account Banco attivo creato direttamente sul database: il Banco non ha un flusso di registrazione. */
+    private Account nuovoBanco() {
         UUID id = UUID.randomUUID();
-        String email = ruolo.toLowerCase() + "-rev30-" + id + "@picus.test";
+        String email = "banco-rev30-" + id + "@picus.test";
         jdbc.update("""
                 insert into utenze_account (id, email, password_hash, nome, ruolo, stato)
-                values (?, ?, ?, ?, ?, 'ATTIVO')
-                """, id, email, encoder.encode(PASSWORD), "Utente " + ruolo, ruolo);
+                values (?, ?, ?, ?, 'BANCO', 'ATTIVO')
+                """, id, email, encoder.encode(PASSWORD), "Utente Banco");
         return new Account(id, email);
     }
 
@@ -639,5 +675,59 @@ class RevocaManualeAccountPostgresTest extends IntegrazionePostgresBase {
     private static boolean autenticata(MockHttpSession sessione) {
         return sessione != null && !sessione.isInvalid()
                 && sessione.getAttribute(SPRING_SECURITY_CONTEXT_KEY) != null;
+    }
+
+    @TestConfiguration(proxyBeanMethods = false)
+    static class PostaDiProvaConfig {
+
+        /* Prevale sull'adattatore di InvioEmail scelto da ConfigurazioneInvioEmail. */
+        @Bean
+        @Primary
+        PostaDiProva postaDiProva() {
+            return new PostaDiProva();
+        }
+    }
+
+    enum Tipo { ATTIVAZIONE, RECUPERO }
+
+    /* Fake manuale e thread-safe della posta: registra le email consegnate, con il token in chiaro. */
+    static final class PostaDiProva implements InvioEmail {
+
+        record Email(Tipo tipo, String destinatario, String token) { }
+
+        private final List<Email> inviate = new CopyOnWriteArrayList<>();
+
+        @Override
+        public void inviaLinkAttivazione(String emailDestinatario, String nomeDestinatario, String tokenInChiaro) {
+            registra(new Email(Tipo.ATTIVAZIONE, emailDestinatario, tokenInChiaro));
+        }
+
+        @Override
+        public void inviaLinkResetPassword(String emailDestinatario, String nomeDestinatario, String tokenInChiaro) {
+            registra(new Email(Tipo.RECUPERO, emailDestinatario, tokenInChiaro));
+        }
+
+        private synchronized void registra(Email email) {
+            inviate.add(email);
+            notifyAll();
+        }
+
+        List<Email> inviateA(String indirizzo, Tipo tipo) {
+            return inviate.stream().filter(e -> e.tipo() == tipo && e.destinatario().equals(indirizzo)).toList();
+        }
+
+        /* Aspetta che l'indirizzo abbia ricevuto almeno {@code quante} email del tipo indicato, senza attese fisse. */
+        synchronized void attendi(String indirizzo, Tipo tipo, int quante, Duration massimo)
+                throws InterruptedException {
+            long limite = System.nanoTime() + massimo.toNanos();
+            while (inviateA(indirizzo, tipo).size() < quante) {
+                long resta = limite - System.nanoTime();
+                if (resta <= 0) {
+                    throw new AssertionError("Meno di " + quante + " email " + tipo + " per " + indirizzo
+                            + " entro " + massimo);
+                }
+                TimeUnit.NANOSECONDS.timedWait(this, resta);
+            }
+        }
     }
 }

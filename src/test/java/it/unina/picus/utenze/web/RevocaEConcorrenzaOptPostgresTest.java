@@ -341,8 +341,10 @@ class RevocaEConcorrenzaOptPostgresTest extends IntegrazionePostgresBase {
             Throwable errAttivazione = fAttivazione.get(15, TimeUnit.SECONDS);
 
             assertNull(errRevoca);
-            assertTrue(errAttivazione instanceof TokenAttivazioneNonValidoException);
-        }
+            if (errAttivazione != null) {
+                assertTrue(errAttivazione instanceof TokenAttivazioneNonValidoException,
+                        () -> "Eccezione inattesa dall'attivazione concorrente: " + errAttivazione);
+            }        }
 
         assertEquals(StatoUtenza.REVOCATO, utenzeApi.cercaAccount(accountId).orElseThrow().stato());
         assertThrows(TokenAttivazioneNonValidoException.class,
