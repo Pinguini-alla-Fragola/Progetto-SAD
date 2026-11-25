@@ -127,6 +127,26 @@ class ArchivioComunicazioniJpa implements ArchivioComunicazioni {
                 """, UUID.class).setParameter("comunicazione", comunicazioneId).getResultList());
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Il join esterno distingue una comunicazione senza destinatari da un identificativo assente,
+     * senza caricare testo o allegati.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<List<RicezioneDestinatario>> ricezioni(UUID comunicazioneId) {
+        List<RicezioneDestinatario> righe = entityManager.createQuery("""
+                select d.id.destinatarioId, d.confermataIl from ComunicazioneJpa c
+                left join DestinatarioComunicazioneJpa d on d.id.comunicazioneId = c.id
+                where c.id = :comunicazione
+                """, RicezioneDestinatario.class).setParameter("comunicazione", comunicazioneId).getResultList();
+        if (righe.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(righe.stream().filter(riga -> riga.destinatarioId() != null).toList());
+    }
+
     @Override
     @Transactional(readOnly = true)
     public Optional<UUID> comunicazioneDellAllegato(UUID allegatoId) {
