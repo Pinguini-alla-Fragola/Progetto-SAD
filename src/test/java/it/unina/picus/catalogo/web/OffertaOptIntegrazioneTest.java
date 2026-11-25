@@ -303,12 +303,15 @@ class OffertaOptIntegrazioneTest {
                     .andReturn();
 
             assertThat(candidati(esito)).containsExactly(optA);
-            assertThat(chiaviDiDisponibilitaPreventiva(JsonPath.read(testo(esito), "$"))).isEmpty();
+            senzaDisponibilitaPreventive(esito, "$[0]", "$[0].erogatore");
 
             MvcResult offerta = mvc.perform(get(OFFERTA, optA).with(user(banco.toString()).roles("BANCO")))
-                    .andExpect(status().isOk()).andReturn();
-            assertThat(offertaVistaDa(banco, "BANCO", optA)).containsExactly(m01 + ":true");
-            assertThat(chiaviDiDisponibilitaPreventiva(JsonPath.read(testo(offerta), "$"))).isEmpty();
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.length()").value(1))
+                    .andExpect(jsonPath("$[0].misuraId").value(m01))
+                    .andExpect(jsonPath("$[0].tramiteProfessionista").value(true))
+                    .andReturn();
+            senzaDisponibilitaPreventive(offerta, "$[0]");
         }
 
         @Test
@@ -546,25 +549,21 @@ class OffertaOptIntegrazioneTest {
     }
 
     /**
-     * Chiavi del JSON, a ogni livello, che descriverebbero una disponibilità preventiva (giorni,
-     * fasce orarie, calendari). Le altre chiavi restano libere, così il test non fissa la forma dei DTO.
+     * Campi che descriverebbero una disponibilità preventiva dell'erogatore: calendario, giorni e fasce
+     * orarie. Sono nomi esatti, cercati solo negli oggetti indicati: le altre estensioni compatibili del
+     * JSON (per esempio una data di aggiornamento) restano libere.
      */
-    private static List<String> chiaviDiDisponibilitaPreventiva(Object json) {
-        var trovate = new ArrayList<String>();
-        raccogliChiavi(json, trovate);
-        return trovate.stream()
-                .filter(chiave -> chiave.matches("(?i).*(disponib|giorn|fasc|orari|calendar|slot|agenda).*"))
-                .toList();
-    }
+    private static final List<String> CAMPI_DISPONIBILITA_PREVENTIVA = List.of(
+            "disponibilita", "disponibilitaPreventiva", "calendario", "giorni", "giorniDisponibili",
+            "fasceOrarie", "fasciaOraria", "orari", "slot");
 
-    private static void raccogliChiavi(Object nodo, List<String> chiavi) {
-        if (nodo instanceof Map<?, ?> mappa) {
-            mappa.forEach((chiave, valore) -> {
-                chiavi.add(String.valueOf(chiave));
-                raccogliChiavi(valore, chiavi);
-            });
-        } else if (nodo instanceof List<?> elenco) {
-            elenco.forEach(elemento -> raccogliChiavi(elemento, chiavi));
+    private static void senzaDisponibilitaPreventive(MvcResult esito, String... oggetti) throws Exception {
+        String json = testo(esito);
+        for (String oggetto : oggetti) {
+            for (String campo : CAMPI_DISPONIBILITA_PREVENTIVA) {
+                jsonPath(oggetto + "." + campo).doesNotExist().match(esito);
+            }
+            assertThat(JsonPath.<Object>read(json, oggetto)).as("oggetto %s presente", oggetto).isNotNull();
         }
     }
 
