@@ -10,6 +10,7 @@
     <script src="/js/operatori.js" type="module"></script>
     <link rel="stylesheet" href="/css/integrazione-ui.css">
     <script src="/js/comunicazioni.js" type="module"></script>
+    <script src="/js/schede-banco.js" type="module"></script>
 </head>
 <body data-area="banco" th:attr="data-utente=${utente.id}">
 <a th:replace="~{fragments/layout :: skip}" href="#contenuto">Vai al contenuto</a>
@@ -199,13 +200,16 @@
                 <button type="button" role="tab" id="monitoraggio-tab-opt" aria-controls="monitoraggio-view-opt" aria-selected="false" tabindex="-1">Conteggi OPT</button>
             </div>
                 <div role="tabpanel" id="monitoraggio-view-schede" aria-labelledby="monitoraggio-tab-schede" tabindex="0">
-                    <h2 class="picus-card-title">Schede trimestrali degli operatori</h2><form id="riepilogo-schede" class="picus-form form-layout" data-form-anteprima><fieldset class="campi-inattivi" disabled>
+                    <h2 class="picus-card-title">Schede trimestrali degli operatori</h2><form id="riepilogo-schede" class="picus-form form-layout" method="post" novalidate><fieldset class="campi-form">
                     <div class="picus-fields fields-period">
                         <label class="campo ">Anno<input class="form-control" name="anno" type="number" required min="2000" max="9999" data-anno></label>
                         <label class="campo ">Trimestre<select class="form-control" name="trimestre" required ><option value="1">1º trimestre</option><option value="2">2º trimestre</option><option value="3">3º trimestre</option><option value="4">4º trimestre</option></select></label>
                     </div>
-                    <div class="form-submit"><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-primary" type="submit">Consulta le schede</button></span><p class="picus-esito" role="status"></p></div>
-                </fieldset></form><div class="picus-list" id="riepilogo-schede-lista" aria-live="polite" data-funzione-inattiva></div>
+                    <div class="form-submit"><button class="btn btn-primary" type="submit">Consulta le schede</button></div>
+                </fieldset></form>
+                <p class="picus-esito" id="riepilogo-schede-esito" role="status"></p>
+                <button class="btn btn-secondary btn-sm" id="riepilogo-schede-riprova" type="button" aria-controls="riepilogo-schede-lista" hidden>Riprova la consultazione</button>
+                <div class="picus-list" id="riepilogo-schede-lista" aria-live="polite"></div>
                 </div>
                 <div role="tabpanel" id="monitoraggio-view-opt" aria-labelledby="monitoraggio-tab-opt" tabindex="0" hidden>
                     <h2 class="picus-card-title">Conteggi delle organizzazioni</h2><form id="riepilogo-opt" class="picus-form form-layout">
