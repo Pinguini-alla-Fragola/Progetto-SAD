@@ -14,17 +14,26 @@ export function valoreConteggio(testo) {
     return valore <= BigInt(Number.MAX_SAFE_INTEGER) ? Number(valore) : valore.toString();
 }
 
-export function aggiungiFinePeriodo(params, annoFine, trimestreFine) {
+export function aggiungiFinePeriodo(params, annoFine, trimestreFine, annoInizio, trimestreInizio) {
     if (Boolean(annoFine) !== Boolean(trimestreFine)) {
         throw new Error("Indica sia l'anno sia il trimestre finale.");
     }
     if (annoFine) {
+        if (annoInizio !== undefined && trimestreInizio !== undefined) {
+            const aInizio = Number(annoInizio);
+            const tInizio = Number(trimestreInizio);
+            const aFine = Number(annoFine);
+            const tFine = Number(trimestreFine);
+            if (aFine < aInizio || (aFine === aInizio && tFine < tInizio)) {
+                throw new Error('Il periodo finale non può precedere quello iniziale.');
+            }
+        }
         params.set('annoFine', annoFine);
         params.set('trimestreFine', trimestreFine);
     }
 }
 
-function leggiOptDaRubrica() {
+function leggiOptDaRubrica(vociServer = null) {
     const mappa = new Map();
     const conteggioNomi = new Map();
     const righe = document.querySelectorAll?.('#account .account-row[data-ruolo="OPT"]') || [];
@@ -34,11 +43,24 @@ function leggiOptDaRubrica() {
         const nome = (riga.dataset.nome || '').trim();
         const riferimento = (riga.dataset.riferimento || '').trim();
         const stato = (riga.dataset.stato || '').trim();
-        const chiaveNome = nome.toLocaleLowerCase('it-IT');
+        mappa.set(id, { id, nome, riferimento, stato });
+    }
+    if (Array.isArray(vociServer)) {
+        for (const voce of vociServer) {
+            if (!voce?.id) continue;
+            mappa.set(String(voce.id), {
+                id: String(voce.id),
+                nome: String(voce.nome || '').trim(),
+                riferimento: String(voce.riferimento || '').trim(),
+                stato: String(voce.stato || '').trim()
+            });
+        }
+    }
+    for (const opt of mappa.values()) {
+        const chiaveNome = opt.nome.toLocaleLowerCase('it-IT');
         if (chiaveNome) {
             conteggioNomi.set(chiaveNome, (conteggioNomi.get(chiaveNome) || 0) + 1);
         }
-        mappa.set(id, { id, nome, riferimento, stato });
     }
     for (const opt of mappa.values()) {
         const chiaveNome = opt.nome.toLocaleLowerCase('it-IT');
@@ -57,25 +79,53 @@ function descriviPeriodo(periodo) {
 
 export async function initConteggiOpt(area) {
     const utenteId = document.body.dataset.utente;
-    const optRubrica = area === 'banco' ? leggiOptDaRubrica() : new Map();
+    let optRubrica = area === 'banco' ? leggiOptDaRubrica() : new Map();
     let categorie = [];
     const misureMap = new Map();
+    const misureNonTrovate = new Set();
     const misureAttive = [];
+    const MASSIMA_CONCORRENZA_MISURE = 4;
+
+    const formattaEtichettaMisura = (m, fallbackId) => {
+        const nome = m.dati?.nome || m.nome || `Misura #${fallbackId ?? m.id}`;
+        return m.attiva === false ? `${nome} (disattivata)` : nome;
+    };
+
+    const aggiornaMappaCatalogo = misRes => {
+        if (!Array.isArray(misRes)) return false;
+        const presenti = new Set();
+        for (const m of misRes) {
+            const id = String(m.id);
+            presenti.add(id);
+            misureNonTrovate.delete(id);
+            misureMap.set(id, formattaEtichettaMisura(m, id));
+        }
+        if (area === 'banco') {
+            for (const id of [...misureMap.keys()]) {
+                if (!presenti.has(id)) misureMap.delete(id);
+            }
+        }
+        return true;
+    };
+
+    const fetchCatalogoArea = () => (
+        area === 'banco'
+            ? api('/api/catalogo/misure/tutte')
+            : api('/api/catalogo/misure')
+    );
 
     try {
         const [catRes, misRes] = await Promise.all([
             api('/api/monitoraggio/categorie'),
-            area === 'banco'
-                ? api('/api/catalogo/misure/tutte').catch(() => api('/api/catalogo/misure').catch(() => []))
-                : api('/api/catalogo/misure').catch(() => [])
+            fetchCatalogoArea().catch(() => [])
         ]);
         categorie = Array.isArray(catRes) ? catRes : [];
-        if (Array.isArray(misRes)) {
+        if (aggiornaMappaCatalogo(misRes)) {
             for (const m of misRes) {
-                const nome = m.dati?.nome || m.nome || `Misura #${m.id}`;
-                const attiva = m.attiva !== false;
-                misureMap.set(String(m.id), attiva ? nome : `${nome} (disattivata)`);
-                if (attiva) misureAttive.push({ id: String(m.id), nome });
+                if (m.attiva !== false) {
+                    const nome = m.dati?.nome || m.nome || `Misura #${m.id}`;
+                    misureAttive.push({ id: String(m.id), nome });
+                }
             }
         }
     } catch {
@@ -86,20 +136,34 @@ export async function initConteggiOpt(area) {
         const mancanti = [...new Set(
             (dati || [])
                 .map(item => String(item?.conteggio?.misuraId ?? ''))
-                .filter(id => id && !misureMap.has(id))
+                .filter(id => id && !misureMap.has(id) && !misureNonTrovate.has(id))
         )];
-        if (mancanti.length === 0) return;
-        const esiti = await Promise.allSettled(
-            mancanti.map(id => api(`/api/catalogo/misure/${encodeURIComponent(id)}`))
-        );
-        for (let i = 0; i < mancanti.length; i++) {
-            const esito = esiti[i];
-            if (esito.status === 'fulfilled' && esito.value) {
-                const m = esito.value;
-                const nome = m.dati?.nome || m.nome || `Misura #${mancanti[i]}`;
-                misureMap.set(mancanti[i], m.attiva === false ? `${nome} (disattivata)` : nome);
+        if (mancanti.length === 0) return [];
+        const nonRisolte = [];
+        let indice = 0;
+        const worker = async () => {
+            while (indice < mancanti.length) {
+                const id = mancanti[indice++];
+                try {
+                    const m = await api(`/api/catalogo/misure/${encodeURIComponent(id)}`);
+                    if (m) {
+                        misureMap.set(id, formattaEtichettaMisura(m, id));
+                    } else {
+                        nonRisolte.push(id);
+                    }
+                } catch (err) {
+                    if (err?.stato === 404) {
+                        misureNonTrovate.add(id);
+                    } else {
+                        nonRisolte.push(id);
+                    }
+                }
             }
-        }
+        };
+        await Promise.all(
+            Array.from({ length: Math.min(MASSIMA_CONCORRENZA_MISURE, mancanti.length) }, () => worker())
+        );
+        return nonRisolte;
     };
 
     const formattaMisura = id => misureMap.get(String(id)) || `Misura #${id}`;
@@ -147,7 +211,9 @@ export async function initConteggiOpt(area) {
         return cell;
     };
 
-    const renderRigheConteggi = (listaEl, dati, mostraOpt, periodo) => {
+    const nodoAvvertenza = mostraOpt => document.getElementById(mostraOpt ? 'riepilogo-opt-avvertenza' : 'conteggi-avvertenza');
+
+    const renderRigheConteggi = (listaEl, dati, mostraOpt, periodo, avvisiFallback = {}) => {
         const righe = (dati || []).map(item => {
             const art = document.createElement('article');
             art.className = 'account-row';
@@ -169,20 +235,22 @@ export async function initConteggiOpt(area) {
             columns: mostraOpt ? ['OPT', 'Misura', 'Voce', 'Conteggio dichiarato'] : ['Misura', 'Voce', 'Conteggio dichiarato'],
             empty: 'Nessun conteggio registrato per il periodo selezionato.'
         });
-        const notaTesto = `${descriviPeriodo(periodo)} · Conteggi dichiarati: le categorie sovrapponibili restano distinte (non indicano persone uniche); lo 0 è un valore dichiarato, le voci non dichiarate sono assenti.`;
-        if (listaEl.parentElement?.insertBefore) {
-            let avvertenza = listaEl.previousElementSibling;
-            if (!avvertenza?.classList?.contains?.('conteggi-avvertenza')) {
-                avvertenza = document.createElement('p');
-                avvertenza.className = 'picus-meta conteggi-avvertenza';
-                listaEl.parentElement.insertBefore(avvertenza, listaEl);
-            }
+        let notaTesto = `${descriviPeriodo(periodo)} · Conteggi dichiarati: le categorie sovrapponibili restano distinte (non indicano persone uniche); lo 0 è un valore dichiarato, le voci non dichiarate sono assenti.`;
+        if (avvisiFallback.catalogoNonAggiornato || (avvisiFallback.misureNonRisolte?.length ?? 0) > 0) {
+            const elenco = avvisiFallback.misureNonRisolte?.length
+                ? ` (${avvisiFallback.misureNonRisolte.map(id => `#${id}`).join(', ')})`
+                : '';
+            notaTesto += ` Avviso: alcuni nomi misura non sono stati aggiornati per un errore temporaneo${elenco}; riprova la consultazione per aggiornare.`;
+        }
+        const avvertenza = nodoAvvertenza(mostraOpt);
+        if (avvertenza) {
             avvertenza.hidden = false;
             avvertenza.textContent = notaTesto;
         }
     };
 
     const collegaConsultazione = (form, lista, esito, riprova, mostraOpt) => {
+        const submitBtn = form.querySelector?.('button[type="submit"]');
         let progressivo = 0;
         let ultimoPeriodo;
         let filtroInModifica = false;
@@ -191,8 +259,8 @@ export async function initConteggiOpt(area) {
             esito.textContent = '';
             riprova.hidden = true;
             lista.hidden = true;
-            const avvertenza = lista.parentElement ? lista.previousElementSibling : null;
-            if (avvertenza?.classList?.contains?.('conteggi-avvertenza')) {
+            const avvertenza = nodoAvvertenza(mostraOpt);
+            if (avvertenza) {
                 avvertenza.hidden = true;
                 avvertenza.textContent = '';
             }
@@ -208,37 +276,36 @@ export async function initConteggiOpt(area) {
             const params = new URLSearchParams({ anno, trimestre });
             if (!mostraOpt) params.set('optId', utenteId);
             try {
-                aggiungiFinePeriodo(params, annoFine, trimestreFine);
+                aggiungiFinePeriodo(params, annoFine, trimestreFine, anno, trimestre);
             } catch (err) {
                 esito.textContent = err.message;
                 return;
             }
-            if (annoFine) {
-                const aInizio = Number(anno);
-                const tInizio = Number(trimestre);
-                const aFine = Number(annoFine);
-                const tFine = Number(trimestreFine);
-                if (aFine < aInizio || (aFine === aInizio && tFine < tInizio)) {
-                    esito.textContent = 'Il periodo finale non può precedere quello iniziale.';
-                    return;
-                }
-            }
 
-            const submitBtn = form.querySelector?.('button[type="submit"]');
             if (submitBtn) submitBtn.disabled = true;
             try {
-                const dati = await api(`/api/monitoraggio/conteggi-opt?${params}`);
+                let catalogoNonAggiornato = false;
+                const [dati, misRes, rubricaRes] = await Promise.all([
+                    api(`/api/monitoraggio/conteggi-opt?${params}`),
+                    fetchCatalogoArea().catch(() => {
+                        catalogoNonAggiornato = true;
+                        return null;
+                    }),
+                    mostraOpt ? api('/api/utenze/rubrica?ruolo=OPT').catch(() => null) : Promise.resolve(null)
+                ]);
                 if (richiesta !== progressivo) return;
-                await risolviMisureMancanti(dati);
+                aggiornaMappaCatalogo(misRes);
+                if (mostraOpt) optRubrica = leggiOptDaRubrica(rubricaRes);
+                const misureNonRisolte = await risolviMisureMancanti(dati);
                 if (richiesta !== progressivo) return;
-                renderRigheConteggi(lista, dati, mostraOpt, periodo);
+                renderRigheConteggi(lista, dati, mostraOpt, periodo, { catalogoNonAggiornato, misureNonRisolte });
                 lista.hidden = false;
             } catch (err) {
                 if (richiesta !== progressivo) return;
                 esito.textContent = err.message;
                 riprova.hidden = false;
             } finally {
-                if (submitBtn) submitBtn.disabled = false;
+                if (submitBtn && richiesta === progressivo) submitBtn.disabled = false;
             }
         };
 
@@ -255,6 +322,7 @@ export async function initConteggiOpt(area) {
             progressivo++;
             ultimoPeriodo = undefined;
             filtroInModifica = true;
+            if (submitBtn) submitBtn.disabled = false;
             pulisciConsultazione();
         });
         riprova.addEventListener('click', () => {
