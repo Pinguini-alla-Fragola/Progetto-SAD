@@ -1,5 +1,7 @@
 package it.unina.picus.comunicazioni.interno.dominio;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -60,6 +62,22 @@ public interface ArchivioComunicazioni {
      * @return gli account destinatari; vuoto se la comunicazione non esiste
      */
     Set<UUID> destinatari(UUID comunicazioneId);
+
+    /**
+     * Legge lo stato di ricezione di tutti i destinatari registrati all'invio.
+     *
+     * @param comunicazioneId identificativo della comunicazione
+     * @return elenco dei destinatari, eventualmente vuoto; {@link Optional#empty()} se la comunicazione manca
+     */
+    Optional<List<RicezioneDestinatario>> ricezioni(UUID comunicazioneId);
+
+    /**
+     * Stato del riscontro per un account destinatario.
+     *
+     * @param destinatarioId identificativo dell'account
+     * @param confermataIl istante della prima conferma, oppure {@code null} se in attesa
+     */
+    record RicezioneDestinatario(UUID destinatarioId, Instant confermataIl) {}
 
     /**
      * Indica a quale comunicazione appartiene un allegato, senza leggerne il contenuto.
