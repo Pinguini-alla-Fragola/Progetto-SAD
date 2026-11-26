@@ -250,6 +250,9 @@
                     <a class="resource-link" href="https://javadocs.strawberrypenguin.it/">
                         Javadoc PICUS <span aria-hidden="true">↗</span>
                     </a>
+                    <a class="resource-link" id="coverage-link" href="https://javadocs.strawberrypenguin.it/copertura/" hidden>
+                        Copertura dei test <span aria-hidden="true">↗</span>
+                    </a>
                     <a class="resource-link" href="https://github.com/Pinguini-alla-Fragola/Progetto-SAD" target="_blank" rel="noopener noreferrer">
                         GitHub <span aria-hidden="true">↗</span>
                     </a>
@@ -287,5 +290,11 @@
             </section>
         </div>
     </main>
+    <script>
+        const coverageLink = document.getElementById('coverage-link');
+        fetch(coverageLink.href, { method: 'HEAD', cache: 'no-store' })
+            .then(response => { coverageLink.hidden = !response.ok; })
+            .catch(() => {});
+    </script>
 </body>
 </html>
