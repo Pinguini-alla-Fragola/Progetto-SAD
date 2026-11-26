@@ -1,5 +1,6 @@
 import { api } from './area-client.js';
 import { renderList } from './list-view.js';
+import { leggiRubricaAccount } from './rubrica-banco.js';
 
 const MASSIMO_CONTEGGIO = 9_223_372_036_854_775_807n;
 
@@ -33,42 +34,6 @@ export function aggiungiFinePeriodo(params, annoFine, trimestreFine, annoInizio,
     }
 }
 
-function leggiOptDaRubrica(vociServer = null) {
-    const mappa = new Map();
-    const conteggioNomi = new Map();
-    const righe = document.querySelectorAll?.('#account .account-row[data-ruolo="OPT"]') || [];
-    for (const riga of righe) {
-        const id = riga.dataset?.id;
-        if (!id) continue;
-        const nome = (riga.dataset.nome || '').trim();
-        const riferimento = (riga.dataset.riferimento || '').trim();
-        const stato = (riga.dataset.stato || '').trim();
-        mappa.set(id, { id, nome, riferimento, stato });
-    }
-    if (Array.isArray(vociServer)) {
-        for (const voce of vociServer) {
-            if (!voce?.id) continue;
-            mappa.set(String(voce.id), {
-                id: String(voce.id),
-                nome: String(voce.nome || '').trim(),
-                riferimento: String(voce.riferimento || '').trim(),
-                stato: String(voce.stato || '').trim()
-            });
-        }
-    }
-    for (const opt of mappa.values()) {
-        const chiaveNome = opt.nome.toLocaleLowerCase('it-IT');
-        if (chiaveNome) {
-            conteggioNomi.set(chiaveNome, (conteggioNomi.get(chiaveNome) || 0) + 1);
-        }
-    }
-    for (const opt of mappa.values()) {
-        const chiaveNome = opt.nome.toLocaleLowerCase('it-IT');
-        opt.omonimo = chiaveNome ? (conteggioNomi.get(chiaveNome) || 0) > 1 : false;
-    }
-    return mappa;
-}
-
 function descriviPeriodo(periodo) {
     const { anno, trimestre, annoFine, trimestreFine } = periodo;
     if (annoFine && trimestreFine) {
@@ -79,16 +44,47 @@ function descriviPeriodo(periodo) {
 
 export async function initConteggiOpt(area) {
     const utenteId = document.body.dataset.utente;
-    let optRubrica = area === 'banco' ? leggiOptDaRubrica() : new Map();
+    let optRubrica = area === 'banco' ? leggiRubricaAccount('OPT') : new Map();
     let categorie = [];
     const misureMap = new Map();
     const misureNonTrovate = new Set();
-    const misureAttive = [];
+    let selectMisura = null;
+    let versioneCatalogo = 0;
     const MASSIMA_CONCORRENZA_MISURE = 4;
 
     const formattaEtichettaMisura = (m, fallbackId) => {
         const nome = m.dati?.nome || m.nome || `Misura #${fallbackId ?? m.id}`;
         return m.attiva === false ? `${nome} (disattivata)` : nome;
+    };
+
+    const aggiornaSelectMisure = misRes => {
+        if (area !== 'opt' || !selectMisura || !Array.isArray(misRes)) return;
+        const attive = [];
+        for (const m of misRes) {
+            if (m.attiva !== false) {
+                attive.push({
+                    id: String(m.id),
+                    nome: m.dati?.nome || m.nome || `Misura #${m.id}`
+                });
+            }
+        }
+        const correnti = Array.from(selectMisura.options || [], o => `${o.value}\u0000${o.textContent}`);
+        const nuove = attive.map(m => `${m.id}\u0000${m.nome}`);
+        if (correnti.length === nuove.length && correnti.every((v, i) => v === nuove[i])) return;
+
+        const precedente = String(selectMisura.value ?? '');
+        const opzioni = attive.map(({ id, nome }) => {
+            const opt = document.createElement('option');
+            opt.value = id;
+            opt.textContent = nome;
+            return opt;
+        });
+        selectMisura.replaceChildren(...opzioni);
+        if (precedente && attive.some(m => m.id === precedente)) {
+            selectMisura.value = precedente;
+        } else if (attive.length > 0) {
+            selectMisura.value = attive[0].id;
+        }
     };
 
     const aggiornaMappaCatalogo = misRes => {
@@ -100,10 +96,11 @@ export async function initConteggiOpt(area) {
             misureNonTrovate.delete(id);
             misureMap.set(id, formattaEtichettaMisura(m, id));
         }
-        if (area === 'banco') {
-            for (const id of [...misureMap.keys()]) {
-                if (!presenti.has(id)) misureMap.delete(id);
-            }
+        for (const id of [...misureMap.keys()]) {
+            if (!presenti.has(id)) misureMap.delete(id);
+        }
+        if (area === 'opt') {
+            aggiornaSelectMisure(misRes);
         }
         return true;
     };
@@ -114,6 +111,16 @@ export async function initConteggiOpt(area) {
             : api('/api/catalogo/misure')
     );
 
+    const ricaricaCatalogoOpt = async () => {
+        if (area !== 'opt') return;
+        const versione = ++versioneCatalogo;
+        const misRes = await fetchCatalogoArea().catch(() => null);
+        if (versione === versioneCatalogo && misRes) {
+            aggiornaMappaCatalogo(misRes);
+        }
+    };
+
+    let misureIniziali = [];
     try {
         const [catRes, misRes] = await Promise.all([
             api('/api/monitoraggio/categorie'),
@@ -121,12 +128,7 @@ export async function initConteggiOpt(area) {
         ]);
         categorie = Array.isArray(catRes) ? catRes : [];
         if (aggiornaMappaCatalogo(misRes)) {
-            for (const m of misRes) {
-                if (m.attiva !== false) {
-                    const nome = m.dati?.nome || m.nome || `Misura #${m.id}`;
-                    misureAttive.push({ id: String(m.id), nome });
-                }
-            }
+            misureIniziali = misRes;
         }
     } catch {
         categorie = [];
@@ -285,6 +287,7 @@ export async function initConteggiOpt(area) {
             if (submitBtn) submitBtn.disabled = true;
             try {
                 let catalogoNonAggiornato = false;
+                const versioneCat = ++versioneCatalogo;
                 const [dati, misRes, rubricaRes] = await Promise.all([
                     api(`/api/monitoraggio/conteggi-opt?${params}`),
                     fetchCatalogoArea().catch(() => {
@@ -294,8 +297,8 @@ export async function initConteggiOpt(area) {
                     mostraOpt ? api('/api/utenze/rubrica?ruolo=OPT').catch(() => null) : Promise.resolve(null)
                 ]);
                 if (richiesta !== progressivo) return;
-                aggiornaMappaCatalogo(misRes);
-                if (mostraOpt) optRubrica = leggiOptDaRubrica(rubricaRes);
+                if (versioneCat === versioneCatalogo && misRes) aggiornaMappaCatalogo(misRes);
+                if (mostraOpt) optRubrica = leggiRubricaAccount('OPT', rubricaRes);
                 const misureNonRisolte = await risolviMisureMancanti(dati);
                 if (richiesta !== progressivo) return;
                 renderRigheConteggi(lista, dati, mostraOpt, periodo, { catalogoNonAggiornato, misureNonRisolte });
@@ -344,16 +347,27 @@ export async function initConteggiOpt(area) {
         const form = document.getElementById('conteggi');
         const contenitoreVoci = document.getElementById('voci-conteggi');
         const btnAggiungi = document.getElementById('altra-voce-opt');
-        const selectMisura = form?.querySelector('select[name="misuraId"]');
+        selectMisura = form?.querySelector?.('select[name="misuraId"]') ?? null;
 
-        if (selectMisura && misureAttive.length > 0 && selectMisura.options.length === 0) {
-            for (const { id, nome } of misureAttive) {
-                const opt = document.createElement('option');
-                opt.value = id;
-                opt.textContent = nome;
-                selectMisura.append(opt);
-            }
+        if (selectMisura && selectMisura.options.length === 0) {
+            aggiornaSelectMisure(misureIniziali);
         }
+        document.getElementById('conteggi-tab-compila')?.addEventListener?.('click', () => {
+            ricaricaCatalogoOpt();
+        });
+        document.querySelector?.('#workspace-sidebar a[href="#monitoraggio"]')?.addEventListener?.('click', () => {
+            ricaricaCatalogoOpt();
+        });
+        globalThis.window?.addEventListener?.('hashchange', () => {
+            if (globalThis.location?.hash === '#monitoraggio') {
+                ricaricaCatalogoOpt();
+            }
+        });
+        document.addEventListener?.('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                ricaricaCatalogoOpt();
+            }
+        });
 
         const aggiornaRimozione = () => {
             const ultimaVoce = contenitoreVoci.childElementCount === 1;
@@ -452,6 +466,7 @@ export async function initConteggiOpt(area) {
             } catch (err) {
                 const dettagliCampi = Object.values(err.campi || {}).join(' ');
                 esito.textContent = dettagliCampi ? `${err.message} ${dettagliCampi}` : err.message;
+                ricaricaCatalogoOpt();
                 return;
             } finally {
                 submitBtn.disabled = false;
