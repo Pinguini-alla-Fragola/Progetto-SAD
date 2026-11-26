@@ -205,25 +205,29 @@ class ServizioCreazioneOperatoriTest {
             // L'attivazione con il vecchio link risolve l'account dal token e si ferma su quel lock. Si procede solo
             // quando pg_blocking_pids mostra un backend bloccato proprio da questa transazione mentre legge l'account;
             // allora il reinvio sostituisce il link nella stessa transazione e il lock si libera al commit.
-            CompletableFuture<Void> tentativo = transazioni.execute(stato -> {
-                accounts.findByIdForUpdate(id).orElseThrow();
-                int processoDelTest = operatori.conta("select pg_backend_pid()");
-                CompletableFuture<Void> avviato = CompletableFuture.runAsync(
-                        () -> attivazione.attivaAccount(vecchio, PRIMA_PASSWORD));
-                OperatoriDiProva.attendi("attivazione bloccata dal lock della transazione del test",
-                        () -> avviato.isDone() || !bloccatiDa(processoDelTest).isEmpty());
-                List<String> bloccati = bloccatiDa(processoDelTest);
-                assertThat(bloccati).as("backend fermi sul lock della transazione del test").hasSize(1);
-                assertThat(bloccati.get(0)).as("query in attesa").containsIgnoringCase("utenze_account");
-                conclusione.concludi(id, nuovo, true);
-                return avviato;
-            });
+            // L'esecutore è chiuso fuori dalla transazione: anche se un controllo fallisce, prima si libera il lock
+            // e poi si attende la fine dell'attivazione, che così non scrive durante il test successivo.
+            try (ExecutorService esecutore = Executors.newSingleThreadExecutor()) {
+                CompletableFuture<Void> tentativo = transazioni.execute(stato -> {
+                    accounts.findByIdForUpdate(id).orElseThrow();
+                    int processoDelTest = operatori.conta("select pg_backend_pid()");
+                    CompletableFuture<Void> avviato = CompletableFuture.runAsync(
+                            () -> attivazione.attivaAccount(vecchio, PRIMA_PASSWORD), esecutore);
+                    OperatoriDiProva.attendi("attivazione bloccata dal lock della transazione del test",
+                            () -> avviato.isDone() || !bloccatiDa(processoDelTest).isEmpty());
+                    List<String> bloccati = bloccatiDa(processoDelTest);
+                    assertThat(bloccati).as("backend fermi sul lock della transazione del test").hasSize(1);
+                    assertThat(bloccati.get(0)).as("query in attesa").containsIgnoringCase("utenze_account");
+                    conclusione.concludi(id, nuovo, true);
+                    return avviato;
+                });
 
-            assertThatThrownBy(() -> tentativo.get(30, SECONDS))
-                    .isInstanceOf(ExecutionException.class)
-                    .cause()
-                    .isExactlyInstanceOf(TokenAttivazioneNonValidoException.class)
-                    .hasMessage("Il link di attivazione è scaduto o è già stato utilizzato.");
+                assertThatThrownBy(() -> tentativo.get(30, SECONDS))
+                        .isInstanceOf(ExecutionException.class)
+                        .cause()
+                        .isExactlyInstanceOf(TokenAttivazioneNonValidoException.class)
+                        .hasMessage("Il link di attivazione è scaduto o è già stato utilizzato.");
+            }
 
             assertThat(operatori.stato(id)).isEqualTo("IN_ATTESA_DI_ATTIVAZIONE");
             assertThat(encoder.matches(PRIMA_PASSWORD, operatori.passwordHash(id))).isFalse();
@@ -263,8 +267,14 @@ class ServizioCreazioneOperatoriTest {
         }
     }
 
-    /** Query dei backend fermi in attesa di un lock tenuto dal processo PostgreSQL indicato. */
+    /**
+     * Query dei backend fermi in attesa di un lock tenuto dal processo PostgreSQL indicato. Dentro una transazione
+     * PostgreSQL conserva le statistiche lette la prima volta, mentre {@code pg_blocking_pids} vede i blocchi attuali:
+     * senza aggiornare lo snapshot la query mostrata sarebbe quella precedente del backend, per esempio
+     * {@code ROLLBACK}. Per questo lo snapshot si azzera prima di ogni lettura.
+     */
     private List<String> bloccatiDa(int processo) {
+        jdbc.execute("select pg_stat_clear_snapshot()");
         return jdbc.queryForList("select query from pg_stat_activity where ? = any(pg_blocking_pids(pid))",
                 String.class, processo);
     }
@@ -277,12 +287,15 @@ class ServizioCreazioneOperatoriTest {
     /** Esito di un comando in gara: il valore restituito oppure l'errore lanciato. */
     private record Esito<T>(T valore, Throwable errore) {}
 
-    /** Avvia i comandi insieme dietro una barriera e raccoglie gli esiti nell'ordine dei comandi. */
+    /**
+     * Avvia i comandi insieme dietro una barriera e raccoglie gli esiti nell'ordine dei comandi. La chiusura
+     * dell'esecutore attende la fine di tutti i thread, anche quando la raccolta degli esiti fallisce: nessun comando
+     * resta in corso mentre il test successivo pulisce il database.
+     */
     @SafeVarargs
     private static <T> List<Esito<T>> inParallelo(Callable<T>... comandi) throws Exception {
-        ExecutorService esecutore = Executors.newFixedThreadPool(comandi.length);
         CyclicBarrier partenza = new CyclicBarrier(comandi.length);
-        try {
+        try (ExecutorService esecutore = Executors.newFixedThreadPool(comandi.length)) {
             List<Future<T>> futuri = new ArrayList<>();
             for (Callable<T> comando : comandi) {
                 futuri.add(esecutore.submit(() -> {
@@ -299,8 +312,6 @@ class ServizioCreazioneOperatoriTest {
                 }
             }
             return esiti;
-        } finally {
-            esecutore.shutdownNow();
         }
     }
 
