@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import it.unina.picus.richieste.api.ConflittoRichiestaException;
 import it.unina.picus.richieste.api.RisorsaRichiesteNonTrovataException;
 import it.unina.picus.shared.ControlloAccesso;
@@ -82,12 +83,9 @@ public class ServizioInvioRichieste implements InvioRichiesteApi {
 
         Map<String, String> errori = new LinkedHashMap<>();
         if (catalogo.cercaMisura(normalizzati.misuraId()).filter(Misura::attiva).isEmpty()) {
-            if (riferimentoInvio != null) {
-                // Un invio concorrente può avere concluso prima della disattivazione.
-                var concorrente = repository.cercaPerInvio(attore.accountId(), riferimentoInvio);
-                if (concorrente.isPresent()) {
-                    return confermaInvio(concorrente.get(), normalizzati);
-                }
+            var ritento = recuperaRitentoConcorrente(attore.accountId(), riferimentoInvio, normalizzati);
+            if (ritento.isPresent()) {
+                return ritento.get();
             }
             errori.put("misuraId", ERRORE_MISURA);
         }
@@ -99,17 +97,22 @@ public class ServizioInvioRichieste implements InvioRichiesteApi {
         }
 
         if (!selezioneMisure.bloccaMisuraAttiva(normalizzati.misuraId())) {
-            if (riferimentoInvio != null) {
-                var concorrente = repository.cercaPerInvio(attore.accountId(), riferimentoInvio);
-                if (concorrente.isPresent()) {
-                    return confermaInvio(concorrente.get(), normalizzati);
-                }
-            }
-            throw new DatiRichiestaNonValidiException(Map.of("misuraId", ERRORE_MISURA));
+            return recuperaRitentoConcorrente(attore.accountId(), riferimentoInvio, normalizzati)
+                    .orElseThrow(() -> new DatiRichiestaNonValidiException(Map.of("misuraId", ERRORE_MISURA)));
         }
 
         var nuova = RichiestaDiMisura.inviata(attore.accountId(), normalizzati, clock.instant(), riferimentoInvio);
         return confermaInvio(repository.registra(nuova), normalizzati);
+    }
+
+    private Optional<RichiestaSintesi> recuperaRitentoConcorrente(
+            UUID accountId, UUID riferimentoInvio, DatiInvio normalizzati) {
+        if (riferimentoInvio == null) {
+            return Optional.empty();
+        }
+        // Un invio concorrente può avere concluso prima della disattivazione o del lock.
+        return repository.cercaPerInvio(accountId, riferimentoInvio)
+                .map(concorrente -> confermaInvio(concorrente, normalizzati));
     }
 
     private RichiestaSintesi confermaInvio(RichiestaDiMisura richiesta, DatiInvio dati) {
