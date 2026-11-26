@@ -33,17 +33,14 @@ jobs:
           java-version: '25'
           cache: maven
 
-      - name: Risolvi il classpath Java
+      - name: Verifica le API e risolvi il classpath Java
         shell: bash
-        run: |
-          bash ./mvnw --batch-mode --no-transfer-progress dependency:build-classpath \
-            -DincludeScope=compile -Dmdep.outputFile="$RUNNER_TEMP/javadoc-classpath.txt"
+        run: bash scripts/verifica_javadoc.sh "$RUNNER_TEMP/javadoc-classpath.txt" "$RUNNER_TEMP/javadoc-api-check"
 
       - name: Genera Javadoc
         shell: bash
         run: |
           classpath="$(cat "$RUNNER_TEMP/javadoc-classpath.txt")"
-          javadoc -quiet -classpath "$classpath" -d "$RUNNER_TEMP/javadoc-api-check" '@scripts/javadoc-api.args'
           javadoc -classpath "$classpath" -d "$RUNNER_TEMP/javadoc-site" '@scripts/javadoc.args'
           test -s "$RUNNER_TEMP/javadoc-site/index.html"
           cp docs/assets/picus-logo.svg "$RUNNER_TEMP/javadoc-site/resource-files/picus-logo.svg"

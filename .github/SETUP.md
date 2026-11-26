@@ -45,6 +45,11 @@ GitHub di scrittura per percorso.
 
 Riferimento: [code owner e protezioni](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners).
 
+Con **Allow auto-merge** attivo in **Settings → General → Pull Requests**,
+chi ha accesso in scrittura può scegliere **Enable auto-merge** su una singola
+PR. GitHub esegue il merge dopo le approvazioni e i controlli richiesti dal
+ruleset.
+
 ## Issue e Project
 
 I form seguono le sette categorie del template del corso: Epic, User Story,
@@ -61,6 +66,11 @@ automazioni di classificazione saranno concordati insieme alla configurazione
 di collaborazione. I form non assegnano persone o sprint automaticamente.
 Non modificare gli elementi esistenti del backlog senza una revisione del team.
 
+Nel [Project](https://github.com/orgs/Pinguini-alla-Fragola/projects/2/workflows),
+`Item closed` è configurato per le issue e `Pull request merged` porta a
+`Done` le PR integrate. Le transizioni delle issue tengono conto anche della
+sincronizzazione con il loro stato nativo.
+
 ## Workflow e dipendenze
 
 [Documentazione](workflows/docs.yml) verifica Markdown e link locali; i link web
@@ -68,6 +78,16 @@ non vengono interrogati. Le regole sono volutamente leggere e non impongono
 limiti alle righe o uno stile delle tabelle. Non vengono eseguite correzioni
 automatiche né commit dei risultati. Word e PDF richiedono una review visiva:
 questi controlli non ne verificano l'impaginazione.
+
+[Link esterni](workflows/link-esterni.yml) verifica gli URL HTTP e HTTPS
+nella documentazione ogni lunedì alle 09:35, ora di Roma. Il risultato
+compare nel riepilogo di Actions. Il workflow supporta anche **Run workflow**.
+
+[Etichette delle PR](workflows/labeler.yml) applica
+[`documentation`, `ci`, `frontend` e `test`](labeler.yml) in base ai percorsi
+del diff. `documentation` richiede percorsi documentali per tutti i file
+elencati da GitHub. Il job aggiorna queste etichette a ogni push sulla PR
+e legge la configurazione dal ramo base tramite API.
 
 [Java CI](workflows/ci.yml) dichiara esplicitamente l'assenza di build e test
 finché non esiste `pom.xml`. Quando il POM compare, esige il Maven Wrapper e
@@ -102,6 +122,10 @@ Riferimenti: [sicurezza delle Action](https://docs.github.com/en/actions/referen
 e [opzioni Dependabot](https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference).
 
 ## Pubblicazione del Javadoc
+
+[Controllo Javadoc](workflows/javadoc-pr.yml) esegue la stessa verifica delle
+API pubbliche prima del merge delle PR che modificano sorgenti o configurazione
+della build e della documentazione Java.
 
 Il workflow [Pubblica Javadoc](workflows/javadoc.yml) si avvia a ogni push su
 `main`, compresi i merge delle PR. Usa Java 25 e il classpath di compilazione
@@ -161,6 +185,16 @@ Credenziali CI eventuali vanno in GitHub Secrets; non in file, template o issue.
 
 Riferimento: [impostazioni di sicurezza](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-security-and-analysis-settings-for-your-repository).
 
+## Bozza di release dello sprint
+
+In **Actions → Prepara la release dello sprint → Run workflow**, selezionare
+`main` e indicare il tag dello sprint già presente su GitHub. Il
+[workflow](workflows/release-sprint.yml) usa il commit del tag per generare
+`PICUS.jar` e allegare il PDF di progetto. La bozza contiene le
+[note di rilascio generate](release.yml) e il riepilogo della run contiene
+il link per aprirla. Si può ripetere l'esecuzione per completare la bozza
+con gli allegati mancanti.
+
 ## Burndown: perimetro e aggiornamento
 
 Il [calcolo](../scripts/burndown.py) conta soltanto le issue di tipo nativo `Task`,
@@ -170,7 +204,8 @@ l'iterazione; non occorre spostarli per correggere il grafico.
 
 I punti di un task sono solo il valore del campo `Estimate`: la taglia `Size`
 non viene usata. Un task senza `Estimate` vale 0 punti, quindi va stimato per
-comparire nel grafico.
+comparire nel grafico. Il riepilogo della run elenca i task dello sprint
+senza stima e quelli `In progress` senza assegnatario, con i link alle issue.
 
 Dopo aver integrato i file in `main`, aprire **Actions → burndown → Run workflow**,
 selezionare `main` e lasciare vuoto il titolo per aggiornare l'iterazione corrente.
