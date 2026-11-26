@@ -3,10 +3,10 @@ package it.unina.picus.monitoraggio.interno.dominio;
 import java.util.Arrays;
 import java.util.Objects;
 
-/** Tracciati di monitoraggio gestibili con versioni immutabili per trimestre. */
+/** Tracciato di monitoraggio gestito con versioni immutabili per trimestre (#181, #41). */
 public enum TracciatoMonitoraggio {
-    TM_OP_01("TM-OP-01"),
-    TM_OPT_01("TM-OPT-01");
+    /** Tracciato della scheda personale degli operatori del Banco. */
+    TM_OP_01("TM-OP-01");
 
     private final String codice;
 
@@ -20,7 +20,7 @@ public enum TracciatoMonitoraggio {
     }
 
     /**
-     * Risolve il tracciato dal codice ufficiale {@code TM-OP-01} o {@code TM-OPT-01}.
+     * Risolve il tracciato dal codice ufficiale {@code TM-OP-01}.
      *
      * @param codice codice testuale del tracciato
      * @return tracciato corrispondente

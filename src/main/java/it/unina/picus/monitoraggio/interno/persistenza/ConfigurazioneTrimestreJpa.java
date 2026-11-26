@@ -1,7 +1,5 @@
 package it.unina.picus.monitoraggio.interno.persistenza;
 
-import it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre;
-import it.unina.picus.monitoraggio.interno.dominio.TracciatoMonitoraggio;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EmbeddedId;
@@ -34,18 +32,8 @@ public class ConfigurazioneTrimestreJpa {
     @Column(name = "assegnata_il", nullable = false)
     private Instant assegnataIl;
 
+    /** Costruttore riservato a JPA. */
     protected ConfigurazioneTrimestreJpa() {}
-
-    ConfigurazioneTrimestreJpa(TracciatoMonitoraggio tracciato, Trimestre trimestre, VersioneCategorieJpa versione, Instant assegnataIl) {
-        this.id = new Id(tracciato.codice(), trimestre.anno(), trimestre.numero());
-        this.versioneId = versione.id();
-        this.versione = versione;
-        this.assegnataIl = assegnataIl;
-    }
-
-    Id id() {
-        return id;
-    }
 
     VersioneCategorieJpa versione() {
         return versione;
@@ -68,21 +56,8 @@ public class ConfigurazioneTrimestreJpa {
         @Column(name = "trimestre", nullable = false)
         private int trimestre;
 
+        /** Costruttore riservato a JPA. */
         protected Id() {}
-
-        public Id(String tracciato, int anno, int trimestre) {
-            this.tracciato = tracciato;
-            this.anno = anno;
-            this.trimestre = trimestre;
-        }
-
-        public String tracciato() {
-            return tracciato;
-        }
-
-        public Trimestre aTrimestre() {
-            return new Trimestre(anno, trimestre);
-        }
 
         @Override
         public boolean equals(Object o) {

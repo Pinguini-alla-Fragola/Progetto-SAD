@@ -55,57 +55,8 @@ public class VersioneCategorieJpa {
     @OrderBy("ordine asc, codice asc")
     private List<VoceVersioneCategorieJpa> voci = new ArrayList<>();
 
+    /** Costruttore riservato a JPA. */
     protected VersioneCategorieJpa() {}
-
-    VersioneCategorieJpa(
-            UUID id,
-            TracciatoMonitoraggio tracciato,
-            String codiceVersione,
-            StatoVersioneCategorie stato,
-            String descrizione,
-            Instant creataIl,
-            Instant pubblicataIl) {
-        this.id = id;
-        this.tracciato = tracciato.codice();
-        this.codiceVersione = codiceVersione;
-        this.stato = stato;
-        this.descrizione = descrizione;
-        this.creataIl = creataIl;
-        this.pubblicataIl = pubblicataIl;
-    }
-
-    UUID id() {
-        return id;
-    }
-
-    TracciatoMonitoraggio tracciatoEnum() {
-        return TracciatoMonitoraggio.daCodice(tracciato);
-    }
-
-    StatoVersioneCategorie stato() {
-        return stato;
-    }
-
-    List<VoceVersioneCategorieJpa> voci() {
-        return voci;
-    }
-
-    void aggiungiVoci(List<VoceCategoriaVersione> nuoveVoci) {
-        for (VoceCategoriaVersione voce : nuoveVoci) {
-            voci.add(new VoceVersioneCategorieJpa(this, voce));
-        }
-    }
-
-    void svuotaVoci() {
-        voci.clear();
-    }
-
-    void segnaPubblicata(Instant istantePubblicazione) {
-        this.stato = StatoVersioneCategorie.PUBBLICATA;
-        if (this.pubblicataIl == null) {
-            this.pubblicataIl = istantePubblicazione;
-        }
-    }
 
     VersioneCategorie aDominio() {
         List<VoceCategoriaVersione> vociDominio = voci.stream()

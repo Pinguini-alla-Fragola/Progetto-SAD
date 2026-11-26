@@ -13,16 +13,6 @@ import java.util.function.Consumer;
 public interface ArchivioSchedeOperatore {
 
     /**
-     * Registra la scheda e i suoi conteggi nella stessa transazione.
-     *
-     * @param scheda invio già validato
-     * @throws SchedaGiaInviataException se il titolare ha già inviato nello stesso periodo
-     */
-    default void registra(SchedaOperatore scheda) {
-        registra(scheda, null);
-    }
-
-    /**
      * Registra la scheda, i conteggi e il riferimento alla versione di categorie usata all'accettazione.
      *
      * @param scheda invio già validato

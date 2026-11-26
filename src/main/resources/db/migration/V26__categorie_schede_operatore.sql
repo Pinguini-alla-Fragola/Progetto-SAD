@@ -1,6 +1,6 @@
 create table monitoraggio_versioni_categorie (
     id uuid primary key,
-    tracciato varchar(32) not null check (tracciato in ('TM-OP-01', 'TM-OPT-01')),
+    tracciato varchar(32) not null constraint chk_mon_ver_cat_tracciato check (tracciato = 'TM-OP-01'),
     codice_versione varchar(64) not null,
     stato varchar(16) not null check (stato in ('BOZZA', 'PUBBLICATA', 'LEGACY')),
     descrizione varchar(255) not null check (length(trim(descrizione)) > 0),
@@ -35,7 +35,7 @@ create table monitoraggio_voci_versione_categorie (
 );
 
 create table monitoraggio_configurazioni_trimestre (
-    tracciato varchar(32) not null check (tracciato in ('TM-OP-01', 'TM-OPT-01')),
+    tracciato varchar(32) not null constraint chk_mon_conf_trim_tracciato check (tracciato = 'TM-OP-01'),
     anno integer not null check (anno > 0),
     trimestre integer not null check (trimestre between 1 and 4),
     versione_id uuid not null,

@@ -37,15 +37,8 @@ public class VoceVersioneCategorieJpa {
     @Column(nullable = false)
     private int ordine;
 
+    /** Costruttore riservato a JPA. */
     protected VoceVersioneCategorieJpa() {}
-
-    VoceVersioneCategorieJpa(VersioneCategorieJpa versione, VoceCategoriaVersione voce) {
-        this.id = new Id(versione.id(), voce.codice());
-        this.versione = versione;
-        this.descrizione = voce.descrizione();
-        this.definizione = voce.definizione();
-        this.ordine = voce.ordine();
-    }
 
     VoceCategoriaVersione aDominio() {
         return new VoceCategoriaVersione(id.codice(), descrizione, definizione, ordine);
@@ -61,14 +54,10 @@ public class VoceVersioneCategorieJpa {
         @Column(name = "codice", nullable = false, length = 64)
         private String codice;
 
+        /** Costruttore riservato a JPA. */
         protected Id() {}
 
-        public Id(UUID versioneId, String codice) {
-            this.versioneId = versioneId;
-            this.codice = codice;
-        }
-
-        public String codice() {
+        String codice() {
             return codice;
         }
 

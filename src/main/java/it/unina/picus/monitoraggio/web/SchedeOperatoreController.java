@@ -55,6 +55,7 @@ class SchedeOperatoreController {
     @GetMapping("/modulo")
     Modulo modulo(IdentitaAutenticata attore, @RequestParam(required = false) Integer anno,
                   @RequestParam(required = false) Integer trimestre) {
+        RegoleAccessoScheda.verificaOperatore(attore);
         Trimestre scelto = periodo(anno, trimestre);
         ConfigurazioneModulo configurazione = schede.moduloPer(attore, scelto);
         return new Modulo(scelto, TracciatoSchedaOperatore.CODICE,

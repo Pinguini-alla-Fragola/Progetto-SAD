@@ -64,12 +64,9 @@ public sealed interface ConfigurazioneTrimestre
      */
     record NonConfigurata(Trimestre trimestre, boolean transitorioSenzaPubblicazioni)
             implements ConfigurazioneTrimestre {
+        /** Valida il riferimento al trimestre non configurato. */
         public NonConfigurata {
             Objects.requireNonNull(trimestre, "trimestre");
-        }
-
-        public NonConfigurata(Trimestre trimestre) {
-            this(trimestre, false);
         }
     }
 }
