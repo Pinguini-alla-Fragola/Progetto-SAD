@@ -12,11 +12,11 @@ public final class ValidatoreDatiOperatore {
 <span class="fc" id="L12">    }</span>
 
     public Errori verifica(DatiOperatore dati) {
-<span class="nc" id="L15">        Errori errori = new Errori();</span>
-<span class="nc bnc" id="L16" title="All 2 branches missed.">        for (RegolaDatiOperatore regola : regole) {</span>
-<span class="nc" id="L17">            regola.verifica(dati, errori);</span>
-<span class="nc" id="L18">        }</span>
-<span class="nc" id="L19">        return errori;</span>
+<span class="fc" id="L15">        Errori errori = new Errori();</span>
+<span class="fc bfc" id="L16" title="All 2 branches covered.">        for (RegolaDatiOperatore regola : regole) {</span>
+<span class="fc" id="L17">            regola.verifica(dati, errori);</span>
+<span class="fc" id="L18">        }</span>
+<span class="fc" id="L19">        return errori;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

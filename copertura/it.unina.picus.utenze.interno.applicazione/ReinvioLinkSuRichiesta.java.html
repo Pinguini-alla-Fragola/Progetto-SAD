@@ -74,9 +74,9 @@ public class ReinvioLinkSuRichiesta {
 <span class="fc" id="L74">        return new ThreadPoolExecutor(thread, thread, 0L, TimeUnit.MILLISECONDS,</span>
                 new ArrayBlockingQueue&lt;&gt;(capacitaCoda),
                 lavoro -&gt; {
-<span class="nc" id="L77">                    Thread t = new Thread(lavoro, &quot;reinvio-attivazione-&quot; + numero.incrementAndGet());</span>
-<span class="nc" id="L78">                    t.setDaemon(true);</span>
-<span class="nc" id="L79">                    return t;</span>
+<span class="fc" id="L77">                    Thread t = new Thread(lavoro, &quot;reinvio-attivazione-&quot; + numero.incrementAndGet());</span>
+<span class="fc" id="L78">                    t.setDaemon(true);</span>
+<span class="fc" id="L79">                    return t;</span>
                 },
                 new ThreadPoolExecutor.AbortPolicy());
     }
@@ -89,8 +89,8 @@ public class ReinvioLinkSuRichiesta {
      */
     public boolean richiedi(String email) {
         try {
-<span class="nc" id="L92">            esecutore.execute(() -&gt; elabora(email));</span>
-<span class="nc" id="L93">            return true;</span>
+<span class="fc" id="L92">            esecutore.execute(() -&gt; elabora(email));</span>
+<span class="fc" id="L93">            return true;</span>
 <span class="nc" id="L94">        } catch (RejectedExecutionException e) {</span>
 <span class="nc" id="L95">            LOG.warn(&quot;Richiesta di un nuovo link di attivazione rifiutata: coda piena (richieste rifiutate finora: {})&quot;,</span>
 <span class="nc" id="L96">                    scartate.incrementAndGet());</span>
@@ -101,20 +101,20 @@ public class ReinvioLinkSuRichiesta {
     /** L'indirizzo non compare nei log: dire quale è stato scartato lo rivelerebbe a chi legge i log. */
     private void elabora(String email) {
         try {
-<span class="nc" id="L104">            attivazione.preparaTokenPerEmail(email).ifPresent(this::consegna);</span>
+<span class="fc" id="L104">            attivazione.preparaTokenPerEmail(email).ifPresent(this::consegna);</span>
 <span class="nc" id="L105">        } catch (RuntimeException e) {</span>
 <span class="nc" id="L106">            LOG.warn(&quot;Richiesta di un nuovo link di attivazione non elaborata (causa={})&quot;, e.getClass().getSimpleName());</span>
-<span class="nc" id="L107">        }</span>
-<span class="nc" id="L108">    }</span>
+<span class="fc" id="L107">        }</span>
+<span class="fc" id="L108">    }</span>
 
     /** Il nuovo link sostituisce il precedente solo se la posta lo ha accettato; la modalità demo vale come accettato. */
     private void consegna(LinkPreparato link) {
-<span class="nc bnc" id="L112" title="All 2 branches missed.">        boolean accettato = consegna.consegna(link.dati()) != ConsegnaLinkAttivazione.Esito.NON_RIUSCITO;</span>
-<span class="nc bnc" id="L113" title="All 2 branches missed.">        if (!accettato) {</span>
-<span class="nc" id="L114">            LOG.warn(&quot;Invio del nuovo link di attivazione non riuscito: restano validi i link già inviati&quot;);</span>
+<span class="fc bfc" id="L112" title="All 2 branches covered.">        boolean accettato = consegna.consegna(link.dati()) != ConsegnaLinkAttivazione.Esito.NON_RIUSCITO;</span>
+<span class="fc bfc" id="L113" title="All 2 branches covered.">        if (!accettato) {</span>
+<span class="fc" id="L114">            LOG.warn(&quot;Invio del nuovo link di attivazione non riuscito: restano validi i link già inviati&quot;);</span>
         }
-<span class="nc" id="L116">        concludi(link, accettato);</span>
-<span class="nc" id="L117">    }</span>
+<span class="fc" id="L116">        concludi(link, accettato);</span>
+<span class="fc" id="L117">    }</span>
 
     /**
      * Registra l'esito dell'invio con la politica comune di {@link RiprovaTransitoria}: la email è già partita e non
@@ -123,12 +123,12 @@ public class ReinvioLinkSuRichiesta {
      */
     private void concludi(LinkPreparato link, boolean accettato) {
         try {
-<span class="nc" id="L126">            RiprovaTransitoria.esegui(() -&gt; conclusione.concludi(link.accountId(), link.dati(), accettato));</span>
-<span class="nc" id="L127">        } catch (RuntimeException e) {</span>
-<span class="nc" id="L128">            LOG.warn(&quot;Aggiornamento dei link di attivazione non riuscito dopo l'invio (causa={})&quot;,</span>
-<span class="nc" id="L129">                    e.getClass().getSimpleName());</span>
-<span class="nc" id="L130">        }</span>
-<span class="nc" id="L131">    }</span>
+<span class="fc" id="L126">            RiprovaTransitoria.esegui(() -&gt; conclusione.concludi(link.accountId(), link.dati(), accettato));</span>
+<span class="fc" id="L127">        } catch (RuntimeException e) {</span>
+<span class="fc" id="L128">            LOG.warn(&quot;Aggiornamento dei link di attivazione non riuscito dopo l'invio (causa={})&quot;,</span>
+<span class="fc" id="L129">                    e.getClass().getSimpleName());</span>
+<span class="fc" id="L130">        }</span>
+<span class="fc" id="L131">    }</span>
 
     /** Alla chiusura dell'applicazione lascia finire le richieste già accodate, per poco tempo. */
     @PreDestroy

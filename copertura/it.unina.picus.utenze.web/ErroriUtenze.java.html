@@ -17,31 +17,31 @@ import it.unina.picus.utenze.interno.applicazione.DatiOperatoreNonValidiExceptio
 <span class="fc" id="L17">public class ErroriUtenze {</span>
 
     /** Stessa forma degli errori degli altri moduli: elenca i campi da correggere. */
-<span class="nc" id="L20">    public record Errore(String codice, String messaggio, Map&lt;String, String&gt; campi) {}</span>
+<span class="fc" id="L20">    public record Errore(String codice, String messaggio, Map&lt;String, String&gt; campi) {}</span>
 
     @ExceptionHandler(DatiOperatoreNonValidiException.class)
     public ResponseEntity&lt;Errore&gt; datiNonValidi(DatiOperatoreNonValidiException ex) {
-<span class="nc" id="L24">        return risposta(HttpStatus.BAD_REQUEST, &quot;Controlla i campi del modulo&quot;, ex.campi());</span>
+<span class="fc" id="L24">        return risposta(HttpStatus.BAD_REQUEST, &quot;Controlla i campi del modulo&quot;, ex.campi());</span>
     }
 
     @ExceptionHandler(UtenzaNonTrovataException.class)
     public ResponseEntity&lt;Errore&gt; nonTrovata(UtenzaNonTrovataException ex) {
-<span class="nc" id="L29">        return risposta(HttpStatus.NOT_FOUND, ex.getMessage(), Map.of());</span>
+<span class="fc" id="L29">        return risposta(HttpStatus.NOT_FOUND, ex.getMessage(), Map.of());</span>
     }
 
     /** Ruolo o stato dell'account non compatibili con l'operazione, per esempio un reinvio a un account già attivo. */
     @ExceptionHandler(OperazioneUtenzaNonConsentitaException.class)
     public ResponseEntity&lt;Errore&gt; nonConsentita(OperazioneUtenzaNonConsentitaException ex) {
-<span class="nc" id="L35">        return risposta(HttpStatus.CONFLICT, ex.getMessage(), Map.of());</span>
+<span class="fc" id="L35">        return risposta(HttpStatus.CONFLICT, ex.getMessage(), Map.of());</span>
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity&lt;Errore&gt; formatoNonValido() {
-<span class="nc" id="L40">        return risposta(HttpStatus.BAD_REQUEST, &quot;Formato dei dati non valido&quot;, Map.of());</span>
+<span class="fc" id="L40">        return risposta(HttpStatus.BAD_REQUEST, &quot;Formato dei dati non valido&quot;, Map.of());</span>
     }
 
     private static ResponseEntity&lt;Errore&gt; risposta(HttpStatus stato, String messaggio, Map&lt;String, String&gt; campi) {
-<span class="nc" id="L44">        return ResponseEntity.status(stato).body(new Errore(stato.name(), messaggio, campi));</span>
+<span class="fc" id="L44">        return ResponseEntity.status(stato).body(new Errore(stato.name(), messaggio, campi));</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

@@ -19,13 +19,13 @@ public class InvioEmailLogAdapter implements InvioEmail {
 
     @Override
     public boolean isSimulato() {
-<span class="nc" id="L22">        return true;</span>
+<span class="fc" id="L22">        return true;</span>
     }
 
     @Override
     public void inviaLinkAttivazione(String emailDestinatario, String nomeDestinatario, String tokenInChiaro) {
-<span class="nc" id="L27">        LOG.info(&quot;Link di attivazione generato in modalità simulata (trasporto=LOG, baseUrl={})&quot;, baseUrl);</span>
-<span class="nc" id="L28">    }</span>
+<span class="fc" id="L27">        LOG.info(&quot;Link di attivazione generato in modalità simulata (trasporto=LOG, baseUrl={})&quot;, baseUrl);</span>
+<span class="fc" id="L28">    }</span>
 
     @Override
     public void inviaLinkResetPassword(String emailDestinatario, String nomeDestinatario, String tokenInChiaro) {

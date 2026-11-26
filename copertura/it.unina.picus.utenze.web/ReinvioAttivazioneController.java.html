@@ -39,7 +39,7 @@ class ReinvioAttivazioneController {
 <span class="fc" id="L39">    private static final Pattern EMAIL = Pattern.compile(&quot;^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$&quot;);</span>
 
     /** L'email resta un valore JSON generico fino al controllo del tipo: un numero o un booleano non diventano testo. */
-<span class="nc" id="L42">    record RichiestaReinvio(Object email) {}</span>
+<span class="fc" id="L42">    record RichiestaReinvio(Object email) {}</span>
 
     private final ReinvioLinkSuRichiesta reinvio;
     private final LimitatoreReinvii limitatore;
@@ -51,25 +51,25 @@ class ReinvioAttivazioneController {
 
     @PostMapping(&quot;/api/auth/attiva/reinvio&quot;)
     ResponseEntity&lt;Map&lt;String, Object&gt;&gt; richiediNuovoLink(@RequestBody RichiestaReinvio corpo) {
-<span class="nc bnc" id="L54" title="All 2 branches missed.">        if (!(corpo.email() instanceof String testo)) {</span>
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">        if (!(corpo.email() instanceof String testo)) {</span>
 <span class="nc" id="L55">            return emailNonValida();</span>
         }
-<span class="nc" id="L57">        String email = testo.strip().toLowerCase(Locale.ROOT);</span>
-<span class="nc bnc" id="L58" title="All 4 branches missed.">        if (email.length() &gt; LUNGHEZZA_MAX_EMAIL || !EMAIL.matcher(email).matches()) {</span>
+<span class="fc" id="L57">        String email = testo.strip().toLowerCase(Locale.ROOT);</span>
+<span class="pc bpc" id="L58" title="2 of 4 branches missed.">        if (email.length() &gt; LUNGHEZZA_MAX_EMAIL || !EMAIL.matcher(email).matches()) {</span>
 <span class="nc" id="L59">            return emailNonValida();</span>
         }
-<span class="nc" id="L61">        Optional&lt;LimitatoreReinvii.Ammissione&gt; ammissione = limitatore.ammetti(email);</span>
-<span class="nc bnc" id="L62" title="All 2 branches missed.">        if (ammissione.isEmpty()) {</span>
+<span class="fc" id="L61">        Optional&lt;LimitatoreReinvii.Ammissione&gt; ammissione = limitatore.ammetti(email);</span>
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">        if (ammissione.isEmpty()) {</span>
 <span class="nc" id="L63">            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)</span>
 <span class="nc" id="L64">                    .body(Map.of(&quot;messaggio&quot;, MESSAGGIO_TROPPE_RICHIESTE));</span>
         }
-<span class="nc bnc" id="L66" title="All 2 branches missed.">        if (!reinvio.richiedi(email)) {</span>
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">        if (!reinvio.richiedi(email)) {</span>
             // La richiesta non è stata presa in carico: si restituisce proprio il suo posto nel limite.
 <span class="nc" id="L68">            limitatore.rilascia(ammissione.get());</span>
 <span class="nc" id="L69">            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)</span>
 <span class="nc" id="L70">                    .body(Map.of(&quot;messaggio&quot;, MESSAGGIO_SERVIZIO_OCCUPATO));</span>
         }
-<span class="nc" id="L72">        return ResponseEntity.ok(Map.of(&quot;messaggio&quot;, MESSAGGIO_CONFERMA));</span>
+<span class="fc" id="L72">        return ResponseEntity.ok(Map.of(&quot;messaggio&quot;, MESSAGGIO_CONFERMA));</span>
     }
 
     private static ResponseEntity&lt;Map&lt;String, Object&gt;&gt; emailNonValida() {

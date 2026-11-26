@@ -21,13 +21,13 @@ class VerificaRiferimentiCatalogo implements RiferimentiCatalogo {
 
     @Override
     public boolean comuneEsiste(String codice) {
-<span class="nc" id="L24">        return catalogo.cercaComune(codice).isPresent();</span>
+<span class="fc" id="L24">        return catalogo.cercaComune(codice).isPresent();</span>
     }
 
     /** {@code cercaMisura} trova anche le misure disattivate, che restano per lo storico: conta solo se è attiva. */
     @Override
     public boolean misuraAttiva(long misuraId) {
-<span class="nc" id="L30">        return catalogo.cercaMisura(misuraId).filter(Misura::attiva).isPresent();</span>
+<span class="fc" id="L30">        return catalogo.cercaMisura(misuraId).filter(Misura::attiva).isPresent();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

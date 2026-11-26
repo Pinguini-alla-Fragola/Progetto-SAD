@@ -20,15 +20,15 @@ public final class RegolaRiferimentiCatalogo implements RegolaDatiOperatore {
     @Override
     public void verifica(DatiOperatore dati, Errori errori) {
         // Un comune già scartato, per esempio per caratteri non ammessi, non va cercato nel catalogo.
-<span class="nc bnc" id="L23" title="All 2 branches missed.">        if (!errori.contiene(CampoOperatore.COMUNE)</span>
-<span class="nc bnc" id="L24" title="All 4 branches missed.">                &amp;&amp; (dati.comuneCodice() == null || !catalogo.comuneEsiste(dati.comuneCodice()))) {</span>
-<span class="nc" id="L25">            errori.aggiungi(CampoOperatore.COMUNE, &quot;Seleziona un comune del catalogo&quot;);</span>
+<span class="pc bpc" id="L23" title="1 of 2 branches missed.">        if (!errori.contiene(CampoOperatore.COMUNE)</span>
+<span class="fc bfc" id="L24" title="All 4 branches covered.">                &amp;&amp; (dati.comuneCodice() == null || !catalogo.comuneEsiste(dati.comuneCodice()))) {</span>
+<span class="fc" id="L25">            errori.aggiungi(CampoOperatore.COMUNE, &quot;Seleziona un comune del catalogo&quot;);</span>
         }
-<span class="nc bnc" id="L27" title="All 2 branches missed.">        if (dati.misure().size() &gt; MASSIMO_MISURE) {</span>
+<span class="pc bpc" id="L27" title="1 of 2 branches missed.">        if (dati.misure().size() &gt; MASSIMO_MISURE) {</span>
 <span class="nc" id="L28">            errori.aggiungi(CampoOperatore.MISURE, &quot;Si possono indicare al massimo &quot; + MASSIMO_MISURE + &quot; misure&quot;);</span>
-<span class="nc bnc" id="L29" title="All 4 branches missed.">        } else if (dati.misure().isEmpty() || !dati.misure().stream().allMatch(catalogo::misuraAttiva)) {</span>
-<span class="nc" id="L30">            errori.aggiungi(CampoOperatore.MISURE, &quot;Seleziona almeno una misura del catalogo&quot;);</span>
+<span class="fc bfc" id="L29" title="All 4 branches covered.">        } else if (dati.misure().isEmpty() || !dati.misure().stream().allMatch(catalogo::misuraAttiva)) {</span>
+<span class="fc" id="L30">            errori.aggiungi(CampoOperatore.MISURE, &quot;Seleziona almeno una misura del catalogo&quot;);</span>
         }
-<span class="nc" id="L32">    }</span>
+<span class="fc" id="L32">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

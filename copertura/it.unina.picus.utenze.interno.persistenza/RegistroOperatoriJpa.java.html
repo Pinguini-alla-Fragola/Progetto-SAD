@@ -42,33 +42,33 @@ class RegistroOperatoriJpa implements RegistroOperatori {
     @Override
     @Transactional(readOnly = true)
     public DisponibilitaEmail disponibilitaEmail(String email) {
-<span class="nc" id="L45">        return accounts.findByEmailIgnoreCase(email)</span>
-<span class="nc bnc" id="L46" title="All 2 branches missed.">                .map(account -&gt; StatoUtenza.REVOCATO.name().equals(account.getStato())</span>
-<span class="nc" id="L47">                        ? DisponibilitaEmail.ACCOUNT_REVOCATO : DisponibilitaEmail.GIA_IN_USO)</span>
-<span class="nc" id="L48">                .orElse(DisponibilitaEmail.LIBERA);</span>
+<span class="fc" id="L45">        return accounts.findByEmailIgnoreCase(email)</span>
+<span class="fc bfc" id="L46" title="All 2 branches covered.">                .map(account -&gt; StatoUtenza.REVOCATO.name().equals(account.getStato())</span>
+<span class="fc" id="L47">                        ? DisponibilitaEmail.ACCOUNT_REVOCATO : DisponibilitaEmail.GIA_IN_USO)</span>
+<span class="fc" id="L48">                .orElse(DisponibilitaEmail.LIBERA);</span>
     }
 
     @Override
     @Transactional(readOnly = true)
     public boolean codiceFiscaleInUso(String codiceFiscale) {
-<span class="nc" id="L54">        return profili.existsByCodiceFiscale(codiceFiscale);</span>
+<span class="fc" id="L54">        return profili.existsByCodiceFiscale(codiceFiscale);</span>
     }
 
     @Override
     public OperatoreRegistrato registra(DatiOperatore dati, String hashPassword) {
         try {
-<span class="nc" id="L60">            AccountJpa account = accounts.saveAndFlush(new AccountJpa(dati.email(), hashPassword,</span>
-<span class="nc" id="L61">                    dati.nomeVisualizzato(), RuoloUtente.OPERATORE.name(),</span>
-<span class="nc" id="L62">                    StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name()));</span>
-<span class="nc" id="L63">            profili.saveAndFlush(new ProfiloOperatoreJpa(account.getId(), dati.tipologia(), dati.comuneCodice(),</span>
-<span class="nc" id="L64">                    dati.centroPicus(), dati.telefono(), dati.codiceFiscale()));</span>
-<span class="nc" id="L65">            misure.saveAllAndFlush(dati.misure().stream()</span>
-<span class="nc" id="L66">                    .map(misuraId -&gt; new OperatoreMisuraJpa(account.getId(), misuraId)).toList());</span>
-<span class="nc" id="L67">            return new OperatoreRegistrato(account.getId(), dati.nomeVisualizzato(), dati.email());</span>
-<span class="nc" id="L68">        } catch (DataIntegrityViolationException e) {</span>
-<span class="nc" id="L69">            Optional&lt;String&gt; campo = campoDuplicato(e);</span>
-<span class="nc bnc" id="L70" title="All 2 branches missed.">            if (campo.isPresent()) {</span>
-<span class="nc" id="L71">                throw new RegistrazioneInConflittoException(campo.get(), e);</span>
+<span class="fc" id="L60">            AccountJpa account = accounts.saveAndFlush(new AccountJpa(dati.email(), hashPassword,</span>
+<span class="fc" id="L61">                    dati.nomeVisualizzato(), RuoloUtente.OPERATORE.name(),</span>
+<span class="fc" id="L62">                    StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name()));</span>
+<span class="fc" id="L63">            profili.saveAndFlush(new ProfiloOperatoreJpa(account.getId(), dati.tipologia(), dati.comuneCodice(),</span>
+<span class="fc" id="L64">                    dati.centroPicus(), dati.telefono(), dati.codiceFiscale()));</span>
+<span class="fc" id="L65">            misure.saveAllAndFlush(dati.misure().stream()</span>
+<span class="fc" id="L66">                    .map(misuraId -&gt; new OperatoreMisuraJpa(account.getId(), misuraId)).toList());</span>
+<span class="fc" id="L67">            return new OperatoreRegistrato(account.getId(), dati.nomeVisualizzato(), dati.email());</span>
+<span class="fc" id="L68">        } catch (DataIntegrityViolationException e) {</span>
+<span class="fc" id="L69">            Optional&lt;String&gt; campo = campoDuplicato(e);</span>
+<span class="pc bpc" id="L70" title="1 of 2 branches missed.">            if (campo.isPresent()) {</span>
+<span class="fc" id="L71">                throw new RegistrazioneInConflittoException(campo.get(), e);</span>
             }
 <span class="nc" id="L73">            throw e;</span>
         }
@@ -79,17 +79,17 @@ class RegistroOperatoriJpa implements RegistroOperatori {
      * non vengono attribuiti a un campo e seguono il trattamento ordinario degli errori di persistenza.
      */
     private static Optional&lt;String&gt; campoDuplicato(DataIntegrityViolationException errore) {
-<span class="nc bnc" id="L82" title="All 2 branches missed.">        for (Throwable causa = errore; causa != null; causa = causa.getCause()) {</span>
-<span class="nc bnc" id="L83" title="All 2 branches missed.">            if (causa instanceof ConstraintViolationException violazione) {</span>
-<span class="nc bnc" id="L84" title="All 4 branches missed.">                if (violazione.getKind() != ConstraintKind.UNIQUE || violazione.getConstraintName() == null) {</span>
+<span class="pc bpc" id="L82" title="1 of 2 branches missed.">        for (Throwable causa = errore; causa != null; causa = causa.getCause()) {</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">            if (causa instanceof ConstraintViolationException violazione) {</span>
+<span class="pc bpc" id="L84" title="2 of 4 branches missed.">                if (violazione.getKind() != ConstraintKind.UNIQUE || violazione.getConstraintName() == null) {</span>
 <span class="nc" id="L85">                    return Optional.empty();</span>
                 }
-<span class="nc" id="L87">                String vincolo = violazione.getConstraintName();</span>
-<span class="nc bnc" id="L88" title="All 2 branches missed.">                if (vincolo.equalsIgnoreCase(VINCOLO_EMAIL)) {</span>
-<span class="nc" id="L89">                    return Optional.of(CampoOperatore.EMAIL);</span>
+<span class="fc" id="L87">                String vincolo = violazione.getConstraintName();</span>
+<span class="fc bfc" id="L88" title="All 2 branches covered.">                if (vincolo.equalsIgnoreCase(VINCOLO_EMAIL)) {</span>
+<span class="fc" id="L89">                    return Optional.of(CampoOperatore.EMAIL);</span>
                 }
-<span class="nc bnc" id="L91" title="All 2 branches missed.">                if (vincolo.equalsIgnoreCase(VINCOLO_CODICE_FISCALE)) {</span>
-<span class="nc" id="L92">                    return Optional.of(CampoOperatore.CODICE_FISCALE);</span>
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">                if (vincolo.equalsIgnoreCase(VINCOLO_CODICE_FISCALE)) {</span>
+<span class="fc" id="L92">                    return Optional.of(CampoOperatore.CODICE_FISCALE);</span>
                 }
 <span class="nc" id="L94">                return Optional.empty();</span>
             }

@@ -41,26 +41,26 @@ class ServizioCreazioneOperatori implements CreazioneOperatori {
 
     @Override
     public OperatoreCreato crea(IdentitaAutenticata attore, ComandoCreaOperatore comando) {
-<span class="nc" id="L44">        RegoleAccessoUtenze.verificaBanco(attore);</span>
-<span class="nc" id="L45">        DatiOperatore dati = NormalizzatoreDatiOperatore.normalizza(comando);</span>
-<span class="nc" id="L46">        Errori errori = validatore.verifica(dati);</span>
-<span class="nc bnc" id="L47" title="All 2 branches missed.">        if (!errori.vuoto()) {</span>
-<span class="nc" id="L48">            throw new DatiOperatoreNonValidiException(errori.perCampo());</span>
+<span class="fc" id="L44">        RegoleAccessoUtenze.verificaBanco(attore);</span>
+<span class="fc" id="L45">        DatiOperatore dati = NormalizzatoreDatiOperatore.normalizza(comando);</span>
+<span class="fc" id="L46">        Errori errori = validatore.verifica(dati);</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        if (!errori.vuoto()) {</span>
+<span class="fc" id="L48">            throw new DatiOperatoreNonValidiException(errori.perCampo());</span>
         }
         try {
-<span class="nc" id="L51">            OperatoreRegistrato registrato = registro.registra(dati, passwordInutilizzabile());</span>
+<span class="fc" id="L51">            OperatoreRegistrato registrato = registro.registra(dati, passwordInutilizzabile());</span>
             // Il link nasce nella stessa transazione dell'account: o esistono entrambi o nessuno dei due.
-<span class="nc" id="L53">            DatiInvioAttivazione invito = attivazione.rigeneraTokenPerAccount(registrato.id(), RuoloUtente.OPERATORE);</span>
-<span class="nc" id="L54">            return new OperatoreCreato(registrato.id(), registrato.nomeVisualizzato(), registrato.email(), invito);</span>
-<span class="nc" id="L55">        } catch (RegistrazioneInConflittoException e) {</span>
+<span class="fc" id="L53">            DatiInvioAttivazione invito = attivazione.rigeneraTokenPerAccount(registrato.id(), RuoloUtente.OPERATORE);</span>
+<span class="fc" id="L54">            return new OperatoreCreato(registrato.id(), registrato.nomeVisualizzato(), registrato.email(), invito);</span>
+<span class="fc" id="L55">        } catch (RegistrazioneInConflittoException e) {</span>
             // Un'altra creazione, nello stesso momento, ha salvato la stessa email o lo stesso codice fiscale.
-<span class="nc" id="L57">            throw new DatiOperatoreNonValidiException(Map.of(e.campo(), RegolaUnicita.messaggioDuplicato(e.campo())));</span>
+<span class="fc" id="L57">            throw new DatiOperatoreNonValidiException(Map.of(e.campo(), RegolaUnicita.messaggioDuplicato(e.campo())));</span>
         }
     }
 
     /** Password casuale che nessuno conosce: l'Operatore ne sceglierà una dal link di attivazione. */
     private String passwordInutilizzabile() {
-<span class="nc" id="L63">        return encoder.encode(UUID.randomUUID().toString());</span>
+<span class="fc" id="L63">        return encoder.encode(UUID.randomUUID().toString());</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

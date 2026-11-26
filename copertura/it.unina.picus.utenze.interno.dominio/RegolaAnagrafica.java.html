@@ -7,19 +7,19 @@
 
     @Override
     public void verifica(DatiOperatore dati, Errori errori) {
-<span class="nc bnc" id="L10" title="All 2 branches missed.">        if (!nomeValido(dati.nome())) {</span>
-<span class="nc" id="L11">            errori.aggiungi(CampoOperatore.NOME, &quot;Inserisci il nome&quot;);</span>
+<span class="fc bfc" id="L10" title="All 2 branches covered.">        if (!nomeValido(dati.nome())) {</span>
+<span class="fc" id="L11">            errori.aggiungi(CampoOperatore.NOME, &quot;Inserisci il nome&quot;);</span>
         }
-<span class="nc bnc" id="L13" title="All 2 branches missed.">        if (!nomeValido(dati.cognome())) {</span>
-<span class="nc" id="L14">            errori.aggiungi(CampoOperatore.COGNOME, &quot;Inserisci il cognome&quot;);</span>
+<span class="fc bfc" id="L13" title="All 2 branches covered.">        if (!nomeValido(dati.cognome())) {</span>
+<span class="fc" id="L14">            errori.aggiungi(CampoOperatore.COGNOME, &quot;Inserisci il cognome&quot;);</span>
         }
-<span class="nc bnc" id="L16" title="All 2 branches missed.">        if (!CodiceFiscale.valido(dati.codiceFiscale())) {</span>
-<span class="nc" id="L17">            errori.aggiungi(CampoOperatore.CODICE_FISCALE, &quot;Inserisci un codice fiscale valido&quot;);</span>
+<span class="fc bfc" id="L16" title="All 2 branches covered.">        if (!CodiceFiscale.valido(dati.codiceFiscale())) {</span>
+<span class="fc" id="L17">            errori.aggiungi(CampoOperatore.CODICE_FISCALE, &quot;Inserisci un codice fiscale valido&quot;);</span>
         }
-<span class="nc" id="L19">    }</span>
+<span class="fc" id="L19">    }</span>
 
     private static boolean nomeValido(String valore) {
-<span class="nc bnc" id="L22" title="All 4 branches missed.">        return valore != null &amp;&amp; valore.length() &lt;= LUNGHEZZA_MAX_NOME;</span>
+<span class="pc bpc" id="L22" title="1 of 4 branches missed.">        return valore != null &amp;&amp; valore.length() &lt;= LUNGHEZZA_MAX_NOME;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

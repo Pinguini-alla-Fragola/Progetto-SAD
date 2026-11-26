@@ -47,26 +47,26 @@ public final class RiprovaTransitoria {
      */
     public static void esegui(Runnable azione) {
 <span class="fc" id="L49">        Objects.requireNonNull(azione);</span>
-<span class="pc" id="L50">        for (int tentativo = 1; ; tentativo++) {</span>
+<span class="fc" id="L50">        for (int tentativo = 1; ; tentativo++) {</span>
             try {
 <span class="fc" id="L52">                azione.run();</span>
 <span class="fc" id="L53">                return;</span>
-<span class="nc" id="L54">            } catch (RuntimeException e) {</span>
-<span class="nc bnc" id="L55" title="All 6 branches missed.">                if (!transitorio(e) || tentativo == TENTATIVI || !attendi(tentativo)) {</span>
-<span class="nc" id="L56">                    throw e;</span>
+<span class="fc" id="L54">            } catch (RuntimeException e) {</span>
+<span class="pc bpc" id="L55" title="1 of 6 branches missed.">                if (!transitorio(e) || tentativo == TENTATIVI || !attendi(tentativo)) {</span>
+<span class="fc" id="L56">                    throw e;</span>
                 }
-<span class="nc" id="L58">                LOG.warn(&quot;Operazione da ripetere dopo un errore transitorio (causa={}, tentativo {} di {})&quot;,</span>
-<span class="nc" id="L59">                        e.getClass().getSimpleName(), tentativo, TENTATIVI);</span>
+<span class="fc" id="L58">                LOG.warn(&quot;Operazione da ripetere dopo un errore transitorio (causa={}, tentativo {} di {})&quot;,</span>
+<span class="fc" id="L59">                        e.getClass().getSimpleName(), tentativo, TENTATIVI);</span>
             }
         }
     }
 
     /** Vero se ripetere l'operazione può dare un esito diverso. */
     static boolean transitorio(RuntimeException e) {
-<span class="nc bnc" id="L66" title="All 4 branches missed.">        if (e instanceof TransientDataAccessException || e instanceof RecoverableDataAccessException) {</span>
-<span class="nc" id="L67">            return true;</span>
+<span class="pc bpc" id="L66" title="1 of 4 branches missed.">        if (e instanceof TransientDataAccessException || e instanceof RecoverableDataAccessException) {</span>
+<span class="fc" id="L67">            return true;</span>
         }
-<span class="nc bnc" id="L69" title="All 4 branches missed.">        return e instanceof CannotCreateTransactionException &amp;&amp; causaRecuperabile(e);</span>
+<span class="pc bpc" id="L69" title="3 of 4 branches missed.">        return e instanceof CannotCreateTransactionException &amp;&amp; causaRecuperabile(e);</span>
     }
 
     /**
@@ -100,8 +100,8 @@ public final class RiprovaTransitoria {
     /** @return falso se il thread è stato interrotto, per esempio alla chiusura dell'applicazione */
     private static boolean attendi(int tentativo) {
         try {
-<span class="nc" id="L103">            Thread.sleep(ATTESA_MILLIS * tentativo);</span>
-<span class="nc" id="L104">            return true;</span>
+<span class="fc" id="L103">            Thread.sleep(ATTESA_MILLIS * tentativo);</span>
+<span class="fc" id="L104">            return true;</span>
 <span class="nc" id="L105">        } catch (InterruptedException e) {</span>
 <span class="nc" id="L106">            Thread.currentThread().interrupt();</span>
 <span class="nc" id="L107">            return false;</span>

@@ -12,13 +12,13 @@ import java.util.regex.Pattern;
 
     @Override
     public void verifica(DatiOperatore dati, Errori errori) {
-<span class="nc bnc" id="L15" title="All 4 branches missed.">        if (dati.email() == null || dati.email().length() &gt; LUNGHEZZA_MAX_EMAIL</span>
-<span class="nc bnc" id="L16" title="All 2 branches missed.">                || !EMAIL.matcher(dati.email()).matches()) {</span>
-<span class="nc" id="L17">            errori.aggiungi(CampoOperatore.EMAIL, &quot;Inserisci un'email valida&quot;);</span>
+<span class="pc bpc" id="L15" title="1 of 4 branches missed.">        if (dati.email() == null || dati.email().length() &gt; LUNGHEZZA_MAX_EMAIL</span>
+<span class="fc bfc" id="L16" title="All 2 branches covered.">                || !EMAIL.matcher(dati.email()).matches()) {</span>
+<span class="fc" id="L17">            errori.aggiungi(CampoOperatore.EMAIL, &quot;Inserisci un'email valida&quot;);</span>
         }
-<span class="nc bnc" id="L19" title="All 4 branches missed.">        if (dati.telefono() == null || !TELEFONO.matcher(dati.telefono()).matches()) {</span>
-<span class="nc" id="L20">            errori.aggiungi(CampoOperatore.TELEFONO, &quot;Inserisci un numero di telefono valido&quot;);</span>
+<span class="fc bfc" id="L19" title="All 4 branches covered.">        if (dati.telefono() == null || !TELEFONO.matcher(dati.telefono()).matches()) {</span>
+<span class="fc" id="L20">            errori.aggiungi(CampoOperatore.TELEFONO, &quot;Inserisci un numero di telefono valido&quot;);</span>
         }
-<span class="nc" id="L22">    }</span>
+<span class="fc" id="L22">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

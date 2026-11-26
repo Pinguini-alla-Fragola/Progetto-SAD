@@ -81,7 +81,7 @@ public class AttivazioneUtenzaService {
      * @param accountId account a cui appartiene il link, per concludere il reinvio dopo l'invio
      * @param dati dati per la consegna
      */
-<span class="nc" id="L84">    public record LinkPreparato(UUID accountId, DatiInvioAttivazione dati) {}</span>
+<span class="fc" id="L84">    public record LinkPreparato(UUID accountId, DatiInvioAttivazione dati) {}</span>
 
 <span class="nc" id="L86">    public record LinkAttivazioneDaInviareEvent(String emailDestinatario, String nomeDestinatario, String tokenInChiaro) {</span>
         @Override
@@ -104,11 +104,11 @@ public class AttivazioneUtenzaService {
 
 <span class="fc" id="L105">        List&lt;TokenAttivazioneJpa&gt; precedenti = tokens.findAttiviByAccountIdForUpdate(account.getId());</span>
 <span class="fc" id="L106">        Instant ora = Instant.now(clock);</span>
-<span class="pc bpc" id="L107" title="1 of 2 branches missed.">        for (TokenAttivazioneJpa vecchio : precedenti) {</span>
-<span class="nc" id="L108">            vecchio.segnaComeUsato(ora);</span>
-<span class="nc" id="L109">        }</span>
-<span class="pc bpc" id="L110" title="1 of 2 branches missed.">        if (!precedenti.isEmpty()) {</span>
-<span class="nc" id="L111">            tokens.saveAllAndFlush(precedenti);</span>
+<span class="fc bfc" id="L107" title="All 2 branches covered.">        for (TokenAttivazioneJpa vecchio : precedenti) {</span>
+<span class="fc" id="L108">            vecchio.segnaComeUsato(ora);</span>
+<span class="fc" id="L109">        }</span>
+<span class="fc bfc" id="L110" title="All 2 branches covered.">        if (!precedenti.isEmpty()) {</span>
+<span class="fc" id="L111">            tokens.saveAllAndFlush(precedenti);</span>
         }
 
 <span class="fc" id="L114">        return creaToken(account, ora, false);</span>
@@ -123,8 +123,8 @@ public class AttivazioneUtenzaService {
      * sull'account per serializzare eventuali reinvii concorrenti ed evitare doppi token attivi.&lt;/p&gt;
      */
     public DatiInvioAttivazione rigeneraTokenPerAccount(UUID accountId, RuoloUtente ruoloAtteso) {
-<span class="nc" id="L126">        AccountJpa account = bloccaAccountPerReinvio(accountId, ruoloAtteso);</span>
-<span class="nc" id="L127">        return preparaTokenAttivazione(account);</span>
+<span class="fc" id="L126">        AccountJpa account = bloccaAccountPerReinvio(accountId, ruoloAtteso);</span>
+<span class="fc" id="L127">        return preparaTokenAttivazione(account);</span>
     }
 
     private AccountJpa bloccaAccountPerReinvio(UUID accountId, RuoloUtente ruoloAtteso) {
@@ -135,7 +135,7 @@ public class AttivazioneUtenzaService {
 
         // 1. Punto unico di serializzazione: prima AccountJpa, poi TokenAttivazioneJpa
 <span class="fc" id="L137">        AccountJpa account = accounts.findByIdForUpdate(accountId)</span>
-<span class="pc" id="L138">                .orElseThrow(() -&gt; new UtenzaNonTrovataException(&quot;Account non trovato.&quot;));</span>
+<span class="fc" id="L138">                .orElseThrow(() -&gt; new UtenzaNonTrovataException(&quot;Account non trovato.&quot;));</span>
 
         // 2. Verifica ruolo e stato sotto lock esclusivo dell'account
 <span class="fc bfc" id="L141" title="All 2 branches covered.">        if (!ruoloAtteso.name().equals(account.getRuolo())) {</span>
@@ -166,14 +166,14 @@ public class AttivazioneUtenzaService {
      * @return il link creato, oppure vuoto se l'indirizzo non è idoneo
      */
     public Optional&lt;LinkPreparato&gt; preparaTokenPerEmail(String email) {
-<span class="nc" id="L169">        String chiave = UtenzeService.normalizzaEmail(email);</span>
-<span class="nc bnc" id="L170" title="All 2 branches missed.">        if (chiave == null) {</span>
+<span class="fc" id="L169">        String chiave = UtenzeService.normalizzaEmail(email);</span>
+<span class="pc bpc" id="L170" title="1 of 2 branches missed.">        if (chiave == null) {</span>
 <span class="nc" id="L171">            return Optional.empty();</span>
         }
-<span class="nc" id="L173">        return accounts.findIdByEmailIgnoreCase(chiave)</span>
-<span class="nc" id="L174">                .flatMap(accounts::findByIdForUpdate)</span>
-<span class="nc" id="L175">                .filter(a -&gt; StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(a.getStato()))</span>
-<span class="nc" id="L176">                .map(a -&gt; new LinkPreparato(a.getId(), creaToken(a, Instant.now(clock), false)));</span>
+<span class="fc" id="L173">        return accounts.findIdByEmailIgnoreCase(chiave)</span>
+<span class="fc" id="L174">                .flatMap(accounts::findByIdForUpdate)</span>
+<span class="fc" id="L175">                .filter(a -&gt; StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(a.getStato()))</span>
+<span class="fc" id="L176">                .map(a -&gt; new LinkPreparato(a.getId(), creaToken(a, Instant.now(clock), false)));</span>
     }
 
     /**
@@ -210,7 +210,7 @@ public class AttivazioneUtenzaService {
         }
 <span class="fc" id="L211">        Instant ora = Instant.now(clock);</span>
 <span class="fc" id="L212">        return tokens.findByTokenHash(TokenMonouso.impronta(tokenInChiaro.strip()))</span>
-<span class="pc bpc" id="L213" title="1 of 4 branches missed.">                .filter(t -&gt; !t.isUsato() &amp;&amp; !t.isScaduto(ora))</span>
+<span class="fc bfc" id="L213" title="All 4 branches covered.">                .filter(t -&gt; !t.isUsato() &amp;&amp; !t.isScaduto(ora))</span>
 <span class="fc" id="L214">                .flatMap(t -&gt; accounts.findById(t.getAccountId()))</span>
 <span class="fc" id="L215">                .filter(a -&gt; StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(a.getStato()))</span>
 <span class="fc" id="L216">                .isPresent();</span>
@@ -224,8 +224,8 @@ public class AttivazioneUtenzaService {
     public void attivaAccount(String tokenInChiaro, String nuovaPassword) {
 <span class="fc" id="L225">        PoliticaPassword.verifica(nuovaPassword);</span>
 
-<span class="pc bpc" id="L227" title="2 of 4 branches missed.">        if (tokenInChiaro == null || tokenInChiaro.isBlank()) {</span>
-<span class="nc" id="L228">            throw new TokenAttivazioneNonValidoException(&quot;Link di attivazione non valido o mancante.&quot;);</span>
+<span class="pc bpc" id="L227" title="1 of 4 branches missed.">        if (tokenInChiaro == null || tokenInChiaro.isBlank()) {</span>
+<span class="fc" id="L228">            throw new TokenAttivazioneNonValidoException(&quot;Link di attivazione non valido o mancante.&quot;);</span>
         }
 
 <span class="fc" id="L231">        String hash = TokenMonouso.impronta(tokenInChiaro.strip());</span>
@@ -234,7 +234,7 @@ public class AttivazioneUtenzaService {
         //    token fosse già caricato, la lettura con lock restituirebbe la copia in memoria con lo stato di prima e
         //    un link appena sostituito da un reinvio attiverebbe comunque l'account.
 <span class="fc" id="L236">        UUID accountId = tokens.findAccountIdByTokenHash(hash)</span>
-<span class="pc" id="L237">                .orElseThrow(() -&gt; new TokenAttivazioneNonValidoException(&quot;Link di attivazione non valido.&quot;));</span>
+<span class="fc" id="L237">                .orElseThrow(() -&gt; new TokenAttivazioneNonValidoException(&quot;Link di attivazione non valido.&quot;));</span>
 
         // 2. Ordine unico di lock: prima AccountJpa, poi TokenAttivazioneJpa
 <span class="fc" id="L240">        AccountJpa account = accounts.findByIdForUpdate(accountId)</span>
@@ -251,7 +251,7 @@ public class AttivazioneUtenzaService {
 <span class="fc" id="L251">            throw new TokenAttivazioneNonValidoException(&quot;L'account non è più attivabile.&quot;);</span>
         }
 
-<span class="pc bpc" id="L254" title="1 of 4 branches missed.">        if (token.isUsato() || token.isScaduto(ora)) {</span>
+<span class="fc bfc" id="L254" title="All 4 branches covered.">        if (token.isUsato() || token.isScaduto(ora)) {</span>
 <span class="fc" id="L255">            throw new TokenAttivazioneNonValidoException(&quot;Il link di attivazione è scaduto o è già stato utilizzato.&quot;);</span>
         }
 

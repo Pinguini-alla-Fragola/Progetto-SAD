@@ -27,15 +27,15 @@ class AttivazioneController {
 
     @GetMapping(&quot;/attiva&quot;)
     String mostraPaginaAttivazione(@RequestParam(name = &quot;token&quot;, required = false) String token, Model modello) {
-<span class="pc bpc" id="L30" title="1 of 2 branches missed.">        boolean valido = token != null &amp;&amp; attivazioneService</span>
+<span class="fc bfc" id="L30" title="All 2 branches covered.">        boolean valido = token != null &amp;&amp; attivazioneService</span>
 <span class="fc" id="L31">                .map(s -&gt; s.isTokenValido(token))</span>
-<span class="pc bpc" id="L32" title="1 of 2 branches missed.">                .orElse(false);</span>
+<span class="fc bfc" id="L32" title="All 2 branches covered.">                .orElse(false);</span>
 
 <span class="fc" id="L34">        modello.addAttribute(&quot;attivazione&quot;, true);</span>
 <span class="fc" id="L35">        modello.addAttribute(&quot;valido&quot;, valido);</span>
 <span class="fc" id="L36">        modello.addAttribute(&quot;token&quot;, token);</span>
         // Link valido: si sceglie la password. Altrimenti si può chiedere un nuovo link con la propria email.
-<span class="pc bpc" id="L38" title="1 of 2 branches missed.">        modello.addAttribute(&quot;endpoint&quot;, valido ? &quot;/api/auth/attiva/conferma&quot; : &quot;/api/auth/attiva/reinvio&quot;);</span>
+<span class="fc bfc" id="L38" title="All 2 branches covered.">        modello.addAttribute(&quot;endpoint&quot;, valido ? &quot;/api/auth/attiva/conferma&quot; : &quot;/api/auth/attiva/reinvio&quot;);</span>
 <span class="fc" id="L39">        return &quot;credenziali&quot;;</span>
     }
 

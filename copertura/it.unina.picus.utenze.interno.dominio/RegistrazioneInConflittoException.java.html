@@ -15,9 +15,9 @@ public class RegistrazioneInConflittoException extends RuntimeException {
      * @param causa errore del database che ha rivelato il conflitto
      */
     public RegistrazioneInConflittoException(String campo, Throwable causa) {
-<span class="nc" id="L18">        super(&quot;Valore già registrato nel campo &quot; + campo, causa);</span>
-<span class="nc" id="L19">        this.campo = campo;</span>
-<span class="nc" id="L20">    }</span>
+<span class="fc" id="L18">        super(&quot;Valore già registrato nel campo &quot; + campo, causa);</span>
+<span class="fc" id="L19">        this.campo = campo;</span>
+<span class="fc" id="L20">    }</span>
 
     /**
      * Indica quale campo è risultato duplicato.
@@ -25,7 +25,7 @@ public class RegistrazioneInConflittoException extends RuntimeException {
      * @return nome del campo, tra quelli di {@link CampoOperatore}
      */
     public String campo() {
-<span class="nc" id="L28">        return campo;</span>
+<span class="fc" id="L28">        return campo;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

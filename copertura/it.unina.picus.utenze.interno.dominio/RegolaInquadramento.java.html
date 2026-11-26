@@ -7,13 +7,13 @@ import java.util.Optional;
 
     @Override
     public void verifica(DatiOperatore dati, Errori errori) {
-<span class="nc" id="L10">        Optional&lt;TipologiaOperatore&gt; tipologia = TipologiaOperatore.da(dati.tipologia());</span>
-<span class="nc bnc" id="L11" title="All 2 branches missed.">        if (tipologia.isEmpty()) {</span>
-<span class="nc" id="L12">            errori.aggiungi(CampoOperatore.TIPOLOGIA, &quot;Seleziona una tipologia consentita&quot;);</span>
+<span class="fc" id="L10">        Optional&lt;TipologiaOperatore&gt; tipologia = TipologiaOperatore.da(dati.tipologia());</span>
+<span class="fc bfc" id="L11" title="All 2 branches covered.">        if (tipologia.isEmpty()) {</span>
+<span class="fc" id="L12">            errori.aggiungi(CampoOperatore.TIPOLOGIA, &quot;Seleziona una tipologia consentita&quot;);</span>
         }
-<span class="nc bnc" id="L14" title="All 4 branches missed.">        if (dati.centroPicus() &amp;&amp; !tipologia.map(TipologiaOperatore::consenteCentroPicus).orElse(false)) {</span>
-<span class="nc" id="L15">            errori.aggiungi(CampoOperatore.CENTRO_PICUS, &quot;Solo gli operatori interni possono essere del Centro PICUS&quot;);</span>
+<span class="fc bfc" id="L14" title="All 4 branches covered.">        if (dati.centroPicus() &amp;&amp; !tipologia.map(TipologiaOperatore::consenteCentroPicus).orElse(false)) {</span>
+<span class="fc" id="L15">            errori.aggiungi(CampoOperatore.CENTRO_PICUS, &quot;Solo gli operatori interni possono essere del Centro PICUS&quot;);</span>
         }
-<span class="nc" id="L17">    }</span>
+<span class="fc" id="L17">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

@@ -13,16 +13,16 @@ public class DatiOperatoreNonValidiException extends IllegalArgumentException {
      * @param campi per ogni campo sbagliato, il messaggio da mostrare all'utente
      */
     public DatiOperatoreNonValidiException(Map&lt;String, String&gt; campi) {
-<span class="nc" id="L16">        super(&quot;Controlla i campi del modulo&quot;);</span>
-<span class="nc" id="L17">        this.campi = Collections.unmodifiableMap(new LinkedHashMap&lt;&gt;(campi));</span>
-<span class="nc" id="L18">    }</span>
+<span class="fc" id="L16">        super(&quot;Controlla i campi del modulo&quot;);</span>
+<span class="fc" id="L17">        this.campi = Collections.unmodifiableMap(new LinkedHashMap&lt;&gt;(campi));</span>
+<span class="fc" id="L18">    }</span>
 
     /**
      * @return i campi da correggere, nello stesso ordine in cui sono stati controllati, ciascuno con il suo
      *         messaggio; non contiene i valori inseriti
      */
     public Map&lt;String, String&gt; campi() {
-<span class="nc" id="L25">        return campi;</span>
+<span class="fc" id="L25">        return campi;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

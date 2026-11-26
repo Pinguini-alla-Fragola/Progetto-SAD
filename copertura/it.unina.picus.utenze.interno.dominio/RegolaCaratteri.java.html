@@ -12,23 +12,23 @@ import java.util.Map;
 
     @Override
     public void verifica(DatiOperatore dati, Errori errori) {
-<span class="nc" id="L15">        Map&lt;String, String&gt; campi = new LinkedHashMap&lt;&gt;();</span>
-<span class="nc" id="L16">        campi.put(CampoOperatore.NOME, dati.nome());</span>
-<span class="nc" id="L17">        campi.put(CampoOperatore.COGNOME, dati.cognome());</span>
-<span class="nc" id="L18">        campi.put(CampoOperatore.CODICE_FISCALE, dati.codiceFiscale());</span>
-<span class="nc" id="L19">        campi.put(CampoOperatore.EMAIL, dati.email());</span>
-<span class="nc" id="L20">        campi.put(CampoOperatore.TELEFONO, dati.telefono());</span>
-<span class="nc" id="L21">        campi.put(CampoOperatore.COMUNE, dati.comuneCodice());</span>
-<span class="nc" id="L22">        campi.put(CampoOperatore.TIPOLOGIA, dati.tipologia());</span>
-<span class="nc" id="L23">        campi.forEach((campo, valore) -&gt; {</span>
-<span class="nc bnc" id="L24" title="All 2 branches missed.">            if (contieneCaratteriDiControllo(valore)) {</span>
+<span class="fc" id="L15">        Map&lt;String, String&gt; campi = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L16">        campi.put(CampoOperatore.NOME, dati.nome());</span>
+<span class="fc" id="L17">        campi.put(CampoOperatore.COGNOME, dati.cognome());</span>
+<span class="fc" id="L18">        campi.put(CampoOperatore.CODICE_FISCALE, dati.codiceFiscale());</span>
+<span class="fc" id="L19">        campi.put(CampoOperatore.EMAIL, dati.email());</span>
+<span class="fc" id="L20">        campi.put(CampoOperatore.TELEFONO, dati.telefono());</span>
+<span class="fc" id="L21">        campi.put(CampoOperatore.COMUNE, dati.comuneCodice());</span>
+<span class="fc" id="L22">        campi.put(CampoOperatore.TIPOLOGIA, dati.tipologia());</span>
+<span class="fc" id="L23">        campi.forEach((campo, valore) -&gt; {</span>
+<span class="pc bpc" id="L24" title="1 of 2 branches missed.">            if (contieneCaratteriDiControllo(valore)) {</span>
 <span class="nc" id="L25">                errori.aggiungi(campo, &quot;Il campo contiene caratteri non ammessi&quot;);</span>
             }
-<span class="nc" id="L27">        });</span>
-<span class="nc" id="L28">    }</span>
+<span class="fc" id="L27">        });</span>
+<span class="fc" id="L28">    }</span>
 
     private static boolean contieneCaratteriDiControllo(String valore) {
-<span class="nc bnc" id="L31" title="All 4 branches missed.">        return valore != null &amp;&amp; valore.chars().anyMatch(Character::isISOControl);</span>
+<span class="pc bpc" id="L31" title="1 of 4 branches missed.">        return valore != null &amp;&amp; valore.chars().anyMatch(Character::isISOControl);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

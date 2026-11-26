@@ -9,12 +9,12 @@ import java.util.Set;
 public record DatiOperatore(String nome, String cognome, String codiceFiscale, String email, String telefono,
         String comuneCodice, String tipologia, Set&lt;Long&gt; misure, boolean centroPicus) {
 
-<span class="nc" id="L12">    public DatiOperatore {</span>
-<span class="nc" id="L13">        misure = Set.copyOf(misure);</span>
-<span class="nc" id="L14">    }</span>
+<span class="fc" id="L12">    public DatiOperatore {</span>
+<span class="fc" id="L13">        misure = Set.copyOf(misure);</span>
+<span class="fc" id="L14">    }</span>
 
     public String nomeVisualizzato() {
-<span class="nc" id="L17">        return nome + &quot; &quot; + cognome;</span>
+<span class="fc" id="L17">        return nome + &quot; &quot; + cognome;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

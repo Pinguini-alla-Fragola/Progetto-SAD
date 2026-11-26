@@ -42,9 +42,9 @@ class LimitatoreReinvii {
      * @param chiave indirizzo a cui appartiene
      * @param numero numero assegnato all'ammissione, unico per questo limitatore
      */
-<span class="nc" id="L45">    record Ammissione(String chiave, long numero) {}</span>
+<span class="fc" id="L45">    record Ammissione(String chiave, long numero) {}</span>
 
-<span class="nc" id="L47">    private record Richiesta(long numero, Instant istante) {}</span>
+<span class="fc" id="L47">    private record Richiesta(long numero, Instant istante) {}</span>
 
     private final Clock clock;
     private final Map&lt;String, Deque&lt;Richiesta&gt;&gt; richieste; // protetta da this
@@ -66,7 +66,7 @@ class LimitatoreReinvii {
 <span class="fc" id="L66">        this.richieste = new LinkedHashMap&lt;&gt;(16, 0.75f, true) {</span>
             @Override
             protected boolean removeEldestEntry(Map.Entry&lt;String, Deque&lt;Richiesta&gt;&gt; piuVecchia) {
-<span class="nc bnc" id="L69" title="All 2 branches missed.">                return size() &gt; maxChiavi;</span>
+<span class="pc bpc" id="L69" title="1 of 2 branches missed.">                return size() &gt; maxChiavi;</span>
             }
         };
 <span class="fc" id="L72">    }</span>
@@ -77,18 +77,18 @@ class LimitatoreReinvii {
      * @return la prenotazione, oppure vuoto se la richiesta supera il limite e va rifiutata
      */
     synchronized Optional&lt;Ammissione&gt; ammetti(String chiave) {
-<span class="nc" id="L80">        Instant ora = clock.instant();</span>
-<span class="nc" id="L81">        Instant limite = ora.minus(FINESTRA);</span>
-<span class="nc" id="L82">        Deque&lt;Richiesta&gt; coda = richieste.computeIfAbsent(chiave, k -&gt; new ArrayDeque&lt;&gt;());</span>
-<span class="nc bnc" id="L83" title="All 4 branches missed.">        while (!coda.isEmpty() &amp;&amp; coda.peekFirst().istante().isBefore(limite)) {</span>
+<span class="fc" id="L80">        Instant ora = clock.instant();</span>
+<span class="fc" id="L81">        Instant limite = ora.minus(FINESTRA);</span>
+<span class="fc" id="L82">        Deque&lt;Richiesta&gt; coda = richieste.computeIfAbsent(chiave, k -&gt; new ArrayDeque&lt;&gt;());</span>
+<span class="pc bpc" id="L83" title="1 of 4 branches missed.">        while (!coda.isEmpty() &amp;&amp; coda.peekFirst().istante().isBefore(limite)) {</span>
 <span class="nc" id="L84">            coda.removeFirst();</span>
         }
-<span class="nc bnc" id="L86" title="All 2 branches missed.">        if (coda.size() &gt;= MAX_RICHIESTE) {</span>
+<span class="pc bpc" id="L86" title="1 of 2 branches missed.">        if (coda.size() &gt;= MAX_RICHIESTE) {</span>
 <span class="nc" id="L87">            return Optional.empty();</span>
         }
-<span class="nc" id="L89">        Richiesta richiesta = new Richiesta(++ultimoNumero, ora);</span>
-<span class="nc" id="L90">        coda.addLast(richiesta);</span>
-<span class="nc" id="L91">        return Optional.of(new Ammissione(chiave, richiesta.numero()));</span>
+<span class="fc" id="L89">        Richiesta richiesta = new Richiesta(++ultimoNumero, ora);</span>
+<span class="fc" id="L90">        coda.addLast(richiesta);</span>
+<span class="fc" id="L91">        return Optional.of(new Ammissione(chiave, richiesta.numero()));</span>
     }
 
     /** Restituisce il posto di una richiesta che non è stata presa in carico; le altre ammissioni restano. */

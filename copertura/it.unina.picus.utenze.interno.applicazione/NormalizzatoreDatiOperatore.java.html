@@ -15,43 +15,43 @@ final class NormalizzatoreDatiOperatore {
     }
 
     static DatiOperatore normalizza(ComandoCreaOperatore comando) {
-<span class="nc bnc" id="L18" title="All 2 branches missed.">        if (comando == null) {</span>
+<span class="pc bpc" id="L18" title="1 of 2 branches missed.">        if (comando == null) {</span>
 <span class="nc" id="L19">            return new DatiOperatore(null, null, null, null, null, null, null, Set.of(), false);</span>
         }
-<span class="nc" id="L21">        return new DatiOperatore(</span>
-<span class="nc" id="L22">                testo(comando.nome()),</span>
-<span class="nc" id="L23">                testo(comando.cognome()),</span>
-<span class="nc" id="L24">                maiuscolo(testo(comando.codiceFiscale())),</span>
-<span class="nc" id="L25">                minuscolo(testo(comando.email())),</span>
-<span class="nc" id="L26">                testo(comando.telefono()),</span>
-<span class="nc" id="L27">                testo(comando.comuneCodice()),</span>
-<span class="nc" id="L28">                testo(comando.tipologia()),</span>
-<span class="nc" id="L29">                misure(comando.misure()),</span>
-<span class="nc" id="L30">                comando.centroPicus());</span>
+<span class="fc" id="L21">        return new DatiOperatore(</span>
+<span class="fc" id="L22">                testo(comando.nome()),</span>
+<span class="fc" id="L23">                testo(comando.cognome()),</span>
+<span class="fc" id="L24">                maiuscolo(testo(comando.codiceFiscale())),</span>
+<span class="fc" id="L25">                minuscolo(testo(comando.email())),</span>
+<span class="fc" id="L26">                testo(comando.telefono()),</span>
+<span class="fc" id="L27">                testo(comando.comuneCodice()),</span>
+<span class="fc" id="L28">                testo(comando.tipologia()),</span>
+<span class="fc" id="L29">                misure(comando.misure()),</span>
+<span class="fc" id="L30">                comando.centroPicus());</span>
     }
 
     /** Toglie gli spazi ai bordi; un testo vuoto diventa {@code null}. */
     private static String testo(String valore) {
-<span class="nc bnc" id="L35" title="All 2 branches missed.">        if (valore == null) {</span>
-<span class="nc" id="L36">            return null;</span>
+<span class="fc bfc" id="L35" title="All 2 branches covered.">        if (valore == null) {</span>
+<span class="fc" id="L36">            return null;</span>
         }
-<span class="nc" id="L38">        String ripulito = valore.strip();</span>
-<span class="nc bnc" id="L39" title="All 2 branches missed.">        return ripulito.isEmpty() ? null : ripulito;</span>
+<span class="fc" id="L38">        String ripulito = valore.strip();</span>
+<span class="fc bfc" id="L39" title="All 2 branches covered.">        return ripulito.isEmpty() ? null : ripulito;</span>
     }
 
     private static String maiuscolo(String valore) {
-<span class="nc bnc" id="L43" title="All 2 branches missed.">        return valore == null ? null : valore.toUpperCase(Locale.ROOT);</span>
+<span class="fc bfc" id="L43" title="All 2 branches covered.">        return valore == null ? null : valore.toUpperCase(Locale.ROOT);</span>
     }
 
     private static String minuscolo(String valore) {
-<span class="nc bnc" id="L47" title="All 2 branches missed.">        return valore == null ? null : valore.toLowerCase(Locale.ROOT);</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        return valore == null ? null : valore.toLowerCase(Locale.ROOT);</span>
     }
 
     private static Set&lt;Long&gt; misure(List&lt;Long&gt; valori) {
-<span class="nc bnc" id="L51" title="All 2 branches missed.">        if (valori == null) {</span>
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">        if (valori == null) {</span>
 <span class="nc" id="L52">            return Set.of();</span>
         }
-<span class="nc" id="L54">        return valori.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableSet());</span>
+<span class="fc" id="L54">        return valori.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableSet());</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

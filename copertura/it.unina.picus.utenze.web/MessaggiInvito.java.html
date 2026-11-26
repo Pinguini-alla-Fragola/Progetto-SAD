@@ -15,9 +15,9 @@ final class MessaggiInvito {
      * @param registrazione frase che dice cosa è stato registrato, per esempio «Operatore creato»
      */
     static String allaCreazione(Esito esito, String registrazione) {
-<span class="pc bpc" id="L18" title="2 of 3 branches missed.">        return switch (esito) {</span>
-<span class="nc" id="L19">            case INVIATO -&gt; registrazione + &quot;. Email di attivazione inviata.&quot;;</span>
-<span class="nc" id="L20">            case SIMULATO -&gt; registrazione</span>
+<span class="fc bfc" id="L18" title="All 3 branches covered.">        return switch (esito) {</span>
+<span class="fc" id="L19">            case INVIATO -&gt; registrazione + &quot;. Email di attivazione inviata.&quot;;</span>
+<span class="fc" id="L20">            case SIMULATO -&gt; registrazione</span>
                     + &quot; (modalità demo/simulata: nessun server SMTP configurato, email non inviata).&quot;;
 <span class="fc" id="L22">            case NON_RIUSCITO -&gt; registrazione + &quot; in attesa di attivazione, ma l'invio dell'email è fallito. &quot;</span>
                     + &quot;Puoi reinviare l'invito dall'elenco Account.&quot;;

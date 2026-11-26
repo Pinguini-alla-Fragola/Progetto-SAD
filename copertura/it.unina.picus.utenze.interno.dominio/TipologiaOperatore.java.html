@@ -4,21 +4,21 @@ import java.util.Arrays;
 import java.util.Optional;
 
 /** Le due tipologie di Operatore che il Banco può creare. */
-<span class="nc" id="L7">public enum TipologiaOperatore {</span>
-<span class="nc" id="L8">    INTERNO_BANCO,</span>
-<span class="nc" id="L9">    ESTERNO_PAGATO_BANCO;</span>
+<span class="fc" id="L7">public enum TipologiaOperatore {</span>
+<span class="fc" id="L8">    INTERNO_BANCO,</span>
+<span class="fc" id="L9">    ESTERNO_PAGATO_BANCO;</span>
 
     /**
      * @param valore testo ricevuto dal modulo
      * @return la tipologia corrispondente, oppure vuoto se il testo non è nel catalogo
      */
     public static Optional&lt;TipologiaOperatore&gt; da(String valore) {
-<span class="nc" id="L16">        return Arrays.stream(values()).filter(tipologia -&gt; tipologia.name().equals(valore)).findFirst();</span>
+<span class="fc" id="L16">        return Arrays.stream(values()).filter(tipologia -&gt; tipologia.name().equals(valore)).findFirst();</span>
     }
 
     /** Il Centro PICUS è composto solo da operatori interni del Banco. */
     public boolean consenteCentroPicus() {
-<span class="nc bnc" id="L21" title="All 2 branches missed.">        return this == INTERNO_BANCO;</span>
+<span class="fc bfc" id="L21" title="All 2 branches covered.">        return this == INTERNO_BANCO;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

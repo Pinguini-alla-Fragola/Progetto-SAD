@@ -12,26 +12,26 @@ import it.unina.picus.utenze.interno.applicazione.DatiOperatoreNonValidiExceptio
  * numero in un campo di testo verrebbe convertito in testo in silenzio. Raccoglie gli errori di tutti i campi e
  * li segnala insieme.
  */
-<span class="nc" id="L15">final class CampiJson {</span>
+<span class="fc" id="L15">final class CampiJson {</span>
 
-<span class="nc" id="L17">    private final Map&lt;String, String&gt; errori = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L17">    private final Map&lt;String, String&gt; errori = new LinkedHashMap&lt;&gt;();</span>
 
     /** Un testo oppure niente; qualsiasi altro valore JSON è un errore sul campo. */
     String testo(Object valore, String campo) {
-<span class="nc bnc" id="L21" title="All 4 branches missed.">        if (valore == null || valore instanceof String) {</span>
-<span class="nc" id="L22">            return (String) valore;</span>
+<span class="fc bfc" id="L21" title="All 4 branches covered.">        if (valore == null || valore instanceof String) {</span>
+<span class="fc" id="L22">            return (String) valore;</span>
         }
-<span class="nc" id="L24">        errori.putIfAbsent(campo, &quot;Il campo deve contenere un testo&quot;);</span>
-<span class="nc" id="L25">        return null;</span>
+<span class="fc" id="L24">        errori.putIfAbsent(campo, &quot;Il campo deve contenere un testo&quot;);</span>
+<span class="fc" id="L25">        return null;</span>
     }
 
     /** Un vero o falso; se manca vale falso. */
     boolean scelta(Object valore, String campo) {
-<span class="nc bnc" id="L30" title="All 2 branches missed.">        if (valore == null) {</span>
-<span class="nc" id="L31">            return false;</span>
+<span class="fc bfc" id="L30" title="All 2 branches covered.">        if (valore == null) {</span>
+<span class="fc" id="L31">            return false;</span>
         }
-<span class="nc bnc" id="L33" title="All 2 branches missed.">        if (valore instanceof Boolean scelta) {</span>
-<span class="nc" id="L34">            return scelta;</span>
+<span class="pc bpc" id="L33" title="1 of 2 branches missed.">        if (valore instanceof Boolean scelta) {</span>
+<span class="fc" id="L34">            return scelta;</span>
         }
 <span class="nc" id="L36">        errori.putIfAbsent(campo, &quot;Il campo deve valere vero o falso&quot;);</span>
 <span class="nc" id="L37">        return false;</span>
@@ -39,25 +39,25 @@ import it.unina.picus.utenze.interno.applicazione.DatiOperatoreNonValidiExceptio
 
     /** Solo numeri interi: un numero con decimali, un testo o un valore vuoto vengono rifiutati. */
     List&lt;Long&gt; identificativi(List&lt;Object&gt; valori, String campo, String messaggio) {
-<span class="nc bnc" id="L42" title="All 2 branches missed.">        if (valori == null) {</span>
-<span class="nc" id="L43">            return List.of();</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">        if (valori == null) {</span>
+<span class="fc" id="L43">            return List.of();</span>
         }
-<span class="nc" id="L45">        List&lt;Long&gt; identificativi = new ArrayList&lt;&gt;();</span>
-<span class="nc bnc" id="L46" title="All 2 branches missed.">        for (Object valore : valori) {</span>
-<span class="nc bnc" id="L47" title="All 4 branches missed.">            if (!(valore instanceof Integer || valore instanceof Long)) {</span>
-<span class="nc" id="L48">                errori.putIfAbsent(campo, messaggio);</span>
-<span class="nc" id="L49">                return List.of();</span>
+<span class="fc" id="L45">        List&lt;Long&gt; identificativi = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L46" title="All 2 branches covered.">        for (Object valore : valori) {</span>
+<span class="pc bpc" id="L47" title="1 of 4 branches missed.">            if (!(valore instanceof Integer || valore instanceof Long)) {</span>
+<span class="fc" id="L48">                errori.putIfAbsent(campo, messaggio);</span>
+<span class="fc" id="L49">                return List.of();</span>
             }
-<span class="nc" id="L51">            identificativi.add(((Number) valore).longValue());</span>
-<span class="nc" id="L52">        }</span>
-<span class="nc" id="L53">        return identificativi;</span>
+<span class="fc" id="L51">            identificativi.add(((Number) valore).longValue());</span>
+<span class="fc" id="L52">        }</span>
+<span class="fc" id="L53">        return identificativi;</span>
     }
 
     /** Se qualche campo ha il tipo sbagliato, ferma la richiesta indicando quali. */
     void verifica() {
-<span class="nc bnc" id="L58" title="All 2 branches missed.">        if (!errori.isEmpty()) {</span>
-<span class="nc" id="L59">            throw new DatiOperatoreNonValidiException(errori);</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">        if (!errori.isEmpty()) {</span>
+<span class="fc" id="L59">            throw new DatiOperatoreNonValidiException(errori);</span>
         }
-<span class="nc" id="L61">    }</span>
+<span class="fc" id="L61">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

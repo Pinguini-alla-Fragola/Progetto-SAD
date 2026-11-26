@@ -8,13 +8,13 @@ import java.util.Map;
  * Raccoglie gli errori trovati su un modulo, uno per campo, così l'utente vede subito tutto
  * quello che deve correggere. Se un campo ha già un errore, il primo messaggio resta quello valido.
  */
-<span class="nc" id="L11">public final class Errori {</span>
+<span class="fc" id="L11">public final class Errori {</span>
 
-<span class="nc" id="L13">    private final Map&lt;String, String&gt; perCampo = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L13">    private final Map&lt;String, String&gt; perCampo = new LinkedHashMap&lt;&gt;();</span>
 
     public void aggiungi(String campo, String messaggio) {
-<span class="nc" id="L16">        perCampo.putIfAbsent(campo, messaggio);</span>
-<span class="nc" id="L17">    }</span>
+<span class="fc" id="L16">        perCampo.putIfAbsent(campo, messaggio);</span>
+<span class="fc" id="L17">    }</span>
 
     /**
      * Indica se un campo ha già un errore, così una regola può evitare controlli inutili su un valore già scartato.
@@ -23,15 +23,15 @@ import java.util.Map;
      * @return vero se il campo ha già un errore
      */
     public boolean contiene(String campo) {
-<span class="nc" id="L26">        return perCampo.containsKey(campo);</span>
+<span class="fc" id="L26">        return perCampo.containsKey(campo);</span>
     }
 
     public boolean vuoto() {
-<span class="nc" id="L30">        return perCampo.isEmpty();</span>
+<span class="fc" id="L30">        return perCampo.isEmpty();</span>
     }
 
     public Map&lt;String, String&gt; perCampo() {
-<span class="nc" id="L34">        return Collections.unmodifiableMap(perCampo);</span>
+<span class="fc" id="L34">        return Collections.unmodifiableMap(perCampo);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>
