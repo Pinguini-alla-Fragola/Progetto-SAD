@@ -1,5 +1,6 @@
 import { api } from './area-client.js';
 import { renderList, listRow } from './list-view.js';
+import { leggiRubricaAccount } from './rubrica-banco.js';
 
 const TIPOLOGIE = {
     INTERNO_BANCO: 'Interno del Banco',
@@ -8,7 +9,13 @@ const TIPOLOGIE = {
 
 let prossimoDettaglio = 0;
 
-/** Nel dettaglio di sola lettura i numeri vanno mostrati con le cifre emesse dal server. */
+/**
+ * Nel dettaglio di sola lettura i numeri vanno mostrati con le cifre emesse dal server:
+ * JSON.parse converte i token numerici in Number IEEE-754 a 64 bit prima di restituire l'oggetto,
+ * arrotondando gli interi Long oltre Number.MAX_SAFE_INTEGER (es. 9223372036854775807).
+ * L'espressione regolare riconosce per prime le stringhe JSON (così da non alterare eventuali cifre
+ * dentro i valori testuali) e quota i soli token numerici prima del parsing.
+ */
 function decodificaDettaglio(testo) {
     const tokenNumericiOStringhe = /"(?:[^"\\]|\\[\s\S])*"|-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/g;
     return JSON.parse(testo.replace(tokenNumericiOStringhe, token =>
@@ -30,36 +37,6 @@ function formattaIstante(istante) {
         timeStyle: 'short',
         timeZone: 'Europe/Rome'
     });
-}
-
-function leggiOperatoriDaRubrica(vociServer) {
-    const voci = Array.isArray(vociServer) ? vociServer : Array.from(
-        document.querySelectorAll('#account .account-row[data-ruolo="OPERATORE"]'),
-        riga => riga.dataset
-    );
-    const mappa = new Map();
-    for (const voce of voci) {
-        if (!voce?.id) continue;
-        const id = String(voce.id);
-        mappa.set(id, {
-            id,
-            nome: String(voce.nome || '').trim(),
-            riferimento: String(voce.riferimento || '').trim(),
-            stato: String(voce.stato || '').trim()
-        });
-    }
-    const conteggioNomi = new Map();
-    for (const op of mappa.values()) {
-        const chiaveNome = op.nome.toLocaleLowerCase('it-IT');
-        if (chiaveNome) {
-            conteggioNomi.set(chiaveNome, (conteggioNomi.get(chiaveNome) || 0) + 1);
-        }
-    }
-    for (const op of mappa.values()) {
-        const chiaveNome = op.nome.toLocaleLowerCase('it-IT');
-        op.omonimo = chiaveNome ? (conteggioNomi.get(chiaveNome) || 0) > 1 : false;
-    }
-    return mappa;
 }
 
 function tabellaConteggi(intestazioni, righe) {
@@ -315,7 +292,7 @@ export function initSchedeBanco() {
                 : [];
             if (richiesta !== progressivo) return;
             mostraEsito('');
-            renderRisultato(periodo.anno, periodo.trimestre, dati, richiesta, leggiOperatoriDaRubrica(vociRubrica));
+            renderRisultato(periodo.anno, periodo.trimestre, dati, richiesta, leggiRubricaAccount('OPERATORE', vociRubrica));
         } catch (err) {
             if (richiesta !== progressivo) return;
             mostraEsito(err.message || 'Impossibile consultare il riepilogo.', {
