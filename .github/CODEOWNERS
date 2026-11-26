@@ -1,4 +1,3 @@
-# Le regole specifiche vengono per ultime: prevalgono sul proprietario generale.
 # Solo questi due account sono code owner della configurazione del repository.
 /.gitignore @CapHello @giob22
 /.github/ @CapHello @giob22

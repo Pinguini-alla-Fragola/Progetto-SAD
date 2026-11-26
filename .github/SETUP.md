@@ -9,7 +9,14 @@ GitHub li mostri; `CODEOWNERS` deve esistere nei branch di destinazione delle PR
 ## Code owner e protezione dei branch
 
 Il [CODEOWNERS](CODEOWNERS) assegna `.gitignore` e tutti i file di `.github/`
-esclusivamente a **@CapHello e @giob22**.
+esclusivamente a **@CapHello e @giob22**. Sugli altri file, senza un proprietario
+generale, non parte più la richiesta automatica di review a tutto il team
+`developers`. Resta comunque in vigore il ruleset di `main`: richiede almeno
+un'approvazione da un revisore autorizzato diverso da chi ha effettuato l'ultimo
+push, su qualunque file. Sui percorsi riservati vale anche il requisito
+CODEOWNERS descritto sopra, e la stessa approvazione può soddisfare entrambi i
+requisiti. Il ruleset attuale non impone invece la risoluzione delle
+conversazioni prima del merge.
 
 Dopo la pubblicazione umana dei file nel branch di destinazione:
 
