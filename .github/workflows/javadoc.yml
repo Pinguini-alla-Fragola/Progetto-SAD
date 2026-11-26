@@ -1,7 +1,9 @@
 name: Pubblica Javadoc
 
 on:
-  push:
+  workflow_run:
+    workflows: [Java CI]
+    types: [completed]
     branches: [main]
   workflow_dispatch:
 
@@ -13,18 +15,57 @@ concurrency:
 
 jobs:
   build:
-    name: Genera e aggiorna il branch Javadoc
-    if: github.ref == 'refs/heads/main'
+    name: Prepara Javadoc e copertura
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_repository.full_name == github.repository &&
+       (github.event.workflow_run.event == 'push' ||
+        github.event.workflow_run.event == 'workflow_dispatch'))
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
+      actions: read
       contents: write
+    env:
+      SOURCE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+    outputs:
+      ready: ${{ steps.publish.outputs.ready }}
     steps:
-      - name: Checkout di main
+      - name: Identifica la Java CI del commit
+        id: java-run
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TRIGGER_RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          run_id="$TRIGGER_RUN_ID"
+          if [[ -z "$run_id" ]]; then
+            run_id="$(gh api --method GET "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs" \
+              -f branch=main -f head_sha="$SOURCE_SHA" -f status=success \
+              --jq '[.workflow_runs[] | select(.event == "push" or .event == "workflow_dispatch")][0].id // empty')"
+            if [[ -z "$run_id" ]]; then
+              echo "::error::Avvia Java CI su main per generare il report di questo commit."
+              exit 1
+            fi
+          fi
+          echo "id=$run_id" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout del commit testato
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: main
+          ref: ${{ env.SOURCE_SHA }}
           persist-credentials: false
+
+      - name: Scarica il report della Java CI
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: copertura-java
+          path: ${{ runner.temp }}/javadoc-site/copertura
+          github-token: ${{ github.token }}
+          run-id: ${{ steps.java-run.outputs.id }}
+          digest-mismatch: error
 
       - name: Configura Java 25
         uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
@@ -43,9 +84,11 @@ jobs:
           classpath="$(cat "$RUNNER_TEMP/javadoc-classpath.txt")"
           javadoc -classpath "$classpath" -d "$RUNNER_TEMP/javadoc-site" '@scripts/javadoc.args'
           test -s "$RUNNER_TEMP/javadoc-site/index.html"
+          test -s "$RUNNER_TEMP/javadoc-site/copertura/index.html"
           cp docs/assets/picus-logo.svg "$RUNNER_TEMP/javadoc-site/resource-files/picus-logo.svg"
 
       - name: Aggiorna il branch javadoc
+        id: publish
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -53,6 +96,13 @@ jobs:
           git_auth() {
             git -c credential.helper= -c 'credential.helper=!gh auth git-credential' "$@"
           }
+
+          current_sha="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq '.object.sha')"
+          if [[ "$SOURCE_SHA" != "$current_sha" ]]; then
+            echo "Il commit testato è stato superato da una nuova versione di main." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          echo "ready=true" >> "$GITHUB_OUTPUT"
 
           # Prepara l'intera nuova versione in un repository temporaneo.
           archive="$RUNNER_TEMP/javadoc-branch"
@@ -79,6 +129,7 @@ jobs:
           git_auth push origin HEAD:refs/heads/javadoc
 
       - name: Carica l'artefatto per GitHub Pages
+        if: steps.publish.outputs.ready == 'true'
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: ${{ runner.temp }}/javadoc-site
@@ -86,6 +137,7 @@ jobs:
   deploy:
     name: Pubblica su GitHub Pages
     needs: build
+    if: needs.build.outputs.ready == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 12
     permissions:

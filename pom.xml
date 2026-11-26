@@ -154,6 +154,9 @@
                             </execution>
                             <execution>
                                 <id>report-copertura</id>
+                                <configuration>
+                                    <title>PICUS - Copertura dei test</title>
+                                </configuration>
                                 <phase>verify</phase>
                                 <goals>
                                     <goal>report</goal>

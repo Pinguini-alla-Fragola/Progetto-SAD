@@ -121,18 +121,17 @@ Aggiungere l'ecosistema Maven soltanto quando esiste il relativo POM.
 Riferimenti: [sicurezza delle Action](https://docs.github.com/en/actions/reference/security/secure-use)
 e [opzioni Dependabot](https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference).
 
-## Pubblicazione del Javadoc
+## Pubblicazione del Javadoc e della copertura dei test
 
 [Controllo Javadoc](workflows/javadoc-pr.yml) esegue la stessa verifica delle
 API pubbliche prima del merge delle PR che modificano sorgenti o configurazione
 della build e della documentazione Java.
 
-Il workflow [Pubblica Javadoc](workflows/javadoc.yml) si avvia a ogni push su
-`main`, compresi i merge delle PR. Usa Java 25 e il classpath di compilazione
-risolto da Maven per generare l'HTML dei package in `src/main/java`. Verifica
-la completezza della documentazione delle API pubbliche, aggiorna il branch
-`javadoc` quando i file cambiano e invia lo stesso HTML a GitHub Pages. Il
-branch viene creato alla prima esecuzione e contiene l'output generato.
+Il workflow [Pubblica Javadoc](workflows/javadoc.yml) si avvia dopo una
+[Java CI](workflows/ci.yml) riuscita su `main`. Genera i Javadoc con Java 25,
+verifica le API pubbliche e aggiunge in `copertura/` il report JaCoCo dello
+stesso commit, con il tema PICUS applicato dalla CI. Aggiorna il branch
+`javadoc` quando i file cambiano e pubblica lo stesso sito su GitHub Pages.
 
 Un maintainer abilita la pubblicazione in
 [Settings → Pages](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/settings/pages)
@@ -142,11 +141,11 @@ Se l'ambiente `github-pages` ha regole di deploy, queste devono consentire
 con `GITHUB_TOKEN` sul branch di output non avviano una build Pages.
 [Configurazione della sorgente](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)
 
-Dopo l'integrazione del workflow, la prima esecuzione può essere avviata
-anche da **Actions → Pubblica Javadoc → Run workflow**, selezionando `main`.
-L'URL effettivo compare nell'ambiente `github-pages` dopo il deploy. Con il
-dominio predefinito del progetto è
-[il sito Javadoc di Progetto-SAD](https://pinguini-alla-fragola.github.io/Progetto-SAD/).
+Per ripetere la pubblicazione, usa **Actions → Pubblica Javadoc → Run workflow**
+su `main` se l'artefatto della Java CI per il commit corrente è ancora
+disponibile. Per rigenerarlo, avvia **Java CI** su `main`. L'URL compare
+nell'ambiente `github-pages` dopo il deploy. La landing di PICUS mostra il
+link **Copertura dei test** quando il report è disponibile sul dominio dei Javadoc.
 
 ## Sicurezza e accesso
 
