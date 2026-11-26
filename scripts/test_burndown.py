@@ -114,6 +114,26 @@ class BurndownScopeTests(unittest.TestCase):
         self.assertEqual([i["punti"] for i in mine], [2, 0, 0, 0])
         self.assertEqual(base, 2)
 
+    def test_sprint_summary_distinguishes_missing_estimate_and_unassigned_work(self):
+        aperto = node("Da [stimare]", points=None)
+        aperto["content"].update(number=42, url="https://github.com/esempio/picus/issues/42",
+                                 assignees={"totalCount": 0})
+        assegnato = node("Con stima zero", points=0)
+        assegnato["content"]["assignees"] = {"totalCount": 1}
+        chiuso = node("Concluso", points=2, done=True)
+        escluso = node("Story", issue_type="Story", points=None)
+        sprint = scarica([aperto, assegnato, chiuso, escluso])[ITERATION["title"]]
+
+        riepilogo = burndown.riepilogo_sprint(ITERATION["title"], sprint["task"])
+
+        self.assertIn("Task senza Estimate (1)", riepilogo)
+        self.assertIn("Task in In progress senza assegnatario (1)", riepilogo)
+        self.assertEqual(riepilogo.count("[#42](<https://github.com/esempio/picus/issues/42>)"), 2)
+        self.assertIn(r"Da \[stimare\]", riepilogo)
+        self.assertNotIn("Con stima zero", riepilogo)
+        self.assertNotIn("Concluso", riepilogo)
+        self.assertNotIn("Story", riepilogo)
+
     def test_remaining_work_depends_on_status(self):
         def task(stato, eventi=(), chiuso=None):
             return {"punti": 8.0, "chiuso": chiuso, "stato_ora": stato, "eventi": list(eventi)}

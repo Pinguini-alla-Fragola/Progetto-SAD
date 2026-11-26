@@ -18,6 +18,22 @@
 | Stati della richiesta | ![Stati della richiesta](diagrams/stati-richiesta/PICUS-Stati-Richiesta.svg) | Stati della richiesta e passaggi da uno stato all’altro. |
 | Schema ER PostgreSQL | ![Schema ER](diagrams/schema-er/PICUS-Schema-ER.svg) | Tabelle e relazioni della persistenza iniziale. |
 
+### Aggiornare le anteprime SVG
+
+Installa Python 3 con Pillow e i renderer per i formati che modifichi.
+Graphviz (`dot`) e Mermaid CLI (`mmdc`) devono essere nel `PATH`.
+Per PlantUML, usa Java 25 e indica il percorso del JAR. Le versioni sono
+riportate nel [workflow dei diagrammi](../../.github/workflows/diagrams.yml).
+
+```console
+python scripts/verifica_diagrammi.py --aggiorna --plantuml-jar "/percorso/plantuml.jar"
+```
+
+Il comando rigenera gli SVG delle sorgenti nuove o modificate rispetto
+all'antenato comune con `origin/main`. Senza quel riferimento confronta i file
+di lavoro con `HEAD`. Usa `--base` per scegliere un altro commit e ometti
+`--plantuml-jar` se hai modificato solo diagrammi Mermaid o DOT.
+
 ## Stati della richiesta
 
 Il diagramma segue il ciclo definito in [ADR-002](../adr/ADR-002-ciclo-di-vita-richiesta.md).
