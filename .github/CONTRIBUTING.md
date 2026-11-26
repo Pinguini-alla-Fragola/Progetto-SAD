@@ -79,9 +79,10 @@ In PowerShell:
 .\mvnw.cmd test
 ```
 
-La CI esegue `bash ./mvnw --batch-mode --no-transfer-progress -Pcoverage verify` con
-Java 25 quando rileva il progetto Maven completo del wrapper. Per le PR che
-modificano soltanto il README principale, file Markdown in `docs/` o
+La CI esegue `bash ./mvnw --batch-mode --no-transfer-progress verify` con
+Java 25 quando rileva il progetto Maven completo del wrapper. Il report JaCoCo
+si genera automaticamente su `main` o tramite l'[avvio manuale di Java CI](SETUP.md#workflow-e-dipendenze).
+Per le PR che modificano soltanto il README principale, file Markdown in `docs/` o
 `.github/`, oppure PDF in `docs/`, il check Java indica nel riepilogo che la
 suite è stata saltata. Se i test Java falliscono, il riepilogo elenca i casi
 falliti e i comandi per ripeterli in locale. Se manca il POM, il check indica

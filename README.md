@@ -65,8 +65,11 @@ usa `bash ./mvnw -Pfast test` oppure `.\mvnw.cmd -Pfast test`.
 
 Il profilo `coverage` genera il report JaCoCo in `target/site/jacoco/` con
 `bash ./mvnw -Pcoverage verify` oppure `.\mvnw.cmd -Pcoverage verify`.
-Nelle esecuzioni Java riuscite su GitHub Actions, il report è scaricabile come
-artefatto **copertura-java**, con lo stesso tema dei Javadoc.
+Su GitHub Actions il report viene generato automaticamente su `main`.
+Per ottenerlo su un altro branch della repository, apri **Actions → Java CI →
+Run workflow**, seleziona il branch e attiva **Genera il report JaCoCo**.
+Il risultato è scaricabile come artefatto **copertura-java**, con lo stesso
+tema dei Javadoc.
 Per applicare il tema anche in locale, esegui
 `python scripts/applica_tema_jacoco.py target/site/jacoco` dopo Maven.
 

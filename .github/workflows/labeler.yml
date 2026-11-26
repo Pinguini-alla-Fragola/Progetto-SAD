@@ -22,4 +22,4 @@ jobs:
       # La configurazione è letta dalla base fidata via API. Il job non fa checkout.
       - uses: actions/labeler@bf12e9b00b37c5c0ca2b87b79b2daf7891dbda13 # v7.0.0
         with:
-          sync-labels: true
+          sync-labels: false

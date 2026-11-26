@@ -45,10 +45,8 @@ GitHub di scrittura per percorso.
 
 Riferimento: [code owner e protezioni](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners).
 
-Con **Allow auto-merge** attivo in **Settings → General → Pull Requests**,
-chi ha accesso in scrittura può scegliere **Enable auto-merge** su una singola
-PR. GitHub esegue il merge dopo le approvazioni e i controlli richiesti dal
-ruleset.
+Il merge si esegue manualmente dopo le approvazioni e i controlli richiesti
+dal ruleset.
 
 ## Issue e Project
 
@@ -86,13 +84,17 @@ compare nel riepilogo di Actions. Il workflow supporta anche **Run workflow**.
 [Etichette delle PR](workflows/labeler.yml) applica
 [`documentation`, `ci`, `frontend` e `test`](labeler.yml) in base ai percorsi
 del diff. `documentation` richiede percorsi documentali per tutti i file
-elencati da GitHub. Il job aggiorna queste etichette a ogni push sulla PR
-e legge la configurazione dal ramo base tramite API.
+elencati da GitHub. Il job aggiunge le etichette corrispondenti all'apertura,
+alla riapertura e a ogni push sulla PR. Le etichette già presenti si conservano
+e chi fa la review può rimuovere quelle non più pertinenti. La configurazione
+è letta tramite API dal ramo base.
 
 [Java CI](workflows/ci.yml) dichiara esplicitamente l'assenza di build e test
 finché non esiste `pom.xml`. Quando il POM compare, esige il Maven Wrapper e
-usa Java 25 con `verify`. La revisione dei workflow è rinviata al confronto
-sulla CI e sulla collaborazione.
+usa Java 25 con `verify`. Su `main` genera automaticamente il report JaCoCo.
+Per generarlo su un altro branch della repository, aprire **Actions → Java CI →
+Run workflow**, selezionare il branch e attivare **Genera il report JaCoCo**.
+A fine esecuzione il report compare tra gli artefatti come **copertura-java**.
 
 [JavaScript CI](workflows/javascript.yml) esegue `node --test src/test/js/*.test.mjs`
 con Node.js 24 sulle pull request, sui push a `main` e `develop` e su avvio manuale.
