@@ -7,6 +7,7 @@ import it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre;
 import it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeRendicontabili;
 import it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeRendicontabili.VersioneInviata;
 import it.unina.picus.monitoraggio.interno.dominio.CategorieSchedeRendicontabili;
+import it.unina.picus.monitoraggio.interno.dominio.ConfigurazioneTrimestre;
 import it.unina.picus.monitoraggio.interno.dominio.RegoleAccessoScheda;
 import it.unina.picus.monitoraggio.interno.dominio.TracciatoSchedaOperatore;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
@@ -18,13 +19,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.BinaryOperator;
 import java.util.function.Predicate;
 
-/** Caso d'uso di riepilogo trimestrale delle schede personali per il Banco (#181). */
+/**
+ * Caso d'uso di riepilogo trimestrale delle schede personali per il Banco (#181, #57, #41).
+ * Distingue la configurazione pubblicata del singolo trimestre, l'associazione esplicita storica
+ * a {@code v0.1} e il trimestre privo di configurazione.
+ */
 public final class ServizioRiepilogoSchede {
 
     private static final BinaryOperator<VersioneInviata> VERSIONE_PIU_RECENTE =
@@ -36,10 +40,10 @@ public final class ServizioRiepilogoSchede {
     private final CategorieSchedeRendicontabili categorie;
 
     /**
-     * Crea il caso d'uso a partire dall'archivio delle schede e dalla fonte delle categorie Banco.
+     * Crea il caso d'uso a partire dall'archivio delle schede e dalla fonte delle configurazioni per trimestre.
      *
      * @param archivio sorgente delle versioni inviate e accettate
-     * @param categorie fonte autorizzata delle categorie ammesse dal Banco per TM-OP-01
+     * @param categorie fonte autorizzata delle versioni di categorie per trimestre (TM-OP-01)
      */
     public ServizioRiepilogoSchede(
             ArchivioSchedeRendicontabili archivio,
@@ -49,13 +53,20 @@ public final class ServizioRiepilogoSchede {
     }
 
     /**
-     * Usa l'ultima versione accettata per operatore e somma i conteggi dichiarati per le sole
-     * categorie ammesse dalla configurazione globale corrente del Banco (o per formato valido
-     * finché nessuna configurazione TM-OP-01 è stata registrata). La configurazione corrente si
-     * applica anche ai totali dei trimestri passati e lascia intatte le schede inviate. Le categorie
-     * sovrapponibili restano distinte e una correzione sostituisce l'intero invio precedente. Uno
-     * zero dichiarato su una categoria ammessa compare fra i totali, mentre una categoria mai
-     * dichiarata o non ammessa è assente. Le schede ricevute nel periodo restano nell'elenco.
+     * Usa l'ultima versione accettata per operatore e somma i conteggi dichiarati secondo la
+     * configurazione risolta per il trimestre richiesto:
+     * <ul>
+     *   <li>{@link ConfigurazioneTrimestre.Pubblicata}: ammette esclusivamente i codici della
+     *   versione immutabile pubblicata per quel trimestre; modifiche o disattivazioni pubblicate
+     *   per trimestri successivi non alterano questo riepilogo;</li>
+     *   <li>{@link ConfigurazioneTrimestre.LegacyProvvisoria}: periodo associato esplicitamente
+     *   al tracciato provvisorio {@code v0.1}, che ammette i codici sintatticamente validi;</li>
+     *   <li>{@link ConfigurazioneTrimestre.NonConfigurata}: trimestre privo di configurazione,
+     *   mai reso implicitamente permissivo, quindi non aggrega codici non configurati.</li>
+     * </ul>
+     * Le categorie sovrapponibili restano distinte e una correzione sostituisce l'intero invio
+     * precedente conservando la configurazione del trimestre. Uno zero dichiarato su una categoria
+     * ammessa compare fra i totali, mentre una categoria mai dichiarata o non ammessa è assente.
      *
      * @param attore identità verificata del Banco
      * @param trimestre singolo periodo da riepilogare
@@ -70,17 +81,20 @@ public final class ServizioRiepilogoSchede {
         RegoleAccessoScheda.verificaRiepilogo(attore);
         Objects.requireNonNull(trimestre, "trimestre");
 
-        Optional<Set<String>> configurate = categorie.codiciAmmessi();
-        Predicate<String> ammessa = configurate
-                .<Predicate<String>>map(ammesse ->
-                        codice -> ammesse.contains(codice) && TracciatoSchedaOperatore.codiceCategoriaValido(codice))
-                .orElse(TracciatoSchedaOperatore::codiceCategoriaValido);
+        ConfigurazioneTrimestre configurazione = categorie.configurazionePer(trimestre);
+        Predicate<String> ammessa = switch (configurazione) {
+            case ConfigurazioneTrimestre.Pubblicata pubblicata -> {
+                Set<String> ammesse = pubblicata.versione().codiciAmmessi();
+                yield codice -> ammesse.contains(codice) && TracciatoSchedaOperatore.codiceCategoriaValido(codice);
+            }
+            case ConfigurazioneTrimestre.LegacyProvvisoria ignored -> TracciatoSchedaOperatore::codiceCategoriaValido;
+            case ConfigurazioneTrimestre.NonConfigurata ignored -> codice -> false;
+        };
 
         Map<UUID, VersioneInviata> ultimeVersioni = new HashMap<>();
         Map<UUID, Set<Long>> progressiviPerOperatore = new HashMap<>();
         for (VersioneInviata versione : archivio.elencaVersioniInviate(trimestre)) {
             SchedaSintesi sintesi = versione.sintesi();
-            // Limita il riepilogo al periodo richiesto anche se l'archivio restituisce altri invii.
             if (!trimestre.equals(sintesi.trimestre())) {
                 continue;
             }

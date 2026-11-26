@@ -5,10 +5,16 @@ import it.unina.picus.monitoraggio.api.MonitoraggioApi;
 import it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeOperatore;
 import it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeRendicontabili;
 import it.unina.picus.monitoraggio.interno.dominio.CategorieSchedeRendicontabili;
+import it.unina.picus.monitoraggio.interno.dominio.ConfigurazioneTrimestre;
+import it.unina.picus.monitoraggio.interno.dominio.ConfigurazioneTrimestreAssenteException;
 import it.unina.picus.monitoraggio.interno.dominio.DatiSchedaNonValidiException;
 import it.unina.picus.monitoraggio.interno.dominio.RegoleAccessoScheda;
+import it.unina.picus.monitoraggio.interno.dominio.StatoVersioneCategorie;
 import it.unina.picus.monitoraggio.interno.dominio.TracciatoSchedaOperatore;
+import it.unina.picus.monitoraggio.interno.dominio.VoceCategoriaVersione;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +26,7 @@ import java.time.temporal.IsoFields;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.UUID;
 
 /** Coordina l'invio, la consultazione e il riepilogo delle schede personali. */
@@ -31,26 +38,56 @@ public class ServizioSchedeOperatore implements MonitoraggioApi {
     private static final ZoneId FUSO_RENDICONTAZIONE = ZoneId.of("Europe/Rome");
 
     private final ArchivioSchedeOperatore archivio;
+    private final CategorieSchedeRendicontabili categorie;
     private final ServizioRiepilogoSchede riepilogo;
     private final ConteggiOptApi conteggiOpt;
     private final Clock orologio;
+    private final Trimestre primoTrimestreObbligatorio;
 
     /**
-     * Crea il servizio applicativo delle schede personali.
+     * Crea il servizio applicativo delle schede personali con soglia di adozione obbligatoria configurabile.
      *
      * @param archivio persistenza delle schede personali
      * @param archivioRendicontabile sorgente delle schede accettate per il riepilogo
-     * @param categorieSchede fonte delle categorie ammesse dal Banco per il riepilogo
+     * @param categorie fonte delle configurazioni per trimestre di TM-OP-01
+     * @param conteggiOpt servizio dei conteggi trimestrali delle OPT
+     * @param orologio sorgente dell'istante di invio
+     * @param primoAnnoObbligatorio anno da cui è richiesta una configurazione pubblicata se assente
+     * @param primoTrimestreObbligatorio trimestre dell'anno indicato da cui è richiesta la pubblicazione
+     */
+    @Autowired
+    public ServizioSchedeOperatore(
+            ArchivioSchedeOperatore archivio,
+            ArchivioSchedeRendicontabili archivioRendicontabile,
+            CategorieSchedeRendicontabili categorie,
+            ConteggiOptApi conteggiOpt,
+            Clock orologio,
+            @Value("${picus.monitoraggio.categorie.primo-trimestre-obbligatorio-anno:2026}") int primoAnnoObbligatorio,
+            @Value("${picus.monitoraggio.categorie.primo-trimestre-obbligatorio-trimestre:4}") int primoTrimestreObbligatorio) {
+        this.archivio = archivio;
+        this.categorie = categorie;
+        this.riepilogo = new ServizioRiepilogoSchede(archivioRendicontabile, categorie);
+        this.conteggiOpt = conteggiOpt;
+        this.orologio = orologio;
+        this.primoTrimestreObbligatorio = new Trimestre(primoAnnoObbligatorio, primoTrimestreObbligatorio);
+    }
+
+    /**
+     * Costruttore di convenienza per test unitari con soglia predefinita al {@code 2026-T4}.
+     *
+     * @param archivio persistenza delle schede personali
+     * @param archivioRendicontabile sorgente delle schede accettate per il riepilogo
+     * @param categorie fonte delle configurazioni per trimestre di TM-OP-01
      * @param conteggiOpt servizio dei conteggi trimestrali delle OPT
      * @param orologio sorgente dell'istante di invio
      */
-    public ServizioSchedeOperatore(ArchivioSchedeOperatore archivio, ArchivioSchedeRendicontabili archivioRendicontabile,
-                                    CategorieSchedeRendicontabili categorieSchede, ConteggiOptApi conteggiOpt,
-                                    Clock orologio) {
-        this.archivio = archivio;
-        this.riepilogo = new ServizioRiepilogoSchede(archivioRendicontabile, categorieSchede);
-        this.conteggiOpt = conteggiOpt;
-        this.orologio = orologio;
+    public ServizioSchedeOperatore(
+            ArchivioSchedeOperatore archivio,
+            ArchivioSchedeRendicontabili archivioRendicontabile,
+            CategorieSchedeRendicontabili categorie,
+            ConteggiOptApi conteggiOpt,
+            Clock orologio) {
+        this(archivio, archivioRendicontabile, categorie, conteggiOpt, orologio, 2026, 4);
     }
 
     /** {@inheritDoc} */
@@ -64,6 +101,40 @@ public class ServizioSchedeOperatore implements MonitoraggioApi {
     @Override
     public List<ConteggioOpt> consultaConteggiOpt(IdentitaAutenticata attore, UUID optId, Trimestre da, Trimestre a) {
         return conteggiOpt.consultaConteggiOpt(attore, optId, da, a);
+    }
+
+    /**
+     * Risolve la configurazione del modulo per il trimestre richiesto, esponendo le categorie
+     * pubblicate oppure la modalità provvisoria storica {@code v0.1}. Un trimestre successivo alla
+     * soglia privo di configurazione riceve {@link ConfigurazioneTrimestreAssenteException}.
+     *
+     * @param attore identità verificata dell'operatore
+     * @param trimestre periodo richiesto
+     * @return metadati della configurazione di categorie applicabile al modulo
+     */
+    public ConfigurazioneModulo moduloPer(IdentitaAutenticata attore, Trimestre trimestre) {
+        RegoleAccessoScheda.verificaOperatore(attore);
+        if (trimestre == null) {
+            throw new DatiSchedaNonValidiException(Map.of("trimestre", "Il periodo è obbligatorio"));
+        }
+        ConfigurazioneTrimestre conf = categorie.configurazionePer(trimestre);
+        return switch (conf) {
+            case ConfigurazioneTrimestre.Pubblicata p -> new ConfigurazioneModulo(
+                    p.versione().codiceVersione(),
+                    StatoVersioneCategorie.PUBBLICATA,
+                    p.versione().voci());
+            case ConfigurazioneTrimestre.LegacyProvvisoria l -> new ConfigurazioneModulo(
+                    l.versione().codiceVersione(),
+                    StatoVersioneCategorie.LEGACY,
+                    l.versione().voci());
+            case ConfigurazioneTrimestre.NonConfigurata n -> {
+                if (precedeSogliaObbligatoria(trimestre)) {
+                    yield new ConfigurazioneModulo("v0.1", StatoVersioneCategorie.LEGACY, List.of());
+                }
+                throw new ConfigurazioneTrimestreAssenteException(
+                        "Configurazione delle categorie non ancora pubblicata dal Banco per il trimestre selezionato");
+            }
+        };
     }
 
     /** {@inheritDoc} */
@@ -80,8 +151,34 @@ public class ServizioSchedeOperatore implements MonitoraggioApi {
                 || (trimestre.anno() == annoCorrente && trimestre.numero() >= trimestreCorrente)) {
             throw new DatiSchedaNonValidiException(Map.of("trimestre", "Scegli un trimestre concluso"));
         }
+
+        ConfigurazioneTrimestre conf = categorie.configurazionePer(trimestre);
+        if (conf instanceof ConfigurazioneTrimestre.NonConfigurata) {
+            if (!precedeSogliaObbligatoria(trimestre)) {
+                throw new ConfigurazioneTrimestreAssenteException(
+                        "Configurazione delle categorie non ancora pubblicata dal Banco per il trimestre selezionato");
+            }
+            conf = categorie.associaLegacySeAssente(trimestre, istanteInvio);
+        }
+
+        UUID versioneCategorieId;
+        switch (conf) {
+            case ConfigurazioneTrimestre.Pubblicata p -> {
+                Set<String> ammesse = p.versione().codiciAmmessi();
+                if (!dati.conteggi().keySet().stream().allMatch(ammesse::contains)) {
+                    throw new DatiSchedaNonValidiException(Map.of("conteggi",
+                            "Contiene categorie non previste dalla configurazione pubblicata per il trimestre"));
+                }
+                versioneCategorieId = p.versione().id();
+            }
+            case ConfigurazioneTrimestre.LegacyProvvisoria l -> versioneCategorieId = l.versione().id();
+            case ConfigurazioneTrimestre.NonConfigurata ignored ->
+                    throw new ConfigurazioneTrimestreAssenteException(
+                            "Configurazione delle categorie non ancora pubblicata dal Banco per il trimestre selezionato");
+        }
+
         var sintesi = new SchedaSintesi(UUID.randomUUID(), attore.accountId(), trimestre, istanteInvio);
-        archivio.registra(new SchedaOperatore(sintesi, dati));
+        archivio.registra(new SchedaOperatore(sintesi, dati), versioneCategorieId);
         return sintesi.id();
     }
 
@@ -125,4 +222,16 @@ public class ServizioSchedeOperatore implements MonitoraggioApi {
         }
         return archivio.perTrimestre(trimestre);
     }
+
+    private boolean precedeSogliaObbligatoria(Trimestre trimestre) {
+        return trimestre.anno() < primoTrimestreObbligatorio.anno()
+                || (trimestre.anno() == primoTrimestreObbligatorio.anno()
+                && trimestre.numero() < primoTrimestreObbligatorio.numero());
+    }
+
+    /** Metadati della configurazione delle categorie esposti al modulo di compilazione. */
+    public record ConfigurazioneModulo(
+            String codiceVersione,
+            StatoVersioneCategorie stato,
+            List<VoceCategoriaVersione> categorie) {}
 }

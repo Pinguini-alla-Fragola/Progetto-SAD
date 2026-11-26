@@ -18,7 +18,18 @@ public interface ArchivioSchedeOperatore {
      * @param scheda invio già validato
      * @throws SchedaGiaInviataException se il titolare ha già inviato nello stesso periodo
      */
-    void registra(SchedaOperatore scheda);
+    default void registra(SchedaOperatore scheda) {
+        registra(scheda, null);
+    }
+
+    /**
+     * Registra la scheda, i conteggi e il riferimento alla versione di categorie usata all'accettazione.
+     *
+     * @param scheda invio già validato
+     * @param versioneCategorieId identificativo della configurazione di categorie applicata al periodo
+     * @throws SchedaGiaInviataException se il titolare ha già inviato nello stesso periodo
+     */
+    void registra(SchedaOperatore scheda, UUID versioneCategorieId);
 
     /**
      * Cerca la scheda e verifica l'accesso prima di costruire il dettaglio.

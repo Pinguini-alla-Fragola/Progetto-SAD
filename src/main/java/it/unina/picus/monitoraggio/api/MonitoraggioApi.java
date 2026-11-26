@@ -61,10 +61,12 @@ public interface MonitoraggioApi extends SchedeOperatoreApi {
 
     /**
      * Riepiloga per il Banco le schede ricevute nel trimestre selezionato. Le voci aggregate
-     * rappresentano conteggi dichiarati esatti (con precisione {@link BigInteger}) per le sole
-     * categorie attive nella configurazione corrente del Banco per il tracciato TM-OP-01, che si
-     * applica a ogni trimestre. Finché nessuna categoria è censita, sono ammesse le voci con
-     * codice valido. Le categorie sovrapponibili restano distinte. Uno zero dichiarato su una
+     * rispettano la configurazione associata al trimestre stesso: una versione immutabile pubblicata
+     * dal Banco per il tracciato TM-OP-01 ammette esclusivamente i codici pubblicati per quel
+     * periodo (modifiche o disattivazioni pubblicate per trimestri successivi non alterano questo
+     * riepilogo), l'associazione esplicita storica {@code v0.1} conserva i codici sintatticamente
+     * validi del tracciato provvisorio, mentre un trimestre non configurato non attiva alcun
+     * fallback permissivo. Le categorie sovrapponibili restano distinte. Uno zero dichiarato su una
      * voce ammessa è incluso nei totali, mentre una voce mai dichiarata o non ammessa è assente.
      * Le schede ricevute restano nell'elenco. Per ogni operatore si usa l'ultima versione
      * accettata nel periodo.

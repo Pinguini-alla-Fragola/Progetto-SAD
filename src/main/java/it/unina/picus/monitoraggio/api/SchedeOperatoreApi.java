@@ -15,15 +15,17 @@ public interface SchedeOperatoreApi {
 
     /**
      * Registra il primo invio di un trimestre concluso a nome dell'operatore autenticato.
-     * L'invio è consentito dal primo giorno del trimestre successivo nel fuso {@code Europe/Rome}.
+     * L'invio è consentito dal primo giorno del trimestre successivo nel fuso {@code Europe/Rome}
+     * e valida i conteggi contro la configurazione pubblicata per il trimestre (o associa in modo
+     * esplicito i periodi storici {@code v0.1}), rifiutando i nuovi trimestri privi di pubblicazione.
      *
      * @param attore identità verificata dell'operatore interno o esterno pagato dal Banco
      * @param trimestre periodo dichiarato
      * @param dati dati dichiarati senza firma
      * @return identificativo della scheda inviata
      * @throws SecurityException se l'attore non è un operatore autorizzato
-     * @throws IllegalArgumentException se il trimestre è assente o non concluso oppure se i dati non sono validi
-     * @throws IllegalStateException se esiste già una scheda per l'operatore e il trimestre
+     * @throws IllegalArgumentException se il trimestre è assente o non concluso oppure se i dati o le categorie non sono validi
+     * @throws IllegalStateException se esiste già una scheda per l'operatore e il trimestre oppure manca la pubblicazione delle categorie per il trimestre
      */
     UUID inviaSchedaOperatore(IdentitaAutenticata attore, Trimestre trimestre, DatiSchedaOperatore dati);
 

@@ -4,6 +4,8 @@ import it.unina.picus.monitoraggio.api.MonitoraggioApi.SchedaOperatore;
 import it.unina.picus.monitoraggio.api.MonitoraggioApi.SchedaSintesi;
 import it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre;
 import it.unina.picus.monitoraggio.interno.applicazione.ServizioSchedeOperatore;
+import it.unina.picus.monitoraggio.interno.applicazione.ServizioSchedeOperatore.ConfigurazioneModulo;
+import it.unina.picus.monitoraggio.interno.dominio.ConfigurazioneTrimestreAssenteException;
 import it.unina.picus.monitoraggio.interno.dominio.DatiSchedaNonValidiException;
 import it.unina.picus.monitoraggio.interno.dominio.RegoleAccessoScheda;
 import it.unina.picus.monitoraggio.interno.dominio.SchedaGiaInviataException;
@@ -49,13 +51,14 @@ class SchedeOperatoreController {
         this.lettore = lettore;
     }
 
-    /** Restituisce all'operatore i campi del modulo per il periodo selezionato. */
+    /** Restituisce all'operatore i campi del modulo e la configurazione di categorie per il periodo scelto. */
     @GetMapping("/modulo")
     Modulo modulo(IdentitaAutenticata attore, @RequestParam(required = false) Integer anno,
                   @RequestParam(required = false) Integer trimestre) {
-        RegoleAccessoScheda.verificaOperatore(attore);
-        return new Modulo(periodo(anno, trimestre), TracciatoSchedaOperatore.CODICE,
-                TracciatoSchedaOperatore.VERSIONE, TracciatoSchedaOperatore.campi());
+        Trimestre scelto = periodo(anno, trimestre);
+        ConfigurazioneModulo configurazione = schede.moduloPer(attore, scelto);
+        return new Modulo(scelto, TracciatoSchedaOperatore.CODICE,
+                TracciatoSchedaOperatore.VERSIONE, TracciatoSchedaOperatore.campi(), configurazione);
     }
 
     /** Invia la scheda e conferma con HTTP 201, riferimento alla risorsa e periodo registrato. */
@@ -132,6 +135,12 @@ class SchedeOperatoreController {
         return errore(HttpStatus.CONFLICT, "Esiste già una scheda inviata per questo trimestre", Map.of());
     }
 
+    /** Segnala che il Banco non ha ancora pubblicato la configurazione di categorie per il trimestre. */
+    @ExceptionHandler(ConfigurazioneTrimestreAssenteException.class)
+    ResponseEntity<Errore> configurazioneAssente(ConfigurazioneTrimestreAssenteException ex) {
+        return errore(HttpStatus.CONFLICT, ex.getMessage(), Map.of());
+    }
+
     /** Segnala l'assenza della scheda richiesta. */
     @ExceptionHandler(NoSuchElementException.class)
     ResponseEntity<Errore> nonTrovata() {
@@ -142,8 +151,13 @@ class SchedeOperatoreController {
         return ResponseEntity.status(stato).body(new Errore(stato.name(), messaggio, campi));
     }
 
-    /** Metadati del tracciato applicabile per il periodo selezionato. */
-    record Modulo(Trimestre trimestre, String tracciato, String versione, List<Campo> campi) {}
+    /** Metadati del tracciato e della configurazione di categorie applicabile per il periodo selezionato. */
+    record Modulo(
+            Trimestre trimestre,
+            String tracciato,
+            String versione,
+            List<Campo> campi,
+            ConfigurazioneModulo configurazioneCategorie) {}
 
     /** Conferma del primo invio accettato. */
     record Ricevuta(UUID id, Trimestre trimestre) {}
