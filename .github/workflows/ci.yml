@@ -81,7 +81,15 @@ jobs:
         id: maven
         if: steps.project.outputs.present == 'true'
         shell: bash
-        run: bash ./mvnw --batch-mode --no-transfer-progress verify
+        run: bash ./mvnw --batch-mode --no-transfer-progress -Pcoverage verify
+
+      - name: Carica il report di copertura Java
+        if: steps.maven.outcome == 'success'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: copertura-java
+          path: target/site/jacoco/
+          if-no-files-found: error
 
       - name: Riepiloga i test Java falliti
         if: failure() && steps.maven.outcome == 'failure'

@@ -27,6 +27,21 @@ i servizi conservando i dati:
 docker compose -p picus-demo-coordinamento down
 ```
 
+### Provare le email con Mailpit
+
+Per provare i link di attivazione e recupero password, avvia la demo con
+il profilo Mailpit e apri la casella locale su <http://localhost:8025>.
+
+```console
+python scripts/demo_coordinamento.py --mailpit
+```
+
+Al termine arresta anche Mailpit.
+
+```console
+docker compose -f docker-compose.yml -f docker-compose.mailpit.yml --profile mailpit -p picus-demo-coordinamento down
+```
+
 ## Riprodurre il percorso
 
 Apri tre profili del browser o sessioni separate. Usa la password impostata

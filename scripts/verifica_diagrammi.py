@@ -1,9 +1,10 @@
-"""Rigenera i diagrammi e verifica le anteprime versionate."""
+"""Verifica le anteprime dei diagrammi o rigenera gli SVG delle sorgenti cambiate."""
 
 import argparse
 from collections import Counter
 from pathlib import Path
 import re
+from shutil import which
 import subprocess
 import sys
 from tempfile import TemporaryDirectory
@@ -25,10 +26,16 @@ def percorsi_git(*args):
     return {Path(nome) for nome in output.decode("utf-8").split("\0") if nome}
 
 
-def diagrammi_da_verificare(file_versionati, base):
+def diagrammi_da_verificare(file_versionati, base, aggiorna=False):
     diagrammi = {file for file in file_versionati if file.suffix in SORGENTI}
     if not base or base == "0" * 40:
-        return diagrammi
+        if not aggiorna:
+            return diagrammi
+        antenato = subprocess.run(
+            ["git", "merge-base", "HEAD", "origin/main"], cwd=ROOT,
+            capture_output=True, text=True,
+        )
+        base = antenato.stdout.strip() if antenato.returncode == 0 else "HEAD"
 
     if subprocess.run(
         ["git", "cat-file", "-e", f"{base}^{{commit}}"],
@@ -36,15 +43,24 @@ def diagrammi_da_verificare(file_versionati, base):
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     ).returncode:
+        if aggiorna:
+            raise ValueError(f"Commit base non disponibile: {base}")
         print("Commit base non disponibile. Verifico tutti i diagrammi.")
         return diagrammi
 
     modificati = percorsi_git("diff", "--name-only", "--no-renames", "-z", base, "--")
-    if modificati & CONFIGURAZIONE:
-        return diagrammi
+    if aggiorna:
+        nuovi = percorsi_git("ls-files", "--others", "--exclude-standard", "-z", "--", "docs")
+        modificati |= nuovi
+        diagrammi |= {file for file in nuovi if file.suffix in SORGENTI}
+        diagrammi = {file for file in diagrammi if (ROOT / file).is_file()}
+        anteprime_modificate = set()
+    else:
+        if modificati & CONFIGURAZIONE:
+            return diagrammi
+        anteprime_modificate = {file.with_suffix("") for file in modificati if file.suffix in ANTEPRIME}
 
     include_modificati = any(file.suffix == ".iuml" for file in modificati)
-    anteprime_modificate = {file.with_suffix("") for file in modificati if file.suffix in ANTEPRIME}
     # Una modifica a un include condiviso può riguardare più sorgenti PlantUML.
     return {
         file for file in diagrammi
@@ -55,6 +71,8 @@ def diagrammi_da_verificare(file_versionati, base):
 
 def renderizza(sorgente, svg, opzioni):
     if sorgente.suffix == ".puml":
+        if not opzioni.plantuml_jar:
+            raise ValueError("Indica il JAR di PlantUML con --plantuml-jar.")
         comando = [
             "java", "-DPLANTUML_SECURITY_PROFILE=ALLOWLIST", f"-Dplantuml.allowlist.path={ROOT / 'docs'}",
             "-jar", str(opzioni.plantuml_jar.resolve()), "-failfast2", "-charset", "UTF-8",
@@ -63,7 +81,8 @@ def renderizza(sorgente, svg, opzioni):
     elif sorgente.suffix == ".dot":
         comando = [opzioni.dot, "-Tsvg", "-o", str(svg), str(sorgente)]
     else:
-        comando = [opzioni.mmdc, "-i", str(sorgente), "-o", str(svg), "-b", "white", "--no-font-embed"]
+        comando = [which(opzioni.mmdc) or opzioni.mmdc, "-i", str(sorgente), "-o", str(svg),
+                   "-b", "white", "--no-font-embed"]
         if opzioni.puppeteer_config:
             comando.extend(["-p", str(opzioni.puppeteer_config.resolve())])
 
@@ -141,29 +160,42 @@ def verifica_anteprime(sorgente, svg_generato, file_versionati):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--base", help="Commit base del diff. Se omesso, verifica tutti i diagrammi.")
-    parser.add_argument("--plantuml-jar", type=Path, required=True)
+    parser.add_argument("--base", help="Commit base del diff (in aggiornamento, antenato comune con origin/main).")
+    parser.add_argument("--aggiorna", action="store_true", help="Rigenera gli SVG delle sorgenti nuove o modificate.")
+    parser.add_argument("--plantuml-jar", type=Path, help="Percorso del JAR per i diagrammi PlantUML.")
     parser.add_argument("--mmdc", default="mmdc")
     parser.add_argument("--dot", default="dot")
     parser.add_argument("--puppeteer-config", type=Path)
     opzioni = parser.parse_args()
 
     file_versionati = percorsi_git("ls-files", "-z", "--", "docs")
-    diagrammi = diagrammi_da_verificare(file_versionati, opzioni.base)
-    errori = 0
-    with TemporaryDirectory(prefix="picus-diagrammi-") as directory:
-        for sorgente in sorted(diagrammi):
-            svg = (Path(directory) / sorgente).with_suffix(".svg")
-            svg.parent.mkdir(parents=True, exist_ok=True)
-            print(f"Verifica {sorgente.as_posix()}", flush=True)
-            try:
-                renderizza(ROOT / sorgente, svg, opzioni)
-                verifica_anteprime(sorgente, svg, file_versionati)
-            except (OSError, subprocess.SubprocessError, ElementTree.ParseError, ValueError) as errore:
-                print(f"{sorgente.as_posix()}: {errore}", file=sys.stderr)
-                errori += 1
+    try:
+        diagrammi = diagrammi_da_verificare(file_versionati, opzioni.base, opzioni.aggiorna)
+    except (subprocess.SubprocessError, ValueError) as errore:
+        print(errore, file=sys.stderr)
+        return 1
 
-    print(f"Diagrammi verificati: {len(diagrammi) - errori}/{len(diagrammi)}")
+    errori = 0
+    azione = "Rigenera" if opzioni.aggiorna else "Verifica"
+    for sorgente in sorted(diagrammi):
+        print(f"{azione} {sorgente.as_posix()}", flush=True)
+        cartella = (ROOT / sorgente).parent if opzioni.aggiorna else None
+        try:
+            # Genera su un file temporaneo prima di sostituire l'anteprima.
+            with TemporaryDirectory(prefix="picus-diagrammi-", dir=cartella) as directory:
+                svg = Path(directory) / sorgente.with_suffix(".svg").name
+                renderizza(ROOT / sorgente, svg, opzioni)
+                if opzioni.aggiorna:
+                    contenuto_svg(svg)
+                    svg.replace(ROOT / sorgente.with_suffix(".svg"))
+                else:
+                    verifica_anteprime(sorgente, svg, file_versionati)
+        except (OSError, subprocess.SubprocessError, ElementTree.ParseError, ValueError) as errore:
+            print(f"{sorgente.as_posix()}: {errore}", file=sys.stderr)
+            errori += 1
+
+    esito = "rigenerati" if opzioni.aggiorna else "verificati"
+    print(f"Diagrammi {esito}: {len(diagrammi) - errori}/{len(diagrammi)}")
     return 1 if errori else 0
 
 

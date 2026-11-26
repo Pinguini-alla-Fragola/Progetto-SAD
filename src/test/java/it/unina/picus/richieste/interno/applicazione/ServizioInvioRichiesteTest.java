@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -51,6 +52,7 @@ import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Servizio di invio e consultazione delle richieste")
+@Tag("unit")
 class ServizioInvioRichiesteTest {
 
     private static final Instant ORA = Instant.parse("2026-11-17T10:00:00Z");

@@ -79,13 +79,15 @@ In PowerShell:
 .\mvnw.cmd test
 ```
 
-La CI esegue `bash ./mvnw --batch-mode --no-transfer-progress verify` con
+La CI esegue `bash ./mvnw --batch-mode --no-transfer-progress -Pcoverage verify` con
 Java 25 quando rileva il progetto Maven completo del wrapper. Per le PR che
 modificano soltanto il README principale, file Markdown in `docs/` o
 `.github/`, oppure PDF in `docs/`, il check Java indica nel riepilogo che la
 suite è stata saltata. Se i test Java falliscono, il riepilogo elenca i casi
 falliti e i comandi per ripeterli in locale. Se manca il POM, il check indica
-che la compilazione e i test non sono stati eseguiti.
+che la compilazione e i test non sono stati eseguiti. Il workflow di
+[avvio Docker](workflows/docker-smoke.yml) costruisce l'immagine e verifica
+`/login` con un database vuoto quando cambiano configurazione o migrazioni.
 Lo scheletro mantiene il test di caricamento del contesto del template,
 con JUnit Jupiter 5 o successivo nella versione gestita da Spring Boot.
 Per il codice aggiungere o aggiornare i test pertinenti; per la documentazione

@@ -1,5 +1,6 @@
 """Avvia PICUS e prepara il database dedicato alla demo di coordinamento."""
 
+import argparse
 from contextlib import closing
 from http.client import HTTPConnection, HTTPException
 from pathlib import Path
@@ -11,11 +12,13 @@ from time import monotonic, sleep
 RADICE = Path(__file__).resolve().parents[1]
 PROGETTO = "picus-demo-coordinamento"
 COMPOSE = ("docker", "compose", "-f", "docker-compose.yml", "-p", PROGETTO)
+MAILPIT = ("-f", "docker-compose.mailpit.yml", "--profile", "mailpit")
 PSQL = ("exec", "-T", "picus-db", "psql", "-X", "-U", "picus", "-d", "picus", "-v", "ON_ERROR_STOP=1")
 
 
-def compose(*argomenti, **opzioni):
-    return subprocess.run([*COMPOSE, *argomenti], cwd=RADICE, check=True, **opzioni)
+def compose(*argomenti, mailpit=False, **opzioni):
+    configurazione = COMPOSE + MAILPIT if mailpit else COMPOSE
+    return subprocess.run([*configurazione, *argomenti], cwd=RADICE, check=True, **opzioni)
 
 
 def login_disponibile():
@@ -44,9 +47,12 @@ def attendi_demo():
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--mailpit", action="store_true", help="Avvia anche la casella email locale.")
+    opzioni = parser.parse_args()
     sql = (RADICE / "scripts/db/demo-coordinamento.sql").read_bytes()
     try:
-        compose("up", "--build", "--detach")
+        compose("up", "--build", "--detach", mailpit=opzioni.mailpit)
         print("Attendo l'avvio di PICUS e degli account demo...", flush=True)
         attendi_demo()
         compose(*PSQL, input=sql, timeout=30)
@@ -55,10 +61,13 @@ def main():
         return 1
     except (subprocess.SubprocessError, TimeoutError) as errore:
         print(f"Preparazione della demo interrotta: {errore}", file=sys.stderr)
-        print(f"Log: docker compose -p {PROGETTO} logs picus-webapp", file=sys.stderr)
+        configurazione = COMPOSE + MAILPIT if opzioni.mailpit else COMPOSE
+        print(f"Log: {' '.join(configurazione)} logs picus-webapp", file=sys.stderr)
         return 1
 
     print("Demo pronta su http://localhost:8080")
+    if opzioni.mailpit:
+        print("Casella email locale su http://localhost:8025")
     return 0
 
 

@@ -60,11 +60,22 @@ bash ./mvnw verify
 
 Su Windows, in PowerShell, usa `.\mvnw.cmd verify`.
 
+Per eseguire i test unitari contrassegnati con `@Tag("unit")` senza Docker,
+usa `bash ./mvnw -Pfast test` oppure `.\mvnw.cmd -Pfast test`.
+
+Il profilo `coverage` genera il report JaCoCo in `target/site/jacoco/` con
+`bash ./mvnw -Pcoverage verify` oppure `.\mvnw.cmd -Pcoverage verify`.
+Nelle esecuzioni Java riuscite su GitHub Actions, il report è scaricabile come
+artefatto **copertura-java**.
+
 ## Avvio locale
 
 Copia [`.env.example`](.env.example) in `.env` e imposta le due password
-`PICUS_DB_PASSWORD` e `PICUS_DEMO_PASSWORD`. Dalla cartella del progetto avvia
-PICUS con Docker Compose.
+`PICUS_DB_PASSWORD` e `PICUS_DEMO_PASSWORD`. Con Python 3, esegui
+`python scripts/doctor.py` per controllare prerequisiti, configurazione
+Compose e disponibilità della porta 8080.
+
+Dalla cartella del progetto avvia PICUS con Docker Compose.
 
 ```bash
 docker compose up --build
