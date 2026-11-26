@@ -82,9 +82,11 @@ nella documentazione ogni lunedì alle 09:35, ora di Roma. Il risultato
 compare nel riepilogo di Actions. Il workflow supporta anche **Run workflow**.
 
 [Etichette delle PR](workflows/labeler.yml) applica
-[`documentation`, `ci`, `frontend` e `test`](labeler.yml) in base ai percorsi
-del diff. `documentation` richiede percorsi documentali per tutti i file
-elencati da GitHub. Il job aggiunge le etichette corrispondenti all'apertura,
+[`documentation`, `ci`, `frontend`, `backend` e `test`](labeler.yml) in base ai
+percorsi del diff. `backend` segnala modifiche al codice Java applicativo o
+ai file sotto `src/main/resources/db/` e può comparire insieme a `test`.
+`documentation` richiede percorsi documentali per tutti i file elencati da
+GitHub. Il job aggiunge le etichette corrispondenti all'apertura,
 alla riapertura e a ogni push sulla PR. Le etichette già presenti si conservano
 e chi fa la review può rimuovere quelle non più pertinenti. La configurazione
 è letta tramite API dal ramo base.

@@ -20,6 +20,12 @@ frontend:
           - 'src/main/resources/static/**'
           - 'src/main/resources/templates/**'
 
+backend:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'src/main/java/**'
+          - 'src/main/resources/db/**'
+
 test:
   - changed-files:
       - any-glob-to-any-file:
