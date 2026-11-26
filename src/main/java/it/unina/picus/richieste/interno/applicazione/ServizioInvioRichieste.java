@@ -1,6 +1,8 @@
 package it.unina.picus.richieste.interno.applicazione;
 
+import it.unina.picus.catalogo.api.CatalogoApi.Misura;
 import it.unina.picus.catalogo.api.ConsultazioneCatalogoApi;
+import it.unina.picus.catalogo.api.SelezioneMisureApi;
 import it.unina.picus.richieste.api.DatiRichiestaNonValidiException;
 import it.unina.picus.richieste.api.InvioRichiesteApi;
 import it.unina.picus.richieste.api.RichiesteApi.DatiInvio;
@@ -19,6 +21,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import it.unina.picus.richieste.api.ConflittoRichiestaException;
 import it.unina.picus.richieste.api.RisorsaRichiesteNonTrovataException;
 import it.unina.picus.shared.ControlloAccesso;
@@ -28,16 +31,46 @@ import java.util.UUID;
 @Service
 @Transactional(readOnly = true)
 public class ServizioInvioRichieste implements InvioRichiesteApi {
+    private static final String ERRORE_MISURA = "Seleziona una misura disponibile";
+
     private final RichiestaRepository repository;
     private final ConsultazioneCatalogoApi catalogo;
+    private final SelezioneMisureApi selezioneMisure;
     private final Clock clock;
 
-    public ServizioInvioRichieste(RichiestaRepository repository, ConsultazioneCatalogoApi catalogo, Clock clock) {
+    /**
+     * Crea il caso d'uso di invio e consultazione delle richieste.
+     *
+     * @param repository persistenza delle richieste
+     * @param catalogo consultazione storica e attiva di misure e comuni
+     * @param selezioneMisure verifica transazionale sotto lock condiviso della misura selezionata
+     * @param clock sorgente dell'istante di invio
+     */
+    public ServizioInvioRichieste(
+            RichiestaRepository repository,
+            ConsultazioneCatalogoApi catalogo,
+            SelezioneMisureApi selezioneMisure,
+            Clock clock) {
         this.repository = repository;
         this.catalogo = catalogo;
+        this.selezioneMisure = selezioneMisure;
         this.clock = clock;
     }
 
+    /**
+     * Convalida i riferimenti del nuovo invio, acquisisce un lock condiviso sulla misura fino al
+     * termine della transazione tramite {@link SelezioneMisureApi#bloccaMisuraAttiva(long)} e
+     * registra la richiesta. Un ritento con la stessa chiave di idempotenza restituisce l'invio
+     * originario anche se la misura è stata successivamente disattivata.
+     *
+     * @param attore identità verificata della OPT richiedente
+     * @param dati dati della richiesta da registrare
+     * @param riferimentoInvio chiave opzionale di idempotenza
+     * @return sintesi della richiesta registrata o recuperata
+     * @throws it.unina.picus.shared.AccessoNegatoException se l'attore non è una OPT autorizzata
+     * @throws DatiRichiestaNonValidiException se i dati non sono validi o la misura non è attiva
+     * @throws ConflittoRichiestaException se la chiave di idempotenza è già associata a dati diversi
+     */
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public RichiestaSintesi invia(IdentitaAutenticata attore, DatiInvio dati, UUID riferimentoInvio) {
@@ -49,8 +82,12 @@ public class ServizioInvioRichieste implements InvioRichiesteApi {
         }
 
         Map<String, String> errori = new LinkedHashMap<>();
-        if (catalogo.cercaMisura(normalizzati.misuraId()).filter(m -> m.attiva()).isEmpty()) {
-            errori.put("misuraId", "Seleziona una misura disponibile");
+        if (catalogo.cercaMisura(normalizzati.misuraId()).filter(Misura::attiva).isEmpty()) {
+            var ritento = recuperaRitentoConcorrente(attore.accountId(), riferimentoInvio, normalizzati);
+            if (ritento.isPresent()) {
+                return ritento.get();
+            }
+            errori.put("misuraId", ERRORE_MISURA);
         }
         if (catalogo.cercaComune(normalizzati.comuneCodice()).isEmpty()) {
             errori.put("comuneCodice", "Seleziona un comune del catalogo");
@@ -59,8 +96,23 @@ public class ServizioInvioRichieste implements InvioRichiesteApi {
             throw new DatiRichiestaNonValidiException(errori);
         }
 
+        if (!selezioneMisure.bloccaMisuraAttiva(normalizzati.misuraId())) {
+            return recuperaRitentoConcorrente(attore.accountId(), riferimentoInvio, normalizzati)
+                    .orElseThrow(() -> new DatiRichiestaNonValidiException(Map.of("misuraId", ERRORE_MISURA)));
+        }
+
         var nuova = RichiestaDiMisura.inviata(attore.accountId(), normalizzati, clock.instant(), riferimentoInvio);
         return confermaInvio(repository.registra(nuova), normalizzati);
+    }
+
+    private Optional<RichiestaSintesi> recuperaRitentoConcorrente(
+            UUID accountId, UUID riferimentoInvio, DatiInvio normalizzati) {
+        if (riferimentoInvio == null) {
+            return Optional.empty();
+        }
+        // Un invio concorrente può avere concluso prima della disattivazione o del lock.
+        return repository.cercaPerInvio(accountId, riferimentoInvio)
+                .map(concorrente -> confermaInvio(concorrente, normalizzati));
     }
 
     private RichiestaSintesi confermaInvio(RichiestaDiMisura richiesta, DatiInvio dati) {
@@ -119,7 +171,7 @@ public class ServizioInvioRichieste implements InvioRichiesteApi {
     private static DatiInvio validaENormalizza(DatiInvio dati) {
         Map<String, String> errori = new LinkedHashMap<>();
         if (dati == null || dati.misuraId() <= 0) {
-            errori.put("misuraId", "Seleziona una misura disponibile");
+            errori.put("misuraId", ERRORE_MISURA);
         }
         if (dati == null || dati.tipoDestinatario() == null) {
             errori.put("tipoDestinatario", "Seleziona PERSONA o NUCLEO");
