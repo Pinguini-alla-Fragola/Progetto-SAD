@@ -9,14 +9,15 @@ import java.util.Optional;
 /** Riferimenti di catalogo necessari all'invio e alla consultazione delle richieste. */
 public interface ConsultazioneCatalogoApi {
     /**
-     * Elenca le misure selezionabili per un nuovo invio.
+     * Elenca le misure selezionabili per una nuova richiesta o dichiarazione di offerta.
      * @return misure attive ordinate per codice
      * @see CatalogoApi#elencoMisureAttive()
      */
     List<Misura> elencoMisureAttive();
 
     /**
-     * Risolve una misura anche quando non è più attiva.
+     * Risolve il riferimento di richieste, dichiarazioni di offerta e conteggi già registrati,
+     * anche quando la misura non è più attiva.
      * @param misuraId identificativo stabile della misura
      * @return misura trovata, oppure vuoto
      * @see CatalogoApi#cercaMisura(long)
