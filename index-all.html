@@ -643,7 +643,17 @@ sui tentativi.</div>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/catalogo/interno/persistenza/OffertaTerritorialeJpa.html#bloccaMisura(long)" class="member-name-link">bloccaMisura(long)</a> - Method in class it.unina.picus.catalogo.interno.persistenza.<a href="it/unina/picus/catalogo/interno/persistenza/OffertaTerritorialeJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">OffertaTerritorialeJpa</a></dt>
 <dd>
-<div class="block">Blocca e rilegge la misura nella transazione del caso d'uso chiamante.</div>
+<div class="block">Blocca con <code>PESSIMISTIC_READ</code> e rilegge la misura nella transazione del chiamante.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/api/SelezioneMisureApi.html#bloccaMisuraAttiva(long)" class="member-name-link">bloccaMisuraAttiva(long)</a> - Method in interface it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/SelezioneMisureApi.html" title="interface in it.unina.picus.catalogo.api">SelezioneMisureApi</a></dt>
+<dd>
+<div class="block">Rilegge la misura sotto lock condiviso (<code>PESSIMISTIC_READ</code>) fino al commit o rollback
+della transazione di scrittura chiamante.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/applicazione/ServizioSelezioneMisure.html#bloccaMisuraAttiva(long)" class="member-name-link">bloccaMisuraAttiva(long)</a> - Method in class it.unina.picus.catalogo.interno.applicazione.<a href="it/unina/picus/catalogo/interno/applicazione/ServizioSelezioneMisure.html" title="class in it.unina.picus.catalogo.interno.applicazione">ServizioSelezioneMisure</a></dt>
+<dd>
+<div class="block">Rilegge la misura sotto lock condiviso (<code>PESSIMISTIC_READ</code>) fino al commit o rollback
+della transazione di scrittura chiamante.</div>
 </dd>
 <dt><a href="it/unina/picus/catalogo/interno/persistenza/OffertaTerritorialeJpa.html#bloccaOfferta(java.util.UUID,long)" class="member-name-link">bloccaOfferta(UUID, long)</a> - Method in class it.unina.picus.catalogo.interno.persistenza.<a href="it/unina/picus/catalogo/interno/persistenza/OffertaTerritorialeJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">OffertaTerritorialeJpa</a></dt>
 <dd>
@@ -948,7 +958,8 @@ sui tentativi.</div>
 </dd>
 <dt><a href="it/unina/picus/catalogo/api/ConsultazioneCatalogoApi.html#cercaMisura(long)" class="member-name-link">cercaMisura(long)</a> - Method in interface it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/ConsultazioneCatalogoApi.html" title="interface in it.unina.picus.catalogo.api">ConsultazioneCatalogoApi</a></dt>
 <dd>
-<div class="block">Risolve una misura anche quando non è più attiva.</div>
+<div class="block">Risolve il riferimento di richieste, dichiarazioni di offerta e conteggi già registrati,
+anche quando la misura non è più attiva.</div>
 </dd>
 <dt><a href="it/unina/picus/catalogo/interno/persistenza/ConsultazioneCatalogoJpa.html#cercaMisura(long)" class="member-name-link">cercaMisura(long)</a> - Method in class it.unina.picus.catalogo.interno.persistenza.<a href="it/unina/picus/catalogo/interno/persistenza/ConsultazioneCatalogoJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">ConsultazioneCatalogoJpa</a></dt>
 <dd>&nbsp;</dd>
@@ -2611,7 +2622,7 @@ sintattici o di dominio del tracciato.</div>
 </dd>
 <dt><a href="it/unina/picus/catalogo/api/ConsultazioneCatalogoApi.html#elencoMisureAttive()" class="member-name-link">elencoMisureAttive()</a> - Method in interface it.unina.picus.catalogo.api.<a href="it/unina/picus/catalogo/api/ConsultazioneCatalogoApi.html" title="interface in it.unina.picus.catalogo.api">ConsultazioneCatalogoApi</a></dt>
 <dd>
-<div class="block">Elenca le misure selezionabili per un nuovo invio.</div>
+<div class="block">Elenca le misure selezionabili per una nuova richiesta o dichiarazione di offerta.</div>
 </dd>
 <dt><a href="it/unina/picus/catalogo/interno/persistenza/ConsultazioneCatalogoJpa.html#elencoMisureAttive()" class="member-name-link">elencoMisureAttive()</a> - Method in class it.unina.picus.catalogo.interno.persistenza.<a href="it/unina/picus/catalogo/interno/persistenza/ConsultazioneCatalogoJpa.html" title="class in it.unina.picus.catalogo.interno.persistenza">ConsultazioneCatalogoJpa</a></dt>
 <dd>&nbsp;</dd>
@@ -4407,7 +4418,11 @@ troncato produce un errore oppure l'avviso di dati mancanti, e in entrambi i cas
 <div class="block">Registra una richiesta della OPT autenticata.</div>
 </dd>
 <dt><a href="it/unina/picus/richieste/interno/applicazione/ServizioInvioRichieste.html#invia(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.richieste.api.RichiesteApi.DatiInvio,java.util.UUID)" class="member-name-link">invia(UtenzeApi.IdentitaAutenticata, RichiesteApi.DatiInvio, UUID)</a> - Method in class it.unina.picus.richieste.interno.applicazione.<a href="it/unina/picus/richieste/interno/applicazione/ServizioInvioRichieste.html" title="class in it.unina.picus.richieste.interno.applicazione">ServizioInvioRichieste</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Convalida i riferimenti del nuovo invio, acquisisce un lock condiviso sulla misura fino al
+termine della transazione tramite <a href="it/unina/picus/catalogo/api/SelezioneMisureApi.html#bloccaMisuraAttiva(long)"><code>SelezioneMisureApi.bloccaMisuraAttiva(long)</code></a> e
+registra la richiesta.</div>
+</dd>
 <dt><a href="it/unina/picus/richieste/web/RichiesteController.html#invia(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.richieste.web.CorpoJson,java.lang.String)" class="member-name-link">invia(UtenzeApi.IdentitaAutenticata, CorpoJson, String)</a> - Method in class it.unina.picus.richieste.web.<a href="it/unina/picus/richieste/web/RichiesteController.html" title="class in it.unina.picus.richieste.web">RichiesteController</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.html#invia(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.lang.Integer,java.lang.Integer,java.io.InputStream)" class="member-name-link">invia(UtenzeApi.IdentitaAutenticata, Integer, Integer, InputStream)</a> - Method in class it.unina.picus.monitoraggio.web.<a href="it/unina/picus/monitoraggio/web/SchedeOperatoreController.html" title="class in it.unina.picus.monitoraggio.web">SchedeOperatoreController</a></dt>
@@ -6857,6 +6872,10 @@ quelli di prima, che l'utente può ancora usare.</div>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/comunicazioni/web/ComunicazioniController.html#selezionabili(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.lang.String)" class="member-name-link">selezionabili(UtenzeApi.IdentitaAutenticata, String)</a> - Method in class it.unina.picus.comunicazioni.web.<a href="it/unina/picus/comunicazioni/web/ComunicazioniController.html" title="class in it.unina.picus.comunicazioni.web">ComunicazioniController</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/catalogo/api/SelezioneMisureApi.html" class="type-name-link" title="interface in it.unina.picus.catalogo.api">SelezioneMisureApi</a> - Interface in <a href="it/unina/picus/catalogo/api/package-summary.html">it.unina.picus.catalogo.api</a></dt>
+<dd>
+<div class="block">Verifica transazionale della selezionabilità di una misura per una nuova richiesta o offerta.</div>
+</dd>
 <dt><a href="it/unina/picus/comunicazioni/interno/dominio/FiltroComunicazioni.FiltroAllegati.html#SENZA" class="member-name-link">SENZA</a> - Enum constant in enum class it.unina.picus.comunicazioni.interno.dominio.<a href="it/unina/picus/comunicazioni/interno/dominio/FiltroComunicazioni.FiltroAllegati.html" title="enum class in it.unina.picus.comunicazioni.interno.dominio">FiltroComunicazioni.FiltroAllegati</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/richieste/interno/applicazione/ServizioAnnullamentoRichieste.html" class="type-name-link" title="class in it.unina.picus.richieste.interno.applicazione">ServizioAnnullamentoRichieste</a> - Class in <a href="it/unina/picus/richieste/interno/applicazione/package-summary.html">it.unina.picus.richieste.interno.applicazione</a></dt>
@@ -6913,8 +6932,10 @@ quelli di prima, che l'utente può ancora usare.</div>
 <dd>
 <div class="block">Casi d'uso della #48, senza comandi di transizione appartenenti al coordinamento.</div>
 </dd>
-<dt><a href="it/unina/picus/richieste/interno/applicazione/ServizioInvioRichieste.html#%3Cinit%3E(it.unina.picus.richieste.interno.dominio.RichiestaRepository,it.unina.picus.catalogo.api.ConsultazioneCatalogoApi,java.time.Clock)" class="member-name-link">ServizioInvioRichieste(RichiestaRepository, ConsultazioneCatalogoApi, Clock)</a> - Constructor for class it.unina.picus.richieste.interno.applicazione.<a href="it/unina/picus/richieste/interno/applicazione/ServizioInvioRichieste.html" title="class in it.unina.picus.richieste.interno.applicazione">ServizioInvioRichieste</a></dt>
-<dd>&nbsp;</dd>
+<dt><a href="it/unina/picus/richieste/interno/applicazione/ServizioInvioRichieste.html#%3Cinit%3E(it.unina.picus.richieste.interno.dominio.RichiestaRepository,it.unina.picus.catalogo.api.ConsultazioneCatalogoApi,it.unina.picus.catalogo.api.SelezioneMisureApi,java.time.Clock)" class="member-name-link">ServizioInvioRichieste(RichiestaRepository, ConsultazioneCatalogoApi, SelezioneMisureApi, Clock)</a> - Constructor for class it.unina.picus.richieste.interno.applicazione.<a href="it/unina/picus/richieste/interno/applicazione/ServizioInvioRichieste.html" title="class in it.unina.picus.richieste.interno.applicazione">ServizioInvioRichieste</a></dt>
+<dd>
+<div class="block">Crea il caso d'uso di invio e consultazione delle richieste.</div>
+</dd>
 <dt><a href="it/unina/picus/comunicazioni/interno/applicazione/ServizioNotificheComunicazioni.html" class="type-name-link" title="class in it.unina.picus.comunicazioni.interno.applicazione">ServizioNotificheComunicazioni</a> - Class in <a href="it/unina/picus/comunicazioni/interno/applicazione/package-summary.html">it.unina.picus.comunicazioni.interno.applicazione</a></dt>
 <dd>
 <div class="block">Conta per l'avviso in app le comunicazioni che aspettano la conferma del destinatario.</div>
@@ -6951,6 +6972,13 @@ quelli di prima, che l'utente può ancora usare.</div>
 <dd>
 <div class="block">Crea il servizio applicativo delle schede personali.</div>
 </dd>
+<dt><a href="it/unina/picus/catalogo/interno/applicazione/ServizioSelezioneMisure.html" class="type-name-link" title="class in it.unina.picus.catalogo.interno.applicazione">ServizioSelezioneMisure</a> - Class in <a href="it/unina/picus/catalogo/interno/applicazione/package-summary.html">it.unina.picus.catalogo.interno.applicazione</a></dt>
+<dd>
+<div class="block">Implementazione applicativa della verifica transazionale di selezionabilità delle misure
+tramite lock condiviso (<code>PESSIMISTIC_READ</code>) in contesa con la disattivazione.</div>
+</dd>
+<dt><a href="it/unina/picus/catalogo/interno/applicazione/ServizioSelezioneMisure.html#%3Cinit%3E(it.unina.picus.catalogo.interno.persistenza.OffertaTerritorialeJpa)" class="member-name-link">ServizioSelezioneMisure(OffertaTerritorialeJpa)</a> - Constructor for class it.unina.picus.catalogo.interno.applicazione.<a href="it/unina/picus/catalogo/interno/applicazione/ServizioSelezioneMisure.html" title="class in it.unina.picus.catalogo.interno.applicazione">ServizioSelezioneMisure</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="it/unina/picus/utenze/interno/applicazione/ConsegnaLinkAttivazione.Esito.html#SIMULATO" class="member-name-link">SIMULATO</a> - Enum constant in enum class it.unina.picus.utenze.interno.applicazione.<a href="it/unina/picus/utenze/interno/applicazione/ConsegnaLinkAttivazione.Esito.html" title="enum class in it.unina.picus.utenze.interno.applicazione">ConsegnaLinkAttivazione.Esito</a></dt>
 <dd>
 <div class="block">Modalità demo: il link è stato generato ma nessuna email è partita.</div>

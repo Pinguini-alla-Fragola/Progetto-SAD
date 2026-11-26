@@ -212,8 +212,8 @@ implements <a href="../../api/GestioneOffertaOptApi.html" title="interface in it
  boolean&nbsp;tramiteProfessionista)</span></div>
 <div class="block">Dichiara o aggiorna l'offerta della OPT autenticata per una misura attiva.
 
-<p>Mantiene il lock della misura durante la scrittura seguendo l'ordine dei lock
-della verifica di compatibilità usata dal Banco.</div>
+<p>Mantiene il lock condiviso (<code>PESSIMISTIC_READ</code>) della misura fino al termine della
+transazione e blocca poi il profilo OPT, seguendo l'ordine della ricerca erogatori.</p></div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../../api/GestioneOffertaOptApi.html#registraOffertaOpt(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,long,boolean)">registraOffertaOpt</a></code>&nbsp;in interface&nbsp;<code><a href="../../api/GestioneOffertaOptApi.html" title="interface in it.unina.picus.catalogo.api">GestioneOffertaOptApi</a></code></dd>

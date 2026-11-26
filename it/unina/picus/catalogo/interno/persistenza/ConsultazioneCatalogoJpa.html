@@ -130,7 +130,8 @@ implements <a href="../../api/ConsultazioneCatalogoApi.html" title="interface in
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="../../api/CatalogoApi.Misura.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.Misura</a>&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#cercaMisura(long)" class="member-name-link">cercaMisura</a><wbr>(long&nbsp;misuraId)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Risolve una misura anche quando non è più attiva.</div>
+<div class="block">Risolve il riferimento di richieste, dichiarazioni di offerta e conteggi già registrati,
+anche quando la misura non è più attiva.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../../api/CatalogoApi.Comune.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.Comune</a>&gt;</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#elencoComuni()" class="member-name-link">elencoComuni</a>()</code></div>
@@ -140,7 +141,7 @@ implements <a href="../../api/ConsultazioneCatalogoApi.html" title="interface in
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../../api/CatalogoApi.Misura.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.Misura</a>&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#elencoMisureAttive()" class="member-name-link">elencoMisureAttive</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Elenca le misure selezionabili per un nuovo invio.</div>
+<div class="block">Elenca le misure selezionabili per una nuova richiesta o dichiarazione di offerta.</div>
 </div>
 </div>
 </div>
@@ -181,7 +182,7 @@ implements <a href="../../api/ConsultazioneCatalogoApi.html" title="interface in
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../../api/CatalogoApi.Misura.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.Misura</a>&gt;</span>&nbsp;<span class="element-name">elencoMisureAttive</span>()</div>
 <div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../../api/ConsultazioneCatalogoApi.html#elencoMisureAttive()">ConsultazioneCatalogoApi</a></code></span></div>
-<div class="block">Elenca le misure selezionabili per un nuovo invio.</div>
+<div class="block">Elenca le misure selezionabili per una nuova richiesta o dichiarazione di offerta.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../../api/ConsultazioneCatalogoApi.html#elencoMisureAttive()">elencoMisureAttive</a></code>&nbsp;in interface&nbsp;<code><a href="../../api/ConsultazioneCatalogoApi.html" title="interface in it.unina.picus.catalogo.api">ConsultazioneCatalogoApi</a></code></dd>
@@ -203,7 +204,8 @@ implements <a href="../../api/ConsultazioneCatalogoApi.html" title="interface in
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="../../api/CatalogoApi.Misura.html" title="class in it.unina.picus.catalogo.api">CatalogoApi.Misura</a>&gt;</span>&nbsp;<span class="element-name">cercaMisura</span><wbr><span class="parameters">(long&nbsp;misuraId)</span></div>
 <div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../../api/ConsultazioneCatalogoApi.html#cercaMisura(long)">ConsultazioneCatalogoApi</a></code></span></div>
-<div class="block">Risolve una misura anche quando non è più attiva.</div>
+<div class="block">Risolve il riferimento di richieste, dichiarazioni di offerta e conteggi già registrati,
+anche quando la misura non è più attiva.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../../api/ConsultazioneCatalogoApi.html#cercaMisura(long)">cercaMisura</a></code>&nbsp;in interface&nbsp;<code><a href="../../api/ConsultazioneCatalogoApi.html" title="interface in it.unina.picus.catalogo.api">ConsultazioneCatalogoApi</a></code></dd>

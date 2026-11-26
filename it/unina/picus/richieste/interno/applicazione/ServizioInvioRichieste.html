@@ -60,7 +60,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-summary" tabindex="0">Method Summary</a></li>
 <li><a href="#constructor-detail" tabindex="0">Constructor Details</a>
 <ol class="toc-list">
-<li><a href="#%3Cinit%3E(it.unina.picus.richieste.interno.dominio.RichiestaRepository,it.unina.picus.catalogo.api.ConsultazioneCatalogoApi,java.time.Clock)" tabindex="0">ServizioInvioRichieste(RichiestaRepository, ConsultazioneCatalogoApi, Clock)</a></li>
+<li><a href="#%3Cinit%3E(it.unina.picus.richieste.interno.dominio.RichiestaRepository,it.unina.picus.catalogo.api.ConsultazioneCatalogoApi,it.unina.picus.catalogo.api.SelezioneMisureApi,java.time.Clock)" tabindex="0">ServizioInvioRichieste(RichiestaRepository, ConsultazioneCatalogoApi, SelezioneMisureApi, Clock)</a></li>
 </ol>
 </li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
@@ -106,10 +106,13 @@ implements <a href="../../api/InvioRichiesteApi.html" title="interface in it.uni
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(it.unina.picus.richieste.interno.dominio.RichiestaRepository,it.unina.picus.catalogo.api.ConsultazioneCatalogoApi,java.time.Clock)" class="member-name-link">ServizioInvioRichieste</a><wbr>(<a href="../dominio/RichiestaRepository.html" title="interface in it.unina.picus.richieste.interno.dominio">RichiestaRepository</a>&nbsp;repository,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(it.unina.picus.richieste.interno.dominio.RichiestaRepository,it.unina.picus.catalogo.api.ConsultazioneCatalogoApi,it.unina.picus.catalogo.api.SelezioneMisureApi,java.time.Clock)" class="member-name-link">ServizioInvioRichieste</a><wbr>(<a href="../dominio/RichiestaRepository.html" title="interface in it.unina.picus.richieste.interno.dominio">RichiestaRepository</a>&nbsp;repository,
  <a href="../../../catalogo/api/ConsultazioneCatalogoApi.html" title="interface in it.unina.picus.catalogo.api">ConsultazioneCatalogoApi</a>&nbsp;catalogo,
+ <a href="../../../catalogo/api/SelezioneMisureApi.html" title="interface in it.unina.picus.catalogo.api">SelezioneMisureApi</a>&nbsp;selezioneMisure,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/time/Clock.html" title="class or interface in java.time" class="external-link">Clock</a>&nbsp;clock)</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Crea il caso d'uso di invio e consultazione delle richieste.</div>
+</div>
 </div>
 </section>
 </li>
@@ -145,7 +148,9 @@ implements <a href="../../api/InvioRichiesteApi.html" title="interface in it.uni
  <a href="../../api/RichiesteApi.DatiInvio.html" title="class in it.unina.picus.richieste.api">RichiesteApi.DatiInvio</a>&nbsp;dati,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;riferimentoInvio)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Registra l'invio valido in Creata o riconosce un ritento della stessa OPT.</div>
+<div class="block">Convalida i riferimenti del nuovo invio, acquisisce un lock condiviso sulla misura fino al
+termine della transazione tramite <a href="../../../catalogo/api/SelezioneMisureApi.html#bloccaMisuraAttiva(long)"><code>SelezioneMisureApi.bloccaMisuraAttiva(long)</code></a> e
+registra la richiesta.</div>
 </div>
 </div>
 </div>
@@ -165,12 +170,21 @@ implements <a href="../../api/InvioRichiesteApi.html" title="interface in it.uni
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(it.unina.picus.richieste.interno.dominio.RichiestaRepository,it.unina.picus.catalogo.api.ConsultazioneCatalogoApi,java.time.Clock)">
+<section class="detail" id="&lt;init&gt;(it.unina.picus.richieste.interno.dominio.RichiestaRepository,it.unina.picus.catalogo.api.ConsultazioneCatalogoApi,it.unina.picus.catalogo.api.SelezioneMisureApi,java.time.Clock)">
 <h3>ServizioInvioRichieste</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">ServizioInvioRichieste</span><wbr><span class="parameters">(<a href="../dominio/RichiestaRepository.html" title="interface in it.unina.picus.richieste.interno.dominio">RichiestaRepository</a>&nbsp;repository,
  <a href="../../../catalogo/api/ConsultazioneCatalogoApi.html" title="interface in it.unina.picus.catalogo.api">ConsultazioneCatalogoApi</a>&nbsp;catalogo,
+ <a href="../../../catalogo/api/SelezioneMisureApi.html" title="interface in it.unina.picus.catalogo.api">SelezioneMisureApi</a>&nbsp;selezioneMisure,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/time/Clock.html" title="class or interface in java.time" class="external-link">Clock</a>&nbsp;clock)</span></div>
+<div class="block">Crea il caso d'uso di invio e consultazione delle richieste.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>repository</code> - persistenza delle richieste</dd>
+<dd><code>catalogo</code> - consultazione storica e attiva di misure e comuni</dd>
+<dd><code>selezioneMisure</code> - verifica transazionale sotto lock condiviso della misura selezionata</dd>
+<dd><code>clock</code> - sorgente dell'istante di invio</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -190,17 +204,23 @@ implements <a href="../../api/InvioRichiesteApi.html" title="interface in it.uni
 </span><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../../api/RichiesteApi.RichiestaSintesi.html" title="class in it.unina.picus.richieste.api">RichiesteApi.RichiestaSintesi</a></span>&nbsp;<span class="element-name">invia</span><wbr><span class="parameters">(<a href="../../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  <a href="../../api/RichiesteApi.DatiInvio.html" title="class in it.unina.picus.richieste.api">RichiesteApi.DatiInvio</a>&nbsp;dati,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;riferimentoInvio)</span></div>
-<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="../../api/InvioRichiesteApi.html#invia(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.richieste.api.RichiesteApi.DatiInvio,java.util.UUID)">InvioRichiesteApi</a></code></span></div>
-<div class="block">Registra l'invio valido in Creata o riconosce un ritento della stessa OPT.</div>
+<div class="block">Convalida i riferimenti del nuovo invio, acquisisce un lock condiviso sulla misura fino al
+termine della transazione tramite <a href="../../../catalogo/api/SelezioneMisureApi.html#bloccaMisuraAttiva(long)"><code>SelezioneMisureApi.bloccaMisuraAttiva(long)</code></a> e
+registra la richiesta. Un ritento con la stessa chiave di idempotenza restituisce l'invio
+originario anche se la misura è stata successivamente disattivata.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../../api/InvioRichiesteApi.html#invia(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.richieste.api.RichiesteApi.DatiInvio,java.util.UUID)">invia</a></code>&nbsp;in interface&nbsp;<code><a href="../../api/InvioRichiesteApi.html" title="interface in it.unina.picus.richieste.api">InvioRichiesteApi</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>attore</code> - identità verificata della OPT richiedente</dd>
-<dd><code>dati</code> - dati ammessi del modulo</dd>
-<dd><code>riferimentoInvio</code> - UUID dell'invio logico, oppure null</dd>
+<dd><code>dati</code> - dati della richiesta da registrare</dd>
+<dd><code>riferimentoInvio</code> - chiave opzionale di idempotenza</dd>
 <dt>Returns:</dt>
-<dd>sintesi della richiesta nuova o già registrata</dd>
+<dd>sintesi della richiesta registrata o recuperata</dd>
+<dt>Throws:</dt>
+<dd><code><a href="../../../shared/AccessoNegatoException.html" title="class in it.unina.picus.shared">AccessoNegatoException</a></code> - se l'attore non è una OPT autorizzata</dd>
+<dd><code><a href="../../api/DatiRichiestaNonValidiException.html" title="class in it.unina.picus.richieste.api">DatiRichiestaNonValidiException</a></code> - se i dati non sono validi o la misura non è attiva</dd>
+<dd><code><a href="../../api/ConflittoRichiestaException.html" title="class in it.unina.picus.richieste.api">ConflittoRichiestaException</a></code> - se la chiave di idempotenza è già associata a dati diversi</dd>
 <dt>See Also:</dt>
 <dd>
 <ul class="tag-list-long">
