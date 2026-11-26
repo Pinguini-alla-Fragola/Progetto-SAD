@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReinvioAttivazioneController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.utenze.web</a> &gt; <span class="el_source">ReinvioAttivazioneController.java</span></div><h1>ReinvioAttivazioneController.java</h1><pre class="source lang-java linenums">package it.unina.picus.utenze.web;
+
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Pattern;
+
+import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import it.unina.picus.utenze.interno.applicazione.ReinvioLinkSuRichiesta;
+
+/**
+ * Nuovo link di attivazione chiesto da chi possiede l'indirizzo, senza sessione (link scaduto o già usato).
+ *
+ * &lt;p&gt;La risposta è la stessa per ogni indirizzo scritto correttamente, sia che l'account esista e sia in
+ * attesa, sia che non esista o sia già attivo o revocato: chi non è autenticato non deve poter scoprire
+ * quali indirizzi sono registrati. Per lo stesso motivo tutto il lavoro sull'account (nuovo token e email)
+ * avviene in secondo piano ({@link ReinvioLinkSuRichiesta}): la risposta ha gli stessi tempi per ogni indirizzo.
+ * Se la coda del lavoro in secondo piano è piena rispondono {@code 503} tutti gli indirizzi, allo stesso modo.&lt;/p&gt;
+ */
+@RestController
+@Profile(&quot;!skeleton&quot;)
+class ReinvioAttivazioneController {
+
+    static final String MESSAGGIO_CONFERMA =
+            &quot;Se l'indirizzo corrisponde a un account in attesa di attivazione, riceverai un nuovo link via email.&quot;;
+    static final String MESSAGGIO_EMAIL_NON_VALIDA = &quot;Inserisci un indirizzo email valido.&quot;;
+    static final String MESSAGGIO_TROPPE_RICHIESTE =
+            &quot;Hai chiesto troppi link per questo indirizzo. Riprova tra qualche minuto.&quot;;
+    static final String MESSAGGIO_SERVIZIO_OCCUPATO =
+            &quot;Il servizio è momentaneamente occupato. Riprova tra qualche minuto.&quot;;
+
+    private static final int LUNGHEZZA_MAX_EMAIL = 254;
+<span class="fc" id="L39">    private static final Pattern EMAIL = Pattern.compile(&quot;^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$&quot;);</span>
+
+    /** L'email resta un valore JSON generico fino al controllo del tipo: un numero o un booleano non diventano testo. */
+<span class="nc" id="L42">    record RichiestaReinvio(Object email) {}</span>
+
+    private final ReinvioLinkSuRichiesta reinvio;
+    private final LimitatoreReinvii limitatore;
+
+<span class="fc" id="L47">    ReinvioAttivazioneController(ReinvioLinkSuRichiesta reinvio, LimitatoreReinvii limitatore) {</span>
+<span class="fc" id="L48">        this.reinvio = reinvio;</span>
+<span class="fc" id="L49">        this.limitatore = limitatore;</span>
+<span class="fc" id="L50">    }</span>
+
+    @PostMapping(&quot;/api/auth/attiva/reinvio&quot;)
+    ResponseEntity&lt;Map&lt;String, Object&gt;&gt; richiediNuovoLink(@RequestBody RichiestaReinvio corpo) {
+<span class="nc bnc" id="L54" title="All 2 branches missed.">        if (!(corpo.email() instanceof String testo)) {</span>
+<span class="nc" id="L55">            return emailNonValida();</span>
+        }
+<span class="nc" id="L57">        String email = testo.strip().toLowerCase(Locale.ROOT);</span>
+<span class="nc bnc" id="L58" title="All 4 branches missed.">        if (email.length() &gt; LUNGHEZZA_MAX_EMAIL || !EMAIL.matcher(email).matches()) {</span>
+<span class="nc" id="L59">            return emailNonValida();</span>
+        }
+<span class="nc" id="L61">        Optional&lt;LimitatoreReinvii.Ammissione&gt; ammissione = limitatore.ammetti(email);</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        if (ammissione.isEmpty()) {</span>
+<span class="nc" id="L63">            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)</span>
+<span class="nc" id="L64">                    .body(Map.of(&quot;messaggio&quot;, MESSAGGIO_TROPPE_RICHIESTE));</span>
+        }
+<span class="nc bnc" id="L66" title="All 2 branches missed.">        if (!reinvio.richiedi(email)) {</span>
+            // La richiesta non è stata presa in carico: si restituisce proprio il suo posto nel limite.
+<span class="nc" id="L68">            limitatore.rilascia(ammissione.get());</span>
+<span class="nc" id="L69">            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)</span>
+<span class="nc" id="L70">                    .body(Map.of(&quot;messaggio&quot;, MESSAGGIO_SERVIZIO_OCCUPATO));</span>
+        }
+<span class="nc" id="L72">        return ResponseEntity.ok(Map.of(&quot;messaggio&quot;, MESSAGGIO_CONFERMA));</span>
+    }
+
+    private static ResponseEntity&lt;Map&lt;String, Object&gt;&gt; emailNonValida() {
+<span class="nc" id="L76">        return ResponseEntity.badRequest().body(Map.of(</span>
+                &quot;messaggio&quot;, MESSAGGIO_EMAIL_NON_VALIDA,
+<span class="nc" id="L78">                &quot;campi&quot;, Map.of(&quot;email&quot;, MESSAGGIO_EMAIL_NON_VALIDA)));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

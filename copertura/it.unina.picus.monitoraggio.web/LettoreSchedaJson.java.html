@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LettoreSchedaJson.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.monitoraggio.web</a> &gt; <span class="el_source">LettoreSchedaJson.java</span></div><h1>LettoreSchedaJson.java</h1><pre class="source lang-java linenums">package it.unina.picus.monitoraggio.web;
+
+import it.unina.picus.monitoraggio.api.MonitoraggioApi.DatiSchedaOperatore;
+import it.unina.picus.monitoraggio.interno.dominio.DatiSchedaNonValidiException;
+import it.unina.picus.monitoraggio.interno.dominio.TracciatoSchedaOperatore;
+import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.StreamReadFeature;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.ObjectReader;
+import tools.jackson.databind.cfg.CoercionAction;
+import tools.jackson.databind.cfg.CoercionInputShape;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.type.LogicalType;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Map;
+import java.util.Objects;
+
+/** Binding dedicato alla scheda. Le regole di deserializzazione degli altri moduli restano indipendenti. */
+@Component
+class LettoreSchedaJson {
+
+    private static final int MASSIMO_BYTE = 65_536;
+    private final ObjectReader lettore;
+
+    /** Prepara il lettore con controllo di tipi, chiavi duplicate e campi sconosciuti. */
+<span class="fc" id="L32">    LettoreSchedaJson(JsonMapper json) {</span>
+<span class="fc" id="L33">        lettore = json.rebuild()</span>
+<span class="fc" id="L34">                .enable(StreamReadFeature.STRICT_DUPLICATE_DETECTION)</span>
+<span class="fc" id="L35">                .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, DeserializationFeature.FAIL_ON_TRAILING_TOKENS)</span>
+<span class="fc" id="L36">                .disable(DeserializationFeature.ACCEPT_FLOAT_AS_INT)</span>
+<span class="fc" id="L37">                .disable(MapperFeature.ALLOW_COERCION_OF_SCALARS)</span>
+<span class="fc" id="L38">                .withCoercionConfig(LogicalType.Textual, config -&gt; config</span>
+<span class="fc" id="L39">                        .setCoercion(CoercionInputShape.Integer, CoercionAction.Fail)</span>
+<span class="fc" id="L40">                        .setCoercion(CoercionInputShape.Float, CoercionAction.Fail)</span>
+<span class="fc" id="L41">                        .setCoercion(CoercionInputShape.Boolean, CoercionAction.Fail))</span>
+<span class="fc" id="L42">                .build().readerFor(Invio.class);</span>
+<span class="fc" id="L43">    }</span>
+
+    /** Legge un oggetto JSON di dimensione limitata e restituisce i soli dati dichiarabili. */
+    DatiSchedaOperatore leggi(InputStream corpo) throws IOException {
+<span class="fc" id="L47">        byte[] contenuto = corpo.readNBytes(MASSIMO_BYTE + 1);</span>
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">        if (contenuto.length &gt; MASSIMO_BYTE) {</span>
+<span class="nc" id="L49">            throw errore(&quot;dati&quot;, &quot;La scheda supera la dimensione consentita&quot;);</span>
+        }
+        Invio invio;
+        try {
+<span class="fc" id="L53">            invio = lettore.readValue(contenuto);</span>
+<span class="fc" id="L54">        } catch (JacksonException ex) {</span>
+<span class="fc bfc" id="L55" title="All 2 branches covered.">            String campo = ex.getPath().isEmpty() ? null : ex.getPath().getFirst().getPropertyName();</span>
+<span class="fc" id="L56">            boolean noto = TracciatoSchedaOperatore.campi().stream().anyMatch(c -&gt; c.nome().equals(campo));</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">            throw errore(noto ? campo : &quot;dati&quot;, &quot;Formato non valido&quot;);</span>
+<span class="fc" id="L58">        }</span>
+<span class="pc bpc" id="L59" title="1 of 2 branches missed.">        if (invio == null) {</span>
+<span class="nc" id="L60">            throw errore(&quot;dati&quot;, &quot;I dati della scheda sono obbligatori&quot;);</span>
+        }
+<span class="fc" id="L62">        return invio.aDati();</span>
+    }
+
+    private static DatiSchedaNonValidiException errore(String campo, String messaggio) {
+<span class="fc" id="L66">        return new DatiSchedaNonValidiException(Map.of(campo, messaggio));</span>
+    }
+
+    /** Dati ricevuti via HTTP, prima della copia immutabile dei conteggi nel contratto Java. */
+<span class="fc" id="L70">    private record Invio(String nome, String cognome, String luogoNascita, LocalDate dataNascita,</span>
+                         String codiceFiscale, String qualifica, String tipologiaContratto, String areaLivello,
+                         BigDecimal ore, BigDecimal costoOrarioLordo, Map&lt;String, Long&gt; conteggi) {
+
+        DatiSchedaOperatore aDati() {
+<span class="fc bfc" id="L75" title="All 4 branches covered.">            if (conteggi == null || conteggi.values().stream().anyMatch(Objects::isNull)) {</span>
+<span class="fc" id="L76">                throw errore(&quot;conteggi&quot;, &quot;Inserisci un oggetto con conteggi interi per categoria&quot;);</span>
+            }
+<span class="fc" id="L78">            return new DatiSchedaOperatore(nome, cognome, luogoNascita, dataNascita, codiceFiscale,</span>
+                    qualifica, tipologiaContratto, areaLivello, ore, costoOrarioLordo, conteggi);
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ServizioCoordinamentoRichieste.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.richieste.interno.applicazione</a> &gt; <span class="el_source">ServizioCoordinamentoRichieste.java</span></div><h1>ServizioCoordinamentoRichieste.java</h1><pre class="source lang-java linenums">package it.unina.picus.richieste.interno.applicazione;
+
+import it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione;
+import it.unina.picus.catalogo.api.CatalogoApi.ErogatoreCompatibile;
+import it.unina.picus.catalogo.api.RicercaErogatoriApi;
+import it.unina.picus.comunicazioni.api.AvvisiOperativiApi;
+import it.unina.picus.richieste.api.ConflittoRichiestaException;
+import it.unina.picus.richieste.api.CoordinamentoRichiesteApi;
+import it.unina.picus.richieste.api.DatiRichiestaNonValidiException;
+import it.unina.picus.richieste.api.InvioRichiesteApi;
+import it.unina.picus.richieste.api.RisorsaRichiesteNonTrovataException;
+import it.unina.picus.richieste.api.RichiesteApi;
+import it.unina.picus.richieste.api.RichiesteApi.AccordoADistanza;
+import it.unina.picus.richieste.api.RichiesteApi.Candidato;
+import it.unina.picus.richieste.api.RichiesteApi.ContattoDisponibilita;
+import it.unina.picus.richieste.api.RichiesteApi.DettagliAccordo;
+import it.unina.picus.richieste.api.RichiesteApi.EsitoContatto;
+import it.unina.picus.richieste.api.RichiesteApi.RichiestaDettaglio;
+import it.unina.picus.richieste.api.RichiesteApi.RichiestaSintesi;
+import it.unina.picus.richieste.api.RichiesteApi.StatoRichiesta;
+import it.unina.picus.richieste.interno.dominio.ContattiRepository;
+import it.unina.picus.richieste.interno.dominio.OrdinamentoErogatori;
+import it.unina.picus.richieste.interno.dominio.RichiestaDiMisura;
+import it.unina.picus.richieste.interno.dominio.RichiestaRepository;
+import it.unina.picus.shared.ControlloAccesso;
+import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
+import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import java.time.Clock;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+/** Service Layer: i comandi condividono il lock della pratica con le risposte degli erogatori. */
+@Service
+@Transactional(readOnly = true)
+public class ServizioCoordinamentoRichieste implements CoordinamentoRichiesteApi {
+    private final RichiestaRepository richieste;
+    private final ContattiRepository contatti;
+    private final RicercaErogatoriApi catalogo;
+    private final InvioRichiesteApi consultazione;
+    private final AvvisiOperativiApi avvisi;
+    private final Clock clock;
+
+    /**
+     * Collega il coordinamento alle porte di persistenza e degli altri moduli.
+     *
+     * @param richieste accesso alle pratiche e al loro lock
+     * @param contatti accesso alle richieste di disponibilità
+     * @param catalogo ricerca di erogatori compatibili
+     * @param consultazione lettura del dettaglio secondo le regole di visibilità
+     * @param avvisi registrazione degli avvisi operativi
+     * @param clock orologio dei contatti
+     */
+    public ServizioCoordinamentoRichieste(RichiestaRepository richieste, ContattiRepository contatti,
+<span class="fc" id="L58">            RicercaErogatoriApi catalogo, InvioRichiesteApi consultazione, AvvisiOperativiApi avvisi, Clock clock) {</span>
+<span class="fc" id="L59">        this.richieste = richieste;</span>
+<span class="fc" id="L60">        this.contatti = contatti;</span>
+<span class="fc" id="L61">        this.catalogo = catalogo;</span>
+<span class="fc" id="L62">        this.consultazione = consultazione;</span>
+<span class="fc" id="L63">        this.avvisi = avvisi;</span>
+<span class="fc" id="L64">        this.clock = clock;</span>
+<span class="fc" id="L65">    }</span>
+
+    @Override
+    public ContattoDisponibilita consultaContattoBanco(IdentitaAutenticata attore, UUID richiestaId, UUID contattoId) {
+<span class="fc" id="L69">        verificaBanco(attore);</span>
+<span class="fc" id="L70">        return contatti.cerca(contattoId).filter(c -&gt; c.richiestaId().equals(richiestaId))</span>
+<span class="fc" id="L71">                .orElseThrow(RisorsaRichiesteNonTrovataException::new);</span>
+    }
+
+    @Override
+    @Transactional
+    public RichiestaSintesi prendiInCarico(IdentitaAutenticata attore, UUID richiestaId) {
+<span class="fc" id="L77">        verificaBanco(attore);</span>
+<span class="fc" id="L78">        richieste.aggiorna(blocca(richiestaId).prendiInCarico());</span>
+<span class="fc" id="L79">        return consultazione.consultaRichiesta(attore, richiestaId).richiesta();</span>
+    }
+
+    @Override
+    public List&lt;Candidato&gt; cercaErogatoriOrdinati(IdentitaAutenticata attore, UUID richiestaId) {
+<span class="fc" id="L84">        verificaBanco(attore);</span>
+<span class="fc" id="L85">        var richiesta = richieste.cercaPerId(richiestaId).orElseThrow(RisorsaRichiesteNonTrovataException::new);</span>
+<span class="fc" id="L86">        richiesta.verificaPresaInCarico();</span>
+<span class="fc" id="L87">        return OrdinamentoErogatori.ordina(compatibili(richiesta), richieste.carichiConfermati(clock.instant()));</span>
+    }
+
+    @Override
+    @Transactional
+    public ContattoDisponibilita interpellaErogatore(IdentitaAutenticata attore, UUID richiestaId,
+            UUID erogatoreId, AmbitoErogazione ambito) {
+<span class="fc" id="L94">        verificaBanco(attore);</span>
+<span class="fc bfc" id="L95" title="All 4 branches covered.">        if (erogatoreId == null || ambito == null) {</span>
+<span class="fc" id="L96">            throw new DatiRichiestaNonValidiException(Map.of(&quot;contatto&quot;, &quot;Erogatore e ambito obbligatori&quot;));</span>
+        }
+<span class="fc" id="L98">        var richiesta = blocca(richiestaId);</span>
+<span class="fc" id="L99">        richiesta.verificaPresaInCarico();</span>
+<span class="fc" id="L100">        verificaAssenzaContattiInAttesa(richiestaId);</span>
+<span class="fc" id="L101">        var opzioni = compatibili(richiesta);</span>
+<span class="fc bfc" id="L102" title="All 6 branches covered.">        if (opzioni.stream().noneMatch(o -&gt; o.accountId().equals(erogatoreId) &amp;&amp; o.ambito() == ambito)) {</span>
+<span class="fc" id="L103">            throw new DatiRichiestaNonValidiException(Map.of(&quot;contatto&quot;, &quot;Erogatore non compatibile con la richiesta&quot;));</span>
+        }
+<span class="fc bfc" id="L105" title="All 2 branches covered.">        if (ambito == AmbitoErogazione.CENTRO_PICUS_A_DISTANZA) {</span>
+<span class="fc" id="L106">            verificaEsaurimentoLocale(richiestaId, opzioni);</span>
+        }
+<span class="fc" id="L108">        String nomeMisura = consultazione.consultaRichiesta(attore, richiestaId).richiesta().nomeMisura();</span>
+<span class="fc" id="L109">        var contatto = contatti.registra(richiestaId, erogatoreId, ambito, nomeMisura, clock.instant());</span>
+<span class="fc" id="L110">        avvisi.avvisaDisponibilita(richiestaId, contatto.id(), erogatoreId);</span>
+<span class="fc" id="L111">        return contatto;</span>
+    }
+
+    @Override
+    @Transactional
+    public RichiestaSintesi assegnaErogatore(IdentitaAutenticata attore, UUID contattoId) {
+<span class="fc" id="L117">        verificaBanco(attore);</span>
+<span class="fc" id="L118">        var richiestaId = contatti.cercaRiferimento(contattoId).map(ContattiRepository.Riferimento::richiestaId)</span>
+<span class="fc" id="L119">                .orElseThrow(RisorsaRichiesteNonTrovataException::new);</span>
+<span class="fc" id="L120">        var richiesta = blocca(richiestaId);</span>
+<span class="fc" id="L121">        richiesta.verificaPresaInCarico();</span>
+<span class="fc" id="L122">        var contatto = contatti.cerca(contattoId).orElseThrow(RisorsaRichiesteNonTrovataException::new);</span>
+<span class="fc bfc" id="L123" title="All 2 branches covered.">        if (contatto.esito() != EsitoContatto.DISPONIBILE) {</span>
+<span class="fc" id="L124">            throw new ConflittoRichiestaException(&quot;Il contatto non attesta disponibilità&quot;);</span>
+        }
+<span class="fc" id="L126">        var ultimo = ultimiContatti(richiestaId).get(new Opzione(contatto.erogatoreId(), contatto.ambito()));</span>
+<span class="pc bpc" id="L127" title="1 of 4 branches missed.">        if (ultimo == null || !ultimo.id().equals(contattoId)) {</span>
+<span class="fc" id="L128">            throw new ConflittoRichiestaException(&quot;La risposta è stata superata da un contatto successivo&quot;);</span>
+        }
+<span class="fc" id="L130">        verificaAssenzaContattiInAttesa(richiestaId);</span>
+<span class="fc bfc" id="L131" title="All 2 branches covered.">        if (!catalogo.bloccaCompatibilita(richiesta.misuraId(), richiesta.comuneCodice(),</span>
+<span class="fc" id="L132">                contatto.erogatoreId(), contatto.ambito())) {</span>
+<span class="fc" id="L133">            throw new ConflittoRichiestaException(&quot;L'erogatore non è più abilitato per questa opzione&quot;);</span>
+        }
+<span class="fc" id="L135">        richieste.aggiorna(richiesta.assegna(contatto.erogatoreId(), contatto.ambito()));</span>
+<span class="fc" id="L136">        return consultazione.consultaRichiesta(attore, richiestaId).richiesta();</span>
+    }
+
+    /**
+     * Conferma l'accordo secondo l'ambito di assegnazione. Il lock della pratica
+     * serializza i comandi e consente di salvare stato e accordo insieme.
+     *
+     * @param attore identità verificata del Banco
+     * @param richiestaId identificativo della richiesta in programmazione
+     * @param accordo dettagli concordati per la modalità assegnata
+     * @return dettaglio della richiesta confermata
+     * @throws SecurityException se l'attore non è il Banco
+     * @throws RisorsaRichiesteNonTrovataException se la richiesta non esiste
+     * @throws DatiRichiestaNonValidiException se i dettagli sono invalidi o la modalità è incompatibile
+     * @throws ConflittoRichiestaException se stato o assegnazione impediscono la conferma
+     *         o la misura non consente più l'erogazione a distanza
+     * @see RichiesteApi#confermaAccordo
+     */
+    @Override
+    @Transactional
+    public RichiestaDettaglio confermaAccordo(IdentitaAutenticata attore, UUID richiestaId,
+            DettagliAccordo accordo) {
+<span class="fc" id="L158">        verificaBanco(attore);</span>
+<span class="fc" id="L159">        var confermata = blocca(richiestaId).conferma(accordo);</span>
+<span class="fc bfc" id="L160" title="All 2 branches covered.">        if (confermata.accordo() instanceof AccordoADistanza</span>
+<span class="fc bfc" id="L161" title="All 2 branches covered.">                &amp;&amp; !catalogo.bloccaAbilitazioneADistanza(confermata.misuraId())) {</span>
+<span class="fc" id="L162">            throw new ConflittoRichiestaException(&quot;L'abilitazione della misura impedisce la conferma a distanza&quot;);</span>
+        }
+<span class="fc" id="L164">        richieste.aggiorna(confermata);</span>
+<span class="fc" id="L165">        return consultazione.consultaRichiesta(attore, richiestaId);</span>
+    }
+
+    /**
+     * Registra il rifiuto dopo aver acquisito il lock della pratica.
+     * Durante la ricerca il sistema verifica l'esito più recente di ogni opzione
+     * compatibile, compresa quella a distanza. Dopo l'assegnazione il Banco valuta
+     * l'esito della trattativa tenuta fuori dal flusso dei contatti.
+     *
+     * @param attore identità verificata del Banco
+     * @param richiestaId identificativo della richiesta da rifiutare
+     * @return sintesi della richiesta rifiutata
+     * @throws SecurityException se l'attore non è il Banco
+     * @throws RisorsaRichiesteNonTrovataException se la richiesta non esiste
+     * @throws ConflittoRichiestaException se lo stato è incompatibile, un contatto è in attesa
+     *         o, durante la ricerca, resta un'opzione compatibile senza diniego
+     * @see RichiesteApi#rifiutaRichiesta
+     */
+    @Override
+    @Transactional
+    public RichiestaSintesi rifiutaRichiesta(IdentitaAutenticata attore, UUID richiestaId) {
+<span class="fc" id="L186">        verificaBanco(attore);</span>
+<span class="fc" id="L187">        var richiesta = blocca(richiestaId);</span>
+<span class="fc" id="L188">        var rifiutata = richiesta.rifiuta();</span>
+<span class="fc" id="L189">        verificaAssenzaContattiInAttesa(richiestaId);</span>
+<span class="fc bfc" id="L190" title="All 2 branches covered.">        if (richiesta.stato() == StatoRichiesta.PRESA_IN_CARICO</span>
+<span class="fc bfc" id="L191" title="All 2 branches covered.">                &amp;&amp; haOpzioniNonDeclinate(richiestaId, compatibili(richiesta))) {</span>
+<span class="fc" id="L192">            throw new ConflittoRichiestaException(&quot;Restano opzioni compatibili da valutare&quot;);</span>
+        }
+<span class="fc" id="L194">        richieste.aggiorna(rifiutata);</span>
+<span class="fc" id="L195">        return consultazione.consultaRichiesta(attore, richiestaId).richiesta();</span>
+    }
+
+    private List&lt;ErogatoreCompatibile&gt; compatibili(RichiestaDiMisura richiesta) {
+<span class="fc" id="L199">        return catalogo.cercaErogatoriCompatibili(richiesta.misuraId(), richiesta.comuneCodice());</span>
+    }
+
+    private void verificaEsaurimentoLocale(UUID richiestaId, List&lt;ErogatoreCompatibile&gt; opzioni) {
+<span class="fc bfc" id="L203" title="All 2 branches covered.">        var locali = opzioni.stream().filter(o -&gt; o.ambito() != AmbitoErogazione.CENTRO_PICUS_A_DISTANZA).toList();</span>
+<span class="fc bfc" id="L204" title="All 2 branches covered.">        if (haOpzioniNonDeclinate(richiestaId, locali)) {</span>
+<span class="fc" id="L205">            throw new ConflittoRichiestaException(&quot;Valutare prima la disponibilità degli erogatori locali&quot;);</span>
+        }
+<span class="fc" id="L207">    }</span>
+
+    private boolean haOpzioniNonDeclinate(UUID richiestaId, List&lt;ErogatoreCompatibile&gt; opzioni) {
+<span class="fc bfc" id="L210" title="All 2 branches covered.">        if (opzioni.isEmpty()) {</span>
+<span class="fc" id="L211">            return false;</span>
+        }
+<span class="fc" id="L213">        var ultimi = ultimiContatti(richiestaId);</span>
+<span class="fc" id="L214">        return opzioni.stream().anyMatch(opzione -&gt; {</span>
+<span class="fc" id="L215">            var ultimo = ultimi.get(new Opzione(opzione.accountId(), opzione.ambito()));</span>
+<span class="pc bpc" id="L216" title="1 of 4 branches missed.">            return ultimo == null || ultimo.esito() != EsitoContatto.NON_DISPONIBILE;</span>
+        });
+    }
+
+    private Map&lt;Opzione, ContattoDisponibilita&gt; ultimiContatti(UUID richiestaId) {
+<span class="fc" id="L221">        Map&lt;Opzione, ContattoDisponibilita&gt; ultimi = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L222">        contatti.storico(richiestaId).forEach(c -&gt; ultimi.put(new Opzione(c.erogatoreId(), c.ambito()), c));</span>
+<span class="fc" id="L223">        return ultimi;</span>
+    }
+
+    private void verificaAssenzaContattiInAttesa(UUID richiestaId) {
+<span class="fc bfc" id="L227" title="All 2 branches covered.">        if (contatti.inAttesa(richiestaId)) {</span>
+<span class="fc" id="L228">            throw new ConflittoRichiestaException(&quot;Un contatto è ancora in attesa di risposta&quot;);</span>
+        }
+<span class="fc" id="L230">    }</span>
+
+    private RichiestaDiMisura blocca(UUID richiestaId) {
+<span class="fc" id="L233">        return richieste.cercaPerAggiornamento(richiestaId).orElseThrow(RisorsaRichiesteNonTrovataException::new);</span>
+    }
+
+    private static void verificaBanco(IdentitaAutenticata attore) {
+<span class="fc bfc" id="L237" title="All 6 branches covered.">        ControlloAccesso.richiedi(attore != null &amp;&amp; attore.accountId() != null &amp;&amp; attore.ruolo() == RuoloUtente.BANCO,</span>
+                &quot;Operazione riservata al Banco&quot;);
+<span class="fc" id="L239">    }</span>
+
+<span class="fc" id="L241">    private record Opzione(UUID accountId, AmbitoErogazione ambito) {}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StubUtenzeApi.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.utenze.interno.stub</a> &gt; <span class="el_source">StubUtenzeApi.java</span></div><h1>StubUtenzeApi.java</h1><pre class="source lang-java linenums">package it.unina.picus.utenze.interno.stub;
+
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+
+import it.unina.picus.utenze.api.NomiAccountApi;
+import it.unina.picus.utenze.api.OperazioneUtenzaNonConsentitaException;
+import it.unina.picus.utenze.api.UtenzaNonTrovataException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+
+import it.unina.picus.utenze.api.UtenzeApi;
+
+/**
+ * Stub in memoria di {@link UtenzeApi} per il walking skeleton: l'applicazione parte e si usa da
+ * capo a coda (login, area per ruolo, logout) senza database. Attivo solo con il profilo
+ * {@code skeleton}; sostituisce {@code UtenzeService}. Non usare in produzione.
+ */
+@Component
+@Profile(&quot;skeleton&quot;)
+public class StubUtenzeApi implements UtenzeApi, NomiAccountApi {
+
+<span class="nc" id="L34">    private static final Logger LOG = LoggerFactory.getLogger(StubUtenzeApi.class);</span>
+
+    /** Come in UtenzeService: BCrypt considera solo i primi 72 byte UTF-8. */
+    static final int LUNGHEZZA_MAX_PASSWORD_BYTE = 72;
+
+    public static final String BANCO = &quot;banco@picus.test&quot;;
+    public static final String OPT = &quot;opt@picus.test&quot;;
+    public static final String OPERATORE = &quot;operatore@picus.test&quot;;
+    public static final String REVOCATO = &quot;revocato@picus.test&quot;;
+    /** Account attivo di prova, da revocare nei test di sessione. */
+    public static final String REVOCABILE = &quot;revocabile@picus.test&quot;;
+
+<span class="nc" id="L46">    private record Account(UUID id, String nome, RuoloUtente ruolo, StatoUtenza stato) {}</span>
+
+<span class="nc" id="L48">    private final Map&lt;String, Account&gt; perEmail = new ConcurrentHashMap&lt;&gt;();</span>
+    private final PasswordEncoder encoder;
+    private final String hash;
+
+<span class="nc" id="L52">    StubUtenzeApi(PasswordEncoder encoder, @Value(&quot;${picus.skeleton.password:picus-demo}&quot;) String password) {</span>
+<span class="nc" id="L53">        this.encoder = encoder;</span>
+<span class="nc" id="L54">        this.hash = encoder.encode(password); // un solo hash per tutti gli account di prova</span>
+<span class="nc" id="L55">        aggiungi(BANCO, &quot;Banco Demo&quot;, RuoloUtente.BANCO, StatoUtenza.ATTIVO);</span>
+<span class="nc" id="L56">        aggiungi(OPT, &quot;OPT Demo&quot;, RuoloUtente.OPT, StatoUtenza.ATTIVO);</span>
+<span class="nc" id="L57">        aggiungi(OPERATORE, &quot;Operatore Demo&quot;, RuoloUtente.OPERATORE, StatoUtenza.ATTIVO);</span>
+<span class="nc" id="L58">        aggiungi(REVOCATO, &quot;Operatore Revocato&quot;, RuoloUtente.OPERATORE, StatoUtenza.REVOCATO);</span>
+<span class="nc" id="L59">        aggiungi(REVOCABILE, &quot;Operatore Temporaneo&quot;, RuoloUtente.OPERATORE, StatoUtenza.ATTIVO);</span>
+<span class="nc" id="L60">        LOG.warn(&quot;Profilo 'skeleton': utenze in memoria (banco/opt/operatore@picus.test). Solo sviluppo e test.&quot;);</span>
+<span class="nc" id="L61">    }</span>
+
+    @Override
+    public void revocaUtenzaOpt(UUID optAccountId) {
+<span class="nc" id="L65">        revocaAccountConRuolo(optAccountId, RuoloUtente.OPT,</span>
+                &quot;La revoca manuale è consentita solo per account con ruolo OPT.&quot;);
+<span class="nc" id="L67">    }</span>
+
+    @Override
+    public void revocaUtenzaOperatore(UUID operatoreAccountId) {
+<span class="nc" id="L71">        revocaAccountConRuolo(operatoreAccountId, RuoloUtente.OPERATORE,</span>
+                &quot;La revoca manuale è consentita solo per account con ruolo OPERATORE.&quot;);
+<span class="nc" id="L73">    }</span>
+
+    private void revocaAccountConRuolo(UUID accountId, RuoloUtente ruoloAtteso, String messaggioErroreRuolo) {
+<span class="nc bnc" id="L76" title="All 2 branches missed.">        if (accountId == null) {</span>
+<span class="nc" id="L77">            throw new UtenzaNonTrovataException(&quot;Identificativo account obbligatorio.&quot;);</span>
+        }
+<span class="nc" id="L79">        Account trovato = trova(accountId)</span>
+<span class="nc" id="L80">                .orElseThrow(() -&gt; new UtenzaNonTrovataException(&quot;Account non trovato.&quot;));</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        if (trovato.ruolo() != ruoloAtteso) {</span>
+<span class="nc" id="L82">            throw new OperazioneUtenzaNonConsentitaException(messaggioErroreRuolo);</span>
+        }
+<span class="nc bnc" id="L84" title="All 2 branches missed.">        if (trovato.stato() == StatoUtenza.REVOCATO) {</span>
+<span class="nc" id="L85">            throw new OperazioneUtenzaNonConsentitaException(&quot;L'account è già stato revocato.&quot;);</span>
+        }
+<span class="nc" id="L87">        perEmail.entrySet().stream()</span>
+<span class="nc" id="L88">                .filter(e -&gt; e.getValue().id().equals(accountId))</span>
+<span class="nc" id="L89">                .findFirst()</span>
+<span class="nc" id="L90">                .ifPresent(e -&gt; perEmail.put(e.getKey(),</span>
+<span class="nc" id="L91">                        new Account(trovato.id(), trovato.nome(), trovato.ruolo(), StatoUtenza.REVOCATO)));</span>
+<span class="nc" id="L92">    }</span>
+    private void aggiungi(String email, String nome, RuoloUtente ruolo, StatoUtenza stato) {
+<span class="nc" id="L94">        perEmail.put(email, new Account(UUID.nameUUIDFromBytes(email.getBytes()), nome, ruolo, stato));</span>
+<span class="nc" id="L95">    }</span>
+
+    /** Simula la revoca di un account mentre ha una sessione aperta. */
+    public void revoca(String email) {
+<span class="nc" id="L99">        perEmail.computeIfPresent(email, (e, a) -&gt; new Account(a.id(), a.nome(), a.ruolo(), StatoUtenza.REVOCATO));</span>
+<span class="nc" id="L100">    }</span>
+
+    @Override
+    public Optional&lt;IdentitaAutenticata&gt; verificaCredenziali(String email, String password) {
+<span class="nc bnc" id="L104" title="All 2 branches missed.">        Account account = email == null ? null : perEmail.get(email.strip().toLowerCase(Locale.ROOT));</span>
+        // confronto sempre eseguito: i tempi non rivelano se l'account esiste
+<span class="nc bnc" id="L106" title="All 6 branches missed.">        boolean passwordOk = password != null &amp;&amp; !password.isEmpty() &amp;&amp; password.getBytes(StandardCharsets.UTF_8).length &lt;= LUNGHEZZA_MAX_PASSWORD_BYTE</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">                &amp;&amp; encoder.matches(password, hash);</span>
+<span class="nc bnc" id="L108" title="All 6 branches missed.">        if (account == null || !passwordOk || account.stato() != StatoUtenza.ATTIVO) {</span>
+<span class="nc" id="L109">            return Optional.empty();</span>
+        }
+<span class="nc" id="L111">        return Optional.of(new IdentitaAutenticata(account.id(), account.ruolo()));</span>
+    }
+
+    @Override
+    public Optional&lt;IdentitaAutenticata&gt; verificaAccountSessione(UUID accountId) {
+<span class="nc bnc" id="L116" title="All 2 branches missed.">        return trova(accountId).filter(a -&gt; a.stato() == StatoUtenza.ATTIVO)</span>
+<span class="nc" id="L117">                .map(a -&gt; new IdentitaAutenticata(a.id(), a.ruolo()));</span>
+    }
+
+    @Override
+    public Optional&lt;AccountSintetico&gt; cercaAccount(UUID accountId) {
+<span class="nc" id="L122">        return trova(accountId).map(StubUtenzeApi::sintetico);</span>
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Map&lt;UUID, String&gt; nomiVisualizzati(Set&lt;UUID&gt; accountIds) {
+<span class="nc" id="L128">        return perEmail.values().stream()</span>
+<span class="nc" id="L129">                .filter(account -&gt; accountIds.contains(account.id()))</span>
+<span class="nc" id="L130">                .collect(Collectors.toUnmodifiableMap(Account::id, Account::nome));</span>
+    }
+
+    @Override
+    public List&lt;AccountAmministrativo&gt; elencoAccountPerRuolo(RuoloUtente ruolo) {
+<span class="nc" id="L135">        return perEmail.entrySet().stream()</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">                .filter(e -&gt; e.getValue().ruolo() == ruolo)</span>
+<span class="nc" id="L137">                .map(e -&gt; {</span>
+<span class="nc" id="L138">                    Account a = e.getValue();</span>
+<span class="nc" id="L139">                    return new AccountAmministrativo(</span>
+<span class="nc" id="L140">                            a.id(), a.nome(), e.getKey(), a.id().toString().substring(0, 8).toUpperCase(),</span>
+<span class="nc" id="L141">                            null, a.ruolo(), a.stato());</span>
+                })
+<span class="nc" id="L143">                .toList();</span>
+    }
+    @Override
+    public List&lt;AccountSintetico&gt; elencoAccountAttivi(RuoloUtente ruolo) {
+<span class="nc" id="L147">        return perEmail.values().stream()</span>
+<span class="nc bnc" id="L148" title="All 4 branches missed.">                .filter(a -&gt; a.ruolo() == ruolo &amp;&amp; a.stato() == StatoUtenza.ATTIVO)</span>
+<span class="nc" id="L149">                .map(StubUtenzeApi::sintetico).toList();</span>
+    }
+
+    @Override
+    public Optional&lt;ProfiloErogatore&gt; cercaProfiloErogatoreAttivo(UUID accountId) {
+<span class="nc bnc" id="L154" title="All 2 branches missed.">        return trova(accountId).filter(a -&gt; a.stato() == StatoUtenza.ATTIVO).flatMap(StubUtenzeApi::profilo);</span>
+    }
+
+    @Override
+    public List&lt;ProfiloErogatore&gt; elencoOperatoriAttiviPerMisura(long misuraId) {
+<span class="nc" id="L159">        return perEmail.values().stream()</span>
+<span class="nc bnc" id="L160" title="All 4 branches missed.">                .filter(a -&gt; a.ruolo() == RuoloUtente.OPERATORE &amp;&amp; a.stato() == StatoUtenza.ATTIVO)</span>
+<span class="nc" id="L161">                .flatMap(a -&gt; profilo(a).stream()).toList();</span>
+    }
+
+    @Override
+    public List&lt;ProfiloErogatore&gt; elencoOptAttive(Set&lt;UUID&gt; ids) {
+<span class="nc" id="L166">        return perEmail.values().stream()</span>
+<span class="nc bnc" id="L167" title="All 6 branches missed.">                .filter(a -&gt; ids.contains(a.id()) &amp;&amp; a.ruolo() == RuoloUtente.OPT &amp;&amp; a.stato() == StatoUtenza.ATTIVO)</span>
+<span class="nc" id="L168">                .flatMap(a -&gt; profilo(a).stream()).toList();</span>
+    }
+
+    @Override
+    public Optional&lt;ProfiloErogatore&gt; bloccaProfiloPerMisura(UUID accountId, long misuraId) {
+        // Lo skeleton offre solo consultazione in memoria; non esegue assegnazioni persistite.
+<span class="nc" id="L174">        return cercaProfiloErogatoreAttivo(accountId);</span>
+    }
+
+    private Optional&lt;Account&gt; trova(UUID id) {
+<span class="nc bnc" id="L178" title="All 2 branches missed.">        return id == null ? Optional.empty()</span>
+<span class="nc" id="L179">                : perEmail.values().stream().filter(a -&gt; a.id().equals(id)).findFirst();</span>
+    }
+
+    private static AccountSintetico sintetico(Account a) {
+<span class="nc" id="L183">        return new AccountSintetico(a.id(), a.nome(), a.ruolo(), a.stato());</span>
+    }
+
+    private static Optional&lt;ProfiloErogatore&gt; profilo(Account a) {
+<span class="nc bnc" id="L187" title="All 3 branches missed.">        return switch (a.ruolo()) {</span>
+<span class="nc" id="L188">            case OPT -&gt; Optional.of(new ProfiloErogatore(a.id(), a.nome(), TipoErogatore.OPT, &quot;napoli&quot;, false));</span>
+<span class="nc" id="L189">            case OPERATORE -&gt; Optional.of(</span>
+<span class="nc" id="L190">                    new ProfiloErogatore(a.id(), a.nome(), TipoErogatore.INTERNO_BANCO, &quot;napoli&quot;, false));</span>
+<span class="nc" id="L191">            case BANCO -&gt; Optional.empty();</span>
+        };
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

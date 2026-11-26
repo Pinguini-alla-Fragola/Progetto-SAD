@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NormalizzatoreComunicazione.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.comunicazioni.interno.applicazione</a> &gt; <span class="el_source">NormalizzatoreComunicazione.java</span></div><h1>NormalizzatoreComunicazione.java</h1><pre class="source lang-java linenums">package it.unina.picus.comunicazioni.interno.applicazione;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+
+import it.unina.picus.comunicazioni.api.ComunicazioniApi.TipoDestinatari;
+import it.unina.picus.comunicazioni.interno.dominio.AllegatoRicevuto;
+import it.unina.picus.comunicazioni.interno.dominio.BozzaComunicazione;
+import it.unina.picus.comunicazioni.interno.dominio.LetturaGruppo;
+import it.unina.picus.comunicazioni.interno.dominio.RegolaDestinatari;
+
+/** Ripulisce i campi ricevuti, così che le regole lavorino sempre su dati nella stessa forma. */
+final class NormalizzatoreComunicazione {
+
+    private NormalizzatoreComunicazione() {
+    }
+
+    static BozzaComunicazione normalizza(ComandoInvioComunicazione comando) {
+<span class="pc bpc" id="L22" title="1 of 2 branches missed.">        if (comando == null) {</span>
+<span class="nc" id="L23">            return new BozzaComunicazione(null, null, null, Set.of(), LetturaGruppo.LEGGIBILE, List.of());</span>
+        }
+<span class="fc" id="L25">        Set&lt;UUID&gt; gruppo = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L26">        LetturaGruppo lettura = leggiGruppo(comando.gruppo(), gruppo);</span>
+<span class="fc" id="L27">        return new BozzaComunicazione(testo(comando.titolo()), testo(comando.contenuto()),</span>
+<span class="fc" id="L28">                tipo(comando.destinatariTipo()), gruppo, lettura, allegati(comando.allegati()));</span>
+    }
+
+    /** Toglie gli spazi ai bordi, lasciando com'è il testo interno; un testo vuoto diventa {@code null}. */
+    static String testo(String valore) {
+<span class="fc bfc" id="L33" title="All 2 branches covered.">        if (valore == null) {</span>
+<span class="fc" id="L34">            return null;</span>
+        }
+<span class="fc" id="L36">        String ripulito = valore.strip();</span>
+<span class="fc bfc" id="L37" title="All 2 branches covered.">        return ripulito.isEmpty() ? null : ripulito;</span>
+    }
+
+    /**
+     * Converte il nome del tipo di destinatari.
+     *
+     * @return il tipo, oppure {@code null} se manca o non esiste
+     */
+    static TipoDestinatari tipo(String valore) {
+<span class="fc" id="L46">        String nome = testo(valore);</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        if (nome == null) {</span>
+<span class="fc" id="L48">            return null;</span>
+        }
+        try {
+<span class="fc" id="L51">            return TipoDestinatari.valueOf(nome);</span>
+<span class="fc" id="L52">        } catch (IllegalArgumentException e) {</span>
+<span class="fc" id="L53">            return null;</span>
+        }
+    }
+
+    /**
+     * Converte gli identificativi del gruppo. Gli elementi ricevuti si contano prima di convertirli e di togliere
+     * le ripetizioni: oltre il limite non se ne converte nessuno.
+     */
+    private static LetturaGruppo leggiGruppo(List&lt;String&gt; valori, Set&lt;UUID&gt; gruppo) {
+<span class="fc bfc" id="L62" title="All 2 branches covered.">        if (valori == null) {</span>
+<span class="fc" id="L63">            return LetturaGruppo.LEGGIBILE;</span>
+        }
+<span class="pc bpc" id="L65" title="1 of 2 branches missed.">        if (valori.size() &gt; RegolaDestinatari.MASSIMO_GRUPPO) {</span>
+<span class="nc" id="L66">            return LetturaGruppo.TROPPO_GRANDE;</span>
+        }
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        for (String valore : valori) {</span>
+            try {
+<span class="fc" id="L70">                gruppo.add(UUID.fromString(valore.strip()));</span>
+<span class="nc" id="L71">            } catch (IllegalArgumentException | NullPointerException e) {</span>
+<span class="nc" id="L72">                return LetturaGruppo.ILLEGGIBILE;</span>
+<span class="fc" id="L73">            }</span>
+<span class="fc" id="L74">        }</span>
+<span class="fc" id="L75">        return LetturaGruppo.LEGGIBILE;</span>
+    }
+
+    /** Tiene del nome del file solo l'ultima parte: un nome come {@code ../../segreto.txt} diventa {@code segreto.txt}. */
+    private static List&lt;AllegatoRicevuto&gt; allegati(List&lt;AllegatoRicevuto&gt; allegati) {
+<span class="pc bpc" id="L80" title="1 of 2 branches missed.">        if (allegati == null) {</span>
+<span class="nc" id="L81">            return List.of();</span>
+        }
+<span class="fc" id="L83">        return allegati.stream().filter(Objects::nonNull)</span>
+<span class="fc" id="L84">                .map(allegato -&gt; new AllegatoRicevuto(nomeFile(allegato.nomeFile()), allegato.contenuto()))</span>
+<span class="fc" id="L85">                .toList();</span>
+    }
+
+    private static String nomeFile(String nome) {
+<span class="pc bpc" id="L89" title="1 of 2 branches missed.">        if (nome == null) {</span>
+<span class="nc" id="L90">            return null;</span>
+        }
+<span class="fc" id="L92">        int separatore = Math.max(nome.lastIndexOf('/'), nome.lastIndexOf('\\'));</span>
+<span class="fc" id="L93">        return testo(nome.substring(separatore + 1));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

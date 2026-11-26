@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ContattoDisponibilitaJpa.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.richieste.interno.persistenza</a> &gt; <span class="el_source">ContattoDisponibilitaJpa.java</span></div><h1>ContattoDisponibilitaJpa.java</h1><pre class="source lang-java linenums">package it.unina.picus.richieste.interno.persistenza;
+
+import java.time.Instant;
+import java.util.UUID;
+
+import it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione;
+import it.unina.picus.richieste.api.RichiesteApi.EsitoContatto;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+
+/**
+ * Entità JPA che conserva il contatto, il destinatario e l'esito della risposta.
+ *
+ * &lt;p&gt;Il contatto appartiene a una richiesta di misura. Il suo esito registra la risposta
+ * dell'erogatore indipendentemente dallo stato della richiesta.
+ */
+@Entity
+@Table(name = &quot;richieste_contatti_disponibilita&quot;)
+public class ContattoDisponibilitaJpa {
+    @Id
+    private UUID id;
+
+    @Column(insertable = false, updatable = false)
+    private Long ordineInvio;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = &quot;richiesta_id&quot;, nullable = false, updatable = false)
+    private RichiestaJpa richiesta;
+
+    @Column(nullable = false, updatable = false)
+    private UUID erogatoreId;
+
+    @Column(nullable = false, updatable = false, length = 30)
+    private String ambito;
+
+    @Column(nullable = false, updatable = false)
+    private String nomeMisura;
+
+    @Column(nullable = false, updatable = false)
+    private Instant inviatoIl;
+
+    @Column(nullable = false, length = 20)
+    private String esito;
+
+    /** Costruttore riservato a JPA. */
+<span class="fc" id="L52">    protected ContattoDisponibilitaJpa() {</span>
+<span class="fc" id="L53">    }</span>
+
+    /** Costruisce il contatto mentre il chiamante mantiene il lock della richiesta. */
+    public static ContattoDisponibilitaJpa crea(RichiestaJpa richiesta, UUID erogatoreId,
+            AmbitoErogazione ambito, String nomeMisura, Instant istante) {
+<span class="fc" id="L58">        richiesta.aDominio().verificaPresaInCarico();</span>
+<span class="fc" id="L59">        var contatto = new ContattoDisponibilitaJpa();</span>
+<span class="fc" id="L60">        contatto.id = UUID.randomUUID();</span>
+<span class="fc" id="L61">        contatto.richiesta = richiesta;</span>
+<span class="fc" id="L62">        contatto.erogatoreId = erogatoreId;</span>
+<span class="fc" id="L63">        contatto.ambito = ambito.name();</span>
+<span class="fc" id="L64">        contatto.nomeMisura = nomeMisura;</span>
+<span class="fc" id="L65">        contatto.inviatoIl = istante;</span>
+<span class="fc" id="L66">        contatto.esito = EsitoContatto.IN_ATTESA.name();</span>
+<span class="fc" id="L67">        return contatto;</span>
+    }
+
+    /** {@return identificativo del contatto} */
+    public UUID getId() {
+<span class="fc" id="L72">        return id;</span>
+    }
+
+    /** {@return richiesta di misura a cui appartiene il contatto} */
+    public RichiestaJpa getRichiesta() {
+<span class="fc" id="L77">        return richiesta;</span>
+    }
+
+    /** {@return identificativo dell'account destinatario del contatto} */
+    public UUID getErogatoreId() {
+<span class="fc" id="L82">        return erogatoreId;</span>
+    }
+
+    /** {@return ambito di erogazione del contatto} */
+    public AmbitoErogazione getAmbito() {
+<span class="fc" id="L87">        return AmbitoErogazione.valueOf(ambito);</span>
+    }
+
+    /** {@return nome della misura registrato nel contatto} */
+    public String getNomeMisura() {
+<span class="fc" id="L92">        return nomeMisura;</span>
+    }
+
+    /** {@return esito corrente del contatto} */
+    public EsitoContatto getEsito() {
+<span class="fc" id="L97">        return EsitoContatto.valueOf(esito);</span>
+    }
+
+    /**
+     * Aggiorna la colonna che rappresenta l'esito del contatto.
+     *
+     * @param nuovoEsito esito determinato dal caso d'uso
+     */
+    void aggiornaEsito(EsitoContatto nuovoEsito) {
+<span class="fc" id="L106">        esito = nuovoEsito.name();</span>
+<span class="fc" id="L107">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

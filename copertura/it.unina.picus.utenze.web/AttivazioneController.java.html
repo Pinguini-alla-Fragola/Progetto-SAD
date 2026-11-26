@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AttivazioneController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.utenze.web</a> &gt; <span class="el_source">AttivazioneController.java</span></div><h1>AttivazioneController.java</h1><pre class="source lang-java linenums">package it.unina.picus.utenze.web;
+
+import java.util.Map;
+import java.util.Optional;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService;
+import it.unina.picus.utenze.interno.applicazione.TokenAttivazioneNonValidoException;
+
+@Controller
+class AttivazioneController {
+
+    private final Optional&lt;AttivazioneUtenzaService&gt; attivazioneService;
+
+<span class="fc" id="L24">    AttivazioneController(Optional&lt;AttivazioneUtenzaService&gt; attivazioneService) {</span>
+<span class="fc" id="L25">        this.attivazioneService = attivazioneService;</span>
+<span class="fc" id="L26">    }</span>
+
+    @GetMapping(&quot;/attiva&quot;)
+    String mostraPaginaAttivazione(@RequestParam(name = &quot;token&quot;, required = false) String token, Model modello) {
+<span class="pc bpc" id="L30" title="1 of 2 branches missed.">        boolean valido = token != null &amp;&amp; attivazioneService</span>
+<span class="fc" id="L31">                .map(s -&gt; s.isTokenValido(token))</span>
+<span class="pc bpc" id="L32" title="1 of 2 branches missed.">                .orElse(false);</span>
+
+<span class="fc" id="L34">        modello.addAttribute(&quot;attivazione&quot;, true);</span>
+<span class="fc" id="L35">        modello.addAttribute(&quot;valido&quot;, valido);</span>
+<span class="fc" id="L36">        modello.addAttribute(&quot;token&quot;, token);</span>
+        // Link valido: si sceglie la password. Altrimenti si può chiedere un nuovo link con la propria email.
+<span class="pc bpc" id="L38" title="1 of 2 branches missed.">        modello.addAttribute(&quot;endpoint&quot;, valido ? &quot;/api/auth/attiva/conferma&quot; : &quot;/api/auth/attiva/reinvio&quot;);</span>
+<span class="fc" id="L39">        return &quot;credenziali&quot;;</span>
+    }
+
+<span class="fc" id="L42">    record RichiestaAttivazione(String token, String nuovaPassword) {}</span>
+
+    @PostMapping(&quot;/api/auth/attiva/conferma&quot;)
+    @ResponseBody
+    ResponseEntity&lt;?&gt; confermaAttivazione(@RequestBody RichiestaAttivazione body) {
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">        if (attivazioneService.isEmpty()) {</span>
+<span class="nc" id="L48">            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)</span>
+<span class="nc" id="L49">                    .body(Map.of(&quot;messaggio&quot;, &quot;Funzionalità non disponibile nel profilo skeleton&quot;));</span>
+        }
+
+        try {
+<span class="fc" id="L53">            attivazioneService.get().attivaAccount(body.token(), body.nuovaPassword());</span>
+<span class="fc" id="L54">            return ResponseEntity.ok(Map.of(</span>
+                    &quot;messaggio&quot;, &quot;Account attivato con successo. Ora puoi accedere da Accedi.&quot;
+            ));
+<span class="fc" id="L57">        } catch (TokenAttivazioneNonValidoException | IllegalArgumentException ex) {</span>
+<span class="fc" id="L58">            return ResponseEntity.badRequest()</span>
+<span class="fc" id="L59">                    .body(Map.of(&quot;messaggio&quot;, ex.getMessage()));</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

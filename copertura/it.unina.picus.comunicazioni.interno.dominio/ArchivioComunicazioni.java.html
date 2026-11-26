@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ArchivioComunicazioni.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.comunicazioni.interno.dominio</a> &gt; <span class="el_source">ArchivioComunicazioni.java</span></div><h1>ArchivioComunicazioni.java</h1><pre class="source lang-java linenums">package it.unina.picus.comunicazioni.interno.dominio;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+
+/**
+ * Dove si registrano e si leggono le comunicazioni. Il dominio la usa senza sapere come vengono salvati i dati
+ * (vedi l'adattatore in {@code interno.persistenza}).
+ */
+public interface ArchivioComunicazioni {
+
+    /**
+     * Salva la comunicazione, i suoi destinatari e i suoi allegati, tutti insieme.
+     *
+     * @param comunicazione la comunicazione già controllata
+     */
+    void registra(NuovaComunicazione comunicazione);
+
+    /**
+     * Conta le comunicazioni ricevute da un account e non ancora confermate.
+     *
+     * @param destinatarioId account destinatario
+     * @return numero di comunicazioni in attesa della conferma di ricezione
+     */
+    long contaDaConfermare(UUID destinatarioId);
+
+    /**
+     * Restituisce una pagina delle comunicazioni inviate che rispettano il filtro, dalla più recente. Il filtro
+     * sulla conferma di ricezione non vale per le inviate e viene ignorato.
+     *
+     * @param filtro ricerca e pagina
+     * @return la pagina, senza il contenuto degli allegati
+     */
+    PaginaComunicazioni elencoInviate(FiltroComunicazioni filtro);
+
+    /**
+     * Restituisce una pagina delle comunicazioni ricevute da un account che rispettano il filtro, dalla più
+     * recente, ciascuna con la conferma di quell'account.
+     *
+     * @param destinatarioId account destinatario
+     * @param filtro ricerca e pagina
+     * @return la pagina, senza il contenuto degli allegati
+     */
+    PaginaComunicazioni elencoRicevute(UUID destinatarioId, FiltroComunicazioni filtro);
+
+    /**
+     * Cerca una comunicazione.
+     *
+     * @param comunicazioneId comunicazione cercata
+     * @param lettoreId account che la consulta, per indicare la sua conferma se è un destinatario
+     * @return la comunicazione, se esiste
+     */
+    Optional&lt;ComunicazioneSalvata&gt; cerca(UUID comunicazioneId, UUID lettoreId);
+
+    /**
+     * Restituisce gli account registrati come destinatari al momento dell'invio.
+     *
+     * @param comunicazioneId comunicazione
+     * @return gli account destinatari; vuoto se la comunicazione non esiste
+     */
+    Set&lt;UUID&gt; destinatari(UUID comunicazioneId);
+
+    /**
+     * Legge lo stato di ricezione di tutti i destinatari registrati all'invio.
+     *
+     * @param comunicazioneId identificativo della comunicazione
+     * @return elenco dei destinatari, eventualmente vuoto; {@link Optional#empty()} se la comunicazione manca
+     */
+    Optional&lt;List&lt;RicezioneDestinatario&gt;&gt; ricezioni(UUID comunicazioneId);
+
+    /**
+     * Stato del riscontro per un account destinatario.
+     *
+     * @param destinatarioId identificativo dell'account
+     * @param confermataIl istante della prima conferma, oppure {@code null} se in attesa
+     */
+<span class="fc" id="L80">    record RicezioneDestinatario(UUID destinatarioId, Instant confermataIl) {}</span>
+
+    /**
+     * Indica a quale comunicazione appartiene un allegato, senza leggerne il contenuto.
+     *
+     * @param allegatoId allegato
+     * @return la comunicazione, se l'allegato esiste
+     */
+    Optional&lt;UUID&gt; comunicazioneDellAllegato(UUID allegatoId);
+
+    /**
+     * Legge un allegato con il suo contenuto.
+     *
+     * @param allegatoId allegato
+     * @return l'allegato, se esiste
+     */
+    Optional&lt;FileSalvato&gt; allegato(UUID allegatoId);
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

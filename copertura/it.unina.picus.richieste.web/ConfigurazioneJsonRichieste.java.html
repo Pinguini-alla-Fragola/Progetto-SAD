@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ConfigurazioneJsonRichieste.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.richieste.web</a> &gt; <span class="el_source">ConfigurazioneJsonRichieste.java</span></div><h1>ConfigurazioneJsonRichieste.java</h1><pre class="source lang-java linenums">package it.unina.picus.richieste.web;
+
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
+
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpInputMessage;
+import org.springframework.http.HttpOutputMessage;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.AbstractHttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverters;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.StreamReadFeature;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.json.JsonMapper;
+
+/** Parser dedicato agli ingressi delle richieste; non cambia i parser degli altri moduli. */
+@Configuration(proxyBeanMethods = false)
+class ConfigurazioneJsonRichieste implements WebMvcConfigurer {
+    private final Lettore lettore;
+
+<span class="fc" id="L32">    ConfigurazioneJsonRichieste(JsonMapper json) {</span>
+<span class="fc" id="L33">        this.lettore = new Lettore(json.rebuild().enable(StreamReadFeature.STRICT_DUPLICATE_DETECTION).build());</span>
+<span class="fc" id="L34">    }</span>
+
+    @Override
+    public void configureMessageConverters(HttpMessageConverters.ServerBuilder converters) {
+<span class="fc" id="L38">        converters.configureMessageConvertersList(lista -&gt; lista.addFirst(lettore));</span>
+<span class="fc" id="L39">    }</span>
+
+    /** Legge il corpo facoltativo dei comandi che controllano l'accesso prima del binding. */
+    CorpoJson leggiFacoltativo(HttpServletRequest richiesta) {
+<span class="fc" id="L43">        var input = new ServletServerHttpRequest(richiesta);</span>
+        try {
+<span class="fc" id="L45">            var corpo = new BufferedInputStream(input.getBody());</span>
+<span class="fc" id="L46">            corpo.mark(1);</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">            if (corpo.read() == -1) {</span>
+<span class="fc" id="L48">                return null;</span>
+            }
+<span class="fc" id="L50">            corpo.reset();</span>
+<span class="fc" id="L51">            MediaType tipo = input.getHeaders().getContentType();</span>
+<span class="pc bpc" id="L52" title="1 of 4 branches missed.">            if (tipo == null || !lettore.canRead(CorpoJson.class, tipo)) {</span>
+<span class="fc" id="L53">                throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE);</span>
+            }
+<span class="fc" id="L55">            return lettore.leggi(corpo, input);</span>
+<span class="nc" id="L56">        } catch (IOException ex) {</span>
+<span class="nc" id="L57">            throw new HttpMessageNotReadableException(&quot;Corpo JSON non valido&quot;, input);</span>
+        }
+    }
+
+    private static final class Lettore extends AbstractHttpMessageConverter&lt;CorpoJson&gt; {
+        private final JsonMapper json;
+
+        Lettore(JsonMapper json) {
+<span class="fc" id="L65">            super(MediaType.APPLICATION_JSON, new MediaType(&quot;application&quot;, &quot;*+json&quot;));</span>
+<span class="fc" id="L66">            this.json = json;</span>
+<span class="fc" id="L67">        }</span>
+
+        @Override
+        protected boolean supports(Class&lt;?&gt; tipo) {
+<span class="fc bfc" id="L71" title="All 2 branches covered.">            return tipo == CorpoJson.class;</span>
+        }
+
+        @Override
+        public boolean canWrite(Class&lt;?&gt; tipo, MediaType mediaType) {
+<span class="fc" id="L76">            return false;</span>
+        }
+
+        @Override
+        protected CorpoJson readInternal(Class&lt;? extends CorpoJson&gt; tipo, HttpInputMessage input) throws IOException {
+<span class="fc" id="L81">            return leggi(input.getBody(), input);</span>
+        }
+
+        private CorpoJson leggi(InputStream corpo, HttpInputMessage input) {
+            try {
+<span class="fc" id="L86">                Map&lt;String, Object&gt; campi = json.readValue(corpo, new TypeReference&lt;&gt;() {});</span>
+<span class="fc" id="L87">                return new CorpoJson(campi);</span>
+<span class="fc" id="L88">            } catch (JacksonException ex) {</span>
+                // Non conservare messaggi/cause del parser: possono contenere valori del corpo.
+<span class="fc" id="L90">                throw new HttpMessageNotReadableException(&quot;Corpo JSON non valido&quot;, input);</span>
+            }
+        }
+
+        @Override
+        protected void writeInternal(CorpoJson corpo, HttpOutputMessage output) {
+<span class="nc" id="L96">            throw new HttpMessageNotWritableException(&quot;Tipo riservato all'ingresso HTTP&quot;);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

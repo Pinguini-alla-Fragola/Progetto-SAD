@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ServizioRiepilogoSchede.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.monitoraggio.interno.applicazione</a> &gt; <span class="el_source">ServizioRiepilogoSchede.java</span></div><h1>ServizioRiepilogoSchede.java</h1><pre class="source lang-java linenums">package it.unina.picus.monitoraggio.interno.applicazione;
+
+import it.unina.picus.monitoraggio.api.MonitoraggioApi;
+import it.unina.picus.monitoraggio.api.MonitoraggioApi.RiepilogoTrimestre;
+import it.unina.picus.monitoraggio.api.MonitoraggioApi.SchedaSintesi;
+import it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre;
+import it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeRendicontabili;
+import it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeRendicontabili.VersioneInviata;
+import it.unina.picus.monitoraggio.interno.dominio.RegoleAccessoScheda;
+import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
+
+import java.math.BigInteger;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.BinaryOperator;
+
+/** Caso d'uso di riepilogo trimestrale delle schede personali per il Banco (#181). */
+public final class ServizioRiepilogoSchede {
+
+<span class="fc" id="L26">    private static final BinaryOperator&lt;VersioneInviata&gt; VERSIONE_PIU_RECENTE =</span>
+<span class="fc" id="L27">            BinaryOperator.maxBy(Comparator.comparingLong(VersioneInviata::numeroVersione));</span>
+<span class="fc" id="L28">    private static final Comparator&lt;SchedaSintesi&gt; PER_INVIO =</span>
+<span class="fc" id="L29">            Comparator.comparing(SchedaSintesi::inviataIl).thenComparing(SchedaSintesi::id);</span>
+
+    private final ArchivioSchedeRendicontabili archivio;
+
+    /**
+     * Crea il caso d'uso a partire dall'archivio di lettura delle schede.
+     *
+     * @param archivio sorgente delle versioni inviate e accettate
+     */
+<span class="fc" id="L38">    public ServizioRiepilogoSchede(ArchivioSchedeRendicontabili archivio) {</span>
+<span class="fc" id="L39">        this.archivio = Objects.requireNonNull(archivio, &quot;archivio&quot;);</span>
+<span class="fc" id="L40">    }</span>
+
+    /**
+     * Usa l'ultima versione accettata per operatore e somma i conteggi dichiarati per codice
+     * di categoria ammesso dal tracciato dell'invio. Le categorie sovrapponibili restano
+     * distinte e una correzione sostituisce l'intero invio precedente. Uno zero dichiarato
+     * compare fra i totali, mentre una categoria mai dichiarata è assente.
+     *
+     * @param attore identità verificata del Banco
+     * @param trimestre singolo periodo da riepilogare
+     * @return sintesi ordinate per istante di invio della versione usata e totali per categoria
+     * @throws SecurityException se l'attore non è autorizzato
+     * @throws NullPointerException se manca il trimestre
+     * @throws IllegalStateException se l'archivio restituisce un progressivo duplicato per
+     *                               lo stesso operatore nel trimestre richiesto
+     * @see MonitoraggioApi#riepilogaSchede
+     */
+    public RiepilogoTrimestre riepilogaSchede(IdentitaAutenticata attore, Trimestre trimestre) {
+<span class="fc" id="L58">        RegoleAccessoScheda.verificaRiepilogo(attore);</span>
+<span class="fc" id="L59">        Objects.requireNonNull(trimestre, &quot;trimestre&quot;);</span>
+
+<span class="fc" id="L61">        Map&lt;UUID, VersioneInviata&gt; ultimeVersioni = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L62">        Map&lt;UUID, Set&lt;Long&gt;&gt; progressiviPerOperatore = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">        for (VersioneInviata versione : archivio.elencaVersioniInviate(trimestre)) {</span>
+<span class="fc" id="L64">            SchedaSintesi sintesi = versione.sintesi();</span>
+            // Limita il riepilogo al periodo richiesto anche se l'archivio restituisce altri invii.
+<span class="fc bfc" id="L66" title="All 2 branches covered.">            if (!trimestre.equals(sintesi.trimestre())) {</span>
+<span class="fc" id="L67">                continue;</span>
+            }
+<span class="fc" id="L69">            UUID operatoreId = sintesi.operatoreId();</span>
+<span class="fc" id="L70">            Set&lt;Long&gt; progressivi = progressiviPerOperatore.computeIfAbsent(operatoreId, id -&gt; new HashSet&lt;&gt;());</span>
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">            if (!progressivi.add(versione.numeroVersione())) {</span>
+<span class="nc" id="L72">                throw new IllegalStateException(&quot;Progressivo duplicato per lo stesso operatore nel trimestre richiesto&quot;);</span>
+            }
+<span class="fc" id="L74">            ultimeVersioni.merge(operatoreId, versione, VERSIONE_PIU_RECENTE);</span>
+<span class="fc" id="L75">        }</span>
+
+<span class="fc" id="L77">        Map&lt;String, BigInteger&gt; totali = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L78" title="All 2 branches covered.">        for (VersioneInviata versione : ultimeVersioni.values()) {</span>
+<span class="fc" id="L79">            versione.conteggiDichiarati().forEach((categoria, valore) -&gt;</span>
+<span class="fc" id="L80">                    totali.merge(categoria, BigInteger.valueOf(valore), BigInteger::add));</span>
+<span class="fc" id="L81">        }</span>
+
+<span class="fc" id="L83">        List&lt;SchedaSintesi&gt; schede = ultimeVersioni.values().stream()</span>
+<span class="fc" id="L84">                .map(VersioneInviata::sintesi)</span>
+<span class="fc" id="L85">                .sorted(PER_INVIO)</span>
+<span class="fc" id="L86">                .toList();</span>
+<span class="fc" id="L87">        return new RiepilogoTrimestre(schede, totali);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RegoleValidazioneMisura.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.catalogo.interno.dominio</a> &gt; <span class="el_source">RegoleValidazioneMisura.java</span></div><h1>RegoleValidazioneMisura.java</h1><pre class="source lang-java linenums">package it.unina.picus.catalogo.interno.dominio;
+
+import it.unina.picus.catalogo.api.CatalogoApi.DatiMisura;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+/**
+ * Regole di validazione e normalizzazione dei dati descrittivi di una misura di catalogo.
+ *
+ * &lt;p&gt;Applica il principio GRASP &lt;em&gt;Pure Fabrication&lt;/em&gt; e il pattern GoF &lt;em&gt;Strategy&lt;/em&gt;
+ * tramite specifiche parametriche per campo, garantendo uniformità con i vincoli di schema
+ * ({@code catalogo_misure}) senza duplicare la logica tra creazione e aggiornamento.&lt;/p&gt;
+ */
+public final class RegoleValidazioneMisura {
+
+    /** Lunghezza massima ammessa per il codice della misura. */
+    public static final int MAX_LUNGHEZZA_CODICE = 10;
+
+    /** Lunghezza massima ammessa per il nome della misura. */
+    public static final int MAX_LUNGHEZZA_NOME = 255;
+
+    /** Lunghezza massima ammessa per la descrizione della misura. */
+    public static final int MAX_LUNGHEZZA_DESCRIZIONE = 255;
+
+<span class="fc" id="L26">    private static final SpecificaCampo SPEC_CODICE = new SpecificaCampo(</span>
+            &quot;codice&quot;,
+            MAX_LUNGHEZZA_CODICE,
+            false,
+            &quot;Indica un codice misura in testo semplice, fino a 10 caratteri&quot;);
+
+<span class="fc" id="L32">    private static final SpecificaCampo SPEC_NOME = new SpecificaCampo(</span>
+            &quot;nome&quot;,
+            MAX_LUNGHEZZA_NOME,
+            false,
+            &quot;Indica il nome della misura in testo semplice, fino a 255 caratteri&quot;);
+
+<span class="fc" id="L38">    private static final SpecificaCampo SPEC_DESCRIZIONE = new SpecificaCampo(</span>
+            &quot;descrizione&quot;,
+            MAX_LUNGHEZZA_DESCRIZIONE,
+            true,
+            &quot;Indica la descrizione della misura in testo semplice, fino a 255 caratteri&quot;);
+
+    private RegoleValidazioneMisura() {
+    }
+
+    /**
+     * Valida e normalizza i dati della misura accumulando tutti gli errori riscontrati.
+     *
+     * @param dati dati della misura da validare
+     * @return dati normalizzati (spazi esterni rimossi) pronti per essere applicati al dominio
+     * @throws DatiMisuraNonValidiException se uno o più campi obbligatori mancano, superano i limiti
+     *                                      o contengono caratteri di controllo non ammessi
+     */
+    public static DatiMisura validaENormalizza(DatiMisura dati) {
+<span class="fc" id="L56">        Map&lt;String, String&gt; errori = new LinkedHashMap&lt;&gt;();</span>
+<span class="pc bpc" id="L57" title="1 of 2 branches missed.">        String codice = validaCampo(dati == null ? null : dati.codice(), SPEC_CODICE, errori);</span>
+<span class="pc bpc" id="L58" title="1 of 2 branches missed.">        String nome = validaCampo(dati == null ? null : dati.nome(), SPEC_NOME, errori);</span>
+<span class="pc bpc" id="L59" title="1 of 2 branches missed.">        String descrizione = validaCampo(dati == null ? null : dati.descrizione(), SPEC_DESCRIZIONE, errori);</span>
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">        if (!errori.isEmpty()) {</span>
+<span class="nc" id="L61">            throw new DatiMisuraNonValidiException(errori);</span>
+        }
+<span class="fc" id="L63">        return new DatiMisura(codice, nome, descrizione, dati.erogabileADistanza());</span>
+    }
+
+    private static String validaCampo(String valore, SpecificaCampo specifica, Map&lt;String, String&gt; errori) {
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">        String pulito = valore == null ? &quot;&quot; : valore.strip();</span>
+<span class="pc bpc" id="L68" title="1 of 2 branches missed.">        if (pulito.isEmpty()</span>
+<span class="pc bpc" id="L69" title="1 of 2 branches missed.">                || pulito.length() &gt; specifica.lunghezzaMassima()</span>
+<span class="pc bpc" id="L70" title="1 of 2 branches missed.">                || pulito.codePoints().anyMatch(c -&gt; controlloNonAmmesso(c, specifica.consentiFormattazione()))) {</span>
+<span class="nc" id="L71">            errori.put(specifica.nomeCampo(), specifica.messaggioErrore());</span>
+        }
+<span class="fc" id="L73">        return pulito;</span>
+    }
+
+    private static boolean controlloNonAmmesso(int codePoint, boolean consentiFormattazione) {
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">        if (!Character.isISOControl(codePoint)) {</span>
+<span class="fc" id="L78">            return false;</span>
+        }
+<span class="nc bnc" id="L80" title="All 8 branches missed.">        return !consentiFormattazione || (codePoint != '\n' &amp;&amp; codePoint != '\r' &amp;&amp; codePoint != '\t');</span>
+    }
+
+    /** Specifica parametrica di validazione per un singolo campo testuale della misura. */
+<span class="fc" id="L84">    private record SpecificaCampo(</span>
+            String nomeCampo,
+            int lunghezzaMassima,
+            boolean consentiFormattazione,
+            String messaggioErrore) {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

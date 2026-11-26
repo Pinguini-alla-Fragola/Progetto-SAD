@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InvioLinkAttivazioneListener.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.utenze.interno.applicazione</a> &gt; <span class="el_source">InvioLinkAttivazioneListener.java</span></div><h1>InvioLinkAttivazioneListener.java</h1><pre class="source lang-java linenums">package it.unina.picus.utenze.interno.applicazione;
+
+import java.util.Objects;
+
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
+
+import it.unina.picus.shared.InvioEmail;
+import it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService.LinkAttivazioneDaInviareEvent;
+
+@Component
+@Profile(&quot;!skeleton&quot;)
+public class InvioLinkAttivazioneListener {
+
+    private final InvioEmail invioEmail;
+
+<span class="fc" id="L19">    public InvioLinkAttivazioneListener(InvioEmail invioEmail) {</span>
+<span class="fc" id="L20">        this.invioEmail = Objects.requireNonNull(invioEmail);</span>
+<span class="fc" id="L21">    }</span>
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
+    public void onLinkAttivazioneDaInviare(LinkAttivazioneDaInviareEvent evento) {
+<span class="nc" id="L25">        invioEmail.inviaLinkAttivazione(</span>
+<span class="nc" id="L26">                evento.emailDestinatario(),</span>
+<span class="nc" id="L27">                evento.nomeDestinatario(),</span>
+<span class="nc" id="L28">                evento.tokenInChiaro()</span>
+        );
+<span class="nc" id="L30">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

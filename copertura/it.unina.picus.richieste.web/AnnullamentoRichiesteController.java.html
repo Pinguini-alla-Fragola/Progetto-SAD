@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AnnullamentoRichiesteController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.richieste.web</a> &gt; <span class="el_source">AnnullamentoRichiesteController.java</span></div><h1>AnnullamentoRichiesteController.java</h1><pre class="source lang-java linenums">package it.unina.picus.richieste.web;
+
+import it.unina.picus.richieste.api.DatiRichiestaNonValidiException;
+import it.unina.picus.richieste.api.RichiesteApi.RichiestaSintesi;
+import it.unina.picus.richieste.interno.applicazione.ServizioAnnullamentoRichieste;
+import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+/** Adattatore REST del comando di annullamento per i soggetti coinvolti nella richiesta. */
+@RestController
+public class AnnullamentoRichiesteController {
+    private final ServizioAnnullamentoRichieste annullamento;
+    private final ConfigurazioneJsonRichieste json;
+
+    /**
+     * Collega l'adattatore al caso d'uso transazionale.
+     * @param annullamento servizio che applica le regole della richiesta
+     * @param json lettore del corpo JSON applicativo
+     */
+<span class="fc" id="L27">    AnnullamentoRichiesteController(ServizioAnnullamentoRichieste annullamento, ConfigurazioneJsonRichieste json) {</span>
+<span class="fc" id="L28">        this.annullamento = annullamento;</span>
+<span class="fc" id="L29">        this.json = json;</span>
+<span class="fc" id="L30">    }</span>
+
+    /**
+     * Registra l'annullamento o restituisce la sintesi dell'esito già registrato.
+     *
+     * @param attore identità verificata ricavata dalla sessione
+     * @param id identificativo della pratica
+     * @param richiesta richiesta HTTP con corpo JSON facoltativo e il solo campo testuale {@code motivo}
+     * @return sintesi della richiesta Annullata
+     */
+    @PostMapping(value = &quot;/api/richieste/{id}/annullamento&quot;, produces = MediaType.APPLICATION_JSON_VALUE)
+    public RichiestaSintesi annulla(IdentitaAutenticata attore, @PathVariable UUID id, HttpServletRequest richiesta) {
+<span class="fc" id="L42">        annullamento.verificaAccesso(attore, id);</span>
+<span class="fc" id="L43">        return annullamento.annullaRichiesta(attore, id, leggiMotivo(json.leggiFacoltativo(richiesta)));</span>
+    }
+
+    /**
+     * Legge il solo dato previsto dal comando, senza conversioni implicite.
+     * @param corpo oggetto JSON ricevuto oppure {@code null} per una richiesta senza corpo
+     * @return motivo ricevuto o {@code null} se omesso
+     */
+    private static String leggiMotivo(CorpoJson corpo) {
+<span class="fc bfc" id="L52" title="All 2 branches covered.">        if (corpo == null) {</span>
+<span class="fc" id="L53">            return null;</span>
+        }
+<span class="fc" id="L55">        var campi = corpo.campi();</span>
+<span class="pc bpc" id="L56" title="1 of 4 branches missed.">        if (campi == null || !Set.of(&quot;motivo&quot;).containsAll(campi.keySet())) {</span>
+<span class="fc" id="L57">            throw new DatiRichiestaNonValidiException(Map.of(&quot;comando&quot;, &quot;Indica soltanto il campo motivo&quot;));</span>
+        }
+<span class="fc" id="L59">        Object motivo = campi.get(&quot;motivo&quot;);</span>
+<span class="fc bfc" id="L60" title="All 4 branches covered.">        if (motivo == null || motivo instanceof String) {</span>
+<span class="fc" id="L61">            return (String) motivo;</span>
+        }
+<span class="fc" id="L63">        throw new DatiRichiestaNonValidiException(Map.of(&quot;motivo&quot;, &quot;Il motivo deve essere un testo&quot;));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

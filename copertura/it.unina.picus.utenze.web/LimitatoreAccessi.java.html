@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LimitatoreAccessi.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.utenze.web</a> &gt; <span class="el_source">LimitatoreAccessi.java</span></div><h1>LimitatoreAccessi.java</h1><pre class="source lang-java linenums">package it.unina.picus.utenze.web;
+
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+/**
+ * Limita i tentativi di accesso per email: dopo {@value #MAX_FALLIMENTI} tentativi falliti in
+ * {@code FINESTRA} il tentativo successivo, se arriva entro {@code ATTESA} dall'ultimo, è rifiutato.
+ *
+ * &lt;p&gt;La chiave è l'email digitata, esista o no l'account: così il messaggio di attesa non permette di
+ * scoprire quali account esistono. Ogni tentativo viene registrato &lt;em&gt;prima&lt;/em&gt; della verifica
+ * (e cancellato se riesce), così richieste parallele non aggirano il limite. Lo stato è in memoria
+ * (MVP a istanza singola): per più istanze va spostato in uno store condiviso.&lt;/p&gt;
+ *
+ * &lt;p&gt;Le email distinte memorizzate non superano mai {@value #MAX_CHIAVI}: a mappa piena si eliminano
+ * prima le chiavi scadute; se non basta, l'email nuova è rifiutata finché non si libera spazio, così
+ * un'ondata di indirizzi inventati non svuota il contatore di un account già sotto tentativo.&lt;/p&gt;
+ *
+ * &lt;p&gt;Conteggio, pulizia e rimozione avvengono sotto un unico lock: una pulizia non può togliere la
+ * coda di una chiave mentre un tentativo sta per registrarvisi. La verifica BCrypt avviene
+ * fuori dal lock.&lt;/p&gt;
+ */
+@Component
+class LimitatoreAccessi {
+
+    static final int MAX_FALLIMENTI = 5;
+<span class="fc" id="L37">    static final Duration FINESTRA = Duration.ofMinutes(5);</span>
+<span class="fc" id="L38">    static final Duration ATTESA = Duration.ofSeconds(60);</span>
+    static final int MAX_CHIAVI = 10_000;
+    private static final int LUNGHEZZA_MAX_CHIAVE = 254;
+
+    private final Clock clock;
+<span class="fc" id="L43">    private final Map&lt;String, Deque&lt;Instant&gt;&gt; tentativi = new HashMap&lt;&gt;(); // protetta da this</span>
+
+    @Autowired
+    LimitatoreAccessi(ObjectProvider&lt;Clock&gt; clock) {
+<span class="fc" id="L47">        this(clock.getIfAvailable(Clock::systemUTC));</span>
+<span class="fc" id="L48">    }</span>
+
+<span class="fc" id="L50">    LimitatoreAccessi(Clock clock) {</span>
+<span class="fc" id="L51">        this.clock = clock;</span>
+<span class="fc" id="L52">    }</span>
+
+    static String chiave(String email) {
+<span class="fc bfc" id="L55" title="All 2 branches covered.">        String e = email == null ? &quot;&quot; : email.strip().toLowerCase(Locale.ROOT);</span>
+<span class="fc bfc" id="L56" title="All 2 branches covered.">        return e.length() &gt; LUNGHEZZA_MAX_CHIAVE ? e.substring(0, LUNGHEZZA_MAX_CHIAVE) : e;</span>
+    }
+
+    /** @return false se il tentativo va rifiutato; altrimenti lo registra e lo ammette. */
+    synchronized boolean ammetti(String chiave) {
+<span class="fc" id="L61">        Instant ora = clock.instant();</span>
+<span class="fc" id="L62">        Instant limite = ora.minus(FINESTRA);</span>
+<span class="fc" id="L63">        Deque&lt;Instant&gt; d = tentativi.get(chiave);</span>
+<span class="fc bfc" id="L64" title="All 2 branches covered.">        if (d == null) {</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">            if (tentativi.size() &gt;= MAX_CHIAVI) {</span>
+                // ogni coda memorizzata contiene almeno un tentativo
+<span class="fc" id="L67">                tentativi.values().removeIf(q -&gt; q.peekLast().isBefore(limite));</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">                if (tentativi.size() &gt;= MAX_CHIAVI) {</span>
+<span class="fc" id="L69">                    return false;</span>
+                }
+            }
+<span class="fc" id="L72">            d = new ArrayDeque&lt;&gt;();</span>
+<span class="fc" id="L73">            tentativi.put(chiave, d);</span>
+        }
+<span class="fc bfc" id="L75" title="All 4 branches covered.">        while (!d.isEmpty() &amp;&amp; d.peekFirst().isBefore(limite)) {</span>
+<span class="fc" id="L76">            d.removeFirst();</span>
+        }
+<span class="fc bfc" id="L78" title="All 4 branches covered.">        if (d.size() &gt;= MAX_FALLIMENTI &amp;&amp; ora.isBefore(d.peekLast().plus(ATTESA))) {</span>
+<span class="fc" id="L79">            return false;</span>
+        }
+<span class="fc" id="L81">        d.addLast(ora);</span>
+<span class="fc" id="L82">        return true;</span>
+    }
+
+    /** Accesso riuscito: i tentativi precedenti non contano più. */
+    synchronized void azzera(String chiave) {
+<span class="fc" id="L87">        tentativi.remove(chiave);</span>
+<span class="fc" id="L88">    }</span>
+
+    /** Solo per i test. */
+    synchronized int numeroChiavi() {
+<span class="fc" id="L92">        return tentativi.size();</span>
+    }
+
+    /** Solo per i test. */
+    synchronized void azzeraTutto() {
+<span class="fc" id="L97">        tentativi.clear();</span>
+<span class="fc" id="L98">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

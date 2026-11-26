@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InvitiOperatoriController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.utenze.web</a> &gt; <span class="el_source">InvitiOperatoriController.java</span></div><h1>InvitiOperatoriController.java</h1><pre class="source lang-java linenums">package it.unina.picus.utenze.web;
+
+import java.util.UUID;
+
+import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
+import it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService;
+import it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService.DatiInvioAttivazione;
+import it.unina.picus.utenze.interno.applicazione.ConsegnaLinkAttivazione;
+import it.unina.picus.utenze.interno.applicazione.ConsegnaLinkAttivazione.Esito;
+import it.unina.picus.utenze.interno.applicazione.ConclusioneReinvio;
+import it.unina.picus.utenze.interno.applicazione.RiprovaTransitoria;
+
+/** Reinvio del link di attivazione di un Operatore in attesa, a cura del Banco. */
+@RestController
+@Profile(&quot;!skeleton&quot;)
+@RequestMapping(&quot;/api/operatori&quot;)
+class InvitiOperatoriController {
+
+    /** Esito del reinvio, con gli stessi campi della risposta equivalente per le OPT. */
+<span class="nc" id="L28">    record EsitoReinvio(UUID accountId, boolean invitoInviato, boolean erroreInvio, String messaggio) {}</span>
+
+    private final AttivazioneUtenzaService attivazione;
+    private final ConsegnaLinkAttivazione consegna;
+    private final ConclusioneReinvio conclusione;
+
+    InvitiOperatoriController(AttivazioneUtenzaService attivazione, ConsegnaLinkAttivazione consegna,
+<span class="fc" id="L35">            ConclusioneReinvio conclusione) {</span>
+<span class="fc" id="L36">        this.attivazione = attivazione;</span>
+<span class="fc" id="L37">        this.consegna = consegna;</span>
+<span class="fc" id="L38">        this.conclusione = conclusione;</span>
+<span class="fc" id="L39">    }</span>
+
+    /**
+     * Crea un nuovo link, lo spedisce e solo se la posta lo accetta sostituisce il precedente: se l'invio fallisce
+     * l'Operatore conserva il link che aveva già ricevuto. Risponde {@code 404} se l'account non esiste,
+     * {@code 409} se non è un Operatore o non è più in attesa di attivazione (gli errori li traduce
+     * {@link ErroriUtenze}).
+     */
+    @PostMapping(&quot;/{id}/reinvia-invito&quot;)
+    ResponseEntity&lt;EsitoReinvio&gt; reinvia(@PathVariable UUID id) {
+<span class="nc" id="L49">        DatiInvioAttivazione invito = attivazione.preparaReinvio(id, RuoloUtente.OPERATORE);</span>
+<span class="nc" id="L50">        Esito esito = consegna.consegna(invito);</span>
+        // la email è già partita: se la registrazione dell'esito ha un errore transitorio si ripete solo quella
+<span class="nc bnc" id="L52" title="All 2 branches missed.">        RiprovaTransitoria.esegui(() -&gt; conclusione.concludi(id, invito, esito != Esito.NON_RIUSCITO));</span>
+<span class="nc bnc" id="L53" title="All 2 branches missed.">        if (esito == Esito.NON_RIUSCITO) {</span>
+<span class="nc" id="L54">            return ResponseEntity.status(HttpStatus.BAD_GATEWAY)</span>
+<span class="nc" id="L55">                    .body(new EsitoReinvio(id, false, true, MessaggiInvito.REINVIO_NON_RIUSCITO));</span>
+        }
+<span class="nc bnc" id="L57" title="All 2 branches missed.">        return ResponseEntity.ok(new EsitoReinvio(id, esito == Esito.INVIATO, false, MessaggiInvito.alReinvio(esito)));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

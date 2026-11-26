@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ComunicazioniController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.comunicazioni.web</a> &gt; <span class="el_source">ComunicazioniController.java</span></div><h1>ComunicazioniController.java</h1><pre class="source lang-java linenums">package it.unina.picus.comunicazioni.web;
+
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import it.unina.picus.comunicazioni.interno.applicazione.AccountSelezionabile;
+import it.unina.picus.comunicazioni.interno.applicazione.ComandoInvioComunicazione;
+import it.unina.picus.comunicazioni.interno.applicazione.ComunicazioneInviata;
+import it.unina.picus.comunicazioni.interno.applicazione.DatiComunicazioneNonValidiException;
+import it.unina.picus.comunicazioni.interno.applicazione.InvioComunicazioni;
+import it.unina.picus.comunicazioni.interno.applicazione.NotificheComunicazioni;
+import it.unina.picus.comunicazioni.interno.dominio.AllegatoRicevuto;
+import it.unina.picus.comunicazioni.interno.dominio.CampoComunicazione;
+import it.unina.picus.comunicazioni.interno.dominio.RegolaAllegati;
+import it.unina.picus.comunicazioni.interno.dominio.RegolaDestinatari;
+import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
+
+/**
+ * Riceve l'invio delle comunicazioni del Banco, l'elenco degli account da scegliere per un gruppo e la richiesta
+ * del contatore da confermare. I nomi dei campi sono quelli del modulo della pagina del Banco. La lettura delle
+ * comunicazioni è in {@link ConsultazioneComunicazioniController}.
+ */
+@RestController
+@RequestMapping(value = &quot;/api/comunicazioni&quot;, produces = MediaType.APPLICATION_JSON_VALUE)
+public class ComunicazioniController {
+
+    /**
+     * Campi del modulo di invio così come li manda il browser in JSON, senza allegati. Restano valori JSON
+     * generici fino al controllo del tipo: convertiti subito, un booleano diventerebbe il testo &quot;true&quot;.
+     *
+     * @param titolo oggetto facoltativo
+     * @param contenuto testo della comunicazione
+     * @param destinatariTipo tipo di destinatari scelto
+     * @param gruppo identificativi degli account scelti, solo per l'invio a un gruppo
+     */
+<span class="fc" id="L52">    public record NuovaComunicazioneJson(Object titolo, Object contenuto, Object destinatariTipo,</span>
+            List&lt;Object&gt; gruppo) {
+
+        ComandoInvioComunicazione comando() {
+<span class="fc" id="L56">            CampiJson campi = new CampiJson();</span>
+<span class="fc" id="L57">            ComandoInvioComunicazione comando = new ComandoInvioComunicazione(</span>
+<span class="fc" id="L58">                    campi.testo(titolo, CampoComunicazione.TITOLO),</span>
+<span class="fc" id="L59">                    campi.testo(contenuto, CampoComunicazione.CONTENUTO),</span>
+<span class="fc" id="L60">                    campi.testo(destinatariTipo, CampoComunicazione.DESTINATARI_TIPO),</span>
+<span class="fc" id="L61">                    campi.testi(gruppo, CampoComunicazione.GRUPPO, RegolaDestinatari.MASSIMO_GRUPPO),</span>
+<span class="fc" id="L62">                    List.of());</span>
+<span class="fc" id="L63">            campi.verifica();</span>
+<span class="fc" id="L64">            return comando;</span>
+        }
+    }
+
+    /**
+     * Ciò che il browser riceve dopo l'invio.
+     *
+     * @param id identificativo della comunicazione
+     * @param titolo oggetto, se indicato
+     * @param inviataIl istante dell'invio
+     * @param destinatariTipo tipo di destinatari scelto
+     * @param destinatari numero di account che l'hanno ricevuta
+     */
+<span class="fc" id="L77">    public record ComunicazioneInviataJson(UUID id, String titolo, Instant inviataIl, String destinatariTipo,</span>
+            int destinatari) {
+
+        static ComunicazioneInviataJson da(ComunicazioneInviata inviata) {
+<span class="fc" id="L81">            return new ComunicazioneInviataJson(inviata.id(), inviata.titolo(), inviata.inviataIl(),</span>
+<span class="fc" id="L82">                    inviata.tipo().name(), inviata.destinatari());</span>
+        }
+    }
+
+    /**
+     * Account che il Banco può scegliere per un gruppo.
+     *
+     * @param id identificativo dell'account
+     * @param nome nome mostrato
+     */
+<span class="fc" id="L92">    public record AccountJson(UUID id, String nome) {</span>
+
+        static AccountJson da(AccountSelezionabile account) {
+<span class="fc" id="L95">            return new AccountJson(account.id(), account.nome());</span>
+        }
+    }
+
+    /**
+     * Numero di comunicazioni ricevute che aspettano la conferma.
+     *
+     * @param daConfermare quante sono
+     */
+<span class="fc" id="L104">    public record DaConfermareJson(long daConfermare) {}</span>
+
+    /** Nome della parte JSON che porta i campi del modulo nell'invio con allegati. */
+    static final String PARTE_DATI = &quot;dati&quot;;
+
+    private final InvioComunicazioni invio;
+    private final NotificheComunicazioni notifiche;
+
+<span class="fc" id="L112">    public ComunicazioniController(InvioComunicazioni invio, NotificheComunicazioni notifiche) {</span>
+<span class="fc" id="L113">        this.invio = invio;</span>
+<span class="fc" id="L114">        this.notifiche = notifiche;</span>
+<span class="fc" id="L115">    }</span>
+
+    /** Invio in JSON, senza allegati. Risponde {@code 201}. */
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity&lt;ComunicazioneInviataJson&gt; invia(IdentitaAutenticata attore,
+            @RequestBody NuovaComunicazioneJson corpo) {
+<span class="fc" id="L121">        ComunicazioneInviata inviata = invio.invia(attore, corpo.comando());</span>
+<span class="fc" id="L122">        return ResponseEntity.status(HttpStatus.CREATED).body(ComunicazioneInviataJson.da(inviata));</span>
+    }
+
+    /**
+     * Invio dal modulo della pagina, con eventuali allegati. I campi arrivano tutti insieme nella parte JSON
+     * {@code dati}, con la stessa forma e gli stessi controlli dell'invio senza allegati: così anche un gruppo di
+     * 1000 account occupa una sola parte della richiesta, e le parti restano al massimo una più i file. Il numero
+     * di file si controlla prima di leggerne il contenuto. Risponde {@code 201}.
+     */
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity&lt;ComunicazioneInviataJson&gt; inviaConAllegati(IdentitaAutenticata attore,
+            @RequestPart(PARTE_DATI) NuovaComunicazioneJson dati,
+            @RequestPart(name = CampoComunicazione.ALLEGATI, required = false) List&lt;MultipartFile&gt; files) {
+<span class="fc" id="L135">        ComandoInvioComunicazione comando = dati.comando().conAllegati(allegati(files));</span>
+<span class="fc" id="L136">        ComunicazioneInviata inviata = invio.invia(attore, comando);</span>
+<span class="fc" id="L137">        return ResponseEntity.status(HttpStatus.CREATED).body(ComunicazioneInviataJson.da(inviata));</span>
+    }
+
+    @GetMapping(&quot;/destinatari&quot;)
+    public List&lt;AccountJson&gt; selezionabili(IdentitaAutenticata attore, @RequestParam String tipo) {
+<span class="fc" id="L142">        return invio.selezionabili(attore, tipo).stream().map(AccountJson::da).toList();</span>
+    }
+
+    @GetMapping(&quot;/da-confermare&quot;)
+    public DaConfermareJson daConfermare(IdentitaAutenticata attore) {
+<span class="fc" id="L147">        return new DaConfermareJson(notifiche.daConfermare(attore));</span>
+    }
+
+    /** Converte i file ricevuti; un campo file lasciato vuoto dal browser non conta come allegato. */
+    private static List&lt;AllegatoRicevuto&gt; allegati(List&lt;MultipartFile&gt; files) {
+<span class="fc bfc" id="L152" title="All 2 branches covered.">        if (files == null) {</span>
+<span class="fc" id="L153">            return List.of();</span>
+        }
+<span class="fc" id="L155">        List&lt;MultipartFile&gt; scelti = files.stream()</span>
+<span class="pc bpc" id="L156" title="1 of 4 branches missed.">                .filter(file -&gt; !(file.isEmpty() &amp;&amp; (file.getOriginalFilename() == null</span>
+<span class="pc bpc" id="L157" title="1 of 2 branches missed.">                        || file.getOriginalFilename().isEmpty())))</span>
+<span class="fc" id="L158">                .toList();</span>
+<span class="fc bfc" id="L159" title="All 2 branches covered.">        if (scelti.size() &gt; RegolaAllegati.MASSIMO_ALLEGATI) {</span>
+<span class="fc" id="L160">            throw new DatiComunicazioneNonValidiException(Map.of(CampoComunicazione.ALLEGATI,</span>
+                    &quot;Si possono allegare al massimo &quot; + RegolaAllegati.MASSIMO_ALLEGATI + &quot; file&quot;));
+        }
+<span class="fc" id="L163">        return scelti.stream().map(ComunicazioniController::allegato).toList();</span>
+    }
+
+    private static AllegatoRicevuto allegato(MultipartFile file) {
+        try {
+<span class="fc" id="L168">            return new AllegatoRicevuto(file.getOriginalFilename(), file.getBytes());</span>
+<span class="nc" id="L169">        } catch (IOException e) {</span>
+<span class="nc" id="L170">            throw new UncheckedIOException(e);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

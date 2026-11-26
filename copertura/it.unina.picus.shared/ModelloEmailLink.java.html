@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ModelloEmailLink.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.shared</a> &gt; <span class="el_source">ModelloEmailLink.java</span></div><h1>ModelloEmailLink.java</h1><pre class="source lang-java linenums">package it.unina.picus.shared;
+
+import java.util.List;
+
+import org.springframework.web.util.HtmlUtils;
+
+/**
+ * Testi delle email che portano un link monouso. Costruisce l'oggetto e le due versioni del corpo, in testo e in
+ * HTML, a partire da pochi elementi: i dati scritti da una persona, come il nome, vengono resi sicuri per l'HTML,
+ * così un nome con simboli non può alterare la pagina dell'email.
+ */
+final class ModelloEmailLink {
+
+    /** Oggetto e corpo dell'email nelle due versioni. */
+<span class="fc" id="L15">    record Contenuto(String oggetto, String testo, String html) {}</span>
+
+    /** Durata scritta nelle regole degli accessi: è la stessa con cui scade il link, che non è configurabile. */
+    private static final int VALIDITA_RECUPERO_MINUTI = 15;
+
+    private ModelloEmailLink() {
+    }
+
+    /**
+     * Email con il link per scegliere una nuova password.
+     *
+     * @param nome nome mostrato nel saluto, se noto
+     * @param link indirizzo completo del link
+     */
+    static Contenuto recuperoPassword(String nome, String link) {
+<span class="fc" id="L30">        String introduzione = &quot;Hai chiesto di recuperare la password del tuo account sulla piattaforma PICUS.&quot;;</span>
+<span class="fc" id="L31">        List&lt;String&gt; avvisi = List.of(</span>
+                &quot;Il link è personale e monouso: dopo aver scelto la nuova password non sarà più valido.&quot;,
+                &quot;Il link vale &quot; + VALIDITA_RECUPERO_MINUTI + &quot; minuti. Se scade, chiedine uno nuovo dalla pagina di accesso.&quot;,
+                &quot;Se non hai chiesto tu il recupero, ignora questa email: la tua password non cambia.&quot;);
+<span class="fc" id="L35">        return costruisci(&quot;PICUS | Recupero della password&quot;, &quot;Recupero della password&quot;, nome, introduzione,</span>
+                &quot;Scegli una nuova password&quot;, link, avvisi);
+    }
+
+    private static Contenuto costruisci(String oggetto, String titolo, String nome, String introduzione,
+            String testoPulsante, String link, List&lt;String&gt; avvisi) {
+<span class="fc bfc" id="L41" title="All 4 branches covered.">        boolean conNome = nome != null &amp;&amp; !nome.isBlank();</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">        String salutoTesto = conNome ? &quot;Gentile &quot; + nome.trim() + &quot;,&quot; : &quot;Gentile Utente,&quot;;</span>
+<span class="fc bfc" id="L43" title="All 2 branches covered.">        String salutoHtml = conNome ? &quot;Gentile &lt;strong&gt;&quot; + HtmlUtils.htmlEscape(nome.trim()) + &quot;&lt;/strong&gt;,&quot; : &quot;Gentile Utente,&quot;;</span>
+
+<span class="fc" id="L45">        StringBuilder testo = new StringBuilder()</span>
+<span class="fc" id="L46">                .append(salutoTesto).append(&quot;\n\n&quot;)</span>
+<span class="fc" id="L47">                .append(introduzione).append(&quot;\n\n&quot;)</span>
+<span class="fc" id="L48">                .append(testoPulsante).append(&quot; aprendo questo link:\n&quot;)</span>
+<span class="fc" id="L49">                .append(link).append(&quot;\n\n&quot;)</span>
+<span class="fc" id="L50">                .append(&quot;Informazioni importanti:\n&quot;);</span>
+<span class="fc" id="L51">        avvisi.forEach(avviso -&gt; testo.append(&quot;- &quot;).append(avviso).append('\n'));</span>
+<span class="fc" id="L52">        testo.append(&quot;\nCordiali saluti,\nTeam PICUS\n&quot;)</span>
+<span class="fc" id="L53">                .append(&quot;(Questa è un'email generata automaticamente, si prega di non rispondere a questo indirizzo.)\n&quot;);</span>
+
+<span class="fc" id="L55">        String linkSicuro = HtmlUtils.htmlEscape(link);</span>
+<span class="fc" id="L56">        StringBuilder elenco = new StringBuilder();</span>
+<span class="fc" id="L57">        avvisi.forEach(avviso -&gt; elenco.append(&quot;&lt;li&gt;&quot;).append(HtmlUtils.htmlEscape(avviso)).append(&quot;&lt;/li&gt;&quot;));</span>
+<span class="fc" id="L58">        String html = &quot;&quot;&quot;</span>
+                &lt;!DOCTYPE html&gt;
+                &lt;html lang=&quot;it&quot;&gt;
+                &lt;head&gt;
+                    &lt;meta charset=&quot;UTF-8&quot;&gt;
+                    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+                    &lt;title&gt;%1$s&lt;/title&gt;
+                &lt;/head&gt;
+                &lt;body style=&quot;margin: 0; padding: 0; background-color: #f4f6f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1f2937;&quot;&gt;
+                    &lt;table role=&quot;presentation&quot; width=&quot;100%%&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; border=&quot;0&quot; style=&quot;background-color: #f4f6f9; padding: 32px 16px;&quot;&gt;
+                        &lt;tr&gt;
+                            &lt;td align=&quot;center&quot;&gt;
+                                &lt;table role=&quot;presentation&quot; width=&quot;600&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; border=&quot;0&quot; style=&quot;max-width: 600px; width: 100%%; background-color: #ffffff; border-radius: 8px; border: 1px solid #e5e7eb;&quot;&gt;
+                                    &lt;tr&gt;
+                                        &lt;td style=&quot;background-color: #1e3a8a; padding: 28px 32px;&quot;&gt;
+                                            &lt;span style=&quot;font-size: 22px; font-weight: 700; color: #ffffff;&quot;&gt;PICUS&lt;/span&gt;
+                                        &lt;/td&gt;
+                                    &lt;/tr&gt;
+                                    &lt;tr&gt;
+                                        &lt;td style=&quot;padding: 32px;&quot;&gt;
+                                            &lt;h1 style=&quot;margin: 0 0 16px 0; font-size: 20px; font-weight: 600; color: #111827;&quot;&gt;%1$s&lt;/h1&gt;
+                                            &lt;p style=&quot;margin: 0 0 16px 0; font-size: 15px; line-height: 1.6; color: #374151;&quot;&gt;%2$s&lt;/p&gt;
+                                            &lt;p style=&quot;margin: 0 0 24px 0; font-size: 15px; line-height: 1.6; color: #374151;&quot;&gt;%3$s&lt;/p&gt;
+                                            &lt;table role=&quot;presentation&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; border=&quot;0&quot; style=&quot;margin: 0 auto 28px auto;&quot;&gt;
+                                                &lt;tr&gt;
+                                                    &lt;td align=&quot;center&quot; style=&quot;border-radius: 6px; background-color: #2563eb;&quot;&gt;
+                                                        &lt;a href=&quot;%4$s&quot; target=&quot;_blank&quot; style=&quot;display: inline-block; padding: 14px 28px; font-size: 15px; font-weight: 600; color: #ffffff; text-decoration: none; border-radius: 6px;&quot;&gt;%5$s&lt;/a&gt;
+                                                    &lt;/td&gt;
+                                                &lt;/tr&gt;
+                                            &lt;/table&gt;
+                                            &lt;table role=&quot;presentation&quot; width=&quot;100%%&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; border=&quot;0&quot; style=&quot;background-color: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 4px; margin-bottom: 24px;&quot;&gt;
+                                                &lt;tr&gt;
+                                                    &lt;td style=&quot;padding: 12px 16px; font-size: 13px; line-height: 1.5; color: #92400e;&quot;&gt;
+                                                        &lt;strong&gt;Note importanti sulla sicurezza:&lt;/strong&gt;
+                                                        &lt;ul style=&quot;margin: 6px 0 0 0; padding-left: 18px;&quot;&gt;%6$s&lt;/ul&gt;
+                                                    &lt;/td&gt;
+                                                &lt;/tr&gt;
+                                            &lt;/table&gt;
+                                            &lt;p style=&quot;margin: 0; font-size: 12px; line-height: 1.5; color: #6b7280; word-break: break-all;&quot;&gt;
+                                                Se il pulsante non funziona, copia e incolla questo indirizzo nel browser:&lt;br/&gt;
+                                                &lt;a href=&quot;%4$s&quot; style=&quot;color: #2563eb; text-decoration: underline;&quot;&gt;%4$s&lt;/a&gt;
+                                            &lt;/p&gt;
+                                        &lt;/td&gt;
+                                    &lt;/tr&gt;
+                                    &lt;tr&gt;
+                                        &lt;td style=&quot;background-color: #f9fafb; padding: 20px 32px; border-top: 1px solid #e5e7eb; text-align: center; font-size: 12px; line-height: 1.5; color: #9ca3af;&quot;&gt;
+                                            Questa comunicazione è stata inviata automaticamente dal sistema &lt;strong&gt;PICUS&lt;/strong&gt;. Si prega di non rispondere a questa email.
+                                        &lt;/td&gt;
+                                    &lt;/tr&gt;
+                                &lt;/table&gt;
+                            &lt;/td&gt;
+                        &lt;/tr&gt;
+                    &lt;/table&gt;
+                &lt;/body&gt;
+                &lt;/html&gt;
+<span class="fc" id="L113">                &quot;&quot;&quot;.formatted(HtmlUtils.htmlEscape(titolo), salutoHtml, HtmlUtils.htmlEscape(introduzione), linkSicuro,</span>
+<span class="fc" id="L114">                HtmlUtils.htmlEscape(testoPulsante), elenco);</span>
+<span class="fc" id="L115">        return new Contenuto(oggetto, testo.toString(), html);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ServizioSchedeOperatore.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.monitoraggio.interno.applicazione</a> &gt; <span class="el_source">ServizioSchedeOperatore.java</span></div><h1>ServizioSchedeOperatore.java</h1><pre class="source lang-java linenums">package it.unina.picus.monitoraggio.interno.applicazione;
+
+import it.unina.picus.monitoraggio.api.ConteggiOptApi;
+import it.unina.picus.monitoraggio.api.MonitoraggioApi;
+import it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeOperatore;
+import it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeRendicontabili;
+import it.unina.picus.monitoraggio.interno.dominio.DatiSchedaNonValidiException;
+import it.unina.picus.monitoraggio.interno.dominio.RegoleAccessoScheda;
+import it.unina.picus.monitoraggio.interno.dominio.TracciatoSchedaOperatore;
+import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.IsoFields;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.UUID;
+
+/** Coordina l'invio, la consultazione e il riepilogo delle schede personali. */
+@Service
+@Profile(&quot;!skeleton&quot;)
+@Transactional(readOnly = true)
+public class ServizioSchedeOperatore implements MonitoraggioApi {
+
+<span class="fc" id="L30">    private static final ZoneId FUSO_RENDICONTAZIONE = ZoneId.of(&quot;Europe/Rome&quot;);</span>
+
+    private final ArchivioSchedeOperatore archivio;
+    private final ServizioRiepilogoSchede riepilogo;
+    private final ConteggiOptApi conteggiOpt;
+    private final Clock orologio;
+
+    /**
+     * Crea il servizio applicativo delle schede personali.
+     *
+     * @param archivio persistenza delle schede personali
+     * @param archivioRendicontabile sorgente delle schede accettate per il riepilogo
+     * @param conteggiOpt servizio dei conteggi trimestrali delle OPT
+     * @param orologio sorgente dell'istante di invio
+     */
+    public ServizioSchedeOperatore(ArchivioSchedeOperatore archivio, ArchivioSchedeRendicontabili archivioRendicontabile,
+<span class="fc" id="L46">                                    ConteggiOptApi conteggiOpt, Clock orologio) {</span>
+<span class="fc" id="L47">        this.archivio = archivio;</span>
+<span class="fc" id="L48">        this.riepilogo = new ServizioRiepilogoSchede(archivioRendicontabile);</span>
+<span class="fc" id="L49">        this.conteggiOpt = conteggiOpt;</span>
+<span class="fc" id="L50">        this.orologio = orologio;</span>
+<span class="fc" id="L51">    }</span>
+
+    /** {@inheritDoc} */
+    @Override
+    @Transactional
+    public void registraConteggiOpt(IdentitaAutenticata attore, Trimestre trimestre, List&lt;VoceMisura&gt; conteggi) {
+<span class="nc" id="L57">        conteggiOpt.registraConteggiOpt(attore, trimestre, conteggi);</span>
+<span class="nc" id="L58">    }</span>
+
+    /** {@inheritDoc} */
+    @Override
+    public List&lt;ConteggioOpt&gt; consultaConteggiOpt(IdentitaAutenticata attore, UUID optId, Trimestre da, Trimestre a) {
+<span class="fc" id="L63">        return conteggiOpt.consultaConteggiOpt(attore, optId, da, a);</span>
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Transactional
+    public UUID inviaSchedaOperatore(IdentitaAutenticata attore, Trimestre trimestre, DatiSchedaOperatore dati) {
+<span class="fc" id="L70">        RegoleAccessoScheda.verificaOperatore(attore);</span>
+<span class="fc" id="L71">        TracciatoSchedaOperatore.valida(trimestre, dati);</span>
+<span class="fc" id="L72">        var istanteInvio = orologio.instant();</span>
+<span class="fc" id="L73">        var dataInvio = LocalDate.ofInstant(istanteInvio, FUSO_RENDICONTAZIONE);</span>
+<span class="fc" id="L74">        int annoCorrente = dataInvio.getYear();</span>
+<span class="fc" id="L75">        int trimestreCorrente = dataInvio.get(IsoFields.QUARTER_OF_YEAR);</span>
+<span class="fc bfc" id="L76" title="All 2 branches covered.">        if (trimestre.anno() &gt; annoCorrente</span>
+<span class="fc bfc" id="L77" title="All 4 branches covered.">                || (trimestre.anno() == annoCorrente &amp;&amp; trimestre.numero() &gt;= trimestreCorrente)) {</span>
+<span class="fc" id="L78">            throw new DatiSchedaNonValidiException(Map.of(&quot;trimestre&quot;, &quot;Scegli un trimestre concluso&quot;));</span>
+        }
+<span class="fc" id="L80">        var sintesi = new SchedaSintesi(UUID.randomUUID(), attore.accountId(), trimestre, istanteInvio);</span>
+<span class="fc" id="L81">        archivio.registra(new SchedaOperatore(sintesi, dati));</span>
+<span class="fc" id="L82">        return sintesi.id();</span>
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public List&lt;SchedaSintesi&gt; elencoSchedeOperatore(IdentitaAutenticata attore) {
+<span class="fc" id="L88">        RegoleAccessoScheda.verificaOperatore(attore);</span>
+<span class="fc" id="L89">        return archivio.perOperatore(attore.accountId());</span>
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public SchedaOperatore consultaSchedaOperatore(IdentitaAutenticata attore, UUID schedaId) {
+<span class="fc" id="L95">        RegoleAccessoScheda.verificaRuoloConsultazione(attore);</span>
+<span class="fc" id="L96">        return archivio.cerca(schedaId, titolare -&gt; RegoleAccessoScheda.verificaConsultazione(attore, titolare))</span>
+<span class="fc" id="L97">                .orElseThrow(() -&gt; {</span>
+<span class="fc" id="L98">                    RegoleAccessoScheda.verificaConsultazione(attore, null);</span>
+<span class="fc" id="L99">                    return new NoSuchElementException(&quot;Scheda non trovata&quot;);</span>
+                });
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public RiepilogoTrimestre riepilogaSchede(IdentitaAutenticata attore, Trimestre trimestre) {
+<span class="fc" id="L106">        return riepilogo.riepilogaSchede(attore, trimestre);</span>
+    }
+
+    /**
+     * Elenca per il Banco i riferimenti da cui consultare le schede di un singolo trimestre.
+     *
+     * @param attore identità verificata del Banco
+     * @param trimestre periodo da consultare
+     * @return riferimenti alle schede ricevute, eventualmente nessuno
+     * @throws SecurityException se l'attore non è il Banco
+     * @throws DatiSchedaNonValidiException se il periodo è assente
+     */
+    public List&lt;SchedaSintesi&gt; elencoSchedeRicevute(IdentitaAutenticata attore, Trimestre trimestre) {
+<span class="fc" id="L119">        RegoleAccessoScheda.verificaRiepilogo(attore);</span>
+<span class="pc bpc" id="L120" title="1 of 2 branches missed.">        if (trimestre == null) {</span>
+<span class="nc" id="L121">            throw new DatiSchedaNonValidiException(Map.of(&quot;trimestre&quot;, &quot;Il periodo è obbligatorio&quot;));</span>
+        }
+<span class="fc" id="L123">        return archivio.perTrimestre(trimestre);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

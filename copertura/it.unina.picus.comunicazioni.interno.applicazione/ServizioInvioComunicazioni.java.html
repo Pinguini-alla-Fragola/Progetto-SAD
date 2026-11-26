@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ServizioInvioComunicazioni.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.comunicazioni.interno.applicazione</a> &gt; <span class="el_source">ServizioInvioComunicazioni.java</span></div><h1>ServizioInvioComunicazioni.java</h1><pre class="source lang-java linenums">package it.unina.picus.comunicazioni.interno.applicazione;
+
+import java.time.Clock;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import it.unina.picus.comunicazioni.api.ComunicazioniApi.TipoDestinatari;
+import it.unina.picus.comunicazioni.interno.dominio.AllegatoRicevuto;
+import it.unina.picus.comunicazioni.interno.dominio.ArchivioComunicazioni;
+import it.unina.picus.comunicazioni.interno.dominio.BozzaComunicazione;
+import it.unina.picus.comunicazioni.interno.dominio.CampoComunicazione;
+import it.unina.picus.comunicazioni.interno.dominio.Errori;
+import it.unina.picus.comunicazioni.interno.dominio.NuovaComunicazione;
+import it.unina.picus.comunicazioni.interno.dominio.NuovoAllegato;
+import it.unina.picus.comunicazioni.interno.dominio.PlateaDestinatari;
+import it.unina.picus.comunicazioni.interno.dominio.RegoleAccessoComunicazione;
+import it.unina.picus.comunicazioni.interno.dominio.TipoAllegato;
+import it.unina.picus.comunicazioni.interno.dominio.ValidatoreComunicazione;
+import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
+
+/** Coordina i passi dell'invio: permesso, pulizia dei dati, controlli, scelta dei destinatari e registrazione. */
+@Service
+@Transactional
+class ServizioInvioComunicazioni implements InvioComunicazioni {
+
+    private final ValidatoreComunicazione validatore;
+    private final DestinatariComunicazione destinatari;
+    private final ArchivioComunicazioni archivio;
+    private final Clock clock;
+
+    ServizioInvioComunicazioni(ValidatoreComunicazione validatore, DestinatariComunicazione destinatari,
+<span class="fc" id="L37">            ArchivioComunicazioni archivio, Clock clock) {</span>
+<span class="fc" id="L38">        this.validatore = validatore;</span>
+<span class="fc" id="L39">        this.destinatari = destinatari;</span>
+<span class="fc" id="L40">        this.archivio = archivio;</span>
+<span class="fc" id="L41">        this.clock = clock;</span>
+<span class="fc" id="L42">    }</span>
+
+    @Override
+    public ComunicazioneInviata invia(IdentitaAutenticata attore, ComandoInvioComunicazione comando) {
+<span class="fc" id="L46">        RegoleAccessoComunicazione.verificaBanco(attore);</span>
+<span class="fc" id="L47">        BozzaComunicazione bozza = NormalizzatoreComunicazione.normalizza(comando);</span>
+<span class="fc" id="L48">        Errori errori = validatore.verifica(bozza);</span>
+        // I destinatari si cercano solo se i campi sono già corretti: con un tipo sconosciuto non c'è chi cercare.
+<span class="fc bfc" id="L50" title="All 2 branches covered.">        Set&lt;UUID&gt; account = errori.vuoto() ? destinatari.risolvi(bozza, errori) : Set.of();</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">        if (!errori.vuoto()) {</span>
+<span class="fc" id="L52">            throw new DatiComunicazioneNonValidiException(errori.perCampo());</span>
+        }
+<span class="fc" id="L54">        NuovaComunicazione comunicazione = new NuovaComunicazione(UUID.randomUUID(), attore.accountId(),</span>
+<span class="fc" id="L55">                bozza.titolo(), bozza.contenuto(), bozza.tipo(), clock.instant(), account, allegati(bozza));</span>
+<span class="fc" id="L56">        archivio.registra(comunicazione);</span>
+<span class="fc" id="L57">        return new ComunicazioneInviata(comunicazione.id(), comunicazione.titolo(), comunicazione.inviataIl(),</span>
+<span class="fc" id="L58">                comunicazione.tipo(), comunicazione.destinatari().size());</span>
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List&lt;AccountSelezionabile&gt; selezionabili(IdentitaAutenticata attore, String destinatariTipo) {
+<span class="fc" id="L64">        RegoleAccessoComunicazione.verificaBanco(attore);</span>
+<span class="fc" id="L65">        TipoDestinatari tipo = NormalizzatoreComunicazione.tipo(destinatariTipo);</span>
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">        if (tipo == null) {</span>
+<span class="nc" id="L67">            throw new DatiComunicazioneNonValidiException(</span>
+<span class="nc" id="L68">                    Map.of(CampoComunicazione.DESTINATARI_TIPO, &quot;Scegli a chi inviare la comunicazione&quot;));</span>
+        }
+<span class="fc" id="L70">        return destinatari.attivi(PlateaDestinatari.di(tipo)).stream()</span>
+<span class="fc" id="L71">                .map(account -&gt; new AccountSelezionabile(account.id(), account.nomeVisualizzato())).toList();</span>
+    }
+
+    /** Gli allegati sono già stati controllati dalle regole: qui si fissa il tipo riconosciuto dal contenuto. */
+    private static List&lt;NuovoAllegato&gt; allegati(BozzaComunicazione bozza) {
+<span class="fc" id="L76">        return bozza.allegati().stream().map(ServizioInvioComunicazioni::nuovoAllegato).toList();</span>
+    }
+
+    private static NuovoAllegato nuovoAllegato(AllegatoRicevuto allegato) {
+<span class="fc" id="L80">        byte[] contenuto = allegato.contenuto();</span>
+<span class="fc" id="L81">        TipoAllegato tipo = TipoAllegato.riconosci(contenuto).orElseThrow();</span>
+<span class="fc" id="L82">        return new NuovoAllegato(UUID.randomUUID(), allegato.nomeFile(), tipo, contenuto);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

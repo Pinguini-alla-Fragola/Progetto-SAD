@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ConsegnaInvitiImportazioneOpt.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.utenze.interno.applicazione</a> &gt; <span class="el_source">ConsegnaInvitiImportazioneOpt.java</span></div><h1>ConsegnaInvitiImportazioneOpt.java</h1><pre class="source lang-java linenums">package it.unina.picus.utenze.interno.applicazione;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
+
+import it.unina.picus.utenze.interno.applicazione.ConsegnaLinkAttivazione.Esito;
+
+/** Consegna gli inviti persistiti dopo il commit e fuori dalla richiesta HTTP. */
+@Configuration(proxyBeanMethods = false)
+@EnableScheduling
+@Profile(&quot;!skeleton&quot;)
+class ConsegnaInvitiImportazioneOpt {
+
+<span class="fc" id="L18">    private static final Logger LOG = LoggerFactory.getLogger(ConsegnaInvitiImportazioneOpt.class);</span>
+    private static final int INVITI_PER_CICLO = 50;
+
+    private final CodaInvitiImportazioneOpt coda;
+    private final ConsegnaLinkAttivazione consegnaLink;
+
+<span class="fc" id="L24">    ConsegnaInvitiImportazioneOpt(CodaInvitiImportazioneOpt coda, ConsegnaLinkAttivazione consegnaLink) {</span>
+<span class="fc" id="L25">        this.coda = coda;</span>
+<span class="fc" id="L26">        this.consegnaLink = consegnaLink;</span>
+<span class="fc" id="L27">    }</span>
+
+    @Scheduled(fixedDelay = 1000)
+    void consegnaInAttesa() {
+<span class="fc bfc" id="L31" title="All 2 branches covered.">        for (int i = 0; i &lt; INVITI_PER_CICLO; i++) {</span>
+<span class="fc" id="L32">            var prenotazione = coda.prenota();</span>
+<span class="fc bfc" id="L33" title="All 2 branches covered.">            if (prenotazione.isEmpty()) {</span>
+<span class="fc" id="L34">                return;</span>
+            }
+<span class="fc" id="L36">            var invito = prenotazione.orElseThrow();</span>
+<span class="fc bfc" id="L37" title="All 2 branches covered.">            if (consegnaLink.consegna(invito.dati()) == Esito.NON_RIUSCITO) {</span>
+<span class="fc bfc" id="L38" title="All 2 branches covered.">                if (invito.tentativo() == CodaInvitiImportazioneOpt.MASSIMO_TENTATIVI) {</span>
+<span class="fc" id="L39">                    LOG.warn(&quot;Tentativi automatici esauriti per l'invito OPT (accountId={})&quot;, invito.accountId());</span>
+                } else {
+<span class="fc" id="L41">                    LOG.warn(&quot;Consegna dell'invito OPT da riprovare (accountId={}, tentativo={})&quot;,</span>
+<span class="fc" id="L42">                            invito.accountId(), invito.tentativo());</span>
+                }
+<span class="fc" id="L44">                continue;</span>
+            }
+<span class="fc" id="L46">            coda.completa(invito);</span>
+        }
+<span class="fc" id="L48">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

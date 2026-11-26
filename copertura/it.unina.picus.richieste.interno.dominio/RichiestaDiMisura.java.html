@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RichiestaDiMisura.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.richieste.interno.dominio</a> &gt; <span class="el_source">RichiestaDiMisura.java</span></div><h1>RichiestaDiMisura.java</h1><pre class="source lang-java linenums">package it.unina.picus.richieste.interno.dominio;
+
+import it.unina.picus.richieste.api.DatiRichiestaNonValidiException;
+import it.unina.picus.richieste.api.RichiesteApi.AccordoADistanza;
+import it.unina.picus.richieste.api.RichiesteApi.DatiInvio;
+import it.unina.picus.richieste.api.RichiesteApi.DettagliAccordo;
+import it.unina.picus.richieste.api.RichiesteApi.StatoRichiesta;
+import it.unina.picus.richieste.api.RichiesteApi.TipoDestinatario;
+import it.unina.picus.richieste.api.ConflittoRichiestaException;
+import it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione;
+
+import java.time.Instant;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+
+/**
+ * Rappresenta lo stato persistito della pratica. Una lettura non esegue transizioni.
+ *
+ * &lt;p&gt;Secondo il principio GRASP &lt;em&gt;Information Expert&lt;/em&gt;, la pratica usa il proprio stato
+ * e l'assegnazione registrata per decidere se può accettare un esito definitivo.
+ */
+<span class="fc" id="L23">public record RichiestaDiMisura(</span>
+        UUID id, UUID titolareId, long misuraId, TipoDestinatario tipoDestinatario,
+        String comuneCodice, String description, Instant inviataIl, StatoRichiesta stato,
+        UUID erogatoreId, DettagliAccordo accordo, UUID riferimentoInvio, AmbitoErogazione erogatoreAmbito,
+        String motivoAnnullamento) {
+
+    /**
+     * Rappresenta una pratica priva di motivo di annullamento registrato.
+     *
+     * @param id identificativo della pratica
+     * @param titolareId account della OPT richiedente
+     * @param misuraId misura richiesta
+     * @param tipoDestinatario persona o nucleo a cui è destinata la misura
+     * @param comuneCodice comune della richiesta
+     * @param description descrizione facoltativa del bisogno
+     * @param inviataIl istante dell'invio
+     * @param stato stato della pratica
+     * @param erogatoreId eventuale assegnatario
+     * @param accordo eventuali dettagli concordati
+     * @param riferimentoInvio eventuale riferimento idempotente dell'invio
+     * @param erogatoreAmbito ambito dell'eventuale assegnazione
+     */
+    public RichiestaDiMisura(UUID id, UUID titolareId, long misuraId, TipoDestinatario tipoDestinatario,
+            String comuneCodice, String description, Instant inviataIl, StatoRichiesta stato,
+            UUID erogatoreId, DettagliAccordo accordo, UUID riferimentoInvio, AmbitoErogazione erogatoreAmbito) {
+<span class="fc" id="L48">        this(id, titolareId, misuraId, tipoDestinatario, comuneCodice, description, inviataIl, stato,</span>
+                erogatoreId, accordo, riferimentoInvio, erogatoreAmbito, null);
+<span class="fc" id="L50">    }</span>
+
+    /** Crea la pratica nel solo stato ammesso all'invio. */
+    public static RichiestaDiMisura inviata(UUID titolareId, DatiInvio dati, Instant istante, UUID riferimento) {
+<span class="fc" id="L54">        return new RichiestaDiMisura(UUID.randomUUID(), titolareId, dati.misuraId(), dati.tipoDestinatario(),</span>
+<span class="fc" id="L55">                dati.comuneCodice(), dati.description(), istante, StatoRichiesta.CREATA, null, null, riferimento, null);</span>
+    }
+
+    /** Esegue la presa in carico esplicita del Banco. */
+    public RichiestaDiMisura prendiInCarico() {
+<span class="fc bfc" id="L60" title="All 2 branches covered.">        if (stato != StatoRichiesta.CREATA) {</span>
+<span class="fc" id="L61">            throw new ConflittoRichiestaException(&quot;La richiesta non è Creata&quot;);</span>
+        }
+<span class="fc" id="L63">        return transita(StatoRichiesta.PRESA_IN_CARICO, erogatoreId, erogatoreAmbito, accordo);</span>
+    }
+
+    /** Impone lo stato previsto per contatto e assegnazione. */
+    public void verificaPresaInCarico() {
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        if (stato != StatoRichiesta.PRESA_IN_CARICO) {</span>
+<span class="fc" id="L69">            throw new ConflittoRichiestaException(&quot;La richiesta non è Presa in carico&quot;);</span>
+        }
+<span class="fc" id="L71">    }</span>
+
+    /** Registra insieme assegnatario, ambito e passaggio In programmazione. */
+    public RichiestaDiMisura assegna(UUID accountId, AmbitoErogazione ambito) {
+<span class="fc" id="L75">        verificaPresaInCarico();</span>
+<span class="fc" id="L76">        Objects.requireNonNull(accountId, &quot;Assegnatario obbligatorio&quot;);</span>
+<span class="fc" id="L77">        Objects.requireNonNull(ambito, &quot;Ambito obbligatorio&quot;);</span>
+<span class="fc" id="L78">        return transita(StatoRichiesta.IN_PROGRAMMAZIONE, accountId, ambito, accordo);</span>
+    }
+
+    /**
+     * Conferma la pratica in programmazione e vi associa l'accordo validato.
+     *
+     * @param dettagli accordo proposto per l’erogatore assegnato
+     * @return pratica Confermata con i dettagli definitivi
+     * @throws ConflittoRichiestaException se la pratica non è in programmazione o manca l’erogatore
+     * @throws DatiRichiestaNonValidiException se i dati sono incompleti o incompatibili
+     */
+    public RichiestaDiMisura conferma(DettagliAccordo dettagli) {
+<span class="pc bpc" id="L90" title="1 of 4 branches missed.">        if (stato != StatoRichiesta.IN_PROGRAMMAZIONE || erogatoreId == null) {</span>
+<span class="fc" id="L91">            throw new ConflittoRichiestaException(&quot;Serve una richiesta In programmazione con erogatore assegnato&quot;);</span>
+        }
+<span class="fc" id="L93">        var accordoValidato = ValidazioneAccordo.valida(dettagli);</span>
+<span class="fc bfc" id="L94" title="All 2 branches covered.">        boolean assegnazioneADistanza = erogatoreAmbito == AmbitoErogazione.CENTRO_PICUS_A_DISTANZA;</span>
+<span class="fc bfc" id="L95" title="All 2 branches covered.">        if (assegnazioneADistanza != (accordoValidato instanceof AccordoADistanza)) {</span>
+<span class="fc" id="L96">            throw new DatiRichiestaNonValidiException(Map.of(&quot;modalita&quot;,</span>
+                    &quot;La modalità dell'accordo deve corrispondere all'ambito dell'assegnazione&quot;));
+        }
+<span class="fc" id="L99">        return transita(StatoRichiesta.CONFERMATA, erogatoreId, erogatoreAmbito, accordoValidato);</span>
+    }
+
+    /**
+     * Chiude la pratica con un rifiuto definitivo deciso dal Banco.
+     *
+     * @return pratica Rifiutata con la storia dell’assegnazione conservata
+     * @throws ConflittoRichiestaException se la pratica non è in ricerca o in programmazione
+     */
+    public RichiestaDiMisura rifiuta() {
+<span class="fc bfc" id="L109" title="All 4 branches covered.">        if (stato != StatoRichiesta.PRESA_IN_CARICO &amp;&amp; stato != StatoRichiesta.IN_PROGRAMMAZIONE) {</span>
+<span class="fc" id="L110">            throw new ConflittoRichiestaException(&quot;Serve una richiesta Presa in carico o In programmazione&quot;);</span>
+        }
+<span class="fc" id="L112">        return transita(StatoRichiesta.RIFIUTATA, erogatoreId, erogatoreAmbito, null);</span>
+    }
+
+    /**
+     * Applica un annullamento autorizzato conservando l'assegnazione e i dettagli dell'accordo.
+     *
+     * @param motivo testo indicato da chi annulla, facoltativo da Creata
+     * @return pratica Annullata, con il motivo originale in caso di ripetizione
+     * @throws DatiRichiestaNonValidiException se al primo annullamento il motivo è obbligatorio
+     *         e assente, oppure contiene caratteri non ammessi
+     */
+    public RichiestaDiMisura annulla(String motivo) {
+<span class="fc bfc" id="L124" title="All 2 branches covered.">        if (RegoleAnnullamento.valuta(stato, motivo) == RegoleAnnullamento.Decisione.GIA_ANNULLATA) {</span>
+<span class="fc" id="L125">            return this;</span>
+        }
+<span class="fc" id="L127">        return new RichiestaDiMisura(id, titolareId, misuraId, tipoDestinatario, comuneCodice, description,</span>
+                inviataIl, StatoRichiesta.ANNULLATA, erogatoreId, accordo, riferimentoInvio, erogatoreAmbito,
+<span class="fc" id="L129">                RegoleAnnullamento.motivoDaRegistrare(motivo));</span>
+    }
+
+    private RichiestaDiMisura transita(StatoRichiesta nuovoStato, UUID accountId,
+            AmbitoErogazione ambito, DettagliAccordo dettagli) {
+<span class="fc" id="L134">        return new RichiestaDiMisura(id, titolareId, misuraId, tipoDestinatario, comuneCodice, description,</span>
+                inviataIl, nuovoStato, accountId, dettagli, riferimentoInvio, ambito);
+    }
+
+    /** Confronta tutti i dati dell'invio, senza confondere richieste distinte con contenuto uguale. */
+    public boolean stessoInvio(DatiInvio dati) {
+<span class="fc bfc" id="L140" title="All 4 branches covered.">        return misuraId == dati.misuraId() &amp;&amp; tipoDestinatario == dati.tipoDestinatario()</span>
+<span class="fc bfc" id="L141" title="All 2 branches covered.">                &amp;&amp; Objects.equals(comuneCodice, dati.comuneCodice())</span>
+<span class="fc bfc" id="L142" title="All 2 branches covered.">                &amp;&amp; Objects.equals(description, dati.description());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

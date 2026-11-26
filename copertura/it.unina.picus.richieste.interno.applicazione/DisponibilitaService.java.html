@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DisponibilitaService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.richieste.interno.applicazione</a> &gt; <span class="el_source">DisponibilitaService.java</span></div><h1>DisponibilitaService.java</h1><pre class="source lang-java linenums">package it.unina.picus.richieste.interno.applicazione;
+
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import it.unina.picus.richieste.api.ConflittoRichiestaException;
+import it.unina.picus.richieste.api.RichiesteApi;
+import it.unina.picus.richieste.api.RichiesteApi.ContattoDisponibilita;
+import it.unina.picus.richieste.api.RichiesteApi.DettaglioContatto;
+import it.unina.picus.richieste.api.RichiesteApi.EsitoContatto;
+import it.unina.picus.richieste.api.RisorsaRichiesteNonTrovataException;
+import it.unina.picus.richieste.interno.dominio.ContattiRepository;
+import it.unina.picus.richieste.interno.dominio.RichiestaRepository;
+import it.unina.picus.shared.ControlloAccesso;
+import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
+import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
+
+/**
+ * Coordina la consultazione e la risposta per un contatto di disponibilità già aperto.
+ *
+ * &lt;p&gt;Applica il pattern &lt;em&gt;Service Layer&lt;/em&gt;. Concentra i controlli di accesso e i
+ * confini delle transazioni dei casi d'uso e usa i repository per accedere ai dati.
+ */
+@Service
+@Transactional(readOnly = true)
+public class DisponibilitaService {
+
+    private final RichiestaRepository richieste;
+    private final ContattiRepository contatti;
+
+    /**
+     * Costruisce il servizio con i repository usati dai casi d'uso di disponibilità.
+     *
+     * @param richieste repository delle richieste di misura
+     * @param contatti repository dei contatti di disponibilità
+     */
+<span class="fc" id="L41">    public DisponibilitaService(RichiestaRepository richieste, ContattiRepository contatti) {</span>
+<span class="fc" id="L42">        this.richieste = richieste;</span>
+<span class="fc" id="L43">        this.contatti = contatti;</span>
+<span class="fc" id="L44">    }</span>
+
+    /**
+     * Fornisce all'erogatore destinatario solo le informazioni necessarie per valutare il contatto.
+     *
+     * @param attore identità verificata della OPT o dell'operatore destinatario
+     * @param contattoId identificativo del contatto da consultare
+     * @return contatto e dati essenziali della richiesta
+     * @throws SecurityException se l'attore non è un erogatore o non è il destinatario
+     * @throws NoSuchElementException se il contatto non esiste
+     * @see RichiesteApi#consultaContatto(IdentitaAutenticata, UUID)
+     */
+    public DettaglioContatto consultaContatto(IdentitaAutenticata attore, UUID contattoId) {
+<span class="fc" id="L57">        verificaRuoloErogatore(attore);</span>
+<span class="fc" id="L58">        var dettaglio = contatti.cercaDettaglio(contattoId)</span>
+<span class="fc" id="L59">                .orElseThrow(RisorsaRichiesteNonTrovataException::new);</span>
+<span class="fc" id="L60">        verificaDestinatario(attore, dettaglio.contatto().erogatoreId());</span>
+<span class="fc" id="L61">        return dettaglio;</span>
+    }
+
+    /**
+     * Registra la risposta del destinatario mantenendo la richiesta in presa in carico.
+     *
+     * &lt;p&gt;Dopo aver verificato il destinatario, acquisisce un lock pessimistico sulla richiesta.
+     * Legge l'esito del contatto sotto lock, così soltanto un invio concorrente può registrare
+     * la risposta.
+     *
+     * @param attore identità verificata della OPT o dell'operatore destinatario
+     * @param contattoId identificativo del contatto a cui si risponde
+     * @param disponibile {@code true} per confermare, {@code false} per rifiutare
+     * @return contatto con l'esito registrato
+     * @throws SecurityException se l'attore non è un erogatore o non è il destinatario
+     * @throws NoSuchElementException se il contatto o la richiesta non esistono
+     * @throws ConflittoRichiestaException se il contatto non è in attesa o la richiesta
+     *         non è in presa in carico
+     * @see RichiesteApi#rispondiDisponibilita(IdentitaAutenticata, UUID, boolean)
+     */
+    @Transactional
+    public ContattoDisponibilita rispondiDisponibilita(IdentitaAutenticata attore, UUID contattoId,
+            boolean disponibile) {
+<span class="fc" id="L84">        verificaRuoloErogatore(attore);</span>
+<span class="fc" id="L85">        var riferimento = contatti.cercaRiferimento(contattoId)</span>
+<span class="fc" id="L86">                .orElseThrow(RisorsaRichiesteNonTrovataException::new);</span>
+<span class="fc" id="L87">        verificaDestinatario(attore, riferimento.erogatoreId());</span>
+
+<span class="fc" id="L89">        var richiesta = richieste.cercaPerAggiornamento(riferimento.richiestaId())</span>
+<span class="fc" id="L90">                .orElseThrow(RisorsaRichiesteNonTrovataException::new);</span>
+<span class="fc" id="L91">        richiesta.verificaPresaInCarico();</span>
+<span class="fc" id="L92">        var contatto = contatti.cerca(contattoId).orElseThrow(RisorsaRichiesteNonTrovataException::new);</span>
+<span class="fc bfc" id="L93" title="All 2 branches covered.">        if (contatto.esito() != EsitoContatto.IN_ATTESA) {</span>
+<span class="fc" id="L94">            throw new ConflittoRichiestaException(&quot;Il contatto non è in attesa di risposta&quot;);</span>
+        }
+<span class="fc bfc" id="L96" title="All 2 branches covered.">        var esito = disponibile ? EsitoContatto.DISPONIBILE : EsitoContatto.NON_DISPONIBILE;</span>
+<span class="fc" id="L97">        return contatti.registraEsito(contattoId, esito);</span>
+    }
+
+    /**
+     * Elenca per il Banco i contatti della richiesta e i rispettivi esiti.
+     *
+     * @param attore identità verificata del Banco
+     * @param richiestaId identificativo della richiesta
+     * @return contatti in ordine di invio, eventualmente nessuno
+     * @throws SecurityException se l'attore non è il Banco
+     * @throws NoSuchElementException se la richiesta non esiste
+     * @see RichiesteApi#elencoContatti(IdentitaAutenticata, UUID)
+     */
+    public List&lt;ContattoDisponibilita&gt; elencoContatti(IdentitaAutenticata attore, UUID richiestaId) {
+<span class="pc bpc" id="L111" title="3 of 6 branches missed.">        ControlloAccesso.richiedi(attore != null &amp;&amp; attore.accountId() != null &amp;&amp; attore.ruolo() == RuoloUtente.BANCO,</span>
+                &quot;Lo storico dei contatti è riservato al Banco&quot;);
+<span class="pc bpc" id="L113" title="1 of 2 branches missed.">        if (!richieste.esiste(richiestaId)) {</span>
+<span class="nc" id="L114">            throw new RisorsaRichiesteNonTrovataException();</span>
+        }
+<span class="fc" id="L116">        return contatti.storico(richiestaId);</span>
+    }
+
+    private static void verificaRuoloErogatore(IdentitaAutenticata attore) {
+<span class="pc bpc" id="L120" title="2 of 4 branches missed.">        ControlloAccesso.richiedi(attore != null &amp;&amp; attore.accountId() != null</span>
+<span class="pc bpc" id="L121" title="1 of 4 branches missed.">                &amp;&amp; (attore.ruolo() == RuoloUtente.OPT || attore.ruolo() == RuoloUtente.OPERATORE),</span>
+                &quot;Operazione riservata agli erogatori&quot;);
+<span class="fc" id="L123">    }</span>
+
+    private static void verificaDestinatario(IdentitaAutenticata attore, UUID erogatoreId) {
+<span class="fc" id="L126">        ControlloAccesso.richiedi(attore.accountId().equals(erogatoreId), &quot;Contatto indirizzato a un altro account&quot;);</span>
+<span class="fc" id="L127">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

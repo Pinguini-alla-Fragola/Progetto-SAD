@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CodaInvitiImportazioneOpt.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.utenze.interno.applicazione</a> &gt; <span class="el_source">CodaInvitiImportazioneOpt.java</span></div><h1>CodaInvitiImportazioneOpt.java</h1><pre class="source lang-java linenums">package it.unina.picus.utenze.interno.applicazione;
+
+import java.sql.Types;
+import java.time.Duration;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.context.annotation.Profile;
+import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import it.unina.picus.utenze.api.UtenzeApi.StatoUtenza;
+import it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService.DatiInvioAttivazione;
+import it.unina.picus.utenze.interno.persistenza.AccountRepository;
+
+/** Conserva gli inviti CSV in attesa e prepara il link prima della consegna. */
+@Service
+@Profile(&quot;!skeleton&quot;)
+class CodaInvitiImportazioneOpt {
+
+<span class="fc" id="L25">    private static final Duration DURATA_PRENOTAZIONE = Duration.ofMinutes(5);</span>
+    static final int MASSIMO_TENTATIVI = 5;
+
+    private final JdbcClient jdbc;
+    private final AccountRepository accounts;
+    private final AttivazioneUtenzaService attivazione;
+
+<span class="fc" id="L32">    CodaInvitiImportazioneOpt(JdbcClient jdbc, AccountRepository accounts, AttivazioneUtenzaService attivazione) {</span>
+<span class="fc" id="L33">        this.jdbc = jdbc;</span>
+<span class="fc" id="L34">        this.accounts = accounts;</span>
+<span class="fc" id="L35">        this.attivazione = attivazione;</span>
+<span class="fc" id="L36">    }</span>
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void accoda(UUID accountId) {
+<span class="fc" id="L40">        jdbc.sql(&quot;insert into utenze_inviti_importazione_opt (account_id) values (?)&quot;)</span>
+<span class="fc" id="L41">                .param(accountId).update();</span>
+<span class="fc" id="L42">    }</span>
+
+    /** Dopo il commit il link è valido e, se la consegna si interrompe, la riga torna disponibile. */
+    @Transactional
+    public Optional&lt;Consegna&gt; prenota() {
+<span class="fc" id="L47">        var prossimo = jdbc.sql(&quot;&quot;&quot;</span>
+                select account_id, tentativi from utenze_inviti_importazione_opt
+                 where disponibile_dal &lt;= current_timestamp and tentativi &lt; ?
+                 order by disponibile_dal, account_id
+                 fetch first 1 row only for update skip locked
+<span class="fc" id="L52">                &quot;&quot;&quot;).param(MASSIMO_TENTATIVI)</span>
+<span class="fc" id="L53">                .query((rs, numero) -&gt; new Invito(rs.getObject(&quot;account_id&quot;, UUID.class),</span>
+<span class="fc" id="L54">                        rs.getInt(&quot;tentativi&quot;))).optional();</span>
+<span class="fc bfc" id="L55" title="All 2 branches covered.">        if (prossimo.isEmpty()) {</span>
+<span class="fc" id="L56">            return Optional.empty();</span>
+        }
+
+<span class="fc" id="L59">        var invito = prossimo.orElseThrow();</span>
+<span class="fc" id="L60">        var account = accounts.findByIdForUpdate(invito.accountId()).orElseThrow();</span>
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">        if (!StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(account.getStato())) {</span>
+<span class="nc" id="L62">            rimuovi(invito.accountId());</span>
+<span class="nc" id="L63">            return Optional.empty();</span>
+        }
+
+<span class="fc" id="L66">        var dati = attivazione.preparaTokenImportazioneOpt(account);</span>
+<span class="fc" id="L67">        int tentativo = invito.tentativi() + 1;</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        OffsetDateTime disponibileDal = tentativo == MASSIMO_TENTATIVI ? null</span>
+<span class="fc" id="L69">                : OffsetDateTime.now(ZoneOffset.UTC).plus(DURATA_PRENOTAZIONE);</span>
+<span class="fc" id="L70">        jdbc.sql(&quot;&quot;&quot;</span>
+                update utenze_inviti_importazione_opt
+                   set tentativi = :tentativo, disponibile_dal = :disponibileDal where account_id = :accountId
+<span class="fc" id="L73">                &quot;&quot;&quot;).param(&quot;tentativo&quot;, tentativo)</span>
+<span class="fc" id="L74">                .param(&quot;disponibileDal&quot;, disponibileDal, Types.TIMESTAMP_WITH_TIMEZONE)</span>
+<span class="fc" id="L75">                .param(&quot;accountId&quot;, invito.accountId()).update();</span>
+<span class="fc" id="L76">        return Optional.of(new Consegna(invito.accountId(), tentativo, dati));</span>
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    void rimuovi(UUID accountId) {
+<span class="fc" id="L81">        jdbc.sql(&quot;delete from utenze_inviti_importazione_opt where account_id = ?&quot;).param(accountId).update();</span>
+<span class="fc" id="L82">    }</span>
+
+    public void completa(Consegna consegna) {
+<span class="fc" id="L85">        jdbc.sql(&quot;delete from utenze_inviti_importazione_opt where account_id = ? and tentativi = ?&quot;)</span>
+<span class="fc" id="L86">                .params(consegna.accountId(), consegna.tentativo()).update();</span>
+<span class="fc" id="L87">    }</span>
+
+<span class="fc" id="L89">    private record Invito(UUID accountId, int tentativi) {</span>
+    }
+
+<span class="fc" id="L92">    record Consegna(UUID accountId, int tentativo, DatiInvioAttivazione dati) {</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

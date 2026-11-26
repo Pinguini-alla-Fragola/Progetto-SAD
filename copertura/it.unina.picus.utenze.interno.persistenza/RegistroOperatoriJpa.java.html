@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RegistroOperatoriJpa.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.utenze.interno.persistenza</a> &gt; <span class="el_source">RegistroOperatoriJpa.java</span></div><h1>RegistroOperatoriJpa.java</h1><pre class="source lang-java linenums">package it.unina.picus.utenze.interno.persistenza;
+
+import java.util.Optional;
+
+import org.hibernate.exception.ConstraintViolationException;
+import org.hibernate.exception.ConstraintViolationException.ConstraintKind;
+import org.springframework.context.annotation.Profile;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
+import it.unina.picus.utenze.api.UtenzeApi.StatoUtenza;
+import it.unina.picus.utenze.interno.dominio.CampoOperatore;
+import it.unina.picus.utenze.interno.dominio.DatiOperatore;
+import it.unina.picus.utenze.interno.dominio.DisponibilitaEmail;
+import it.unina.picus.utenze.interno.dominio.RegistrazioneInConflittoException;
+import it.unina.picus.utenze.interno.dominio.RegistroOperatori;
+
+/** Salva gli Operatori nel database. */
+@Repository
+@Profile(&quot;!skeleton&quot;)
+@Transactional
+class RegistroOperatoriJpa implements RegistroOperatori {
+
+    /** Vincolo di unicità dell'email, con il nome che PostgreSQL gli ha dato nella V1. */
+    static final String VINCOLO_EMAIL = &quot;utenze_account_email_key&quot;;
+    /** Vincolo di unicità del codice fiscale, dichiarato nella V16. */
+    static final String VINCOLO_CODICE_FISCALE = &quot;utenze_operatori_codice_fiscale_unico&quot;;
+
+    private final AccountRepository accounts;
+    private final ProfiloOperatoreRepository profili;
+    private final OperatoreMisuraRepository misure;
+
+    RegistroOperatoriJpa(AccountRepository accounts, ProfiloOperatoreRepository profili,
+<span class="fc" id="L36">            OperatoreMisuraRepository misure) {</span>
+<span class="fc" id="L37">        this.accounts = accounts;</span>
+<span class="fc" id="L38">        this.profili = profili;</span>
+<span class="fc" id="L39">        this.misure = misure;</span>
+<span class="fc" id="L40">    }</span>
+
+    @Override
+    @Transactional(readOnly = true)
+    public DisponibilitaEmail disponibilitaEmail(String email) {
+<span class="nc" id="L45">        return accounts.findByEmailIgnoreCase(email)</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">                .map(account -&gt; StatoUtenza.REVOCATO.name().equals(account.getStato())</span>
+<span class="nc" id="L47">                        ? DisponibilitaEmail.ACCOUNT_REVOCATO : DisponibilitaEmail.GIA_IN_USO)</span>
+<span class="nc" id="L48">                .orElse(DisponibilitaEmail.LIBERA);</span>
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean codiceFiscaleInUso(String codiceFiscale) {
+<span class="nc" id="L54">        return profili.existsByCodiceFiscale(codiceFiscale);</span>
+    }
+
+    @Override
+    public OperatoreRegistrato registra(DatiOperatore dati, String hashPassword) {
+        try {
+<span class="nc" id="L60">            AccountJpa account = accounts.saveAndFlush(new AccountJpa(dati.email(), hashPassword,</span>
+<span class="nc" id="L61">                    dati.nomeVisualizzato(), RuoloUtente.OPERATORE.name(),</span>
+<span class="nc" id="L62">                    StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name()));</span>
+<span class="nc" id="L63">            profili.saveAndFlush(new ProfiloOperatoreJpa(account.getId(), dati.tipologia(), dati.comuneCodice(),</span>
+<span class="nc" id="L64">                    dati.centroPicus(), dati.telefono(), dati.codiceFiscale()));</span>
+<span class="nc" id="L65">            misure.saveAllAndFlush(dati.misure().stream()</span>
+<span class="nc" id="L66">                    .map(misuraId -&gt; new OperatoreMisuraJpa(account.getId(), misuraId)).toList());</span>
+<span class="nc" id="L67">            return new OperatoreRegistrato(account.getId(), dati.nomeVisualizzato(), dati.email());</span>
+<span class="nc" id="L68">        } catch (DataIntegrityViolationException e) {</span>
+<span class="nc" id="L69">            Optional&lt;String&gt; campo = campoDuplicato(e);</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">            if (campo.isPresent()) {</span>
+<span class="nc" id="L71">                throw new RegistrazioneInConflittoException(campo.get(), e);</span>
+            }
+<span class="nc" id="L73">            throw e;</span>
+        }
+    }
+
+    /**
+     * Riconosce dal nome del vincolo quale campo unico è stato violato. Gli altri errori di integrità
+     * non vengono attribuiti a un campo e seguono il trattamento ordinario degli errori di persistenza.
+     */
+    private static Optional&lt;String&gt; campoDuplicato(DataIntegrityViolationException errore) {
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        for (Throwable causa = errore; causa != null; causa = causa.getCause()) {</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">            if (causa instanceof ConstraintViolationException violazione) {</span>
+<span class="nc bnc" id="L84" title="All 4 branches missed.">                if (violazione.getKind() != ConstraintKind.UNIQUE || violazione.getConstraintName() == null) {</span>
+<span class="nc" id="L85">                    return Optional.empty();</span>
+                }
+<span class="nc" id="L87">                String vincolo = violazione.getConstraintName();</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">                if (vincolo.equalsIgnoreCase(VINCOLO_EMAIL)) {</span>
+<span class="nc" id="L89">                    return Optional.of(CampoOperatore.EMAIL);</span>
+                }
+<span class="nc bnc" id="L91" title="All 2 branches missed.">                if (vincolo.equalsIgnoreCase(VINCOLO_CODICE_FISCALE)) {</span>
+<span class="nc" id="L92">                    return Optional.of(CampoOperatore.CODICE_FISCALE);</span>
+                }
+<span class="nc" id="L94">                return Optional.empty();</span>
+            }
+        }
+<span class="nc" id="L97">        return Optional.empty();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UtenzeDemo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.utenze.interno.persistenza</a> &gt; <span class="el_source">UtenzeDemo.java</span></div><h1>UtenzeDemo.java</h1><pre class="source lang-java linenums">package it.unina.picus.utenze.interno.persistenza;
+
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.context.annotation.Profile;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+@Component
+@Profile(&quot;demo&quot;)
+public class UtenzeDemo implements ApplicationRunner {
+    private final JdbcTemplate jdbc;
+    private final String password;
+<span class="nc" id="L19">    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();</span>
+
+<span class="nc" id="L21">    public UtenzeDemo(JdbcTemplate jdbc, @Value(&quot;${PICUS_DEMO_PASSWORD}&quot;) String password) {</span>
+<span class="nc" id="L22">        this.jdbc = jdbc;</span>
+<span class="nc" id="L23">        this.password = password;</span>
+<span class="nc" id="L24">    }</span>
+
+    @Override
+    @Transactional
+    public void run(ApplicationArguments args) {
+<span class="nc" id="L29">        creaAccount(&quot;banco@picus.test&quot;, &quot;Banco Demo&quot;, &quot;BANCO&quot;);</span>
+<span class="nc" id="L30">        creaOpt(&quot;opt-a@picus.test&quot;, &quot;OPT A&quot;, &quot;OPT-01&quot;, &quot;napoli&quot;, &quot;00000000001&quot;);</span>
+<span class="nc" id="L31">        creaOpt(&quot;opt-b@picus.test&quot;, &quot;OPT B&quot;, &quot;OPT-02&quot;, &quot;pozzuoli&quot;, &quot;00000000002&quot;);</span>
+
+<span class="nc" id="L33">        String operatore = &quot;operatore@picus.test&quot;;</span>
+<span class="nc" id="L34">        creaAccount(operatore, &quot;Operatore Demo&quot;, &quot;OPERATORE&quot;);</span>
+<span class="nc" id="L35">        jdbc.update(&quot;&quot;&quot;</span>
+                insert into utenze_profili_operatore (account_id, tipologia, comune_codice)
+                select id, 'INTERNO_BANCO', 'napoli'
+                from utenze_account where email = ? and ruolo = 'OPERATORE'
+                on conflict (account_id) do nothing
+                &quot;&quot;&quot;, operatore);
+<span class="nc" id="L41">    }</span>
+
+    private void creaOpt(String email, String nome, String codiceStruttura, String comune, String codiceFiscale) {
+<span class="nc" id="L44">        creaAccount(email, nome, &quot;OPT&quot;);</span>
+<span class="nc" id="L45">        jdbc.update(&quot;&quot;&quot;</span>
+                insert into utenze_profili_opt (account_id, codice_struttura, comune_codice, codice_fiscale)
+                select id, ?, ?, ?
+                from utenze_account where email = ? and ruolo = 'OPT'
+                on conflict (account_id) do nothing
+                &quot;&quot;&quot;, codiceStruttura, comune, codiceFiscale, email);
+<span class="nc" id="L51">    }</span>
+
+    private void creaAccount(String email, String nome, String ruolo) {
+<span class="nc" id="L54">        jdbc.update(&quot;&quot;&quot;</span>
+                insert into utenze_account (id, email, password_hash, nome, ruolo, stato)
+                values (?, ?, ?, ?, ?, 'ATTIVO')
+                on conflict (email) do nothing
+<span class="nc" id="L58">                &quot;&quot;&quot;, UUID.randomUUID(), email, encoder.encode(password), nome, ruolo);</span>
+<span class="nc" id="L59">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

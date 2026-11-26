@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RiprovaTransitoria.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.utenze.interno.applicazione</a> &gt; <span class="el_source">RiprovaTransitoria.java</span></div><h1>RiprovaTransitoria.java</h1><pre class="source lang-java linenums">package it.unina.picus.utenze.interno.applicazione;
+
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
+import java.sql.SQLException;
+import java.sql.SQLRecoverableException;
+import java.sql.SQLTransientException;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.Objects;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.RecoverableDataAccessException;
+import org.springframework.dao.TransientDataAccessException;
+import org.springframework.transaction.CannotCreateTransactionException;
+
+/**
+ * Politica comune per ripetere un'operazione di database fallita per un errore passeggero. Serve a chi, dopo aver
+ * spedito un'email, deve ancora registrare l'esito: l'email è già partita e non si rispedisce, quindi si ripete
+ * solo la registrazione, ogni volta in una nuova transazione.
+ *
+ * &lt;p&gt;Si riprova soltanto quando l'errore può passare da solo: guasti transitori o recuperabili dell'accesso ai dati,
+ * come un deadlock, un timeout o una connessione persa. Quando Spring non riesce ad aprire la transazione
+ * ({@link CannotCreateTransactionException}) il tipo da solo non basta, perché il wrapper contiene anche errori
+ * permanenti, per esempio le credenziali del database rifiutate: si guarda la causa, e in dubbio non si riprova.
+ * Gli errori permanenti e quelli di programmazione hanno un solo tentativo, perché ripeterli non li risolverebbe e
+ * terrebbe occupato il thread. I tentativi sono al massimo 3, con una breve attesa crescente.&lt;/p&gt;
+ */
+public final class RiprovaTransitoria {
+
+    static final int TENTATIVI = 3;
+    static final long ATTESA_MILLIS = 200;
+
+<span class="fc" id="L36">    private static final Logger LOG = LoggerFactory.getLogger(RiprovaTransitoria.class);</span>
+
+    private RiprovaTransitoria() {
+    }
+
+    /**
+     * Esegue l'azione e la ripete se fallisce per un errore transitorio. L'azione deve poter essere ripetuta senza
+     * effetti doppi e aprire da sé la sua transazione.
+     *
+     * @param azione operazione da eseguire
+     * @throws RuntimeException l'ultimo errore, se non è transitorio o i tentativi sono finiti
+     */
+    public static void esegui(Runnable azione) {
+<span class="fc" id="L49">        Objects.requireNonNull(azione);</span>
+<span class="pc" id="L50">        for (int tentativo = 1; ; tentativo++) {</span>
+            try {
+<span class="fc" id="L52">                azione.run();</span>
+<span class="fc" id="L53">                return;</span>
+<span class="nc" id="L54">            } catch (RuntimeException e) {</span>
+<span class="nc bnc" id="L55" title="All 6 branches missed.">                if (!transitorio(e) || tentativo == TENTATIVI || !attendi(tentativo)) {</span>
+<span class="nc" id="L56">                    throw e;</span>
+                }
+<span class="nc" id="L58">                LOG.warn(&quot;Operazione da ripetere dopo un errore transitorio (causa={}, tentativo {} di {})&quot;,</span>
+<span class="nc" id="L59">                        e.getClass().getSimpleName(), tentativo, TENTATIVI);</span>
+            }
+        }
+    }
+
+    /** Vero se ripetere l'operazione può dare un esito diverso. */
+    static boolean transitorio(RuntimeException e) {
+<span class="nc bnc" id="L66" title="All 4 branches missed.">        if (e instanceof TransientDataAccessException || e instanceof RecoverableDataAccessException) {</span>
+<span class="nc" id="L67">            return true;</span>
+        }
+<span class="nc bnc" id="L69" title="All 4 branches missed.">        return e instanceof CannotCreateTransactionException &amp;&amp; causaRecuperabile(e);</span>
+    }
+
+    /**
+     * Guarda la catena delle cause di un errore di apertura della transazione. Decide lo stato SQL dell'errore più
+     * profondo che ne ha uno, perché è quello restituito dal database: connessione (classe 08), transazione annullata
+     * (40), risorse esaurite (53) o server che si spegne o non accetta ancora connessioni (57P01, 57P02, 57P03) sono
+     * recuperabili; ogni altro stato, per esempio 28P01 con le credenziali rifiutate, non lo è. Senza stato SQL decide
+     * il tipo: errori JDBC transitori o recuperabili, connessione rifiutata o scaduta.
+     */
+    private static boolean causaRecuperabile(Throwable errore) {
+<span class="nc" id="L80">        Set&lt;Throwable&gt; visitate = Collections.newSetFromMap(new IdentityHashMap&lt;&gt;());</span>
+<span class="nc" id="L81">        String statoPiuProfondo = null;</span>
+<span class="nc" id="L82">        boolean tipoTransitorio = false;</span>
+<span class="nc bnc" id="L83" title="All 4 branches missed.">        for (Throwable causa = errore.getCause(); causa != null &amp;&amp; visitate.add(causa); causa = causa.getCause()) {</span>
+<span class="nc bnc" id="L84" title="All 4 branches missed.">            if (causa instanceof SQLException sql &amp;&amp; sql.getSQLState() != null) {</span>
+<span class="nc" id="L85">                statoPiuProfondo = sql.getSQLState();</span>
+            }
+<span class="nc bnc" id="L87" title="All 8 branches missed.">            tipoTransitorio |= causa instanceof SQLTransientException</span>
+                    || causa instanceof SQLRecoverableException
+                    || causa instanceof ConnectException
+                    || causa instanceof SocketTimeoutException;
+        }
+<span class="nc bnc" id="L92" title="All 2 branches missed.">        return statoPiuProfondo != null ? statoRecuperabile(statoPiuProfondo) : tipoTransitorio;</span>
+    }
+
+    private static boolean statoRecuperabile(String stato) {
+<span class="nc bnc" id="L96" title="All 6 branches missed.">        return stato.startsWith(&quot;08&quot;) || stato.startsWith(&quot;40&quot;) || stato.startsWith(&quot;53&quot;)</span>
+<span class="nc bnc" id="L97" title="All 6 branches missed.">                || &quot;57P01&quot;.equals(stato) || &quot;57P02&quot;.equals(stato) || &quot;57P03&quot;.equals(stato);</span>
+    }
+
+    /** @return falso se il thread è stato interrotto, per esempio alla chiusura dell'applicazione */
+    private static boolean attendi(int tentativo) {
+        try {
+<span class="nc" id="L103">            Thread.sleep(ATTESA_MILLIS * tentativo);</span>
+<span class="nc" id="L104">            return true;</span>
+<span class="nc" id="L105">        } catch (InterruptedException e) {</span>
+<span class="nc" id="L106">            Thread.currentThread().interrupt();</span>
+<span class="nc" id="L107">            return false;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

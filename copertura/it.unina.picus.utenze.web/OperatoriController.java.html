@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OperatoriController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.utenze.web</a> &gt; <span class="el_source">OperatoriController.java</span></div><h1>OperatoriController.java</h1><pre class="source lang-java linenums">package it.unina.picus.utenze.web;
+
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
+import it.unina.picus.utenze.api.UtenzeApi.StatoUtenza;
+import it.unina.picus.utenze.interno.applicazione.ComandoCreaOperatore;
+import it.unina.picus.utenze.interno.applicazione.ConsegnaLinkAttivazione;
+import it.unina.picus.utenze.interno.applicazione.ConsegnaLinkAttivazione.Esito;
+import it.unina.picus.utenze.interno.applicazione.CreazioneOperatori;
+import it.unina.picus.utenze.interno.applicazione.OperatoreCreato;
+import it.unina.picus.utenze.interno.dominio.CampoOperatore;
+
+/** Riceve la richiesta con cui il Banco crea l'account personale di un Operatore. */
+@RestController
+@Profile(&quot;!skeleton&quot;)
+@RequestMapping(value = &quot;/api/utenze/operatori&quot;, produces = MediaType.APPLICATION_JSON_VALUE)
+public class OperatoriController {
+
+    /**
+     * Campi del modulo così come li invia il browser. Restano valori JSON generici fino al controllo del tipo:
+     * convertiti subito, un booleano diventerebbe il testo &quot;true&quot; e un numero come {@code 1.5} verrebbe troncato.
+     */
+<span class="nc" id="L34">    public record NuovoOperatoreJson(Object nome, Object cognome, Object codiceFiscale, Object email,</span>
+            Object telefono, Object comuneCodice, Object tipologia, List&lt;Object&gt; misure, Object centroPicus) {
+
+        ComandoCreaOperatore comando() {
+<span class="nc" id="L38">            CampiJson campi = new CampiJson();</span>
+<span class="nc" id="L39">            ComandoCreaOperatore comando = new ComandoCreaOperatore(</span>
+<span class="nc" id="L40">                    campi.testo(nome, CampoOperatore.NOME),</span>
+<span class="nc" id="L41">                    campi.testo(cognome, CampoOperatore.COGNOME),</span>
+<span class="nc" id="L42">                    campi.testo(codiceFiscale, CampoOperatore.CODICE_FISCALE),</span>
+<span class="nc" id="L43">                    campi.testo(email, CampoOperatore.EMAIL),</span>
+<span class="nc" id="L44">                    campi.testo(telefono, CampoOperatore.TELEFONO),</span>
+<span class="nc" id="L45">                    campi.testo(comuneCodice, CampoOperatore.COMUNE),</span>
+<span class="nc" id="L46">                    campi.testo(tipologia, CampoOperatore.TIPOLOGIA),</span>
+<span class="nc" id="L47">                    campi.identificativi(misure, CampoOperatore.MISURE,</span>
+                            &quot;Seleziona le misure tramite il loro identificativo numerico&quot;),
+<span class="nc" id="L49">                    campi.scelta(centroPicus, CampoOperatore.CENTRO_PICUS));</span>
+<span class="nc" id="L50">            campi.verifica();</span>
+<span class="nc" id="L51">            return comando;</span>
+        }
+    }
+
+    /**
+     * Ciò che il browser riceve dopo la creazione, con l'esito dell'invio del link: il token non esce mai dal
+     * server.
+     */
+<span class="nc" id="L59">    public record OperatoreCreatoJson(UUID id, String nomeVisualizzato, String email, String stato,</span>
+            boolean invitoInviato, boolean erroreInvio, String messaggio) {
+
+        static OperatoreCreatoJson da(OperatoreCreato creato, Esito esito) {
+<span class="nc" id="L63">            return new OperatoreCreatoJson(creato.id(), creato.nomeVisualizzato(), creato.email(),</span>
+<span class="nc bnc" id="L64" title="All 4 branches missed.">                    StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name(), esito == Esito.INVIATO, esito == Esito.NON_RIUSCITO,</span>
+<span class="nc" id="L65">                    MessaggiInvito.allaCreazione(esito, &quot;Operatore creato&quot;));</span>
+        }
+    }
+
+    private final CreazioneOperatori creazione;
+    private final ConsegnaLinkAttivazione consegna;
+
+<span class="fc" id="L72">    public OperatoriController(CreazioneOperatori creazione, ConsegnaLinkAttivazione consegna) {</span>
+<span class="fc" id="L73">        this.creazione = creazione;</span>
+<span class="fc" id="L74">        this.consegna = consegna;</span>
+<span class="fc" id="L75">    }</span>
+
+    /**
+     * Crea l'Operatore, spedisce il link di attivazione e risponde {@code 201}. Se l'email non parte l'account
+     * esiste comunque e la risposta lo dice, perché il Banco può reinviare il link. Non indica un indirizzo
+     * della risorsa, perché in questa fase non esiste ancora una pagina che mostri il singolo Operatore.
+     */
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity&lt;OperatoreCreatoJson&gt; crea(IdentitaAutenticata attore,
+            @RequestBody NuovoOperatoreJson corpo) {
+<span class="nc" id="L85">        OperatoreCreato creato = creazione.crea(attore, corpo.comando());</span>
+<span class="nc" id="L86">        Esito esito = consegna.consegna(creato.invito());</span>
+<span class="nc" id="L87">        return ResponseEntity.status(HttpStatus.CREATED).body(OperatoreCreatoJson.da(creato, esito));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

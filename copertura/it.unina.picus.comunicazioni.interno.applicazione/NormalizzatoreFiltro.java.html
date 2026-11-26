@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NormalizzatoreFiltro.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.comunicazioni.interno.applicazione</a> &gt; <span class="el_source">NormalizzatoreFiltro.java</span></div><h1>NormalizzatoreFiltro.java</h1><pre class="source lang-java linenums">package it.unina.picus.comunicazioni.interno.applicazione;
+
+import java.util.Map;
+import java.util.Optional;
+
+import it.unina.picus.comunicazioni.api.ComunicazioniApi.TipoDestinatari;
+import it.unina.picus.comunicazioni.interno.dominio.Errori;
+import it.unina.picus.comunicazioni.interno.dominio.FiltroComunicazioni;
+import it.unina.picus.comunicazioni.interno.dominio.FiltroComunicazioni.FiltroAllegati;
+import it.unina.picus.comunicazioni.interno.dominio.FiltroComunicazioni.FiltroRicezione;
+
+/**
+ * Trasforma la ricerca ricevuta dalla pagina in un filtro controllato. Un valore che manca vuol dire «nessun
+ * filtro»; un valore sbagliato non viene ignorato ma segnalato sul suo campo, senza ripeterlo nel messaggio.
+ */
+final class NormalizzatoreFiltro {
+
+    static final String CAMPO_TESTO = &quot;testo&quot;;
+    static final String CAMPO_DESTINATARI = &quot;destinatari&quot;;
+    static final String CAMPO_ALLEGATI = &quot;allegati&quot;;
+    static final String CAMPO_RICEZIONE = &quot;ricezione&quot;;
+    static final String CAMPO_PAGINA = &quot;pagina&quot;;
+
+<span class="fc" id="L24">    private static final Map&lt;String, FiltroAllegati&gt; ALLEGATI =</span>
+<span class="fc" id="L25">            Map.of(&quot;con&quot;, FiltroAllegati.CON, &quot;senza&quot;, FiltroAllegati.SENZA);</span>
+<span class="fc" id="L26">    private static final Map&lt;String, FiltroRicezione&gt; RICEZIONE =</span>
+<span class="fc" id="L27">            Map.of(&quot;confermata&quot;, FiltroRicezione.CONFERMATA, &quot;da-confermare&quot;, FiltroRicezione.DA_CONFERMARE);</span>
+
+    private NormalizzatoreFiltro() {
+    }
+
+    /**
+     * Controlla e converte la ricerca.
+     *
+     * @param richiesta valori ricevuti dalla pagina; {@code null} vale come nessun filtro
+     * @return il filtro da usare
+     * @throws DatiComunicazioneNonValidiException se un valore non è ammesso
+     */
+    static FiltroComunicazioni normalizza(RichiestaElenco richiesta) {
+<span class="pc bpc" id="L40" title="1 of 2 branches missed.">        RichiestaElenco valori = richiesta != null ? richiesta : new RichiestaElenco(null, null, null, null, null);</span>
+<span class="fc" id="L41">        Errori errori = new Errori();</span>
+<span class="fc" id="L42">        String testo = testo(valori.testo(), errori);</span>
+<span class="fc" id="L43">        TipoDestinatari destinatari = destinatari(valori.destinatari(), errori);</span>
+<span class="fc" id="L44">        FiltroAllegati allegati = scelta(valori.allegati(), ALLEGATI, FiltroAllegati.QUALSIASI, CAMPO_ALLEGATI,</span>
+                errori);
+<span class="fc" id="L46">        FiltroRicezione ricezione = scelta(valori.ricezione(), RICEZIONE, FiltroRicezione.QUALSIASI,</span>
+                CAMPO_RICEZIONE, errori);
+<span class="fc" id="L48">        int pagina = pagina(valori.pagina(), errori);</span>
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">        if (!errori.vuoto()) {</span>
+<span class="nc" id="L50">            throw new DatiComunicazioneNonValidiException(errori.perCampo());</span>
+        }
+<span class="fc" id="L52">        return new FiltroComunicazioni(testo, destinatari, allegati, ricezione, pagina);</span>
+    }
+
+    private static String testo(String valore, Errori errori) {
+<span class="fc" id="L56">        String testo = Optional.ofNullable(NormalizzatoreComunicazione.testo(valore)).orElse(&quot;&quot;);</span>
+<span class="pc bpc" id="L57" title="1 of 2 branches missed.">        if (testo.length() &gt; FiltroComunicazioni.LUNGHEZZA_MAX_TESTO) {</span>
+<span class="nc" id="L58">            errori.aggiungi(CAMPO_TESTO, &quot;La ricerca può avere al massimo &quot;</span>
+                    + FiltroComunicazioni.LUNGHEZZA_MAX_TESTO + &quot; caratteri&quot;);
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">        } else if (testo.chars().anyMatch(Character::isISOControl)) {</span>
+<span class="nc" id="L61">            errori.aggiungi(CAMPO_TESTO, &quot;La ricerca contiene caratteri non ammessi&quot;);</span>
+        }
+<span class="fc" id="L63">        return testo;</span>
+    }
+
+    private static TipoDestinatari destinatari(String valore, Errori errori) {
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">        if (NormalizzatoreComunicazione.testo(valore) == null) {</span>
+<span class="fc" id="L68">            return null;</span>
+        }
+<span class="nc" id="L70">        TipoDestinatari tipo = NormalizzatoreComunicazione.tipo(valore);</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">        if (tipo == null) {</span>
+<span class="nc" id="L72">            errori.aggiungi(CAMPO_DESTINATARI, &quot;Tipo di destinatari non valido&quot;);</span>
+        }
+<span class="nc" id="L74">        return tipo;</span>
+    }
+
+    private static &lt;T&gt; T scelta(String valore, Map&lt;String, T&gt; ammesse, T qualsiasi, String campo, Errori errori) {
+<span class="fc" id="L78">        String nome = NormalizzatoreComunicazione.testo(valore);</span>
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">        if (nome == null) {</span>
+<span class="fc" id="L80">            return qualsiasi;</span>
+        }
+<span class="nc" id="L82">        T scelta = ammesse.get(nome);</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">        if (scelta == null) {</span>
+<span class="nc" id="L84">            errori.aggiungi(campo, &quot;Filtro non valido&quot;);</span>
+<span class="nc" id="L85">            return qualsiasi;</span>
+        }
+<span class="nc" id="L87">        return scelta;</span>
+    }
+
+    private static int pagina(String valore, Errori errori) {
+<span class="fc" id="L91">        String numero = NormalizzatoreComunicazione.testo(valore);</span>
+<span class="pc bpc" id="L92" title="1 of 2 branches missed.">        if (numero == null) {</span>
+<span class="fc" id="L93">            return 0;</span>
+        }
+        // Al massimo 5 cifre: un numero enorme non arriva nemmeno alla conversione.
+<span class="nc bnc" id="L96" title="All 8 branches missed.">        if (numero.length() &lt;= 5 &amp;&amp; numero.chars().allMatch(carattere -&gt; carattere &gt;= '0' &amp;&amp; carattere &lt;= '9')) {</span>
+<span class="nc" id="L97">            int pagina = Integer.parseInt(numero);</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">            if (pagina &lt;= FiltroComunicazioni.PAGINA_MASSIMA) {</span>
+<span class="nc" id="L99">                return pagina;</span>
+            }
+        }
+<span class="nc" id="L102">        errori.aggiungi(CAMPO_PAGINA, &quot;Pagina non valida&quot;);</span>
+<span class="nc" id="L103">        return 0;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

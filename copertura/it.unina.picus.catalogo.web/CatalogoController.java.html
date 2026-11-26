@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CatalogoController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.catalogo.web</a> &gt; <span class="el_source">CatalogoController.java</span></div><h1>CatalogoController.java</h1><pre class="source lang-java linenums">package it.unina.picus.catalogo.web;
+
+import it.unina.picus.catalogo.api.CatalogoApi.Comune;
+import it.unina.picus.catalogo.api.CatalogoApi.DatiMisura;
+import it.unina.picus.catalogo.api.CatalogoApi.Misura;
+import it.unina.picus.catalogo.api.ConsultazioneCatalogoApi;
+import it.unina.picus.catalogo.interno.applicazione.ServizioGestioneCatalogo;
+import it.unina.picus.catalogo.interno.dominio.MisuraNonTrovataException;
+import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.net.URI;
+import java.util.List;
+
+/**
+ * Espone gli endpoint REST del modulo Catalogo per consultazione e gestione delle misure persistenti.
+ *
+ * &lt;p&gt;Delega la consultazione a {@link ConsultazioneCatalogoApi} e i comandi riservati al Banco a
+ * {@link ServizioGestioneCatalogo}, senza introdurre logica di presentazione.&lt;/p&gt;
+ */
+@RestController
+@RequestMapping(value = &quot;/api/catalogo&quot;, produces = MediaType.APPLICATION_JSON_VALUE)
+public class CatalogoController {
+
+    private final ConsultazioneCatalogoApi catalogo;
+    private final ServizioGestioneCatalogo gestione;
+
+    /**
+     * Costruisce il controller collegando le capacità di consultazione e gestione catalogo.
+     *
+     * @param catalogo servizio di lettura di misure attive, storiche e comuni
+     * @param gestione servizio applicativo per creazione, modifica e disattivazione delle misure
+     */
+<span class="fc" id="L42">    public CatalogoController(ConsultazioneCatalogoApi catalogo, ServizioGestioneCatalogo gestione) {</span>
+<span class="fc" id="L43">        this.catalogo = catalogo;</span>
+<span class="fc" id="L44">        this.gestione = gestione;</span>
+<span class="fc" id="L45">    }</span>
+
+    /**
+     * Elenca le misure attive selezionabili nelle nuove richieste e offerte.
+     *
+     * @param attore identità autenticata corrente
+     * @return misure attive ordinate per codice
+     */
+    @GetMapping(&quot;/misure&quot;)
+    public List&lt;Misura&gt; elencoMisureAttive(IdentitaAutenticata attore) {
+<span class="nc" id="L55">        return catalogo.elencoMisureAttive();</span>
+    }
+
+    /**
+     * Elenca per il Banco tutte le misure del catalogo, comprese quelle disattivate.
+     *
+     * @param attore identità verificata del Banco di coordinamento
+     * @return elenco completo delle misure presenti in catalogo
+     */
+    @GetMapping(&quot;/misure/tutte&quot;)
+    public List&lt;Misura&gt; elencoMisure(IdentitaAutenticata attore) {
+<span class="nc" id="L66">        return gestione.elencoMisure(attore);</span>
+    }
+
+    /**
+     * Restituisce i dati di una misura anche quando è stata disattivata, per consultazione storica.
+     *
+     * @param attore identità autenticata corrente
+     * @param id identificativo stabile della misura
+     * @return dettaglio della misura trovata
+     * @throws MisuraNonTrovataException se l'identificativo non corrisponde ad alcuna misura
+     */
+    @GetMapping(&quot;/misure/{id}&quot;)
+    public Misura consultaMisura(IdentitaAutenticata attore, @PathVariable long id) {
+<span class="nc" id="L79">        return catalogo.cercaMisura(id).orElseThrow(MisuraNonTrovataException::new);</span>
+    }
+
+    /**
+     * Crea una nuova misura attiva nel catalogo persistente su comando del Banco.
+     * Il campo facoltativo {@code erogabileADistanza} assume il valore {@code false} se omesso.
+     *
+     * @param attore identità verificata del Banco di coordinamento
+     * @param corpo proprietà JSON della nuova misura
+     * @return risposta {@code 201 Created} con intestazione {@code Location} e misura creata
+     */
+    @PostMapping(value = &quot;/misure&quot;, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity&lt;Misura&gt; creaMisura(IdentitaAutenticata attore, @RequestBody CorpoJsonCatalogo corpo) {
+<span class="nc" id="L92">        DatiMisura dati = MisuraJson.leggiCreazione(corpo.campi());</span>
+<span class="nc" id="L93">        Misura creata = gestione.creaMisura(attore, dati);</span>
+<span class="nc" id="L94">        return ResponseEntity.created(URI.create(&quot;/api/catalogo/misure/&quot; + creata.id())).body(creata);</span>
+    }
+
+    /**
+     * Sostituisce i dati aggiornabili di una misura conservandone l'identificativo.
+     *
+     * &lt;p&gt;Il corpo dichiara esplicitamente {@code erogabileADistanza} e {@code attiva}.
+     * Con {@code attiva} a {@code false} la sostituzione disattiva la misura.
+     * Impostare {@code attiva} a {@code true} riattiva una misura disattivata.
+     * Per la sola disattivazione usare
+     * {@code POST /api/catalogo/misure/{id}/disattivazione}.&lt;/p&gt;
+     *
+     * @param attore identità verificata del Banco di coordinamento
+     * @param id identificativo stabile della misura da aggiornare
+     * @param corpo proprietà JSON aggiornate della misura
+     * @return misura aggiornata
+     */
+    @PutMapping(value = &quot;/misure/{id}&quot;, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Misura aggiornaMisura(
+            IdentitaAutenticata attore, @PathVariable long id, @RequestBody CorpoJsonCatalogo corpo) {
+<span class="nc" id="L114">        var aggiornamento = MisuraJson.leggiAggiornamento(corpo.campi());</span>
+<span class="nc" id="L115">        return gestione.aggiornaMisura(attore, id, aggiornamento.dati(), aggiornamento.attiva());</span>
+    }
+
+    /**
+     * Disattiva una misura esistente per le nuove selezioni e conserva il riferimento storico.
+     * Se la misura è già disattivata, restituisce il suo stato corrente.
+     *
+     * @param attore identità verificata del Banco di coordinamento
+     * @param id identificativo stabile della misura da disattivare
+     * @param corpo corpo opzionale che, se presente, deve essere un oggetto JSON vuoto
+     * @return misura aggiornata con {@code attiva = false}
+     */
+    @PostMapping(&quot;/misure/{id}/disattivazione&quot;)
+    public Misura disattivaMisura(
+            IdentitaAutenticata attore,
+            @PathVariable long id,
+            @RequestBody(required = false) CorpoJsonCatalogo corpo) {
+<span class="nc" id="L132">        MisuraJson.verificaCorpoVuoto(corpo);</span>
+<span class="nc" id="L133">        return gestione.disattivaMisura(attore, id);</span>
+    }
+
+    /**
+     * Elenca i comuni censiti nel catalogo.
+     *
+     * @param attore identità autenticata corrente
+     * @return comuni ordinati per nome
+     */
+    @GetMapping(&quot;/comuni&quot;)
+    public List&lt;Comune&gt; elencoComuni(IdentitaAutenticata attore) {
+<span class="nc" id="L144">        return catalogo.elencoComuni();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

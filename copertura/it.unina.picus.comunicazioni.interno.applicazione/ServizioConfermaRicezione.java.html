@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ServizioConfermaRicezione.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.comunicazioni.interno.applicazione</a> &gt; <span class="el_source">ServizioConfermaRicezione.java</span></div><h1>ServizioConfermaRicezione.java</h1><pre class="source lang-java linenums">package it.unina.picus.comunicazioni.interno.applicazione;
+
+import it.unina.picus.comunicazioni.api.ComunicazioniApi;
+import it.unina.picus.comunicazioni.interno.dominio.RegoleAccessoComunicazione;
+import it.unina.picus.comunicazioni.interno.dominio.RiscontroRicezioneRepository;
+import it.unina.picus.shared.AccessoNegatoException;
+import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Clock;
+import java.time.Instant;
+import java.util.Objects;
+import java.util.UUID;
+
+/** Registra il riscontro esplicito di un destinatario sulla comunicazione del Banco. */
+@Service
+@Profile(&quot;!skeleton&quot;)
+public class ServizioConfermaRicezione {
+
+    private final RiscontroRicezioneRepository riscontri;
+    private final Clock clock;
+
+    /**
+     * Collega il caso d'uso all'archivio dei destinatari e all'orologio dell'applicazione.
+     *
+     * @param riscontri archivio dei destinatari effettivi e dei loro riscontri
+     * @param clock orologio usato per datare il primo riscontro
+     */
+<span class="fc" id="L31">    public ServizioConfermaRicezione(RiscontroRicezioneRepository riscontri, Clock clock) {</span>
+<span class="fc" id="L32">        this.riscontri = riscontri;</span>
+<span class="fc" id="L33">        this.clock = clock;</span>
+<span class="fc" id="L34">    }</span>
+
+    /**
+     * Conferma la ricezione per l'account verificato della sessione. La verifica dei
+     * destinatari e la registrazione avvengono nella stessa transazione. Un ritento
+     * restituisce l'istante già registrato per la coppia comunicazione e destinatario.
+     *
+     * @param attore identità verificata della sessione
+     * @param comunicazioneId identificativo della comunicazione ricevuta
+     * @return istante persistito del primo riscontro
+     * @throws AccessoNegatoException se l'attore non può confermare per la comunicazione indicata
+     * @throws NullPointerException se manca l'identificativo della comunicazione
+     * @see ComunicazioniApi#confermaRicezione
+     */
+    @Transactional
+    public Instant confermaRicezione(IdentitaAutenticata attore, UUID comunicazioneId) {
+<span class="fc" id="L50">        RegoleAccessoComunicazione.verificaPossibileDestinatario(attore);</span>
+<span class="fc" id="L51">        Objects.requireNonNull(comunicazioneId, &quot;comunicazioneId&quot;);</span>
+
+<span class="fc" id="L53">        return riscontri.registraPrimaConferma(comunicazioneId, attore.accountId(), clock.instant())</span>
+<span class="fc" id="L54">                .orElseThrow(() -&gt; new AccessoNegatoException(&quot;Conferma riservata ai destinatari&quot;));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

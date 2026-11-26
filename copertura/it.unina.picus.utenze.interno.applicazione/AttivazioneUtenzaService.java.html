@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AttivazioneUtenzaService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.utenze.interno.applicazione</a> &gt; <span class="el_source">AttivazioneUtenzaService.java</span></div><h1>AttivazioneUtenzaService.java</h1><pre class="source lang-java linenums">package it.unina.picus.utenze.interno.applicazione;
+
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import it.unina.picus.utenze.api.OperazioneUtenzaNonConsentitaException;
+import it.unina.picus.utenze.api.UtenzaNonTrovataException;
+import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
+import it.unina.picus.utenze.api.UtenzeApi.StatoUtenza;
+import it.unina.picus.utenze.interno.persistenza.AccountJpa;
+import it.unina.picus.utenze.interno.persistenza.AccountRepository;
+import it.unina.picus.utenze.interno.persistenza.TokenAttivazioneJpa;
+import it.unina.picus.utenze.interno.persistenza.TokenAttivazioneRepository;
+
+/**
+ * Servizio comune per la generazione dei token monouso di attivazione utenza e
+ * l'impostazione iniziale della password (Task #147). Vale per OPT e Operatori: il link dura 72 ore
+ * (regole degli accessi) e un nuovo link rende inutilizzabile il precedente.
+ */
+@Service
+@Profile(&quot;!skeleton&quot;)
+@Transactional
+public class AttivazioneUtenzaService {
+
+    private final AccountRepository accounts;
+    private final TokenAttivazioneRepository tokens;
+    private final PasswordEncoder passwordEncoder;
+    private final ApplicationEventPublisher eventPublisher;
+    private final Duration durataValidita;
+    private final Clock clock;
+
+    @Autowired
+    public AttivazioneUtenzaService(
+            AccountRepository accounts,
+            TokenAttivazioneRepository tokens,
+            PasswordEncoder passwordEncoder,
+            ApplicationEventPublisher eventPublisher,
+            @Value(&quot;${picus.utenze.attivazione.validita:PT72H}&quot;) Duration durataValidita) {
+<span class="fc" id="L52">        this(accounts, tokens, passwordEncoder, eventPublisher, durataValidita, Clock.systemUTC());</span>
+<span class="fc" id="L53">    }</span>
+
+    AttivazioneUtenzaService(
+            AccountRepository accounts,
+            TokenAttivazioneRepository tokens,
+            PasswordEncoder passwordEncoder,
+            ApplicationEventPublisher eventPublisher,
+            Duration durataValidita,
+<span class="fc" id="L61">            Clock clock) {</span>
+<span class="fc" id="L62">        this.accounts = Objects.requireNonNull(accounts);</span>
+<span class="fc" id="L63">        this.tokens = Objects.requireNonNull(tokens);</span>
+<span class="fc" id="L64">        this.passwordEncoder = Objects.requireNonNull(passwordEncoder);</span>
+<span class="fc" id="L65">        this.eventPublisher = Objects.requireNonNull(eventPublisher);</span>
+<span class="fc" id="L66">        this.durataValidita = Objects.requireNonNull(durataValidita);</span>
+<span class="fc" id="L67">        this.clock = Objects.requireNonNull(clock);</span>
+<span class="fc" id="L68">    }</span>
+
+    /** Dati per consegnare il link. Il token in chiaro non compare mai nel testo del record, così non finisce nei log. */
+<span class="fc" id="L71">    public record DatiInvioAttivazione(String emailDestinatario, String nomeDestinatario, String tokenInChiaro) {</span>
+        @Override
+        public String toString() {
+<span class="fc" id="L74">            return &quot;DatiInvioAttivazione[emailDestinatario=&quot; + emailDestinatario + &quot;, token=***]&quot;;</span>
+        }
+    }
+
+    /**
+     * Link appena creato, non ancora consegnato, per chi lo chiede con la propria email.
+     *
+     * @param accountId account a cui appartiene il link, per concludere il reinvio dopo l'invio
+     * @param dati dati per la consegna
+     */
+<span class="nc" id="L84">    public record LinkPreparato(UUID accountId, DatiInvioAttivazione dati) {}</span>
+
+<span class="nc" id="L86">    public record LinkAttivazioneDaInviareEvent(String emailDestinatario, String nomeDestinatario, String tokenInChiaro) {</span>
+        @Override
+        public String toString() {
+<span class="nc" id="L89">            return &quot;LinkAttivazioneDaInviareEvent[emailDestinatario=&quot; + emailDestinatario + &quot;, token=***]&quot;;</span>
+        }
+    }
+
+    /**
+     * Genera un nuovo token monouso per un account in attesa di attivazione,
+     * invalida eventuali token precedenti ancora attivi sotto lock e restituisce
+     * i dati per la consegna post-commit. L'account deve essere appena inserito
+     * nella transazione corrente oppure già bloccato dal chiamante.
+     */
+    public DatiInvioAttivazione preparaTokenAttivazione(AccountJpa account) {
+<span class="fc" id="L100">        Objects.requireNonNull(account, &quot;account obbligatorio&quot;);</span>
+<span class="pc bpc" id="L101" title="1 of 2 branches missed.">        if (!StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(account.getStato())) {</span>
+<span class="nc" id="L102">            throw new IllegalStateException(&quot;L'account non è in stato IN_ATTESA_DI_ATTIVAZIONE&quot;);</span>
+        }
+
+<span class="fc" id="L105">        List&lt;TokenAttivazioneJpa&gt; precedenti = tokens.findAttiviByAccountIdForUpdate(account.getId());</span>
+<span class="fc" id="L106">        Instant ora = Instant.now(clock);</span>
+<span class="pc bpc" id="L107" title="1 of 2 branches missed.">        for (TokenAttivazioneJpa vecchio : precedenti) {</span>
+<span class="nc" id="L108">            vecchio.segnaComeUsato(ora);</span>
+<span class="nc" id="L109">        }</span>
+<span class="pc bpc" id="L110" title="1 of 2 branches missed.">        if (!precedenti.isEmpty()) {</span>
+<span class="nc" id="L111">            tokens.saveAllAndFlush(precedenti);</span>
+        }
+
+<span class="fc" id="L114">        return creaToken(account, ora, false);</span>
+    }
+
+    /**
+     * Emette un token monouso per un account del ruolo atteso ancora in attesa di attivazione: vale sia per il
+     * primo link, alla creazione, sia per i reinvii, che sostituiscono il link precedente.
+     *
+     * &lt;p&gt;Mantiene lo stesso ordine dei lock di {@link #attivaAccount} e {@code UtenzeService.revocaAccount}
+     * (prima l'account, poi i token pendenti) e rilegge i token attivi dopo l'acquisizione del lock
+     * sull'account per serializzare eventuali reinvii concorrenti ed evitare doppi token attivi.&lt;/p&gt;
+     */
+    public DatiInvioAttivazione rigeneraTokenPerAccount(UUID accountId, RuoloUtente ruoloAtteso) {
+<span class="nc" id="L126">        AccountJpa account = bloccaAccountPerReinvio(accountId, ruoloAtteso);</span>
+<span class="nc" id="L127">        return preparaTokenAttivazione(account);</span>
+    }
+
+    private AccountJpa bloccaAccountPerReinvio(UUID accountId, RuoloUtente ruoloAtteso) {
+<span class="pc bpc" id="L131" title="1 of 2 branches missed.">        if (accountId == null) {</span>
+<span class="nc" id="L132">            throw new UtenzaNonTrovataException(&quot;Identificativo account obbligatorio.&quot;);</span>
+        }
+<span class="fc" id="L134">        Objects.requireNonNull(ruoloAtteso, &quot;ruoloAtteso obbligatorio&quot;);</span>
+
+        // 1. Punto unico di serializzazione: prima AccountJpa, poi TokenAttivazioneJpa
+<span class="fc" id="L137">        AccountJpa account = accounts.findByIdForUpdate(accountId)</span>
+<span class="pc" id="L138">                .orElseThrow(() -&gt; new UtenzaNonTrovataException(&quot;Account non trovato.&quot;));</span>
+
+        // 2. Verifica ruolo e stato sotto lock esclusivo dell'account
+<span class="fc bfc" id="L141" title="All 2 branches covered.">        if (!ruoloAtteso.name().equals(account.getRuolo())) {</span>
+<span class="fc" id="L142">            throw new OperazioneUtenzaNonConsentitaException(</span>
+<span class="fc" id="L143">                    &quot;Il reinvio dell'invito è consentito solo per account con ruolo &quot; + ruoloAtteso.name() + &quot;.&quot;);</span>
+        }
+<span class="fc bfc" id="L145" title="All 2 branches covered.">        if (!StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(account.getStato())) {</span>
+<span class="fc" id="L146">            throw new OperazioneUtenzaNonConsentitaException(&quot;L'account non è in attesa di attivazione.&quot;);</span>
+        }
+
+<span class="fc" id="L149">        return account;</span>
+    }
+
+    /**
+     * Primo passo del reinvio richiesto da chi possiede l'indirizzo, senza sessione: crea un nuovo link solo se
+     * l'email appartiene a un account in attesa di attivazione, di qualsiasi ruolo, e non tocca quelli già
+     * emessi. Per ogni altro indirizzo (sconosciuto, già attivo, revocato) non succede nulla e il chiamante non
+     * deve far capire la differenza.
+     *
+     * &lt;p&gt;Il link precedente si invalida solo quando la posta ha accettato l'email: l'esito si registra con
+     * {@link #concludeReinvio}, e se l'invio fallisce l'utente conserva l'ultimo link che ha ricevuto davvero. I
+     * tre passi sono transazioni separate, così durante l'invio non c'è nessun lock.&lt;/p&gt;
+     *
+     * &lt;p&gt;Lo stato si controlla dopo aver preso il lock sull'account, così una attivazione o una revoca arrivata
+     * nel frattempo non lascia un link valido.&lt;/p&gt;
+     *
+     * @param email indirizzo digitato dall'utente
+     * @return il link creato, oppure vuoto se l'indirizzo non è idoneo
+     */
+    public Optional&lt;LinkPreparato&gt; preparaTokenPerEmail(String email) {
+<span class="nc" id="L169">        String chiave = UtenzeService.normalizzaEmail(email);</span>
+<span class="nc bnc" id="L170" title="All 2 branches missed.">        if (chiave == null) {</span>
+<span class="nc" id="L171">            return Optional.empty();</span>
+        }
+<span class="nc" id="L173">        return accounts.findIdByEmailIgnoreCase(chiave)</span>
+<span class="nc" id="L174">                .flatMap(accounts::findByIdForUpdate)</span>
+<span class="nc" id="L175">                .filter(a -&gt; StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(a.getStato()))</span>
+<span class="nc" id="L176">                .map(a -&gt; new LinkPreparato(a.getId(), creaToken(a, Instant.now(clock), false)));</span>
+    }
+
+    /**
+     * Primo passo del reinvio del Banco: crea un nuovo link per l'account del ruolo atteso ancora in attesa di
+     * attivazione, senza chiudere quelli già emessi. Il link nuovo sostituisce i precedenti solo quando
+     * {@link #concludeReinvio} registra che la posta lo ha accettato; se l'invio fallisce, l'utente conserva l'ultimo
+     * link che ha ricevuto davvero.
+     *
+     * @param accountId account in attesa di attivazione
+     * @param ruoloAtteso ruolo che l'account deve avere
+     * @return dati per consegnare il nuovo link
+     */
+    public DatiInvioAttivazione preparaReinvio(UUID accountId, RuoloUtente ruoloAtteso) {
+<span class="fc" id="L190">        AccountJpa account = bloccaAccountPerReinvio(accountId, ruoloAtteso);</span>
+<span class="fc" id="L191">        return creaToken(account, Instant.now(clock), false);</span>
+    }
+
+    /**
+     * Mantiene la compatibilità per i chiamanti interni che usano l'evento AFTER_COMMIT.
+     */
+    public void generaEInviaAttivazione(AccountJpa account) {
+<span class="nc" id="L198">        DatiInvioAttivazione dati = preparaTokenAttivazione(account);</span>
+<span class="nc" id="L199">        eventPublisher.publishEvent(</span>
+<span class="nc" id="L200">                new LinkAttivazioneDaInviareEvent(dati.emailDestinatario(), dati.nomeDestinatario(), dati.tokenInChiaro()));</span>
+<span class="nc" id="L201">    }</span>
+
+    /**
+     * Verifica che un token esista, non sia scaduto e non sia già stato usato.
+     */
+    @Transactional(readOnly = true)
+    public boolean isTokenValido(String tokenInChiaro) {
+<span class="pc bpc" id="L208" title="2 of 4 branches missed.">        if (tokenInChiaro == null || tokenInChiaro.isBlank()) {</span>
+<span class="nc" id="L209">            return false;</span>
+        }
+<span class="fc" id="L211">        Instant ora = Instant.now(clock);</span>
+<span class="fc" id="L212">        return tokens.findByTokenHash(TokenMonouso.impronta(tokenInChiaro.strip()))</span>
+<span class="pc bpc" id="L213" title="1 of 4 branches missed.">                .filter(t -&gt; !t.isUsato() &amp;&amp; !t.isScaduto(ora))</span>
+<span class="fc" id="L214">                .flatMap(t -&gt; accounts.findById(t.getAccountId()))</span>
+<span class="fc" id="L215">                .filter(a -&gt; StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(a.getStato()))</span>
+<span class="fc" id="L216">                .isPresent();</span>
+    }
+
+    /**
+     * Consuma il token monouso in modo atomico (ordine lock: prima account, poi token),
+     * rilegge stato e scadenza sotto lock, imposta l'hash BCrypt della nuova password
+     * e attiva l'account.
+     */
+    public void attivaAccount(String tokenInChiaro, String nuovaPassword) {
+<span class="fc" id="L225">        PoliticaPassword.verifica(nuovaPassword);</span>
+
+<span class="pc bpc" id="L227" title="2 of 4 branches missed.">        if (tokenInChiaro == null || tokenInChiaro.isBlank()) {</span>
+<span class="nc" id="L228">            throw new TokenAttivazioneNonValidoException(&quot;Link di attivazione non valido o mancante.&quot;);</span>
+        }
+
+<span class="fc" id="L231">        String hash = TokenMonouso.impronta(tokenInChiaro.strip());</span>
+
+        // 1. Risoluzione senza lock per individuare l'account da serializzare. Si legge solo l'identificativo: se il
+        //    token fosse già caricato, la lettura con lock restituirebbe la copia in memoria con lo stato di prima e
+        //    un link appena sostituito da un reinvio attiverebbe comunque l'account.
+<span class="fc" id="L236">        UUID accountId = tokens.findAccountIdByTokenHash(hash)</span>
+<span class="pc" id="L237">                .orElseThrow(() -&gt; new TokenAttivazioneNonValidoException(&quot;Link di attivazione non valido.&quot;));</span>
+
+        // 2. Ordine unico di lock: prima AccountJpa, poi TokenAttivazioneJpa
+<span class="fc" id="L240">        AccountJpa account = accounts.findByIdForUpdate(accountId)</span>
+<span class="pc" id="L241">                .orElseThrow(() -&gt; new TokenAttivazioneNonValidoException(&quot;Account associato non trovato.&quot;));</span>
+
+<span class="fc" id="L243">        TokenAttivazioneJpa token = tokens.findByTokenHashForUpdate(hash)</span>
+<span class="pc" id="L244">                .orElseThrow(() -&gt; new TokenAttivazioneNonValidoException(&quot;Link di attivazione non valido.&quot;));</span>
+
+        // 3. Rilegge l'istante corrente dopo aver acquisito entrambi i lock
+<span class="fc" id="L247">        Instant ora = Instant.now(clock);</span>
+
+        // 4. Verifica stato account, validità, scadenza e uso sotto lock
+<span class="fc bfc" id="L250" title="All 2 branches covered.">        if (!StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(account.getStato())) {</span>
+<span class="fc" id="L251">            throw new TokenAttivazioneNonValidoException(&quot;L'account non è più attivabile.&quot;);</span>
+        }
+
+<span class="pc bpc" id="L254" title="1 of 4 branches missed.">        if (token.isUsato() || token.isScaduto(ora)) {</span>
+<span class="fc" id="L255">            throw new TokenAttivazioneNonValidoException(&quot;Il link di attivazione è scaduto o è già stato utilizzato.&quot;);</span>
+        }
+
+<span class="fc" id="L258">        token.segnaComeUsato(ora);</span>
+<span class="fc" id="L259">        account.attivaConPassword(passwordEncoder.encode(nuovaPassword));</span>
+<span class="fc" id="L260">        tokens.saveAndFlush(token);</span>
+<span class="fc" id="L261">        accounts.saveAndFlush(account);</span>
+<span class="fc" id="L262">    }</span>
+
+    /**
+     * Crea il link di un tentativo di consegna con l'account già bloccato dalla coda.
+     * I tentativi precedenti possono aver già raggiunto la casella del destinatario.
+     */
+    DatiInvioAttivazione preparaTokenImportazioneOpt(AccountJpa account) {
+<span class="fc" id="L269">        return creaToken(account, Instant.now(clock), true);</span>
+    }
+
+    /**
+     * Ultimo passo del reinvio: se la posta ha accettato l'email il link nuovo sostituisce i precedenti, altrimenti
+     * viene scartato e restano validi quelli di prima. Va chiamato dopo aver tolto, se c'è, l'invito dalla coda
+     * dell'importazione CSV ({@link ConclusioneReinvio}), per tenere l'ordine dei lock coda, account, token.
+     *
+     * @param accountId account che ha ricevuto il link
+     * @param dati link preparato per questo reinvio
+     * @param riuscito consegna accettata dal server SMTP oppure completata in modalità simulata
+     */
+    void concludeReinvio(UUID accountId, DatiInvioAttivazione dati, boolean riuscito) {
+<span class="fc" id="L282">        var account = accounts.findByIdForUpdate(accountId);</span>
+<span class="pc bpc" id="L283" title="2 of 4 branches missed.">        if (account.isEmpty() || !StatoUtenza.IN_ATTESA_DI_ATTIVAZIONE.name().equals(account.get().getStato())) {</span>
+<span class="nc" id="L284">            return;</span>
+        }
+
+<span class="fc" id="L287">        String hash = TokenMonouso.impronta(dati.tokenInChiaro());</span>
+<span class="fc" id="L288">        var attivi = tokens.findAttiviByAccountIdForUpdate(accountId);</span>
+<span class="fc" id="L289">        var tokenInviato = attivi.stream().filter(token -&gt; token.getTokenHash().equals(hash)).findFirst();</span>
+<span class="fc bfc" id="L290" title="All 2 branches covered.">        if (tokenInviato.isEmpty()) {</span>
+<span class="fc" id="L291">            return;</span>
+        }
+
+<span class="fc" id="L294">        var inviato = tokenInviato.get();</span>
+<span class="fc" id="L295">        Instant ora = Instant.now(clock);</span>
+<span class="fc bfc" id="L296" title="All 2 branches covered.">        if (!riuscito) {</span>
+<span class="fc" id="L297">            inviato.segnaComeUsato(ora);</span>
+<span class="fc" id="L298">            return;</span>
+        }
+
+        // Anche i link CSV preparati durante l'invio manuale sono sostituiti.
+<span class="fc" id="L302">        attivi.stream()</span>
+<span class="fc bfc" id="L303" title="All 4 branches covered.">                .filter(token -&gt; token.isDaImportazioneOpt() || token.getOrdineEmissione() &lt; inviato.getOrdineEmissione())</span>
+<span class="fc" id="L304">                .forEach(token -&gt; token.segnaComeUsato(ora));</span>
+<span class="fc" id="L305">    }</span>
+
+    /**
+     * Salva un nuovo token senza toccare quelli già emessi. Ogni token ha un numero di emissione strettamente
+     * maggiore dei precedenti dell'account, ed è questo ordine, e non il timestamp, che dice quale link sostituisce
+     * quale.
+     */
+    private DatiInvioAttivazione creaToken(AccountJpa account, Instant ora, boolean daImportazioneOpt) {
+        // L'inserimento dell'account o il suo lock serializza le emissioni anche su più istanze.
+<span class="fc" id="L314">        long ordineEmissione = tokens.ultimoOrdineEmissione(account.getId()) + 1;</span>
+<span class="fc" id="L315">        String tokenInChiaro = TokenMonouso.genera();</span>
+<span class="fc" id="L316">        tokens.saveAndFlush(new TokenAttivazioneJpa(</span>
+<span class="fc" id="L317">                UUID.randomUUID(), account.getId(), TokenMonouso.impronta(tokenInChiaro),</span>
+<span class="fc" id="L318">                ora.plus(durataValidita), ora, daImportazioneOpt, ordineEmissione));</span>
+<span class="fc" id="L319">        return new DatiInvioAttivazione(account.getEmail(), account.getNome(), tokenInChiaro);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

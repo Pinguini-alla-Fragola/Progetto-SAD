@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RegoleAnnullamento.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.richieste.interno.dominio</a> &gt; <span class="el_source">RegoleAnnullamento.java</span></div><h1>RegoleAnnullamento.java</h1><pre class="source lang-java linenums">package it.unina.picus.richieste.interno.dominio;
+
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
+import it.unina.picus.richieste.api.DatiRichiestaNonValidiException;
+import it.unina.picus.richieste.api.RichiesteApi;
+import it.unina.picus.richieste.api.RichiesteApi.StatoRichiesta;
+
+/**
+ * Regole sullo stato e sul motivo dell'annullamento di una richiesta (#28, criteri 10, 11, 12 e 15).
+ *
+ * &lt;p&gt;Stabiliscono se un comando di annullamento può proseguire. Chi può annullare lo decide
+ * {@link RegoleAccessoRichiesta#verificaAnnullamento}, che va chiamata per prima: a un account non
+ * autorizzato non si rivela nulla sulle regole di stato. L'annullamento è ammesso in qualsiasi stato.
+ *
+ * &lt;p&gt;Una ripetizione su una richiesta già Annullata è idempotente anche senza motivo, come
+ * promette il contratto di {@code RichiesteApi} e come prevede la #54. Per questo Annullata è tra
+ * gli stati con motivo facoltativo, e {@link #motivoObbligatorio} e {@link #valuta} danno la
+ * stessa risposta.
+ *
+ * @see RichiesteApi#annullaRichiesta
+ */
+public final class RegoleAnnullamento {
+
+    /** Cosa deve fare il caso d'uso dopo aver applicato le regole. */
+<span class="fc" id="L28">    public enum Decisione {</span>
+        /** Annulla la richiesta, conserva i dati già registrati e fa avvisare i soggetti coinvolti. */
+<span class="fc" id="L30">        ANNULLA,</span>
+        /** La richiesta è già Annullata: restituisce l'esito esistente senza riaprire la ricerca. */
+<span class="fc" id="L32">        GIA_ANNULLATA</span>
+    }
+
+    // Stati con motivo facoltativo: Creata e Annullata (la ripetizione è idempotente).
+<span class="fc" id="L36">    private static final Set&lt;StatoRichiesta&gt; MOTIVO_FACOLTATIVO =</span>
+<span class="fc" id="L37">            Set.of(StatoRichiesta.CREATA, StatoRichiesta.ANNULLATA);</span>
+    private static final int LUNGHEZZA_MASSIMA_MOTIVO = 500;
+
+    private RegoleAnnullamento() {
+    }
+
+    /**
+     * Dice se per annullare partendo da questo stato serve un motivo.
+     *
+     * @param stato stato corrente della richiesta
+     * @return {@code false} partendo da Creata e da Annullata, {@code true} negli altri stati
+     */
+    public static boolean motivoObbligatorio(StatoRichiesta stato) {
+<span class="fc bfc" id="L50" title="All 2 branches covered.">        return !MOTIVO_FACOLTATIVO.contains(Objects.requireNonNull(stato, &quot;stato&quot;));</span>
+    }
+
+    /**
+     * Applica le regole di stato e di motivo a un comando di annullamento già autorizzato.
+     * Il motivo mancante è un valore {@code null} oppure fatto solo di spazi, anche non separabili
+     * come U+00A0 e U+202F.
+     *
+     * @param stato stato corrente della richiesta
+     * @param motivo motivo indicato da chi annulla, facoltativo partendo da Creata e da Annullata
+     * @return {@link Decisione#GIA_ANNULLATA} se la richiesta è già Annullata, con o senza motivo,
+     *         altrimenti {@link Decisione#ANNULLA}
+     * @throws IllegalArgumentException se manca il motivo negli stati in cui è obbligatorio, cioè
+     *         tutti tranne Creata e Annullata
+     */
+    public static Decisione valuta(StatoRichiesta stato, String motivo) {
+<span class="fc bfc" id="L66" title="All 4 branches covered.">        if (motivoObbligatorio(stato) &amp;&amp; eVuoto(motivo)) {</span>
+<span class="fc" id="L67">            throw new DatiRichiestaNonValidiException(Map.of(&quot;motivo&quot;, &quot;Motivo obbligatorio&quot;));</span>
+        }
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        return stato == StatoRichiesta.ANNULLATA ? Decisione.GIA_ANNULLATA : Decisione.ANNULLA;</span>
+    }
+
+    /**
+     * Prepara il motivo del primo annullamento per la persistenza.
+     *
+     * @param motivo testo già valutato rispetto allo stato di partenza
+     * @return testo originale o {@code null} se il motivo è vuoto
+     * @throws DatiRichiestaNonValidiException se il motivo supera il limite, contiene Unicode malformato o caratteri
+     *         di controllo diversi da tabulazioni e ritorni a capo
+     */
+    static String motivoDaRegistrare(String motivo) {
+<span class="fc bfc" id="L81" title="All 4 branches covered.">        if (motivo != null &amp;&amp; motivo.length() &gt; LUNGHEZZA_MASSIMA_MOTIVO) {</span>
+<span class="fc" id="L82">            throw new DatiRichiestaNonValidiException(Map.of(&quot;motivo&quot;,</span>
+                    &quot;Il motivo può contenere al massimo &quot; + LUNGHEZZA_MASSIMA_MOTIVO + &quot; caratteri&quot;));
+        }
+<span class="fc bfc" id="L85" title="All 2 branches covered.">        if (eVuoto(motivo)) {</span>
+<span class="fc" id="L86">            return null;</span>
+        }
+<span class="fc bfc" id="L88" title="All 2 branches covered.">        if (motivo.codePoints().anyMatch(c -&gt;</span>
+<span class="fc bfc" id="L89" title="All 4 branches covered.">                (c &gt;= Character.MIN_SURROGATE &amp;&amp; c &lt;= Character.MAX_SURROGATE)</span>
+<span class="pc bpc" id="L90" title="1 of 8 branches missed.">                        || (Character.isISOControl(c) &amp;&amp; c != '\t' &amp;&amp; c != '\n' &amp;&amp; c != '\r'))) {</span>
+<span class="fc" id="L91">            throw new DatiRichiestaNonValidiException(Map.of(&quot;motivo&quot;, &quot;Usa testo semplice per il motivo&quot;));</span>
+        }
+<span class="fc" id="L93">        return motivo;</span>
+    }
+
+    // isBlank() non considera spazi i caratteri non separabili: isSpaceChar li include.
+    private static boolean eVuoto(String motivo) {
+<span class="fc bfc" id="L98" title="All 2 branches covered.">        return motivo == null</span>
+<span class="fc bfc" id="L99" title="All 6 branches covered.">                || motivo.codePoints().allMatch(c -&gt; Character.isWhitespace(c) || Character.isSpaceChar(c));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

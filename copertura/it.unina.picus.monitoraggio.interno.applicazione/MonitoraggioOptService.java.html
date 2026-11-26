@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MonitoraggioOptService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.monitoraggio.interno.applicazione</a> &gt; <span class="el_source">MonitoraggioOptService.java</span></div><h1>MonitoraggioOptService.java</h1><pre class="source lang-java linenums">package it.unina.picus.monitoraggio.interno.applicazione;
+
+import java.time.Clock;
+import java.time.Instant;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import it.unina.picus.catalogo.api.ConsultazioneCatalogoApi;
+import it.unina.picus.monitoraggio.api.ConteggiOptApi;
+import it.unina.picus.monitoraggio.api.DatiConteggiNonValidiException;
+import it.unina.picus.monitoraggio.api.MonitoraggioApi.ConteggioOpt;
+import it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre;
+import it.unina.picus.monitoraggio.api.MonitoraggioApi.VoceMisura;
+import it.unina.picus.monitoraggio.interno.dominio.RegoleAccessoConteggi;
+import it.unina.picus.monitoraggio.interno.persistenza.CategoriaMonitoraggioJpa;
+import it.unina.picus.monitoraggio.interno.persistenza.CategoriaMonitoraggioRepository;
+import it.unina.picus.monitoraggio.interno.persistenza.ConfigurazioneMonitoraggioJpa;
+import it.unina.picus.monitoraggio.interno.persistenza.ConfigurazioneMonitoraggioRepository;
+import it.unina.picus.monitoraggio.interno.persistenza.ConteggioOptJpa;
+import it.unina.picus.monitoraggio.interno.persistenza.ConteggioOptRepository;
+import it.unina.picus.utenze.api.UtenzeApi;
+import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
+
+@Service
+@Profile(&quot;!skeleton&quot;)
+public class MonitoraggioOptService implements ConteggiOptApi, ConsultazioneConteggiOpt {
+
+    private final ConteggioOptRepository conteggiRepo;
+    private final CategoriaMonitoraggioRepository categorieRepo;
+    private final ConfigurazioneMonitoraggioRepository configRepo;
+    private final ConsultazioneCatalogoApi catalogo;
+    private final UtenzeApi utenze;
+    private final Clock clock;
+
+    public MonitoraggioOptService(
+            ConteggioOptRepository conteggiRepo,
+            CategoriaMonitoraggioRepository categorieRepo,
+            ConfigurazioneMonitoraggioRepository configRepo,
+            ConsultazioneCatalogoApi catalogo,
+            UtenzeApi utenze,
+<span class="fc" id="L53">            Optional&lt;Clock&gt; clock) {</span>
+<span class="fc" id="L54">        this.conteggiRepo = conteggiRepo;</span>
+<span class="fc" id="L55">        this.categorieRepo = categorieRepo;</span>
+<span class="fc" id="L56">        this.configRepo = configRepo;</span>
+<span class="fc" id="L57">        this.catalogo = catalogo;</span>
+<span class="fc" id="L58">        this.utenze = utenze;</span>
+<span class="fc" id="L59">        this.clock = clock.orElse(Clock.systemUTC());</span>
+<span class="fc" id="L60">    }</span>
+
+    @Override
+    @Transactional(readOnly = true)
+    public List&lt;CategoriaVoce&gt; elencoCategorieAttive() {
+<span class="nc" id="L65">        return categorieRepo.findByAttivaTrueOrderByCodiceAsc().stream()</span>
+<span class="nc" id="L66">                .map(c -&gt; new CategoriaVoce(c.getCodice(), c.getDescrizione()))</span>
+<span class="nc" id="L67">                .toList();</span>
+    }
+
+    @Override
+    @Transactional
+    public void registraConteggiOpt(IdentitaAutenticata attore, Trimestre trimestre, List&lt;VoceMisura&gt; conteggi) {
+<span class="fc" id="L73">        RegoleAccessoConteggi.verificaRegistrazione(attore);</span>
+
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">        if (trimestre == null) {</span>
+<span class="nc" id="L76">            throw new DatiConteggiNonValidiException(</span>
+                    &quot;Trimestre obbligatorio.&quot;,
+<span class="nc" id="L78">                    Map.of(&quot;trimestre&quot;, &quot;Seleziona anno e trimestre.&quot;));</span>
+        }
+<span class="fc" id="L80">        ConteggiTrimestrali.validaPeriodo(trimestre, &quot;anno&quot;, &quot;trimestre&quot;);</span>
+
+<span class="pc bpc" id="L82" title="2 of 4 branches missed.">        if (conteggi == null || conteggi.isEmpty()) {</span>
+<span class="nc" id="L83">            throw new DatiConteggiNonValidiException(</span>
+                    &quot;Inserisci almeno una voce di conteggio.&quot;,
+<span class="nc" id="L85">                    Map.of(&quot;voci&quot;, &quot;Inserisci almeno una voce valida.&quot;));</span>
+        }
+
+<span class="fc" id="L88">        Map&lt;String, String&gt; errori = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L89">        Set&lt;String&gt; chiaviNelBatch = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L90">        Set&lt;String&gt; categorieAttive = categorieRepo.findByAttivaTrueOrderByCodiceAsc().stream()</span>
+<span class="fc" id="L91">                .map(CategoriaMonitoraggioJpa::getCodice)</span>
+<span class="fc" id="L92">                .collect(Collectors.toSet());</span>
+<span class="fc" id="L93">        Map&lt;Long, Boolean&gt; misureCache = new HashMap&lt;&gt;();</span>
+
+<span class="fc bfc" id="L95" title="All 2 branches covered.">        for (int i = 0; i &lt; conteggi.size(); i++) {</span>
+<span class="fc" id="L96">            VoceMisura item = conteggi.get(i);</span>
+<span class="pc bpc" id="L97" title="1 of 2 branches missed.">            if (item == null) {</span>
+<span class="nc" id="L98">                errori.put(&quot;voci[&quot; + i + &quot;]&quot;, &quot;Voce non valida.&quot;);</span>
+<span class="nc" id="L99">                continue;</span>
+            }
+<span class="fc bfc" id="L101" title="All 4 branches covered.">            if (item.misuraId() &lt;= 0 || !misuraEsiste(item.misuraId(), misureCache)) {</span>
+<span class="fc" id="L102">                errori.put(&quot;misuraId&quot;, &quot;La misura selezionata non è valida.&quot;);</span>
+            }
+<span class="pc bpc" id="L104" title="1 of 2 branches missed.">            String codiceVoce = item.voce() == null ? &quot;&quot; : item.voce().trim();</span>
+<span class="fc bfc" id="L105" title="All 4 branches covered.">            if (codiceVoce.isEmpty() || !categorieAttive.contains(codiceVoce)) {</span>
+<span class="fc" id="L106">                errori.put(&quot;voci[&quot; + i + &quot;].voce&quot;, &quot;Voce del tracciato non valida o non attiva.&quot;);</span>
+            }
+<span class="fc bfc" id="L108" title="All 2 branches covered.">            if (item.valore() &lt; 0) {</span>
+<span class="fc" id="L109">                errori.put(&quot;voci[&quot; + i + &quot;].valore&quot;, &quot;Il conteggio non può essere negativo (usa 0 per dichiarare zero).&quot;);</span>
+            }
+<span class="fc" id="L111">            String chiaveDuplicato = item.misuraId() + &quot;::&quot; + codiceVoce;</span>
+<span class="fc bfc" id="L112" title="All 2 branches covered.">            if (!chiaviNelBatch.add(chiaveDuplicato)) {</span>
+<span class="fc" id="L113">                errori.put(&quot;voci[&quot; + i + &quot;].voce&quot;, &quot;Voce duplicata per la stessa misura nel medesimo invio.&quot;);</span>
+            }
+        }
+
+<span class="fc bfc" id="L117" title="All 2 branches covered.">        if (!errori.isEmpty()) {</span>
+<span class="fc" id="L118">            throw new DatiConteggiNonValidiException(&quot;Controlla i campi dei conteggi trimestrali.&quot;, errori);</span>
+        }
+
+<span class="fc" id="L121">        Instant adesso = Instant.now(clock);</span>
+<span class="fc" id="L122">        UUID optId = attore.accountId();</span>
+
+        // Invii equivalenti acquisiscono i lock delle voci nello stesso ordine.
+<span class="fc" id="L125">        var vociOrdinate = conteggi.stream()</span>
+<span class="fc" id="L126">                .sorted(Comparator.comparingLong(VoceMisura::misuraId).thenComparing(voce -&gt; voce.voce().trim()))</span>
+<span class="fc" id="L127">                .toList();</span>
+<span class="fc bfc" id="L128" title="All 2 branches covered.">        for (VoceMisura item : vociOrdinate) {</span>
+<span class="fc" id="L129">            String voce = item.voce().trim();</span>
+<span class="fc" id="L130">            int inseriti = conteggiRepo.inserisciSeAssente(</span>
+<span class="fc" id="L131">                    UUID.randomUUID(), optId, trimestre.anno(), trimestre.numero(),</span>
+<span class="fc" id="L132">                    item.misuraId(), voce, item.valore(), adesso);</span>
+
+<span class="fc bfc" id="L134" title="All 2 branches covered.">            if (inseriti == 0) {</span>
+<span class="fc" id="L135">                ConteggioOptJpa esistente = conteggiRepo</span>
+<span class="fc" id="L136">                        .findByOptIdAndAnnoAndTrimestreAndMisuraIdAndVoce(</span>
+<span class="fc" id="L137">                                optId, trimestre.anno(), trimestre.numero(), item.misuraId(), voce)</span>
+<span class="pc" id="L138">                        .orElseThrow(() -&gt; new IllegalStateException(&quot;Conflitto concorrente durante la lettura del conteggio.&quot;));</span>
+
+<span class="fc bfc" id="L140" title="All 2 branches covered.">                if (esistente.getValore() == item.valore()) {</span>
+<span class="fc" id="L141">                    continue;</span>
+                }
+<span class="fc" id="L143">                verificaCorrezioneConsentita(adesso);</span>
+<span class="fc" id="L144">                esistente.aggiornaValore(item.valore(), adesso);</span>
+<span class="fc" id="L145">                conteggiRepo.save(esistente);</span>
+            }
+<span class="fc" id="L147">        }</span>
+<span class="fc" id="L148">    }</span>
+
+    /** {@inheritDoc} */
+    @Override
+    @Transactional(readOnly = true)
+    public List&lt;ConteggioOpt&gt; consultaConteggiOpt(IdentitaAutenticata attore, UUID optId, Trimestre da, Trimestre a) {
+<span class="fc" id="L154">        return ConteggiTrimestrali.convertiInConteggi(consultaConteggiEsatti(attore, optId, da, a));</span>
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Transactional(readOnly = true)
+    public List&lt;ConteggioEsatto&gt; consultaConteggiEsatti(
+            IdentitaAutenticata attore, UUID optId, Trimestre da, Trimestre a) {
+<span class="fc" id="L162">        RegoleAccessoConteggi.verificaConsultazione(attore, optId);</span>
+
+<span class="fc" id="L164">        ConteggiTrimestrali.validaIntervallo(da, a);</span>
+<span class="fc" id="L165">        ConteggiTrimestrali.verificaOpt(utenze, optId);</span>
+
+        // La #43 conserva una sola riga per OPT, trimestre, misura e voce. Una correzione la aggiorna.
+<span class="fc" id="L168">        var righe = conteggiRepo.cercaNelPeriodo(optId, da.anno(), da.numero(), a.anno(), a.numero()).stream()</span>
+<span class="fc" id="L169">                .map(riga -&gt; new ConteggioOpt(riga.getOptId(),</span>
+<span class="fc" id="L170">                        new VoceMisura(riga.getMisuraId(), riga.getVoce(), riga.getValore())))</span>
+<span class="fc" id="L171">                .toList();</span>
+<span class="fc" id="L172">        return ConteggiTrimestrali.cumula(righe);</span>
+    }
+
+    private boolean misuraEsiste(long misuraId, Map&lt;Long, Boolean&gt; cache) {
+<span class="fc" id="L176">        return cache.computeIfAbsent(misuraId, id -&gt; catalogo.cercaMisura(id).isPresent());</span>
+    }
+
+    private void verificaCorrezioneConsentita(Instant adesso) {
+<span class="fc" id="L180">        ConfigurazioneMonitoraggioJpa config = configRepo.findById((short) 1).orElse(null);</span>
+<span class="pc bpc" id="L181" title="1 of 4 branches missed.">        if (config == null || !config.isCorrezioniAbilitate()) {</span>
+<span class="fc" id="L182">            throw new IllegalStateException(</span>
+                    &quot;I conteggi per questa voce risultano già registrati e le correzioni sono disattivate dal Banco.&quot;);
+        }
+<span class="fc bfc" id="L185" title="All 4 branches covered.">        if (config.getScadenzaCorrezioni() != null &amp;&amp; adesso.isAfter(config.getScadenzaCorrezioni())) {</span>
+<span class="fc" id="L186">            throw new IllegalStateException(</span>
+                    &quot;Il termine fissato dal Banco per le correzioni dei conteggi è scaduto.&quot;);
+        }
+<span class="fc" id="L189">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

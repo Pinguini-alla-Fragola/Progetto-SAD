@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TipoAllegato.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.comunicazioni.interno.dominio</a> &gt; <span class="el_source">TipoAllegato.java</span></div><h1>TipoAllegato.java</h1><pre class="source lang-java linenums">package it.unina.picus.comunicazioni.interno.dominio;
+
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Predicate;
+
+/**
+ * I tipi di file che si possono allegare: PDF, immagini PNG e JPEG, testo semplice. Sono quelli già indicati nel
+ * modulo della pagina del Banco. Il tipo si riconosce dal contenuto del file, non dal nome né da quello che
+ * dichiara il browser: un file rinominato non può fingersi un altro tipo. Ogni tipo sa anche controllare che il
+ * file sia completo e si possa aprire (vedi {@link StrutturaAllegato}).
+ */
+<span class="fc" id="L15">public enum TipoAllegato {</span>
+<span class="fc" id="L16">    PDF(&quot;application/pdf&quot;, Set.of(&quot;pdf&quot;), Firme.PDF, StrutturaAllegato::pdfApribile),</span>
+<span class="fc" id="L17">    PNG(&quot;image/png&quot;, Set.of(&quot;png&quot;), Firme.PNG, contenuto -&gt; StrutturaAllegato.immagineLeggibile(contenuto, &quot;png&quot;)),</span>
+<span class="fc" id="L18">    JPEG(&quot;image/jpeg&quot;, Set.of(&quot;jpg&quot;, &quot;jpeg&quot;), Firme.JPEG,</span>
+<span class="fc" id="L19">            contenuto -&gt; StrutturaAllegato.immagineLeggibile(contenuto, &quot;jpeg&quot;)),</span>
+    /** Il testo non ha una firma: è l'ultima possibilità, se nessun formato binario corrisponde. */
+<span class="fc" id="L21">    TESTO(&quot;text/plain&quot;, Set.of(&quot;txt&quot;), Firme.NESSUNA, StrutturaAllegato::testoSemplice);</span>
+
+    private final String tipoMime;
+    private final Set&lt;String&gt; estensioni;
+    private final byte[] firma;
+    private final Predicate&lt;byte[]&gt; struttura;
+
+<span class="fc" id="L28">    TipoAllegato(String tipoMime, Set&lt;String&gt; estensioni, byte[] firma, Predicate&lt;byte[]&gt; struttura) {</span>
+<span class="fc" id="L29">        this.tipoMime = tipoMime;</span>
+<span class="fc" id="L30">        this.estensioni = estensioni;</span>
+<span class="fc" id="L31">        this.firma = firma;</span>
+<span class="fc" id="L32">        this.struttura = struttura;</span>
+<span class="fc" id="L33">    }</span>
+
+    public String tipoMime() {
+<span class="fc" id="L36">        return tipoMime;</span>
+    }
+
+    /**
+     * Indica se il nome del file ha un'estensione coerente con questo tipo.
+     *
+     * @param nomeFile nome del file, con estensione
+     * @return vero se l'estensione è una di quelle del tipo
+     */
+    public boolean ammette(String nomeFile) {
+<span class="fc" id="L46">        int punto = nomeFile.lastIndexOf('.');</span>
+<span class="pc bpc" id="L47" title="1 of 4 branches missed.">        return punto &gt;= 0 &amp;&amp; estensioni.contains(nomeFile.substring(punto + 1).toLowerCase(Locale.ROOT));</span>
+    }
+
+    /**
+     * Indica se il file è completo e si può aprire: non basta che inizi con i byte giusti.
+     *
+     * @param contenuto contenuto del file, già riconosciuto come di questo tipo
+     * @return vero se la struttura del file è valida
+     */
+    public boolean integro(byte[] contenuto) {
+<span class="fc" id="L57">        return struttura.test(contenuto);</span>
+    }
+
+    /**
+     * Ritrova il tipo a partire dal tipo MIME salvato.
+     *
+     * @param tipoMime tipo MIME
+     * @return il tipo corrispondente, se è tra quelli ammessi
+     */
+    public static Optional&lt;TipoAllegato&gt; daTipoMime(String tipoMime) {
+<span class="fc" id="L67">        return Arrays.stream(values()).filter(tipo -&gt; tipo.tipoMime.equals(tipoMime)).findFirst();</span>
+    }
+
+    /**
+     * Riconosce il tipo guardando i primi byte del file, che per PDF, PNG e JPEG sono sempre gli stessi. Un file
+     * senza una di queste firme è accettato solo se è testo semplice. Che un PDF o un'immagine sia anche integro
+     * si controlla a parte con {@link #integro(byte[])}.
+     *
+     * @param contenuto contenuto del file
+     * @return il tipo riconosciuto, oppure vuoto se il file non è di un tipo ammesso
+     */
+    public static Optional&lt;TipoAllegato&gt; riconosci(byte[] contenuto) {
+<span class="fc" id="L79">        return Arrays.stream(values())</span>
+<span class="fc bfc" id="L80" title="All 4 branches covered.">                .filter(tipo -&gt; tipo.firma.length &gt; 0 &amp;&amp; iniziaCon(contenuto, tipo.firma))</span>
+<span class="fc" id="L81">                .findFirst()</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">                .or(() -&gt; TESTO.integro(contenuto) ? Optional.of(TESTO) : Optional.empty());</span>
+    }
+
+    private static boolean iniziaCon(byte[] contenuto, byte[] firma) {
+<span class="fc bfc" id="L86" title="All 4 branches covered.">        return contenuto.length &gt;= firma.length &amp;&amp; Arrays.equals(contenuto, 0, firma.length, firma, 0, firma.length);</span>
+    }
+
+    /** Primi byte che identificano i formati binari. */
+    private static final class Firme {
+<span class="fc" id="L91">        static final byte[] PDF = {'%', 'P', 'D', 'F', '-'};</span>
+<span class="fc" id="L92">        static final byte[] PNG = {(byte) 0x89, 'P', 'N', 'G', '\r', '\n', 0x1A, '\n'};</span>
+<span class="fc" id="L93">        static final byte[] JPEG = {(byte) 0xFF, (byte) 0xD8, (byte) 0xFF};</span>
+<span class="fc" id="L94">        static final byte[] NESSUNA = {};</span>
+
+        private Firme() {
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

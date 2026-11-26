@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NormalizzatoreDatiOperatore.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.utenze.interno.applicazione</a> &gt; <span class="el_source">NormalizzatoreDatiOperatore.java</span></div><h1>NormalizzatoreDatiOperatore.java</h1><pre class="source lang-java linenums">package it.unina.picus.utenze.interno.applicazione;
+
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import it.unina.picus.utenze.interno.dominio.DatiOperatore;
+
+/** Ripulisce i campi ricevuti, così che le regole lavorino sempre su dati nella stessa forma. */
+final class NormalizzatoreDatiOperatore {
+
+    private NormalizzatoreDatiOperatore() {
+    }
+
+    static DatiOperatore normalizza(ComandoCreaOperatore comando) {
+<span class="nc bnc" id="L18" title="All 2 branches missed.">        if (comando == null) {</span>
+<span class="nc" id="L19">            return new DatiOperatore(null, null, null, null, null, null, null, Set.of(), false);</span>
+        }
+<span class="nc" id="L21">        return new DatiOperatore(</span>
+<span class="nc" id="L22">                testo(comando.nome()),</span>
+<span class="nc" id="L23">                testo(comando.cognome()),</span>
+<span class="nc" id="L24">                maiuscolo(testo(comando.codiceFiscale())),</span>
+<span class="nc" id="L25">                minuscolo(testo(comando.email())),</span>
+<span class="nc" id="L26">                testo(comando.telefono()),</span>
+<span class="nc" id="L27">                testo(comando.comuneCodice()),</span>
+<span class="nc" id="L28">                testo(comando.tipologia()),</span>
+<span class="nc" id="L29">                misure(comando.misure()),</span>
+<span class="nc" id="L30">                comando.centroPicus());</span>
+    }
+
+    /** Toglie gli spazi ai bordi; un testo vuoto diventa {@code null}. */
+    private static String testo(String valore) {
+<span class="nc bnc" id="L35" title="All 2 branches missed.">        if (valore == null) {</span>
+<span class="nc" id="L36">            return null;</span>
+        }
+<span class="nc" id="L38">        String ripulito = valore.strip();</span>
+<span class="nc bnc" id="L39" title="All 2 branches missed.">        return ripulito.isEmpty() ? null : ripulito;</span>
+    }
+
+    private static String maiuscolo(String valore) {
+<span class="nc bnc" id="L43" title="All 2 branches missed.">        return valore == null ? null : valore.toUpperCase(Locale.ROOT);</span>
+    }
+
+    private static String minuscolo(String valore) {
+<span class="nc bnc" id="L47" title="All 2 branches missed.">        return valore == null ? null : valore.toLowerCase(Locale.ROOT);</span>
+    }
+
+    private static Set&lt;Long&gt; misure(List&lt;Long&gt; valori) {
+<span class="nc bnc" id="L51" title="All 2 branches missed.">        if (valori == null) {</span>
+<span class="nc" id="L52">            return Set.of();</span>
+        }
+<span class="nc" id="L54">        return valori.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableSet());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RegoleAccessoScheda.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.monitoraggio.interno.dominio</a> &gt; <span class="el_source">RegoleAccessoScheda.java</span></div><h1>RegoleAccessoScheda.java</h1><pre class="source lang-java linenums">package it.unina.picus.monitoraggio.interno.dominio;
+
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.BiPredicate;
+
+import it.unina.picus.monitoraggio.api.MonitoraggioApi;
+import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
+import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
+
+import static it.unina.picus.shared.ControlloAccesso.richiedi;
+
+/**
+ * Regole di accesso alle schede personali degli operatori (#28, criteri 4 e 5).
+ *
+ * &lt;p&gt;La scheda contiene dati personali, contrattuali ed economici: la invia il solo operatore
+ * titolare e la consultano il titolare e il Banco. Le OPT e gli altri operatori non hanno accesso.
+ * L'identità arriva dalla sessione e il titolare della scheda dai dati salvati, mai da parametri
+ * del client. Un accesso non consentito lancia {@link SecurityException}, che il livello web
+ * traduce in {@code 403} senza restituire dati.
+ *
+ * &lt;p&gt;Ciò che non è espressamente consentito è negato. Un'identità incompleta non ha mai accesso.
+ *
+ * &lt;p&gt;Oggi il permesso «Banco autorizzato alla rendicontazione» (#57, {@code MonitoraggioApi#riepilogaSchede})
+ * coincide con il ruolo Banco, perché il modello ha solo ruoli: ogni identità Banco completa lo
+ * possiede. Se il team distinguerà i due livelli, la decisione dovrà ricevere il permesso
+ * verificato dal server.
+ *
+ * @see MonitoraggioApi
+ */
+public final class RegoleAccessoScheda {
+
+<span class="fc" id="L33">    private static final Set&lt;RuoloUtente&gt; SOLO_BANCO = Set.of(RuoloUtente.BANCO);</span>
+<span class="fc" id="L34">    private static final Set&lt;RuoloUtente&gt; SOLO_OPERATORE = Set.of(RuoloUtente.OPERATORE);</span>
+<span class="fc" id="L35">    private static final Set&lt;RuoloUtente&gt; LETTORI = Set.of(RuoloUtente.BANCO, RuoloUtente.OPERATORE);</span>
+
+    // Relazioni con la scheda. Il secondo argomento è l'account dell'operatore titolare.
+<span class="fc" id="L38">    private static final BiPredicate&lt;IdentitaAutenticata, UUID&gt; E_BANCO =</span>
+<span class="fc bfc" id="L39" title="All 2 branches covered.">            (attore, operatoreId) -&gt; attore.ruolo() == RuoloUtente.BANCO;</span>
+
+<span class="fc" id="L41">    private static final BiPredicate&lt;IdentitaAutenticata, UUID&gt; E_TITOLARE =</span>
+<span class="pc bpc" id="L42" title="1 of 2 branches missed.">            (attore, operatoreId) -&gt; attore.ruolo() == RuoloUtente.OPERATORE</span>
+<span class="fc bfc" id="L43" title="All 2 branches covered.">                    &amp;&amp; attore.accountId().equals(operatoreId);</span>
+
+<span class="fc" id="L45">    private static final BiPredicate&lt;IdentitaAutenticata, UUID&gt; PUO_CONSULTARE =</span>
+<span class="fc" id="L46">            E_BANCO.or(E_TITOLARE);</span>
+
+    private RegoleAccessoScheda() {
+    }
+
+    /**
+     * Invio ed elenco delle proprie schede: riservati agli operatori interni e agli esterni pagati
+     * dal Banco. La scheda inviata appartiene all'operatore autenticato.
+     *
+     * @param attore identità verificata della sessione
+     * @throws SecurityException se l'identità è incompleta o l'attore non è un operatore
+     * @see MonitoraggioApi#inviaSchedaOperatore
+     * @see MonitoraggioApi#elencoSchedeOperatore
+     */
+    public static void verificaOperatore(IdentitaAutenticata attore) {
+<span class="fc" id="L61">        richiediRuolo(attore, SOLO_OPERATORE, &quot;Operazione riservata agli operatori&quot;);</span>
+<span class="fc" id="L62">    }</span>
+
+    /**
+     * Esclude i ruoli non ammessi prima di cercare la scheda. Dopo la ricerca
+     * {@link #verificaConsultazione} controlla anche la titolarità.
+     *
+     * @param attore identità verificata della sessione
+     * @throws SecurityException se l'identità è incompleta o il ruolo non è ammesso
+     */
+    public static void verificaRuoloConsultazione(IdentitaAutenticata attore) {
+<span class="fc" id="L72">        richiediRuolo(attore, LETTORI, &quot;Accesso negato alla scheda&quot;);</span>
+<span class="fc" id="L73">    }</span>
+
+    /**
+     * Consultazione di una scheda: il Banco oppure l'operatore titolare, e nessun altro.
+     *
+     * @param attore identità verificata della sessione
+     * @param operatoreId account dell'operatore titolare, oppure {@code null} se la scheda è assente
+     * @throws SecurityException se l'identità è incompleta o l'attore è una OPT o un altro operatore
+     * @see MonitoraggioApi#consultaSchedaOperatore
+     */
+    public static void verificaConsultazione(IdentitaAutenticata attore, UUID operatoreId) {
+<span class="fc" id="L84">        richiedi(consente(PUO_CONSULTARE, attore, operatoreId), &quot;Accesso negato alla scheda&quot;);</span>
+<span class="fc" id="L85">    }</span>
+
+    /**
+     * Riepilogo delle schede ricevute nel trimestre, per la rendicontazione: riservato al Banco.
+     *
+     * @param attore identità verificata della sessione
+     * @throws SecurityException se l'identità è incompleta o l'attore non è il Banco
+     * @see MonitoraggioApi#riepilogaSchede
+     */
+    public static void verificaRiepilogo(IdentitaAutenticata attore) {
+<span class="fc" id="L95">        richiediRuolo(attore, SOLO_BANCO, &quot;Operazione riservata al Banco&quot;);</span>
+<span class="fc" id="L96">    }</span>
+
+    private static void richiediRuolo(IdentitaAutenticata attore, Set&lt;RuoloUtente&gt; ammessi, String messaggio) {
+<span class="pc bpc" id="L99" title="1 of 4 branches missed.">        richiedi(identitaCompleta(attore) &amp;&amp; ammessi.contains(attore.ruolo()), messaggio);</span>
+<span class="fc" id="L100">    }</span>
+
+    /** Un'identità incompleta, senza account o senza ruolo, non ha mai accesso. */
+    private static boolean identitaCompleta(IdentitaAutenticata attore) {
+<span class="pc bpc" id="L104" title="3 of 6 branches missed.">        return attore != null &amp;&amp; attore.accountId() != null &amp;&amp; attore.ruolo() != null;</span>
+    }
+
+    /**
+     * Valuta una politica solo su un'identità completa: un attore incompleto non ha mai accesso.
+     */
+    private static boolean consente(BiPredicate&lt;IdentitaAutenticata, UUID&gt; politica,
+                                    IdentitaAutenticata attore, UUID operatoreId) {
+<span class="pc bpc" id="L112" title="1 of 2 branches missed.">        if (!identitaCompleta(attore)) {</span>
+<span class="nc" id="L113">            return false;</span>
+        }
+<span class="fc" id="L115">        return politica.test(attore, operatoreId);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

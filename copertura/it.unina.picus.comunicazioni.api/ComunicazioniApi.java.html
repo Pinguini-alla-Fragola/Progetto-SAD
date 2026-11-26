@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ComunicazioniApi.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.comunicazioni.api</a> &gt; <span class="el_source">ComunicazioniApi.java</span></div><h1>ComunicazioniApi.java</h1><pre class="source lang-java linenums">package it.unina.picus.comunicazioni.api;
+
+import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.UUID;
+
+/**
+ * Gestisce le comunicazioni del Banco, i riscontri dei destinatari e la consegna degli avvisi
+ * operativi. Richieste rimane responsabile della pratica e delle azioni a cui puntano gli avvisi.
+ */
+public interface ComunicazioniApi extends AvvisiOperativiApi, AvvisiAnnullamentoApi {
+
+    /**
+     * Invia una comunicazione del Banco. Il modulo risolve e registra gli account destinatari
+     * al momento dell'invio e rende disponibili nell'app la comunicazione e gli allegati.
+     *
+     * @param attore identità verificata del Banco di coordinamento
+     * @param dati testo, selezione destinatari ed eventuali allegati
+     * @return comunicazione registrata
+     * @throws SecurityException se l'attore non è il Banco
+     * @throws IllegalArgumentException se mancano testo o destinatari, la selezione è incoerente
+     *                                  o un allegato non rispetta le regole di caricamento
+     */
+    Comunicazione inviaComunicazione(IdentitaAutenticata attore, DatiComunicazione dati);
+
+    /**
+     * Elenca per il Banco le comunicazioni inviate, consultabili anche dopo l'invio.
+     *
+     * @param attore identità verificata del Banco di coordinamento
+     * @return comunicazioni inviate, senza contenuto binario
+     * @throws SecurityException se l'attore non è il Banco
+     */
+    List&lt;Comunicazione&gt; elencoInviate(IdentitaAutenticata attore);
+
+    /**
+     * Elenca le comunicazioni ricevute dall'account autenticato.
+     *
+     * @param attore identità verificata dell'account che consulta la propria casella
+     * @return comunicazioni con eventuale riscontro dell'account, senza contenuto binario
+     */
+    List&lt;Comunicazione&gt; elencoRicevute(IdentitaAutenticata attore);
+
+    /**
+     * Consulta il testo e i metadati degli allegati. L'apertura lascia il riscontro invariato.
+     *
+     * @param attore identità verificata del Banco o dell'account destinatario
+     * @param comunicazioneId identificativo della comunicazione
+     * @return comunicazione visibile all'account
+     * @throws SecurityException se l'attore non può leggere la comunicazione
+     * @throws NoSuchElementException se la comunicazione non esiste
+     */
+    Comunicazione consultaComunicazione(IdentitaAutenticata attore, UUID comunicazioneId);
+
+    /**
+     * Scarica un allegato con gli stessi controlli di accesso della comunicazione.
+     *
+     * @param attore identità verificata del Banco o dell'account destinatario
+     * @param allegatoId identificativo dell'allegato
+     * @return file e relativi metadati
+     * @throws SecurityException se l'attore non può leggere la comunicazione
+     * @throws NoSuchElementException se l'allegato non esiste
+     */
+    FileAllegato scaricaAllegato(IdentitaAutenticata attore, UUID allegatoId);
+
+    /**
+     * Registra la conferma esplicita per l'account destinatario. Un nuovo tentativo dello stesso
+     * account per la stessa comunicazione restituisce la data e l'ora del primo riscontro.
+     *
+     * @param attore identità verificata dell'account destinatario
+     * @param comunicazioneId identificativo della comunicazione ricevuta
+     * @return istante della prima conferma
+     * @throws SecurityException se l'account non può confermare per la comunicazione indicata,
+     *                           inclusa una comunicazione inesistente
+     */
+    Instant confermaRicezione(IdentitaAutenticata attore, UUID comunicazioneId);
+
+    /**
+     * Elenca per il Banco i destinatari registrati all'invio, con l'istante del primo riscontro
+     * se hanno confermato e lo stato di attesa negli altri casi.
+     *
+     * @param attore identità verificata del Banco di coordinamento
+     * @param comunicazioneId identificativo della comunicazione inviata
+     * @return una voce per account destinatario
+     * @throws SecurityException se l'attore non è il Banco
+     * @throws NoSuchElementException se la comunicazione indicata non è in archivio
+     */
+    List&lt;Riscontro&gt; elencoRiscontri(IdentitaAutenticata attore, UUID comunicazioneId);
+
+    /**
+     * Registra l'avviso per un contatto di disponibilità acquisito da Richieste. Più chiamate
+     * per lo stesso contatto e destinatario producono un solo avviso visibile nell'app.
+     *
+     * @param richiestaId riferimento alla pratica
+     * @param contattoId riferimento al contatto da aprire per rispondere
+     * @param destinatarioId unico account interpellato, determinato da Richieste
+     */
+    void avvisaDisponibilita(UUID richiestaId, UUID contattoId, UUID destinatarioId);
+
+    /**
+     * Elenca gli avvisi operativi destinati all'account, senza esporre i dati della pratica.
+     *
+     * @param attore identità verificata dell'account destinatario
+     * @return avvisi visibili al destinatario, eventualmente nessuno
+     */
+    List&lt;AvvisoOperativo&gt; elencoAvvisiOperativi(IdentitaAutenticata attore);
+
+    /**
+     * Dati di invio della comunicazione e selezione dei destinatari.
+     *
+     * @param titolo titolo della comunicazione
+     * @param testo testo da inviare
+     * @param tipo categoria di destinatari e ampiezza della selezione
+     * @param gruppo account selezionati per un invio a gruppo, insieme vuoto per un invio all'intera categoria
+     * @param allegati file da inviare, eventualmente nessuno
+     */
+    record DatiComunicazione(
+            String titolo, String testo, TipoDestinatari tipo, Set&lt;UUID&gt; gruppo, List&lt;FileAllegato&gt; allegati) {
+        /** Crea una copia immutabile della selezione e della lista degli allegati. */
+<span class="nc" id="L123">        public DatiComunicazione {</span>
+<span class="nc" id="L124">            gruppo = Set.copyOf(gruppo);</span>
+<span class="nc" id="L125">            allegati = List.copyOf(allegati);</span>
+<span class="nc" id="L126">        }</span>
+    }
+
+    /**
+     * File allegato per l'invio o lo scaricamento.
+     *
+     * @param nomeFile nome del file
+     * @param tipoMime tipo MIME del contenuto
+     * @param contenuto byte del file, copiati all'ingresso e alla lettura
+     */
+    record FileAllegato(String nomeFile, String tipoMime, byte[] contenuto) {
+        /** Conserva una copia dei byte ricevuti. */
+<span class="nc" id="L138">        public FileAllegato {</span>
+<span class="nc" id="L139">            contenuto = contenuto.clone();</span>
+<span class="nc" id="L140">        }</span>
+
+        /**
+         * Restituisce una copia dei byte del file.
+         *
+         * @return contenuto del file
+         */
+        @Override
+        public byte[] contenuto() {
+<span class="nc" id="L149">            return contenuto.clone();</span>
+        }
+    }
+
+    /**
+     * Metadati di un allegato ottenibili senza scaricare il file.
+     *
+     * @param id identificativo dell'allegato
+     * @param nomeFile nome visualizzato
+     * @param tipoMime tipo MIME del contenuto
+     * @param dimensioneByte dimensione in byte
+     */
+<span class="nc" id="L161">    record Allegato(UUID id, String nomeFile, String tipoMime, long dimensioneByte) {}</span>
+
+    /**
+     * Dati di una comunicazione visibile al Banco o all'account destinatario.
+     *
+     * @param id identificativo della comunicazione
+     * @param titolo titolo visualizzato
+     * @param testo testo della comunicazione
+     * @param inviataIl istante dell'invio
+     * @param allegati metadati degli allegati, eventualmente nessuno
+     * @param confermataIl istante del riscontro dell'account che consulta, oppure {@code null}
+     */
+    record Comunicazione(
+            UUID id, String titolo, String testo, Instant inviataIl, List&lt;Allegato&gt; allegati, Instant confermataIl) {
+        /** Crea una copia immutabile della lista degli allegati. */
+<span class="nc" id="L176">        public Comunicazione {</span>
+<span class="nc" id="L177">            allegati = List.copyOf(allegati);</span>
+<span class="nc" id="L178">        }</span>
+    }
+
+    /**
+     * Riscontro di un account destinatario, anche se ancora in attesa.
+     *
+     * @param destinatarioId account destinatario
+     * @param nomeVisualizzato nome dell'organizzazione o dell'operatore
+     * @param confermataIl istante della prima conferma, oppure {@code null} in assenza di riscontro
+     */
+<span class="fc" id="L188">    record Riscontro(UUID destinatarioId, String nomeVisualizzato, Instant confermataIl) {}</span>
+
+    /**
+     * Avviso di un evento operativo con i riferimenti da usare nel modulo Richieste.
+     *
+     * @param id identificativo dell'avviso
+     * @param tipo evento che ha generato l'avviso
+     * @param richiestaId riferimento alla richiesta
+     * @param contattoId riferimento al contatto per gli avvisi di disponibilità, altrimenti {@code null}
+     * @param registratoIl istante di registrazione dell'avviso
+     */
+<span class="fc" id="L199">    record AvvisoOperativo(UUID id, TipoAvviso tipo, UUID richiestaId, UUID contattoId, Instant registratoIl) {}</span>
+
+    /** Selezioni previste per una comunicazione del Banco. */
+<span class="fc" id="L202">    enum TipoDestinatari {</span>
+        /** Tutti gli account organizzativi OPT attivi. */
+<span class="fc" id="L204">        TUTTE_LE_OPT,</span>
+        /** Account organizzativi OPT selezionati dal Banco. */
+<span class="fc" id="L206">        GRUPPO_OPT,</span>
+        /** Tutti gli account personali degli operatori attivi. */
+<span class="fc" id="L208">        TUTTI_GLI_OPERATORI,</span>
+        /** Account personali degli operatori selezionati dal Banco. */
+<span class="fc" id="L210">        GRUPPO_OPERATORI</span>
+    }
+
+    /** Eventi operativi della pratica comunicati nell'app. */
+<span class="fc" id="L214">    enum TipoAvviso {</span>
+        /** Disponibilità da valutare per il contatto ricevuto. */
+<span class="fc" id="L216">        RICHIESTA_DISPONIBILITA,</span>
+        /** Annullamento della richiesta. */
+<span class="fc" id="L218">        RICHIESTA_ANNULLATA</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

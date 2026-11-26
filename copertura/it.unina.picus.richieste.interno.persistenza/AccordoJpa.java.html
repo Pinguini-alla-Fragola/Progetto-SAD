@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AccordoJpa.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.richieste.interno.persistenza</a> &gt; <span class="el_source">AccordoJpa.java</span></div><h1>AccordoJpa.java</h1><pre class="source lang-java linenums">package it.unina.picus.richieste.interno.persistenza;
+
+import it.unina.picus.richieste.api.RichiesteApi.AccordoADistanza;
+import it.unina.picus.richieste.api.RichiesteApi.AccordoInPresenza;
+import it.unina.picus.richieste.api.RichiesteApi.DettagliAccordo;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+
+import java.net.URI;
+import java.time.Instant;
+
+/**
+ * Componente persistito sulla riga della richiesta. La conversione delle due varianti
+ * applica il pattern &lt;em&gt;Data Mapper&lt;/em&gt; tra i dettagli di dominio e le colonne SQL.
+ */
+@Embeddable
+public class AccordoJpa {
+    @Column(name = &quot;accordo_modalita&quot;)
+    private String modalita;
+    @Column(name = &quot;accordo_data_ora&quot;)
+    private Instant dataOra;
+    @Column(name = &quot;accordo_luogo&quot;, length = 500)
+    private String luogo;
+    @Column(name = &quot;accordo_link&quot;, length = 2048)
+    private String link;
+    @Column(name = &quot;accordo_nome_referente&quot;)
+    private String nomeReferente;
+    @Column(name = &quot;accordo_cognome_referente&quot;)
+    private String cognomeReferente;
+    @Column(name = &quot;accordo_telefono_referente&quot;, length = 50)
+    private String telefonoReferente;
+
+    /** Costruttore riservato a JPA. */
+<span class="fc" id="L34">    protected AccordoJpa() {}</span>
+
+    /**
+     * Prepara i dettagli da salvare insieme alla transizione di stato.
+     *
+     * @param dettagli accordo già validato, oppure {@code null} se assente
+     * @return componente da incorporare nella richiesta, oppure {@code null}
+     */
+    static AccordoJpa daDto(DettagliAccordo dettagli) {
+<span class="fc bfc" id="L43" title="All 2 branches covered.">        if (dettagli == null) {</span>
+<span class="fc" id="L44">            return null;</span>
+        }
+<span class="fc" id="L46">        var entita = new AccordoJpa();</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        switch (dettagli) {</span>
+<span class="fc" id="L48">            case AccordoInPresenza presenza -&gt; {</span>
+<span class="fc" id="L49">                entita.modalita = &quot;IN_PRESENZA&quot;;</span>
+<span class="fc" id="L50">                entita.dataOra = presenza.dataOra();</span>
+<span class="fc" id="L51">                entita.luogo = presenza.luogo();</span>
+<span class="fc" id="L52">                entita.nomeReferente = presenza.nomeReferente();</span>
+<span class="fc" id="L53">                entita.cognomeReferente = presenza.cognomeReferente();</span>
+<span class="fc" id="L54">                entita.telefonoReferente = presenza.telefonoReferente();</span>
+<span class="fc" id="L55">            }</span>
+<span class="fc" id="L56">            case AccordoADistanza remoto -&gt; {</span>
+<span class="fc" id="L57">                entita.modalita = &quot;A_DISTANZA&quot;;</span>
+<span class="fc" id="L58">                entita.dataOra = remoto.dataOra();</span>
+<span class="fc" id="L59">                entita.link = remoto.link().toString();</span>
+            }
+        }
+<span class="fc" id="L62">        return entita;</span>
+    }
+
+    /** {@return dettagli di dominio ricostruiti dalle colonne, oppure {@code null} se assenti} */
+    DettagliAccordo aDto() {
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">        if (modalita == null) {</span>
+<span class="nc" id="L68">            return null;</span>
+        }
+<span class="pc bpc" id="L70" title="1 of 3 branches missed.">        return switch (modalita) {</span>
+<span class="fc" id="L71">            case &quot;IN_PRESENZA&quot; -&gt; new AccordoInPresenza(</span>
+                    dataOra, luogo, nomeReferente, cognomeReferente, telefonoReferente);
+<span class="fc" id="L73">            case &quot;A_DISTANZA&quot; -&gt; new AccordoADistanza(dataOra, URI.create(link));</span>
+<span class="nc" id="L74">            default -&gt; throw new IllegalStateException(&quot;Modalità dell'accordo non riconosciuta&quot;);</span>
+        };
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

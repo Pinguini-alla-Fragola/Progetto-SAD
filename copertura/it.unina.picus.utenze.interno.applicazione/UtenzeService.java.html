@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UtenzeService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.utenze.interno.applicazione</a> &gt; <span class="el_source">UtenzeService.java</span></div><h1>UtenzeService.java</h1><pre class="source lang-java linenums">package it.unina.picus.utenze.interno.applicazione;
+
+import java.nio.charset.StandardCharsets;
+import java.time.Clock;
+import java.time.Instant;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import it.unina.picus.utenze.api.NomiAccountApi;
+import it.unina.picus.utenze.api.OperazioneUtenzaNonConsentitaException;
+import it.unina.picus.utenze.api.UtenzaNonTrovataException;
+import it.unina.picus.utenze.api.UtenzeApi;
+import it.unina.picus.utenze.interno.persistenza.AccountJpa;
+import it.unina.picus.utenze.interno.persistenza.AccountRepository;
+import it.unina.picus.utenze.interno.persistenza.AccountRepository.NomeAccount;
+import it.unina.picus.utenze.interno.persistenza.OperatoreMisuraJpa;
+import it.unina.picus.utenze.interno.persistenza.ProfiloOperatoreJpa;
+import it.unina.picus.utenze.interno.persistenza.ProfiloOperatoreRepository;
+import it.unina.picus.utenze.interno.persistenza.ProfiloOptJpa;
+import it.unina.picus.utenze.interno.persistenza.ProfiloOptRepository;
+import it.unina.picus.utenze.interno.persistenza.TokenAttivazioneJpa;
+import it.unina.picus.utenze.interno.persistenza.TokenAttivazioneRepository;
+import it.unina.picus.utenze.interno.persistenza.TokenRecuperoPasswordRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
+
+@Service
+@Profile(&quot;!skeleton&quot;)
+@Transactional
+class UtenzeService implements UtenzeApi, NomiAccountApi {
+
+    static final int LUNGHEZZA_MAX_EMAIL = 254;
+    static final int LUNGHEZZA_MAX_PASSWORD_BYTE = 72;
+
+    private final AccountRepository accounts;
+    private final ProfiloOptRepository profiliOpt;
+    private final ProfiloOperatoreRepository profiliOperatore;
+    private final TokenAttivazioneRepository tokensAttivazione;
+    private final TokenRecuperoPasswordRepository tokensRecupero;
+    private final PasswordEncoder encoder;
+    private final EntityManager em;
+    private final Clock clock;
+    private final String hashFittizio;
+
+    @Autowired
+    UtenzeService(AccountRepository accounts, ProfiloOptRepository profiliOpt,
+                  ProfiloOperatoreRepository profiliOperatore,
+                  TokenAttivazioneRepository tokensAttivazione,
+                  TokenRecuperoPasswordRepository tokensRecupero,
+                  PasswordEncoder encoder, EntityManager em) {
+<span class="fc" id="L65">        this(accounts, profiliOpt, profiliOperatore, tokensAttivazione, tokensRecupero, encoder, em,</span>
+<span class="fc" id="L66">                Clock.systemUTC());</span>
+<span class="fc" id="L67">    }</span>
+
+    UtenzeService(AccountRepository accounts, ProfiloOptRepository profiliOpt,
+                  ProfiloOperatoreRepository profiliOperatore,
+                  TokenAttivazioneRepository tokensAttivazione,
+                  TokenRecuperoPasswordRepository tokensRecupero,
+<span class="fc" id="L73">                  PasswordEncoder encoder, EntityManager em, Clock clock) {</span>
+<span class="fc" id="L74">        this.accounts = accounts;</span>
+<span class="fc" id="L75">        this.profiliOpt = profiliOpt;</span>
+<span class="fc" id="L76">        this.profiliOperatore = profiliOperatore;</span>
+<span class="fc" id="L77">        this.tokensAttivazione = tokensAttivazione;</span>
+<span class="fc" id="L78">        this.tokensRecupero = tokensRecupero;</span>
+<span class="fc" id="L79">        this.encoder = encoder;</span>
+<span class="fc" id="L80">        this.em = em;</span>
+<span class="fc" id="L81">        this.clock = Objects.requireNonNull(clock);</span>
+<span class="fc" id="L82">        this.hashFittizio = encoder.encode(UUID.randomUUID().toString());</span>
+<span class="fc" id="L83">    }</span>
+
+    @Override
+    public void revocaUtenzaOpt(UUID optAccountId) {
+<span class="fc" id="L87">        revocaAccount(optAccountId, RuoloUtente.OPT,</span>
+                &quot;La revoca manuale è consentita solo per account con ruolo OPT.&quot;);
+<span class="fc" id="L89">    }</span>
+
+    @Override
+    public void revocaUtenzaOperatore(UUID operatoreAccountId) {
+<span class="fc" id="L93">        revocaAccount(operatoreAccountId, RuoloUtente.OPERATORE,</span>
+                &quot;La revoca manuale è consentita solo per account con ruolo OPERATORE.&quot;);
+<span class="fc" id="L95">    }</span>
+
+    private void revocaAccount(UUID accountId, RuoloUtente ruoloAtteso, String messaggioErroreRuolo) {
+<span class="pc bpc" id="L98" title="1 of 2 branches missed.">        if (accountId == null) {</span>
+<span class="nc" id="L99">            throw new UtenzaNonTrovataException(&quot;Identificativo account obbligatorio.&quot;);</span>
+        }
+
+        // 1. Punto unico di serializzazione: prima AccountJpa, poi TokenAttivazioneJpa
+<span class="fc" id="L103">        AccountJpa account = accounts.findByIdForUpdate(accountId)</span>
+<span class="fc" id="L104">                .orElseThrow(() -&gt; new UtenzaNonTrovataException(&quot;Account non trovato.&quot;));</span>
+
+        // 2. Verifica ruolo e stato sotto lock esclusivo dell'account
+<span class="fc bfc" id="L107" title="All 2 branches covered.">        if (!ruoloAtteso.name().equals(account.getRuolo())) {</span>
+<span class="fc" id="L108">            throw new OperazioneUtenzaNonConsentitaException(messaggioErroreRuolo);</span>
+        }
+
+<span class="fc bfc" id="L111" title="All 2 branches covered.">        if (StatoUtenza.REVOCATO.name().equals(account.getStato())) {</span>
+<span class="fc" id="L112">            throw new OperazioneUtenzaNonConsentitaException(&quot;L'account è già stato revocato.&quot;);</span>
+        }
+
+        // 3. Blocca e invalida i token ancora attivi (ordine: account -&gt; token)
+<span class="fc" id="L116">        List&lt;TokenAttivazioneJpa&gt; tokenAttivi = tokensAttivazione.findAttiviByAccountIdForUpdate(accountId);</span>
+<span class="fc" id="L117">        Instant ora = Instant.now(clock);</span>
+<span class="fc" id="L118">        account.revoca();</span>
+<span class="fc" id="L119">        accounts.saveAndFlush(account);</span>
+
+<span class="fc bfc" id="L121" title="All 2 branches covered.">        for (TokenAttivazioneJpa token : tokenAttivi) {</span>
+<span class="pc bpc" id="L122" title="1 of 2 branches missed.">            if (!token.isUsato()) {</span>
+<span class="fc" id="L123">                token.segnaComeUsato(ora);</span>
+            }
+<span class="fc" id="L125">        }</span>
+<span class="fc bfc" id="L126" title="All 2 branches covered.">        if (!tokenAttivi.isEmpty()) {</span>
+<span class="fc" id="L127">            tokensAttivazione.saveAllAndFlush(tokenAttivi);</span>
+        }
+        // Anche un eventuale link di recupero password ancora valido non deve sopravvivere alla revoca.
+<span class="fc" id="L130">        tokensRecupero.invalidaTokenAttiviPerAccount(accountId, ora);</span>
+<span class="fc" id="L131">    }</span>
+
+    /** {@inheritDoc} */
+    @Override
+    @Transactional(readOnly = true)
+    public Map&lt;UUID, String&gt; nomiVisualizzati(Set&lt;UUID&gt; accountIds) {
+<span class="fc bfc" id="L137" title="All 2 branches covered.">        if (accountIds.isEmpty()) {</span>
+<span class="fc" id="L138">            return Map.of();</span>
+        }
+<span class="fc" id="L140">        return accounts.findNomiByIdIn(accountIds).stream()</span>
+<span class="fc" id="L141">                .collect(Collectors.toUnmodifiableMap(NomeAccount::getId, NomeAccount::getNome));</span>
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List&lt;AccountAmministrativo&gt; elencoAccountPerRuolo(RuoloUtente ruolo) {
+<span class="fc" id="L147">        List&lt;AccountJpa&gt; lista = accounts.findByRuolo(ruolo.name());</span>
+<span class="fc bfc" id="L148" title="All 2 branches covered.">        if (lista.isEmpty()) {</span>
+<span class="fc" id="L149">            return List.of();</span>
+        }
+<span class="fc bfc" id="L151" title="All 2 branches covered.">        if (ruolo == RuoloUtente.OPT) {</span>
+<span class="fc" id="L152">            Map&lt;UUID, ProfiloOptJpa&gt; profili = profiliOpt.findAllById(</span>
+<span class="fc" id="L153">                    lista.stream().map(AccountJpa::getId).toList()</span>
+<span class="fc" id="L154">            ).stream().collect(Collectors.toMap(ProfiloOptJpa::getAccountId, Function.identity()));</span>
+<span class="fc" id="L155">            return lista.stream().map(a -&gt; {</span>
+<span class="fc" id="L156">                ProfiloOptJpa p = profili.get(a.getId());</span>
+<span class="fc bfc" id="L157" title="All 2 branches covered.">                String codiceStruttura = p != null ? p.getCodiceStruttura() : null;</span>
+<span class="fc bfc" id="L158" title="All 2 branches covered.">                String comune = p != null ? p.getComuneCodice() : null;</span>
+<span class="fc" id="L159">                return new AccountAmministrativo(</span>
+<span class="fc" id="L160">                        a.getId(), a.getNome(), a.getEmail(), codiceStruttura, comune,</span>
+<span class="fc" id="L161">                        RuoloUtente.OPT, StatoUtenza.valueOf(a.getStato()));</span>
+<span class="fc" id="L162">            }).toList();</span>
+        }
+<span class="fc bfc" id="L164" title="All 2 branches covered.">        if (ruolo == RuoloUtente.OPERATORE) {</span>
+<span class="fc" id="L165">            Map&lt;UUID, ProfiloOperatoreJpa&gt; profili = profiliOperatore.findAllById(</span>
+<span class="fc" id="L166">                    lista.stream().map(AccountJpa::getId).toList()</span>
+<span class="fc" id="L167">            ).stream().collect(Collectors.toMap(ProfiloOperatoreJpa::getAccountId, Function.identity()));</span>
+<span class="fc" id="L168">            return lista.stream().map(a -&gt; {</span>
+<span class="fc" id="L169">                ProfiloOperatoreJpa p = profili.get(a.getId());</span>
+<span class="fc bfc" id="L170" title="All 2 branches covered.">                String comune = p != null ? p.getComuneCodice() : null;</span>
+<span class="fc bfc" id="L171" title="All 2 branches covered.">                String ref = p != null ? p.getTipologia() : null;</span>
+<span class="fc" id="L172">                return new AccountAmministrativo(</span>
+<span class="fc" id="L173">                        a.getId(), a.getNome(), a.getEmail(), ref, comune,</span>
+<span class="fc" id="L174">                        RuoloUtente.OPERATORE, StatoUtenza.valueOf(a.getStato()));</span>
+<span class="fc" id="L175">            }).toList();</span>
+        }
+<span class="fc" id="L177">        return lista.stream().map(a -&gt; new AccountAmministrativo(</span>
+<span class="fc" id="L178">                a.getId(), a.getNome(), a.getEmail(), null, null,</span>
+<span class="fc" id="L179">                RuoloUtente.valueOf(a.getRuolo()), StatoUtenza.valueOf(a.getStato()))).toList();</span>
+    }
+
+    @Override
+    public Optional&lt;IdentitaAutenticata&gt; verificaCredenziali(String email, String password) {
+<span class="fc" id="L184">        String chiave = normalizzaEmail(email);</span>
+<span class="fc bfc" id="L185" title="All 6 branches covered.">        if (chiave == null || password == null || password.isEmpty()</span>
+<span class="fc bfc" id="L186" title="All 2 branches covered.">                || password.getBytes(StandardCharsets.UTF_8).length &gt; LUNGHEZZA_MAX_PASSWORD_BYTE) {</span>
+<span class="fc" id="L187">            confrontoFittizio();</span>
+<span class="fc" id="L188">            return Optional.empty();</span>
+        }
+
+<span class="fc" id="L191">        Optional&lt;AccountJpa&gt; trovato = accounts.findByEmailIgnoreCase(chiave);</span>
+<span class="fc bfc" id="L192" title="All 2 branches covered.">        if (trovato.isEmpty()) {</span>
+<span class="fc" id="L193">            confrontoFittizio();</span>
+<span class="fc" id="L194">            return Optional.empty();</span>
+        }
+
+<span class="fc" id="L197">        AccountJpa account = trovato.get();</span>
+<span class="fc" id="L198">        String passwordHash = account.getPasswordHash();</span>
+<span class="fc bfc" id="L199" title="All 2 branches covered.">        if (passwordHash == null) {</span>
+<span class="fc" id="L200">            confrontoFittizio();</span>
+<span class="fc" id="L201">            return Optional.empty();</span>
+        }
+
+<span class="fc bfc" id="L204" title="All 2 branches covered.">        if (!encoder.matches(password, passwordHash)</span>
+<span class="fc bfc" id="L205" title="All 2 branches covered.">                || !StatoUtenza.ATTIVO.name().equals(account.getStato())) {</span>
+<span class="fc" id="L206">            return Optional.empty();</span>
+        }
+
+<span class="fc bfc" id="L209" title="All 2 branches covered.">        if (encoder.upgradeEncoding(passwordHash)) {</span>
+            // Solo se l'hash è ancora quello verificato: un cambio password concorrente non va annullato.
+<span class="fc" id="L211">            accounts.aggiornaHashSeInvariato(account.getId(), passwordHash, encoder.encode(password));</span>
+        }
+<span class="fc" id="L213">        return Optional.of(identita(account));</span>
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional&lt;IdentitaAutenticata&gt; verificaAccountSessione(UUID accountId) {
+<span class="fc bfc" id="L219" title="All 2 branches covered.">        if (accountId == null) {</span>
+<span class="fc" id="L220">            return Optional.empty();</span>
+        }
+<span class="fc" id="L222">        return accounts.findById(accountId).filter(UtenzeService::attivo).map(UtenzeService::identita);</span>
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional&lt;AccountSintetico&gt; cercaAccount(UUID accountId) {
+<span class="pc bpc" id="L228" title="1 of 2 branches missed.">        if (accountId == null) {</span>
+<span class="nc" id="L229">            return Optional.empty();</span>
+        }
+<span class="fc" id="L231">        return accounts.findById(accountId).map(UtenzeService::sintetico);</span>
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List&lt;AccountSintetico&gt; elencoAccountAttivi(RuoloUtente ruolo) {
+<span class="fc" id="L237">        return accounts.findByRuoloAndStato(ruolo.name(), StatoUtenza.ATTIVO.name()).stream()</span>
+<span class="fc" id="L238">                .map(UtenzeService::sintetico).toList();</span>
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional&lt;ProfiloErogatore&gt; cercaProfiloErogatoreAttivo(UUID accountId) {
+<span class="nc bnc" id="L244" title="All 2 branches missed.">        if (accountId == null) {</span>
+<span class="nc" id="L245">            return Optional.empty();</span>
+        }
+<span class="nc" id="L247">        return accounts.findById(accountId).filter(UtenzeService::attivo).flatMap(a -&gt; {</span>
+<span class="nc" id="L248">            RuoloUtente ruolo = RuoloUtente.valueOf(a.getRuolo());</span>
+<span class="nc bnc" id="L249" title="All 3 branches missed.">            return switch (ruolo) {</span>
+<span class="nc" id="L250">                case OPT -&gt; profiliOpt.findById(a.getId()).map(p -&gt; new ProfiloErogatore(</span>
+<span class="nc" id="L251">                        a.getId(), a.getNome(), TipoErogatore.OPT, p.getComuneCodice(), false));</span>
+<span class="nc" id="L252">                case OPERATORE -&gt; profiliOperatore.findById(a.getId()).map(p -&gt; new ProfiloErogatore(</span>
+<span class="nc" id="L253">                        a.getId(), a.getNome(), TipoErogatore.valueOf(p.getTipologia()),</span>
+<span class="nc" id="L254">                        p.getComuneCodice(), p.isCentroPicus()));</span>
+<span class="nc" id="L255">                case BANCO -&gt; Optional.empty();</span>
+            };
+        });
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List&lt;ProfiloErogatore&gt; elencoOperatoriAttiviPerMisura(long misuraId) {
+<span class="fc" id="L263">        return profiliOperatore.perMisura(misuraId).stream()</span>
+<span class="fc" id="L264">                .map(p -&gt; new ProfiloErogatore(p.getAccountId(), p.getNome(),</span>
+<span class="fc" id="L265">                        TipoErogatore.valueOf(p.getTipologia()), p.getComuneCodice(), p.isCentroPicus()))</span>
+<span class="fc" id="L266">                .toList();</span>
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List&lt;ProfiloErogatore&gt; elencoOptAttive(Set&lt;UUID&gt; ids) {
+<span class="fc bfc" id="L272" title="All 2 branches covered.">        if (ids.isEmpty()) {</span>
+<span class="fc" id="L273">            return List.of();</span>
+        }
+<span class="fc" id="L275">        return profiliOpt.attive(ids).stream().map(p -&gt; new ProfiloErogatore(</span>
+<span class="fc" id="L276">                p.getAccountId(), p.getNome(), TipoErogatore.OPT, p.getComuneCodice(), false)).toList();</span>
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.MANDATORY)
+    public Optional&lt;ProfiloErogatore&gt; bloccaProfiloPerMisura(UUID accountId, long misuraId) {
+<span class="pc bpc" id="L282" title="1 of 2 branches missed.">        if (accountId == null) {</span>
+<span class="nc" id="L283">            return Optional.empty();</span>
+        }
+<span class="fc" id="L285">        var account = blocca(AccountJpa.class, accountId);</span>
+<span class="pc bpc" id="L286" title="1 of 4 branches missed.">        if (account == null || !attivo(account)) {</span>
+<span class="fc" id="L287">            return Optional.empty();</span>
+        }
+<span class="pc bpc" id="L289" title="1 of 3 branches missed.">        return switch (RuoloUtente.valueOf(account.getRuolo())) {</span>
+<span class="fc" id="L290">            case OPT -&gt; Optional.ofNullable(blocca(ProfiloOptJpa.class, accountId))</span>
+<span class="fc" id="L291">                    .map(p -&gt; new ProfiloErogatore(accountId, account.getNome(), TipoErogatore.OPT,</span>
+<span class="fc" id="L292">                            p.getComuneCodice(), false));</span>
+            case OPERATORE -&gt; {
+<span class="fc" id="L294">                var profilo = blocca(ProfiloOperatoreJpa.class, accountId);</span>
+<span class="fc" id="L295">                var competenza = blocca(OperatoreMisuraJpa.class, new OperatoreMisuraJpa.Chiave(accountId, misuraId));</span>
+<span class="pc bpc" id="L296" title="2 of 4 branches missed.">                yield profilo == null || competenza == null ? Optional.empty()</span>
+<span class="fc" id="L297">                        : Optional.of(new ProfiloErogatore(accountId, account.getNome(),</span>
+<span class="fc" id="L298">                        TipoErogatore.valueOf(profilo.getTipologia()), profilo.getComuneCodice(), profilo.isCentroPicus()));</span>
+            }
+<span class="nc" id="L300">            case BANCO -&gt; Optional.empty();</span>
+        };
+    }
+
+    private &lt;T&gt; T blocca(Class&lt;T&gt; tipo, Object id) {
+<span class="fc" id="L305">        var entita = em.find(tipo, id, LockModeType.PESSIMISTIC_READ);</span>
+<span class="pc bpc" id="L306" title="1 of 2 branches missed.">        if (entita != null) {</span>
+<span class="fc" id="L307">            em.refresh(entita, LockModeType.PESSIMISTIC_READ);</span>
+        }
+<span class="fc" id="L309">        return entita;</span>
+    }
+
+    private void confrontoFittizio() {
+<span class="fc" id="L313">        encoder.matches(UUID.randomUUID().toString(), hashFittizio);</span>
+<span class="fc" id="L314">    }</span>
+
+    static String normalizzaEmail(String email) {
+<span class="fc bfc" id="L317" title="All 2 branches covered.">        if (email == null) {</span>
+<span class="fc" id="L318">            return null;</span>
+        }
+<span class="fc" id="L320">        String e = email.strip().toLowerCase(Locale.ROOT);</span>
+<span class="fc bfc" id="L321" title="All 4 branches covered.">        return e.isEmpty() || e.length() &gt; LUNGHEZZA_MAX_EMAIL ? null : e;</span>
+    }
+
+    private static boolean attivo(AccountJpa a) {
+<span class="fc" id="L325">        return StatoUtenza.ATTIVO.name().equals(a.getStato());</span>
+    }
+
+    private static IdentitaAutenticata identita(AccountJpa a) {
+<span class="fc" id="L329">        return new IdentitaAutenticata(a.getId(), RuoloUtente.valueOf(a.getRuolo()));</span>
+    }
+
+    private static AccountSintetico sintetico(AccountJpa a) {
+<span class="fc" id="L333">        return new AccountSintetico(a.getId(), a.getNome(),</span>
+<span class="fc" id="L334">                RuoloUtente.valueOf(a.getRuolo()), StatoUtenza.valueOf(a.getStato()));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

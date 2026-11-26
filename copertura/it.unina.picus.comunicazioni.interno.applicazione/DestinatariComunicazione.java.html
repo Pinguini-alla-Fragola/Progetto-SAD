@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DestinatariComunicazione.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.comunicazioni.interno.applicazione</a> &gt; <span class="el_source">DestinatariComunicazione.java</span></div><h1>DestinatariComunicazione.java</h1><pre class="source lang-java linenums">package it.unina.picus.comunicazioni.interno.applicazione;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Component;
+
+import it.unina.picus.comunicazioni.interno.dominio.BozzaComunicazione;
+import it.unina.picus.comunicazioni.interno.dominio.CampoComunicazione;
+import it.unina.picus.comunicazioni.interno.dominio.Errori;
+import it.unina.picus.comunicazioni.interno.dominio.PlateaDestinatari;
+import it.unina.picus.utenze.api.UtenzeApi;
+import it.unina.picus.utenze.api.UtenzeApi.AccountSintetico;
+import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
+
+/**
+ * Individua gli account che ricevono la comunicazione, chiedendo a Utenze quelli attivi. Gli account in attesa di
+ * attivazione o revocati non ricevono comunicazioni.
+ */
+@Component
+class DestinatariComunicazione {
+
+    private final UtenzeApi utenze;
+
+<span class="fc" id="L28">    DestinatariComunicazione(UtenzeApi utenze) {</span>
+<span class="fc" id="L29">        this.utenze = utenze;</span>
+<span class="fc" id="L30">    }</span>
+
+    /**
+     * Restituisce gli account attivi della platea, in ordine di nome, per permettere al Banco di scegliere il gruppo.
+     *
+     * @param platea ruolo degli account cercati
+     * @return gli account attivi
+     */
+    List&lt;AccountSintetico&gt; attivi(PlateaDestinatari platea) {
+<span class="fc" id="L39">        return utenze.elencoAccountAttivi(platea.ruolo()).stream()</span>
+<span class="fc" id="L40">                .sorted(Comparator.comparing(AccountSintetico::nomeVisualizzato, String.CASE_INSENSITIVE_ORDER))</span>
+<span class="fc" id="L41">                .toList();</span>
+    }
+
+    /**
+     * Restituisce i destinatari della bozza, già controllata dalle regole.
+     *
+     * @param bozza comunicazione con un tipo di destinatari valido
+     * @param errori dove segnalare un gruppo con account non ammessi o un invio senza destinatari
+     * @return gli account destinatari
+     */
+    Set&lt;UUID&gt; risolvi(BozzaComunicazione bozza, Errori errori) {
+<span class="fc" id="L52">        PlateaDestinatari platea = PlateaDestinatari.di(bozza.tipo());</span>
+<span class="fc" id="L53">        Set&lt;UUID&gt; attivi = attivi(platea).stream().map(AccountSintetico::id).collect(Collectors.toUnmodifiableSet());</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">        if (!platea.gruppo()) {</span>
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">            if (attivi.isEmpty()) {</span>
+<span class="nc" id="L56">                errori.aggiungi(CampoComunicazione.DESTINATARI_TIPO,</span>
+                        &quot;Non ci sono account attivi a cui inviare la comunicazione&quot;);
+            }
+<span class="fc" id="L59">            return attivi;</span>
+        }
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">        if (!attivi.containsAll(bozza.gruppo())) {</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">            errori.aggiungi(CampoComunicazione.GRUPPO, platea.ruolo() == RuoloUtente.OPT</span>
+<span class="nc" id="L63">                    ? &quot;Il gruppo può contenere solo OPT attive&quot;</span>
+<span class="nc" id="L64">                    : &quot;Il gruppo può contenere solo operatori attivi&quot;);</span>
+        }
+<span class="fc" id="L66">        return bozza.gruppo();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

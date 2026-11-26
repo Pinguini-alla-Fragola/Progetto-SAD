@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RegoleAccessoComunicazione.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.comunicazioni.interno.dominio</a> &gt; <span class="el_source">RegoleAccessoComunicazione.java</span></div><h1>RegoleAccessoComunicazione.java</h1><pre class="source lang-java linenums">package it.unina.picus.comunicazioni.interno.dominio;
+
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.BiPredicate;
+
+import it.unina.picus.comunicazioni.api.ComunicazioniApi;
+import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
+import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
+
+import static it.unina.picus.shared.ControlloAccesso.richiedi;
+
+/**
+ * Regole di accesso alle comunicazioni del Banco (#28, criterio 7).
+ *
+ * &lt;p&gt;Una comunicazione la invia e ne vede i riscontri il solo Banco. La consultano, allegati
+ * compresi, il Banco e i destinatari, cioè gli account OPT od operatori che il modulo ha
+ * registrato al momento dell'invio. Ogni destinatario conferma la ricezione soltanto per il
+ * proprio account: il riscontro va registrato per l'account della sessione, mai per uno indicato
+ * dal client. L'identità arriva dalla sessione e i destinatari dai dati salvati. Un accesso non
+ * consentito lancia {@link SecurityException}, che il livello web traduce in {@code 403} senza
+ * restituire dati. Un'identità incompleta non ha mai accesso.
+ *
+ * &lt;p&gt;Gli elenchi delle comunicazioni ricevute e degli avvisi operativi non richiedono una regola
+ * sul singolo oggetto, ma ogni query deve usare l'{@code accountId} dell'identità verificata come
+ * filtro obbligatorio. Una query senza destinatario non è valida: le implementazioni delle storie
+ * #55 e #56 non devono restituire elenchi non filtrati per account.
+ *
+ * @see ComunicazioniApi
+ */
+public final class RegoleAccessoComunicazione {
+
+<span class="fc" id="L34">    private static final Set&lt;RuoloUtente&gt; SOLO_BANCO = Set.of(RuoloUtente.BANCO);</span>
+
+    // Ruoli che possono essere destinatari: le OPT e gli operatori, non il Banco.
+<span class="fc" id="L37">    private static final Set&lt;RuoloUtente&gt; RUOLI_DESTINATARI = Set.of(RuoloUtente.OPT, RuoloUtente.OPERATORE);</span>
+
+    // Relazioni con la comunicazione. Il secondo argomento sono gli account destinatari registrati all'invio.
+<span class="fc" id="L40">    private static final BiPredicate&lt;IdentitaAutenticata, Set&lt;UUID&gt;&gt; E_BANCO =</span>
+<span class="fc bfc" id="L41" title="All 2 branches covered.">            (attore, destinatari) -&gt; attore.ruolo() == RuoloUtente.BANCO;</span>
+
+<span class="fc" id="L43">    private static final BiPredicate&lt;IdentitaAutenticata, Set&lt;UUID&gt;&gt; E_DESTINATARIO =</span>
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">            (attore, destinatari) -&gt; RUOLI_DESTINATARI.contains(attore.ruolo())</span>
+<span class="fc bfc" id="L45" title="All 2 branches covered.">                    &amp;&amp; destinatari.contains(attore.accountId());</span>
+
+<span class="fc" id="L47">    private static final BiPredicate&lt;IdentitaAutenticata, Set&lt;UUID&gt;&gt; PUO_CONSULTARE =</span>
+<span class="fc" id="L48">            E_BANCO.or(E_DESTINATARIO);</span>
+
+    // Oggi la conferma è dei soli destinatari: il Banco legge, ma non conferma al posto di nessuno.
+<span class="fc" id="L51">    private static final BiPredicate&lt;IdentitaAutenticata, Set&lt;UUID&gt;&gt; PUO_CONFERMARE =</span>
+            E_DESTINATARIO;
+
+    private RegoleAccessoComunicazione() {
+    }
+
+    /**
+     * Invio delle comunicazioni, elenco delle inviate e dei riscontri: riservati al Banco.
+     *
+     * @param attore identità verificata della sessione
+     * @throws SecurityException se l'identità è incompleta o l'attore non è il Banco
+     * @see ComunicazioniApi#inviaComunicazione
+     * @see ComunicazioniApi#elencoInviate
+     * @see ComunicazioniApi#elencoRiscontri
+     */
+    public static void verificaBanco(IdentitaAutenticata attore) {
+<span class="fc" id="L67">        richiediRuolo(attore, SOLO_BANCO, &quot;Operazione riservata al Banco&quot;);</span>
+<span class="fc" id="L68">    }</span>
+
+    /**
+     * Consultazione di una comunicazione e download dei suoi allegati: il Banco oppure un
+     * destinatario. Per un allegato si usano i destinatari della comunicazione a cui appartiene.
+     *
+     * @param attore identità verificata della sessione
+     * @param destinatari account destinatari registrati all'invio, letti dai dati salvati
+     * @throws SecurityException se l'identità è incompleta o l'attore non è il Banco né un destinatario
+     * @throws NullPointerException se i destinatari mancano per un attore con identità completa
+     * @see ComunicazioniApi#consultaComunicazione
+     * @see ComunicazioniApi#scaricaAllegato
+     */
+    public static void verificaConsultazione(IdentitaAutenticata attore, Set&lt;UUID&gt; destinatari) {
+<span class="fc" id="L82">        richiedi(consente(PUO_CONSULTARE, attore, destinatari), &quot;Accesso negato alla comunicazione&quot;);</span>
+<span class="fc" id="L83">    }</span>
+
+    /**
+     * Conferma di ricezione: riservata ai destinatari. Il Banco non può confermare al posto loro.
+     * Chi chiama registra il riscontro per {@code attore.accountId()}.
+     *
+     * @param attore identità verificata della sessione
+     * @param destinatari account destinatari registrati all'invio, letti dai dati salvati
+     * @throws SecurityException se l'identità è incompleta o l'attore non è un destinatario
+     * @throws NullPointerException se i destinatari mancano per un attore con identità completa
+     * @see ComunicazioniApi#confermaRicezione
+     */
+    public static void verificaConfermaRicezione(IdentitaAutenticata attore, Set&lt;UUID&gt; destinatari) {
+<span class="nc" id="L96">        richiedi(consente(PUO_CONFERMARE, attore, destinatari), &quot;Conferma riservata ai destinatari&quot;);</span>
+<span class="nc" id="L97">    }</span>
+
+    /**
+     * Ammette soltanto i ruoli che possono ricevere comunicazioni: le OPT e gli operatori, non il Banco.
+     *
+     * @param attore identità verificata della sessione
+     * @throws SecurityException se l'identità è incompleta o il ruolo non può ricevere comunicazioni
+     */
+    public static void verificaPossibileDestinatario(IdentitaAutenticata attore) {
+<span class="fc" id="L106">        richiediRuolo(attore, RUOLI_DESTINATARI, &quot;Riservato ai destinatari delle comunicazioni&quot;);</span>
+<span class="fc" id="L107">    }</span>
+
+    private static void richiediRuolo(IdentitaAutenticata attore, Set&lt;RuoloUtente&gt; ammessi, String messaggio) {
+<span class="fc bfc" id="L110" title="All 4 branches covered.">        richiedi(identitaCompleta(attore) &amp;&amp; ammessi.contains(attore.ruolo()), messaggio);</span>
+<span class="fc" id="L111">    }</span>
+
+    /** Un'identità incompleta, senza account o senza ruolo, non ha mai accesso. */
+    private static boolean identitaCompleta(IdentitaAutenticata attore) {
+<span class="fc bfc" id="L115" title="All 6 branches covered.">        return attore != null &amp;&amp; attore.accountId() != null &amp;&amp; attore.ruolo() != null;</span>
+    }
+
+    /**
+     * Valuta una politica solo su un'identità completa: un attore incompleto non ha mai accesso.
+     * I destinatari sono una precondizione per un attore completo.
+     */
+    private static boolean consente(BiPredicate&lt;IdentitaAutenticata, Set&lt;UUID&gt;&gt; politica,
+                                    IdentitaAutenticata attore, Set&lt;UUID&gt; destinatari) {
+<span class="pc bpc" id="L124" title="1 of 2 branches missed.">        if (!identitaCompleta(attore)) {</span>
+<span class="nc" id="L125">            return false;</span>
+        }
+<span class="fc" id="L127">        Objects.requireNonNull(destinatari, &quot;destinatari&quot;);</span>
+<span class="fc" id="L128">        return politica.test(attore, destinatari);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

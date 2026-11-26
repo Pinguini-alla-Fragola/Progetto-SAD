@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AllegatoComunicazioneJpa.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.comunicazioni.interno.persistenza</a> &gt; <span class="el_source">AllegatoComunicazioneJpa.java</span></div><h1>AllegatoComunicazioneJpa.java</h1><pre class="source lang-java linenums">package it.unina.picus.comunicazioni.interno.persistenza;
+
+import java.util.UUID;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+/** Allegato di una comunicazione, salvato nel database con il suo contenuto. */
+@Entity
+@Table(name = &quot;comunicazioni_allegati&quot;)
+public class AllegatoComunicazioneJpa {
+    @Id
+    private UUID id;
+    private UUID comunicazioneId;
+    private String nomeFile;
+    private String tipoMime;
+    private long dimensioneByte;
+    private byte[] contenuto;
+
+<span class="fc" id="L21">    protected AllegatoComunicazioneJpa() {</span>
+<span class="fc" id="L22">    }</span>
+
+<span class="fc" id="L24">    public AllegatoComunicazioneJpa(UUID id, UUID comunicazioneId, String nomeFile, String tipoMime, byte[] contenuto) {</span>
+<span class="fc" id="L25">        this.id = id;</span>
+<span class="fc" id="L26">        this.comunicazioneId = comunicazioneId;</span>
+<span class="fc" id="L27">        this.nomeFile = nomeFile;</span>
+<span class="fc" id="L28">        this.tipoMime = tipoMime;</span>
+<span class="fc" id="L29">        this.dimensioneByte = contenuto.length;</span>
+<span class="fc" id="L30">        this.contenuto = contenuto.clone();</span>
+<span class="fc" id="L31">    }</span>
+
+<span class="fc" id="L33">    public UUID getComunicazioneId() { return comunicazioneId; }</span>
+<span class="fc" id="L34">    public String getNomeFile() { return nomeFile; }</span>
+<span class="fc" id="L35">    public String getTipoMime() { return tipoMime; }</span>
+<span class="fc" id="L36">    public byte[] getContenuto() { return contenuto.clone(); }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

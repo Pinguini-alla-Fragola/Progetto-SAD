@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IdentitaResolver.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.utenze.web</a> &gt; <span class="el_source">IdentitaResolver.java</span></div><h1>IdentitaResolver.java</h1><pre class="source lang-java linenums">package it.unina.picus.utenze.web;
+
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.MethodParameter;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.support.WebDataBinderFactory;
+import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
+import it.unina.picus.utenze.api.UtenzeApi;
+
+/**
+ * Permette ai controller di tutti i moduli di dichiarare un parametro {@link IdentitaAutenticata}:
+ * l'attore è sempre quello della sessione, mai un valore inviato dal client.
+ */
+@Configuration
+class IdentitaResolver implements WebMvcConfigurer, HandlerMethodArgumentResolver {
+<span class="fc" id="L28">    static final String ATTRIBUTO_IDENTITA = IdentitaResolver.class.getName() + &quot;.identita&quot;;</span>
+    private final UtenzeApi utenze;
+
+<span class="fc" id="L31">    IdentitaResolver(UtenzeApi utenze) {</span>
+<span class="fc" id="L32">        this.utenze = utenze;</span>
+<span class="fc" id="L33">    }</span>
+
+    @Override
+    public void addArgumentResolvers(List&lt;HandlerMethodArgumentResolver&gt; resolvers) {
+<span class="fc" id="L37">        resolvers.add(this);</span>
+<span class="fc" id="L38">    }</span>
+
+    @Override
+    public boolean supportsParameter(MethodParameter parametro) {
+<span class="fc" id="L42">        return IdentitaAutenticata.class.equals(parametro.getParameterType());</span>
+    }
+
+    @Override
+    public Object resolveArgument(MethodParameter parametro, ModelAndViewContainer contenitore,
+            NativeWebRequest richiesta, WebDataBinderFactory binder) {
+<span class="fc" id="L48">        Object verificata = richiesta.getAttribute(ATTRIBUTO_IDENTITA, RequestAttributes.SCOPE_REQUEST);</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        if (verificata instanceof IdentitaAutenticata identita) {</span>
+<span class="fc" id="L50">            return identita;</span>
+        }
+<span class="fc" id="L52">        Authentication auth = SecurityContextHolder.getContext().getAuthentication();</span>
+<span class="pc bpc" id="L53" title="3 of 6 branches missed.">        if (auth != null &amp;&amp; auth.isAuthenticated() &amp;&amp; !(auth instanceof AnonymousAuthenticationToken)) {</span>
+            UUID accountId;
+            try {
+<span class="fc" id="L56">                accountId = UUID.fromString(auth.getName());</span>
+<span class="nc" id="L57">            } catch (IllegalArgumentException ex) {</span>
+<span class="nc" id="L58">                throw new AuthenticationCredentialsNotFoundException(&quot;Sessione non valida&quot;);</span>
+<span class="fc" id="L59">            }</span>
+<span class="fc" id="L60">            return utenze.verificaAccountSessione(accountId)</span>
+<span class="pc" id="L61">                    .orElseThrow(() -&gt; new AuthenticationCredentialsNotFoundException(&quot;Sessione non valida&quot;));</span>
+        }
+<span class="nc" id="L63">        throw new AuthenticationCredentialsNotFoundException(&quot;Sessione non autenticata&quot;);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

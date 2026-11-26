@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ConteggiOptController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.monitoraggio.web</a> &gt; <span class="el_source">ConteggiOptController.java</span></div><h1>ConteggiOptController.java</h1><pre class="source lang-java linenums">package it.unina.picus.monitoraggio.web;
+
+import java.math.BigInteger;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import it.unina.picus.monitoraggio.api.ConteggiOptApi;
+import it.unina.picus.monitoraggio.api.ConteggiOptApi.CategoriaVoce;
+import it.unina.picus.monitoraggio.api.DatiConteggiNonValidiException;
+import it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre;
+import it.unina.picus.monitoraggio.interno.applicazione.ConsultazioneConteggiOpt;
+import it.unina.picus.monitoraggio.interno.applicazione.ConsultazioneConteggiOpt.ConteggioEsatto;
+import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
+
+/** Endpoint backend per registrazione e consultazione dei conteggi trimestrali delle OPT. */
+@RestController
+@RequestMapping(value = &quot;/api/monitoraggio&quot;, produces = MediaType.APPLICATION_JSON_VALUE)
+class ConteggiOptController {
+
+<span class="fc" id="L31">    private static final BigInteger MASSIMO_INTERO_SICURO_JS =</span>
+<span class="fc" id="L32">            BigInteger.valueOf(RegistrazioneConteggiJson.MASSIMO_INTERO_SICURO_JS);</span>
+
+    private final ConteggiOptApi monitoraggio;
+    private final ConsultazioneConteggiOpt consultazione;
+
+<span class="fc" id="L37">    ConteggiOptController(ConteggiOptApi monitoraggio, ConsultazioneConteggiOpt consultazione) {</span>
+<span class="fc" id="L38">        this.monitoraggio = monitoraggio;</span>
+<span class="fc" id="L39">        this.consultazione = consultazione;</span>
+<span class="fc" id="L40">    }</span>
+
+    @GetMapping(&quot;/categorie&quot;)
+    List&lt;CategoriaVoce&gt; categorieAttive() {
+<span class="nc" id="L44">        return monitoraggio.elencoCategorieAttive();</span>
+    }
+
+    @PostMapping(value = &quot;/conteggi-opt&quot;, consumes = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity&lt;Void&gt; registraConteggi(@RequestBody Map&lt;String, Object&gt; corpo, IdentitaAutenticata attore) {
+<span class="fc" id="L49">        var richiesta = RegistrazioneConteggiJson.leggi(corpo);</span>
+<span class="fc" id="L50">        monitoraggio.registraConteggiOpt(attore, richiesta.trimestre(), richiesta.voci());</span>
+<span class="fc" id="L51">        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();</span>
+    }
+
+    /** Consulta il trimestre iniziale o l'intervallo inclusivo quando sono indicati entrambi i campi finali. */
+    @GetMapping(&quot;/conteggi-opt&quot;)
+    List&lt;ConteggioJson&gt; consultaConteggi(
+            @RequestParam(required = false) UUID optId,
+            @RequestParam int anno,
+            @RequestParam int trimestre,
+            @RequestParam(required = false) Integer annoFine,
+            @RequestParam(required = false) Integer trimestreFine,
+            IdentitaAutenticata attore) {
+
+<span class="fc bfc" id="L64" title="All 6 branches covered.">        if ((annoFine == null) != (trimestreFine == null)) {</span>
+<span class="fc" id="L65">            throw new DatiConteggiNonValidiException(&quot;Indica sia l'anno sia il trimestre finale.&quot;,</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">                    annoFine == null ? Map.of(&quot;annoFine&quot;, &quot;Indica l'anno finale.&quot;)</span>
+<span class="fc" id="L67">                            : Map.of(&quot;trimestreFine&quot;, &quot;Indica il trimestre finale.&quot;));</span>
+        }
+<span class="fc" id="L69">        Trimestre da = new Trimestre(anno, trimestre);</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">        Trimestre a = annoFine == null ? da : new Trimestre(annoFine, trimestreFine);</span>
+
+<span class="fc" id="L72">        return consultazione.consultaConteggiEsatti(attore, optId, da, a).stream()</span>
+<span class="fc" id="L73">                .map(ConteggioJson::da)</span>
+<span class="fc" id="L74">                .toList();</span>
+    }
+
+<span class="fc" id="L77">    record ConteggioJson(UUID optId, VoceJson conteggio) {</span>
+        /** Mantiene i numeri JSON esatti in JavaScript e trasmette i totali più grandi come testo decimale. */
+        private static ConteggioJson da(ConteggioEsatto risultato) {
+<span class="fc" id="L80">            BigInteger valore = risultato.valore();</span>
+<span class="fc bfc" id="L81" title="All 2 branches covered.">            Object valoreJson = valore.compareTo(MASSIMO_INTERO_SICURO_JS) &gt; 0</span>
+<span class="fc" id="L82">                    ? valore.toString() : valore.longValueExact();</span>
+<span class="fc" id="L83">            return new ConteggioJson(risultato.optId(), new VoceJson(risultato.misuraId(), risultato.voce(), valoreJson));</span>
+        }
+    }
+
+<span class="fc" id="L87">    record VoceJson(long misuraId, String voce, Object valore) {}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

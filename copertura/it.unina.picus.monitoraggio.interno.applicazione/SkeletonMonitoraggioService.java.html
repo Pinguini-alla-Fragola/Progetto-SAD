@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SkeletonMonitoraggioService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.monitoraggio.interno.applicazione</a> &gt; <span class="el_source">SkeletonMonitoraggioService.java</span></div><h1>SkeletonMonitoraggioService.java</h1><pre class="source lang-java linenums">package it.unina.picus.monitoraggio.interno.applicazione;
+
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Service;
+
+import it.unina.picus.monitoraggio.api.ConteggiOptApi;
+import it.unina.picus.monitoraggio.api.DatiConteggiNonValidiException;
+import it.unina.picus.monitoraggio.api.MonitoraggioApi.ConteggioOpt;
+import it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre;
+import it.unina.picus.monitoraggio.api.MonitoraggioApi.VoceMisura;
+import it.unina.picus.monitoraggio.interno.dominio.RegoleAccessoConteggi;
+import it.unina.picus.utenze.api.UtenzeApi;
+import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
+
+@Service
+@Profile(&quot;skeleton&quot;)
+public class SkeletonMonitoraggioService implements ConteggiOptApi, ConsultazioneConteggiOpt {
+
+<span class="fc" id="L25">    private record Chiave(UUID optId, Trimestre periodo, long misuraId, String voce) {}</span>
+
+<span class="fc" id="L27">    private static final List&lt;CategoriaVoce&gt; CATEGORIE = List.of(</span>
+            new CategoriaVoce(&quot;ANZIANI&quot;, &quot;Anziani raggiunti&quot;),
+            new CategoriaVoce(&quot;MINORI&quot;, &quot;Minori raggiunti&quot;),
+            new CategoriaVoce(&quot;NUCLEI_FAMILIARI&quot;, &quot;Nuclei familiari raggiunti&quot;),
+            new CategoriaVoce(&quot;PERSONE_RAGGIUNTE&quot;, &quot;Persone raggiunte nel trimestre&quot;));
+
+<span class="fc" id="L33">    private final Map&lt;Chiave, Long&gt; archivio = new HashMap&lt;&gt;();</span>
+    private final UtenzeApi utenze;
+
+<span class="fc" id="L36">    public SkeletonMonitoraggioService(UtenzeApi utenze) {</span>
+<span class="fc" id="L37">        this.utenze = utenze;</span>
+<span class="fc" id="L38">    }</span>
+
+    @Override
+    public List&lt;CategoriaVoce&gt; elencoCategorieAttive() {
+<span class="nc" id="L42">        return CATEGORIE;</span>
+    }
+
+    @Override
+    public synchronized void registraConteggiOpt(IdentitaAutenticata attore, Trimestre trimestre, List&lt;VoceMisura&gt; conteggi) {
+<span class="fc" id="L47">        RegoleAccessoConteggi.verificaRegistrazione(attore);</span>
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">        if (trimestre == null) {</span>
+<span class="nc" id="L49">            throw new DatiConteggiNonValidiException(&quot;Trimestre obbligatorio.&quot;,</span>
+<span class="nc" id="L50">                    Map.of(&quot;trimestre&quot;, &quot;Seleziona anno e trimestre.&quot;));</span>
+        }
+<span class="fc" id="L52">        ConteggiTrimestrali.validaPeriodo(trimestre, &quot;anno&quot;, &quot;trimestre&quot;);</span>
+<span class="pc bpc" id="L53" title="2 of 4 branches missed.">        if (conteggi == null || conteggi.isEmpty()) {</span>
+<span class="nc" id="L54">            throw new DatiConteggiNonValidiException(&quot;Dati mancanti.&quot;, Map.of(&quot;voci&quot;, &quot;Inserisci almeno una voce.&quot;));</span>
+        }
+
+<span class="fc" id="L57">        Map&lt;Chiave, Long&gt; dichiarazione = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">        for (VoceMisura v : conteggi) {</span>
+<span class="pc bpc" id="L59" title="3 of 8 branches missed.">            if (v == null || v.misuraId() &lt;= 0 || v.valore() &lt; 0 || v.voce() == null</span>
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">                    || CATEGORIE.stream().noneMatch(categoria -&gt; categoria.codice().equals(v.voce().trim()))) {</span>
+<span class="fc" id="L61">                throw new DatiConteggiNonValidiException(&quot;Dati non validi.&quot;, Map.of(&quot;voci&quot;, &quot;Controlla misura, voce e valore.&quot;));</span>
+            }
+<span class="fc" id="L63">            var chiave = new Chiave(attore.accountId(), trimestre, v.misuraId(), v.voce().trim());</span>
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">            if (dichiarazione.putIfAbsent(chiave, v.valore()) != null) {</span>
+<span class="nc" id="L65">                throw new DatiConteggiNonValidiException(&quot;Voce duplicata.&quot;,</span>
+<span class="nc" id="L66">                        Map.of(&quot;voci&quot;, &quot;Dichiara una sola volta ogni voce della misura.&quot;));</span>
+            }
+<span class="fc" id="L68">        }</span>
+<span class="fc" id="L69">        dichiarazione.forEach((chiave, valore) -&gt; {</span>
+<span class="fc" id="L70">            Long precedente = archivio.get(chiave);</span>
+<span class="fc bfc" id="L71" title="All 4 branches covered.">            if (precedente != null &amp;&amp; !precedente.equals(valore)) {</span>
+<span class="fc" id="L72">                throw new IllegalStateException(&quot;Correzioni disattivate.&quot;);</span>
+            }
+<span class="fc" id="L74">        });</span>
+<span class="fc" id="L75">        archivio.putAll(dichiarazione);</span>
+<span class="fc" id="L76">    }</span>
+
+    /** {@inheritDoc} */
+    @Override
+    public List&lt;ConteggioOpt&gt; consultaConteggiOpt(IdentitaAutenticata attore, UUID optId, Trimestre da, Trimestre a) {
+<span class="fc" id="L81">        return ConteggiTrimestrali.convertiInConteggi(consultaConteggiEsatti(attore, optId, da, a));</span>
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public synchronized List&lt;ConteggioEsatto&gt; consultaConteggiEsatti(
+            IdentitaAutenticata attore, UUID optId, Trimestre da, Trimestre a) {
+<span class="fc" id="L88">        RegoleAccessoConteggi.verificaConsultazione(attore, optId);</span>
+<span class="fc" id="L89">        ConteggiTrimestrali.validaIntervallo(da, a);</span>
+<span class="fc" id="L90">        ConteggiTrimestrali.verificaOpt(utenze, optId);</span>
+
+<span class="fc" id="L92">        var ordine = ConteggiTrimestrali.ORDINE_PERIODI;</span>
+<span class="fc" id="L93">        var righe = archivio.entrySet().stream()</span>
+<span class="fc" id="L94">                .filter(entry -&gt; {</span>
+<span class="fc" id="L95">                    var chiave = entry.getKey();</span>
+<span class="fc bfc" id="L96" title="All 4 branches covered.">                    return (optId == null || optId.equals(chiave.optId()))</span>
+<span class="fc bfc" id="L97" title="All 4 branches covered.">                            &amp;&amp; ordine.compare(da, chiave.periodo()) &lt;= 0 &amp;&amp; ordine.compare(chiave.periodo(), a) &lt;= 0;</span>
+                })
+<span class="fc" id="L99">                .map(entry -&gt; {</span>
+<span class="fc" id="L100">                    var chiave = entry.getKey();</span>
+<span class="fc" id="L101">                    return new ConteggioOpt(chiave.optId(),</span>
+<span class="fc" id="L102">                            new VoceMisura(chiave.misuraId(), chiave.voce(), entry.getValue()));</span>
+                })
+<span class="fc" id="L104">                .sorted(Comparator.comparing((ConteggioOpt riga) -&gt; riga.optId().toString())</span>
+<span class="fc" id="L105">                        .thenComparingLong(riga -&gt; riga.conteggio().misuraId())</span>
+<span class="fc" id="L106">                        .thenComparing(riga -&gt; riga.conteggio().voce()))</span>
+<span class="fc" id="L107">                .toList();</span>
+<span class="fc" id="L108">        return ConteggiTrimestrali.cumula(righe);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

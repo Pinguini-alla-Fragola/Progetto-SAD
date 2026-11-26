@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RegoleAccessoRichiesta.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.richieste.interno.dominio</a> &gt; <span class="el_source">RegoleAccessoRichiesta.java</span></div><h1>RegoleAccessoRichiesta.java</h1><pre class="source lang-java linenums">package it.unina.picus.richieste.interno.dominio;
+
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Predicate;
+
+import it.unina.picus.richieste.api.RichiesteApi;
+import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
+import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
+
+import static it.unina.picus.shared.ControlloAccesso.richiedi;
+
+/**
+ * Regole di accesso alle richieste (#28), usate dall'implementazione di {@link RichiesteApi}.
+ *
+ * &lt;p&gt;Il contratto stabilisce che ogni operazione riceve l'identità verificata dal server e
+ * controlla il ruolo e il legame dell'attore con la pratica. Queste regole decidono con l'identità
+ * della sessione e con i soggetti letti dai dati salvati, mai con parametri del client.
+ * Quando l'accesso non è consentito lanciano {@link SecurityException}, come dichiarato nel
+ * contratto. Il livello web la traduce in {@code 403} senza restituire dati.
+ *
+ * &lt;p&gt;Ciò che non è espressamente consentito è negato. Un'identità incompleta non ha mai accesso.
+ * Finché l'erogatore non è assegnato, la relazione «erogatore» non concede nulla a nessuno: il
+ * Banco e la OPT titolare mantengono il proprio accesso.
+ */
+public final class RegoleAccessoRichiesta {
+
+    /**
+     * Soggetti legati a una richiesta. Vanno letti dai dati salvati, mai dai parametri del client.
+     *
+     * @param titolareId account della OPT che ha inviato la richiesta
+     * @param erogatoreId account dell'erogatore assegnato, {@code null} prima dell'assegnazione
+     */
+    public record Soggetti(UUID titolareId, UUID erogatoreId) {
+        /** Una richiesta ha sempre un titolare. */
+<span class="fc" id="L37">        public Soggetti {</span>
+<span class="fc" id="L38">            Objects.requireNonNull(titolareId, &quot;titolareId&quot;);</span>
+<span class="fc" id="L39">        }</span>
+    }
+
+    /** Attore e soggetti della richiesta su cui si decide. */
+<span class="fc" id="L43">    private record Contesto(IdentitaAutenticata attore, Soggetti soggetti) {</span>
+    }
+
+    // -- regole come dati
+    // Ruoli ammessi dalle operazioni che dipendono solo dal ruolo di chi le intende eseguire.
+<span class="fc" id="L48">    private static final Set&lt;RuoloUtente&gt; SOLO_BANCO = Set.of(RuoloUtente.BANCO);</span>
+<span class="fc" id="L49">    private static final Set&lt;RuoloUtente&gt; SOLO_OPT = Set.of(RuoloUtente.OPT);</span>
+<span class="fc" id="L50">    private static final Set&lt;RuoloUtente&gt; EROGATORI = Set.of(RuoloUtente.OPT, RuoloUtente.OPERATORE);</span>
+
+    // Relazioni con la richiesta: una per riga della tabella della #28.
+    // sono tre domande sull'attore che possono essere riusate in tutto il codice
+    // la E iniziale sta per &quot;è&quot;: &quot;è il Banco?&quot;, &quot;è il titolare?&quot;, &quot;è l'erogatore assegnato?&quot;
+    // serve per la quinta Acceptance criteria
+<span class="fc" id="L56">    private static final Predicate&lt;Contesto&gt; E_BANCO =</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">            c -&gt; c.attore().ruolo() == RuoloUtente.BANCO;</span>
+
+    // due condizioni in and perché l'accesso ai dati per una richiesta deve essere consentito unicamente
+    // all'account che ha come ruolo OPT ma che è anche il titolare della richiesta
+    // Serve per soddisfare il primo Acceptance criteria.
+<span class="fc" id="L62">    private static final Predicate&lt;Contesto&gt; E_TITOLARE =</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">            c -&gt; c.attore().ruolo() == RuoloUtente.OPT</span>
+<span class="fc bfc" id="L64" title="All 2 branches covered.">                    &amp;&amp; c.attore().accountId().equals(c.soggetti().titolareId());</span>
+
+    // equals sull'attore: se l'erogatore non c'è ancora (null) il risultato è false, mai true.
+<span class="fc" id="L67">    private static final Predicate&lt;Contesto&gt; E_EROGATORE_ASSEGNATO =</span>
+<span class="pc bpc" id="L68" title="1 of 2 branches missed.">            c -&gt; EROGATORI.contains(c.attore().ruolo())</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">                    &amp;&amp; c.attore().accountId().equals(c.soggetti().erogatoreId());</span>
+
+    // Politiche: chi può fare cosa. Oggi coincidono, ma nascono da requisiti diversi e restano
+    // separate, così cambiarne una non modifica l'altra.
+<span class="fc" id="L73">    private static final Predicate&lt;Contesto&gt; PUO_CONSULTARE =</span>
+<span class="fc" id="L74">            E_BANCO.or(E_TITOLARE).or(E_EROGATORE_ASSEGNATO);</span>
+
+<span class="fc" id="L76">    private static final Predicate&lt;Contesto&gt; PUO_ANNULLARE =</span>
+<span class="fc" id="L77">            E_BANCO.or(E_TITOLARE).or(E_EROGATORE_ASSEGNATO);</span>
+
+<span class="fc" id="L79">    private static final Predicate&lt;Contesto&gt; VEDE_DATI_DEL_TITOLARE =</span>
+<span class="fc" id="L80">            E_BANCO.or(E_TITOLARE);</span>
+
+    private RegoleAccessoRichiesta() {
+    }
+
+    /**
+     * Operazioni riservate al Banco di coordinamento: coda e archivio, presa in carico, ricerca e
+     * contatto degli erogatori, assegnazione, conferma dell'accordo e rifiuto definitivo.
+     *
+     * @param attore identità verificata della sessione
+     * @throws SecurityException se l'identità è incompleta o l'attore non è il Banco
+     * @see RichiesteApi#prendiInCarico
+     * @see RichiesteApi#confermaAccordo
+     * @see RichiesteApi#rifiutaRichiesta
+     */
+    public static void verificaBanco(IdentitaAutenticata attore) {
+<span class="nc" id="L96">        richiediRuolo(attore, SOLO_BANCO, &quot;Operazione riservata al Banco&quot;);</span>
+<span class="nc" id="L97">    }</span>
+
+    /**
+     * Operazioni della OPT richiedente: invio ed elenco delle proprie richieste.
+     *
+     * @param attore identità verificata della sessione
+     * @throws SecurityException se l'identità è incompleta o l'attore non è una OPT
+     * @see RichiesteApi#invia
+     * @see RichiesteApi#elencoRichiesteOpt
+     */
+    public static void verificaOpt(IdentitaAutenticata attore) {
+<span class="nc" id="L108">        richiediRuolo(attore, SOLO_OPT, &quot;Operazione riservata alle OPT&quot;);</span>
+<span class="nc" id="L109">    }</span>
+
+    /**
+     * Elenco delle pratiche assegnate, riservato a chi può erogare: OPT e operatori.
+     *
+     * @param attore identità verificata della sessione
+     * @throws SecurityException se l'identità è incompleta o l'attore non ha un ruolo da erogatore
+     * @see RichiesteApi#elencoAssegnazioni
+     */
+    public static void verificaErogatore(IdentitaAutenticata attore) {
+<span class="nc" id="L119">        richiediRuolo(attore, EROGATORI, &quot;Operazione riservata agli erogatori&quot;);</span>
+<span class="nc" id="L120">    }</span>
+
+    /**
+     * Consultazione del dettaglio: il Banco, la OPT titolare o l'erogatore assegnato.
+     *
+     * @param attore identità verificata della sessione
+     * @param soggetti titolare ed erogatore letti dalla richiesta salvata
+     * @throws SecurityException se l'identità è incompleta o l'attore non ha relazione con la richiesta
+     * @throws NullPointerException se i soggetti mancano per un attore con identità completa
+     * @see RichiesteApi#consultaRichiesta
+     */
+    public static void verificaConsultazione(IdentitaAutenticata attore, Soggetti soggetti) {
+<span class="nc" id="L132">        richiedi(consente(PUO_CONSULTARE, attore, soggetti), &quot;Accesso negato alla richiesta&quot;);</span>
+<span class="nc" id="L133">    }</span>
+
+    // Attenzione: essere un erogatore candidato non significa avere la possibilità di accedere alle funzionalità dell'erogatore
+    // Solo dopo l'assegnazione alla richiesta dà la possibilità di annullarla (con motivazione obbligatoria).
+    /**
+     * Annullamento: il Banco, la OPT titolare o l'erogatore assegnato. Il solo contatto come
+     * candidato non basta, perché l'erogatore viene registrato solo con l'assegnazione. Le regole
+     * su motivo e stato sono in {@link RegoleAnnullamento}.
+     *
+     * @param attore identità verificata della sessione
+     * @param soggetti titolare ed erogatore letti dalla richiesta salvata
+     * @throws SecurityException se l'identità è incompleta o l'attore non ha relazione con la richiesta
+     * @throws NullPointerException se i soggetti mancano per un attore con identità completa
+     * @see RichiesteApi#annullaRichiesta
+     */
+    public static void verificaAnnullamento(IdentitaAutenticata attore, Soggetti soggetti) {
+<span class="fc" id="L149">        richiedi(consente(PUO_ANNULLARE, attore, soggetti), &quot;Annullamento non consentito&quot;);</span>
+<span class="fc" id="L150">    }</span>
+
+    /**
+     * Dice se l'attore può vedere titolare e descrizione nel {@link RichiesteApi.RichiestaDettaglio}.
+     * Li vedono solo il Banco e la OPT titolare: all'erogatore assegnato quei campi arrivano
+     * {@code null}. Va usato dopo {@link #verificaConsultazione}.
+     *
+     * @param attore identità verificata della sessione
+     * @param soggetti titolare ed erogatore letti dalla richiesta salvata
+     * @return {@code true} per il Banco e per la OPT titolare
+     * @throws NullPointerException se i soggetti mancano per un attore con identità completa
+     */
+    public static boolean vedeDatiDelTitolare(IdentitaAutenticata attore, Soggetti soggetti) {
+<span class="nc" id="L163">        return consente(VEDE_DATI_DEL_TITOLARE, attore, soggetti);</span>
+    }
+
+    // richiediRuolo esiste per scrivere una sola volta il controllo &quot;il ruolo è tra quelli ammessi?&quot;
+    private static void richiediRuolo(IdentitaAutenticata attore, Set&lt;RuoloUtente&gt; ammessi, String messaggio) {
+<span class="nc bnc" id="L168" title="All 4 branches missed.">        richiedi(identitaCompleta(attore) &amp;&amp; ammessi.contains(attore.ruolo()), messaggio);</span>
+<span class="nc" id="L169">    }</span>
+
+    /** Un'identità incompleta, senza account o senza ruolo, non ha mai accesso. */
+    private static boolean identitaCompleta(IdentitaAutenticata attore) {
+<span class="pc bpc" id="L173" title="3 of 6 branches missed.">        return attore != null &amp;&amp; attore.accountId() != null &amp;&amp; attore.ruolo() != null;</span>
+    }
+
+    /**
+     * Valuta una politica solo su un'identità completa: un attore incompleto non ha mai accesso.
+     * I soggetti sono una precondizione per un attore completo.
+     */
+    private static boolean consente(Predicate&lt;Contesto&gt; politica, IdentitaAutenticata attore, Soggetti soggetti) {
+<span class="pc bpc" id="L181" title="1 of 2 branches missed.">        if (!identitaCompleta(attore)) {</span>
+<span class="nc" id="L182">            return false;</span>
+        }
+<span class="fc" id="L184">        Objects.requireNonNull(soggetti, &quot;soggetti&quot;);</span>
+<span class="fc" id="L185">        return politica.test(new Contesto(attore, soggetti));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

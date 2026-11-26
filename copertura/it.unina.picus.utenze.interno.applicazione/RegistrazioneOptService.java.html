@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RegistrazioneOptService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.utenze.interno.applicazione</a> &gt; <span class="el_source">RegistrazioneOptService.java</span></div><h1>RegistrazioneOptService.java</h1><pre class="source lang-java linenums">package it.unina.picus.utenze.interno.applicazione;
+
+import java.util.Locale;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.regex.Pattern;
+
+import jakarta.mail.internet.AddressException;
+import jakarta.mail.internet.InternetAddress;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.context.annotation.Profile;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
+import it.unina.picus.utenze.interno.applicazione.AttivazioneUtenzaService.DatiInvioAttivazione;
+import it.unina.picus.utenze.interno.persistenza.AccountJpa;
+import it.unina.picus.utenze.interno.persistenza.AccountRepository;
+import it.unina.picus.utenze.interno.persistenza.ProfiloOptJpa;
+import it.unina.picus.utenze.interno.persistenza.ProfiloOptRepository;
+
+@Service
+@Profile(&quot;!skeleton&quot;)
+@Transactional
+public class RegistrazioneOptService {
+
+    static final int LUNGHEZZA_MAX_CODICE_STRUTTURA = 30;
+    static final int LUNGHEZZA_MAX_NOME = 200;
+    static final int LUNGHEZZA_MAX_COMUNE_CODICE = 50;
+
+<span class="fc" id="L32">    private static final Pattern PATTERN_CODICE_FISCALE =</span>
+<span class="fc" id="L33">            Pattern.compile(&quot;^(?:[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]|[0-9]{11})$&quot;);</span>
+
+<span class="fc" id="L35">    private static final Pattern PATTERN_EMAIL =</span>
+<span class="fc" id="L36">            Pattern.compile(&quot;^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$&quot;);</span>
+
+    private final AccountRepository accounts;
+    private final ProfiloOptRepository profiliOpt;
+    private final AttivazioneUtenzaService attivazioneService;
+    private final ConclusioneReinvio conclusioneReinvio;
+
+    RegistrazioneOptService(
+            AccountRepository accounts,
+            ProfiloOptRepository profiliOpt,
+            AttivazioneUtenzaService attivazioneService,
+<span class="fc" id="L47">            ConclusioneReinvio conclusioneReinvio) {</span>
+<span class="fc" id="L48">        this.accounts = Objects.requireNonNull(accounts);</span>
+<span class="fc" id="L49">        this.profiliOpt = Objects.requireNonNull(profiliOpt);</span>
+<span class="fc" id="L50">        this.attivazioneService = Objects.requireNonNull(attivazioneService);</span>
+<span class="fc" id="L51">        this.conclusioneReinvio = Objects.requireNonNull(conclusioneReinvio);</span>
+<span class="fc" id="L52">    }</span>
+
+<span class="fc" id="L54">    public record ComandoRegistrazioneOpt(</span>
+            String codiceStruttura,
+            String nome,
+            String comuneCodice,
+            String codiceFiscale,
+            String email
+    ) {}
+
+<span class="fc" id="L62">    public record EsitoRegistrazioneOpt(</span>
+            UUID accountId,
+            DatiInvioAttivazione datiInvio
+    ) {}
+
+    /**
+     * Registra una nuova OPT in attesa di attivazione e prepara il link monouso.
+     *
+     * @param comando dati inseriti dal Banco
+     * @return identificativo dell'account e dati per l'invio dopo il commit
+     */
+    public EsitoRegistrazioneOpt registraOpt(ComandoRegistrazioneOpt comando) {
+<span class="fc" id="L74">        AccountJpa account = creaAccount(valida(comando));</span>
+<span class="fc" id="L75">        return new EsitoRegistrazioneOpt(account.getId(), attivazioneService.preparaTokenAttivazione(account));</span>
+    }
+
+    /**
+     * Prepara un nuovo link per il reinvio del Banco, lasciando attivi i link precedenti.
+     *
+     * @param accountId identificativo dell'OPT in attesa
+     * @return dati per l'invio dopo il commit
+     */
+    public DatiInvioAttivazione preparaReinvio(UUID accountId) {
+<span class="fc" id="L85">        return attivazioneService.preparaReinvio(accountId, RuoloUtente.OPT);</span>
+    }
+
+    /**
+     * Registra l'esito dell'invio e rimuove l'invito CSV solo se la consegna è riuscita.
+     *
+     * @param accountId identificativo dell'OPT
+     * @param dati link preparato per questo reinvio
+     * @param riuscito consegna accettata dal server SMTP oppure completata in modalità simulata
+     */
+    public void concludeReinvio(UUID accountId, DatiInvioAttivazione dati, boolean riuscito) {
+<span class="fc" id="L96">        conclusioneReinvio.concludi(accountId, dati, riuscito);</span>
+<span class="fc" id="L97">    }</span>
+
+    /**
+     * Applica le regole condivise della registrazione manuale e dell'importazione.
+     *
+     * @param comando anagrafica di ingresso
+     * @return anagrafica normalizzata
+     * @throws DatiOptNonValidiException se un campo è invalido
+     */
+    static DatiOpt valida(ComandoRegistrazioneOpt comando) {
+<span class="fc" id="L107">        Objects.requireNonNull(comando, &quot;comando obbligatorio&quot;);</span>
+
+<span class="fc" id="L109">        String codiceStruttura = validaTestoObbligatorio(</span>
+<span class="fc" id="L110">                comando.codiceStruttura(), &quot;codiceStruttura&quot;,</span>
+                &quot;Il codice struttura è obbligatorio.&quot;,
+                LUNGHEZZA_MAX_CODICE_STRUTTURA,
+                &quot;Il codice struttura non può superare &quot; + LUNGHEZZA_MAX_CODICE_STRUTTURA + &quot; caratteri.&quot;,
+                Locale.ROOT, true);
+
+<span class="fc" id="L116">        String nome = validaTestoObbligatorio(</span>
+<span class="fc" id="L117">                comando.nome(), &quot;nome&quot;,</span>
+                &quot;Il nome della OPT è obbligatorio.&quot;,
+                LUNGHEZZA_MAX_NOME,
+                &quot;Il nome della OPT non può superare &quot; + LUNGHEZZA_MAX_NOME + &quot; caratteri.&quot;,
+                null, false);
+
+<span class="fc" id="L123">        String comuneCodice = validaTestoObbligatorio(</span>
+<span class="fc" id="L124">                comando.comuneCodice(), &quot;comuneCodice&quot;,</span>
+                &quot;Il comune è obbligatorio.&quot;,
+                LUNGHEZZA_MAX_COMUNE_CODICE,
+                &quot;Il codice del comune non può superare &quot; + LUNGHEZZA_MAX_COMUNE_CODICE + &quot; caratteri.&quot;,
+                Locale.ROOT, false);
+
+<span class="fc" id="L130">        String codiceFiscale = validaCodiceFiscale(comando.codiceFiscale());</span>
+<span class="fc" id="L131">        String email = validaEmail(comando.email());</span>
+<span class="fc" id="L132">        return new DatiOpt(codiceStruttura, nome, comuneCodice, codiceFiscale, email);</span>
+    }
+
+    /**
+     * Crea account e profilo nella transazione del caso d'uso chiamante.
+     *
+     * @param dati anagrafica già validata
+     * @return account OPT in attesa di attivazione
+     */
+    AccountJpa creaAccount(DatiOpt dati) {
+<span class="fc bfc" id="L142" title="All 2 branches covered.">        if (accounts.existsByEmailIgnoreCase(dati.email())) {</span>
+<span class="fc" id="L143">            throw new DatiOptNonValidiException(&quot;email&quot;, &quot;Esiste già un account associato a questa email.&quot;);</span>
+        }
+<span class="pc bpc" id="L145" title="1 of 2 branches missed.">        if (profiliOpt.existsByCodiceStrutturaIgnoreCase(dati.codiceStruttura())) {</span>
+<span class="nc" id="L146">            throw new DatiOptNonValidiException(&quot;codiceStruttura&quot;, &quot;Esiste già una OPT registrata con questo codice struttura.&quot;);</span>
+        }
+
+        try {
+<span class="fc" id="L150">            AccountJpa account = AccountJpa.inAttesaDiAttivazione(dati.email(), dati.nome(), RuoloUtente.OPT);</span>
+<span class="fc" id="L151">            account = accounts.saveAndFlush(account);</span>
+
+<span class="fc" id="L153">            ProfiloOptJpa profilo = new ProfiloOptJpa(</span>
+<span class="fc" id="L154">                    account.getId(),</span>
+<span class="fc" id="L155">                    dati.codiceStruttura(),</span>
+<span class="fc" id="L156">                    dati.comuneCodice(),</span>
+<span class="fc" id="L157">                    dati.codiceFiscale()</span>
+            );
+<span class="fc" id="L159">            profiliOpt.saveAndFlush(profilo);</span>
+
+<span class="fc" id="L161">            return account;</span>
+
+<span class="nc" id="L163">        } catch (DataIntegrityViolationException ex) {</span>
+<span class="nc" id="L164">            throw classificaViolazioneVincolo(ex);</span>
+        }
+    }
+
+    /** Converte i conflitti anagrafici prevedibili in scarti e propaga gli altri errori tecnici. */
+    static DatiOptNonValidiException classificaViolazioneVincolo(DataIntegrityViolationException ex) {
+<span class="nc" id="L170">        String nomeVincolo = estraiNomeVincolo(ex);</span>
+<span class="nc bnc" id="L171" title="All 4 branches missed.">        if (nomeVincolo == null || nomeVincolo.isBlank()) {</span>
+<span class="nc" id="L172">            throw ex;</span>
+        }
+<span class="nc" id="L174">        String vincoloLower = nomeVincolo.toLowerCase(Locale.ROOT);</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">        if (vincoloLower.contains(&quot;email&quot;)) {</span>
+<span class="nc" id="L176">            return new DatiOptNonValidiException(&quot;email&quot;, &quot;Esiste già un account associato a questa email.&quot;);</span>
+        }
+<span class="nc bnc" id="L178" title="All 2 branches missed.">        if (vincoloLower.contains(&quot;codice_struttura&quot;)) {</span>
+<span class="nc" id="L179">            return new DatiOptNonValidiException(&quot;codiceStruttura&quot;, &quot;Esiste già una OPT registrata con questo codice struttura.&quot;);</span>
+        }
+<span class="nc bnc" id="L181" title="All 2 branches missed.">        if (vincoloLower.contains(&quot;comune&quot;)) {</span>
+<span class="nc" id="L182">            return new DatiOptNonValidiException(&quot;comuneCodice&quot;, &quot;Il comune selezionato non è valido.&quot;);</span>
+        }
+<span class="nc" id="L184">        throw ex;</span>
+    }
+
+    private static String estraiNomeVincolo(DataIntegrityViolationException ex) {
+<span class="nc" id="L188">        Throwable corrente = ex;</span>
+<span class="nc bnc" id="L189" title="All 2 branches missed.">        while (corrente != null) {</span>
+<span class="nc bnc" id="L190" title="All 2 branches missed.">            if (corrente instanceof ConstraintViolationException cve) {</span>
+<span class="nc" id="L191">                return cve.getConstraintName();</span>
+            }
+<span class="nc" id="L193">            corrente = corrente.getCause();</span>
+        }
+<span class="nc" id="L195">        return null;</span>
+    }
+
+    private static String validaTestoObbligatorio(
+            String valore,
+            String campo,
+            String msgObbligatorio,
+            int maxLunghezza,
+            String msgLunghezza,
+            Locale localeNormalizzazione,
+            boolean maiuscolo) {
+<span class="pc bpc" id="L206" title="1 of 4 branches missed.">        if (valore == null || valore.isBlank()) {</span>
+<span class="fc" id="L207">            throw new DatiOptNonValidiException(campo, msgObbligatorio);</span>
+        }
+<span class="fc" id="L209">        String normalizzato = valore.strip();</span>
+<span class="fc bfc" id="L210" title="All 2 branches covered.">        if (localeNormalizzazione != null) {</span>
+<span class="fc bfc" id="L211" title="All 2 branches covered.">            normalizzato = maiuscolo</span>
+<span class="fc" id="L212">                    ? normalizzato.toUpperCase(localeNormalizzazione)</span>
+<span class="fc" id="L213">                    : normalizzato.toLowerCase(localeNormalizzazione);</span>
+        }
+<span class="pc bpc" id="L215" title="1 of 2 branches missed.">        if (normalizzato.length() &gt; maxLunghezza) {</span>
+<span class="nc" id="L216">            throw new DatiOptNonValidiException(campo, msgLunghezza);</span>
+        }
+<span class="fc" id="L218">        return normalizzato;</span>
+    }
+
+    private static String validaEmail(String emailRaw) {
+<span class="fc" id="L222">        String normalizzata = UtenzeService.normalizzaEmail(emailRaw);</span>
+<span class="fc bfc" id="L223" title="All 4 branches covered.">        if (normalizzata == null || !PATTERN_EMAIL.matcher(normalizzata).matches()) {</span>
+<span class="fc" id="L224">            throw new DatiOptNonValidiException(&quot;email&quot;, &quot;Inserisci un indirizzo email valido.&quot;);</span>
+        }
+<span class="pc bpc" id="L226" title="1 of 2 branches missed.">        if (normalizzata.length() &gt; UtenzeService.LUNGHEZZA_MAX_EMAIL) {</span>
+<span class="nc" id="L227">            throw new DatiOptNonValidiException(&quot;email&quot;,</span>
+                    &quot;L'indirizzo email non può superare &quot; + UtenzeService.LUNGHEZZA_MAX_EMAIL + &quot; caratteri.&quot;);
+        }
+        try {
+<span class="fc" id="L231">            InternetAddress addr = new InternetAddress(normalizzata, true);</span>
+<span class="fc" id="L232">            addr.validate();</span>
+<span class="pc bpc" id="L233" title="1 of 2 branches missed.">            if (!normalizzata.equals(addr.getAddress())) {</span>
+<span class="nc" id="L234">                throw new DatiOptNonValidiException(&quot;email&quot;, &quot;Inserisci un singolo indirizzo email valido.&quot;);</span>
+            }
+<span class="fc" id="L236">        } catch (AddressException ex) {</span>
+<span class="fc" id="L237">            throw new DatiOptNonValidiException(&quot;email&quot;, &quot;Inserisci un indirizzo email valido.&quot;);</span>
+<span class="fc" id="L238">        }</span>
+<span class="fc" id="L239">        return normalizzata;</span>
+    }
+
+    private static String validaCodiceFiscale(String cfRaw) {
+<span class="pc bpc" id="L243" title="1 of 4 branches missed.">        if (cfRaw == null || cfRaw.isBlank()) {</span>
+<span class="fc" id="L244">            throw new DatiOptNonValidiException(&quot;codiceFiscale&quot;, &quot;Il codice fiscale è obbligatorio.&quot;);</span>
+        }
+<span class="fc" id="L246">        String cf = cfRaw.strip().toUpperCase(Locale.ROOT);</span>
+<span class="pc bpc" id="L247" title="1 of 4 branches missed.">        if (&quot;00000000000&quot;.equals(cf) || !PATTERN_CODICE_FISCALE.matcher(cf).matches()) {</span>
+<span class="fc" id="L248">            throw new DatiOptNonValidiException(&quot;codiceFiscale&quot;,</span>
+                    &quot;Il codice fiscale non ha un formato valido (16 caratteri alfanumerici o 11 cifre).&quot;);
+        }
+<span class="fc" id="L251">        return cf;</span>
+    }
+
+    /** Anagrafica normalizzata secondo le regole condivise delle OPT. */
+<span class="fc" id="L255">    record DatiOpt(String codiceStruttura, String nome, String comuneCodice, String codiceFiscale, String email) {</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>
