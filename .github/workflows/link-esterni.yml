@@ -1,0 +1,47 @@
+name: Link esterni della documentazione
+
+on:
+  schedule:
+    - cron: '35 9 * * 1'
+      timezone: Europe/Rome
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: link-esterni
+  cancel-in-progress: false
+
+jobs:
+  links:
+    name: Riepilogo dei link web
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Verifica i link esterni e pubblica il riepilogo
+        id: lychee
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          lycheeVersion: v0.24.2
+          args: >-
+            --scheme http --scheme https --exclude-all-private --no-progress --hidden
+            --timeout 15 --max-retries 2
+            'README.md' 'docs/**/*.md' '.github/**/*.md'
+          format: markdown
+          fail: false
+          failIfEmpty: false
+          jobSummary: true
+          output: ${{ runner.temp }}/lychee-link-esterni.md
+          token: ""
+
+      - name: Segnala un errore nell'esecuzione di Lychee
+        if: steps.lychee.outputs.exit_code != '0' && steps.lychee.outputs.exit_code != '2'
+        run: |
+          echo "::error::Lychee non ha completato il controllo. Consulta il log del passaggio precedente."
+          exit 1

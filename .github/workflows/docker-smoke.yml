@@ -1,0 +1,68 @@
+name: Avvio Docker
+
+on:
+  pull_request:
+    paths: &avvio_docker
+      - 'Dockerfile'
+      - '.dockerignore'
+      - '.gitattributes'
+      - 'docker-compose*.yml'
+      - 'mvnw'
+      - '.mvn/**'
+      - 'pom.xml'
+      - 'src/main/resources/application*.yml'
+      - 'src/main/resources/db/**'
+      - '.github/workflows/docker-smoke.yml'
+  push:
+    branches: [main, develop]
+    paths: *avvio_docker
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docker-smoke-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    name: Avvio PICUS e accesso HTTP
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      COMPOSE_FILE: docker-compose.yml:docker-compose.mailpit.yml
+      COMPOSE_PROJECT_NAME: picus-smoke
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Prepara l'ambiente locale di prova
+        shell: bash
+        run: |
+          for key in PICUS_DB_PASSWORD PICUS_DEMO_PASSWORD; do
+            value="$(openssl rand -hex 16)"
+            echo "::add-mask::$value"
+            echo "$key=$value" >> "$GITHUB_ENV"
+          done
+
+      - name: Costruisci e avvia PICUS
+        run: docker compose --profile mailpit up --build --wait --wait-timeout 90
+
+      - name: Verifica la pagina di accesso
+        shell: bash
+        run: |
+          status="$(curl --fail --silent --show-error --retry 20 --retry-all-errors \
+            --retry-delay 2 --connect-timeout 2 --max-time 5 --output /dev/null \
+            --write-out '%{http_code}' http://127.0.0.1:8080/login)"
+          test "$status" = 200
+
+      - name: Mostra i log di avvio in caso di errore
+        if: failure() && env.PICUS_DB_PASSWORD != ''
+        run: docker compose --profile mailpit logs --no-color
+
+      - name: Rimuovi il progetto temporaneo
+        if: always() && env.PICUS_DB_PASSWORD != ''
+        run: docker compose --profile mailpit down --volumes

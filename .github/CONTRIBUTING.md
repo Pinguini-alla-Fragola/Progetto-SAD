@@ -34,7 +34,13 @@ completare una task di analisi non equivale a implementare la relativa Story.
 3. Preservare il lavoro altrui e mantenere la modifica focalizzata.
 4. Eseguire le verifiche appropriate e controllare il diff.
 5. Usare Conventional Commits: `<type>(<scope>): <descrizione>`.
-6. Aprire una PR con il template e attendere review e controlli richiesti.
+6. Aprire una PR con il template. Usare lo stato Draft se è ancora in lavorazione.
+   Quando è pronta, verificare chi è già stato richiesto da GitHub e, se serve,
+   chiedere la review a una persona che conosce l'area interessata. Attendere
+   la review e i controlli richiesti.
+
+Il filtro [Le mie review](https://github.com/Pinguini-alla-Fragola/Progetto-SAD/pulls?q=is%3Apr+is%3Aopen+user-review-requested%3A%40me)
+mostra le PR aperte per cui ti è stata richiesta direttamente una review.
 
 Usare `Closes #123` solo quando la PR completa effettivamente quell'issue;
 per un contributo parziale usare `Refs #123`. Non chiudere un'Epic soltanto
@@ -49,10 +55,6 @@ I code owner di `.gitignore` e dell'intera cartella `.github/`, compreso
 `CODEOWNERS`, sono esclusivamente **@CapHello e @giob22**. Le modifiche a
 questi percorsi vanno concordate con loro e approvate da uno dei due, diverso
 dall'autore della PR, prima dell'integrazione.
-
-Il team `@Pinguini-alla-Fragola/developers` è il code owner ordinario degli altri
-file. Le protezioni devono richiedere la review dei code owner: consultare la
-[configurazione da completare su GitHub](SETUP.md).
 
 `CODEOWNERS` assegna le revisioni e non vieta tecnicamente ad altri account di
 creare un branch, modificare file o proporre una PR. Non costituisce un sistema
@@ -78,8 +80,15 @@ In PowerShell:
 ```
 
 La CI esegue `bash ./mvnw --batch-mode --no-transfer-progress verify` con
-Java 25 quando rileva il progetto Maven completo del wrapper. Se lo scheletro
-non esiste, lo dichiara nel riepilogo e non esegue compilazione o test.
+Java 25 quando rileva il progetto Maven completo del wrapper. Il report JaCoCo
+si genera automaticamente su `main` o tramite l'[avvio manuale di Java CI](SETUP.md#workflow-e-dipendenze).
+Per le PR che modificano soltanto il README principale, file Markdown in `docs/` o
+`.github/`, oppure PDF in `docs/`, il check Java indica nel riepilogo che la
+suite è stata saltata. Se i test Java falliscono, il riepilogo elenca i casi
+falliti e i comandi per ripeterli in locale. Se manca il POM, il check indica
+che la compilazione e i test non sono stati eseguiti. Il workflow di
+[avvio Docker](workflows/docker-smoke.yml) costruisce l'immagine e verifica
+`/login` con un database vuoto quando cambiano configurazione o migrazioni.
 Lo scheletro mantiene il test di caricamento del contesto del template,
 con JUnit Jupiter 5 o successivo nella versione gestita da Spring Boot.
 Per il codice aggiungere o aggiornare i test pertinenti; per la documentazione

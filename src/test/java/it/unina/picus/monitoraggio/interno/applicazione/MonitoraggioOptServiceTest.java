@@ -25,6 +25,7 @@ import java.util.UUID;
 import it.unina.picus.monitoraggio.api.DatiConteggiNonValidiException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -46,6 +47,7 @@ import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Task #174 · Salvataggio e isolamento dei conteggi OPT")
+@Tag("unit")
 class MonitoraggioOptServiceTest {
 
     @Mock private ConteggioOptRepository conteggiRepo;

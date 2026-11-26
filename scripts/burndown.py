@@ -39,7 +39,8 @@ query($login:String!, $num:Int!, $after:String) {
           createdAt updatedAt
           content {
             __typename
-            ... on Issue { number title closedAt issueType { name }
+            ... on Issue { number title url closedAt issueType { name }
+              assignees(first:1) { totalCount }
               timelineItems(first:100, itemTypes:[PROJECT_V2_ITEM_STATUS_CHANGED_EVENT]) {
                 nodes { ... on ProjectV2ItemStatusChangedEvent { createdAt previousStatus status } }
               } }
@@ -97,7 +98,8 @@ def scarica_dati(cfg):
         tipo = (contenuto.get("issueType") or {}).get("name", "").strip().casefold()
         if contenuto.get("__typename") != "Issue" or tipo != cfg["tipo_task"].strip().casefold():
             continue        # contano solo i task tecnici: né Story, Epic, Bug, Question, PR o bozze
-        punti = campi.get(cfg["campo_punti"], {}).get("number") or 0       # solo Estimate, mai la taglia
+        stima = campi.get(cfg["campo_punti"], {}).get("number")
+        punti = stima if stima is not None else 0
         fatto = campi.get(cfg["campo_stato"], {}).get("name") == cfg["valore_fatto"]
         # completato: chiusura dell'issue se c'è, altrimenti ultimo aggiornamento
         chiuso = (data(contenuto.get("closedAt")) or data(riga["updatedAt"])) if fatto else None
@@ -106,7 +108,9 @@ def scarica_dati(cfg):
                         for e in (contenuto.get("timelineItems") or {}).get("nodes", []) if e)
         s["task"].append({"titolo": contenuto.get("title", "?"), "punti": float(punti),
                           "creato": data(riga["createdAt"]), "chiuso": chiuso,
-                          "stato_ora": stato_ora, "eventi": eventi})
+                          "stato_ora": stato_ora, "eventi": eventi, "stima": stima,
+                          "numero": contenuto.get("number"), "url": contenuto.get("url"),
+                          "assegnato": bool((contenuto.get("assignees") or {}).get("totalCount", 0))})
     return sprint
 
 
@@ -286,6 +290,27 @@ def disegna_grafico(titolo, sprint, base, righe, adesso):
     return "\n".join(o)
 
 
+def riepilogo_sprint(titolo, task):
+    """Elenca i dati da completare nel riepilogo Actions del burndown."""
+    righe = ["## Riepilogo dello sprint", "", html.escape(titolo), ""]
+    sezioni = (
+        ("Task senza Estimate", [t for t in task if t["stima"] is None]),
+        ("Task in In progress senza assegnatario",
+         [t for t in task if t["stato_ora"] == "In progress" and not t["assegnato"]]),
+    )
+    for titolo_sezione, elementi in sezioni:
+        righe.extend([f"### {titolo_sezione} ({len(elementi)})", ""])
+        for t in elementi:
+            testo = html.escape(" ".join(t["titolo"].split()))
+            testo = re.sub(r"([\\\[\]_*`])", r"\\\1", testo)
+            link = f"[#{t['numero']}](<{t['url']}>) " if t["url"] and t["numero"] else ""
+            righe.append(f"- {link}{testo}")
+        if not elementi:
+            righe.append("Nessun task.")
+        righe.append("")
+    return "\n".join(righe) + "\n"
+
+
 def main():
     env = os.environ
     cfg = {"token": env["PROJECT_TOKEN"], "tipo": env.get("OWNER_TYPE", "user"),
@@ -310,6 +335,9 @@ def main():
     (cartella / "burndown-latest.svg").write_text(svg, encoding="utf-8")     # il README punta a questo
     print(f"{titolo}: {len(dati[titolo]['task'])} item conteggiati, base {base:g} punti, rimanenti {righe[-1][3]:g}"
           if righe else "nessun dato")
+    if percorso := env.get("GITHUB_STEP_SUMMARY"):
+        with open(percorso, "a", encoding="utf-8") as summary:
+            summary.write(riepilogo_sprint(titolo, dati[titolo]["task"]))
 
 
 if __name__ == "__main__":

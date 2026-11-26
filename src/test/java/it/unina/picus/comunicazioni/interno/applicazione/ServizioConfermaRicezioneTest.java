@@ -33,6 +33,7 @@ import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
 @ExtendWith(MockitoExtension.class)
 @Tag("issue-145")
 @DisplayName("#145 Servizio di conferma di ricezione")
+@Tag("unit")
 class ServizioConfermaRicezioneTest {
 
     private static final Instant ORA = Instant.parse("2026-11-22T10:00:00Z");

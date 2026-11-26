@@ -1,0 +1,25 @@
+name: Etichette delle pull request
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+concurrency:
+  group: labeler-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  labels:
+    name: Applica le etichette per percorso
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # La configurazione è letta dalla base fidata via API. Il job non fa checkout.
+      - uses: actions/labeler@bf12e9b00b37c5c0ca2b87b79b2daf7891dbda13 # v7.0.0
+        with:
+          sync-labels: false

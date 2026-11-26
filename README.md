@@ -60,11 +60,27 @@ bash ./mvnw verify
 
 Su Windows, in PowerShell, usa `.\mvnw.cmd verify`.
 
+Per eseguire i test unitari contrassegnati con `@Tag("unit")` senza Docker,
+usa `bash ./mvnw -Pfast test` oppure `.\mvnw.cmd -Pfast test`.
+
+Il profilo `coverage` genera il report JaCoCo in `target/site/jacoco/` con
+`bash ./mvnw -Pcoverage verify` oppure `.\mvnw.cmd -Pcoverage verify`.
+Su GitHub Actions il report viene generato automaticamente su `main`.
+Per ottenerlo su un altro branch della repository, apri **Actions → Java CI →
+Run workflow**, seleziona il branch e attiva **Genera il report JaCoCo**.
+Il risultato è scaricabile come artefatto **copertura-java**, con lo stesso
+tema dei Javadoc.
+Per applicare il tema anche in locale, esegui
+`python scripts/applica_tema_jacoco.py target/site/jacoco` dopo Maven.
+
 ## Avvio locale
 
 Copia [`.env.example`](.env.example) in `.env` e imposta le due password
-`PICUS_DB_PASSWORD` e `PICUS_DEMO_PASSWORD`. Dalla cartella del progetto avvia
-PICUS con Docker Compose.
+`PICUS_DB_PASSWORD` e `PICUS_DEMO_PASSWORD`. Con Python 3, esegui
+`python scripts/doctor.py` per controllare prerequisiti, configurazione
+Compose e disponibilità della porta 8080.
+
+Dalla cartella del progetto avvia PICUS con Docker Compose.
 
 ```bash
 docker compose up --build
@@ -72,3 +88,6 @@ docker compose up --build
 
 Apri <http://localhost:8080> e accedi con `banco@picus.test` e la password
 che hai impostato in `PICUS_DEMO_PASSWORD`.
+
+Per provare il percorso dalla richiesta all'appuntamento, usa il comando della
+[demo di coordinamento](docs/reviews/demo-coordinamento.md).

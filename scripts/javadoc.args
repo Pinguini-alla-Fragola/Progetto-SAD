@@ -13,6 +13,7 @@
 -group "Monitoraggio" "it.unina.picus.monitoraggio,it.unina.picus.monitoraggio.*"
 -group "Avvio e componenti condivisi" "it.unina.picus,it.unina.picus.shared,it.unina.picus.shared.*"
 -header "<a class='picus-brand' href='https://strawberrypenguin.it/' aria-label='PICUS, pagina iniziale del progetto'><img src='{@docRoot}/resource-files/picus-logo.svg' width='38' height='38' alt=''>PICUS</a><button type='button' class='picus-theme-toggle' hidden>Tema chiaro</button>"
+--add-stylesheet docs/architecture/Javadocs/picus-theme.css
 --add-stylesheet docs/architecture/Javadocs/picus-javadoc.css
 --add-script docs/architecture/Javadocs/picus-javadoc-theme.js
 -subpackages it.unina.picus
