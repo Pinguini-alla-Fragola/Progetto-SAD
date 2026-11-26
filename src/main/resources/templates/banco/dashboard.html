@@ -146,17 +146,19 @@
                 <button type="button" role="tab" id="catalogo-tab-offerte" aria-controls="catalogo-view-offerte" aria-selected="false" tabindex="-1">Offerte OPT</button>
             </div>
                 <div role="tabpanel" id="catalogo-view-misure" aria-labelledby="catalogo-tab-misure" tabindex="0">
-                    <h2 class="picus-card-title">Misure attive</h2><div class="picus-list" id="catalogo-lista" aria-live="polite"></div>
+                    <div class="panel-heading"><h2 class="picus-card-title">Misure del catalogo</h2><button class="btn btn-secondary btn-sm" type="button" id="catalogo-aggiorna">Aggiorna elenco</button></div>
+                    <p class="picus-esito" id="catalogo-esito" role="status"></p>
+                    <div class="picus-list" id="catalogo-lista" aria-live="polite"></div>
                 </div>
                 <div role="tabpanel" id="catalogo-view-nuova" aria-labelledby="catalogo-tab-nuova" tabindex="0" hidden>
-                    <h2 class="sr-only">Aggiungi una misura</h2><form id="nuova-misura" class="picus-form form-layout" data-form-anteprima><fieldset class="campi-inattivi" disabled>
+                    <h2 class="sr-only">Aggiungi una misura</h2><form id="nuova-misura" class="picus-form form-layout" novalidate><fieldset class="campi-form">
                     <fieldset class="form-section"><legend>Misura</legend><div class="form-section-content"><div class="picus-fields fields-two">
                         <label class="campo ">Codice misura<input class="form-control" name="codice" type="text" required ></label>
                         <label class="campo ">Titolo<input class="form-control" name="titolo" type="text" required ></label>
                         <label class="campo campo-esteso">Descrizione<textarea class="form-control" name="descrizione" rows="6" ></textarea></label>
                         <label class="picus-check"><input name="remoto" type="checkbox" > Compatibile con il remoto</label>
                     </div></div></fieldset>
-                    <div class="form-submit"><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-primary" type="submit">Salva misura</button></span><p class="picus-esito" role="status"></p></div>
+                    <div class="form-submit"><button class="btn btn-primary" type="submit">Salva misura</button><p class="picus-esito" id="nuova-misura-esito" role="status"></p></div>
                 </fieldset></form>
                 </div>
                 <div role="tabpanel" id="catalogo-view-offerte" aria-labelledby="catalogo-tab-offerte" tabindex="0" hidden>
