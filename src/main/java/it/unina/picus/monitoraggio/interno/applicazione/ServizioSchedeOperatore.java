@@ -13,8 +13,6 @@ import it.unina.picus.monitoraggio.interno.dominio.StatoVersioneCategorie;
 import it.unina.picus.monitoraggio.interno.dominio.TracciatoSchedaOperatore;
 import it.unina.picus.monitoraggio.interno.dominio.VoceCategoriaVersione;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,38 +40,9 @@ public class ServizioSchedeOperatore implements MonitoraggioApi {
     private final ServizioRiepilogoSchede riepilogo;
     private final ConteggiOptApi conteggiOpt;
     private final Clock orologio;
-    private final Trimestre primoTrimestreObbligatorio;
 
     /**
-     * Crea il servizio applicativo delle schede personali con soglia di adozione obbligatoria configurabile.
-     *
-     * @param archivio persistenza delle schede personali
-     * @param archivioRendicontabile sorgente delle schede accettate per il riepilogo
-     * @param categorie fonte delle configurazioni per trimestre di TM-OP-01
-     * @param conteggiOpt servizio dei conteggi trimestrali delle OPT
-     * @param orologio sorgente dell'istante di invio
-     * @param primoAnnoObbligatorio anno da cui è richiesta una configurazione pubblicata se assente
-     * @param primoTrimestreObbligatorio trimestre dell'anno indicato da cui è richiesta la pubblicazione
-     */
-    @Autowired
-    public ServizioSchedeOperatore(
-            ArchivioSchedeOperatore archivio,
-            ArchivioSchedeRendicontabili archivioRendicontabile,
-            CategorieSchedeRendicontabili categorie,
-            ConteggiOptApi conteggiOpt,
-            Clock orologio,
-            @Value("${picus.monitoraggio.categorie.primo-trimestre-obbligatorio-anno:2026}") int primoAnnoObbligatorio,
-            @Value("${picus.monitoraggio.categorie.primo-trimestre-obbligatorio-trimestre:4}") int primoTrimestreObbligatorio) {
-        this.archivio = archivio;
-        this.categorie = categorie;
-        this.riepilogo = new ServizioRiepilogoSchede(archivioRendicontabile, categorie);
-        this.conteggiOpt = conteggiOpt;
-        this.orologio = orologio;
-        this.primoTrimestreObbligatorio = new Trimestre(primoAnnoObbligatorio, primoTrimestreObbligatorio);
-    }
-
-    /**
-     * Costruttore di convenienza per test unitari con soglia predefinita al {@code 2026-T4}.
+     * Crea il servizio applicativo delle schede personali.
      *
      * @param archivio persistenza delle schede personali
      * @param archivioRendicontabile sorgente delle schede accettate per il riepilogo
@@ -87,7 +56,11 @@ public class ServizioSchedeOperatore implements MonitoraggioApi {
             CategorieSchedeRendicontabili categorie,
             ConteggiOptApi conteggiOpt,
             Clock orologio) {
-        this(archivio, archivioRendicontabile, categorie, conteggiOpt, orologio, 2026, 4);
+        this.archivio = archivio;
+        this.categorie = categorie;
+        this.riepilogo = new ServizioRiepilogoSchede(archivioRendicontabile, categorie);
+        this.conteggiOpt = conteggiOpt;
+        this.orologio = orologio;
     }
 
     /** {@inheritDoc} */
@@ -104,9 +77,10 @@ public class ServizioSchedeOperatore implements MonitoraggioApi {
     }
 
     /**
-     * Risolve la configurazione del modulo per il trimestre richiesto, esponendo le categorie
-     * pubblicate oppure la modalità provvisoria storica {@code v0.1}. Un trimestre successivo alla
-     * soglia privo di configurazione riceve {@link ConfigurazioneTrimestreAssenteException}.
+     * Risolve la configurazione del modulo per il trimestre richiesto. Quando il Banco ha
+     * pubblicato almeno una versione per {@code TM-OP-01}, ogni trimestre privo di configurazione
+     * pubblicata o di associazione storica {@code v0.1} pre-migrazione viene rifiutato con
+     * {@link ConfigurazioneTrimestreAssenteException}, senza creare nuove associazioni legacy.
      *
      * @param attore identità verificata dell'operatore
      * @param trimestre periodo richiesto
@@ -128,8 +102,9 @@ public class ServizioSchedeOperatore implements MonitoraggioApi {
                     StatoVersioneCategorie.LEGACY,
                     l.versione().voci());
             case ConfigurazioneTrimestre.NonConfigurata n -> {
-                if (precedeSogliaObbligatoria(trimestre)) {
-                    yield new ConfigurazioneModulo("v0.1", StatoVersioneCategorie.LEGACY, List.of());
+                if (n.transitorioSenzaPubblicazioni()) {
+                    yield new ConfigurazioneModulo(
+                            TracciatoSchedaOperatore.VERSIONE, StatoVersioneCategorie.LEGACY, List.of());
                 }
                 throw new ConfigurazioneTrimestreAssenteException(
                         "Configurazione delle categorie non ancora pubblicata dal Banco per il trimestre selezionato");
@@ -153,14 +128,6 @@ public class ServizioSchedeOperatore implements MonitoraggioApi {
         }
 
         ConfigurazioneTrimestre conf = categorie.configurazionePer(trimestre);
-        if (conf instanceof ConfigurazioneTrimestre.NonConfigurata) {
-            if (!precedeSogliaObbligatoria(trimestre)) {
-                throw new ConfigurazioneTrimestreAssenteException(
-                        "Configurazione delle categorie non ancora pubblicata dal Banco per il trimestre selezionato");
-            }
-            conf = categorie.associaLegacySeAssente(trimestre, istanteInvio);
-        }
-
         UUID versioneCategorieId;
         switch (conf) {
             case ConfigurazioneTrimestre.Pubblicata p -> {
@@ -172,9 +139,13 @@ public class ServizioSchedeOperatore implements MonitoraggioApi {
                 versioneCategorieId = p.versione().id();
             }
             case ConfigurazioneTrimestre.LegacyProvvisoria l -> versioneCategorieId = l.versione().id();
-            case ConfigurazioneTrimestre.NonConfigurata ignored ->
+            case ConfigurazioneTrimestre.NonConfigurata n -> {
+                if (!n.transitorioSenzaPubblicazioni()) {
                     throw new ConfigurazioneTrimestreAssenteException(
                             "Configurazione delle categorie non ancora pubblicata dal Banco per il trimestre selezionato");
+                }
+                versioneCategorieId = null;
+            }
         }
 
         var sintesi = new SchedaSintesi(UUID.randomUUID(), attore.accountId(), trimestre, istanteInvio);
@@ -221,12 +192,6 @@ public class ServizioSchedeOperatore implements MonitoraggioApi {
             throw new DatiSchedaNonValidiException(Map.of("trimestre", "Il periodo è obbligatorio"));
         }
         return archivio.perTrimestre(trimestre);
-    }
-
-    private boolean precedeSogliaObbligatoria(Trimestre trimestre) {
-        return trimestre.anno() < primoTrimestreObbligatorio.anno()
-                || (trimestre.anno() == primoTrimestreObbligatorio.anno()
-                && trimestre.numero() < primoTrimestreObbligatorio.numero());
     }
 
     /** Metadati della configurazione delle categorie esposti al modulo di compilazione. */

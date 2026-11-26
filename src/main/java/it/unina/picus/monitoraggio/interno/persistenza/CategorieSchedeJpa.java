@@ -2,23 +2,23 @@ package it.unina.picus.monitoraggio.interno.persistenza;
 
 import it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre;
 import it.unina.picus.monitoraggio.interno.dominio.ArchivioVersioniCategorie;
-import it.unina.picus.monitoraggio.interno.dominio.AssegnazioneTrimestre;
 import it.unina.picus.monitoraggio.interno.dominio.CategorieSchedeRendicontabili;
 import it.unina.picus.monitoraggio.interno.dominio.ConfigurazioneTrimestre;
+import it.unina.picus.monitoraggio.interno.dominio.ConfigurazioneTrimestreGiaPubblicataException;
 import it.unina.picus.monitoraggio.interno.dominio.StatoVersioneCategorie;
 import it.unina.picus.monitoraggio.interno.dominio.TracciatoMonitoraggio;
-import it.unina.picus.monitoraggio.interno.dominio.ConfigurazioneTrimestreGiaPubblicataException;
 import it.unina.picus.monitoraggio.interno.dominio.VersioneCategorie;
 import it.unina.picus.monitoraggio.interno.dominio.VersioneCategorieImmutabileException;
 import it.unina.picus.monitoraggio.interno.dominio.VoceCategoriaVersione;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.OptimisticLockException;
 import jakarta.persistence.PersistenceException;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
@@ -53,31 +53,6 @@ public class CategorieSchedeJpa implements CategorieSchedeRendicontabili, Archiv
 
     /** {@inheritDoc} */
     @Override
-    @Transactional
-    public ConfigurazioneTrimestre associaLegacySeAssente(Trimestre trimestre, Instant istante) {
-        ConfigurazioneTrimestre attuale = configurazionePer(TracciatoMonitoraggio.TM_OP_01, trimestre);
-        if (!(attuale instanceof ConfigurazioneTrimestre.NonConfigurata)) {
-            return attuale;
-        }
-        entita.createNativeQuery("""
-                insert into monitoraggio_configurazioni_trimestre (tracciato, anno, trimestre, versione_id, assegnata_il)
-                select :tracciato, :anno, :trimestre, :versioneId, :assegnataIl
-                where not exists (
-                    select 1 from monitoraggio_configurazioni_trimestre
-                    where tracciato = :tracciato and anno = :anno and trimestre = :trimestre
-                )
-                """)
-                .setParameter("tracciato", TracciatoMonitoraggio.TM_OP_01.codice())
-                .setParameter("anno", trimestre.anno())
-                .setParameter("trimestre", trimestre.numero())
-                .setParameter("versioneId", VERSIONE_LEGACY_V01_ID)
-                .setParameter("assegnataIl", Timestamp.from(istante))
-                .executeUpdate();
-        return configurazionePer(TracciatoMonitoraggio.TM_OP_01, trimestre);
-    }
-
-    /** {@inheritDoc} */
-    @Override
     @Transactional(readOnly = true)
     public ConfigurazioneTrimestre configurazionePer(TracciatoMonitoraggio tracciato, Trimestre trimestre) {
         List<ConfigurazioneTrimestreJpa> righe = entita.createQuery("""
@@ -93,7 +68,16 @@ public class CategorieSchedeJpa implements CategorieSchedeRendicontabili, Archiv
                 .setParameter("trimestre", trimestre.numero())
                 .getResultList();
         if (righe.isEmpty()) {
-            return new ConfigurazioneTrimestre.NonConfigurata(trimestre);
+            boolean esistonoPubblicazioni = !entita.createQuery("""
+                    select v.id from VersioneCategorieJpa v
+                    where v.tracciato = :tracciato and v.stato = :pubblicata
+                    """, UUID.class)
+                    .setParameter("tracciato", tracciato.codice())
+                    .setParameter("pubblicata", StatoVersioneCategorie.PUBBLICATA)
+                    .setMaxResults(1)
+                    .getResultList()
+                    .isEmpty();
+            return new ConfigurazioneTrimestre.NonConfigurata(trimestre, !esistonoPubblicazioni);
         }
         ConfigurazioneTrimestreJpa riga = righe.getFirst();
         VersioneCategorie versione = riga.versione().aDominio();
@@ -131,19 +115,41 @@ public class CategorieSchedeJpa implements CategorieSchedeRendicontabili, Archiv
     @Override
     @Transactional
     public VersioneCategorie aggiornaBozza(UUID versioneId, String descrizione, List<VoceCategoriaVersione> voci) {
-        VersioneCategorieJpa entity = entita.find(VersioneCategorieJpa.class, versioneId);
-        if (entity == null) {
-            throw new NoSuchElementException("Versione categorie non trovata");
+        VersioneCategorieJpa inCache = entita.find(VersioneCategorieJpa.class, versioneId);
+        if (inCache != null) {
+            entita.detach(inCache);
         }
-        if (entity.stato() != StatoVersioneCategorie.BOZZA) {
+        int aggiornate = entita.createQuery("""
+                update VersioneCategorieJpa v
+                set v.descrizione = :descrizione,
+                    v.versioneRecord = v.versioneRecord + 1
+                where v.id = :id and v.stato = :bozza
+                """)
+                .setParameter("descrizione", descrizione)
+                .setParameter("id", versioneId)
+                .setParameter("bozza", StatoVersioneCategorie.BOZZA)
+                .executeUpdate();
+        if (aggiornate == 0) {
+            Long presenti = entita.createQuery(
+                            "select count(v) from VersioneCategorieJpa v where v.id = :id", Long.class)
+                    .setParameter("id", versioneId)
+                    .getSingleResult();
+            if (presenti == 0) {
+                throw new NoSuchElementException("Versione categorie non trovata");
+            }
             throw new VersioneCategorieImmutabileException("La versione pubblicata non è modificabile");
         }
-        entity.aggiornaDescrizione(descrizione);
-        entity.svuotaVoci();
-        entita.flush();
-        entity.aggiungiVoci(voci);
-        entita.flush();
-        return entity.aDominio();
+        try {
+            VersioneCategorieJpa entity = entita.find(
+                    VersioneCategorieJpa.class, versioneId, LockModeType.PESSIMISTIC_WRITE);
+            entity.svuotaVoci();
+            entita.flush();
+            entity.aggiungiVoci(voci);
+            entita.flush();
+            return entity.aDominio();
+        } catch (OptimisticLockException ex) {
+            throw new VersioneCategorieImmutabileException("Modifica concorrente non consentita sulla versione");
+        }
     }
 
     /** {@inheritDoc} */
@@ -151,12 +157,17 @@ public class CategorieSchedeJpa implements CategorieSchedeRendicontabili, Archiv
     @Transactional
     public ConfigurazioneTrimestre.Pubblicata pubblicaPerTrimestre(
             UUID versioneId, Trimestre trimestre, Instant istante) {
+        VersioneCategorieJpa inCache = entita.find(VersioneCategorieJpa.class, versioneId);
+        if (inCache != null) {
+            entita.detach(inCache);
+        }
         List<VersioneCategorieJpa> trovate = entita.createQuery("""
                 select v from VersioneCategorieJpa v
                 left join fetch v.voci
                 where v.id = :id
                 """, VersioneCategorieJpa.class)
                 .setParameter("id", versioneId)
+                .setLockMode(LockModeType.PESSIMISTIC_WRITE)
                 .getResultList();
         if (trovate.isEmpty()) {
             throw new NoSuchElementException("Versione categorie non trovata");
@@ -169,8 +180,17 @@ public class CategorieSchedeJpa implements CategorieSchedeRendicontabili, Archiv
             throw new IllegalArgumentException("Inserisci almeno una categoria prima di pubblicare");
         }
         TracciatoMonitoraggio tracciato = versione.tracciatoEnum();
-        ConfigurazioneTrimestre existing = configurazionePer(tracciato, trimestre);
-        if (!(existing instanceof ConfigurazioneTrimestre.NonConfigurata)) {
+        boolean giaConfigurato = !entita.createQuery("""
+                select c.versioneId from ConfigurazioneTrimestreJpa c
+                where c.id.tracciato = :tracciato and c.id.anno = :anno and c.id.trimestre = :trimestre
+                """, UUID.class)
+                .setParameter("tracciato", tracciato.codice())
+                .setParameter("anno", trimestre.anno())
+                .setParameter("trimestre", trimestre.numero())
+                .setMaxResults(1)
+                .getResultList()
+                .isEmpty();
+        if (giaConfigurato) {
             throw new ConfigurazioneTrimestreGiaPubblicataException("Il trimestre ha già una configurazione pubblicata");
         }
         if (versione.stato() == StatoVersioneCategorie.BOZZA) {
@@ -217,28 +237,6 @@ public class CategorieSchedeJpa implements CategorieSchedeRendicontabili, Archiv
                 .setParameter("id", versioneId)
                 .getResultList();
         return trovate.isEmpty() ? Optional.empty() : Optional.of(trovate.getFirst().aDominio());
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    @Transactional(readOnly = true)
-    public List<AssegnazioneTrimestre> elencaAssegnazioni(TracciatoMonitoraggio tracciato) {
-        return entita.createQuery("""
-                select c from ConfigurazioneTrimestreJpa c
-                join fetch c.versione v
-                where c.id.tracciato = :tracciato
-                order by c.id.anno asc, c.id.trimestre asc
-                """, ConfigurazioneTrimestreJpa.class)
-                .setParameter("tracciato", tracciato.codice())
-                .getResultList().stream()
-                .map(c -> new AssegnazioneTrimestre(
-                        TracciatoMonitoraggio.daCodice(c.id().tracciato()),
-                        c.id().aTrimestre(),
-                        c.versione().id(),
-                        c.versione().aDominio().codiceVersione(),
-                        c.versione().stato(),
-                        c.assegnataIl()))
-                .toList();
     }
 
     private static boolean isConstraintName(Throwable errore, String attesa) {

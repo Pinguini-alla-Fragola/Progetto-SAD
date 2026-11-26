@@ -8,8 +8,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Porta di gestione lato Banco delle bozze e pubblicazioni immutabili delle categorie
- * per i tracciati di monitoraggio ({@code TM-OP-01} e {@code TM-OPT-01}) (#41, #181).
+ * Porta di persistenza delle bozze e pubblicazioni immutabili delle categorie per trimestre
+ * su {@code TM-OP-01} e {@code TM-OPT-01} (#41, #181), predisposta per il caso d'uso di
+ * configurazione e pubblicazione lato Banco.
  */
 public interface ArchivioVersioniCategorie {
 
@@ -31,7 +32,7 @@ public interface ArchivioVersioniCategorie {
             Instant creataIl);
 
     /**
-     * Aggiorna una versione esistente esclusivamente finché resta in stato {@code BOZZA}.
+     * Aggiorna una versione esistente esclusivamente finché resta in stato {@code BOZZA} sul database.
      *
      * @param versioneId identificativo della versione
      * @param descrizione nuova descrizione leggibile
@@ -78,12 +79,4 @@ public interface ArchivioVersioniCategorie {
      * @return {@code Pubblicata}, {@code LegacyProvvisoria} oppure {@code NonConfigurata}
      */
     ConfigurazioneTrimestre configurazionePer(TracciatoMonitoraggio tracciato, Trimestre trimestre);
-
-    /**
-     * Elenca tutte le associazioni trimestre -> versione per il tracciato indicato.
-     *
-     * @param tracciato tracciato da consultare
-     * @return associazioni ordinate cronologicamente per anno e trimestre
-     */
-    List<AssegnazioneTrimestre> elencaAssegnazioni(TracciatoMonitoraggio tracciato);
 }

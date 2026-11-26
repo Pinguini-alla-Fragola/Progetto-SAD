@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -45,6 +46,10 @@ public class VersioneCategorieJpa {
 
     @Column(name = "pubblicata_il")
     private Instant pubblicataIl;
+
+    @Version
+    @Column(name = "versione_record", nullable = false)
+    private long versioneRecord;
 
     @OneToMany(mappedBy = "versione", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("ordine asc, codice asc")
@@ -93,10 +98,6 @@ public class VersioneCategorieJpa {
 
     void svuotaVoci() {
         voci.clear();
-    }
-
-    void aggiornaDescrizione(String nuovaDescrizione) {
-        this.descrizione = nuovaDescrizione;
     }
 
     void segnaPubblicata(Instant istantePubblicazione) {

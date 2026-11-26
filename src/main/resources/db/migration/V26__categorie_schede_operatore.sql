@@ -6,6 +6,7 @@ create table monitoraggio_versioni_categorie (
     descrizione varchar(255) not null check (length(trim(descrizione)) > 0),
     creata_il timestamp with time zone not null,
     pubblicata_il timestamp with time zone,
+    versione_record bigint not null default 0,
     constraint chk_mon_ver_cat_codice_versione check (
         length(codice_versione) between 1 and 64
         and regexp_like(codice_versione, '^[A-Za-z0-9]')
@@ -47,9 +48,9 @@ create table monitoraggio_configurazioni_trimestre (
 create index monitoraggio_conf_trim_versione_idx
     on monitoraggio_configurazioni_trimestre (versione_id);
 
--- Versione esplicita per la rendicontazione storica del tracciato provvisorio v0.1 (#181, #41).
+-- Versione esplicita riservata ai soli trimestri gia' rendicontati con v0.1 prima della migrazione (#181, #41).
 insert into monitoraggio_versioni_categorie (
-    id, tracciato, codice_versione, stato, descrizione, creata_il, pubblicata_il
+    id, tracciato, codice_versione, stato, descrizione, creata_il, pubblicata_il, versione_record
 ) values (
     cast('00000000-0000-0000-0000-000000000001' as uuid),
     'TM-OP-01',
@@ -57,7 +58,8 @@ insert into monitoraggio_versioni_categorie (
     'LEGACY',
     'Tracciato provvisorio v0.1',
     current_timestamp,
-    current_timestamp
+    current_timestamp,
+    0
 );
 
 alter table monitoraggio_schede_operatore

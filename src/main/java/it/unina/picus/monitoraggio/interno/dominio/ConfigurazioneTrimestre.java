@@ -7,9 +7,9 @@ import java.util.Objects;
 
 /**
  * Configurazione delle categorie risolta per un singolo trimestre e tracciato (#181, #41).
- * Distingue esplicitamente: una configurazione {@link Pubblicata}, un periodo storico
- * associato alla versione {@link LegacyProvvisoria} {@code v0.1} e un periodo
- * {@link NonConfigurata} ancora privo di pubblicazione.
+ * Distingue esplicitamente: una configurazione {@link Pubblicata}, un periodo già rendicontato
+ * associato alla versione {@link LegacyProvvisoria} {@code v0.1} in sede di migrazione, e un
+ * periodo {@link NonConfigurata} privo di associazione.
  */
 public sealed interface ConfigurazioneTrimestre
         permits ConfigurazioneTrimestre.Pubblicata,
@@ -36,11 +36,12 @@ public sealed interface ConfigurazioneTrimestre
     }
 
     /**
-     * Configurazione storica associata esplicitamente al tracciato provvisorio {@code v0.1}.
+     * Configurazione storica associata al tracciato provvisorio {@code v0.1} per i soli
+     * periodi già rendicontati prima della migrazione.
      *
-     * @param trimestre trimestre associato
+     * @param trimestre trimestre già rendicontato in {@code v0.1}
      * @param versione versione esplicita {@code LEGACY} {@code v0.1}
-     * @param assegnataIl istante di associazione al tracciato provvisorio
+     * @param assegnataIl istante di associazione storica
      */
     record LegacyProvvisoria(Trimestre trimestre, VersioneCategorie versione, Instant assegnataIl)
             implements ConfigurazioneTrimestre {
@@ -55,13 +56,20 @@ public sealed interface ConfigurazioneTrimestre
     }
 
     /**
-     * Trimestre privo di associazione pubblicata o storica nella tabella delle configurazioni.
+     * Trimestre privo di associazione nella tabella delle configurazioni.
      *
      * @param trimestre trimestre non configurato
+     * @param transitorioSenzaPubblicazioni {@code true} esclusivamente finché il Banco non ha
+     *                                      ancora pubblicato alcuna versione per il tracciato
      */
-    record NonConfigurata(Trimestre trimestre) implements ConfigurazioneTrimestre {
+    record NonConfigurata(Trimestre trimestre, boolean transitorioSenzaPubblicazioni)
+            implements ConfigurazioneTrimestre {
         public NonConfigurata {
             Objects.requireNonNull(trimestre, "trimestre");
+        }
+
+        public NonConfigurata(Trimestre trimestre) {
+            this(trimestre, false);
         }
     }
 }

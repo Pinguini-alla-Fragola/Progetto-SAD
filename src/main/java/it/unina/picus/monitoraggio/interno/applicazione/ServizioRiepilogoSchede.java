@@ -26,8 +26,8 @@ import java.util.function.Predicate;
 
 /**
  * Caso d'uso di riepilogo trimestrale delle schede personali per il Banco (#181, #57, #41).
- * Distingue la configurazione pubblicata del singolo trimestre, l'associazione esplicita storica
- * a {@code v0.1} e il trimestre privo di configurazione.
+ * Distingue la configurazione pubblicata del singolo trimestre, l'associazione storica a
+ * {@code v0.1} dei periodi già rendicontati e il trimestre privo di pubblicazione.
  */
 public final class ServizioRiepilogoSchede {
 
@@ -59,14 +59,14 @@ public final class ServizioRiepilogoSchede {
      *   <li>{@link ConfigurazioneTrimestre.Pubblicata}: ammette esclusivamente i codici della
      *   versione immutabile pubblicata per quel trimestre; modifiche o disattivazioni pubblicate
      *   per trimestri successivi non alterano questo riepilogo;</li>
-     *   <li>{@link ConfigurazioneTrimestre.LegacyProvvisoria}: periodo associato esplicitamente
-     *   al tracciato provvisorio {@code v0.1}, che ammette i codici sintatticamente validi;</li>
-     *   <li>{@link ConfigurazioneTrimestre.NonConfigurata}: trimestre privo di configurazione,
-     *   mai reso implicitamente permissivo, quindi non aggrega codici non configurati.</li>
+     *   <li>{@link ConfigurazioneTrimestre.LegacyProvvisoria}: periodo già rendicontato prima
+     *   della migrazione e associato esplicitamente al tracciato provvisorio {@code v0.1}, che
+     *   ammette i codici sintatticamente validi;</li>
+     *   <li>{@link ConfigurazioneTrimestre.NonConfigurata}: se il Banco ha già pubblicato almeno
+     *   una versione per il tracciato non aggrega voci non pubblicate; finché nessuna versione è
+     *   stata ancora pubblicata resta attivo in via transitoria il filtro sintattico {@code v0.1}
+     *   senza registrare nuove associazioni legacy.</li>
      * </ul>
-     * Le categorie sovrapponibili restano distinte e una correzione sostituisce l'intero invio
-     * precedente conservando la configurazione del trimestre. Uno zero dichiarato su una categoria
-     * ammessa compare fra i totali, mentre una categoria mai dichiarata o non ammessa è assente.
      *
      * @param attore identità verificata del Banco
      * @param trimestre singolo periodo da riepilogare
@@ -88,7 +88,10 @@ public final class ServizioRiepilogoSchede {
                 yield codice -> ammesse.contains(codice) && TracciatoSchedaOperatore.codiceCategoriaValido(codice);
             }
             case ConfigurazioneTrimestre.LegacyProvvisoria ignored -> TracciatoSchedaOperatore::codiceCategoriaValido;
-            case ConfigurazioneTrimestre.NonConfigurata ignored -> codice -> false;
+            case ConfigurazioneTrimestre.NonConfigurata nonConfigurata ->
+                    nonConfigurata.transitorioSenzaPubblicazioni()
+                            ? TracciatoSchedaOperatore::codiceCategoriaValido
+                            : codice -> false;
         };
 
         Map<UUID, VersioneInviata> ultimeVersioni = new HashMap<>();

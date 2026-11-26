@@ -16,8 +16,10 @@ public interface SchedeOperatoreApi {
     /**
      * Registra il primo invio di un trimestre concluso a nome dell'operatore autenticato.
      * L'invio è consentito dal primo giorno del trimestre successivo nel fuso {@code Europe/Rome}
-     * e valida i conteggi contro la configurazione pubblicata per il trimestre (o associa in modo
-     * esplicito i periodi storici {@code v0.1}), rifiutando i nuovi trimestri privi di pubblicazione.
+     * e valida i conteggi contro la configurazione pubblicata per il trimestre (preservando i
+     * periodi già rendicontati con {@code v0.1} prima della migrazione e rifiutando i trimestri
+     * privi di pubblicazione una volta avviata la pubblicazione delle versioni del tracciato,
+     * senza creare nuove associazioni {@code v0.1}).
      *
      * @param attore identità verificata dell'operatore interno o esterno pagato dal Banco
      * @param trimestre periodo dichiarato

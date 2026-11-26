@@ -64,11 +64,13 @@ public interface MonitoraggioApi extends SchedeOperatoreApi {
      * rispettano la configurazione associata al trimestre stesso: una versione immutabile pubblicata
      * dal Banco per il tracciato TM-OP-01 ammette esclusivamente i codici pubblicati per quel
      * periodo (modifiche o disattivazioni pubblicate per trimestri successivi non alterano questo
-     * riepilogo), l'associazione esplicita storica {@code v0.1} conserva i codici sintatticamente
-     * validi del tracciato provvisorio, mentre un trimestre non configurato non attiva alcun
-     * fallback permissivo. Le categorie sovrapponibili restano distinte. Uno zero dichiarato su una
-     * voce ammessa è incluso nei totali, mentre una voce mai dichiarata o non ammessa è assente.
-     * Le schede ricevute restano nell'elenco. Per ogni operatore si usa l'ultima versione
+     * riepilogo), l'associazione storica {@code v0.1} riservata ai periodi già rendicontati prima
+     * della migrazione conserva i codici sintatticamente validi, mentre quando esiste almeno una
+     * pubblicazione per il tracciato un trimestre non configurato non aggrega voci non pubblicate
+     * (finché nessuna versione è ancora pubblicata resta attivo in via transitoria il tracciato
+     * provvisorio {@code v0.1}). Le categorie sovrapponibili restano distinte. Uno zero dichiarato
+     * su una voce ammessa è incluso nei totali, mentre una voce mai dichiarata o non ammessa è
+     * assente. Le schede ricevute restano nell'elenco. Per ogni operatore si usa l'ultima versione
      * accettata nel periodo.
      *
      * @param attore identità verificata del Banco autorizzato alla rendicontazione
