@@ -47,10 +47,12 @@ import tools.jackson.databind.json.JsonMapper;
  *
  * <p>I blocchi {@code @Nested} «Criterio 1..5» seguono gli Acceptance Criteria della #46. Il blocco
  * «Regressioni» copre la parte della #165 sulla ricerca esistente: elenchi e dettaglio delle richieste
- * già registrate, consultazione della misura per identificativo e ritento idempotente di un invio
- * concluso prima della disattivazione (#164). La gestione da interfaccia del Banco (#186) non è ancora
- * implementata: qui si provano gli endpoint di {@link CatalogoController}, la vista di nuova richiesta
- * della OPT e gli endpoint di invio e di offerta che usano il catalogo attivo.</p>
+ * già registrate, ricerca degli erogatori per una richiesta presa in carico, consultazione della misura
+ * per identificativo e ritento idempotente di un invio concluso prima della disattivazione (#164).
+ * La gestione dalla dashboard del Banco (#186) è in review in un'altra PR: qui si provano gli endpoint
+ * di {@link CatalogoController}, la vista di nuova richiesta della OPT e gli endpoint di invio e di
+ * offerta che usano il catalogo attivo. Le contese con ordine fissato su PostgreSQL sono in
+ * {@code ServizioGestioneCatalogoConcorrenzaTest}.</p>
  *
  * <p>Gli endpoint sono quelli reali, con la catena di sicurezza attiva: l'utente è simulato con l'UUID
  * del proprio account, che esiste nel database con lo stesso ruolo, e ogni comando porta il token CSRF,
@@ -74,6 +76,8 @@ class GestioneCatalogoIntegrazioneTest {
     private static final String RICHIESTE_OPT = "/api/richieste/mie";
     private static final String RICHIESTA = "/api/richieste/{id}";
     private static final String OFFERTA_MISURA = "/api/catalogo/offerte-opt/misure/{misuraId}";
+    private static final String PRESA_IN_CARICO = "/api/richieste/{id}/presa-in-carico";
+    private static final String CANDIDATI = "/api/richieste/{id}/candidati";
 
     private static final List<String> CODICI_INIZIALI = List.of(
             "M01", "M02", "M03", "M04", "M05", "M06", "M07", "M08", "M09", "M10", "M11", "M12");
@@ -755,6 +759,26 @@ class GestioneCatalogoIntegrazioneTest {
         }
 
         @Test
+        @DisplayName("La ricerca degli erogatori per una richiesta presa in carico risponde come prima della disattivazione")
+        void ricercaErogatoriSuRichiestaStorica() throws Exception {
+            long id = creaMisura("T01", "Misura di prova", "Descrizione", false);
+            UUID erogatrice = dati.opt("OPT erogatrice di prova", "napoli");
+            mvc.perform(conCorpo(put(OFFERTA_MISURA, id), "{\"tramiteProfessionista\":false}")
+                            .with(come(erogatrice, "OPT")).with(csrf()))
+                    .andExpect(status().isNoContent());
+            UUID richiesta = idRichiesta(inviaRichiesta(id).andExpect(status().isCreated()).andReturn());
+            mvc.perform(post(PRESA_IN_CARICO, richiesta).with(come(banco, "BANCO")).with(csrf()))
+                    .andExpect(status().isOk());
+            List<String> prima = candidati(richiesta);
+            assertThat(prima).contains(erogatrice.toString());
+
+            disattiva(banco, "BANCO", id).andExpect(status().isOk());
+
+            assertThat(candidati(richiesta)).containsExactlyElementsOf(prima);
+            assertThat(misuraDellaRichiesta(richiesta)).isEqualTo(id);
+        }
+
+        @Test
         @DisplayName("Le misure iniziali restano selezionabili e invariate dopo le operazioni su una nuova misura")
         void misureInizialiInvariate() throws Exception {
             List<String> iniziali = catalogo();
@@ -887,6 +911,12 @@ class GestioneCatalogoIntegrazioneTest {
                 .andExpect(status().isOk()).andReturn()), "$[?(@.id == '" + richiesta + "')].nomeMisura");
         assertThat(nomi).as("richiesta %s in %s", richiesta, percorso).hasSize(1);
         return nomi.get(0);
+    }
+
+    /** Account degli erogatori proposti al Banco per la richiesta, nell'ordine della risposta. */
+    private List<String> candidati(UUID richiesta) throws Exception {
+        return JsonPath.read(testo(mvc.perform(get(CANDIDATI, richiesta).with(come(banco, "BANCO")))
+                .andExpect(status().isOk()).andReturn()), "$[*].erogatore.accountId");
     }
 
     private static long idMisura(MvcResult esito) throws Exception {
