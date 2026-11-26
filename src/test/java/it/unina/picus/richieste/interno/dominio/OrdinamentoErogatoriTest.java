@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import it.unina.picus.catalogo.api.CatalogoApi.AmbitoErogazione;
@@ -19,6 +20,7 @@ import it.unina.picus.utenze.api.UtenzeApi.TipoErogatore;
  * del Banco prima delle OPT, poi minor carico; nome e UUID rendono soltanto stabile l'ordine.
  */
 @DisplayName("Ordinamento degli erogatori compatibili")
+@Tag("unit")
 class OrdinamentoErogatoriTest {
 
     @Test

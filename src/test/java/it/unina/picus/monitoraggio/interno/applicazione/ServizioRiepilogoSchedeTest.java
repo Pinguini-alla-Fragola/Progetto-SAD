@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import it.unina.picus.monitoraggio.api.MonitoraggioApi.SchedaSintesi;
@@ -17,6 +18,7 @@ import it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeRendicontabili.
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
 
+@Tag("unit")
 class ServizioRiepilogoSchedeTest {
 
     private static final Trimestre PERIODO = new Trimestre(2025, 1);

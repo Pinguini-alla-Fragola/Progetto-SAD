@@ -22,6 +22,7 @@ import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
  */
 @Tag("issue-145")
 @DisplayName("#145 Regola di accesso alla conferma di ricezione")
+@Tag("unit")
 class RegoleAccessoConfermaRicezioneTest {
 
     private static final UUID ACCOUNT = UUID.randomUUID();

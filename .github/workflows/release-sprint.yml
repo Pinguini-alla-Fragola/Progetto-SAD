@@ -1,0 +1,145 @@
+name: Prepara la release dello sprint
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag già pubblicato dello sprint
+        required: true
+        type: string
+
+permissions: {}
+
+concurrency:
+  group: release-sprint-${{ inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Costruisci gli allegati dal tag
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      RELEASE_TAG: ${{ inputs.tag }}
+    outputs:
+      tag_sha: ${{ steps.tag.outputs.tag_sha }}
+    steps:
+      - name: Checkout di main e dei tag
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verifica il tag e usa il commit dello sprint
+        id: tag
+        shell: bash
+        run: |
+          test -n "$RELEASE_TAG"
+          [[ "$RELEASE_TAG" != -* ]]
+          git check-ref-format "refs/tags/$RELEASE_TAG"
+          tag_ref="refs/tags/$RELEASE_TAG"
+          tag_sha="$(git rev-parse --verify "$tag_ref")"
+          commit="$(git rev-parse --verify "$tag_ref^{commit}")"
+          if ! git merge-base --is-ancestor "$commit" HEAD; then
+            echo "::error::Il tag deve puntare a un commit integrato in main."
+            exit 1
+          fi
+          echo "tag_sha=$tag_sha" >> "$GITHUB_OUTPUT"
+          git checkout --detach "$commit"
+
+      - name: Configura Java 25
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      - name: Prepara il JAR e il PDF
+        shell: bash
+        run: |
+          bash ./mvnw --batch-mode --no-transfer-progress -DskipTests package
+          shopt -s nullglob
+          jars=(target/*.jar)
+          if (( ${#jars[@]} != 1 )); then
+            echo "::error::Atteso un solo JAR in target."
+            exit 1
+          fi
+          test -s "${jars[0]}"
+          test -s docs/Documentazione_SAD_2026.pdf
+          mkdir -p "$RUNNER_TEMP/release-sprint"
+          cp "${jars[0]}" "$RUNNER_TEMP/release-sprint/PICUS.jar"
+          cp docs/Documentazione_SAD_2026.pdf "$RUNNER_TEMP/release-sprint/"
+
+      - name: Conserva gli allegati per la bozza
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: allegati-release-sprint
+          path: ${{ runner.temp }}/release-sprint/
+          if-no-files-found: error
+
+  draft:
+    name: Prepara la bozza su GitHub
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Recupera gli allegati
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: allegati-release-sprint
+          path: ${{ runner.temp }}/release-sprint/
+
+      - name: Crea o completa la bozza
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ inputs.tag }}
+          TAG_SHA: ${{ needs.build.outputs.tag_sha }}
+        run: |
+          payload="$RUNNER_TEMP/release-sprint"
+          test -s "$payload/PICUS.jar"
+          test -s "$payload/Documentazione_SAD_2026.pdf"
+
+          tag_path="$(jq -nr --arg tag "$RELEASE_TAG" '$tag | split("/") | map(@uri) | join("/")')"
+          remote_sha="$(gh api "repos/{owner}/{repo}/git/ref/tags/$tag_path" --jq '.object.sha')"
+          if [[ "$remote_sha" != "$TAG_SHA" ]]; then
+            echo "::error::Il tag è cambiato durante la preparazione degli allegati."
+            exit 1
+          fi
+
+          releases="$(gh api --paginate --slurp 'repos/{owner}/{repo}/releases?per_page=100' |
+            jq -c --arg tag "$RELEASE_TAG" '[.[][] | select(.tag_name == $tag)]')"
+          case "$(jq 'length' <<< "$releases")" in
+            0)
+              gh release create "$RELEASE_TAG" --title "PICUS $RELEASE_TAG" --draft --verify-tag --generate-notes
+              ;;
+            1)
+              if ! jq -e '.[0].draft' <<< "$releases" > /dev/null; then
+                echo "::error::Per questo tag esiste già una release pubblicata."
+                exit 1
+              fi
+              ;;
+            *)
+              echo "::error::Ci sono più release per questo tag."
+              exit 1
+              ;;
+          esac
+
+          for file in PICUS.jar Documentazione_SAD_2026.pdf; do
+            state="$(jq -r --arg name "$file" '.[0].assets[]? | select(.name == $name) | .state' <<< "$releases")"
+            case "$state" in
+              '') gh release upload "$RELEASE_TAG" "$payload/$file" ;;
+              uploaded) ;;
+              *)
+                echo "::error::Caricamento precedente incompleto per $file."
+                exit 1
+                ;;
+            esac
+          done
+          gh release view "$RELEASE_TAG" --json url --jq '"[Apri la bozza di release](\(.url))"' >> "$GITHUB_STEP_SUMMARY"

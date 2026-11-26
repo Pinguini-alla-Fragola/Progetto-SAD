@@ -2,6 +2,7 @@ import { api, ErroreHttp } from './area-client.js';
 
 const TIPOLOGIA_INTERNA = 'INTERNO_BANCO';
 const MESSAGGIO_RETE = 'Connessione non disponibile. Riprova tra poco.';
+let versioneMisure = 0;
 
 /** Un errore del server ha già un messaggio leggibile; un errore di rete no. */
 function messaggioErrore(causa) {
@@ -15,19 +16,36 @@ function aggiornaCentroPicus(form) {
     if (!interno) form.elements.centroPicus.checked = false;
 }
 
-/** Comuni e misure arrivano dal catalogo: il Banco sceglie solo valori esistenti. */
-function popolaCatalogo(form, comuni, misure) {
-    for (const comune of comuni) form.elements.comune.append(new Option(comune.nome, comune.codice));
-    const elenco = form.querySelector('[data-misure] .picus-choices');
-    for (const misura of misure) {
+function applicaScelteMisure(elenco, misure) {
+    if (!elenco) return;
+    const selezionate = new Set(
+        Array.from(elenco.querySelectorAll('input[name="misure"]:checked'), input => input.value)
+    );
+    elenco.replaceChildren();
+    for (const misura of (Array.isArray(misure) ? misure : []).filter(m => m && m.attiva !== false)) {
         const etichetta = document.createElement('label');
         etichetta.className = 'picus-check';
         const scelta = document.createElement('input');
         scelta.type = 'checkbox';
         scelta.name = 'misure';
         scelta.value = String(misura.id);
+        scelta.checked = selezionate.has(scelta.value);
         etichetta.append(scelta, ' ' + misura.dati.codice + ' · ' + misura.dati.nome);
         elenco.append(etichetta);
+    }
+}
+
+export function aggiornaScelteMisureOperatore(misure) {
+    versioneMisure++;
+    const formOperatore = document.getElementById('nuovo-operatore');
+    applicaScelteMisure(formOperatore?.querySelector('[data-misure] .picus-choices'), misure);
+}
+
+/** Comuni e misure arrivano dal catalogo: il Banco sceglie solo valori esistenti. */
+function popolaCatalogo(form, comuni, misure, versioneIniziale) {
+    for (const comune of comuni) form.elements.comune.append(new Option(comune.nome, comune.codice));
+    if (versioneIniziale === versioneMisure) {
+        applicaScelteMisure(form.querySelector('[data-misure] .picus-choices'), misure);
     }
 }
 
@@ -109,8 +127,9 @@ async function avvia(form) {
     });
     form.elements.tipo.addEventListener('change', () => aggiornaCentroPicus(form));
     try {
+        const versioneIniziale = versioneMisure;
         const [comuni, misure] = await Promise.all([api('/api/catalogo/comuni'), api('/api/catalogo/misure')]);
-        popolaCatalogo(form, comuni, misure);
+        popolaCatalogo(form, comuni, misure, versioneIniziale);
     } catch (causa) {
         esito.textContent = 'Il catalogo non è disponibile, quindi il modulo resta disattivato. ' + messaggioErrore(causa);
         return;
