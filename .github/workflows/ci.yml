@@ -22,10 +22,37 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          # Il checkout di una PR usa il merge di prova. Serve anche il suo genitore base.
+          fetch-depth: 2
           persist-credentials: false
+
+      - name: Riconosci le PR di sola documentazione
+        id: docs
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        shell: bash
+        run: |
+          changed_files="$(mktemp)"
+          trap 'rm -f "$changed_files"' EXIT
+          if [[ "$(git rev-parse --verify HEAD^1)" != "$BASE_SHA" ]] ||
+             ! git diff --no-renames --name-only -z "$BASE_SHA" HEAD -- > "$changed_files"; then
+            echo "::warning::Diff della PR non disponibile. Eseguo la suite Java completa."
+            exit 0
+          fi
+          [[ -s "$changed_files" ]] || exit 0
+          while IFS= read -r -d '' file; do
+            case "$file" in
+              README.md|docs/*.md|docs/*.pdf|.github/*.md) ;;
+              *) exit 0 ;;
+            esac
+          done < "$changed_files"
+          echo "only=true" >> "$GITHUB_OUTPUT"
+          echo "Build e test Java saltati: la PR modifica soltanto documentazione." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Verifica presenza del progetto Maven
         id: project
+        if: steps.docs.outputs.only != 'true'
         shell: bash
         run: |
           if [[ ! -f pom.xml ]]; then
@@ -51,6 +78,11 @@ jobs:
           cache-dependency-path: '**/pom.xml'
 
       - name: Build e test con Maven Wrapper
+        id: maven
         if: steps.project.outputs.present == 'true'
         shell: bash
         run: bash ./mvnw --batch-mode --no-transfer-progress verify
+
+      - name: Riepiloga i test Java falliti
+        if: failure() && steps.maven.outcome == 'failure'
+        run: python3 scripts/riassumi_test_java.py >> "$GITHUB_STEP_SUMMARY"

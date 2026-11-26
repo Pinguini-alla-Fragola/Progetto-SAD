@@ -72,3 +72,6 @@ docker compose up --build
 
 Apri <http://localhost:8080> e accedi con `banco@picus.test` e la password
 che hai impostato in `PICUS_DEMO_PASSWORD`.
+
+Per provare il percorso dalla richiesta all'appuntamento, usa il comando della
+[demo di coordinamento](docs/reviews/demo-coordinamento.md).
