@@ -102,7 +102,10 @@ async function schermata(t, area, rispostaConteggi) {
                 { codice: 'NUCLEI_FAMILIARI', descrizione: 'Nuclei familiari' }
             ]);
         }
-        if (url === '/api/catalogo/misure') return Response.json([{ id: 1, nome: 'Misura sintetica' }]);
+        if (url === '/api/catalogo/misure' || url === '/api/catalogo/misure/tutte') {
+            return Response.json([{ id: 1, nome: 'Misura sintetica' }]);
+        }
+        if (url === '/api/utenze/rubrica?ruolo=OPT') return Response.json([]);
         if (url === '/api/auth/csrf') return Response.json({ headerName: 'X-CSRF-TOKEN', token: 'prova' });
         return rispostaConteggi(new URL(url, 'http://picus.test'), opzioni);
     });
