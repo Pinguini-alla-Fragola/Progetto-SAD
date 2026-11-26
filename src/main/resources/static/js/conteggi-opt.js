@@ -47,8 +47,20 @@ export async function initConteggiOpt(area) {
     let optRubrica = area === 'banco' ? leggiRubricaAccount('OPT') : new Map();
     let categorie = [];
     const misureMap = new Map();
+    const misureAttive = new Map();
     const misureNonTrovate = new Set();
     let selectMisura = null;
+    let formConteggi = null;
+    let contenitoreVoci = null;
+    let avvisoMisuraEl = null;
+    let cambioMisuraBoxEl = null;
+    let cambioMisuraTestoEl = null;
+    let catalogoCaricato = false;
+    let misuraSelezionataId = '';
+    let misuraSelezionataNome = '';
+    let bozzaOrfana = null;
+    let transizioneInAttesa = null;
+    let erroreRefreshCatalogo = false;
     let versioneCatalogo = 0;
     const MASSIMA_CONCORRENZA_MISURE = 4;
 
@@ -57,34 +69,177 @@ export async function initConteggiOpt(area) {
         return m.attiva === false ? `${nome} (disattivata)` : nome;
     };
 
-    const aggiornaSelectMisure = misRes => {
-        if (area !== 'opt' || !selectMisura || !Array.isArray(misRes)) return;
-        const attive = [];
-        for (const m of misRes) {
-            if (m.attiva !== false) {
-                attive.push({
-                    id: String(m.id),
-                    nome: m.dati?.nome || m.nome || `Misura #${m.id}`
-                });
+    const haValoriBozza = () => {
+        if (!contenitoreVoci?.querySelectorAll) return false;
+        return Array.from(contenitoreVoci.querySelectorAll('input[name="valore"]'))
+            .some(input => String(input.value ?? '').trim() !== '');
+    };
+
+    const sincronizzaValoreSelect = valore => {
+        if (!selectMisura) return;
+        selectMisura.value = valore;
+        if (formConteggi?.elements?.misuraId && formConteggi.elements.misuraId !== selectMisura) {
+            formConteggi.elements.misuraId.value = valore;
+        }
+    };
+
+    const costruisciOpzioneMisura = (valore, testo) => {
+        const opt = document.createElement('option');
+        opt.value = valore;
+        opt.textContent = testo;
+        return opt;
+    };
+
+    const applicaOpzioniSelect = (opzioni, valoreSelezionato) => {
+        if (!selectMisura) return;
+        const correnti = Array.from(selectMisura.options || [], o => `${o.value}\u0000${o.textContent}`);
+        const nuove = opzioni.map(o => `${o.value}\u0000${o.textContent}`);
+        const opzioniIdentiche = correnti.length === nuove.length && correnti.every((v, i) => v === nuove[i]);
+        if (!opzioniIdentiche) {
+            selectMisura.replaceChildren(...opzioni);
+        }
+        if (String(selectMisura.value ?? '') !== valoreSelezionato || !opzioniIdentiche) {
+            sincronizzaValoreSelect(valoreSelezionato);
+        }
+    };
+
+    const aggiornaStatoMisuraUi = () => {
+        if (area !== 'opt') return;
+        const messaggi = [];
+        if (bozzaOrfana) {
+            messaggi.push(
+                `La misura precedente («${bozzaOrfana.misuraNome}») non è più disponibile: i conteggi in bozza appartengono a tale misura. Seleziona una misura attiva e conferma lo svuotamento prima di salvare.`
+            );
+        } else if (catalogoCaricato && misureAttive.size === 0) {
+            messaggi.push('Nessuna misura attiva disponibile nel catalogo: il salvataggio è bloccato.');
+        } else if (misuraSelezionataId === '' && catalogoCaricato && misureAttive.size > 0) {
+            messaggi.push('La misura selezionata non è più disponibile. Seleziona una misura attiva per continuare.');
+        }
+        if (erroreRefreshCatalogo) {
+            messaggi.push("Impossibile aggiornare il catalogo misure: mantenuto l'ultimo elenco valido.");
+        }
+
+        const testoAvviso = messaggi.join(' ');
+        if (avvisoMisuraEl) {
+            avvisoMisuraEl.textContent = testoAvviso;
+            avvisoMisuraEl.hidden = testoAvviso.length === 0;
+        } else if (testoAvviso && formConteggi?.querySelector) {
+            const esitoFallback = formConteggi.querySelector('.picus-esito');
+            if (esitoFallback) esitoFallback.textContent = testoAvviso;
+        }
+
+        if (cambioMisuraBoxEl) {
+            const mostraConferma = Boolean(bozzaOrfana && transizioneInAttesa && haValoriBozza());
+            cambioMisuraBoxEl.hidden = !mostraConferma;
+            if (cambioMisuraTestoEl) {
+                cambioMisuraTestoEl.textContent = mostraConferma
+                    ? `I conteggi inseriti si riferiscono a «${bozzaOrfana.misuraNome}». Passando a «${transizioneInAttesa.misuraNome}», i soli campi conteggio verranno svuotati (anno e trimestre restano invariati).`
+                    : '';
             }
         }
-        const correnti = Array.from(selectMisura.options || [], o => `${o.value}\u0000${o.textContent}`);
-        const nuove = attive.map(m => `${m.id}\u0000${m.nome}`);
-        if (correnti.length === nuove.length && correnti.every((v, i) => v === nuove[i])) return;
+    };
 
-        const precedente = String(selectMisura.value ?? '');
-        const opzioni = attive.map(({ id, nome }) => {
-            const opt = document.createElement('option');
-            opt.value = id;
-            opt.textContent = nome;
-            return opt;
-        });
-        selectMisura.replaceChildren(...opzioni);
-        if (precedente && attive.some(m => m.id === precedente)) {
-            selectMisura.value = precedente;
-        } else if (attive.length > 0) {
-            selectMisura.value = attive[0].id;
+    const aggiornaSelectMisure = misRes => {
+        if (area !== 'opt' || !selectMisura || !Array.isArray(misRes)) return;
+        const precedentiMisure = new Map(misureAttive);
+        const attive = [];
+        misureAttive.clear();
+        for (const m of misRes) {
+            if (m.attiva !== false) {
+                const id = String(m.id);
+                const nome = m.dati?.nome || m.nome || `Misura #${m.id}`;
+                attive.push({ id, nome });
+                misureAttive.set(id, nome);
+            }
         }
+        const catalogoEraCaricato = catalogoCaricato;
+        catalogoCaricato = true;
+        erroreRefreshCatalogo = false;
+
+        const opzioniPrima = Array.from(selectMisura.options || []);
+        const opzionePrecedente = opzioniPrima.find(o => String(o.value ?? '') === String(selectMisura.value ?? ''));
+        const precedente = String(selectMisura.value ?? '').trim();
+        const nomePrecedente = precedentiMisure.get(precedente)
+            || (misuraSelezionataId === precedente ? misuraSelezionataNome : '')
+            || opzionePrecedente?.textContent
+            || `Misura #${precedente}`;
+
+        if (attive.length === 0) {
+            if (precedente && !bozzaOrfana && haValoriBozza()) {
+                bozzaOrfana = { misuraId: precedente, misuraNome: nomePrecedente };
+            }
+            transizioneInAttesa = null;
+            misuraSelezionataId = '';
+            misuraSelezionataNome = '';
+            applicaOpzioniSelect(
+                [costruisciOpzioneMisura('', 'Nessuna misura attiva disponibile')],
+                ''
+            );
+            aggiornaStatoMisuraUi();
+            return;
+        }
+
+        const ancoraAttiva = precedente && attive.some(m => m.id === precedente);
+        if (ancoraAttiva) {
+            const opzioni = [];
+            if (bozzaOrfana) {
+                opzioni.push(costruisciOpzioneMisura('', 'Seleziona una misura'));
+            }
+            for (const { id, nome } of attive) {
+                opzioni.push(costruisciOpzioneMisura(id, nome));
+            }
+            applicaOpzioniSelect(opzioni, precedente);
+            misuraSelezionataId = precedente;
+            misuraSelezionataNome = misureAttive.get(precedente) || '';
+            if (transizioneInAttesa?.misuraId === precedente) {
+                transizioneInAttesa = { misuraId: precedente, misuraNome: misuraSelezionataNome };
+            }
+            aggiornaStatoMisuraUi();
+            return;
+        }
+
+        if (precedente) {
+            if (transizioneInAttesa?.misuraId === precedente) {
+                transizioneInAttesa = null;
+            } else if (!bozzaOrfana && haValoriBozza()) {
+                bozzaOrfana = { misuraId: precedente, misuraNome: nomePrecedente };
+            }
+            misuraSelezionataId = '';
+            misuraSelezionataNome = '';
+            applicaOpzioniSelect(
+                [
+                    costruisciOpzioneMisura('', 'Seleziona una misura'),
+                    ...attive.map(({ id, nome }) => costruisciOpzioneMisura(id, nome))
+                ],
+                ''
+            );
+            aggiornaStatoMisuraUi();
+            return;
+        }
+
+        const primoPopolamentoIniziale = !catalogoEraCaricato && opzioniPrima.length === 0 && !bozzaOrfana && !haValoriBozza();
+        if (primoPopolamentoIniziale) {
+            const iniziale = attive[0];
+            applicaOpzioniSelect(
+                attive.map(({ id, nome }) => costruisciOpzioneMisura(id, nome)),
+                iniziale.id
+            );
+            misuraSelezionataId = iniziale.id;
+            misuraSelezionataNome = iniziale.nome;
+            aggiornaStatoMisuraUi();
+            return;
+        }
+
+        misuraSelezionataId = '';
+        misuraSelezionataNome = '';
+        applicaOpzioniSelect(
+            [
+                costruisciOpzioneMisura('', 'Seleziona una misura'),
+                ...attive.map(({ id, nome }) => costruisciOpzioneMisura(id, nome))
+            ],
+            ''
+        );
+        aggiornaStatoMisuraUi();
     };
 
     const aggiornaMappaCatalogo = misRes => {
@@ -115,16 +270,20 @@ export async function initConteggiOpt(area) {
         if (area !== 'opt') return;
         const versione = ++versioneCatalogo;
         const misRes = await fetchCatalogoArea().catch(() => null);
-        if (versione === versioneCatalogo && misRes) {
+        if (versione !== versioneCatalogo) return;
+        if (Array.isArray(misRes)) {
             aggiornaMappaCatalogo(misRes);
+        } else {
+            erroreRefreshCatalogo = true;
+            aggiornaStatoMisuraUi();
         }
     };
 
-    let misureIniziali = [];
+    let misureIniziali = null;
     try {
         const [catRes, misRes] = await Promise.all([
             api('/api/monitoraggio/categorie'),
-            fetchCatalogoArea().catch(() => [])
+            fetchCatalogoArea().catch(() => null)
         ]);
         categorie = Array.isArray(catRes) ? catRes : [];
         if (aggiornaMappaCatalogo(misRes)) {
@@ -345,27 +504,108 @@ export async function initConteggiOpt(area) {
 
     if (area === 'opt') {
         const form = document.getElementById('conteggi');
-        const contenitoreVoci = document.getElementById('voci-conteggi');
+        formConteggi = form;
+        contenitoreVoci = document.getElementById('voci-conteggi');
         const btnAggiungi = document.getElementById('altra-voce-opt');
         selectMisura = form?.querySelector?.('select[name="misuraId"]') ?? null;
+        avvisoMisuraEl = document.getElementById('conteggi-misura-avviso') ?? null;
+        cambioMisuraBoxEl = document.getElementById('conteggi-cambio-misura') ?? null;
+        cambioMisuraTestoEl = document.getElementById('conteggi-cambio-misura-testo') ?? null;
+        const btnSvuotaBozza = document.getElementById('conteggi-svuota-bozza') ?? null;
+        const btnAnnullaCambio = document.getElementById('conteggi-annulla-cambio') ?? null;
 
         if (selectMisura && selectMisura.options.length === 0) {
-            aggiornaSelectMisure(misureIniziali);
+            if (Array.isArray(misureIniziali)) {
+                aggiornaSelectMisure(misureIniziali);
+            } else {
+                erroreRefreshCatalogo = true;
+                aggiornaStatoMisuraUi();
+            }
         }
-        document.getElementById('conteggi-tab-compila')?.addEventListener?.('click', () => {
-            ricaricaCatalogoOpt();
+
+        const rimuoviOpzioneVuotaSeValida = valore => {
+            if (!selectMisura || !valore) return;
+            const attive = Array.from(selectMisura.options || [])
+                .filter(o => String(o.value ?? '') !== '')
+                .map(o => costruisciOpzioneMisura(String(o.value), o.textContent));
+            if (attive.some(o => o.value === valore)) {
+                applicaOpzioniSelect(attive, valore);
+            }
+        };
+
+        selectMisura?.addEventListener?.('change', () => {
+            const nuovaId = String(selectMisura.value ?? '').trim();
+            if (!nuovaId) {
+                transizioneInAttesa = null;
+                misuraSelezionataId = '';
+                misuraSelezionataNome = '';
+                aggiornaStatoMisuraUi();
+                return;
+            }
+            const nomeNuova = misureAttive.get(nuovaId) || `Misura #${nuovaId}`;
+            if (bozzaOrfana && haValoriBozza()) {
+                transizioneInAttesa = { misuraId: nuovaId, misuraNome: nomeNuova };
+                aggiornaStatoMisuraUi();
+                return;
+            }
+            bozzaOrfana = null;
+            transizioneInAttesa = null;
+            misuraSelezionataId = nuovaId;
+            misuraSelezionataNome = nomeNuova;
+            rimuoviOpzioneVuotaSeValida(nuovaId);
+            aggiornaStatoMisuraUi();
         });
-        document.querySelector?.('#workspace-sidebar a[href="#monitoraggio"]')?.addEventListener?.('click', () => {
-            ricaricaCatalogoOpt();
+
+        btnSvuotaBozza?.addEventListener?.('click', () => {
+            if (!transizioneInAttesa && !bozzaOrfana) return;
+            const targetId = transizioneInAttesa?.misuraId || String(selectMisura?.value ?? '').trim();
+            if (!targetId || !misureAttive.has(targetId)) {
+                transizioneInAttesa = null;
+                sincronizzaValoreSelect('');
+                aggiornaStatoMisuraUi();
+                return;
+            }
+            if (contenitoreVoci?.querySelectorAll) {
+                for (const input of contenitoreVoci.querySelectorAll('input[name="valore"]')) {
+                    input.value = '';
+                }
+            }
+            bozzaOrfana = null;
+            transizioneInAttesa = null;
+            misuraSelezionataId = targetId;
+            misuraSelezionataNome = misureAttive.get(targetId) || '';
+            rimuoviOpzioneVuotaSeValida(targetId);
+            aggiornaStatoMisuraUi();
+            if (avvisoMisuraEl) {
+                avvisoMisuraEl.textContent = `Conteggi in bozza svuotati. Ora puoi compilare per «${misuraSelezionataNome}».`;
+                avvisoMisuraEl.hidden = false;
+            }
+            contenitoreVoci?.querySelector?.('input[name="valore"]')?.focus?.();
         });
+
+        btnAnnullaCambio?.addEventListener?.('click', () => {
+            transizioneInAttesa = null;
+            misuraSelezionataId = '';
+            misuraSelezionataNome = '';
+            const opzioniConVuota = [
+                costruisciOpzioneMisura('', 'Seleziona una misura'),
+                ...Array.from(misureAttive.entries(), ([id, nome]) => costruisciOpzioneMisura(id, nome))
+            ];
+            applicaOpzioniSelect(opzioniConVuota, '');
+            aggiornaStatoMisuraUi();
+            selectMisura?.focus?.();
+        });
+
+        document.getElementById('conteggi-tab-compila')?.addEventListener?.('click', () => ricaricaCatalogoOpt());
+        document.querySelector?.('#workspace-sidebar a[href="#monitoraggio"]')?.addEventListener?.('click', () => ricaricaCatalogoOpt());
         globalThis.window?.addEventListener?.('hashchange', () => {
             if (globalThis.location?.hash === '#monitoraggio') {
-                ricaricaCatalogoOpt();
+                return ricaricaCatalogoOpt();
             }
         });
         document.addEventListener?.('visibilitychange', () => {
             if (document.visibilityState === 'visible') {
-                ricaricaCatalogoOpt();
+                return ricaricaCatalogoOpt();
             }
         });
 
@@ -445,13 +685,38 @@ export async function initConteggiOpt(area) {
 
         form?.addEventListener('submit', async event => {
             event.preventDefault();
-            const esito = form.querySelector('.picus-esito');
+            const esito = form.querySelector('.form-submit .picus-esito') || form.querySelector('.picus-esito');
             const submitBtn = form.querySelector('button[type="submit"]');
             esito.textContent = '';
 
+            if (bozzaOrfana || transizioneInAttesa) {
+                esito.textContent = bozzaOrfana
+                    ? `I conteggi in bozza appartengono a «${bozzaOrfana.misuraNome}». Svuota i conteggi o annulla il cambio misura prima di salvare.`
+                    : 'Conferma il cambio misura prima di salvare i conteggi.';
+                aggiornaStatoMisuraUi();
+                return;
+            }
+
+            const rawSelect = selectMisura ? String(selectMisura.value ?? '').trim() : '';
+            const rawElem = form.elements?.misuraId ? String(form.elements.misuraId.value ?? '').trim() : '';
+            const misuraValore = (selectMisura && form.elements?.misuraId && form.elements.misuraId !== selectMisura)
+                ? (rawSelect && rawElem ? rawSelect : '')
+                : (rawSelect || rawElem);
+
+            if (!misuraValore || !/^[1-9][0-9]*$/.test(misuraValore)) {
+                esito.textContent = 'Seleziona una misura attiva prima di salvare i conteggi.';
+                selectMisura?.focus?.();
+                return;
+            }
+            if (catalogoCaricato && !misureAttive.has(misuraValore)) {
+                esito.textContent = 'La misura selezionata non è più disponibile. Seleziona una misura attiva per continuare.';
+                aggiornaStatoMisuraUi();
+                return;
+            }
+
             const anno = Number(form.elements.anno.value);
             const trimestre = Number(form.elements.trimestre.value);
-            const misuraId = Number(form.elements.misuraId.value);
+            const misuraId = Number(misuraValore);
             submitBtn.disabled = true;
             try {
                 const righe = Array.from(contenitoreVoci.querySelectorAll('.count-row')).map(r => ({
