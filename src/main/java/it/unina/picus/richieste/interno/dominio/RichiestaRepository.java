@@ -22,6 +22,11 @@ public interface RichiestaRepository {
      */
     boolean esiste(UUID id);
 
+    /**
+     * Cerca e blocca in scrittura le richieste In programmazione o Confermate assegnate
+     * all'erogatore indicato, ordinate per id per prevenire deadlock.
+     */
+    List<RichiestaDiMisura> cercaPerAggiornamentoDaErogatore(UUID erogatoreId);
     /** Rilegge e blocca la pratica fino alla fine della transazione chiamante. */
     Optional<RichiestaDiMisura> cercaPerAggiornamento(UUID id);
 
