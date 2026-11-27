@@ -1,6 +1,7 @@
 import { api, ErroreHttp } from './area-client.js';
 import { renderList, listRow } from './list-view.js';
 import { aggiornaScelteMisureOperatore } from './operatori.js';
+import { aggiornaCatalogoOfferteBanco } from './offerte-opt.js';
 
 const MAPPA_CAMPI_NUOVA = {
     codice: 'codice',
@@ -359,6 +360,7 @@ export function initCatalogoBanco() {
             const dati = await api('/api/catalogo/misure/tutte');
             if (richiesta !== progressivoLista) return true;
             misureCorrenti = Array.isArray(dati) ? dati : [];
+            aggiornaCatalogoOfferteBanco(misureCorrenti);
             renderMisure();
             mostraEsitoLista(messaggioSuccesso);
             return true;
@@ -381,6 +383,7 @@ export function initCatalogoBanco() {
 
     const aggiornaDopoSalvataggio = async messaggioSalvataggio => {
         aggiornaScelteMisureOperatore(misureCorrenti);
+        aggiornaCatalogoOfferteBanco(misureCorrenti);
         const ok = await caricaMisure({ messaggioSuccesso: messaggioSalvataggio });
         if (!ok) {
             mostraEsitoLista(
@@ -392,6 +395,7 @@ export function initCatalogoBanco() {
             );
         } else {
             aggiornaScelteMisureOperatore(misureCorrenti);
+            aggiornaCatalogoOfferteBanco(misureCorrenti);
         }
     };
 

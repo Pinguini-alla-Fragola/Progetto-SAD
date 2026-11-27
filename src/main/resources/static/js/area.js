@@ -4,6 +4,9 @@ import { renderList } from './list-view.js';
 import { caricaRichieste, caricaAvvisi } from './richieste-area.js';
 import { segnalaFunzioniInattive } from './funzioni-inattive.js';
 import { initConteggiOpt } from './conteggi-opt.js';
+import { initImportazioneOpt } from './importazione-opt.js';
+import { initOfferteOpt, aggiornaOptOfferteBanco } from './offerte-opt.js';
+import { initSchedeOperatore } from './schede-operatore.js';
 
 const byId = id => document.getElementById(id);
 const area = document.body.dataset.area;
@@ -51,12 +54,27 @@ for (const lista of document.querySelectorAll('.picus-list[data-funzione-inattiv
 }
 
 const utenti = byId('account');
+let aggiornaAccountBanco = async () => {};
 if (utenti) {
-    const righeUtenti = Array.from(utenti.children);
+    let righeUtenti = Array.from(utenti.children);
     const opzioniUtenti = {
         searchLabel: 'Cerca account', placeholder: 'Nome, codice o email',
         filters: [{ key: 'ruolo', label: 'Ruolo' }, { key: 'stato', label: 'Stato' }],
         columns: ['Account', 'Email', 'Comune', 'Stato', 'Azioni'], empty: 'Nessun account registrato.'
+    };
+
+    aggiornaAccountBanco = async () => {
+        const res = await fetch('/banco/dashboard', { headers: { Accept: 'text/html' } });
+        if (!res.ok || res.redirected) {
+            throw new Error('Impossibile aggiornare l’elenco account');
+        }
+        const html = await res.text();
+        const parsed = new DOMParser().parseFromString(html, 'text/html');
+        const nuovoElenco = parsed.getElementById('account');
+        if (!nuovoElenco) return;
+        righeUtenti = Array.from(nuovoElenco.children).map(riga => document.importNode(riga, true));
+        renderList(utenti, righeUtenti, opzioniUtenti);
+        await aggiornaOptOfferteBanco();
     };
 
     utenti.addEventListener('click', async (event) => {
@@ -130,24 +148,6 @@ if (utenti) {
     renderList(utenti, righeUtenti, opzioniUtenti);
 }
 
-for (const contenitore of document.querySelectorAll('#voci-scheda')) {
-    const riga = document.createElement('div');
-    riga.className = 'count-row';
-    for (const [label, type] of [['Voce', 'text'], ['Conteggio', 'number']]) {
-        const campo = document.createElement('label');
-        campo.className = 'campo';
-        const etichetta = document.createElement('span');
-        etichetta.textContent = label;
-        campo.append(etichetta);
-        const input = document.createElement('input');
-        input.className = 'form-control';
-        input.type = type;
-        input.disabled = true;
-        campo.append(input);
-        riga.append(campo);
-    }
-    contenitore.append(riga);
-}
 for (const form of document.querySelectorAll('[data-form-anteprima]')) {
     form.addEventListener('submit', event => event.preventDefault());
 }
@@ -171,6 +171,7 @@ if (formNuovaOpt) {
             if (!risultato.erroreInvio) {
                 formNuovaOpt.reset();
             }
+            await aggiornaAccountBanco().catch(() => {});
         } catch (causa) {
             esito.textContent = causa?.message || 'Connessione non disponibile. Riprova.';
             const campiErrati = causa?.campi ? Object.keys(causa.campi) : [];
@@ -187,16 +188,20 @@ if (formNuovaOpt) {
     });
 }
 
-const lavori = [initConteggiOpt(area)];
+const lavori = [];
 if (area === 'banco') {
     lavori.push(
+        initConteggiOpt(area),
         caricaRichieste(area),
-        import('./catalogo-banco.js').then(({ initCatalogoBanco }) => initCatalogoBanco())
+        import('./catalogo-banco.js').then(({ initCatalogoBanco }) => initCatalogoBanco()),
+        initImportazioneOpt({ onMutazioneConfermata: () => aggiornaAccountBanco() }),
+        initOfferteOpt('banco')
     );
 }
 else {
     lavori.push(caricaAvvisi());
-    if (area === 'opt') lavori.push(caricaRichieste(area));
+    if (area === 'opt') lavori.push(initConteggiOpt(area), caricaRichieste(area), initOfferteOpt('opt'));
+    if (area === 'operatore') lavori.push(initSchedeOperatore());
 }
 Promise.allSettled(lavori);
 for (const button of document.querySelectorAll('[data-aggiorna]')) {

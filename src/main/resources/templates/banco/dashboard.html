@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="/css/integrazione-ui.css">
     <script src="/js/comunicazioni.js" type="module"></script>
 </head>
-<body data-area="banco" th:attr="data-utente=${utente.id}">
+<body data-area="banco" th:attr="data-utente=${utente.id},data-skeleton=${skeleton ? 'true' : null}">
 <a th:replace="~{fragments/layout :: skip}" href="#contenuto">Vai al contenuto</a>
 <header class="picus-navbar workspace-navbar">
     <div class="nav-inner">
@@ -131,12 +131,13 @@
                 </fieldset></form>
                 </div>
                 <div role="tabpanel" id="utenze-view-csv" aria-labelledby="utenze-tab-csv" tabindex="0" hidden>
-                    <h2 class="picus-card-title">Importa organizzazioni da CSV</h2><form id="csv" class="picus-form form-layout" data-form-anteprima><fieldset class="campi-inattivi" disabled>
+                    <h2 class="picus-card-title">Importa organizzazioni da CSV</h2><form id="csv" class="picus-form form-layout" method="post" enctype="multipart/form-data" novalidate><fieldset class="campi-form" disabled>
                     <div class="picus-fields fields-one">
-                        <label class="campo ">File CSV UTF-8<input class="form-control" name="csv" type="file" required accept=".csv,text/csv"></label>
+                        <label class="campo ">File CSV UTF-8<input class="form-control" name="file" type="file" required accept=".csv,text/csv"></label>
                     </div>
-                    <div class="form-submit"><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-primary" type="submit">Importa OPT</button></span><p class="picus-esito" role="status"></p></div>
-                </fieldset></form><div class="picus-list" id="rapporto-csv" aria-live="polite" data-funzione-inattiva></div>
+                    <p class="form-text">Intestazione attesa: <code>codice_struttura,nome_opt,comune,codice_fiscale,email</code> (UTF-8, massimo 1 MiB).</p>
+                    <div class="form-submit"><button class="btn btn-primary" type="submit">Importa OPT</button><p class="picus-esito" role="status"></p></div>
+                </fieldset></form><div class="picus-list" id="rapporto-csv" aria-live="polite" hidden></div>
                 </div>
             </div>
         </section>
@@ -163,12 +164,18 @@
                 </fieldset></form>
                 </div>
                 <div role="tabpanel" id="catalogo-view-offerte" aria-labelledby="catalogo-tab-offerte" tabindex="0" hidden>
-                    <h2 class="sr-only">Offerte delle organizzazioni</h2><form id="consulta-offerta" class="picus-form form-layout" data-form-anteprima><fieldset class="campi-inattivi" disabled>
+                    <h2 class="sr-only">Offerte delle organizzazioni</h2><form id="consulta-offerta" class="picus-form form-layout" novalidate><fieldset class="campi-form">
                     <div class="picus-fields fields-one">
-                        <label class="campo ">Organizzazione<select class="form-control" name="optId" required ></select></label>
+                        <label class="campo ">Organizzazione<select class="form-control" name="optId" required>
+                            <option value="">Seleziona un’organizzazione</option>
+                            <option th:each="opt : ${optElenco}"
+                                    th:value="${opt.id}"
+                                    th:attr="data-nome=${opt.nomeVisualizzato},data-riferimento=${opt.riferimento},data-stato=${opt.stato.name()}"
+                                    th:text="${opt.riferimento != null ? opt.nomeVisualizzato + ' (' + opt.riferimento + ')' : opt.nomeVisualizzato}"></option>
+                        </select></label>
                     </div>
-                    <div class="form-submit"><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-primary" type="submit">Consulta offerta</button></span><p class="picus-esito" role="status"></p></div>
-                </fieldset></form><div class="picus-list" id="offerta-banco" aria-live="polite" data-funzione-inattiva></div>
+                    <div class="form-submit"><button class="btn btn-primary" type="submit">Consulta offerta</button><p class="picus-esito" role="status"></p></div>
+                </fieldset></form><div class="picus-list" id="offerta-banco" aria-live="polite" hidden></div>
                 </div>
             </div>
         </section>

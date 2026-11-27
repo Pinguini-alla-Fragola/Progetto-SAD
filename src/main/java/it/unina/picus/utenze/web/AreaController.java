@@ -48,6 +48,7 @@ class AreaController {
         var account = utenze.cercaAccount(identita.accountId())
                 .orElseThrow(() -> new AccessDeniedException("Account non disponibile"));
         modello.addAttribute("utente", account);
+        modello.addAttribute("skeleton", ambiente.acceptsProfiles(Profiles.of("skeleton")));
 
         if (identita.ruolo() == RuoloUtente.BANCO) {
             modello.addAttribute("optElenco", utenze.elencoAccountPerRuolo(RuoloUtente.OPT));
