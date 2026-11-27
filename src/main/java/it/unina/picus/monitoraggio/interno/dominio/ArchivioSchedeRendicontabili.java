@@ -6,7 +6,6 @@ import it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Porta di lettura delle schede registrate dal caso d'uso di invio (#58).
@@ -34,27 +33,24 @@ public interface ArchivioSchedeRendicontabili {
      *                versione accettata rappresentata, anche in caso di correzione
      * @param numeroVersione progressivo positivo e univoco per operatore e trimestre, crescente
      *                       a ogni correzione accettata
-     * @param conteggiDichiarati valori non negativi dichiarati per codice di categoria ammesso
-     *                          dal tracciato, incluso lo zero
-     * @param categorieTracciato codici stabili delle categorie di conteggio ammesse dal tracciato
-     *                            applicato all'invio
+     * @param conteggiDichiarati valori non negativi dichiarati nell'invio per codice di categoria
+     *                          sintatticamente valido, incluso lo zero. La selezione delle categorie
+     *                          configurate dal Banco avviene nel caso d'uso di riepilogo
      */
     record VersioneInviata(
             SchedaSintesi sintesi,
             long numeroVersione,
-            Map<String, Long> conteggiDichiarati,
-            Set<String> categorieTracciato) {
+            Map<String, Long> conteggiDichiarati) {
 
         /**
-         * Valida la proiezione e acquisisce copie immutabili dei conteggi e delle categorie.
+         * Valida la proiezione e acquisisce una copia immutabile dei conteggi dichiarati.
          *
          * @param sintesi riferimento completo alla scheda e all'istante di invio della versione
          * @param numeroVersione progressivo positivo della versione accettata
          * @param conteggiDichiarati valori dichiarati per codice di categoria
-         * @param categorieTracciato categorie di conteggio ammesse dal tracciato dell'invio
          * @throws NullPointerException se un dato richiesto è mancante
-         * @throws IllegalArgumentException se il progressivo non è positivo, un conteggio è
-         *                                  negativo o una categoria dichiarata è fuori tracciato
+         * @throws IllegalArgumentException se il progressivo non è positivo, un codice è malformato
+         *                                  o un conteggio è negativo
          */
         public VersioneInviata {
             Objects.requireNonNull(sintesi, "sintesi");
@@ -66,9 +62,8 @@ public interface ArchivioSchedeRendicontabili {
                 throw new IllegalArgumentException("Il numero di versione deve essere positivo");
             }
             conteggiDichiarati = Map.copyOf(conteggiDichiarati);
-            categorieTracciato = Set.copyOf(categorieTracciato);
-            if (!categorieTracciato.containsAll(conteggiDichiarati.keySet())) {
-                throw new IllegalArgumentException("I conteggi contengono categorie fuori tracciato");
+            if (!conteggiDichiarati.keySet().stream().allMatch(TracciatoSchedaOperatore::codiceCategoriaValido)) {
+                throw new IllegalArgumentException("I conteggi contengono codici di categoria non validi");
             }
             if (conteggiDichiarati.values().stream().anyMatch(valore -> valore < 0)) {
                 throw new IllegalArgumentException("I conteggi dichiarati devono essere non negativi");
