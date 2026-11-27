@@ -29,8 +29,8 @@ public class DatiMisuraNonValidiException extends IllegalArgumentException {
      * @param campi mappa non nulla dei campi errati e relativi messaggi controllati
      */
     public DatiMisuraNonValidiException(Map&lt;String, String&gt; campi) {
-<span class="nc" id="L32">        this(&quot;Controlla i campi della misura&quot;, campi);</span>
-<span class="nc" id="L33">    }</span>
+<span class="fc" id="L32">        this(&quot;Controlla i campi della misura&quot;, campi);</span>
+<span class="fc" id="L33">    }</span>
 
     /**
      * Costruisce l'eccezione con un messaggio generale e la mappa dei campi errati.
@@ -39,9 +39,9 @@ public class DatiMisuraNonValidiException extends IllegalArgumentException {
      * @param campi mappa non nulla dei campi errati e relativi messaggi controllati
      */
     protected DatiMisuraNonValidiException(String messaggio, Map&lt;String, String&gt; campi) {
-<span class="nc" id="L42">        super(Objects.requireNonNull(messaggio, &quot;messaggio&quot;));</span>
-<span class="nc" id="L43">        this.campi = Map.copyOf(Objects.requireNonNull(campi, &quot;campi&quot;));</span>
-<span class="nc" id="L44">    }</span>
+<span class="fc" id="L42">        super(Objects.requireNonNull(messaggio, &quot;messaggio&quot;));</span>
+<span class="fc" id="L43">        this.campi = Map.copyOf(Objects.requireNonNull(campi, &quot;campi&quot;));</span>
+<span class="fc" id="L44">    }</span>
 
     /**
      * Restituisce una vista immutabile degli errori per campo.
@@ -49,7 +49,7 @@ public class DatiMisuraNonValidiException extends IllegalArgumentException {
      * @return mappa immutabile con i nomi dei campi e i messaggi di correzione
      */
     public Map&lt;String, String&gt; campi() {
-<span class="nc" id="L52">        return campi;</span>
+<span class="fc" id="L52">        return campi;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

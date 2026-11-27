@@ -69,6 +69,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
 <li><a href="#campi()" tabindex="0">campi()</a></li>
+<li><a href="#codiceCategoriaValido(java.lang.String)" tabindex="0">codiceCategoriaValido(String)</a></li>
 <li><a href="#valida(it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,it.unina.picus.monitoraggio.api.MonitoraggioApi.DatiSchedaOperatore)" tabindex="0">valida(MonitoraggioApi.Trimestre, MonitoraggioApi.DatiSchedaOperatore)</a></li>
 </ol>
 </li>
@@ -150,10 +151,15 @@ delle categorie e dei campi obbligatori è in raffinamento (#41).</div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Returns i campi compilabili del tracciato provvisorio, nell'ordine del modulo.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#valida(it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,it.unina.picus.monitoraggio.api.MonitoraggioApi.DatiSchedaOperatore)" class="member-name-link">valida</a><wbr>(<a href="../../api/MonitoraggioApi.Trimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.Trimestre</a>&nbsp;trimestre,
- <a href="../../api/MonitoraggioApi.DatiSchedaOperatore.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.DatiSchedaOperatore</a>&nbsp;dati)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#codiceCategoriaValido(java.lang.String)" class="member-name-link">codiceCategoriaValido</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;codice)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Verifica la validità sintattica di un codice di categoria del tracciato TM-OP-01.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#valida(it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,it.unina.picus.monitoraggio.api.MonitoraggioApi.DatiSchedaOperatore)" class="member-name-link">valida</a><wbr>(<a href="../../api/MonitoraggioApi.Trimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.Trimestre</a>&nbsp;trimestre,
+ <a href="../../api/MonitoraggioApi.DatiSchedaOperatore.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.DatiSchedaOperatore</a>&nbsp;dati)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Controlla i dati minimi richiesti e i limiti di rappresentazione del tracciato.</div>
 </div>
 </div>
@@ -224,6 +230,21 @@ delle categorie e dei campi obbligatori è in raffinamento (#41).</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>i campi compilabili del tracciato provvisorio, nell'ordine del modulo</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="codiceCategoriaValido(java.lang.String)">
+<h3>codiceCategoriaValido</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">codiceCategoriaValido</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;codice)</span></div>
+<div class="block">Verifica la validità sintattica di un codice di categoria del tracciato TM-OP-01.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>codice</code> - codice da verificare</dd>
+<dt>Returns:</dt>
+<dd><code>true</code> se rispetta il formato del tracciato</dd>
 </dl>
 </div>
 </section>

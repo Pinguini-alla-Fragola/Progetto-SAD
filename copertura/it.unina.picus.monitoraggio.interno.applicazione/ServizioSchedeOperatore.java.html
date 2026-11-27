@@ -4,9 +4,14 @@ import it.unina.picus.monitoraggio.api.ConteggiOptApi;
 import it.unina.picus.monitoraggio.api.MonitoraggioApi;
 import it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeOperatore;
 import it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeRendicontabili;
+import it.unina.picus.monitoraggio.interno.dominio.CategorieSchedeRendicontabili;
+import it.unina.picus.monitoraggio.interno.dominio.ConfigurazioneTrimestre;
+import it.unina.picus.monitoraggio.interno.dominio.ConfigurazioneTrimestreAssenteException;
 import it.unina.picus.monitoraggio.interno.dominio.DatiSchedaNonValidiException;
 import it.unina.picus.monitoraggio.interno.dominio.RegoleAccessoScheda;
+import it.unina.picus.monitoraggio.interno.dominio.StatoVersioneCategorie;
 import it.unina.picus.monitoraggio.interno.dominio.TracciatoSchedaOperatore;
+import it.unina.picus.monitoraggio.interno.dominio.VoceCategoriaVersione;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -19,6 +24,7 @@ import java.time.temporal.IsoFields;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.UUID;
 
 /** Coordina l'invio, la consultazione e il riepilogo delle schede personali. */
@@ -27,9 +33,10 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class ServizioSchedeOperatore implements MonitoraggioApi {
 
-<span class="fc" id="L30">    private static final ZoneId FUSO_RENDICONTAZIONE = ZoneId.of(&quot;Europe/Rome&quot;);</span>
+<span class="fc" id="L36">    private static final ZoneId FUSO_RENDICONTAZIONE = ZoneId.of(&quot;Europe/Rome&quot;);</span>
 
     private final ArchivioSchedeOperatore archivio;
+    private final CategorieSchedeRendicontabili categorie;
     private final ServizioRiepilogoSchede riepilogo;
     private final ConteggiOptApi conteggiOpt;
     private final Clock orologio;
@@ -39,71 +46,135 @@ public class ServizioSchedeOperatore implements MonitoraggioApi {
      *
      * @param archivio persistenza delle schede personali
      * @param archivioRendicontabile sorgente delle schede accettate per il riepilogo
+     * @param categorie fonte delle configurazioni per trimestre di TM-OP-01
      * @param conteggiOpt servizio dei conteggi trimestrali delle OPT
      * @param orologio sorgente dell'istante di invio
      */
-    public ServizioSchedeOperatore(ArchivioSchedeOperatore archivio, ArchivioSchedeRendicontabili archivioRendicontabile,
-<span class="fc" id="L46">                                    ConteggiOptApi conteggiOpt, Clock orologio) {</span>
-<span class="fc" id="L47">        this.archivio = archivio;</span>
-<span class="fc" id="L48">        this.riepilogo = new ServizioRiepilogoSchede(archivioRendicontabile);</span>
-<span class="fc" id="L49">        this.conteggiOpt = conteggiOpt;</span>
-<span class="fc" id="L50">        this.orologio = orologio;</span>
-<span class="fc" id="L51">    }</span>
+    public ServizioSchedeOperatore(
+            ArchivioSchedeOperatore archivio,
+            ArchivioSchedeRendicontabili archivioRendicontabile,
+            CategorieSchedeRendicontabili categorie,
+            ConteggiOptApi conteggiOpt,
+<span class="fc" id="L58">            Clock orologio) {</span>
+<span class="fc" id="L59">        this.archivio = archivio;</span>
+<span class="fc" id="L60">        this.categorie = categorie;</span>
+<span class="fc" id="L61">        this.riepilogo = new ServizioRiepilogoSchede(archivioRendicontabile, categorie);</span>
+<span class="fc" id="L62">        this.conteggiOpt = conteggiOpt;</span>
+<span class="fc" id="L63">        this.orologio = orologio;</span>
+<span class="fc" id="L64">    }</span>
 
     /** {@inheritDoc} */
     @Override
     @Transactional
     public void registraConteggiOpt(IdentitaAutenticata attore, Trimestre trimestre, List&lt;VoceMisura&gt; conteggi) {
-<span class="nc" id="L57">        conteggiOpt.registraConteggiOpt(attore, trimestre, conteggi);</span>
-<span class="nc" id="L58">    }</span>
+<span class="nc" id="L70">        conteggiOpt.registraConteggiOpt(attore, trimestre, conteggi);</span>
+<span class="nc" id="L71">    }</span>
 
     /** {@inheritDoc} */
     @Override
     public List&lt;ConteggioOpt&gt; consultaConteggiOpt(IdentitaAutenticata attore, UUID optId, Trimestre da, Trimestre a) {
-<span class="fc" id="L63">        return conteggiOpt.consultaConteggiOpt(attore, optId, da, a);</span>
+<span class="fc" id="L76">        return conteggiOpt.consultaConteggiOpt(attore, optId, da, a);</span>
+    }
+
+    /**
+     * Risolve la configurazione del modulo per il trimestre richiesto. Quando il Banco ha
+     * pubblicato almeno una versione per {@code TM-OP-01}, ogni trimestre privo di configurazione
+     * pubblicata o di associazione storica {@code v0.1} pre-migrazione viene rifiutato con
+     * {@link ConfigurazioneTrimestreAssenteException}, senza creare nuove associazioni legacy.
+     *
+     * @param attore identità verificata dell'operatore
+     * @param trimestre periodo richiesto
+     * @return metadati della configurazione di categorie applicabile al modulo
+     */
+    public ConfigurazioneModulo moduloPer(IdentitaAutenticata attore, Trimestre trimestre) {
+<span class="fc" id="L90">        RegoleAccessoScheda.verificaOperatore(attore);</span>
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">        if (trimestre == null) {</span>
+<span class="nc" id="L92">            throw new DatiSchedaNonValidiException(Map.of(&quot;trimestre&quot;, &quot;Il periodo è obbligatorio&quot;));</span>
+        }
+<span class="fc" id="L94">        ConfigurazioneTrimestre conf = categorie.configurazionePer(trimestre);</span>
+<span class="pc bpc" id="L95" title="2 of 3 branches missed.">        return switch (conf) {</span>
+<span class="nc" id="L96">            case ConfigurazioneTrimestre.Pubblicata p -&gt; new ConfigurazioneModulo(</span>
+<span class="nc" id="L97">                    p.versione().codiceVersione(),</span>
+                    StatoVersioneCategorie.PUBBLICATA,
+<span class="nc" id="L99">                    p.versione().voci());</span>
+<span class="nc" id="L100">            case ConfigurazioneTrimestre.LegacyProvvisoria l -&gt; new ConfigurazioneModulo(</span>
+<span class="nc" id="L101">                    l.versione().codiceVersione(),</span>
+                    StatoVersioneCategorie.LEGACY,
+<span class="nc" id="L103">                    l.versione().voci());</span>
+<span class="fc" id="L104">            case ConfigurazioneTrimestre.NonConfigurata n -&gt; {</span>
+<span class="pc bpc" id="L105" title="1 of 2 branches missed.">                if (n.transitorioSenzaPubblicazioni()) {</span>
+<span class="fc" id="L106">                    yield new ConfigurazioneModulo(</span>
+<span class="fc" id="L107">                            TracciatoSchedaOperatore.VERSIONE, StatoVersioneCategorie.LEGACY, List.of());</span>
+                }
+<span class="nc" id="L109">                throw new ConfigurazioneTrimestreAssenteException(</span>
+                        &quot;Configurazione delle categorie non ancora pubblicata dal Banco per il trimestre selezionato&quot;);
+            }
+        };
     }
 
     /** {@inheritDoc} */
     @Override
     @Transactional
     public UUID inviaSchedaOperatore(IdentitaAutenticata attore, Trimestre trimestre, DatiSchedaOperatore dati) {
-<span class="fc" id="L70">        RegoleAccessoScheda.verificaOperatore(attore);</span>
-<span class="fc" id="L71">        TracciatoSchedaOperatore.valida(trimestre, dati);</span>
-<span class="fc" id="L72">        var istanteInvio = orologio.instant();</span>
-<span class="fc" id="L73">        var dataInvio = LocalDate.ofInstant(istanteInvio, FUSO_RENDICONTAZIONE);</span>
-<span class="fc" id="L74">        int annoCorrente = dataInvio.getYear();</span>
-<span class="fc" id="L75">        int trimestreCorrente = dataInvio.get(IsoFields.QUARTER_OF_YEAR);</span>
-<span class="fc bfc" id="L76" title="All 2 branches covered.">        if (trimestre.anno() &gt; annoCorrente</span>
-<span class="fc bfc" id="L77" title="All 4 branches covered.">                || (trimestre.anno() == annoCorrente &amp;&amp; trimestre.numero() &gt;= trimestreCorrente)) {</span>
-<span class="fc" id="L78">            throw new DatiSchedaNonValidiException(Map.of(&quot;trimestre&quot;, &quot;Scegli un trimestre concluso&quot;));</span>
+<span class="fc" id="L119">        RegoleAccessoScheda.verificaOperatore(attore);</span>
+<span class="fc" id="L120">        TracciatoSchedaOperatore.valida(trimestre, dati);</span>
+<span class="fc" id="L121">        var istanteInvio = orologio.instant();</span>
+<span class="fc" id="L122">        var dataInvio = LocalDate.ofInstant(istanteInvio, FUSO_RENDICONTAZIONE);</span>
+<span class="fc" id="L123">        int annoCorrente = dataInvio.getYear();</span>
+<span class="fc" id="L124">        int trimestreCorrente = dataInvio.get(IsoFields.QUARTER_OF_YEAR);</span>
+<span class="fc bfc" id="L125" title="All 2 branches covered.">        if (trimestre.anno() &gt; annoCorrente</span>
+<span class="fc bfc" id="L126" title="All 4 branches covered.">                || (trimestre.anno() == annoCorrente &amp;&amp; trimestre.numero() &gt;= trimestreCorrente)) {</span>
+<span class="fc" id="L127">            throw new DatiSchedaNonValidiException(Map.of(&quot;trimestre&quot;, &quot;Scegli un trimestre concluso&quot;));</span>
         }
-<span class="fc" id="L80">        var sintesi = new SchedaSintesi(UUID.randomUUID(), attore.accountId(), trimestre, istanteInvio);</span>
-<span class="fc" id="L81">        archivio.registra(new SchedaOperatore(sintesi, dati));</span>
-<span class="fc" id="L82">        return sintesi.id();</span>
+
+<span class="fc" id="L130">        ConfigurazioneTrimestre conf = categorie.configurazionePer(trimestre);</span>
+        UUID versioneCategorieId;
+<span class="pc bpc" id="L132" title="2 of 3 branches missed.">        switch (conf) {</span>
+<span class="nc" id="L133">            case ConfigurazioneTrimestre.Pubblicata p -&gt; {</span>
+<span class="nc" id="L134">                Set&lt;String&gt; ammesse = p.versione().codiciAmmessi();</span>
+<span class="nc bnc" id="L135" title="All 2 branches missed.">                if (!dati.conteggi().keySet().stream().allMatch(ammesse::contains)) {</span>
+<span class="nc" id="L136">                    throw new DatiSchedaNonValidiException(Map.of(&quot;conteggi&quot;,</span>
+                            &quot;Contiene categorie non previste dalla configurazione pubblicata per il trimestre&quot;));
+                }
+<span class="nc" id="L139">                versioneCategorieId = p.versione().id();</span>
+<span class="nc" id="L140">            }</span>
+<span class="nc" id="L141">            case ConfigurazioneTrimestre.LegacyProvvisoria l -&gt; versioneCategorieId = l.versione().id();</span>
+<span class="fc" id="L142">            case ConfigurazioneTrimestre.NonConfigurata n -&gt; {</span>
+<span class="pc bpc" id="L143" title="1 of 2 branches missed.">                if (!n.transitorioSenzaPubblicazioni()) {</span>
+<span class="nc" id="L144">                    throw new ConfigurazioneTrimestreAssenteException(</span>
+                            &quot;Configurazione delle categorie non ancora pubblicata dal Banco per il trimestre selezionato&quot;);
+                }
+<span class="fc" id="L147">                versioneCategorieId = null;</span>
+            }
+        }
+
+<span class="fc" id="L151">        var sintesi = new SchedaSintesi(UUID.randomUUID(), attore.accountId(), trimestre, istanteInvio);</span>
+<span class="fc" id="L152">        archivio.registra(new SchedaOperatore(sintesi, dati), versioneCategorieId);</span>
+<span class="fc" id="L153">        return sintesi.id();</span>
     }
 
     /** {@inheritDoc} */
     @Override
     public List&lt;SchedaSintesi&gt; elencoSchedeOperatore(IdentitaAutenticata attore) {
-<span class="fc" id="L88">        RegoleAccessoScheda.verificaOperatore(attore);</span>
-<span class="fc" id="L89">        return archivio.perOperatore(attore.accountId());</span>
+<span class="fc" id="L159">        RegoleAccessoScheda.verificaOperatore(attore);</span>
+<span class="fc" id="L160">        return archivio.perOperatore(attore.accountId());</span>
     }
 
     /** {@inheritDoc} */
     @Override
     public SchedaOperatore consultaSchedaOperatore(IdentitaAutenticata attore, UUID schedaId) {
-<span class="fc" id="L95">        RegoleAccessoScheda.verificaRuoloConsultazione(attore);</span>
-<span class="fc" id="L96">        return archivio.cerca(schedaId, titolare -&gt; RegoleAccessoScheda.verificaConsultazione(attore, titolare))</span>
-<span class="fc" id="L97">                .orElseThrow(() -&gt; {</span>
-<span class="fc" id="L98">                    RegoleAccessoScheda.verificaConsultazione(attore, null);</span>
-<span class="fc" id="L99">                    return new NoSuchElementException(&quot;Scheda non trovata&quot;);</span>
+<span class="fc" id="L166">        RegoleAccessoScheda.verificaRuoloConsultazione(attore);</span>
+<span class="fc" id="L167">        return archivio.cerca(schedaId, titolare -&gt; RegoleAccessoScheda.verificaConsultazione(attore, titolare))</span>
+<span class="fc" id="L168">                .orElseThrow(() -&gt; {</span>
+<span class="fc" id="L169">                    RegoleAccessoScheda.verificaConsultazione(attore, null);</span>
+<span class="fc" id="L170">                    return new NoSuchElementException(&quot;Scheda non trovata&quot;);</span>
                 });
     }
 
     /** {@inheritDoc} */
     @Override
     public RiepilogoTrimestre riepilogaSchede(IdentitaAutenticata attore, Trimestre trimestre) {
-<span class="fc" id="L106">        return riepilogo.riepilogaSchede(attore, trimestre);</span>
+<span class="fc" id="L177">        return riepilogo.riepilogaSchede(attore, trimestre);</span>
     }
 
     /**
@@ -116,11 +187,17 @@ public class ServizioSchedeOperatore implements MonitoraggioApi {
      * @throws DatiSchedaNonValidiException se il periodo è assente
      */
     public List&lt;SchedaSintesi&gt; elencoSchedeRicevute(IdentitaAutenticata attore, Trimestre trimestre) {
-<span class="fc" id="L119">        RegoleAccessoScheda.verificaRiepilogo(attore);</span>
-<span class="pc bpc" id="L120" title="1 of 2 branches missed.">        if (trimestre == null) {</span>
-<span class="nc" id="L121">            throw new DatiSchedaNonValidiException(Map.of(&quot;trimestre&quot;, &quot;Il periodo è obbligatorio&quot;));</span>
+<span class="fc" id="L190">        RegoleAccessoScheda.verificaRiepilogo(attore);</span>
+<span class="pc bpc" id="L191" title="1 of 2 branches missed.">        if (trimestre == null) {</span>
+<span class="nc" id="L192">            throw new DatiSchedaNonValidiException(Map.of(&quot;trimestre&quot;, &quot;Il periodo è obbligatorio&quot;));</span>
         }
-<span class="fc" id="L123">        return archivio.perTrimestre(trimestre);</span>
+<span class="fc" id="L194">        return archivio.perTrimestre(trimestre);</span>
     }
+
+    /** Metadati della configurazione delle categorie esposti al modulo di compilazione. */
+<span class="fc" id="L198">    public record ConfigurazioneModulo(</span>
+            String codiceVersione,
+            StatoVersioneCategorie stato,
+            List&lt;VoceCategoriaVersione&gt; categorie) {}
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

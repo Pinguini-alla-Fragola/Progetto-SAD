@@ -45,6 +45,16 @@ public final class TracciatoSchedaOperatore {
     }
 
     /**
+     * Verifica la validità sintattica di un codice di categoria del tracciato TM-OP-01.
+     *
+     * @param codice codice da verificare
+     * @return {@code true} se rispetta il formato del tracciato
+     */
+    public static boolean codiceCategoriaValido(String codice) {
+<span class="pc bpc" id="L54" title="2 of 4 branches missed.">        return codice != null &amp;&amp; CODICE_CATEGORIA.matcher(codice).matches();</span>
+    }
+
+    /**
      * Controlla i dati minimi richiesti e i limiti di rappresentazione del tracciato.
      *
      * @param trimestre periodo dichiarato
@@ -52,63 +62,63 @@ public final class TracciatoSchedaOperatore {
      * @throws DatiSchedaNonValidiException se uno o più campi non sono validi
      */
     public static void valida(Trimestre trimestre, DatiSchedaOperatore dati) {
-<span class="fc" id="L55">        Map&lt;String, String&gt; errori = new LinkedHashMap&lt;&gt;();</span>
-<span class="pc bpc" id="L56" title="1 of 2 branches missed.">        if (trimestre == null) {</span>
-<span class="nc" id="L57">            errori.put(&quot;trimestre&quot;, &quot;Il periodo è obbligatorio&quot;);</span>
+<span class="fc" id="L65">        Map&lt;String, String&gt; errori = new LinkedHashMap&lt;&gt;();</span>
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">        if (trimestre == null) {</span>
+<span class="nc" id="L67">            errori.put(&quot;trimestre&quot;, &quot;Il periodo è obbligatorio&quot;);</span>
         }
-<span class="pc bpc" id="L59" title="1 of 2 branches missed.">        if (dati == null) {</span>
-<span class="nc" id="L60">            errori.put(&quot;dati&quot;, &quot;I dati della scheda sono obbligatori&quot;);</span>
+<span class="pc bpc" id="L69" title="1 of 2 branches missed.">        if (dati == null) {</span>
+<span class="nc" id="L70">            errori.put(&quot;dati&quot;, &quot;I dati della scheda sono obbligatori&quot;);</span>
         } else {
-<span class="fc" id="L62">            verificaTesti(dati, errori);</span>
-<span class="pc bpc" id="L63" title="2 of 6 branches missed.">            if (dati.dataNascita() != null &amp;&amp; (dati.dataNascita().getYear() &lt; 1 || dati.dataNascita().getYear() &gt; 9999)) {</span>
-<span class="nc" id="L64">                errori.put(&quot;dataNascita&quot;, &quot;Usa una data con anno tra 1 e 9999&quot;);</span>
+<span class="fc" id="L72">            verificaTesti(dati, errori);</span>
+<span class="pc bpc" id="L73" title="2 of 6 branches missed.">            if (dati.dataNascita() != null &amp;&amp; (dati.dataNascita().getYear() &lt; 1 || dati.dataNascita().getYear() &gt; 9999)) {</span>
+<span class="nc" id="L74">                errori.put(&quot;dataNascita&quot;, &quot;Usa una data con anno tra 1 e 9999&quot;);</span>
             }
-<span class="fc" id="L66">            verificaDecimale(&quot;ore&quot;, dati.ore(), errori);</span>
-<span class="fc" id="L67">            verificaDecimale(&quot;costoOrarioLordo&quot;, dati.costoOrarioLordo(), errori);</span>
-<span class="fc bfc" id="L68" title="All 2 branches covered.">            if (dati.conteggi().entrySet().stream().anyMatch(voce -&gt;</span>
-<span class="fc bfc" id="L69" title="All 4 branches covered.">                    !CODICE_CATEGORIA.matcher(voce.getKey()).matches() || voce.getValue() &lt; 0)) {</span>
-<span class="fc" id="L70">                errori.put(&quot;conteggi&quot;, &quot;Usa codici di categoria validi e interi non negativi&quot;);</span>
+<span class="fc" id="L76">            verificaDecimale(&quot;ore&quot;, dati.ore(), errori);</span>
+<span class="fc" id="L77">            verificaDecimale(&quot;costoOrarioLordo&quot;, dati.costoOrarioLordo(), errori);</span>
+<span class="fc bfc" id="L78" title="All 2 branches covered.">            if (dati.conteggi().entrySet().stream().anyMatch(voce -&gt;</span>
+<span class="fc bfc" id="L79" title="All 4 branches covered.">                    !CODICE_CATEGORIA.matcher(voce.getKey()).matches() || voce.getValue() &lt; 0)) {</span>
+<span class="fc" id="L80">                errori.put(&quot;conteggi&quot;, &quot;Usa codici di categoria validi e interi non negativi&quot;);</span>
             }
         }
-<span class="fc bfc" id="L73" title="All 2 branches covered.">        if (!errori.isEmpty()) {</span>
-<span class="fc" id="L74">            throw new DatiSchedaNonValidiException(errori);</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">        if (!errori.isEmpty()) {</span>
+<span class="fc" id="L84">            throw new DatiSchedaNonValidiException(errori);</span>
         }
-<span class="fc" id="L76">    }</span>
+<span class="fc" id="L86">    }</span>
 
     /** Controlla la lunghezza dei testi facoltativi. */
     private static void verificaTesti(DatiSchedaOperatore dati, Map&lt;String, String&gt; errori) {
-<span class="fc" id="L80">        verificaTesto(&quot;nome&quot;, dati.nome(), errori);</span>
-<span class="fc" id="L81">        verificaTesto(&quot;cognome&quot;, dati.cognome(), errori);</span>
-<span class="fc" id="L82">        verificaTesto(&quot;luogoNascita&quot;, dati.luogoNascita(), errori);</span>
-<span class="fc" id="L83">        verificaTesto(&quot;codiceFiscale&quot;, dati.codiceFiscale(), errori);</span>
-<span class="fc" id="L84">        verificaTesto(&quot;qualifica&quot;, dati.qualifica(), errori);</span>
-<span class="fc" id="L85">        verificaTesto(&quot;tipologiaContratto&quot;, dati.tipologiaContratto(), errori);</span>
-<span class="fc" id="L86">        verificaTesto(&quot;areaLivello&quot;, dati.areaLivello(), errori);</span>
-<span class="fc" id="L87">    }</span>
+<span class="fc" id="L90">        verificaTesto(&quot;nome&quot;, dati.nome(), errori);</span>
+<span class="fc" id="L91">        verificaTesto(&quot;cognome&quot;, dati.cognome(), errori);</span>
+<span class="fc" id="L92">        verificaTesto(&quot;luogoNascita&quot;, dati.luogoNascita(), errori);</span>
+<span class="fc" id="L93">        verificaTesto(&quot;codiceFiscale&quot;, dati.codiceFiscale(), errori);</span>
+<span class="fc" id="L94">        verificaTesto(&quot;qualifica&quot;, dati.qualifica(), errori);</span>
+<span class="fc" id="L95">        verificaTesto(&quot;tipologiaContratto&quot;, dati.tipologiaContratto(), errori);</span>
+<span class="fc" id="L96">        verificaTesto(&quot;areaLivello&quot;, dati.areaLivello(), errori);</span>
+<span class="fc" id="L97">    }</span>
 
     /** Allinea i testi al limite della colonna e ai caratteri supportati dal database. */
     private static void verificaTesto(String campo, String valore, Map&lt;String, String&gt; errori) {
-<span class="fc bfc" id="L91" title="All 2 branches covered.">        if (valore == null) {</span>
-<span class="fc" id="L92">            return;</span>
+<span class="fc bfc" id="L101" title="All 2 branches covered.">        if (valore == null) {</span>
+<span class="fc" id="L102">            return;</span>
         }
-<span class="fc bfc" id="L94" title="All 8 branches covered.">        if (valore.codePoints().anyMatch(c -&gt; c == 0 || (c &gt;= Character.MIN_SURROGATE &amp;&amp; c &lt;= Character.MAX_SURROGATE))) {</span>
-<span class="fc" id="L95">            errori.put(campo, &quot;Usa un testo Unicode valido&quot;);</span>
-<span class="fc bfc" id="L96" title="All 2 branches covered.">        } else if (valore.codePointCount(0, valore.length()) &gt; LUNGHEZZA_TESTO) {</span>
-<span class="fc" id="L97">            errori.put(campo, &quot;Usa al massimo 255 caratteri di testo&quot;);</span>
+<span class="fc bfc" id="L104" title="All 8 branches covered.">        if (valore.codePoints().anyMatch(c -&gt; c == 0 || (c &gt;= Character.MIN_SURROGATE &amp;&amp; c &lt;= Character.MAX_SURROGATE))) {</span>
+<span class="fc" id="L105">            errori.put(campo, &quot;Usa un testo Unicode valido&quot;);</span>
+<span class="fc bfc" id="L106" title="All 2 branches covered.">        } else if (valore.codePointCount(0, valore.length()) &gt; LUNGHEZZA_TESTO) {</span>
+<span class="fc" id="L107">            errori.put(campo, &quot;Usa al massimo 255 caratteri di testo&quot;);</span>
         }
-<span class="fc" id="L99">    }</span>
+<span class="fc" id="L109">    }</span>
 
     /** Verifica che il valore sia rappresentabile senza arrotondamento in NUMERIC(19,6). */
     private static void verificaDecimale(String campo, BigDecimal valore, Map&lt;String, String&gt; errori) {
-<span class="fc bfc" id="L103" title="All 2 branches covered.">        if (valore == null) {</span>
-<span class="fc" id="L104">            errori.put(campo, &quot;Il valore è obbligatorio&quot;);</span>
-<span class="fc" id="L105">            return;</span>
+<span class="fc bfc" id="L113" title="All 2 branches covered.">        if (valore == null) {</span>
+<span class="fc" id="L114">            errori.put(campo, &quot;Il valore è obbligatorio&quot;);</span>
+<span class="fc" id="L115">            return;</span>
         }
-<span class="pc bpc" id="L107" title="1 of 6 branches missed.">        if (valore.signum() &lt; 0 || valore.scale() &lt; -12 || valore.scale() &gt; 6</span>
-<span class="fc bfc" id="L108" title="All 2 branches covered.">                || (long) valore.precision() - valore.scale() &gt; 13) {</span>
-<span class="fc" id="L109">            errori.put(campo, &quot;Usa un numero non negativo con al massimo 13 cifre intere e 6 decimali&quot;);</span>
+<span class="pc bpc" id="L117" title="1 of 6 branches missed.">        if (valore.signum() &lt; 0 || valore.scale() &lt; -12 || valore.scale() &gt; 6</span>
+<span class="fc bfc" id="L118" title="All 2 branches covered.">                || (long) valore.precision() - valore.scale() &gt; 13) {</span>
+<span class="fc" id="L119">            errori.put(campo, &quot;Usa un numero non negativo con al massimo 13 cifre intere e 6 decimali&quot;);</span>
         }
-<span class="fc" id="L111">    }</span>
+<span class="fc" id="L121">    }</span>
 
     /**
      * Campo del modulo compilabile.
@@ -117,6 +127,6 @@ public final class TracciatoSchedaOperatore {
      * @param tipo tipo del dato rappresentato
      * @param obbligatorio indica se il tracciato richiede il valore
      */
-<span class="fc" id="L120">    public record Campo(String nome, String tipo, boolean obbligatorio) {}</span>
+<span class="fc" id="L130">    public record Campo(String nome, String tipo, boolean obbligatorio) {}</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

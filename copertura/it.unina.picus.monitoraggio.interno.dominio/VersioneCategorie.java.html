@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VersioneCategorie.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../jacoco-resources/picus-theme.css" type="text/css"/><link rel="stylesheet" href="../jacoco-resources/picus-coverage.css" type="text/css"/><script src="../jacoco-resources/picus-javadoc-theme.js" type="text/javascript"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="picus-coverage-header"><a class="picus-brand" href="https://strawberrypenguin.it/" aria-label="PICUS, pagina iniziale del progetto"><img src="../jacoco-resources/picus-logo.svg" width="38" height="38" alt=""/>PICUS</a><button type="button" class="picus-theme-toggle" hidden="hidden">Tema chiaro</button></div><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PICUS - Copertura dei test</a> &gt; <a href="index.source.html" class="el_package">it.unina.picus.monitoraggio.interno.dominio</a> &gt; <span class="el_source">VersioneCategorie.java</span></div><h1>VersioneCategorie.java</h1><pre class="source lang-java linenums">package it.unina.picus.monitoraggio.interno.dominio;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+/**
+ * Versione delle categorie di un tracciato di monitoraggio (#41, #181).
+ * Le versioni in {@link StatoVersioneCategorie#BOZZA} sono modificabili dal Banco;
+ * le versioni in {@link StatoVersioneCategorie#PUBBLICATA} e {@link StatoVersioneCategorie#LEGACY} sono immutabili.
+ *
+ * @param id identificativo stabile della versione
+ * @param tracciato tracciato a cui appartiene la versione
+ * @param codiceVersione codice identificativo univoco per tracciato (es. {@code 2026-t2})
+ * @param stato stato corrente del ciclo di vita
+ * @param descrizione descrizione della versione
+ * @param creataIl istante di creazione
+ * @param pubblicataIl istante di pubblicazione, o {@code null} finché resta bozza
+ * @param voci elenco ordinato delle voci configurate nella versione
+ */
+public record VersioneCategorie(
+        UUID id,
+        TracciatoMonitoraggio tracciato,
+        String codiceVersione,
+        StatoVersioneCategorie stato,
+        String descrizione,
+        Instant creataIl,
+        Instant pubblicataIl,
+        List&lt;VoceCategoriaVersione&gt; voci) {
+
+<span class="fc" id="L34">    public VersioneCategorie {</span>
+<span class="fc" id="L35">        Objects.requireNonNull(id, &quot;id&quot;);</span>
+<span class="fc" id="L36">        Objects.requireNonNull(tracciato, &quot;tracciato&quot;);</span>
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">        if (!TracciatoSchedaOperatore.codiceCategoriaValido(codiceVersione)) {</span>
+<span class="nc" id="L38">            throw new IllegalArgumentException(&quot;Codice versione non valido&quot;);</span>
+        }
+<span class="fc" id="L40">        Objects.requireNonNull(stato, &quot;stato&quot;);</span>
+<span class="fc" id="L41">        Objects.requireNonNull(descrizione, &quot;descrizione&quot;);</span>
+<span class="fc" id="L42">        descrizione = descrizione.trim();</span>
+<span class="pc bpc" id="L43" title="2 of 4 branches missed.">        if (descrizione.isEmpty() || descrizione.length() &gt; 255) {</span>
+<span class="nc" id="L44">            throw new IllegalArgumentException(&quot;Descrizione della versione non valida&quot;);</span>
+        }
+<span class="fc" id="L46">        Objects.requireNonNull(creataIl, &quot;creataIl&quot;);</span>
+<span class="pc bpc" id="L47" title="3 of 4 branches missed.">        if (stato == StatoVersioneCategorie.BOZZA &amp;&amp; pubblicataIl != null) {</span>
+<span class="nc" id="L48">            throw new IllegalArgumentException(&quot;Una bozza non può avere istante di pubblicazione&quot;);</span>
+        }
+<span class="pc bpc" id="L50" title="2 of 4 branches missed.">        if (stato != StatoVersioneCategorie.BOZZA &amp;&amp; pubblicataIl == null) {</span>
+<span class="nc" id="L51">            throw new IllegalArgumentException(&quot;Una versione pubblicata o legacy richiede l'istante di pubblicazione&quot;);</span>
+        }
+<span class="fc" id="L53">        voci = List.copyOf(Objects.requireNonNull(voci, &quot;voci&quot;));</span>
+<span class="fc" id="L54">    }</span>
+
+    /** {@return insieme immutabile dei codici ammessi dalla versione} */
+    public Set&lt;String&gt; codiciAmmessi() {
+<span class="fc" id="L58">        return voci.stream().map(VoceCategoriaVersione::codice).collect(Collectors.toUnmodifiableSet());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

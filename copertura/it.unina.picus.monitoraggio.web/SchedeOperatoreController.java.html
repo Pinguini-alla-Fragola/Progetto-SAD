@@ -4,6 +4,8 @@ import it.unina.picus.monitoraggio.api.MonitoraggioApi.SchedaOperatore;
 import it.unina.picus.monitoraggio.api.MonitoraggioApi.SchedaSintesi;
 import it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre;
 import it.unina.picus.monitoraggio.interno.applicazione.ServizioSchedeOperatore;
+import it.unina.picus.monitoraggio.interno.applicazione.ServizioSchedeOperatore.ConfigurazioneModulo;
+import it.unina.picus.monitoraggio.interno.dominio.ConfigurazioneTrimestreAssenteException;
 import it.unina.picus.monitoraggio.interno.dominio.DatiSchedaNonValidiException;
 import it.unina.picus.monitoraggio.interno.dominio.RegoleAccessoScheda;
 import it.unina.picus.monitoraggio.interno.dominio.SchedaGiaInviataException;
@@ -44,18 +46,20 @@ class SchedeOperatoreController {
     private final LettoreSchedaJson lettore;
 
     /** Collega gli endpoint ai casi d'uso e al lettore del tracciato JSON. */
-<span class="fc" id="L47">    SchedeOperatoreController(ServizioSchedeOperatore schede, LettoreSchedaJson lettore) {</span>
-<span class="fc" id="L48">        this.schede = schede;</span>
-<span class="fc" id="L49">        this.lettore = lettore;</span>
-<span class="fc" id="L50">    }</span>
+<span class="fc" id="L49">    SchedeOperatoreController(ServizioSchedeOperatore schede, LettoreSchedaJson lettore) {</span>
+<span class="fc" id="L50">        this.schede = schede;</span>
+<span class="fc" id="L51">        this.lettore = lettore;</span>
+<span class="fc" id="L52">    }</span>
 
-    /** Restituisce all'operatore i campi del modulo per il periodo selezionato. */
+    /** Restituisce all'operatore i campi del modulo e la configurazione di categorie per il periodo scelto. */
     @GetMapping(&quot;/modulo&quot;)
     Modulo modulo(IdentitaAutenticata attore, @RequestParam(required = false) Integer anno,
                   @RequestParam(required = false) Integer trimestre) {
-<span class="fc" id="L56">        RegoleAccessoScheda.verificaOperatore(attore);</span>
-<span class="fc" id="L57">        return new Modulo(periodo(anno, trimestre), TracciatoSchedaOperatore.CODICE,</span>
-<span class="fc" id="L58">                TracciatoSchedaOperatore.VERSIONE, TracciatoSchedaOperatore.campi());</span>
+<span class="fc" id="L58">        RegoleAccessoScheda.verificaOperatore(attore);</span>
+<span class="fc" id="L59">        Trimestre scelto = periodo(anno, trimestre);</span>
+<span class="fc" id="L60">        ConfigurazioneModulo configurazione = schede.moduloPer(attore, scelto);</span>
+<span class="fc" id="L61">        return new Modulo(scelto, TracciatoSchedaOperatore.CODICE,</span>
+<span class="fc" id="L62">                TracciatoSchedaOperatore.VERSIONE, TracciatoSchedaOperatore.campi(), configurazione);</span>
     }
 
     /** Invia la scheda e conferma con HTTP 201, riferimento alla risorsa e periodo registrato. */
@@ -63,95 +67,106 @@ class SchedeOperatoreController {
     ResponseEntity&lt;Ricevuta&gt; invia(IdentitaAutenticata attore, @RequestParam(required = false) Integer anno,
                                    @RequestParam(required = false) Integer trimestre, InputStream corpo)
             throws IOException {
-<span class="fc" id="L66">        RegoleAccessoScheda.verificaOperatore(attore);</span>
-<span class="fc" id="L67">        Trimestre periodo = periodo(anno, trimestre);</span>
-<span class="fc" id="L68">        UUID id = schede.inviaSchedaOperatore(attore, periodo, lettore.leggi(corpo));</span>
-<span class="fc" id="L69">        return ResponseEntity.created(URI.create(PERCORSO + &quot;/&quot; + id)).body(new Ricevuta(id, periodo));</span>
+<span class="fc" id="L70">        RegoleAccessoScheda.verificaOperatore(attore);</span>
+<span class="fc" id="L71">        Trimestre periodo = periodo(anno, trimestre);</span>
+<span class="fc" id="L72">        UUID id = schede.inviaSchedaOperatore(attore, periodo, lettore.leggi(corpo));</span>
+<span class="fc" id="L73">        return ResponseEntity.created(URI.create(PERCORSO + &quot;/&quot; + id)).body(new Ricevuta(id, periodo));</span>
     }
 
     /** Elenca le schede personali inviate dall'operatore autenticato. */
     @GetMapping(&quot;/mie&quot;)
     List&lt;SchedaSintesi&gt; mie(IdentitaAutenticata attore) {
-<span class="fc" id="L75">        return schede.elencoSchedeOperatore(attore);</span>
+<span class="fc" id="L79">        return schede.elencoSchedeOperatore(attore);</span>
     }
 
     /** Elenca per il Banco le schede ricevute nel periodo selezionato. */
     @GetMapping(&quot;/ricevute&quot;)
     List&lt;SchedaSintesi&gt; ricevute(IdentitaAutenticata attore, @RequestParam(required = false) Integer anno,
                                 @RequestParam(required = false) Integer trimestre) {
-<span class="fc" id="L82">        return schede.elencoSchedeRicevute(attore, periodo(anno, trimestre));</span>
+<span class="fc" id="L86">        return schede.elencoSchedeRicevute(attore, periodo(anno, trimestre));</span>
     }
 
     /** Riepiloga per il Banco le schede ricevute e i conteggi dichiarati per categoria. */
     @GetMapping(&quot;/ricevute/riepilogo&quot;)
     RiepilogoRicevute riepilogo(IdentitaAutenticata attore, @RequestParam(required = false) Integer anno,
                               @RequestParam(required = false) Integer trimestre) {
-<span class="fc" id="L89">        var riepilogo = schede.riepilogaSchede(attore, periodo(anno, trimestre));</span>
-<span class="fc" id="L90">        var totali = riepilogo.conteggi().entrySet().stream()</span>
-<span class="fc" id="L91">                .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, voce -&gt; voce.getValue().toString()));</span>
-<span class="fc" id="L92">        return new RiepilogoRicevute(riepilogo.schede(), totali);</span>
+<span class="fc" id="L93">        var riepilogo = schede.riepilogaSchede(attore, periodo(anno, trimestre));</span>
+<span class="fc" id="L94">        var totali = riepilogo.conteggi().entrySet().stream()</span>
+<span class="fc" id="L95">                .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, voce -&gt; voce.getValue().toString()));</span>
+<span class="fc" id="L96">        return new RiepilogoRicevute(riepilogo.schede(), totali);</span>
     }
 
     /** Restituisce la scheda al titolare o al Banco autorizzato. */
     @GetMapping(&quot;/{id}&quot;)
     SchedaOperatore dettaglio(IdentitaAutenticata attore, @PathVariable UUID id) {
-<span class="fc" id="L98">        return schede.consultaSchedaOperatore(attore, id);</span>
+<span class="fc" id="L102">        return schede.consultaSchedaOperatore(attore, id);</span>
     }
 
     /** Traduce i parametri di periodo in un riferimento valido, segnalando i campi da correggere. */
     private static Trimestre periodo(Integer anno, Integer trimestre) {
-<span class="fc" id="L103">        Map&lt;String, String&gt; errori = new LinkedHashMap&lt;&gt;();</span>
-<span class="fc bfc" id="L104" title="All 4 branches covered.">        if (anno == null || anno &lt; 1) {</span>
-<span class="fc" id="L105">            errori.put(&quot;anno&quot;, &quot;Indica un anno positivo&quot;);</span>
+<span class="fc" id="L107">        Map&lt;String, String&gt; errori = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L108" title="All 4 branches covered.">        if (anno == null || anno &lt; 1) {</span>
+<span class="fc" id="L109">            errori.put(&quot;anno&quot;, &quot;Indica un anno positivo&quot;);</span>
         }
-<span class="fc bfc" id="L107" title="All 6 branches covered.">        if (trimestre == null || trimestre &lt; 1 || trimestre &gt; 4) {</span>
-<span class="fc" id="L108">            errori.put(&quot;trimestre&quot;, &quot;Indica un trimestre da 1 a 4&quot;);</span>
+<span class="fc bfc" id="L111" title="All 6 branches covered.">        if (trimestre == null || trimestre &lt; 1 || trimestre &gt; 4) {</span>
+<span class="fc" id="L112">            errori.put(&quot;trimestre&quot;, &quot;Indica un trimestre da 1 a 4&quot;);</span>
         }
-<span class="fc bfc" id="L110" title="All 2 branches covered.">        if (!errori.isEmpty()) {</span>
-<span class="fc" id="L111">            throw new DatiSchedaNonValidiException(errori);</span>
+<span class="fc bfc" id="L114" title="All 2 branches covered.">        if (!errori.isEmpty()) {</span>
+<span class="fc" id="L115">            throw new DatiSchedaNonValidiException(errori);</span>
         }
-<span class="fc" id="L113">        return new Trimestre(anno, trimestre);</span>
+<span class="fc" id="L117">        return new Trimestre(anno, trimestre);</span>
     }
 
     /** Espone i soli messaggi controllati della validazione. */
     @ExceptionHandler(DatiSchedaNonValidiException.class)
     ResponseEntity&lt;Errore&gt; datiNonValidi(DatiSchedaNonValidiException ex) {
-<span class="fc" id="L119">        return errore(HttpStatus.BAD_REQUEST, &quot;Controlla i campi della scheda&quot;, ex.campi());</span>
+<span class="fc" id="L123">        return errore(HttpStatus.BAD_REQUEST, &quot;Controlla i campi della scheda&quot;, ex.campi());</span>
     }
 
     /** Segnala un parametro di URL malformato senza restituirne il valore. */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     ResponseEntity&lt;Errore&gt; parametroNonValido(MethodArgumentTypeMismatchException ex) {
-<span class="fc" id="L125">        return errore(HttpStatus.BAD_REQUEST, &quot;Controlla i parametri&quot;,</span>
-<span class="fc" id="L126">                Map.of(ex.getName(), &quot;Formato non valido&quot;));</span>
+<span class="fc" id="L129">        return errore(HttpStatus.BAD_REQUEST, &quot;Controlla i parametri&quot;,</span>
+<span class="fc" id="L130">                Map.of(ex.getName(), &quot;Formato non valido&quot;));</span>
     }
 
     /** Segnala un invio già registrato nel periodo, senza modificare la scheda salvata. */
     @ExceptionHandler(SchedaGiaInviataException.class)
     ResponseEntity&lt;Errore&gt; giaInviata() {
-<span class="fc" id="L132">        return errore(HttpStatus.CONFLICT, &quot;Esiste già una scheda inviata per questo trimestre&quot;, Map.of());</span>
+<span class="fc" id="L136">        return errore(HttpStatus.CONFLICT, &quot;Esiste già una scheda inviata per questo trimestre&quot;, Map.of());</span>
+    }
+
+    /** Segnala che il Banco non ha ancora pubblicato la configurazione di categorie per il trimestre. */
+    @ExceptionHandler(ConfigurazioneTrimestreAssenteException.class)
+    ResponseEntity&lt;Errore&gt; configurazioneAssente(ConfigurazioneTrimestreAssenteException ex) {
+<span class="nc" id="L142">        return errore(HttpStatus.CONFLICT, ex.getMessage(), Map.of());</span>
     }
 
     /** Segnala l'assenza della scheda richiesta. */
     @ExceptionHandler(NoSuchElementException.class)
     ResponseEntity&lt;Errore&gt; nonTrovata() {
-<span class="fc" id="L138">        return errore(HttpStatus.NOT_FOUND, &quot;Scheda non trovata&quot;, Map.of());</span>
+<span class="fc" id="L148">        return errore(HttpStatus.NOT_FOUND, &quot;Scheda non trovata&quot;, Map.of());</span>
     }
 
     private static ResponseEntity&lt;Errore&gt; errore(HttpStatus stato, String messaggio, Map&lt;String, String&gt; campi) {
-<span class="fc" id="L142">        return ResponseEntity.status(stato).body(new Errore(stato.name(), messaggio, campi));</span>
+<span class="fc" id="L152">        return ResponseEntity.status(stato).body(new Errore(stato.name(), messaggio, campi));</span>
     }
 
-    /** Metadati del tracciato applicabile per il periodo selezionato. */
-<span class="fc" id="L146">    record Modulo(Trimestre trimestre, String tracciato, String versione, List&lt;Campo&gt; campi) {}</span>
+    /** Metadati del tracciato e della configurazione di categorie applicabile per il periodo selezionato. */
+<span class="fc" id="L156">    record Modulo(</span>
+            Trimestre trimestre,
+            String tracciato,
+            String versione,
+            List&lt;Campo&gt; campi,
+            ConfigurazioneModulo configurazioneCategorie) {}
 
     /** Conferma del primo invio accettato. */
-<span class="fc" id="L149">    record Ricevuta(UUID id, Trimestre trimestre) {}</span>
+<span class="fc" id="L164">    record Ricevuta(UUID id, Trimestre trimestre) {}</span>
 
     /** Totali in stringhe decimali per preservarne la precisione anche nei client JavaScript. */
-<span class="fc" id="L152">    record RiepilogoRicevute(List&lt;SchedaSintesi&gt; schede, Map&lt;String, String&gt; conteggi) {}</span>
+<span class="fc" id="L167">    record RiepilogoRicevute(List&lt;SchedaSintesi&gt; schede, Map&lt;String, String&gt; conteggi) {}</span>
 
     /** Errore HTTP senza valori dichiarati dal compilatore. */
-<span class="fc" id="L155">    record Errore(String codice, String messaggio, Map&lt;String, String&gt; campi) {}</span>
+<span class="fc" id="L170">    record Errore(String codice, String messaggio, Map&lt;String, String&gt; campi) {}</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

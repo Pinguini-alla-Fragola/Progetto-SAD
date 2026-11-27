@@ -96,7 +96,7 @@ loadScripts(document, 'script');</script>
 </li>
 <li>
 <div id="class-summary">
-<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="class-summary-tab0" role="tab" aria-selected="true" aria-controls="class-summary.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary', 2)" class="active-table-tab">All Classes and Interfaces</button><button id="class-summary-tab1" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab1', 2)" class="table-tab">Interfaces</button><button id="class-summary-tab2" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab2', 2)" class="table-tab">Classes</button><button id="class-summary-tab4" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab4', 2)" class="table-tab">Record Classes</button><button id="class-summary-tab5" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab5', 2)" class="table-tab">Exception Classes</button></div>
+<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="class-summary-tab0" role="tab" aria-selected="true" aria-controls="class-summary.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary', 2)" class="active-table-tab">All Classes and Interfaces</button><button id="class-summary-tab1" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab1', 2)" class="table-tab">Interfaces</button><button id="class-summary-tab2" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab2', 2)" class="table-tab">Classes</button><button id="class-summary-tab3" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab3', 2)" class="table-tab">Enum Classes</button><button id="class-summary-tab4" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab4', 2)" class="table-tab">Record Classes</button><button id="class-summary-tab5" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab5', 2)" class="table-tab">Exception Classes</button></div>
 <div id="class-summary.tabpanel" role="tabpanel" aria-labelledby="class-summary-tab0">
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Class</div>
@@ -112,6 +112,32 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color class-summary class-summary-tab4"><a href="ArchivioSchedeRendicontabili.VersioneInviata.html" title="class in it.unina.picus.monitoraggio.interno.dominio">ArchivioSchedeRendicontabili.VersioneInviata</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab4">
 <div class="block">Dati di un invio accettato, proiettati per il riepilogo.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab1"><a href="CategorieSchedeRendicontabili.html" title="interface in it.unina.picus.monitoraggio.interno.dominio">CategorieSchedeRendicontabili</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab1">
+<div class="block">Porta di lettura per trimestre delle configurazioni di categoria rendicontabili
+della scheda personale TM-OP-01 (#181, #41).</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab1"><a href="ConfigurazioneTrimestre.html" title="interface in it.unina.picus.monitoraggio.interno.dominio">ConfigurazioneTrimestre</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab1">
+<div class="block">Configurazione delle categorie risolta per un singolo trimestre e tracciato (#181, #41).</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab4"><a href="ConfigurazioneTrimestre.LegacyProvvisoria.html" title="class in it.unina.picus.monitoraggio.interno.dominio">ConfigurazioneTrimestre.LegacyProvvisoria</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab4">
+<div class="block">Configurazione storica associata al tracciato provvisorio <code>v0.1</code> per i soli
+periodi già rendicontati prima della migrazione.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab4"><a href="ConfigurazioneTrimestre.NonConfigurata.html" title="class in it.unina.picus.monitoraggio.interno.dominio">ConfigurazioneTrimestre.NonConfigurata</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab4">
+<div class="block">Trimestre privo di associazione nella tabella delle configurazioni.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab4"><a href="ConfigurazioneTrimestre.Pubblicata.html" title="class in it.unina.picus.monitoraggio.interno.dominio">ConfigurazioneTrimestre.Pubblicata</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab4">
+<div class="block">Configurazione pubblicata e immutabile assegnata al trimestre.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab5"><a href="ConfigurazioneTrimestreAssenteException.html" title="class in it.unina.picus.monitoraggio.interno.dominio">ConfigurazioneTrimestreAssenteException</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab5">
+<div class="block">Segnala l'assenza di una configurazione pubblicata per un trimestre che la richiede.</div>
 </div>
 <div class="col-first odd-row-color class-summary class-summary-tab5"><a href="DatiSchedaNonValidiException.html" title="class in it.unina.picus.monitoraggio.interno.dominio">DatiSchedaNonValidiException</a></div>
 <div class="col-last odd-row-color class-summary class-summary-tab5">
@@ -129,6 +155,14 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color class-summary class-summary-tab5">
 <div class="block">Esito del primo invio se l'account ha già registrato una scheda nello stesso periodo.</div>
 </div>
+<div class="col-first odd-row-color class-summary class-summary-tab3"><a href="StatoVersioneCategorie.html" title="enum class in it.unina.picus.monitoraggio.interno.dominio">StatoVersioneCategorie</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab3">
+<div class="block">Stato del ciclo di vita di una versione di categorie per il monitoraggio.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab3"><a href="TracciatoMonitoraggio.html" title="enum class in it.unina.picus.monitoraggio.interno.dominio">TracciatoMonitoraggio</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab3">
+<div class="block">Tracciato di monitoraggio gestito con versioni immutabili per trimestre (#181, #41).</div>
+</div>
 <div class="col-first odd-row-color class-summary class-summary-tab2"><a href="TracciatoSchedaOperatore.html" title="class in it.unina.picus.monitoraggio.interno.dominio">TracciatoSchedaOperatore</a></div>
 <div class="col-last odd-row-color class-summary class-summary-tab2">
 <div class="block">Tracciato provvisorio di primo invio TM-OP-01.</div>
@@ -136,6 +170,14 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color class-summary class-summary-tab4"><a href="TracciatoSchedaOperatore.Campo.html" title="class in it.unina.picus.monitoraggio.interno.dominio">TracciatoSchedaOperatore.Campo</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab4">
 <div class="block">Campo del modulo compilabile.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab4"><a href="VersioneCategorie.html" title="class in it.unina.picus.monitoraggio.interno.dominio">VersioneCategorie</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab4">
+<div class="block">Versione delle categorie di un tracciato di monitoraggio (#41, #181).</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab4"><a href="VoceCategoriaVersione.html" title="class in it.unina.picus.monitoraggio.interno.dominio">VoceCategoriaVersione</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab4">
+<div class="block">Singola voce di una versione di categorie del monitoraggio (#41, #181).</div>
 </div>
 </div>
 </div>

@@ -60,7 +60,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-summary" tabindex="0">Method Summary</a></li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
-<li><a href="#registra(it.unina.picus.monitoraggio.api.MonitoraggioApi.SchedaOperatore)" tabindex="0">registra(MonitoraggioApi.SchedaOperatore)</a></li>
+<li><a href="#registra(it.unina.picus.monitoraggio.api.MonitoraggioApi.SchedaOperatore,java.util.UUID)" tabindex="0">registra(MonitoraggioApi.SchedaOperatore, UUID)</a></li>
 <li><a href="#cerca(java.util.UUID,java.util.function.Consumer)" tabindex="0">cerca(UUID, Consumer)</a></li>
 <li><a href="#perOperatore(java.util.UUID)" tabindex="0">perOperatore(UUID)</a></li>
 <li><a href="#perTrimestre(it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre)" tabindex="0">perTrimestre(MonitoraggioApi.Trimestre)</a></li>
@@ -114,9 +114,10 @@ loadScripts(document, 'script');</script>
 <div class="block">Proietta i riferimenti alle schede inviate nel periodo.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#registra(it.unina.picus.monitoraggio.api.MonitoraggioApi.SchedaOperatore)" class="member-name-link">registra</a><wbr>(<a href="../../api/MonitoraggioApi.SchedaOperatore.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.SchedaOperatore</a>&nbsp;scheda)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#registra(it.unina.picus.monitoraggio.api.MonitoraggioApi.SchedaOperatore,java.util.UUID)" class="member-name-link">registra</a><wbr>(<a href="../../api/MonitoraggioApi.SchedaOperatore.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.SchedaOperatore</a>&nbsp;scheda,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;versioneCategorieId)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Registra la scheda e i suoi conteggi nella stessa transazione.</div>
+<div class="block">Registra la scheda, i conteggi e il riferimento alla versione di categorie usata all'accettazione.</div>
 </div>
 </div>
 </div>
@@ -133,14 +134,16 @@ loadScripts(document, 'script');</script>
 <h2>Method Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="registra(it.unina.picus.monitoraggio.api.MonitoraggioApi.SchedaOperatore)">
+<section class="detail" id="registra(it.unina.picus.monitoraggio.api.MonitoraggioApi.SchedaOperatore,java.util.UUID)">
 <h3>registra</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">registra</span><wbr><span class="parameters">(<a href="../../api/MonitoraggioApi.SchedaOperatore.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.SchedaOperatore</a>&nbsp;scheda)</span></div>
-<div class="block">Registra la scheda e i suoi conteggi nella stessa transazione.</div>
+<div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">registra</span><wbr><span class="parameters">(<a href="../../api/MonitoraggioApi.SchedaOperatore.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.SchedaOperatore</a>&nbsp;scheda,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;versioneCategorieId)</span></div>
+<div class="block">Registra la scheda, i conteggi e il riferimento alla versione di categorie usata all'accettazione.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>scheda</code> - invio già validato</dd>
+<dd><code>versioneCategorieId</code> - identificativo della configurazione di categorie applicata al periodo</dd>
 <dt>Throws:</dt>
 <dd><code><a href="SchedaGiaInviataException.html" title="class in it.unina.picus.monitoraggio.interno.dominio">SchedaGiaInviataException</a></code> - se il titolare ha già inviato nello stesso periodo</dd>
 </dl>

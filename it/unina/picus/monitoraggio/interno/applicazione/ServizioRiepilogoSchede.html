@@ -61,7 +61,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-summary" tabindex="0">Method Summary</a></li>
 <li><a href="#constructor-detail" tabindex="0">Constructor Details</a>
 <ol class="toc-list">
-<li><a href="#%3Cinit%3E(it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeRendicontabili)" tabindex="0">ServizioRiepilogoSchede(ArchivioSchedeRendicontabili)</a></li>
+<li><a href="#%3Cinit%3E(it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeRendicontabili,it.unina.picus.monitoraggio.interno.dominio.CategorieSchedeRendicontabili)" tabindex="0">ServizioRiepilogoSchede(ArchivioSchedeRendicontabili, CategorieSchedeRendicontabili)</a></li>
 </ol>
 </li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
@@ -84,7 +84,9 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="type-signature"><span class="modifiers">public final class </span><span class="element-name type-name-label">ServizioRiepilogoSchede</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">Caso d'uso di riepilogo trimestrale delle schede personali per il Banco (#181).</div>
+<div class="block">Caso d'uso di riepilogo trimestrale delle schede personali per il Banco (#181, #57, #41).
+Distingue la configurazione pubblicata del singolo trimestre, l'associazione storica a
+<code>v0.1</code> dei periodi già rendicontati e il trimestre privo di pubblicazione.</div>
 </div>
 </section>
 <section class="summary">
@@ -97,9 +99,10 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeRendicontabili)" class="member-name-link">ServizioRiepilogoSchede</a><wbr>(<a href="../dominio/ArchivioSchedeRendicontabili.html" title="interface in it.unina.picus.monitoraggio.interno.dominio">ArchivioSchedeRendicontabili</a>&nbsp;archivio)</code></div>
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeRendicontabili,it.unina.picus.monitoraggio.interno.dominio.CategorieSchedeRendicontabili)" class="member-name-link">ServizioRiepilogoSchede</a><wbr>(<a href="../dominio/ArchivioSchedeRendicontabili.html" title="interface in it.unina.picus.monitoraggio.interno.dominio">ArchivioSchedeRendicontabili</a>&nbsp;archivio,
+ <a href="../dominio/CategorieSchedeRendicontabili.html" title="interface in it.unina.picus.monitoraggio.interno.dominio">CategorieSchedeRendicontabili</a>&nbsp;categorie)</code></div>
 <div class="col-last even-row-color">
-<div class="block">Crea il caso d'uso a partire dall'archivio di lettura delle schede.</div>
+<div class="block">Crea il caso d'uso a partire dall'archivio delle schede e dalla fonte delle configurazioni per trimestre.</div>
 </div>
 </div>
 </section>
@@ -119,8 +122,20 @@ loadScripts(document, 'script');</script>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#riepilogaSchede(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre)" class="member-name-link">riepilogaSchede</a><wbr>(<a href="../../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  <a href="../../api/MonitoraggioApi.Trimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.Trimestre</a>&nbsp;trimestre)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Usa l'ultima versione accettata per operatore e somma i conteggi dichiarati per codice
-di categoria ammesso dal tracciato dell'invio.</div>
+<div class="block">Usa l'ultima versione accettata per operatore e somma i conteggi dichiarati secondo la
+configurazione risolta per il trimestre richiesto:
+
+  <a href="../dominio/ConfigurazioneTrimestre.Pubblicata.html" title="class in it.unina.picus.monitoraggio.interno.dominio"><code>ConfigurazioneTrimestre.Pubblicata</code></a>: ammette esclusivamente i codici della
+  versione immutabile pubblicata per quel trimestre; modifiche o disattivazioni pubblicate
+  per trimestri successivi non alterano questo riepilogo;
+  <a href="../dominio/ConfigurazioneTrimestre.LegacyProvvisoria.html" title="class in it.unina.picus.monitoraggio.interno.dominio"><code>ConfigurazioneTrimestre.LegacyProvvisoria</code></a>: periodo già rendicontato prima
+  della migrazione e associato esplicitamente al tracciato provvisorio <code>v0.1</code>, che
+  ammette i codici sintatticamente validi;
+  <a href="../dominio/ConfigurazioneTrimestre.NonConfigurata.html" title="class in it.unina.picus.monitoraggio.interno.dominio"><code>ConfigurazioneTrimestre.NonConfigurata</code></a>: se il Banco ha già pubblicato almeno
+  una versione per il tracciato non aggrega voci non pubblicate; finché nessuna versione è
+  stata ancora pubblicata resta attivo in via transitoria il filtro sintattico <code>v0.1</code>
+  senza registrare nuove associazioni legacy.
+</div>
 </div>
 </div>
 </div>
@@ -140,14 +155,16 @@ di categoria ammesso dal tracciato dell'invio.</div>
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeRendicontabili)">
+<section class="detail" id="&lt;init&gt;(it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeRendicontabili,it.unina.picus.monitoraggio.interno.dominio.CategorieSchedeRendicontabili)">
 <h3>ServizioRiepilogoSchede</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">ServizioRiepilogoSchede</span><wbr><span class="parameters">(<a href="../dominio/ArchivioSchedeRendicontabili.html" title="interface in it.unina.picus.monitoraggio.interno.dominio">ArchivioSchedeRendicontabili</a>&nbsp;archivio)</span></div>
-<div class="block">Crea il caso d'uso a partire dall'archivio di lettura delle schede.</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">ServizioRiepilogoSchede</span><wbr><span class="parameters">(<a href="../dominio/ArchivioSchedeRendicontabili.html" title="interface in it.unina.picus.monitoraggio.interno.dominio">ArchivioSchedeRendicontabili</a>&nbsp;archivio,
+ <a href="../dominio/CategorieSchedeRendicontabili.html" title="interface in it.unina.picus.monitoraggio.interno.dominio">CategorieSchedeRendicontabili</a>&nbsp;categorie)</span></div>
+<div class="block">Crea il caso d'uso a partire dall'archivio delle schede e dalla fonte delle configurazioni per trimestre.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>archivio</code> - sorgente delle versioni inviate e accettate</dd>
+<dd><code>categorie</code> - fonte autorizzata delle versioni di categorie per trimestre (TM-OP-01)</dd>
 </dl>
 </div>
 </section>
@@ -166,10 +183,20 @@ di categoria ammesso dal tracciato dell'invio.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../../api/MonitoraggioApi.RiepilogoTrimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.RiepilogoTrimestre</a></span>&nbsp;<span class="element-name">riepilogaSchede</span><wbr><span class="parameters">(<a href="../../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  <a href="../../api/MonitoraggioApi.Trimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.Trimestre</a>&nbsp;trimestre)</span></div>
-<div class="block">Usa l'ultima versione accettata per operatore e somma i conteggi dichiarati per codice
-di categoria ammesso dal tracciato dell'invio. Le categorie sovrapponibili restano
-distinte e una correzione sostituisce l'intero invio precedente. Uno zero dichiarato
-compare fra i totali, mentre una categoria mai dichiarata è assente.</div>
+<div class="block">Usa l'ultima versione accettata per operatore e somma i conteggi dichiarati secondo la
+configurazione risolta per il trimestre richiesto:
+<ul>
+  <li><a href="../dominio/ConfigurazioneTrimestre.Pubblicata.html" title="class in it.unina.picus.monitoraggio.interno.dominio"><code>ConfigurazioneTrimestre.Pubblicata</code></a>: ammette esclusivamente i codici della
+  versione immutabile pubblicata per quel trimestre; modifiche o disattivazioni pubblicate
+  per trimestri successivi non alterano questo riepilogo;</li>
+  <li><a href="../dominio/ConfigurazioneTrimestre.LegacyProvvisoria.html" title="class in it.unina.picus.monitoraggio.interno.dominio"><code>ConfigurazioneTrimestre.LegacyProvvisoria</code></a>: periodo già rendicontato prima
+  della migrazione e associato esplicitamente al tracciato provvisorio <code>v0.1</code>, che
+  ammette i codici sintatticamente validi;</li>
+  <li><a href="../dominio/ConfigurazioneTrimestre.NonConfigurata.html" title="class in it.unina.picus.monitoraggio.interno.dominio"><code>ConfigurazioneTrimestre.NonConfigurata</code></a>: se il Banco ha già pubblicato almeno
+  una versione per il tracciato non aggrega voci non pubblicate; finché nessuna versione è
+  stata ancora pubblicata resta attivo in via transitoria il filtro sintattico <code>v0.1</code>
+  senza registrare nuove associazioni legacy.</li>
+</ul></div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>attore</code> - identità verificata del Banco</dd>

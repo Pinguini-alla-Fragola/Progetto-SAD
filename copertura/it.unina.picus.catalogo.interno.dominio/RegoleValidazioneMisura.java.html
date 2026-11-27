@@ -57,27 +57,27 @@ public final class RegoleValidazioneMisura {
 <span class="pc bpc" id="L57" title="1 of 2 branches missed.">        String codice = validaCampo(dati == null ? null : dati.codice(), SPEC_CODICE, errori);</span>
 <span class="pc bpc" id="L58" title="1 of 2 branches missed.">        String nome = validaCampo(dati == null ? null : dati.nome(), SPEC_NOME, errori);</span>
 <span class="pc bpc" id="L59" title="1 of 2 branches missed.">        String descrizione = validaCampo(dati == null ? null : dati.descrizione(), SPEC_DESCRIZIONE, errori);</span>
-<span class="pc bpc" id="L60" title="1 of 2 branches missed.">        if (!errori.isEmpty()) {</span>
-<span class="nc" id="L61">            throw new DatiMisuraNonValidiException(errori);</span>
+<span class="fc bfc" id="L60" title="All 2 branches covered.">        if (!errori.isEmpty()) {</span>
+<span class="fc" id="L61">            throw new DatiMisuraNonValidiException(errori);</span>
         }
 <span class="fc" id="L63">        return new DatiMisura(codice, nome, descrizione, dati.erogabileADistanza());</span>
     }
 
     private static String validaCampo(String valore, SpecificaCampo specifica, Map&lt;String, String&gt; errori) {
-<span class="pc bpc" id="L67" title="1 of 2 branches missed.">        String pulito = valore == null ? &quot;&quot; : valore.strip();</span>
-<span class="pc bpc" id="L68" title="1 of 2 branches missed.">        if (pulito.isEmpty()</span>
-<span class="pc bpc" id="L69" title="1 of 2 branches missed.">                || pulito.length() &gt; specifica.lunghezzaMassima()</span>
-<span class="pc bpc" id="L70" title="1 of 2 branches missed.">                || pulito.codePoints().anyMatch(c -&gt; controlloNonAmmesso(c, specifica.consentiFormattazione()))) {</span>
-<span class="nc" id="L71">            errori.put(specifica.nomeCampo(), specifica.messaggioErrore());</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">        String pulito = valore == null ? &quot;&quot; : valore.strip();</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        if (pulito.isEmpty()</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">                || pulito.length() &gt; specifica.lunghezzaMassima()</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">                || pulito.codePoints().anyMatch(c -&gt; controlloNonAmmesso(c, specifica.consentiFormattazione()))) {</span>
+<span class="fc" id="L71">            errori.put(specifica.nomeCampo(), specifica.messaggioErrore());</span>
         }
 <span class="fc" id="L73">        return pulito;</span>
     }
 
     private static boolean controlloNonAmmesso(int codePoint, boolean consentiFormattazione) {
-<span class="pc bpc" id="L77" title="1 of 2 branches missed.">        if (!Character.isISOControl(codePoint)) {</span>
+<span class="fc bfc" id="L77" title="All 2 branches covered.">        if (!Character.isISOControl(codePoint)) {</span>
 <span class="fc" id="L78">            return false;</span>
         }
-<span class="nc bnc" id="L80" title="All 8 branches missed.">        return !consentiFormattazione || (codePoint != '\n' &amp;&amp; codePoint != '\r' &amp;&amp; codePoint != '\t');</span>
+<span class="pc bpc" id="L80" title="5 of 8 branches missed.">        return !consentiFormattazione || (codePoint != '\n' &amp;&amp; codePoint != '\r' &amp;&amp; codePoint != '\t');</span>
     }
 
     /** Specifica parametrica di validazione per un singolo campo testuale della misura. */

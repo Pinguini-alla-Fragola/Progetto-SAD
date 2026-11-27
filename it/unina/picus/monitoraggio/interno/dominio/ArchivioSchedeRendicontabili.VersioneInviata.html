@@ -62,7 +62,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-summary" tabindex="0">Method Summary</a></li>
 <li><a href="#constructor-detail" tabindex="0">Constructor Details</a>
 <ol class="toc-list">
-<li><a href="#%3Cinit%3E(it.unina.picus.monitoraggio.api.MonitoraggioApi.SchedaSintesi,long,java.util.Map,java.util.Set)" tabindex="0">VersioneInviata(MonitoraggioApi.SchedaSintesi, long, Map, Set)</a></li>
+<li><a href="#%3Cinit%3E(it.unina.picus.monitoraggio.api.MonitoraggioApi.SchedaSintesi,long,java.util.Map)" tabindex="0">VersioneInviata(MonitoraggioApi.SchedaSintesi, long, Map)</a></li>
 </ol>
 </li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
@@ -73,7 +73,6 @@ loadScripts(document, 'script');</script>
 <li><a href="#sintesi()" tabindex="0">sintesi()</a></li>
 <li><a href="#numeroVersione()" tabindex="0">numeroVersione()</a></li>
 <li><a href="#conteggiDichiarati()" tabindex="0">conteggiDichiarati()</a></li>
-<li><a href="#categorieTracciato()" tabindex="0">categorieTracciato()</a></li>
 </ol>
 </li>
 </ol>
@@ -96,10 +95,9 @@ loadScripts(document, 'script');</script>
                versione accettata rappresentata, anche in caso di correzione</dd>
 <dd><code><span id="param-numeroVersione">numeroVersione</span></code> - progressivo positivo e univoco per operatore e trimestre, crescente
                       a ogni correzione accettata</dd>
-<dd><code><span id="param-conteggiDichiarati">conteggiDichiarati</span></code> - valori non negativi dichiarati per codice di categoria ammesso
-                         dal tracciato, incluso lo zero</dd>
-<dd><code><span id="param-categorieTracciato">categorieTracciato</span></code> - codici stabili delle categorie di conteggio ammesse dal tracciato
-                           applicato all'invio</dd>
+<dd><code><span id="param-conteggiDichiarati">conteggiDichiarati</span></code> - valori non negativi dichiarati nell'invio per codice di categoria
+                         sintatticamente valido, incluso lo zero. La selezione delle categorie
+                         configurate dal Banco avviene nel caso d'uso di riepilogo</dd>
 </dl>
 <dl class="notes">
 <dt>Enclosing interface:</dt>
@@ -107,7 +105,7 @@ loadScripts(document, 'script');</script>
 </dl>
 <hr>
 <div class="horizontal-scroll">
-<div class="type-signature"><span class="modifiers">public static record </span><span class="element-name type-name-label">ArchivioSchedeRendicontabili.VersioneInviata</span>(<a href="../../api/MonitoraggioApi.SchedaSintesi.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.SchedaSintesi</a>&nbsp;sintesi, long&nbsp;numeroVersione, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Long.html" title="class or interface in java.lang" class="external-link">Long</a>&gt;&nbsp;conteggiDichiarati, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html" title="class or interface in java.util" class="external-link">Set</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;categorieTracciato)
+<div class="type-signature"><span class="modifiers">public static record </span><span class="element-name type-name-label">ArchivioSchedeRendicontabili.VersioneInviata</span>(<a href="../../api/MonitoraggioApi.SchedaSintesi.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.SchedaSintesi</a>&nbsp;sintesi, long&nbsp;numeroVersione, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Long.html" title="class or interface in java.lang" class="external-link">Long</a>&gt;&nbsp;conteggiDichiarati)
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Record.html" title="class or interface in java.lang" class="external-link">Record</a></span></div>
 <div class="block">Dati di un invio accettato, proiettati per il riepilogo.</div>
 </div>
@@ -122,12 +120,11 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(it.unina.picus.monitoraggio.api.MonitoraggioApi.SchedaSintesi,long,java.util.Map,java.util.Set)" class="member-name-link">VersioneInviata</a><wbr>(<a href="../../api/MonitoraggioApi.SchedaSintesi.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.SchedaSintesi</a>&nbsp;sintesi,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(it.unina.picus.monitoraggio.api.MonitoraggioApi.SchedaSintesi,long,java.util.Map)" class="member-name-link">VersioneInviata</a><wbr>(<a href="../../api/MonitoraggioApi.SchedaSintesi.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.SchedaSintesi</a>&nbsp;sintesi,
  long&nbsp;numeroVersione,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Long.html" title="class or interface in java.lang" class="external-link">Long</a>&gt;&nbsp;conteggiDichiarati,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html" title="class or interface in java.util" class="external-link">Set</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;categorieTracciato)</code></div>
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Long.html" title="class or interface in java.lang" class="external-link">Long</a>&gt;&nbsp;conteggiDichiarati)</code></div>
 <div class="col-last even-row-color">
-<div class="block">Valida la proiezione e acquisisce copie immutabili dei conteggi e delle categorie.</div>
+<div class="block">Valida la proiezione e acquisisce una copia immutabile dei conteggi dichiarati.</div>
 </div>
 </div>
 </section>
@@ -143,39 +140,34 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html" title="class or interface in java.util" class="external-link">Set</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#categorieTracciato()" class="member-name-link">categorieTracciato</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Long.html" title="class or interface in java.lang" class="external-link">Long</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#conteggiDichiarati()" class="member-name-link">conteggiDichiarati</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the value of the <a href="#param-categorieTracciato"><code>categorieTracciato</code></a> record component.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Long.html" title="class or interface in java.lang" class="external-link">Long</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#conteggiDichiarati()" class="member-name-link">conteggiDichiarati</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the value of the <a href="#param-conteggiDichiarati"><code>conteggiDichiarati</code></a> record component.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#equals(java.lang.Object)" class="member-name-link">equals</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;o)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#equals(java.lang.Object)" class="member-name-link">equals</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;o)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Indicates whether some other object is "equal to" this one.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final int</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hashCode()" class="member-name-link">hashCode</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final int</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hashCode()" class="member-name-link">hashCode</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns a hash code value for this object.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>long</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#numeroVersione()" class="member-name-link">numeroVersione</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>long</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#numeroVersione()" class="member-name-link">numeroVersione</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the value of the <a href="#param-numeroVersione"><code>numeroVersione</code></a> record component.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../api/MonitoraggioApi.SchedaSintesi.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.SchedaSintesi</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#sintesi()" class="member-name-link">sintesi</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../api/MonitoraggioApi.SchedaSintesi.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.SchedaSintesi</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#sintesi()" class="member-name-link">sintesi</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the value of the <a href="#param-sintesi"><code>sintesi</code></a> record component.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#toString()" class="member-name-link">toString</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#toString()" class="member-name-link">toString</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns a string representation of this record class.</div>
 </div>
 </div>
@@ -196,24 +188,22 @@ loadScripts(document, 'script');</script>
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(it.unina.picus.monitoraggio.api.MonitoraggioApi.SchedaSintesi,long,java.util.Map,java.util.Set)">
+<section class="detail" id="&lt;init&gt;(it.unina.picus.monitoraggio.api.MonitoraggioApi.SchedaSintesi,long,java.util.Map)">
 <h3>VersioneInviata</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">VersioneInviata</span><wbr><span class="parameters">(<a href="../../api/MonitoraggioApi.SchedaSintesi.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.SchedaSintesi</a>&nbsp;sintesi,
  long&nbsp;numeroVersione,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Long.html" title="class or interface in java.lang" class="external-link">Long</a>&gt;&nbsp;conteggiDichiarati,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html" title="class or interface in java.util" class="external-link">Set</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;&nbsp;categorieTracciato)</span></div>
-<div class="block">Valida la proiezione e acquisisce copie immutabili dei conteggi e delle categorie.</div>
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Long.html" title="class or interface in java.lang" class="external-link">Long</a>&gt;&nbsp;conteggiDichiarati)</span></div>
+<div class="block">Valida la proiezione e acquisisce una copia immutabile dei conteggi dichiarati.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>sintesi</code> - riferimento completo alla scheda e all'istante di invio della versione</dd>
 <dd><code>numeroVersione</code> - progressivo positivo della versione accettata</dd>
 <dd><code>conteggiDichiarati</code> - valori dichiarati per codice di categoria</dd>
-<dd><code>categorieTracciato</code> - categorie di conteggio ammesse dal tracciato dell'invio</dd>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/NullPointerException.html" title="class or interface in java.lang" class="external-link">NullPointerException</a></code> - se un dato richiesto è mancante</dd>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - se il progressivo non è positivo, un conteggio è
-                                 negativo o una categoria dichiarata è fuori tracciato</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - se il progressivo non è positivo, un codice è malformato
+                                 o un conteggio è negativo</dd>
 </dl>
 </div>
 </section>
@@ -308,19 +298,6 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>the value of the <a href="#param-conteggiDichiarati"><code>conteggiDichiarati</code></a> record component</dd>
-</dl>
-</div>
-</section>
-</li>
-<li>
-<section class="detail" id="categorieTracciato()">
-<h3>categorieTracciato</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html" title="class or interface in java.util" class="external-link">Set</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</span>&nbsp;<span class="element-name">categorieTracciato</span>()</div>
-<div class="block">Returns the value of the <a href="#param-categorieTracciato"><code>categorieTracciato</code></a> record component.</div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd>the value of the <a href="#param-categorieTracciato"><code>categorieTracciato</code></a> record component</dd>
 </dl>
 </div>
 </section>

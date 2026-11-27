@@ -264,7 +264,11 @@ assente, mentre uno zero dichiarato è un valore. Le categorie sovrapponibili re
  <a href="MonitoraggioApi.Trimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.Trimestre</a>&nbsp;trimestre,
  <a href="MonitoraggioApi.DatiSchedaOperatore.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.DatiSchedaOperatore</a>&nbsp;dati)</span></div>
 <div class="block">Registra il primo invio di un trimestre concluso a nome dell'operatore autenticato.
-L'invio è consentito dal primo giorno del trimestre successivo nel fuso <code>Europe/Rome</code>.</div>
+L'invio è consentito dal primo giorno del trimestre successivo nel fuso <code>Europe/Rome</code>
+e valida i conteggi contro la configurazione pubblicata per il trimestre (preservando i
+periodi già rendicontati con <code>v0.1</code> prima della migrazione e rifiutando i trimestri
+privi di pubblicazione una volta avviata la pubblicazione delle versioni del tracciato,
+senza creare nuove associazioni <code>v0.1</code>).</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="SchedeOperatoreApi.html#inviaSchedaOperatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,it.unina.picus.monitoraggio.api.MonitoraggioApi.DatiSchedaOperatore)">inviaSchedaOperatore</a></code>&nbsp;in interface&nbsp;<code><a href="SchedeOperatoreApi.html" title="interface in it.unina.picus.monitoraggio.api">SchedeOperatoreApi</a></code></dd>
@@ -321,8 +325,17 @@ L'invio è consentito dal primo giorno del trimestre successivo nel fuso <code>E
 <div class="member-signature"><span class="return-type"><a href="MonitoraggioApi.RiepilogoTrimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.RiepilogoTrimestre</a></span>&nbsp;<span class="element-name">riepilogaSchede</span><wbr><span class="parameters">(<a href="../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  <a href="MonitoraggioApi.Trimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.Trimestre</a>&nbsp;trimestre)</span></div>
 <div class="block">Riepiloga per il Banco le schede ricevute nel trimestre selezionato. Le voci aggregate
-rappresentano conteggi dichiarati e conservano distinte le categorie sovrapponibili.
-Per ogni operatore si usa l'ultima versione accettata nel periodo.</div>
+rispettano la configurazione associata al trimestre stesso: una versione immutabile pubblicata
+dal Banco per il tracciato TM-OP-01 ammette esclusivamente i codici pubblicati per quel
+periodo (modifiche o disattivazioni pubblicate per trimestri successivi non alterano questo
+riepilogo), l'associazione storica <code>v0.1</code> riservata ai periodi già rendicontati prima
+della migrazione conserva i codici sintatticamente validi, mentre quando esiste almeno una
+pubblicazione per il tracciato un trimestre non configurato non aggrega voci non pubblicate
+(finché nessuna versione è ancora pubblicata resta attivo in via transitoria il tracciato
+provvisorio <code>v0.1</code>). Le categorie sovrapponibili restano distinte. Uno zero dichiarato
+su una voce ammessa è incluso nei totali, mentre una voce mai dichiarata o non ammessa è
+assente. Le schede ricevute restano nell'elenco. Per ogni operatore si usa l'ultima versione
+accettata nel periodo.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>attore</code> - identità verificata del Banco autorizzato alla rendicontazione</dd>

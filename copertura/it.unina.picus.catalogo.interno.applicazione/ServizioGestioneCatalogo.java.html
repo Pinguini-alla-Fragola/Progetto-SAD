@@ -45,8 +45,8 @@ public class ServizioGestioneCatalogo {
      * @throws it.unina.picus.shared.AccessoNegatoException se l'attore non è il Banco
      */
     public List&lt;Misura&gt; elencoMisure(IdentitaAutenticata attore) {
-<span class="nc" id="L48">        RegoleAccessoCatalogo.verificaBanco(attore);</span>
-<span class="nc" id="L49">        return misure.trovaTutte().stream().map(MisuraDiCatalogo::aDto).toList();</span>
+<span class="fc" id="L48">        RegoleAccessoCatalogo.verificaBanco(attore);</span>
+<span class="fc" id="L49">        return misure.trovaTutte().stream().map(MisuraDiCatalogo::aDto).toList();</span>
     }
 
     /**
@@ -63,8 +63,8 @@ public class ServizioGestioneCatalogo {
     public Misura creaMisura(IdentitaAutenticata attore, DatiMisura dati) {
 <span class="fc" id="L64">        RegoleAccessoCatalogo.verificaBanco(attore);</span>
 <span class="fc" id="L65">        MisuraDiCatalogo nuova = MisuraDiCatalogo.nuova(dati);</span>
-<span class="pc bpc" id="L66" title="1 of 2 branches missed.">        if (misure.esisteCodice(nuova.codice())) {</span>
-<span class="nc" id="L67">            throw new CodiceMisuraDuplicatoException();</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">        if (misure.esisteCodice(nuova.codice())) {</span>
+<span class="fc" id="L67">            throw new CodiceMisuraDuplicatoException();</span>
         }
 <span class="fc" id="L69">        return misure.salvaNuova(nuova)</span>
 <span class="fc" id="L70">                .orElseThrow(CodiceMisuraDuplicatoException::new)</span>
@@ -88,8 +88,8 @@ public class ServizioGestioneCatalogo {
     public Misura aggiornaMisura(IdentitaAutenticata attore, long misuraId, DatiMisura dati, boolean attiva) {
 <span class="fc" id="L89">        MisuraDiCatalogo esistente = misuraInScrittura(attore, misuraId);</span>
 <span class="fc" id="L90">        MisuraDiCatalogo aggiornata = esistente.aggiorna(dati, attiva);</span>
-<span class="pc bpc" id="L91" title="1 of 2 branches missed.">        if (misure.esisteCodiceSuAltraMisura(aggiornata.codice(), misuraId)) {</span>
-<span class="nc" id="L92">            throw new CodiceMisuraDuplicatoException();</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        if (misure.esisteCodiceSuAltraMisura(aggiornata.codice(), misuraId)) {</span>
+<span class="fc" id="L92">            throw new CodiceMisuraDuplicatoException();</span>
         }
 <span class="fc" id="L94">        return misure.aggiorna(aggiornata)</span>
 <span class="fc" id="L95">                .orElseThrow(CodiceMisuraDuplicatoException::new)</span>
@@ -112,8 +112,8 @@ public class ServizioGestioneCatalogo {
     @Transactional
     public Misura disattivaMisura(IdentitaAutenticata attore, long misuraId) {
 <span class="fc" id="L114">        MisuraDiCatalogo esistente = misuraInScrittura(attore, misuraId);</span>
-<span class="pc bpc" id="L115" title="1 of 2 branches missed.">        if (!esistente.attiva()) {</span>
-<span class="nc" id="L116">            return esistente.aDto();</span>
+<span class="fc bfc" id="L115" title="All 2 branches covered.">        if (!esistente.attiva()) {</span>
+<span class="fc" id="L116">            return esistente.aDto();</span>
         }
 <span class="fc" id="L118">        return misure.aggiorna(esistente.disattiva())</span>
 <span class="pc" id="L119">                .orElseThrow(() -&gt; new IllegalStateException(</span>

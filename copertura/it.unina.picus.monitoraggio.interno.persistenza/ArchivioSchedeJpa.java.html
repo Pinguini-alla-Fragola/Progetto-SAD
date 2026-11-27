@@ -44,8 +44,8 @@ public class ArchivioSchedeJpa implements ArchivioSchedeOperatore, ArchivioSched
 
     /** {@inheritDoc} */
     @Override
-    public void registra(SchedaOperatore scheda) {
-<span class="fc" id="L48">        entita.persist(new SchedaOperatoreJpa(scheda));</span>
+    public void registra(SchedaOperatore scheda, UUID versioneCategorieId) {
+<span class="fc" id="L48">        entita.persist(new SchedaOperatoreJpa(scheda, versioneCategorieId));</span>
         try {
 <span class="fc" id="L50">            entita.flush();</span>
 <span class="fc" id="L51">        } catch (ConstraintViolationException ex) {</span>

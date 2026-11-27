@@ -35,6 +35,8 @@ public class SchedaOperatoreJpa {
     private Instant inviataIl;
     @Column(length = 16)
     private String versioneTracciato;
+    @Column(name = &quot;versione_categorie_id&quot;)
+    private UUID versioneCategorieId;
     private String nome;
     private String cognome;
     private String luogoNascita;
@@ -51,60 +53,61 @@ public class SchedaOperatoreJpa {
     private BigDecimal costoOrarioLordo;
     private int scalaCostoOrarioLordo;
 
-<span class="fc" id="L54">    @ElementCollection</span>
+<span class="fc" id="L56">    @ElementCollection</span>
     @CollectionTable(name = &quot;monitoraggio_conteggi_scheda&quot;, joinColumns = @JoinColumn(name = &quot;scheda_id&quot;))
     @MapKeyColumn(name = &quot;categoria&quot;, length = 64)
     @Column(name = &quot;valore&quot;, nullable = false)
     private Map&lt;String, Long&gt; conteggi = new HashMap&lt;&gt;();
 
     /** Costruttore riservato a JPA. */
-<span class="fc" id="L61">    protected SchedaOperatoreJpa() {}</span>
+<span class="fc" id="L63">    protected SchedaOperatoreJpa() {}</span>
 
     /** Converte l'invio già validato in un'entità da inserire. */
-<span class="fc" id="L64">    SchedaOperatoreJpa(SchedaOperatore scheda) {</span>
-<span class="fc" id="L65">        SchedaSintesi sintesi = scheda.sintesi();</span>
-<span class="fc" id="L66">        DatiSchedaOperatore dati = scheda.dati();</span>
-<span class="fc" id="L67">        id = sintesi.id();</span>
-<span class="fc" id="L68">        operatoreId = sintesi.operatoreId();</span>
-<span class="fc" id="L69">        anno = sintesi.trimestre().anno();</span>
-<span class="fc" id="L70">        trimestre = sintesi.trimestre().numero();</span>
-<span class="fc" id="L71">        inviataIl = sintesi.inviataIl();</span>
-<span class="fc" id="L72">        versioneTracciato = TracciatoSchedaOperatore.VERSIONE;</span>
-<span class="fc" id="L73">        nome = dati.nome();</span>
-<span class="fc" id="L74">        cognome = dati.cognome();</span>
-<span class="fc" id="L75">        luogoNascita = dati.luogoNascita();</span>
-<span class="fc" id="L76">        dataNascita = dati.dataNascita();</span>
-<span class="fc" id="L77">        codiceFiscale = dati.codiceFiscale();</span>
-<span class="fc" id="L78">        qualifica = dati.qualifica();</span>
-<span class="fc" id="L79">        tipologiaContratto = dati.tipologiaContratto();</span>
-<span class="fc" id="L80">        areaLivello = dati.areaLivello();</span>
-<span class="fc" id="L81">        ore = dati.ore();</span>
-<span class="fc" id="L82">        scalaOre = ore.scale();</span>
-<span class="fc" id="L83">        costoOrarioLordo = dati.costoOrarioLordo();</span>
-<span class="fc" id="L84">        scalaCostoOrarioLordo = costoOrarioLordo.scale();</span>
-<span class="fc" id="L85">        conteggi.putAll(dati.conteggi());</span>
-<span class="fc" id="L86">    }</span>
+<span class="fc" id="L66">    SchedaOperatoreJpa(SchedaOperatore scheda, UUID versioneCategorieId) {</span>
+<span class="fc" id="L67">        SchedaSintesi sintesi = scheda.sintesi();</span>
+<span class="fc" id="L68">        DatiSchedaOperatore dati = scheda.dati();</span>
+<span class="fc" id="L69">        id = sintesi.id();</span>
+<span class="fc" id="L70">        operatoreId = sintesi.operatoreId();</span>
+<span class="fc" id="L71">        anno = sintesi.trimestre().anno();</span>
+<span class="fc" id="L72">        trimestre = sintesi.trimestre().numero();</span>
+<span class="fc" id="L73">        inviataIl = sintesi.inviataIl();</span>
+<span class="fc" id="L74">        versioneTracciato = TracciatoSchedaOperatore.VERSIONE;</span>
+<span class="fc" id="L75">        this.versioneCategorieId = versioneCategorieId;</span>
+<span class="fc" id="L76">        nome = dati.nome();</span>
+<span class="fc" id="L77">        cognome = dati.cognome();</span>
+<span class="fc" id="L78">        luogoNascita = dati.luogoNascita();</span>
+<span class="fc" id="L79">        dataNascita = dati.dataNascita();</span>
+<span class="fc" id="L80">        codiceFiscale = dati.codiceFiscale();</span>
+<span class="fc" id="L81">        qualifica = dati.qualifica();</span>
+<span class="fc" id="L82">        tipologiaContratto = dati.tipologiaContratto();</span>
+<span class="fc" id="L83">        areaLivello = dati.areaLivello();</span>
+<span class="fc" id="L84">        ore = dati.ore();</span>
+<span class="fc" id="L85">        scalaOre = ore.scale();</span>
+<span class="fc" id="L86">        costoOrarioLordo = dati.costoOrarioLordo();</span>
+<span class="fc" id="L87">        scalaCostoOrarioLordo = costoOrarioLordo.scale();</span>
+<span class="fc" id="L88">        conteggi.putAll(dati.conteggi());</span>
+<span class="fc" id="L89">    }</span>
 
     /** Identifica il titolare senza caricare la collezione dei conteggi. */
     UUID operatoreId() {
-<span class="fc" id="L90">        return operatoreId;</span>
+<span class="fc" id="L93">        return operatoreId;</span>
     }
 
     /** Ricompone la scheda completa dopo il controllo della titolarità. */
     SchedaOperatore aScheda() {
-<span class="fc" id="L95">        var dati = new DatiSchedaOperatore(nome, cognome, luogoNascita, dataNascita, codiceFiscale,</span>
-<span class="fc" id="L96">                qualifica, tipologiaContratto, areaLivello, ore.setScale(scalaOre),</span>
-<span class="fc" id="L97">                costoOrarioLordo.setScale(scalaCostoOrarioLordo), conteggi);</span>
-<span class="fc" id="L98">        return new SchedaOperatore(sintesi(), dati);</span>
+<span class="fc" id="L98">        var dati = new DatiSchedaOperatore(nome, cognome, luogoNascita, dataNascita, codiceFiscale,</span>
+<span class="fc" id="L99">                qualifica, tipologiaContratto, areaLivello, ore.setScale(scalaOre),</span>
+<span class="fc" id="L100">                costoOrarioLordo.setScale(scalaCostoOrarioLordo), conteggi);</span>
+<span class="fc" id="L101">        return new SchedaOperatore(sintesi(), dati);</span>
     }
 
-    /** Proietta il primo invio. La bozza TM-OP-01 ammette i codici validi dichiarati. */
+    /** Proietta il primo invio conservando tutti i conteggi originariamente dichiarati. */
     VersioneInviata aVersioneInviata() {
-<span class="fc" id="L103">        return new VersioneInviata(sintesi(), 1, conteggi, conteggi.keySet());</span>
+<span class="fc" id="L106">        return new VersioneInviata(sintesi(), 1, conteggi);</span>
     }
 
     private SchedaSintesi sintesi() {
-<span class="fc" id="L107">        return new SchedaSintesi(id, operatoreId, new Trimestre(anno, trimestre), inviataIl);</span>
+<span class="fc" id="L110">        return new SchedaSintesi(id, operatoreId, new Trimestre(anno, trimestre), inviataIl);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

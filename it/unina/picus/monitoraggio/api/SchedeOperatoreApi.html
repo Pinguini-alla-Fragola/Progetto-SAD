@@ -140,7 +140,11 @@ loadScripts(document, 'script');</script>
  <a href="MonitoraggioApi.Trimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.Trimestre</a>&nbsp;trimestre,
  <a href="MonitoraggioApi.DatiSchedaOperatore.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.DatiSchedaOperatore</a>&nbsp;dati)</span></div>
 <div class="block">Registra il primo invio di un trimestre concluso a nome dell'operatore autenticato.
-L'invio è consentito dal primo giorno del trimestre successivo nel fuso <code>Europe/Rome</code>.</div>
+L'invio è consentito dal primo giorno del trimestre successivo nel fuso <code>Europe/Rome</code>
+e valida i conteggi contro la configurazione pubblicata per il trimestre (preservando i
+periodi già rendicontati con <code>v0.1</code> prima della migrazione e rifiutando i trimestri
+privi di pubblicazione una volta avviata la pubblicazione delle versioni del tracciato,
+senza creare nuove associazioni <code>v0.1</code>).</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>attore</code> - identità verificata dell'operatore interno o esterno pagato dal Banco</dd>
@@ -150,8 +154,8 @@ L'invio è consentito dal primo giorno del trimestre successivo nel fuso <code>E
 <dd>identificativo della scheda inviata</dd>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/SecurityException.html" title="class or interface in java.lang" class="external-link">SecurityException</a></code> - se l'attore non è un operatore autorizzato</dd>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - se il trimestre è assente o non concluso oppure se i dati non sono validi</dd>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - se esiste già una scheda per l'operatore e il trimestre</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - se il trimestre è assente o non concluso oppure se i dati o le categorie non sono validi</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - se esiste già una scheda per l'operatore e il trimestre oppure manca la pubblicazione delle categorie per il trimestre</dd>
 </dl>
 </div>
 </section>

@@ -53,7 +53,7 @@ class ConfigurazioneJsonCatalogo implements WebMvcConfigurer {
 
         @Override
         protected boolean supports(Class&lt;?&gt; tipo) {
-<span class="pc bpc" id="L56" title="1 of 2 branches missed.">            return tipo == CorpoJsonCatalogo.class;</span>
+<span class="fc bfc" id="L56" title="All 2 branches covered.">            return tipo == CorpoJsonCatalogo.class;</span>
         }
 
         @Override
@@ -65,11 +65,11 @@ class ConfigurazioneJsonCatalogo implements WebMvcConfigurer {
         protected CorpoJsonCatalogo readInternal(Class&lt;? extends CorpoJsonCatalogo&gt; tipo, HttpInputMessage input)
                 throws IOException {
             try {
-<span class="nc" id="L68">                Map&lt;String, Object&gt; campi = json.readValue(input.getBody(), new TypeReference&lt;&gt;() {});</span>
-<span class="nc" id="L69">                return new CorpoJsonCatalogo(campi);</span>
-<span class="nc" id="L70">            } catch (JacksonException ex) {</span>
+<span class="fc" id="L68">                Map&lt;String, Object&gt; campi = json.readValue(input.getBody(), new TypeReference&lt;&gt;() {});</span>
+<span class="fc" id="L69">                return new CorpoJsonCatalogo(campi);</span>
+<span class="fc" id="L70">            } catch (JacksonException ex) {</span>
                 // Non propagare il messaggio del parser per evitare di esporre frammenti dell'input.
-<span class="nc" id="L72">                throw new HttpMessageNotReadableException(&quot;Corpo JSON non valido&quot;, input);</span>
+<span class="fc" id="L72">                throw new HttpMessageNotReadableException(&quot;Corpo JSON non valido&quot;, input);</span>
             }
         }
 

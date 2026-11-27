@@ -62,7 +62,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#constructor-detail" tabindex="0">Constructor Details</a>
 <ol class="toc-list">
 <li><a href="#%3Cinit%3E()" tabindex="0">SchedaOperatoreJpa()</a></li>
-<li><a href="#%3Cinit%3E(it.unina.picus.monitoraggio.api.MonitoraggioApi.SchedaOperatore)" tabindex="0">SchedaOperatoreJpa(MonitoraggioApi.SchedaOperatore)</a></li>
+<li><a href="#%3Cinit%3E(it.unina.picus.monitoraggio.api.MonitoraggioApi.SchedaOperatore,java.util.UUID)" tabindex="0">SchedaOperatoreJpa(MonitoraggioApi.SchedaOperatore, UUID)</a></li>
 </ol>
 </li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
@@ -108,7 +108,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Costruttore riservato a JPA.</div>
 </div>
 <div class="col-first odd-row-color"><code>(package private)</code></div>
-<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(it.unina.picus.monitoraggio.api.MonitoraggioApi.SchedaOperatore)" class="member-name-link">SchedaOperatoreJpa</a><wbr>(<a href="../../api/MonitoraggioApi.SchedaOperatore.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.SchedaOperatore</a>&nbsp;scheda)</code></div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(it.unina.picus.monitoraggio.api.MonitoraggioApi.SchedaOperatore,java.util.UUID)" class="member-name-link">SchedaOperatoreJpa</a><wbr>(<a href="../../api/MonitoraggioApi.SchedaOperatore.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.SchedaOperatore</a>&nbsp;scheda,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;versioneCategorieId)</code></div>
 <div class="col-last odd-row-color">
 <div class="block">Converte l'invio già validato in un'entità da inserire.</div>
 </div>
@@ -134,7 +135,7 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>(package private) <a href="../dominio/ArchivioSchedeRendicontabili.VersioneInviata.html" title="class in it.unina.picus.monitoraggio.interno.dominio">ArchivioSchedeRendicontabili.VersioneInviata</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#aVersioneInviata()" class="member-name-link">aVersioneInviata</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Proietta il primo invio.</div>
+<div class="block">Proietta il primo invio conservando tutti i conteggi originariamente dichiarati.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>(package private) <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#operatoreId()" class="member-name-link">operatoreId</a>()</code></div>
@@ -168,10 +169,11 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="&lt;init&gt;(it.unina.picus.monitoraggio.api.MonitoraggioApi.SchedaOperatore)">
+<section class="detail" id="&lt;init&gt;(it.unina.picus.monitoraggio.api.MonitoraggioApi.SchedaOperatore,java.util.UUID)">
 <h3>SchedaOperatoreJpa</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="element-name">SchedaOperatoreJpa</span><wbr><span class="parameters">(<a href="../../api/MonitoraggioApi.SchedaOperatore.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.SchedaOperatore</a>&nbsp;scheda)</span></div>
+<div class="member-signature"><span class="element-name">SchedaOperatoreJpa</span><wbr><span class="parameters">(<a href="../../api/MonitoraggioApi.SchedaOperatore.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.SchedaOperatore</a>&nbsp;scheda,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;versioneCategorieId)</span></div>
 <div class="block">Converte l'invio già validato in un'entità da inserire.</div>
 </div>
 </section>
@@ -207,7 +209,7 @@ loadScripts(document, 'script');</script>
 <h3>aVersioneInviata</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="return-type"><a href="../dominio/ArchivioSchedeRendicontabili.VersioneInviata.html" title="class in it.unina.picus.monitoraggio.interno.dominio">ArchivioSchedeRendicontabili.VersioneInviata</a></span>&nbsp;<span class="element-name">aVersioneInviata</span>()</div>
-<div class="block">Proietta il primo invio. La bozza TM-OP-01 ammette i codici validi dichiarati.</div>
+<div class="block">Proietta il primo invio conservando tutti i conteggi originariamente dichiarati.</div>
 </div>
 </section>
 </li>

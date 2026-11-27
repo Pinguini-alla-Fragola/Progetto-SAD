@@ -62,13 +62,14 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-summary" tabindex="0">Method Summary</a></li>
 <li><a href="#constructor-detail" tabindex="0">Constructor Details</a>
 <ol class="toc-list">
-<li><a href="#%3Cinit%3E(it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeOperatore,it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeRendicontabili,it.unina.picus.monitoraggio.api.ConteggiOptApi,java.time.Clock)" tabindex="0">ServizioSchedeOperatore(ArchivioSchedeOperatore, ArchivioSchedeRendicontabili, ConteggiOptApi, Clock)</a></li>
+<li><a href="#%3Cinit%3E(it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeOperatore,it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeRendicontabili,it.unina.picus.monitoraggio.interno.dominio.CategorieSchedeRendicontabili,it.unina.picus.monitoraggio.api.ConteggiOptApi,java.time.Clock)" tabindex="0">ServizioSchedeOperatore(ArchivioSchedeOperatore, ArchivioSchedeRendicontabili, CategorieSchedeRendicontabili, ConteggiOptApi, Clock)</a></li>
 </ol>
 </li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
 <li><a href="#registraConteggiOpt(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,java.util.List)" tabindex="0">registraConteggiOpt(UtenzeApi.IdentitaAutenticata, MonitoraggioApi.Trimestre, List)</a></li>
 <li><a href="#consultaConteggiOpt(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre)" tabindex="0">consultaConteggiOpt(UtenzeApi.IdentitaAutenticata, UUID, MonitoraggioApi.Trimestre, MonitoraggioApi.Trimestre)</a></li>
+<li><a href="#moduloPer(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre)" tabindex="0">moduloPer(UtenzeApi.IdentitaAutenticata, MonitoraggioApi.Trimestre)</a></li>
 <li><a href="#inviaSchedaOperatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,it.unina.picus.monitoraggio.api.MonitoraggioApi.DatiSchedaOperatore)" tabindex="0">inviaSchedaOperatore(UtenzeApi.IdentitaAutenticata, MonitoraggioApi.Trimestre, MonitoraggioApi.DatiSchedaOperatore)</a></li>
 <li><a href="#elencoSchedeOperatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata)" tabindex="0">elencoSchedeOperatore(UtenzeApi.IdentitaAutenticata)</a></li>
 <li><a href="#consultaSchedaOperatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,java.util.UUID)" tabindex="0">consultaSchedaOperatore(UtenzeApi.IdentitaAutenticata, UUID)</a></li>
@@ -108,6 +109,17 @@ implements <a href="../../api/MonitoraggioApi.html" title="interface in it.unina
 <li>
 <section class="nested-class-summary" id="nested-class-summary">
 <h2>Nested Class Summary</h2>
+<div class="caption"><span>Nested Classes</span></div>
+<div class="summary-table three-column-summary">
+<div class="table-header col-first">Modifier and Type</div>
+<div class="table-header col-second">Class</div>
+<div class="table-header col-last">Description</div>
+<div class="col-first even-row-color"><code>static final record&nbsp;</code></div>
+<div class="col-second even-row-color"><code><a href="ServizioSchedeOperatore.ConfigurazioneModulo.html" class="type-name-link" title="class in it.unina.picus.monitoraggio.interno.applicazione">ServizioSchedeOperatore.ConfigurazioneModulo</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Metadati della configurazione delle categorie esposti al modulo di compilazione.</div>
+</div>
+</div>
 <div class="inherited-list">
 <h3 id="nested-classes-inherited-from-class-it.unina.picus.monitoraggio.api.MonitoraggioApi">Nested classes/interfaces inherited from interface&nbsp;<a href="../../api/MonitoraggioApi.html#nested-class-summary" title="interface in it.unina.picus.monitoraggio.api">MonitoraggioApi</a></h3>
 <code><a href="../../api/MonitoraggioApi.ConteggioOpt.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.ConteggioOpt</a>, <a href="../../api/MonitoraggioApi.DatiSchedaOperatore.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.DatiSchedaOperatore</a>, <a href="../../api/MonitoraggioApi.RiepilogoTrimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.RiepilogoTrimestre</a>, <a href="../../api/MonitoraggioApi.SchedaOperatore.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.SchedaOperatore</a>, <a href="../../api/MonitoraggioApi.SchedaSintesi.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.SchedaSintesi</a>, <a href="../../api/MonitoraggioApi.Trimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.Trimestre</a>, <a href="../../api/MonitoraggioApi.VoceMisura.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.VoceMisura</a></code></div>
@@ -121,8 +133,9 @@ implements <a href="../../api/MonitoraggioApi.html" title="interface in it.unina
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeOperatore,it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeRendicontabili,it.unina.picus.monitoraggio.api.ConteggiOptApi,java.time.Clock)" class="member-name-link">ServizioSchedeOperatore</a><wbr>(<a href="../dominio/ArchivioSchedeOperatore.html" title="interface in it.unina.picus.monitoraggio.interno.dominio">ArchivioSchedeOperatore</a>&nbsp;archivio,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeOperatore,it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeRendicontabili,it.unina.picus.monitoraggio.interno.dominio.CategorieSchedeRendicontabili,it.unina.picus.monitoraggio.api.ConteggiOptApi,java.time.Clock)" class="member-name-link">ServizioSchedeOperatore</a><wbr>(<a href="../dominio/ArchivioSchedeOperatore.html" title="interface in it.unina.picus.monitoraggio.interno.dominio">ArchivioSchedeOperatore</a>&nbsp;archivio,
  <a href="../dominio/ArchivioSchedeRendicontabili.html" title="interface in it.unina.picus.monitoraggio.interno.dominio">ArchivioSchedeRendicontabili</a>&nbsp;archivioRendicontabile,
+ <a href="../dominio/CategorieSchedeRendicontabili.html" title="interface in it.unina.picus.monitoraggio.interno.dominio">CategorieSchedeRendicontabili</a>&nbsp;categorie,
  <a href="../../api/ConteggiOptApi.html" title="interface in it.unina.picus.monitoraggio.api">ConteggiOptApi</a>&nbsp;conteggiOpt,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/time/Clock.html" title="class or interface in java.time" class="external-link">Clock</a>&nbsp;orologio)</code></div>
 <div class="col-last even-row-color">
@@ -174,17 +187,23 @@ implements <a href="../../api/MonitoraggioApi.html" title="interface in it.unina
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Registra il primo invio di un trimestre concluso a nome dell'operatore autenticato.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#registraConteggiOpt(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,java.util.List)" class="member-name-link">registraConteggiOpt</a><wbr>(<a href="../../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ServizioSchedeOperatore.ConfigurazioneModulo.html" title="class in it.unina.picus.monitoraggio.interno.applicazione">ServizioSchedeOperatore.ConfigurazioneModulo</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#moduloPer(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre)" class="member-name-link">moduloPer</a><wbr>(<a href="../../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+ <a href="../../api/MonitoraggioApi.Trimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.Trimestre</a>&nbsp;trimestre)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Risolve la configurazione del modulo per il trimestre richiesto.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#registraConteggiOpt(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,java.util.List)" class="member-name-link">registraConteggiOpt</a><wbr>(<a href="../../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  <a href="../../api/MonitoraggioApi.Trimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.Trimestre</a>&nbsp;trimestre,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../../api/MonitoraggioApi.VoceMisura.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.VoceMisura</a>&gt;&nbsp;conteggi)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Registra i conteggi della OPT autenticata per il trimestre.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../api/MonitoraggioApi.RiepilogoTrimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.RiepilogoTrimestre</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#riepilogaSchede(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre)" class="member-name-link">riepilogaSchede</a><wbr>(<a href="../../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../api/MonitoraggioApi.RiepilogoTrimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.RiepilogoTrimestre</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#riepilogaSchede(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre)" class="member-name-link">riepilogaSchede</a><wbr>(<a href="../../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  <a href="../../api/MonitoraggioApi.Trimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.Trimestre</a>&nbsp;trimestre)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Riepiloga per il Banco le schede ricevute nel trimestre selezionato.</div>
 </div>
 </div>
@@ -205,11 +224,12 @@ implements <a href="../../api/MonitoraggioApi.html" title="interface in it.unina
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeOperatore,it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeRendicontabili,it.unina.picus.monitoraggio.api.ConteggiOptApi,java.time.Clock)">
+<section class="detail" id="&lt;init&gt;(it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeOperatore,it.unina.picus.monitoraggio.interno.dominio.ArchivioSchedeRendicontabili,it.unina.picus.monitoraggio.interno.dominio.CategorieSchedeRendicontabili,it.unina.picus.monitoraggio.api.ConteggiOptApi,java.time.Clock)">
 <h3>ServizioSchedeOperatore</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">ServizioSchedeOperatore</span><wbr><span class="parameters">(<a href="../dominio/ArchivioSchedeOperatore.html" title="interface in it.unina.picus.monitoraggio.interno.dominio">ArchivioSchedeOperatore</a>&nbsp;archivio,
  <a href="../dominio/ArchivioSchedeRendicontabili.html" title="interface in it.unina.picus.monitoraggio.interno.dominio">ArchivioSchedeRendicontabili</a>&nbsp;archivioRendicontabile,
+ <a href="../dominio/CategorieSchedeRendicontabili.html" title="interface in it.unina.picus.monitoraggio.interno.dominio">CategorieSchedeRendicontabili</a>&nbsp;categorie,
  <a href="../../api/ConteggiOptApi.html" title="interface in it.unina.picus.monitoraggio.api">ConteggiOptApi</a>&nbsp;conteggiOpt,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/time/Clock.html" title="class or interface in java.time" class="external-link">Clock</a>&nbsp;orologio)</span></div>
 <div class="block">Crea il servizio applicativo delle schede personali.</div>
@@ -217,6 +237,7 @@ implements <a href="../../api/MonitoraggioApi.html" title="interface in it.unina
 <dt>Parameters:</dt>
 <dd><code>archivio</code> - persistenza delle schede personali</dd>
 <dd><code>archivioRendicontabile</code> - sorgente delle schede accettate per il riepilogo</dd>
+<dd><code>categorie</code> - fonte delle configurazioni per trimestre di TM-OP-01</dd>
 <dd><code>conteggiOpt</code> - servizio dei conteggi trimestrali delle OPT</dd>
 <dd><code>orologio</code> - sorgente dell'istante di invio</dd>
 </dl>
@@ -279,6 +300,26 @@ assente, mentre uno zero dichiarato è un valore. Le categorie sovrapponibili re
 </section>
 </li>
 <li>
+<section class="detail" id="moduloPer(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre)">
+<h3>moduloPer</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ServizioSchedeOperatore.ConfigurazioneModulo.html" title="class in it.unina.picus.monitoraggio.interno.applicazione">ServizioSchedeOperatore.ConfigurazioneModulo</a></span>&nbsp;<span class="element-name">moduloPer</span><wbr><span class="parameters">(<a href="../../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
+ <a href="../../api/MonitoraggioApi.Trimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.Trimestre</a>&nbsp;trimestre)</span></div>
+<div class="block">Risolve la configurazione del modulo per il trimestre richiesto. Quando il Banco ha
+pubblicato almeno una versione per <code>TM-OP-01</code>, ogni trimestre privo di configurazione
+pubblicata o di associazione storica <code>v0.1</code> pre-migrazione viene rifiutato con
+<a href="../dominio/ConfigurazioneTrimestreAssenteException.html" title="class in it.unina.picus.monitoraggio.interno.dominio"><code>ConfigurazioneTrimestreAssenteException</code></a>, senza creare nuove associazioni legacy.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>attore</code> - identità verificata dell'operatore</dd>
+<dd><code>trimestre</code> - periodo richiesto</dd>
+<dt>Returns:</dt>
+<dd>metadati della configurazione di categorie applicabile al modulo</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="inviaSchedaOperatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,it.unina.picus.monitoraggio.api.MonitoraggioApi.DatiSchedaOperatore)">
 <h3>inviaSchedaOperatore</h3>
 <div class="horizontal-scroll">
@@ -287,7 +328,11 @@ assente, mentre uno zero dichiarato è un valore. Le categorie sovrapponibili re
  <a href="../../api/MonitoraggioApi.Trimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.Trimestre</a>&nbsp;trimestre,
  <a href="../../api/MonitoraggioApi.DatiSchedaOperatore.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.DatiSchedaOperatore</a>&nbsp;dati)</span></div>
 <div class="block">Registra il primo invio di un trimestre concluso a nome dell'operatore autenticato.
-L'invio è consentito dal primo giorno del trimestre successivo nel fuso <code>Europe/Rome</code>.</div>
+L'invio è consentito dal primo giorno del trimestre successivo nel fuso <code>Europe/Rome</code>
+e valida i conteggi contro la configurazione pubblicata per il trimestre (preservando i
+periodi già rendicontati con <code>v0.1</code> prima della migrazione e rifiutando i trimestri
+privi di pubblicazione una volta avviata la pubblicazione delle versioni del tracciato,
+senza creare nuove associazioni <code>v0.1</code>).</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../../api/MonitoraggioApi.html#inviaSchedaOperatore(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre,it.unina.picus.monitoraggio.api.MonitoraggioApi.DatiSchedaOperatore)">inviaSchedaOperatore</a></code>&nbsp;in interface&nbsp;<code><a href="../../api/MonitoraggioApi.html" title="interface in it.unina.picus.monitoraggio.api">MonitoraggioApi</a></code></dd>
@@ -350,8 +395,17 @@ L'invio è consentito dal primo giorno del trimestre successivo nel fuso <code>E
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../../api/MonitoraggioApi.RiepilogoTrimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.RiepilogoTrimestre</a></span>&nbsp;<span class="element-name">riepilogaSchede</span><wbr><span class="parameters">(<a href="../../../utenze/api/UtenzeApi.IdentitaAutenticata.html" title="class in it.unina.picus.utenze.api">UtenzeApi.IdentitaAutenticata</a>&nbsp;attore,
  <a href="../../api/MonitoraggioApi.Trimestre.html" title="class in it.unina.picus.monitoraggio.api">MonitoraggioApi.Trimestre</a>&nbsp;trimestre)</span></div>
 <div class="block">Riepiloga per il Banco le schede ricevute nel trimestre selezionato. Le voci aggregate
-rappresentano conteggi dichiarati e conservano distinte le categorie sovrapponibili.
-Per ogni operatore si usa l'ultima versione accettata nel periodo.</div>
+rispettano la configurazione associata al trimestre stesso: una versione immutabile pubblicata
+dal Banco per il tracciato TM-OP-01 ammette esclusivamente i codici pubblicati per quel
+periodo (modifiche o disattivazioni pubblicate per trimestri successivi non alterano questo
+riepilogo), l'associazione storica <code>v0.1</code> riservata ai periodi già rendicontati prima
+della migrazione conserva i codici sintatticamente validi, mentre quando esiste almeno una
+pubblicazione per il tracciato un trimestre non configurato non aggrega voci non pubblicate
+(finché nessuna versione è ancora pubblicata resta attivo in via transitoria il tracciato
+provvisorio <code>v0.1</code>). Le categorie sovrapponibili restano distinte. Uno zero dichiarato
+su una voce ammessa è incluso nei totali, mentre una voce mai dichiarata o non ammessa è
+assente. Le schede ricevute restano nell'elenco. Per ogni operatore si usa l'ultima versione
+accettata nel periodo.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../../api/MonitoraggioApi.html#riepilogaSchede(it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata,it.unina.picus.monitoraggio.api.MonitoraggioApi.Trimestre)">riepilogaSchede</a></code>&nbsp;in interface&nbsp;<code><a href="../../api/MonitoraggioApi.html" title="interface in it.unina.picus.monitoraggio.api">MonitoraggioApi</a></code></dd>

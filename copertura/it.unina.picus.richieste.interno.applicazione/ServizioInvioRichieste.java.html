@@ -84,8 +84,8 @@ public class ServizioInvioRichieste implements InvioRichiesteApi {
 <span class="fc" id="L84">        Map&lt;String, String&gt; errori = new LinkedHashMap&lt;&gt;();</span>
 <span class="fc bfc" id="L85" title="All 2 branches covered.">        if (catalogo.cercaMisura(normalizzati.misuraId()).filter(Misura::attiva).isEmpty()) {</span>
 <span class="fc" id="L86">            var ritento = recuperaRitentoConcorrente(attore.accountId(), riferimentoInvio, normalizzati);</span>
-<span class="pc bpc" id="L87" title="1 of 2 branches missed.">            if (ritento.isPresent()) {</span>
-<span class="nc" id="L88">                return ritento.get();</span>
+<span class="fc bfc" id="L87" title="All 2 branches covered.">            if (ritento.isPresent()) {</span>
+<span class="fc" id="L88">                return ritento.get();</span>
             }
 <span class="fc" id="L90">            errori.put(&quot;misuraId&quot;, ERRORE_MISURA);</span>
         }

@@ -61,8 +61,17 @@ public interface MonitoraggioApi extends SchedeOperatoreApi {
 
     /**
      * Riepiloga per il Banco le schede ricevute nel trimestre selezionato. Le voci aggregate
-     * rappresentano conteggi dichiarati e conservano distinte le categorie sovrapponibili.
-     * Per ogni operatore si usa l'ultima versione accettata nel periodo.
+     * rispettano la configurazione associata al trimestre stesso: una versione immutabile pubblicata
+     * dal Banco per il tracciato TM-OP-01 ammette esclusivamente i codici pubblicati per quel
+     * periodo (modifiche o disattivazioni pubblicate per trimestri successivi non alterano questo
+     * riepilogo), l'associazione storica {@code v0.1} riservata ai periodi già rendicontati prima
+     * della migrazione conserva i codici sintatticamente validi, mentre quando esiste almeno una
+     * pubblicazione per il tracciato un trimestre non configurato non aggrega voci non pubblicate
+     * (finché nessuna versione è ancora pubblicata resta attivo in via transitoria il tracciato
+     * provvisorio {@code v0.1}). Le categorie sovrapponibili restano distinte. Uno zero dichiarato
+     * su una voce ammessa è incluso nei totali, mentre una voce mai dichiarata o non ammessa è
+     * assente. Le schede ricevute restano nell'elenco. Per ogni operatore si usa l'ultima versione
+     * accettata nel periodo.
      *
      * @param attore identità verificata del Banco autorizzato alla rendicontazione
      * @param trimestre singolo trimestre da riepilogare
@@ -86,11 +95,11 @@ public interface MonitoraggioApi extends SchedeOperatoreApi {
          * @param numero numero del trimestre, da 1 a 4
          * @throws IllegalArgumentException se l'anno non è positivo o il trimestre è fuori intervallo
          */
-<span class="fc" id="L89">        public Trimestre {</span>
-<span class="fc bfc" id="L90" title="All 6 branches covered.">            if (anno &lt; 1 || numero &lt; 1 || numero &gt; 4) {</span>
-<span class="fc" id="L91">                throw new IllegalArgumentException(&quot;Anno o trimestre non valido&quot;);</span>
+<span class="fc" id="L98">        public Trimestre {</span>
+<span class="fc bfc" id="L99" title="All 6 branches covered.">            if (anno &lt; 1 || numero &lt; 1 || numero &gt; 4) {</span>
+<span class="fc" id="L100">                throw new IllegalArgumentException(&quot;Anno o trimestre non valido&quot;);</span>
             }
-<span class="fc" id="L93">        }</span>
+<span class="fc" id="L102">        }</span>
     }
 
     /**
@@ -100,7 +109,7 @@ public interface MonitoraggioApi extends SchedeOperatoreApi {
      * @param voce codice della voce nel tracciato applicabile
      * @param valore conteggio per la voce, incluso zero se dichiarato
      */
-<span class="fc" id="L103">    record VoceMisura(long misuraId, String voce, long valore) {}</span>
+<span class="fc" id="L112">    record VoceMisura(long misuraId, String voce, long valore) {}</span>
 
     /**
      * Conteggio di un'organizzazione nel periodo consultato.
@@ -108,7 +117,7 @@ public interface MonitoraggioApi extends SchedeOperatoreApi {
      * @param optId account dell'organizzazione
      * @param conteggio valore per una voce e una misura
      */
-<span class="fc" id="L111">    record ConteggioOpt(UUID optId, VoceMisura conteggio) {}</span>
+<span class="fc" id="L120">    record ConteggioOpt(UUID optId, VoceMisura conteggio) {}</span>
 
     /**
      * Dati dichiarati per la scheda personale TM-OP-01, inviata senza firma.
@@ -138,9 +147,9 @@ public interface MonitoraggioApi extends SchedeOperatoreApi {
             BigDecimal costoOrarioLordo,
             Map&lt;String, Long&gt; conteggi) {
         /** Crea una copia immutabile dei conteggi dichiarati. */
-<span class="fc" id="L141">        public DatiSchedaOperatore {</span>
-<span class="fc" id="L142">            conteggi = Map.copyOf(conteggi);</span>
-<span class="fc" id="L143">        }</span>
+<span class="fc" id="L150">        public DatiSchedaOperatore {</span>
+<span class="fc" id="L151">            conteggi = Map.copyOf(conteggi);</span>
+<span class="fc" id="L152">        }</span>
     }
 
     /**
@@ -151,7 +160,7 @@ public interface MonitoraggioApi extends SchedeOperatoreApi {
      * @param trimestre trimestre dichiarato
      * @param inviataIl istante di invio della scheda ricevuta
      */
-<span class="fc" id="L154">    record SchedaSintesi(UUID id, UUID operatoreId, Trimestre trimestre, Instant inviataIl) {}</span>
+<span class="fc" id="L163">    record SchedaSintesi(UUID id, UUID operatoreId, Trimestre trimestre, Instant inviataIl) {}</span>
 
     /**
      * Scheda personale consultabile nei casi d'uso autorizzati.
@@ -159,7 +168,7 @@ public interface MonitoraggioApi extends SchedeOperatoreApi {
      * @param sintesi riferimento e periodo della scheda
      * @param dati dati personali, professionali e aggregati dichiarati
      */
-<span class="fc" id="L162">    record SchedaOperatore(SchedaSintesi sintesi, DatiSchedaOperatore dati) {}</span>
+<span class="fc" id="L171">    record SchedaOperatore(SchedaSintesi sintesi, DatiSchedaOperatore dati) {}</span>
 
     /**
      * Dati usati dal Banco per la rendicontazione trimestrale.
@@ -170,10 +179,10 @@ public interface MonitoraggioApi extends SchedeOperatoreApi {
      */
     record RiepilogoTrimestre(List&lt;SchedaSintesi&gt; schede, Map&lt;String, BigInteger&gt; conteggi) {
         /** Crea copie immutabili dell'elenco delle schede e dei totali. */
-<span class="fc" id="L173">        public RiepilogoTrimestre {</span>
-<span class="fc" id="L174">            schede = List.copyOf(schede);</span>
-<span class="fc" id="L175">            conteggi = Map.copyOf(conteggi);</span>
-<span class="fc" id="L176">        }</span>
+<span class="fc" id="L182">        public RiepilogoTrimestre {</span>
+<span class="fc" id="L183">            schede = List.copyOf(schede);</span>
+<span class="fc" id="L184">            conteggi = Map.copyOf(conteggi);</span>
+<span class="fc" id="L185">        }</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

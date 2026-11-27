@@ -16,11 +16,11 @@ import java.util.Set;
  */
 final class MisuraJson {
 
-<span class="nc" id="L19">    private static final Set&lt;String&gt; CAMPI_CREAZIONE =</span>
-<span class="nc" id="L20">            Set.of(&quot;codice&quot;, &quot;nome&quot;, &quot;descrizione&quot;, &quot;erogabileADistanza&quot;);</span>
+<span class="fc" id="L19">    private static final Set&lt;String&gt; CAMPI_CREAZIONE =</span>
+<span class="fc" id="L20">            Set.of(&quot;codice&quot;, &quot;nome&quot;, &quot;descrizione&quot;, &quot;erogabileADistanza&quot;);</span>
 
-<span class="nc" id="L22">    private static final Set&lt;String&gt; CAMPI_AGGIORNAMENTO =</span>
-<span class="nc" id="L23">            Set.of(&quot;codice&quot;, &quot;nome&quot;, &quot;descrizione&quot;, &quot;erogabileADistanza&quot;, &quot;attiva&quot;);</span>
+<span class="fc" id="L22">    private static final Set&lt;String&gt; CAMPI_AGGIORNAMENTO =</span>
+<span class="fc" id="L23">            Set.of(&quot;codice&quot;, &quot;nome&quot;, &quot;descrizione&quot;, &quot;erogabileADistanza&quot;, &quot;attiva&quot;);</span>
 
     private MisuraJson() {
     }
@@ -31,7 +31,7 @@ final class MisuraJson {
      * @param dati dati descrittivi della misura
      * @param attiva nuovo stato di attivazione richiesto
      */
-<span class="nc" id="L34">    record RichiestaAggiornamento(DatiMisura dati, boolean attiva) {</span>
+<span class="fc" id="L34">    record RichiestaAggiornamento(DatiMisura dati, boolean attiva) {</span>
     }
 
     /**
@@ -42,13 +42,13 @@ final class MisuraJson {
      * @throws DatiMisuraNonValidiException se il corpo è assente, contiene campi estranei o tipi errati
      */
     static DatiMisura leggiCreazione(Map&lt;String, Object&gt; corpo) {
-<span class="nc" id="L45">        verificaCampiAmmessi(corpo, CAMPI_CREAZIONE);</span>
-<span class="nc" id="L46">        Map&lt;String, String&gt; errori = new LinkedHashMap&lt;&gt;();</span>
-<span class="nc" id="L47">        DatiMisura dati = estraiDatiComuni(corpo, errori, false);</span>
-<span class="nc bnc" id="L48" title="All 2 branches missed.">        if (!errori.isEmpty()) {</span>
-<span class="nc" id="L49">            throw new DatiMisuraNonValidiException(errori);</span>
+<span class="fc" id="L45">        verificaCampiAmmessi(corpo, CAMPI_CREAZIONE);</span>
+<span class="fc" id="L46">        Map&lt;String, String&gt; errori = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L47">        DatiMisura dati = estraiDatiComuni(corpo, errori, false);</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">        if (!errori.isEmpty()) {</span>
+<span class="fc" id="L49">            throw new DatiMisuraNonValidiException(errori);</span>
         }
-<span class="nc" id="L51">        return dati;</span>
+<span class="fc" id="L51">        return dati;</span>
     }
 
     /**
@@ -60,14 +60,14 @@ final class MisuraJson {
      *                                     oppure omette uno dei due campi booleani
      */
     static RichiestaAggiornamento leggiAggiornamento(Map&lt;String, Object&gt; corpo) {
-<span class="nc" id="L63">        verificaCampiAmmessi(corpo, CAMPI_AGGIORNAMENTO);</span>
-<span class="nc" id="L64">        Map&lt;String, String&gt; errori = new LinkedHashMap&lt;&gt;();</span>
-<span class="nc" id="L65">        DatiMisura dati = estraiDatiComuni(corpo, errori, true);</span>
-<span class="nc" id="L66">        boolean attiva = leggiBooleano(corpo, &quot;attiva&quot;, true, &quot;Indica se la misura è attiva&quot;, errori);</span>
-<span class="nc bnc" id="L67" title="All 2 branches missed.">        if (!errori.isEmpty()) {</span>
-<span class="nc" id="L68">            throw new DatiMisuraNonValidiException(errori);</span>
+<span class="fc" id="L63">        verificaCampiAmmessi(corpo, CAMPI_AGGIORNAMENTO);</span>
+<span class="fc" id="L64">        Map&lt;String, String&gt; errori = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L65">        DatiMisura dati = estraiDatiComuni(corpo, errori, true);</span>
+<span class="fc" id="L66">        boolean attiva = leggiBooleano(corpo, &quot;attiva&quot;, true, &quot;Indica se la misura è attiva&quot;, errori);</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">        if (!errori.isEmpty()) {</span>
+<span class="fc" id="L68">            throw new DatiMisuraNonValidiException(errori);</span>
         }
-<span class="nc" id="L70">        return new RichiestaAggiornamento(dati, attiva);</span>
+<span class="fc" id="L70">        return new RichiestaAggiornamento(dati, attiva);</span>
     }
 
     /**
@@ -77,38 +77,38 @@ final class MisuraJson {
      * @throws DatiMisuraNonValidiException se il corpo non è assente né un oggetto JSON vuoto
      */
     static void verificaCorpoVuoto(CorpoJsonCatalogo corpo) {
-<span class="nc bnc" id="L80" title="All 6 branches missed.">        if (corpo != null &amp;&amp; (corpo.campi() == null || !corpo.campi().isEmpty())) {</span>
-<span class="nc" id="L81">            throw new DatiMisuraNonValidiException(Map.of(&quot;comando&quot;, &quot;Questo comando non prevede campi aggiuntivi&quot;));</span>
+<span class="pc bpc" id="L80" title="1 of 6 branches missed.">        if (corpo != null &amp;&amp; (corpo.campi() == null || !corpo.campi().isEmpty())) {</span>
+<span class="fc" id="L81">            throw new DatiMisuraNonValidiException(Map.of(&quot;comando&quot;, &quot;Questo comando non prevede campi aggiuntivi&quot;));</span>
         }
-<span class="nc" id="L83">    }</span>
+<span class="fc" id="L83">    }</span>
 
     private static void verificaCampiAmmessi(Map&lt;String, Object&gt; corpo, Set&lt;String&gt; ammessi) {
-<span class="nc bnc" id="L86" title="All 4 branches missed.">        if (corpo == null || !ammessi.containsAll(corpo.keySet())) {</span>
-<span class="nc" id="L87">            throw new DatiMisuraNonValidiException(Map.of(&quot;misura&quot;, &quot;Sono ammessi solo i campi previsti per la misura&quot;));</span>
+<span class="fc bfc" id="L86" title="All 4 branches covered.">        if (corpo == null || !ammessi.containsAll(corpo.keySet())) {</span>
+<span class="fc" id="L87">            throw new DatiMisuraNonValidiException(Map.of(&quot;misura&quot;, &quot;Sono ammessi solo i campi previsti per la misura&quot;));</span>
         }
-<span class="nc" id="L89">    }</span>
+<span class="fc" id="L89">    }</span>
 
     private static DatiMisura estraiDatiComuni(
             Map&lt;String, Object&gt; corpo, Map&lt;String, String&gt; errori, boolean erogabileADistanzaObbligatorio) {
-<span class="nc" id="L93">        String codice = testo(corpo, &quot;codice&quot;, &quot;Indica un codice misura testuale&quot;, errori);</span>
-<span class="nc" id="L94">        String nome = testo(corpo, &quot;nome&quot;, &quot;Indica il nome della misura in formato testuale&quot;, errori);</span>
-<span class="nc" id="L95">        String descrizione = testo(corpo, &quot;descrizione&quot;, &quot;Indica una descrizione in formato testuale&quot;, errori);</span>
-<span class="nc" id="L96">        boolean erogabileADistanza = leggiBooleano(</span>
+<span class="fc" id="L93">        String codice = testo(corpo, &quot;codice&quot;, &quot;Indica un codice misura testuale&quot;, errori);</span>
+<span class="fc" id="L94">        String nome = testo(corpo, &quot;nome&quot;, &quot;Indica il nome della misura in formato testuale&quot;, errori);</span>
+<span class="fc" id="L95">        String descrizione = testo(corpo, &quot;descrizione&quot;, &quot;Indica una descrizione in formato testuale&quot;, errori);</span>
+<span class="fc" id="L96">        boolean erogabileADistanza = leggiBooleano(</span>
                 corpo,
                 &quot;erogabileADistanza&quot;,
                 erogabileADistanzaObbligatorio,
                 &quot;Indica vero o falso per l'erogazione a distanza&quot;,
                 errori);
-<span class="nc" id="L102">        return new DatiMisura(codice, nome, descrizione, erogabileADistanza);</span>
+<span class="fc" id="L102">        return new DatiMisura(codice, nome, descrizione, erogabileADistanza);</span>
     }
 
     private static String testo(Map&lt;String, Object&gt; corpo, String campo, String messaggio, Map&lt;String, String&gt; errori) {
-<span class="nc" id="L106">        Object valore = corpo.get(campo);</span>
-<span class="nc bnc" id="L107" title="All 4 branches missed.">        if (valore == null || valore instanceof String) {</span>
-<span class="nc" id="L108">            return (String) valore;</span>
+<span class="fc" id="L106">        Object valore = corpo.get(campo);</span>
+<span class="fc bfc" id="L107" title="All 4 branches covered.">        if (valore == null || valore instanceof String) {</span>
+<span class="fc" id="L108">            return (String) valore;</span>
         }
-<span class="nc" id="L110">        errori.put(campo, messaggio);</span>
-<span class="nc" id="L111">        return null;</span>
+<span class="fc" id="L110">        errori.put(campo, messaggio);</span>
+<span class="fc" id="L111">        return null;</span>
     }
 
     private static boolean leggiBooleano(
@@ -117,18 +117,18 @@ final class MisuraJson {
             boolean obbligatorio,
             String messaggio,
             Map&lt;String, String&gt; errori) {
-<span class="nc bnc" id="L120" title="All 2 branches missed.">        if (!corpo.containsKey(campo)) {</span>
-<span class="nc bnc" id="L121" title="All 2 branches missed.">            if (obbligatorio) {</span>
-<span class="nc" id="L122">                errori.put(campo, messaggio);</span>
+<span class="fc bfc" id="L120" title="All 2 branches covered.">        if (!corpo.containsKey(campo)) {</span>
+<span class="fc bfc" id="L121" title="All 2 branches covered.">            if (obbligatorio) {</span>
+<span class="fc" id="L122">                errori.put(campo, messaggio);</span>
             }
-<span class="nc" id="L124">            return false;</span>
+<span class="fc" id="L124">            return false;</span>
         }
-<span class="nc" id="L126">        Object valore = corpo.get(campo);</span>
-<span class="nc bnc" id="L127" title="All 2 branches missed.">        if (valore instanceof Boolean flag) {</span>
-<span class="nc" id="L128">            return flag;</span>
+<span class="fc" id="L126">        Object valore = corpo.get(campo);</span>
+<span class="fc bfc" id="L127" title="All 2 branches covered.">        if (valore instanceof Boolean flag) {</span>
+<span class="fc" id="L128">            return flag;</span>
         }
-<span class="nc" id="L130">        errori.put(campo, messaggio);</span>
-<span class="nc" id="L131">        return false;</span>
+<span class="fc" id="L130">        errori.put(campo, messaggio);</span>
+<span class="fc" id="L131">        return false;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>
