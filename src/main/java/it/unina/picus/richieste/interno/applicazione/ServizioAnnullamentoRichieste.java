@@ -5,9 +5,11 @@ import it.unina.picus.richieste.api.DatiRichiestaNonValidiException;
 import it.unina.picus.richieste.api.InvioRichiesteApi;
 import it.unina.picus.richieste.api.RichiesteApi;
 import it.unina.picus.richieste.api.RichiesteApi.RichiestaSintesi;
+import it.unina.picus.richieste.api.RichiesteApi.StatoRichiesta;
 import it.unina.picus.richieste.api.RisorsaRichiesteNonTrovataException;
 import it.unina.picus.richieste.interno.dominio.RegoleAccessoRichiesta;
 import it.unina.picus.richieste.interno.dominio.RegoleAccessoRichiesta.Soggetti;
+import it.unina.picus.richieste.interno.dominio.RegoleAnnullamento;
 import it.unina.picus.richieste.interno.dominio.RichiestaRepository;
 import it.unina.picus.utenze.api.UtenzeApi;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
@@ -53,6 +55,39 @@ public class ServizioAnnullamentoRichieste {
     public void verificaAccesso(IdentitaAutenticata attore, UUID richiestaId) {
         var richiesta = richieste.cercaPerId(richiestaId).orElseThrow(RisorsaRichiesteNonTrovataException::new);
         RegoleAccessoRichiesta.verificaAnnullamento(attore, new Soggetti(richiesta.titolareId(), richiesta.erogatoreId()));
+    }
+
+    /**
+     * Dice alla vista se l'attore autenticato è autorizzato ad annullare la richiesta
+     * secondo le regole di dominio.
+     *
+     * @param attore identità verificata dalla sessione
+     * @param richiestaId identificativo della richiesta
+     * @return {@code true} se l'attore ha titolo per eseguire l'annullamento
+     */
+    @Transactional(readOnly = true)
+    public boolean puoAnnullare(IdentitaAutenticata attore, UUID richiestaId) {
+        return richieste.cercaPerId(richiestaId)
+                .map(richiesta -> {
+                    try {
+                        RegoleAccessoRichiesta.verificaAnnullamento(
+                                attore, new Soggetti(richiesta.titolareId(), richiesta.erogatoreId()));
+                        return true;
+                    } catch (SecurityException ex) {
+                        return false;
+                    }
+                })
+                .orElse(false);
+    }
+
+    /**
+     * Dice se dallo stato indicato è obbligatorio fornire un motivo di annullamento.
+     *
+     * @param stato stato corrente della richiesta
+     * @return {@code false} in Creata o Annullata, {@code true} negli altri stati
+     */
+    public boolean motivoObbligatorio(StatoRichiesta stato) {
+        return RegoleAnnullamento.motivoObbligatorio(stato);
     }
 
     /**

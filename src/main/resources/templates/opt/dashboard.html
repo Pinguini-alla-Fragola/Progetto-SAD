@@ -11,7 +11,7 @@
     <script src="/js/comunicazioni.js" type="module"></script>
     <link rel="stylesheet" href="/css/integrazione-ui.css">
 </head>
-<body data-area="opt" th:attr="data-utente=${utente.id}">
+<body data-area="opt" th:attr="data-utente=${utente.id},data-skeleton=${skeleton ? 'true' : null}">
 <a th:replace="~{fragments/layout :: skip}" href="#contenuto">Vai al contenuto</a>
 <header class="picus-navbar workspace-navbar">
     <div class="nav-inner">
@@ -53,12 +53,14 @@
                 <button type="button" role="tab" id="offerta-tab-modifica" aria-controls="offerta-view-modifica" aria-selected="false" tabindex="-1">Dichiara misure</button>
             </div>
                 <div role="tabpanel" id="offerta-view-attuale" aria-labelledby="offerta-tab-attuale" tabindex="0">
-                    <h2 class="picus-card-title">Misure dichiarate</h2><div class="picus-list" id="offerta-opt" aria-live="polite" data-funzione-inattiva></div>
+                    <div class="panel-heading"><h2 class="picus-card-title">Misure dichiarate</h2><button class="btn btn-secondary btn-sm" type="button" id="offerta-opt-aggiorna">Aggiorna offerta</button></div>
+                    <p class="picus-esito" id="offerta-opt-esito" role="status"></p>
+                    <div class="picus-list" id="offerta-opt" aria-live="polite"></div>
                 </div>
                 <div role="tabpanel" id="offerta-view-modifica" aria-labelledby="offerta-tab-modifica" tabindex="0" hidden>
-                    <h2 class="sr-only">Dichiara le misure erogate</h2><form id="dichiara-offerta" class="picus-form form-layout" data-form-anteprima><fieldset class="campi-inattivi" disabled>
-                    <fieldset class="form-section"><legend>Misure erogate</legend><div class="form-section-content"><fieldset class="campo-scelte" data-misure ><legend class="sr-only">Misure</legend><div class="picus-choices"></div></fieldset></div></fieldset><fieldset class="form-section"><legend>Erogazione</legend><div class="form-section-content"><label class="picus-check"><input name="professionista" type="checkbox" > Tramite professionista</label></div></fieldset>
-                    <div class="form-submit"><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-primary" type="submit">Salva offerta</button></span><p class="picus-esito" role="status"></p></div>
+                    <h2 class="sr-only">Dichiara le misure erogate</h2><form id="dichiara-offerta" class="picus-form form-layout" novalidate><fieldset class="campi-form" disabled>
+                    <fieldset class="form-section"><legend>Misura attiva del catalogo</legend><div class="form-section-content"><div class="picus-fields fields-one"><label class="campo ">Misura da dichiarare o aggiornare<select class="form-control" name="misuraId" required></select></label></div></div></fieldset><fieldset class="form-section"><legend>Modalità di erogazione</legend><div class="form-section-content"><div class="picus-fields fields-one"><label class="campo ">Erogazione per la misura selezionata<select class="form-control" name="tramiteProfessionista" required><option value="false">Direttamente dall’organizzazione</option><option value="true">Tramite professionista esterno</option></select></label></div></div></fieldset>
+                    <div class="form-submit"><button class="btn btn-primary" type="submit">Salva offerta</button><p class="picus-esito" role="status"></p></div>
                 </fieldset></form>
                 </div>
             </div>

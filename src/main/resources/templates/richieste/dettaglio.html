@@ -133,11 +133,31 @@
         <section class="request-reference" aria-labelledby="titolo-riferimenti">
             <h2 id="titolo-riferimenti">Riferimenti della pratica</h2>
             <p><span>Identificativo</span><code id="dettaglio-id" th:text="${richiesta.id}"></code></p>
-            <details class="request-future">
+            <p class="picus-meta" id="annullamento-stato-finale" th:if="${richiesta.stato.name() == 'ANNULLATA'}">La pratica è già annullata.</p>
+            <details class="request-future" id="sezione-annullamento" th:if="${annullamentoDisponibile}">
                 <summary>Altre operazioni</summary>
-                <div class="picus-actions future-actions">
-                    <span class="azione-inattiva" data-funzione-inattiva><button type="button" class="btn btn-secondary btn-sm" disabled>Annulla la richiesta</button></span>
-                </div>
+                <form id="form-annullamento" class="picus-form" method="post" novalidate
+                      th:attr="data-motivo-obbligatorio=${motivoAnnullamentoObbligatorio}">
+                    <fieldset id="campi-annullamento" class="campi-form" disabled>
+                        <label class="campo" for="annullamento-motivo">
+                            <span th:text="${motivoAnnullamentoObbligatorio ? 'Motivo dell’annullamento (obbligatorio)' : 'Motivo dell’annullamento (facoltativo)'}">Motivo dell’annullamento</span>
+                            <textarea id="annullamento-motivo" name="motivo" class="form-control" rows="3" maxlength="500"
+                                      disabled
+                                      th:required="${motivoAnnullamentoObbligatorio}"
+                                      aria-describedby="annullamento-aiuto errore-annullamento-motivo"></textarea>
+                        </label>
+                        <p id="annullamento-aiuto" class="field-help"
+                           th:text="${motivoAnnullamentoObbligatorio ? 'Indica un motivo (massimo 500 caratteri). I dati e lo storico già registrati restano conservati.' : 'Puoi indicare un motivo facoltativo (massimo 500 caratteri). I dati già registrati restano conservati.'}"></p>
+                        <p id="errore-annullamento-motivo" class="field-error picus-errore" role="alert"></p>
+                        <div class="picus-actions future-actions">
+                            <button id="annulla-richiesta" type="submit" class="btn btn-danger btn-sm" disabled>Annulla la richiesta</button>
+                        </div>
+                    </fieldset>
+                    <div class="picus-actions">
+                        <a id="annullamento-rileggi" class="btn btn-secondary btn-sm" th:href="@{/richieste/{id}(id=${richiestaId})}" hidden>Rileggi lo stato corrente</a>
+                    </div>
+                    <p id="esito-annullamento" class="picus-esito" role="status" tabindex="-1"></p>
+                </form>
             </details>
         </section>
     </div>

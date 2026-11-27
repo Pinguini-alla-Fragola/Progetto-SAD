@@ -153,6 +153,44 @@ class SchedeOperatoreControllerTest {
                 .andExpect(jsonPath("$.campi.trimestre").isString());
     }
 
+    @Test
+    void conservaPrecisioneDiOreECostoOrarioERespigeValoriFuoriLimite() throws Exception {
+        String percorso = invia(operatore, "1", """
+                {"ore":1234567890123.123456,"costoOrarioLordo":9999999999999.999999,"conteggi":{}}
+                """)
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getHeader("Location");
+
+        String dettaglio = mvc.perform(get(percorso).with(user(operatore.toString()).roles("OPERATORE")))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        assertThat(dettaglio)
+                .contains("\"ore\":1234567890123.123456")
+                .contains("\"costoOrarioLordo\":9999999999999.999999");
+
+        invia(operatore, "2", """
+                {"ore":0,"costoOrarioLordo":0,"conteggi":{}}
+                """).andExpect(status().isCreated());
+
+        invia(operatore, "3", """
+                {"ore":10000000000000,"costoOrarioLordo":1,"conteggi":{}}
+                """)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.campi.ore").isString());
+
+        invia(operatore, "3", """
+                {"ore":1,"costoOrarioLordo":1.1234567,"conteggi":{}}
+                """)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.campi.costoOrarioLordo").isString());
+
+        invia(operatore, "3", """
+                {"ore":-0.01,"costoOrarioLordo":1,"conteggi":{}}
+                """)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.campi.ore").isString());
+    }
+
     private static MockHttpServletRequestBuilder riepilogo(String trimestre) {
         return get(RIEPILOGO).param("anno", "2025").param("trimestre", trimestre);
     }

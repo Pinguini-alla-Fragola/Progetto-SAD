@@ -7,27 +7,29 @@ export class ErroreHttp extends Error {
             409: 'I dati sono cambiati. Aggiorna la vista prima di riprovare.',
             429: 'Troppi tentativi. Attendi un minuto prima di riprovare.'
         };
-        super(messaggi[stato] || dati?.messaggio || 'Operazione non riuscita. Riprova tra poco.');
+        const messaggioServer = dati?.messaggio || dati?.detail || null;
+        super(messaggi[stato] || messaggioServer || 'Operazione non riuscita. Riprova tra poco.');
         this.stato = stato;
         this.campi = dati?.campi || {};
         // testo del server, anche quando il messaggio mostrato è quello generico dello stato HTTP
-        this.messaggioServer = dati?.messaggio || null;
+        this.messaggioServer = messaggioServer;
     }
 }
 
-export async function api(url, { method = 'GET', body, contentType = 'application/json', headers: aggiuntive = {}, csrf, decodificaJson } = {}) {
+export async function api(url, { method = 'GET', body, bodyJson = false, contentType = 'application/json', headers: aggiuntive = {}, csrf, decodificaJson } = {}) {
     const headers = { ...aggiuntive, Accept: 'application/json' };
     if (!['GET', 'HEAD', 'OPTIONS', 'TRACE'].includes(method)) {
         const { headerName, token } = csrf ?? await api('/api/auth/csrf');
         headers[headerName] = token;
     }
-    if (body !== undefined) {
+    const multipart = typeof FormData !== 'undefined' && body instanceof FormData;
+    if (body !== undefined && !multipart && contentType != null) {
         headers['Content-Type'] = contentType;
     }
-    const res = await fetch(url, {
-        method, headers,
-        body: body !== undefined && contentType === 'application/json' ? JSON.stringify(body) : body
-    });
+    const payload = body !== undefined && !multipart && !bodyJson && contentType === 'application/json'
+        ? JSON.stringify(body)
+        : body;
+    const res = await fetch(url, { method, headers, body: payload });
     if (res.status === 204) return null;
     const dati = await (decodificaJson ? res.text().then(decodificaJson) : res.json()).catch(() => null);
     if (!res.ok) {

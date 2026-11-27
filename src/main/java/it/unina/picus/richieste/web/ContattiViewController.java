@@ -25,6 +25,8 @@ import it.unina.picus.richieste.api.InvioRichiesteApi;
 import it.unina.picus.richieste.api.RisorsaRichiesteNonTrovataException;
 import it.unina.picus.richieste.api.RichiesteApi.AccordoADistanza;
 import it.unina.picus.richieste.api.RichiesteApi.AccordoInPresenza;
+import it.unina.picus.richieste.api.RichiesteApi.StatoRichiesta;
+import it.unina.picus.richieste.interno.applicazione.ServizioAnnullamentoRichieste;
 
 /**
  * Presenta le viste dei contatti di disponibilità. Gli endpoint di Richieste verificano
@@ -37,16 +39,18 @@ class ContattiViewController {
     private final InvioRichiesteApi richieste;
     private final ConsultazioneCatalogoApi catalogo;
     private final UtenzeApi utenze;
+    private final ServizioAnnullamentoRichieste annullamento;
     private static final DateTimeFormatter DATA = DateTimeFormatter.ofPattern("d MMMM uuuu, HH:mm", Locale.ITALIAN)
             .withZone(ZoneId.of("Europe/Rome"));
 
     ContattiViewController(@Qualifier("requestMappingHandlerMapping")
             ObjectProvider<RequestMappingHandlerMapping> rotte, InvioRichiesteApi richieste,
-            ConsultazioneCatalogoApi catalogo, UtenzeApi utenze) {
+            ConsultazioneCatalogoApi catalogo, UtenzeApi utenze, ServizioAnnullamentoRichieste annullamento) {
         this.rotte = rotte;
         this.richieste = richieste;
         this.catalogo = catalogo;
         this.utenze = utenze;
+        this.annullamento = annullamento;
     }
 
     /** Carica i valori di catalogo ammessi per l'invio della OPT. */
@@ -87,6 +91,13 @@ class ContattiViewController {
             modello.addAttribute("accordoRemoto", accordo);
             modello.addAttribute("dataAccordo", DATA.format(accordo.dataOra()));
         }
+        boolean giaAnnullata = dettaglio.richiesta().stato() == StatoRichiesta.ANNULLATA;
+        boolean annullamentoDisponibile = !giaAnnullata
+                && endpointRegistrato("/api/richieste/{id}/annullamento")
+                && annullamento.puoAnnullare(identita, richiestaId);
+        modello.addAttribute("annullamentoDisponibile", annullamentoDisponibile);
+        modello.addAttribute("motivoAnnullamentoObbligatorio",
+                annullamento.motivoObbligatorio(dettaglio.richiesta().stato()));
         return "richieste/dettaglio";
     }
 
