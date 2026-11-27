@@ -63,22 +63,31 @@ Su Windows, in PowerShell, usa `.\mvnw.cmd verify`.
 Per eseguire i test unitari contrassegnati con `@Tag("unit")` senza Docker,
 usa `bash ./mvnw -Pfast test` oppure `.\mvnw.cmd -Pfast test`.
 
-Il profilo `coverage` genera il report JaCoCo in `target/site/jacoco/` con
-`bash ./mvnw -Pcoverage verify` oppure `.\mvnw.cmd -Pcoverage verify`.
+### Report di copertura
+
+Genera il report JaCoCo con `bash ./mvnw -Pcoverage verify` oppure
+`.\mvnw.cmd -Pcoverage verify` in PowerShell. Per applicare il tema PICUS,
+esegui il comando seguente dopo Maven e apri `target/site/jacoco/index.html`.
+
+```console
+python scripts/applica_tema_jacoco.py target/site/jacoco
+```
+
 Su GitHub Actions il report viene generato automaticamente su `main`.
 Per ottenerlo su un altro branch della repository, apri **Actions → Java CI →
 Run workflow**, seleziona il branch e attiva **Genera il report JaCoCo**.
 Il risultato è scaricabile come artefatto **copertura-java**, con lo stesso
 tema dei Javadoc.
-Per applicare il tema anche in locale, esegui
-`python scripts/applica_tema_jacoco.py target/site/jacoco` dopo Maven.
 
 ## Avvio locale
 
 Copia [`.env.example`](.env.example) in `.env` e imposta le due password
-`PICUS_DB_PASSWORD` e `PICUS_DEMO_PASSWORD`. Con Python 3, esegui
-`python scripts/doctor.py` per controllare prerequisiti, configurazione
-Compose e disponibilità della porta 8080.
+`PICUS_DB_PASSWORD` e `PICUS_DEMO_PASSWORD`. Controlla i prerequisiti,
+la configurazione Compose e la disponibilità della porta 8080 con Python 3.
+
+```console
+python scripts/doctor.py
+```
 
 Dalla cartella del progetto avvia PICUS con Docker Compose.
 
@@ -89,5 +98,39 @@ docker compose up --build
 Apri <http://localhost:8080> e accedi con `banco@picus.test` e la password
 che hai impostato in `PICUS_DEMO_PASSWORD`.
 
-Per provare il percorso dalla richiesta all'appuntamento, usa il comando della
-[demo di coordinamento](docs/reviews/demo-coordinamento.md).
+### Demo del coordinamento
+
+Con Docker avviato, `.env` configurato e porta 8080 libera, lancia la demo
+dalla radice del repository. Il comando avvia PICUS in un progetto Compose
+dedicato e carica i dati sintetici per il percorso dalla richiesta all'accordo.
+
+```console
+python scripts/demo_coordinamento.py
+```
+
+Per provare le email di attivazione e recupero password, avvia la variante
+con Mailpit e apri la casella su <http://localhost:8025>.
+
+```console
+python scripts/demo_coordinamento.py --mailpit
+```
+
+Gli account, i passaggi della demo e i comandi per arrestarla sono nella
+[guida al coordinamento](docs/reviews/demo-coordinamento.md).
+
+## Diagrammi e release dello sprint
+
+Dopo una modifica ai sorgenti dei diagrammi, rigenera le anteprime SVG
+dalla radice del repository.
+
+```console
+python scripts/verifica_diagrammi.py --aggiorna
+```
+
+Per PlantUML aggiungi `--plantuml-jar "/percorso/plantuml.jar"`. La
+[guida ai diagrammi](docs/architecture/README.md#aggiornare-le-anteprime-svg)
+elenca i renderer richiesti e spiega come scegliere il commit di confronto.
+
+Per preparare la bozza della release con JAR, PDF e note di rilascio, apri
+**Actions → Prepara la release dello sprint → Run workflow**, seleziona
+`main` e indica un tag già pubblicato. [Guida alla release](.github/SETUP.md#bozza-di-release-dello-sprint)
