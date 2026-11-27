@@ -1,0 +1,33 @@
+documentation:
+  - changed-files:
+      - any-glob-to-all-files: '{README.md,docs/**,.github/**/*.md}'
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/workflows/**'
+          - '.github/labeler.yml'
+          - 'pom.xml'
+          - '.mvn/**'
+          - 'mvnw'
+          - 'mvnw.cmd'
+          - 'Dockerfile'
+          - 'docker-compose*.yml'
+
+frontend:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'src/main/resources/static/**'
+          - 'src/main/resources/templates/**'
+
+backend:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'src/main/java/**'
+          - 'src/main/resources/db/**'
+
+test:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'src/test/**'
+          - 'scripts/test_*.py'

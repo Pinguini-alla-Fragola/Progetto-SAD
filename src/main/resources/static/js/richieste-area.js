@@ -140,7 +140,7 @@ function rigaRichiesta(r, azioni, banco) {
 }
 export async function caricaAvvisi() {
     return caricaLista('assegnazioni', async () => {
-        const avvisi = await api('/api/avvisi');
+        const avvisi = (await api('/api/avvisi')).filter(avviso => avviso.tipo === 'RICHIESTA_DISPONIBILITA');
         const risultati = await Promise.allSettled(avvisi.map(a => api('/api/contatti-disponibilita/' + a.contattoId)));
         return avvisi.map((avviso, index) => {
             const risultato = risultati[index];
@@ -167,12 +167,6 @@ export async function caricaAvvisi() {
             });
         });
     }, 'Nessuna richiesta di disponibilità ricevuta.', ['stato', 'ambito']);
-}
-export async function caricaCatalogo() {
-    return caricaLista('catalogo-lista', async () => (await api('/api/catalogo/misure')).map(m =>
-        riga(m.dati.codice + ' · ' + m.dati.nome,
-            m.dati.descrizione + (m.dati.erogabileADistanza ? ' · Disponibile anche a distanza' : ''), [])),
-        'Nessuna misura attiva disponibile.');
 }
 export async function avviaCoordinamento(pagina) {
     if (pagina.dataset.banco !== 'true') return;

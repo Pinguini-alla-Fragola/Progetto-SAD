@@ -22,11 +22,15 @@ function size(bytes) {
     return new Intl.NumberFormat('it-IT', { maximumFractionDigits: 1 }).format(bytes / (bytes < 1048576 ? 1024 : 1048576)) + (bytes < 1048576 ? ' KB' : ' MB');
 }
 
-export function communications(host, messages, { banco, formatDate, onConfirm }) {
-    const rows = messages.map(message => {
+/**
+ * Crea le schede delle comunicazioni di una pagina. Quando richiesto, il Banco può aprire lo stato
+ * di ricezione e i destinatari possono registrare la propria conferma.
+ */
+export function communicationCards(messages, { banco, formatDate, onConfirm, conRiscontri = false, conConferma = false }) {
+    return messages.map(message => {
         const card = el('article', null, 'message-entry');
         const header = el('header', null, 'message-heading');
-        const title = el('h3', message.titolo);
+        const title = el('h3', message.titolo || 'Comunicazione senza oggetto');
         const time = el('time', formatDate(message.inviataIl), 'message-date');
         time.dateTime = message.inviataIl;
         header.append(title, time);
@@ -71,7 +75,7 @@ export function communications(host, messages, { banco, formatDate, onConfirm })
             card.append(files);
         }
         const footer = el('div', null, 'message-actions');
-        if (banco) {
+        if (banco && conRiscontri) {
             const toggle = button('Mostra riscontri');
             const panel = el('section', null, 'receipt-panel');
             panel.id = 'receipts-' + message.id;
@@ -89,46 +93,80 @@ export function communications(host, messages, { banco, formatDate, onConfirm })
                 panel.hidden = !panel.hidden;
                 toggle.setAttribute('aria-expanded', String(!panel.hidden));
                 toggle.textContent = panel.hidden ? 'Mostra riscontri' : 'Nascondi riscontri';
-                if (panel.hidden) return;
-                toggle.disabled = true;
+                if (panel.hidden || panel.getAttribute('aria-busy') === 'true') return;
                 panel.setAttribute('aria-busy', 'true');
+                summary.textContent = '';
+                receipts.hidden = true;
                 status.classList.remove('picus-errore');
                 status.textContent = 'Caricamento riscontri…';
                 try {
                     const data = await api('/api/comunicazioni/' + message.id + '/riscontri');
                     const confirmed = data.filter(r => r.confermataIl).length;
                     summary.textContent = `${confirmed} di ${data.length} ricezioni confermate`;
+                    const nameCounts = new Map();
+                    for (const receipt of data) {
+                        const key = receipt.nomeVisualizzato.toLocaleLowerCase('it');
+                        nameCounts.set(key, (nameCounts.get(key) ?? 0) + 1);
+                    }
                     const items = data.map(receipt => {
+                        const confirmedAt = receipt.confermataIl;
+                        const state = confirmedAt ? 'Confermata' : 'In attesa di conferma';
                         const row = el('div', null, 'receipt-row');
-                        row.append(el('strong', receipt.destinatario), el('span', receipt.confermataIl
-                            ? 'Confermata · ' + formatDate(receipt.confermataIl) : 'In attesa di conferma', 'picus-meta'));
-                        return listRow(row, { text: receipt.destinatario, filters: { stato: receipt.confermataIl ? 'Confermata' : 'In attesa' } });
+                        const name = receipt.nomeVisualizzato;
+                        const recipient = el('div');
+                        recipient.append(el('strong', name));
+                        const homonym = nameCounts.get(name.toLocaleLowerCase('it')) > 1;
+                        if (homonym) {
+                            recipient.append(el('p', 'ID account ' + receipt.destinatarioId, 'picus-meta'));
+                        }
+                        const detail = el('span', state, 'picus-meta');
+                        if (confirmedAt) {
+                            const time = el('time', formatDate(confirmedAt));
+                            time.dateTime = confirmedAt;
+                            detail.append(' · ', time);
+                        }
+                        row.append(recipient, detail);
+                        return listRow(row, {
+                            text: homonym ? name + ' ' + receipt.destinatarioId : name,
+                            filters: { stato: state }
+                        });
                     });
-                    renderList(receipts, items, { searchLabel: 'Cerca destinatari nei riscontri', filters: [{ key: 'stato', label: 'Ricezione' }], empty: 'Nessun destinatario.' });
+                    renderList(receipts, items, {
+                        searchLabel: 'Cerca destinatari', filters: [{ key: 'stato', label: 'Ricezione' }],
+                        empty: 'Nessun destinatario.'
+                    });
+                    receipts.hidden = false;
                     status.textContent = '';
                 } catch (error) {
                     status.textContent = error.message + ' Chiudi e riapri i riscontri per riprovare.';
                     status.classList.add('picus-errore');
-                } finally { toggle.disabled = false; panel.removeAttribute('aria-busy'); }
+                } finally {
+                    panel.removeAttribute('aria-busy');
+                }
             });
             footer.append(toggle);
             card.append(footer, panel);
-        } else if (!message.confermataIl) {
+        } else if (!banco && conConferma && !message.confermataIl) {
             const confirm = button('Confermo la ricezione');
             confirm.classList.replace('btn-secondary', 'btn-primary');
             const status = el('p', null, 'picus-esito');
             status.setAttribute('role', 'status');
             confirm.addEventListener('click', async () => {
                 confirm.disabled = true;
-                try { await api('/api/comunicazioni/' + message.id + '/ricezione', { method: 'POST' }); await onConfirm(); }
-                catch (error) { status.textContent = error.message; status.classList.add('picus-errore'); confirm.disabled = false; }
+                try {
+                    await api('/api/comunicazioni/' + message.id + '/ricezione', { method: 'POST' });
+                    document.dispatchEvent(new Event('comunicazioni:ricezione-confermata'));
+                    await onConfirm();
+                } catch (error) {
+                    status.textContent = error.message;
+                    status.classList.add('picus-errore');
+                    confirm.disabled = false;
+                }
             });
             footer.append(confirm, status);
             card.append(footer);
         }
-        return listRow(card, { text: [message.titolo, message.contenuto, formatDate(message.inviataIl), ...[...metadata.values()].map(f => f.nomeFile)].join(' '),
-            filters: { destinatari: audience, allegati: message.allegati.length ? 'Con allegati' : 'Senza allegati', ricezione: message.confermataIl ? 'Confermata' : 'Da confermare' } });
+        card.setAttribute('role', 'listitem');
+        return card;
     });
-    renderList(host, rows, { searchLabel: 'Cerca comunicazioni', placeholder: 'Oggetto, testo o nome allegato',
-        filters: [{ key: 'destinatari', label: 'Destinatari' }, { key: 'allegati', label: 'Allegati' }, ...(banco ? [] : [{ key: 'ricezione', label: 'Ricezione' }])], empty: 'Nessuna comunicazione.' });
 }

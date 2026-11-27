@@ -10,7 +10,6 @@ public interface AvvisiAnnullamentoApi {
      *
      * @param richiestaId identificativo della richiesta annullata
      * @param destinatari account coinvolti individuati dal modulo Richieste
-     * @see ComunicazioniApi#avvisaAnnullamento(UUID, Set)
      */
     void avvisaAnnullamento(UUID richiestaId, Set<UUID> destinatari);
 }

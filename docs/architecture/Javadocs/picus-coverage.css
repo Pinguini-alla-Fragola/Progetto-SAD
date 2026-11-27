@@ -1,0 +1,163 @@
+@media screen {
+    :root {
+        --coverage-covered: #1d422d;
+        --coverage-missed: #53272e;
+        --coverage-partial: #48380f;
+    }
+
+    :root[data-picus-theme="light"] {
+        --coverage-covered: #dafbe1;
+        --coverage-missed: #ffebe9;
+        --coverage-partial: #fff8c5;
+    }
+
+    body {
+        margin: 0;
+        padding: 0 var(--picus-gutter) 2rem;
+        background: var(--picus-background);
+        color: var(--picus-text);
+        font: 0.9rem/1.5 var(--picus-font);
+    }
+
+    td {
+        font: inherit;
+    }
+
+    a {
+        color: var(--picus-accent);
+    }
+
+    a:hover {
+        color: var(--picus-accent-hover);
+    }
+
+    :focus-visible {
+        outline: 2px solid var(--picus-accent);
+        outline-offset: 2px;
+    }
+
+    .picus-coverage-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        min-height: 54px;
+        font-size: 1rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+    }
+
+    .breadcrumb {
+        display: flow-root;
+        padding: 0.6rem 0.85rem;
+        border: 1px solid var(--picus-border);
+        border-radius: 8px;
+        background: var(--picus-surface);
+        overflow-wrap: anywhere;
+    }
+
+    .breadcrumb .info {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem 0.75rem;
+        margin-inline-start: 0.75rem;
+    }
+
+    .breadcrumb .info a {
+        margin: 0;
+    }
+
+    h1 {
+        font-size: clamp(1.6rem, 3vw, 2.5rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+        overflow-wrap: anywhere;
+    }
+
+    .picus-coverage-table,
+    pre.source {
+        overflow: auto;
+        border: 1px solid var(--picus-border);
+        border-radius: 10px;
+        background: var(--picus-surface);
+    }
+
+    table.coverage {
+        width: 100%;
+        font-variant-numeric: tabular-nums;
+    }
+
+    table.coverage thead,
+    table.coverage tfoot {
+        background: var(--picus-raised);
+        font-weight: 600;
+    }
+
+    table.coverage thead td,
+    table.coverage tfoot td,
+    table.coverage tbody td {
+        padding-block: 0.45rem;
+        border-color: var(--picus-border) !important;
+    }
+
+    table.coverage tbody tr:nth-child(even) {
+        background: var(--picus-alternate);
+    }
+
+    table.coverage tbody tr:hover {
+        background: var(--picus-accent-surface) !important;
+    }
+
+    pre.source {
+        padding: 0.75rem;
+    }
+
+    pre.source li,
+    .footer,
+    .footer a {
+        border-color: var(--picus-border);
+        color: var(--picus-muted);
+    }
+
+    pre.source span.fc,
+    pre.source span.bfc:hover {
+        background-color: var(--coverage-covered);
+    }
+
+    pre.source span.nc,
+    pre.source span.bnc:hover {
+        background-color: var(--coverage-missed);
+    }
+
+    pre.source span.pc,
+    pre.source span.bpc:hover {
+        background-color: var(--coverage-partial);
+    }
+
+    :root:not([data-picus-theme="light"]) pre.source :is(.pln, .pun) {
+        color: var(--picus-text);
+    }
+
+    :root:not([data-picus-theme="light"]) pre.source :is(.typ, .lit, .tag) {
+        color: #a5d2ff;
+    }
+
+    :root:not([data-picus-theme="light"]) pre.source :is(.kwd, .atn, .dec) {
+        color: #e2bcff;
+    }
+
+    :root:not([data-picus-theme="light"]) pre.source :is(.str, .atv) {
+        color: #b4e1a4;
+    }
+
+    :root:not([data-picus-theme="light"]) pre.source .com {
+        color: #b6c2cf;
+    }
+
+    @media (max-width: 36rem) {
+        .breadcrumb .info {
+            float: none;
+            margin: 0 0 0.35rem;
+        }
+    }
+}

@@ -3,6 +3,7 @@ package it.unina.picus.monitoraggio.api;
 import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.UUID;
  * Raccoglie i conteggi trimestrali delle OPT e le schede personali degli operatori del Banco.
  * I dati descrivono attività dichiarate e sono indipendenti dal ciclo della singola richiesta.
  */
-public interface MonitoraggioApi {
+public interface MonitoraggioApi extends SchedeOperatoreApi {
 
     /**
      * Registra i conteggi della OPT autenticata per il trimestre. Lo stesso valore ritrasmesso
@@ -46,50 +47,37 @@ public interface MonitoraggioApi {
      */
     List<ConteggioOpt> consultaConteggiOpt(IdentitaAutenticata attore, UUID optId, Trimestre da, Trimestre a);
 
-    /**
-     * Invia la scheda personale trimestrale dell'operatore autenticato. Il modulo ricava il
-     * titolare dall'identità verificata. Il tracciato e le regole di firma e correzione seguono
-     * il raffinamento della storia di compilazione.
-     *
-     * @param attore identità verificata dell'operatore interno o esterno pagato dal Banco
-     * @param trimestre periodo di rendicontazione
-     * @param dati dati dichiarati nella scheda personale
-     * @return identificativo della scheda ricevuta
-     * @throws SecurityException se l'attore non è un operatore autorizzato
-     * @throws IllegalArgumentException se i dati non rispettano il tracciato applicabile
-     * @throws IllegalStateException se il periodo o la scheda esistente non consentono un nuovo invio
-     */
+    /** {@inheritDoc} */
+    @Override
     UUID inviaSchedaOperatore(IdentitaAutenticata attore, Trimestre trimestre, DatiSchedaOperatore dati);
 
-    /**
-     * Elenca le schede personali inviate dall'operatore autenticato.
-     *
-     * @param attore identità verificata dell'operatore titolare
-     * @return riferimenti alle proprie schede
-     * @throws SecurityException se l'attore non è un operatore autorizzato
-     */
+    /** {@inheritDoc} */
+    @Override
     List<SchedaSintesi> elencoSchedeOperatore(IdentitaAutenticata attore);
 
-    /**
-     * Consulta la scheda personale. Il Banco può leggerla per la rendicontazione e
-     * l'operatore titolare può consultare la propria.
-     *
-     * @param attore identità verificata del Banco autorizzato o dell'operatore titolare
-     * @param schedaId identificativo della scheda
-     * @return scheda personale visibile all'attore
-     * @throws SecurityException se l'attore non può consultare la scheda
-     * @throws NoSuchElementException se la scheda non esiste
-     */
+    /** {@inheritDoc} */
+    @Override
     SchedaOperatore consultaSchedaOperatore(IdentitaAutenticata attore, UUID schedaId);
 
     /**
      * Riepiloga per il Banco le schede ricevute nel trimestre selezionato. Le voci aggregate
-     * rappresentano conteggi dichiarati e conservano distinte le categorie sovrapponibili.
+     * rispettano la configurazione associata al trimestre stesso: una versione immutabile pubblicata
+     * dal Banco per il tracciato TM-OP-01 ammette esclusivamente i codici pubblicati per quel
+     * periodo (modifiche o disattivazioni pubblicate per trimestri successivi non alterano questo
+     * riepilogo), l'associazione storica {@code v0.1} riservata ai periodi già rendicontati prima
+     * della migrazione conserva i codici sintatticamente validi, mentre quando esiste almeno una
+     * pubblicazione per il tracciato un trimestre non configurato non aggrega voci non pubblicate
+     * (finché nessuna versione è ancora pubblicata resta attivo in via transitoria il tracciato
+     * provvisorio {@code v0.1}). Le categorie sovrapponibili restano distinte. Uno zero dichiarato
+     * su una voce ammessa è incluso nei totali, mentre una voce mai dichiarata o non ammessa è
+     * assente. Le schede ricevute restano nell'elenco. Per ogni operatore si usa l'ultima versione
+     * accettata nel periodo.
      *
      * @param attore identità verificata del Banco autorizzato alla rendicontazione
      * @param trimestre singolo trimestre da riepilogare
      * @return riferimenti alle schede ricevute e totali per voce, anche in assenza di invii
      * @throws SecurityException se l'attore non è autorizzato al riepilogo
+     * @throws NullPointerException se manca il trimestre
      */
     RiepilogoTrimestre riepilogaSchede(IdentitaAutenticata attore, Trimestre trimestre);
 
@@ -132,8 +120,7 @@ public interface MonitoraggioApi {
     record ConteggioOpt(UUID optId, VoceMisura conteggio) {}
 
     /**
-     * Dati iniziali della scheda personale. Obbligatorietà, firma e versione del tracciato
-     * restano da definire con il raffinamento dei requisiti di monitoraggio.
+     * Dati dichiarati per la scheda personale TM-OP-01, inviata senza firma.
      *
      * @param nome nome dell'operatore
      * @param cognome cognome dell'operatore
@@ -187,9 +174,10 @@ public interface MonitoraggioApi {
      * Dati usati dal Banco per la rendicontazione trimestrale.
      *
      * @param schede riferimenti alle schede ricevute usate per il riepilogo
-     * @param conteggi totali dichiarati per voce, senza stima di persone uniche
+     * @param conteggi totali esatti per voce, senza stima di persone uniche. Uno zero
+     *                 dichiarato è incluso e una voce mai dichiarata è assente
      */
-    record RiepilogoTrimestre(List<SchedaSintesi> schede, Map<String, Long> conteggi) {
+    record RiepilogoTrimestre(List<SchedaSintesi> schede, Map<String, BigInteger> conteggi) {
         /** Crea copie immutabili dell'elenco delle schede e dei totali. */
         public RiepilogoTrimestre {
             schede = List.copyOf(schede);

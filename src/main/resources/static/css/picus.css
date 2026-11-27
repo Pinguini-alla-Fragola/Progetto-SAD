@@ -293,6 +293,8 @@ body[data-area] { --sidebar-width: 15rem; --workspace-gutter: 2rem; background: 
 .count-rows { display: grid; gap: .75rem; margin-bottom: .875rem; }
 .count-row .campo { gap: 0; }
 .count-row .btn { margin: 0; }
+.conteggi-opt-righe :is(.count-head, .count-row) { grid-template-columns: minmax(0, 1fr) 8rem 6rem; }
+.conteggi-opt-righe .rimuovi-voce { justify-self: start; }
 .count-row .campo > span { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .record { padding: 1.25rem 0; border-bottom: 1px solid var(--color-line); }
 .record:first-child { padding-top: 0; }
@@ -391,6 +393,7 @@ body[data-area] .picus-footer { background: var(--color-white); }
 .receipt-heading { display: flex; align-items: baseline; flex-wrap: wrap; gap: .5rem 1rem; }
 .receipt-heading p { margin: 0; }
 .receipt-row { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: .375rem 1rem; padding-block: .875rem; border-bottom: 1px solid var(--color-line); font-size: .9375rem; }
+.receipt-row > div { min-width: 0; overflow-wrap: anywhere; }
 .receipt-row .picus-meta { margin: 0; }
 .report-record { padding-block: 1.25rem; border-bottom: 1px solid var(--color-line); }
 .report-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem 1.5rem; }
@@ -412,8 +415,8 @@ body[data-area] .picus-footer { background: var(--color-white); }
 .count-report-row { align-items: baseline; padding-block: .875rem; border-bottom: 1px solid var(--color-line); font-size: .9375rem; overflow-wrap: anywhere; }
 .count-value { text-align: right; font-variant-numeric: tabular-nums; }
 #riepilogo-schede, #riepilogo-opt { padding-bottom: 1.25rem; border-bottom: 1px solid var(--color-line); }
-#riepilogo-schede > .campi-inattivi, #riepilogo-opt > .campi-inattivi { display: flex; align-items: end; flex-wrap: wrap; gap: 1rem 1.5rem; width: 100%; }
-#riepilogo-schede > .campi-inattivi > .picus-fields { flex: 0 1 24rem; max-width: 100%; }
+#riepilogo-schede > .campi-inattivi, #riepilogo-schede > .campi-form, #riepilogo-opt > .campi-inattivi { display: flex; align-items: end; flex-wrap: wrap; gap: 1rem 1.5rem; width: 100%; }
+#riepilogo-schede > .campi-inattivi > .picus-fields, #riepilogo-schede > .campi-form > .picus-fields { flex: 0 1 24rem; max-width: 100%; }
 #riepilogo-schede .form-submit, #riepilogo-opt .form-submit { margin: 0; padding: 0; border: 0; }
 #riepilogo-opt .form-section { flex: 1 1 22rem; padding: 0; border: 0; }
 #riepilogo-opt .form-section > legend { float: none; width: auto; margin-bottom: .5rem; padding: 0; color: var(--color-slate-600); font-size: .875rem; }
@@ -502,7 +505,7 @@ body[data-area] .picus-footer { background: var(--color-white); }
     .form-section-content { clear: both; margin-left: 0; }
     .form-section { padding-block: 1.25rem; }
     .count-head { display: none; }
-    .count-row { grid-template-columns: minmax(0, 1fr) 6rem; }
+    .count-row, .conteggi-opt-righe .count-row { grid-template-columns: minmax(0, 1fr) 6rem; }
     .count-row .campo { gap: .375rem; }
     .count-row .campo > span { position: static; width: auto; height: auto; overflow: visible; clip-path: none; white-space: normal; }
     .count-row .btn { grid-column: 1 / -1; justify-self: start; }

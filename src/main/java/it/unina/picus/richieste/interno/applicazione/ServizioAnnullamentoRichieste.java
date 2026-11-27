@@ -21,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 /** Service Layer per registrare l'annullamento e consegnare gli avvisi nella stessa transazione. */
 @Service
 public class ServizioAnnullamentoRichieste {
-
     /** Motivo registrato automaticamente quando il Banco revoca l'utenza dell'erogatore assegnato (#67). */
     public static final String MOTIVO_REVOCA_EROGATORE = "Revoca dell'utenza dell'erogatore assegnato";
 
@@ -39,11 +38,24 @@ public class ServizioAnnullamentoRichieste {
      * @param avvisi scrittura degli avvisi operativi
      */
     public ServizioAnnullamentoRichieste(RichiestaRepository richieste, InvioRichiesteApi consultazione,
-                                         UtenzeApi utenze, AvvisiAnnullamentoApi avvisi) {
+            UtenzeApi utenze, AvvisiAnnullamentoApi avvisi) {
         this.richieste = richieste;
         this.consultazione = consultazione;
         this.utenze = utenze;
         this.avvisi = avvisi;
+    }
+
+    /**
+     * Controlla l'accesso prima che il controller legga il corpo del comando.
+     * Il comando ripete il controllo sulla richiesta bloccata prima di modificarla.
+     *
+     * @param attore identità verificata dalla sessione
+     * @param richiestaId identificativo della richiesta
+     */
+    @Transactional(readOnly = true)
+    public void verificaAccesso(IdentitaAutenticata attore, UUID richiestaId) {
+        var richiesta = richieste.cercaPerId(richiestaId).orElseThrow(RisorsaRichiesteNonTrovataException::new);
+        RegoleAccessoRichiesta.verificaAnnullamento(attore, new Soggetti(richiesta.titolareId(), richiesta.erogatoreId()));
     }
 
     /**

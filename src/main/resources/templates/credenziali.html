@@ -22,22 +22,39 @@
         <h1 th:text="${attivazione ? 'Attiva il tuo account' : 'Recupera la password'}"></h1>
     </header>
     <div class="mobile-body">
-        <p class="page-description" th:unless="${valido}">Per continuare richiedi un nuovo link usando l’email associata all’account.</p>
-        <form id="credenziali" th:data-endpoint="${endpoint}" data-form-anteprima><fieldset class="campi-inattivi" disabled>
-            <div th:if="${valido}" class="form-group">
-                <input type="hidden" name="token" th:value="${token}">
-                <label class="form-label" for="password">Nuova password</label>
-                <input id="password" class="form-control" name="nuovaPassword" type="password" required
-                       minlength="12" maxlength="256" autocomplete="new-password" aria-describedby="password-help">
-                <p class="form-text" id="password-help">Usa almeno 12 caratteri.</p>
-            </div>
-            <div th:unless="${valido}" class="form-group">
-                <label class="form-label" for="email">Email dell’account</label>
-                <input id="email" class="form-control" type="email" name="email" required autocomplete="email">
-            </div>
-            <span class="azione-inattiva" data-funzione-inattiva><button type="submit" class="btn btn-primary btn-block" th:text="${valido ? 'Salva password' : 'Richiedi un link'}"></button></span>
-            <p id="esito" class="picus-esito" role="status"></p>
-        </fieldset></form>
+        <p class="page-description" th:if="${attivazione and !valido}">
+            Il link di attivazione non è valido, è scaduto oppure è già stato utilizzato.
+            Richiedine uno nuovo indicando l’email del tuo account, oppure <a href="/login">torna all’accesso</a>.
+        </p>
+        <p class="page-description" th:if="${!attivazione and !valido}">
+            Per continuare richiedi un nuovo link usando l’email associata all’account.
+        </p>
+        <form id="credenziali"
+              method="post"
+              action="/attiva"
+              th:data-endpoint="${endpoint}"
+              th:attr="data-form-anteprima=${!attivazione ? '' : null}">
+            <fieldset th:classappend="${!attivazione} ? 'campi-inattivi'" th:disabled="${!attivazione}">
+                <div th:if="${valido}" class="form-group">
+                    <input type="hidden" name="token" th:value="${token}">
+                    <label class="form-label" for="password">Nuova password</label>
+                    <input id="password" class="form-control" name="nuovaPassword" type="password" required
+                           minlength="12" maxlength="256" autocomplete="new-password" aria-describedby="password-help">
+                    <p class="form-text" id="password-help">Usa almeno 12 caratteri.</p>
+                </div>
+                <div th:unless="${valido}" class="form-group">
+                    <label class="form-label" for="email">Email dell’account</label>
+                    <input id="email" class="form-control" type="email" name="email" required autocomplete="email">
+                </div>
+                <span th:classappend="${!attivazione} ? 'azione-inattiva'"
+                      th:attr="data-funzione-inattiva=${!attivazione ? '' : null}">
+                    <button type="submit" class="btn btn-primary btn-block"
+                            th:text="${valido ? 'Salva password' : (attivazione ? 'Richiedi un nuovo link' : 'Richiedi un link')}"></button>
+                </span>
+                <p id="esito" class="picus-esito" role="status"></p>
+                <p id="vai-al-login" th:if="${valido}" hidden><a href="/login">Vai all’accesso</a></p>
+            </fieldset>
+        </form>
     </div>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>

@@ -7,6 +7,8 @@
     <link rel="icon" href="/img/picus.svg" type="image/svg+xml">
     <link rel="stylesheet" href="/css/picus.css">
     <script src="/js/area.js" type="module"></script>
+    <script src="/js/notifiche-comunicazioni.js" type="module"></script>
+    <script src="/js/comunicazioni.js" type="module"></script>
     <link rel="stylesheet" href="/css/integrazione-ui.css">
 </head>
 <body data-area="opt" th:attr="data-utente=${utente.id}">
@@ -24,67 +26,80 @@
 <button class="sidebar-backdrop" type="button" aria-label="Chiudi menu di navigazione" tabindex="-1" hidden></button>
 <main id="contenuto" class="picus-container area" tabindex="-1">
     <nav class="area-nav" id="workspace-sidebar" aria-label="Sezioni dell’area di lavoro">
-<a href="#richieste"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#requests"></use></svg><span>Richieste</span></a>
-<a href="#offerta"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#book"></use></svg><span>Offerta</span></a>
-<a href="#comunicazioni"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#mail"></use></svg><span>Comunicazioni</span></a>
-<a href="#monitoraggio"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#chart"></use></svg><span>Monitoraggio</span></a>
+        <a href="#richieste"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#requests"></use></svg><span>Richieste</span></a>
+        <a href="#offerta"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#book"></use></svg><span>Offerta</span></a>
+        <a href="#comunicazioni"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#mail"></use></svg><span>Comunicazioni</span></a>
+        <a href="#monitoraggio"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#chart"></use></svg><span>Monitoraggio</span></a>
     </nav>
     <div class="area-content">
         <header class="area-intro"><h1 id="workspace-title">Richieste</h1></header>
         <p id="area-esito" class="picus-esito" role="status"></p>
-<section class="area-panel" id="richieste" tabindex="-1" aria-label="Richieste">
-<div class="workspace-tabs" data-tabs><div class="tab-list" role="tablist" aria-label="Richieste organizzazione">
-<button type="button" role="tab" id="richieste-tab-mie" aria-controls="richieste-view-mie" aria-selected="true" tabindex="0">Richieste inviate</button>
-<button type="button" role="tab" id="richieste-tab-assegnazioni" aria-controls="richieste-view-assegnazioni" aria-selected="false" tabindex="-1">Richieste di disponibilità</button>
-</div>
-<div role="tabpanel" id="richieste-view-mie" aria-labelledby="richieste-tab-mie" tabindex="0">
-<div class="panel-heading"><h2 class="picus-card-title">Richieste dell’organizzazione</h2><div class="picus-actions"><button class="btn btn-secondary btn-sm" type="button" data-aggiorna="richieste">Aggiorna elenco</button><a class="btn btn-primary" href="/richieste/nuova">Nuova richiesta</a></div></div><div class="picus-list" id="richieste-mie" aria-live="polite"></div>
-</div>
-<div role="tabpanel" id="richieste-view-assegnazioni" aria-labelledby="richieste-tab-assegnazioni" tabindex="0" hidden>
-<div class="panel-heading"><h2 class="sr-only">Richieste di disponibilità</h2><button class="btn btn-secondary btn-sm" type="button" data-aggiorna="avvisi">Aggiorna contatti</button></div><div class="picus-list" id="assegnazioni" aria-live="polite"></div>
-</div>
-</div>
-</section>
-<section class="area-panel" id="offerta" tabindex="-1" aria-label="Offerta">
-<div class="workspace-tabs" data-tabs><div class="tab-list" role="tablist" aria-label="Offerta">
-<button type="button" role="tab" id="offerta-tab-attuale" aria-controls="offerta-view-attuale" aria-selected="true" tabindex="0">Offerta attuale</button>
-<button type="button" role="tab" id="offerta-tab-modifica" aria-controls="offerta-view-modifica" aria-selected="false" tabindex="-1">Dichiara misure</button>
-</div>
-<div role="tabpanel" id="offerta-view-attuale" aria-labelledby="offerta-tab-attuale" tabindex="0">
-<h2 class="picus-card-title">Misure dichiarate</h2><div class="picus-list" id="offerta-opt" aria-live="polite" data-funzione-inattiva></div>
-</div>
-<div role="tabpanel" id="offerta-view-modifica" aria-labelledby="offerta-tab-modifica" tabindex="0" hidden>
-<h2 class="sr-only">Dichiara le misure erogate</h2><form id="dichiara-offerta" class="picus-form form-layout" data-form-anteprima><fieldset class="campi-inattivi" disabled>
-<fieldset class="form-section"><legend>Misure erogate</legend><div class="form-section-content"><fieldset class="campo-scelte" data-misure ><legend class="sr-only">Misure</legend><div class="picus-choices"></div></fieldset></div></fieldset><fieldset class="form-section"><legend>Erogazione</legend><div class="form-section-content"><label class="picus-check"><input name="professionista" type="checkbox" > Tramite professionista</label></div></fieldset>
-<div class="form-submit"><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-primary" type="submit">Salva offerta</button></span><p class="picus-esito" role="status"></p></div>
-</fieldset></form>
-</div>
-</div>
-</section>
-<section class="area-panel" id="comunicazioni" tabindex="-1" aria-label="Comunicazioni">
-<h2 class="sr-only">Comunicazioni ricevute</h2><div class="picus-list" id="messaggi" aria-live="polite" data-funzione-inattiva></div>
-</section>
-<section class="area-panel" id="monitoraggio" tabindex="-1" aria-label="Monitoraggio">
-<div class="workspace-tabs" data-tabs><div class="tab-list" role="tablist" aria-label="Conteggi trimestrali">
-<button type="button" role="tab" id="conteggi-tab-compila" aria-controls="conteggi-view-compila" aria-selected="true" tabindex="0">Compila</button>
-<button type="button" role="tab" id="conteggi-tab-inviati" aria-controls="conteggi-view-inviati" aria-selected="false" tabindex="-1">Invii registrati</button>
-</div>
-<div role="tabpanel" id="conteggi-view-compila" aria-labelledby="conteggi-tab-compila" tabindex="0">
-<h2 class="picus-card-title">Conteggi trimestrali</h2><form id="conteggi" class="picus-form form-layout" data-form-anteprima><fieldset class="campi-inattivi" disabled>
-<fieldset class="form-section"><legend>Periodo</legend><div class="form-section-content"><div class="picus-fields fields-period">
-<label class="campo ">Anno<input class="form-control" name="anno" type="number" required min="2000" max="9999" data-anno></label>
-<label class="campo ">Trimestre<select class="form-control" name="trimestre" required ><option value="1">1º trimestre</option><option value="2">2º trimestre</option><option value="3">3º trimestre</option><option value="4">4º trimestre</option></select></label>
-</div></div></fieldset><fieldset class="form-section"><legend>Misura</legend><div class="form-section-content"><div class="picus-fields fields-one">
-<label class="campo "><span class="sr-only">Misura</span><select class="form-control" name="misuraId" required data-misure-storiche></select></label>
-</div></div></fieldset><fieldset class="form-section"><legend>Voci del tracciato</legend><div class="form-section-content"><div class="count-head" aria-hidden="true"><span>Voce</span><span>Conteggio</span></div><div id="voci-conteggi" class="count-rows"></div><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-secondary btn-sm" type="button" id="altra-voce-opt">Aggiungi voce</button></span><p class="form-text">Indica 0 per dichiarare un conteggio nullo.</p></div></fieldset>
-<div class="form-submit"><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-primary" type="submit">Salva conteggi</button></span><p class="picus-esito" role="status"></p></div>
-</fieldset></form>
-</div>
-<div role="tabpanel" id="conteggi-view-inviati" aria-labelledby="conteggi-tab-inviati" tabindex="0" hidden>
-<h2 class="sr-only">Invii registrati</h2><div class="picus-list" id="conteggi-lista" aria-live="polite" data-funzione-inattiva></div>
-</div>
-</div>
-</section>
+        <section class="area-panel" id="richieste" tabindex="-1" aria-label="Richieste">
+            <div class="workspace-tabs" data-tabs><div class="tab-list" role="tablist" aria-label="Richieste organizzazione">
+                <button type="button" role="tab" id="richieste-tab-mie" aria-controls="richieste-view-mie" aria-selected="true" tabindex="0">Richieste inviate</button>
+                <button type="button" role="tab" id="richieste-tab-assegnazioni" aria-controls="richieste-view-assegnazioni" aria-selected="false" tabindex="-1">Richieste di disponibilità</button>
+            </div>
+                <div role="tabpanel" id="richieste-view-mie" aria-labelledby="richieste-tab-mie" tabindex="0">
+                    <div class="panel-heading"><h2 class="picus-card-title">Richieste dell’organizzazione</h2><div class="picus-actions"><button class="btn btn-secondary btn-sm" type="button" data-aggiorna="richieste">Aggiorna elenco</button><a class="btn btn-primary" href="/richieste/nuova">Nuova richiesta</a></div></div><div class="picus-list" id="richieste-mie" aria-live="polite"></div>
+                </div>
+                <div role="tabpanel" id="richieste-view-assegnazioni" aria-labelledby="richieste-tab-assegnazioni" tabindex="0" hidden>
+                    <div class="panel-heading"><h2 class="sr-only">Richieste di disponibilità</h2><button class="btn btn-secondary btn-sm" type="button" data-aggiorna="avvisi">Aggiorna contatti</button></div><div class="picus-list" id="assegnazioni" aria-live="polite"></div>
+                </div>
+            </div>
+        </section>
+        <section class="area-panel" id="offerta" tabindex="-1" aria-label="Offerta">
+            <div class="workspace-tabs" data-tabs><div class="tab-list" role="tablist" aria-label="Offerta">
+                <button type="button" role="tab" id="offerta-tab-attuale" aria-controls="offerta-view-attuale" aria-selected="true" tabindex="0">Offerta attuale</button>
+                <button type="button" role="tab" id="offerta-tab-modifica" aria-controls="offerta-view-modifica" aria-selected="false" tabindex="-1">Dichiara misure</button>
+            </div>
+                <div role="tabpanel" id="offerta-view-attuale" aria-labelledby="offerta-tab-attuale" tabindex="0">
+                    <h2 class="picus-card-title">Misure dichiarate</h2><div class="picus-list" id="offerta-opt" aria-live="polite" data-funzione-inattiva></div>
+                </div>
+                <div role="tabpanel" id="offerta-view-modifica" aria-labelledby="offerta-tab-modifica" tabindex="0" hidden>
+                    <h2 class="sr-only">Dichiara le misure erogate</h2><form id="dichiara-offerta" class="picus-form form-layout" data-form-anteprima><fieldset class="campi-inattivi" disabled>
+                    <fieldset class="form-section"><legend>Misure erogate</legend><div class="form-section-content"><fieldset class="campo-scelte" data-misure ><legend class="sr-only">Misure</legend><div class="picus-choices"></div></fieldset></div></fieldset><fieldset class="form-section"><legend>Erogazione</legend><div class="form-section-content"><label class="picus-check"><input name="professionista" type="checkbox" > Tramite professionista</label></div></fieldset>
+                    <div class="form-submit"><span class="azione-inattiva" data-funzione-inattiva><button class="btn btn-primary" type="submit">Salva offerta</button></span><p class="picus-esito" role="status"></p></div>
+                </fieldset></form>
+                </div>
+            </div>
+        </section>
+        <section class="area-panel" id="comunicazioni" tabindex="-1" aria-label="Comunicazioni">
+            <h2 class="sr-only">Comunicazioni ricevute</h2><div class="picus-list" id="messaggi" aria-live="polite"></div>
+        </section>
+        <section class="area-panel" id="monitoraggio" tabindex="-1" aria-label="Monitoraggio">
+            <div class="workspace-tabs" data-tabs><div class="tab-list" role="tablist" aria-label="Conteggi trimestrali">
+                <button type="button" role="tab" id="conteggi-tab-compila" aria-controls="conteggi-view-compila" aria-selected="true" tabindex="0">Compila</button>
+                <button type="button" role="tab" id="conteggi-tab-inviati" aria-controls="conteggi-view-inviati" aria-selected="false" tabindex="-1">Invii registrati</button>
+            </div>
+                <div role="tabpanel" id="conteggi-view-compila" aria-labelledby="conteggi-tab-compila" tabindex="0">
+                    <h2 class="picus-card-title">Conteggi trimestrali</h2><form id="conteggi" class="picus-form form-layout">
+                    <fieldset class="form-section"><legend>Periodo</legend><div class="form-section-content"><div class="picus-fields fields-period">
+                        <label class="campo ">Anno<input class="form-control" name="anno" type="number" required min="2000" max="2100" data-anno></label>
+                        <label class="campo ">Trimestre<select class="form-control" name="trimestre" required ><option value="1">1º trimestre</option><option value="2">2º trimestre</option><option value="3">3º trimestre</option><option value="4">4º trimestre</option></select></label>
+                    </div></div></fieldset><fieldset class="form-section"><legend>Misura</legend><div class="form-section-content"><div class="picus-fields fields-one">
+                    <label class="campo "><span class="sr-only">Misura</span><select class="form-control" name="misuraId" required data-misure-storiche></select></label>
+                </div><p class="picus-meta" id="conteggi-misura-avviso" role="status" aria-live="polite" hidden></p><div id="conteggi-cambio-misura" class="form-submit" role="alert" hidden><p class="form-text" id="conteggi-cambio-misura-testo"></p><div class="picus-actions"><button type="button" class="btn btn-secondary btn-sm" id="conteggi-svuota-bozza">Svuota conteggi e seleziona misura</button><button type="button" class="btn btn-secondary btn-sm" id="conteggi-annulla-cambio">Annulla cambio misura</button></div></div></div></fieldset><fieldset class="form-section conteggi-opt-righe"><legend>Voci del tracciato</legend><div class="form-section-content"><div class="count-head" aria-hidden="true"><span>Voce</span><span>Conteggio</span></div><div id="voci-conteggi" class="count-rows"></div><button class="btn btn-secondary btn-sm" type="button" id="altra-voce-opt">Aggiungi voce</button><p class="form-text">Indica 0 per dichiarare un conteggio nullo.</p></div></fieldset>
+                    <div class="form-submit"><button class="btn btn-primary" type="submit">Salva conteggi</button><p class="picus-esito" role="status"></p></div>
+                </form>
+                </div>
+                <div role="tabpanel" id="conteggi-view-inviati" aria-labelledby="conteggi-tab-inviati" tabindex="0" hidden>
+                    <h2 class="sr-only">Invii registrati</h2><form id="filtro-conteggi-opt" class="picus-form form-layout">
+                    <div class="picus-fields fields-period">
+                        <label class="campo ">Anno inizio<input class="form-control" name="anno" type="number" required min="2000" max="2100" data-anno></label>
+                        <label class="campo ">Trimestre inizio<select class="form-control" name="trimestre" required ><option value="1">1º trimestre</option><option value="2">2º trimestre</option><option value="3">3º trimestre</option><option value="4">4º trimestre</option></select></label>
+                        <label class="campo ">Anno fine (opz.)<input class="form-control" name="annoFine" type="number" min="2000" max="2100"></label>
+                        <label class="campo ">Trimestre fine<select class="form-control" name="trimestreFine" ><option value="">Seleziona</option><option value="1">1º trimestre</option><option value="2">2º trimestre</option><option value="3">3º trimestre</option><option value="4">4º trimestre</option></select></label>
+                    </div>
+                    <p class="form-text">Per consultare un solo trimestre lascia vuoti entrambi i campi finali.</p>
+                    <div class="form-submit"><button class="btn btn-secondary btn-sm" type="submit">Consulta conteggi</button></div>
+                </form>
+                <p class="picus-esito" id="conteggi-lettura-esito" role="status"></p>
+                <button class="btn btn-secondary btn-sm" id="conteggi-riprova" type="button" aria-controls="conteggi-lista" hidden>Riprova la consultazione</button>
+                <p class="picus-meta conteggi-avvertenza" id="conteggi-avvertenza" role="status" hidden></p>
+                <div class="picus-list" id="conteggi-lista" aria-live="polite"></div>
+                </div>
+            </div>
+        </section>
     </div>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>

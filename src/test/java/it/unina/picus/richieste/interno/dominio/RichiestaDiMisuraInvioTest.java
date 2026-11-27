@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import it.unina.picus.richieste.api.RichiesteApi.DatiInvio;
@@ -16,6 +17,7 @@ import it.unina.picus.richieste.api.RichiesteApi.TipoDestinatario;
  * Creazione della pratica all'invio (#48, criterio 1 della #99) e riconoscimento dei ritenti.
  */
 @DisplayName("Creazione della richiesta all'invio")
+@Tag("unit")
 class RichiestaDiMisuraInvioTest {
 
     private static final Instant ISTANTE = Instant.parse("2026-11-17T10:00:00Z");

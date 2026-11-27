@@ -15,9 +15,12 @@ Stati ammessi per l’utenza sono In attesa di attivazione, Attivo e Revocato. #
 | Password | Almeno 12 caratteri; stessa policy per attivazione e recupero |
 | Attivazione | Link email monouso valido 72 ore; l’utente sceglie la password |
 | Reinvio attivazione | Solo account in attesa; nuovo link invalida il precedente |
+| Reinvio richiesto dall’utente | Con la propria email, senza sessione; al massimo 3 richieste in 5 minuti per indirizzo, soglia da validare |
 | Recupero | Solo account attivo, link monouso di 15 minuti |
 | Password cambiata | Nuova password valida, precedente non più utilizzabile |
 | Tentativi ripetuti | Cinque fallimenti in cinque minuti; attesa proposta di 60 secondi |
+| Richieste di recupero | Con la propria email, senza sessione; al massimo 3 richieste in 5 minuti per indirizzo, soglia da validare; un nuovo link invalida il precedente |
+| Cambio password dal link | Stessa regola della password iniziale; il link si consuma insieme al cambio e chiude gli altri link aperti dell’account. Password da correggere: nessun cambio e link ancora valido. Link scaduto o già usato: nessun cambio e invito a una nuova richiesta |
 | Messaggi pubblici | Stesso riscontro per email esistente o non abilitata, senza rivelare l’account |
 | Logout | Sessione terminata sul server; successivo riuso della sessione negato |
 

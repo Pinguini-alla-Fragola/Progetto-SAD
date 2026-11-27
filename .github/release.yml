@@ -1,0 +1,16 @@
+changelog:
+  categories:
+    - title: Funzionalità
+      labels:
+        - 'type: user-story'
+        - enhancement
+    - title: Correzioni
+      labels:
+        - 'type: bug'
+        - bug
+    - title: Documentazione
+      labels:
+        - documentation
+    - title: Altri aggiornamenti
+      labels:
+        - '*'
