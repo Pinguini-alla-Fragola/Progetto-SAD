@@ -44,3 +44,16 @@ test('passa il corpo JSON integro alla decodifica opzionale', async t => {
     });
     assert.deepEqual(parsed, { testo: grezzo });
 });
+
+test('bodyJson invia una stringa JSON già serializzata con Content-Type e CSRF senza doppia codifica', async t => {
+    const chiamate = [];
+    t.mock.method(globalThis, 'fetch', async (url, options) => {
+        chiamate.push({ url, ...options });
+        return Response.json(url.endsWith('/csrf') ? { headerName: 'X-CSRF-TOKEN', token: 'token-json' } : { id: 'ok' });
+    });
+    const grezzo = '{"ore":1234567890123.123456,"costoOrarioLordo":9999999999999.999999}';
+    await api('/api/monitoraggio/schede-operatore', { method: 'POST', body: grezzo, bodyJson: true });
+    assert.equal(chiamate[1].headers['Content-Type'], 'application/json');
+    assert.equal(chiamate[1].headers['X-CSRF-TOKEN'], 'token-json');
+    assert.equal(chiamate[1].body, grezzo);
+});

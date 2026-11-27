@@ -134,20 +134,40 @@ function mostraErroreSuControllo(controllo, messaggio) {
     (controllo.closest?.('label') ?? controllo.parentElement).append(err);
 }
 
-function parseDecimaleNonNegativo(testo, etichetta) {
+/**
+ * Normalizza e valida un decimale non negativo entro 13 cifre intere e 6 decimali
+ * conservandolo come testo esatto per evitare perdita di precisione in IEEE-754.
+ */
+export function normalizzaDecimaleScheda(testo, etichetta) {
     const pulito = String(testo ?? '').trim().replace(',', '.');
-    if (!/^(?:0|[1-9][0-9]*)(?:\.[0-9]+)?$/.test(pulito)) {
-        throw new Error(`Indica un numero non negativo valido per ${etichetta}`);
+    if (!/^[0-9]+(?:\.[0-9]+)?$/.test(pulito)) {
+        throw new Error(`Usa un numero non negativo valido per ${etichetta}`);
     }
-    const [parteIntera, parteDecimale = ''] = pulito.split('.');
-    if (parteIntera.length > 13 || parteDecimale.length > 6) {
-        throw new Error('Usa al massimo 13 cifre intere e 6 decimali');
+    const [interaGrezza, decimale = ''] = pulito.split('.');
+    const intera = interaGrezza.replace(/^0+(?=[0-9])/, '');
+    const cifreIntere = intera === '0' ? 0 : intera.length;
+    if (cifreIntere > 13 || decimale.length > 6) {
+        throw new Error('Usa un numero non negativo con al massimo 13 cifre intere e 6 decimali');
     }
-    const numero = Number(pulito);
-    if (!Number.isFinite(numero) || numero < 0) {
-        throw new Error(`Indica un numero non negativo valido per ${etichetta}`);
-    }
-    return numero;
+    return pulito.includes('.') ? `${intera}.${decimale}` : intera;
+}
+
+/**
+ * Serializza l'oggetto di invio preservando i token numerici esatti per {@code ore} e
+ * {@code costoOrarioLordo}, lasciando a {@code JSON.stringify} la serializzazione dei campi restanti.
+ */
+export function serializzaInvioScheda(dati) {
+    const campiBase = JSON.stringify({
+        nome: dati.nome,
+        cognome: dati.cognome,
+        luogoNascita: dati.luogoNascita,
+        dataNascita: dati.dataNascita,
+        codiceFiscale: dati.codiceFiscale,
+        qualifica: dati.qualifica,
+        tipologiaContratto: dati.tipologiaContratto,
+        areaLivello: dati.areaLivello
+    });
+    return `${campiBase.slice(0, -1)},"ore":${dati.ore},"costoOrarioLordo":${dati.costoOrarioLordo},"conteggi":${JSON.stringify(dati.conteggi)}}`;
 }
 
 /** Collega compilazione e consultazione delle schede personali trimestrali dell'Operatore (#179). */
@@ -449,13 +469,13 @@ export function initSchedeOperatore() {
         const erroriLocali = [];
         let ore;
         try {
-            ore = parseDecimaleNonNegativo(form.elements.ore?.value, 'le ore lavorate');
+            ore = normalizzaDecimaleScheda(form.elements.ore?.value, 'le ore lavorate');
         } catch (err) {
             erroriLocali.push([form.elements.ore, err.message]);
         }
         let costoOrarioLordo;
         try {
-            costoOrarioLordo = parseDecimaleNonNegativo(form.elements.costoOrarioLordo?.value, 'il costo orario lordo');
+            costoOrarioLordo = normalizzaDecimaleScheda(form.elements.costoOrarioLordo?.value, 'il costo orario lordo');
         } catch (err) {
             erroriLocali.push([form.elements.costoOrarioLordo, err.message]);
         }
@@ -491,7 +511,7 @@ export function initSchedeOperatore() {
             return;
         }
 
-        const payload = {
+        const corpoJson = serializzaInvioScheda({
             nome: testoFacoltativo('nome'),
             cognome: testoFacoltativo('cognome'),
             luogoNascita: testoFacoltativo('luogoNascita'),
@@ -503,7 +523,7 @@ export function initSchedeOperatore() {
             ore,
             costoOrarioLordo,
             conteggi
-        };
+        });
 
         invioInCorso = true;
         if (submitBtn) submitBtn.disabled = true;
@@ -516,7 +536,8 @@ export function initSchedeOperatore() {
             const params = new URLSearchParams({ anno: annoRaw, trimestre: trimestreRaw });
             const ricevuta = await api(`/api/monitoraggio/schede-operatore?${params}`, {
                 method: 'POST',
-                body: payload
+                body: corpoJson,
+                bodyJson: true
             });
             for (const input of vociContenitore.querySelectorAll('input[data-categoria]')) {
                 input.value = '';

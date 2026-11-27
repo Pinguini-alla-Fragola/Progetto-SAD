@@ -12,6 +12,7 @@ export function avviaAnnullamentoRichiesta(pagina) {
     if (!pagina || !form) return;
 
     const id = pagina.dataset.richiestaId;
+    const campi = document.getElementById('campi-annullamento');
     const textarea = document.getElementById('annullamento-motivo');
     const erroreMotivo = document.getElementById('errore-annullamento-motivo');
     const submitBtn = document.getElementById('annulla-richiesta');
@@ -21,6 +22,12 @@ export function avviaAnnullamentoRichiesta(pagina) {
 
     const motivoObbligatorio = form.dataset.motivoObbligatorio === 'true';
     let invioInCorso = false;
+
+    const impostaControlliDisabilitati = disabilitati => {
+        if (campi) campi.disabled = disabilitati;
+        textarea.disabled = disabilitati;
+        submitBtn.disabled = disabilitati;
+    };
 
     const pulisciErrori = () => {
         textarea.removeAttribute('aria-invalid');
@@ -58,8 +65,7 @@ export function avviaAnnullamentoRichiesta(pagina) {
         }
 
         invioInCorso = true;
-        submitBtn.disabled = true;
-        textarea.disabled = true;
+        impostaControlliDisabilitati(true);
 
         try {
             const confermata = await confermaOperazione({
@@ -71,8 +77,7 @@ export function avviaAnnullamentoRichiesta(pagina) {
             });
             if (!confermata) {
                 invioInCorso = false;
-                submitBtn.disabled = false;
-                textarea.disabled = false;
+                impostaControlliDisabilitati(false);
                 submitBtn.focus();
                 return;
             }
@@ -85,8 +90,7 @@ export function avviaAnnullamentoRichiesta(pagina) {
             location.reload();
         } catch (causa) {
             invioInCorso = false;
-            submitBtn.disabled = false;
-            textarea.disabled = false;
+            impostaControlliDisabilitati(false);
             if (rileggiLink) rileggiLink.hidden = false;
 
             const testoErrore = causa?.stato || causa?.campi
@@ -113,6 +117,9 @@ export function avviaAnnullamentoRichiesta(pagina) {
             }
         }
     });
+
+    // I controlli partono disabilitati nel markup finché il gestore submit non è attivo (#250).
+    impostaControlliDisabilitati(false);
 }
 
 if (typeof document !== 'undefined') {
