@@ -105,7 +105,7 @@ public class OffertaTerritorialeJpa {
     }
 
     /**
-     * Blocca e rilegge la misura nella transazione del caso d'uso chiamante.
+     * Blocca con {@code PESSIMISTIC_READ} e rilegge la misura nella transazione del chiamante.
      *
      * @param id identificativo della misura
      * @return misura aggiornata sotto lock, se presente

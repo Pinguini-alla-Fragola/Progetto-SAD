@@ -23,9 +23,8 @@ function size(bytes) {
 }
 
 /**
- * Crea le schede delle comunicazioni di una pagina; ricerca, filtri e pagine li gestisce il server. I pulsanti dei
- * riscontri (Banco) e della conferma di ricezione (destinatari) si attivano con le opzioni conRiscontri e
- * conConferma, quando esistono i rispettivi endpoint (#143, #144).
+ * Crea le schede delle comunicazioni di una pagina. Quando richiesto, il Banco può aprire lo stato
+ * di ricezione e i destinatari possono registrare la propria conferma.
  */
 export function communicationCards(messages, { banco, formatDate, onConfirm, conRiscontri = false, conConferma = false }) {
     return messages.map(message => {
@@ -94,27 +93,56 @@ export function communicationCards(messages, { banco, formatDate, onConfirm, con
                 panel.hidden = !panel.hidden;
                 toggle.setAttribute('aria-expanded', String(!panel.hidden));
                 toggle.textContent = panel.hidden ? 'Mostra riscontri' : 'Nascondi riscontri';
-                if (panel.hidden) return;
-                toggle.disabled = true;
+                if (panel.hidden || panel.getAttribute('aria-busy') === 'true') return;
                 panel.setAttribute('aria-busy', 'true');
+                summary.textContent = '';
+                receipts.hidden = true;
                 status.classList.remove('picus-errore');
                 status.textContent = 'Caricamento riscontri…';
                 try {
                     const data = await api('/api/comunicazioni/' + message.id + '/riscontri');
                     const confirmed = data.filter(r => r.confermataIl).length;
                     summary.textContent = `${confirmed} di ${data.length} ricezioni confermate`;
+                    const nameCounts = new Map();
+                    for (const receipt of data) {
+                        const key = receipt.nomeVisualizzato.toLocaleLowerCase('it');
+                        nameCounts.set(key, (nameCounts.get(key) ?? 0) + 1);
+                    }
                     const items = data.map(receipt => {
+                        const confirmedAt = receipt.confermataIl;
+                        const state = confirmedAt ? 'Confermata' : 'In attesa di conferma';
                         const row = el('div', null, 'receipt-row');
-                        row.append(el('strong', receipt.destinatario), el('span', receipt.confermataIl
-                            ? 'Confermata · ' + formatDate(receipt.confermataIl) : 'In attesa di conferma', 'picus-meta'));
-                        return listRow(row, { text: receipt.destinatario, filters: { stato: receipt.confermataIl ? 'Confermata' : 'In attesa' } });
+                        const name = receipt.nomeVisualizzato;
+                        const recipient = el('div');
+                        recipient.append(el('strong', name));
+                        const homonym = nameCounts.get(name.toLocaleLowerCase('it')) > 1;
+                        if (homonym) {
+                            recipient.append(el('p', 'ID account ' + receipt.destinatarioId, 'picus-meta'));
+                        }
+                        const detail = el('span', state, 'picus-meta');
+                        if (confirmedAt) {
+                            const time = el('time', formatDate(confirmedAt));
+                            time.dateTime = confirmedAt;
+                            detail.append(' · ', time);
+                        }
+                        row.append(recipient, detail);
+                        return listRow(row, {
+                            text: homonym ? name + ' ' + receipt.destinatarioId : name,
+                            filters: { stato: state }
+                        });
                     });
-                    renderList(receipts, items, { searchLabel: 'Cerca destinatari nei riscontri', filters: [{ key: 'stato', label: 'Ricezione' }], empty: 'Nessun destinatario.' });
+                    renderList(receipts, items, {
+                        searchLabel: 'Cerca destinatari', filters: [{ key: 'stato', label: 'Ricezione' }],
+                        empty: 'Nessun destinatario.'
+                    });
+                    receipts.hidden = false;
                     status.textContent = '';
                 } catch (error) {
                     status.textContent = error.message + ' Chiudi e riapri i riscontri per riprovare.';
                     status.classList.add('picus-errore');
-                } finally { toggle.disabled = false; panel.removeAttribute('aria-busy'); }
+                } finally {
+                    panel.removeAttribute('aria-busy');
+                }
             });
             footer.append(toggle);
             card.append(footer, panel);

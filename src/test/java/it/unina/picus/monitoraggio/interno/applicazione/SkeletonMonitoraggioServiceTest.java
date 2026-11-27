@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import it.unina.picus.monitoraggio.api.DatiConteggiNonValidiException;
@@ -21,6 +22,7 @@ import it.unina.picus.utenze.api.UtenzeApi.IdentitaAutenticata;
 import it.unina.picus.utenze.api.UtenzeApi.RuoloUtente;
 import it.unina.picus.utenze.api.UtenzeApi.StatoUtenza;
 
+@Tag("unit")
 class SkeletonMonitoraggioServiceTest {
 
     private final UtenzeApi utenze = mock(UtenzeApi.class);

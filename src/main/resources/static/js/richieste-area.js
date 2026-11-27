@@ -168,12 +168,6 @@ export async function caricaAvvisi() {
         });
     }, 'Nessuna richiesta di disponibilità ricevuta.', ['stato', 'ambito']);
 }
-export async function caricaCatalogo() {
-    return caricaLista('catalogo-lista', async () => (await api('/api/catalogo/misure')).map(m =>
-        riga(m.dati.codice + ' · ' + m.dati.nome,
-            m.dati.descrizione + (m.dati.erogabileADistanza ? ' · Disponibile anche a distanza' : ''), [])),
-        'Nessuna misura attiva disponibile.');
-}
 export async function avviaCoordinamento(pagina) {
     if (pagina.dataset.banco !== 'true') return;
     const id = encodeURIComponent(pagina.dataset.richiestaId);

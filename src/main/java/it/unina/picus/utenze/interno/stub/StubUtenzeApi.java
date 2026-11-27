@@ -8,7 +8,9 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
+import it.unina.picus.utenze.api.NomiAccountApi;
 import it.unina.picus.utenze.api.OperazioneUtenzaNonConsentitaException;
 import it.unina.picus.utenze.api.UtenzaNonTrovataException;
 import org.slf4j.Logger;
@@ -27,7 +29,7 @@ import it.unina.picus.utenze.api.UtenzeApi;
  */
 @Component
 @Profile("skeleton")
-public class StubUtenzeApi implements UtenzeApi {
+public class StubUtenzeApi implements UtenzeApi, NomiAccountApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(StubUtenzeApi.class);
 
@@ -118,6 +120,14 @@ public class StubUtenzeApi implements UtenzeApi {
     @Override
     public Optional<AccountSintetico> cercaAccount(UUID accountId) {
         return trova(accountId).map(StubUtenzeApi::sintetico);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Map<UUID, String> nomiVisualizzati(Set<UUID> accountIds) {
+        return perEmail.values().stream()
+                .filter(account -> accountIds.contains(account.id()))
+                .collect(Collectors.toUnmodifiableMap(Account::id, Account::nome));
     }
 
     @Override

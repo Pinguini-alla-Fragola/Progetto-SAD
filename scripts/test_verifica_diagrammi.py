@@ -1,5 +1,8 @@
+from contextlib import redirect_stderr, redirect_stdout
+import io
 import struct
 from pathlib import Path
+from subprocess import CompletedProcess
 from tempfile import TemporaryDirectory
 import unittest
 from unittest.mock import patch
@@ -28,6 +31,44 @@ class VerificaDiagrammiTest(unittest.TestCase):
         file = self.root / "diagramma.png"
         Image.new("RGB", (16, 16), "white").save(file)
         return file
+
+    def test_aggiornamento_include_sorgenti_nuove_e_ignora_anteprime_o_sorgenti_eliminate(self):
+        modificato, nuovo, eliminato, invariato = map(Path, ("a.dot", "b.mmd", "c.puml", "d.dot"))
+        for file in (modificato, nuovo, invariato):
+            (self.root / file).touch()
+
+        with (
+            patch.object(verifica.subprocess, "run", return_value=CompletedProcess([], 0)),
+            patch.object(verifica, "percorsi_git", side_effect=[{modificato, eliminato, Path("d.svg")}, {nuovo}]),
+        ):
+            scelti = verifica.diagrammi_da_verificare({modificato, eliminato, invariato}, "HEAD", aggiorna=True)
+
+        self.assertEqual(scelti, {modificato, nuovo})
+
+    def test_aggiornamento_sostituisce_l_anteprima_solo_con_svg_valido(self):
+        sorgente = Path("a.dot")
+        anteprima = self.svg("a.svg", "<text>Prima</text>")
+        (self.root / sorgente).touch()
+
+        def render(content):
+            def scrivi(_sorgente, svg, _opzioni):
+                svg.write_text(content, encoding="utf-8")
+            return scrivi
+
+        with (
+            patch.object(verifica.sys, "argv", ["verifica_diagrammi.py", "--aggiorna"]),
+            patch.object(verifica, "percorsi_git", return_value={sorgente}),
+            patch.object(verifica, "diagrammi_da_verificare", return_value={sorgente}),
+            redirect_stdout(io.StringIO()),
+            redirect_stderr(io.StringIO()),
+        ):
+            with patch.object(verifica, "renderizza", side_effect=render("<invalido>")):
+                self.assertEqual(verifica.main(), 1)
+            self.assertIn("Prima", anteprima.read_text(encoding="utf-8"))
+            svg = '<svg xmlns="http://www.w3.org/2000/svg"><text>Dopo</text></svg>'
+            with patch.object(verifica, "renderizza", side_effect=render(svg)):
+                self.assertEqual(verifica.main(), 0)
+            self.assertEqual(anteprima.read_text(encoding="utf-8"), svg)
 
     def test_mermaid_rileva_transizione_senza_etichetta_rimossa(self):
         freccia = '<path data-et="edge" data-id="edge0" d="M0 0 L10 0" marker-end="url(#fine)"/>'

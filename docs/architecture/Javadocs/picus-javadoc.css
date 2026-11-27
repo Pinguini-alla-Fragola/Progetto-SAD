@@ -1,25 +1,7 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400..800&display=swap");
-
 @media screen {
     :root {
-        color-scheme: dark;
-
-        /* Palette e tipografia di strawberrypenguin.it. */
-        --picus-background: #0d1117;
-        --picus-surface: #161b22;
-        --picus-raised: #1b2330;
-        --picus-alternate: #121821;
-        --picus-border: #30363d;
-        --picus-text: #f0f6fc;
-        --picus-muted: #8b949e;
-        --picus-accent: #58a6ff;
-        --picus-accent-hover: #a5d2ff;
-        --picus-accent-surface: #16273c;
-        --picus-icon-filter: brightness(0) invert(0.8);
-        --picus-gutter: clamp(1rem, 3vw, 2.5rem);
-
         /* Variabili dello standard doclet del JDK 25. */
-        --body-font-family: Inter, system-ui, sans-serif;
+        --body-font-family: var(--picus-font);
         --block-font-family: var(--body-font-family);
         --body-text-color: var(--picus-text);
         --block-text-color: var(--picus-text);
@@ -59,22 +41,6 @@
         --tab-border-radius: 999px;
     }
 
-    :root[data-picus-theme="light"] {
-        color-scheme: light;
-
-        --picus-background: #ffffff;
-        --picus-surface: #f6f8fa;
-        --picus-raised: #edf2f8;
-        --picus-alternate: #ffffff;
-        --picus-border: #d0d7de;
-        --picus-text: #172332;
-        --picus-muted: #4e5d6d;
-        --picus-accent: #0962c9;
-        --picus-accent-hover: #064b9c;
-        --picus-accent-surface: #e1eeff;
-        --picus-icon-filter: brightness(0) invert(0.26);
-    }
-
     .nav-content {
         box-sizing: border-box;
         padding-inline: var(--picus-gutter);
@@ -89,39 +55,6 @@
         font-size: 1rem;
         font-weight: 800;
         letter-spacing: -0.02em;
-    }
-
-    .about-language a.picus-brand {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        color: var(--picus-text);
-        text-decoration: none;
-    }
-
-    .about-language a.picus-brand:hover {
-        color: var(--picus-accent);
-    }
-
-    .picus-brand img {
-        display: block;
-    }
-
-    .picus-theme-toggle {
-        min-height: 2.125rem;
-        padding: 0.35rem 0.7rem;
-        border: 1px solid var(--picus-border);
-        border-radius: 999px;
-        background: var(--picus-surface);
-        color: var(--picus-accent);
-        font-size: 0.875rem;
-        font-weight: 600;
-        cursor: pointer;
-    }
-
-    .picus-theme-toggle:hover {
-        border-color: var(--picus-accent);
-        background: var(--picus-accent-surface);
     }
 
     div.sub-nav {

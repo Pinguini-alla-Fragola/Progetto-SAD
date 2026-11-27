@@ -8,6 +8,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -22,6 +23,7 @@ import it.unina.picus.richieste.api.RichiesteApi.TipoDestinatario;
  * assegnazione che registra insieme erogatore, ambito e In programmazione.
  */
 @DisplayName("Transizioni di presa in carico e assegnazione della richiesta")
+@Tag("unit")
 class RichiestaDiMisuraTest {
 
     @Test

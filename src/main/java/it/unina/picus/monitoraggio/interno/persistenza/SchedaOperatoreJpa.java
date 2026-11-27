@@ -35,6 +35,8 @@ public class SchedaOperatoreJpa {
     private Instant inviataIl;
     @Column(length = 16)
     private String versioneTracciato;
+    @Column(name = "versione_categorie_id")
+    private UUID versioneCategorieId;
     private String nome;
     private String cognome;
     private String luogoNascita;
@@ -61,7 +63,7 @@ public class SchedaOperatoreJpa {
     protected SchedaOperatoreJpa() {}
 
     /** Converte l'invio già validato in un'entità da inserire. */
-    SchedaOperatoreJpa(SchedaOperatore scheda) {
+    SchedaOperatoreJpa(SchedaOperatore scheda, UUID versioneCategorieId) {
         SchedaSintesi sintesi = scheda.sintesi();
         DatiSchedaOperatore dati = scheda.dati();
         id = sintesi.id();
@@ -70,6 +72,7 @@ public class SchedaOperatoreJpa {
         trimestre = sintesi.trimestre().numero();
         inviataIl = sintesi.inviataIl();
         versioneTracciato = TracciatoSchedaOperatore.VERSIONE;
+        this.versioneCategorieId = versioneCategorieId;
         nome = dati.nome();
         cognome = dati.cognome();
         luogoNascita = dati.luogoNascita();
@@ -98,9 +101,9 @@ public class SchedaOperatoreJpa {
         return new SchedaOperatore(sintesi(), dati);
     }
 
-    /** Proietta il primo invio. La bozza TM-OP-01 ammette i codici validi dichiarati. */
+    /** Proietta il primo invio conservando tutti i conteggi originariamente dichiarati. */
     VersioneInviata aVersioneInviata() {
-        return new VersioneInviata(sintesi(), 1, conteggi, conteggi.keySet());
+        return new VersioneInviata(sintesi(), 1, conteggi);
     }
 
     private SchedaSintesi sintesi() {

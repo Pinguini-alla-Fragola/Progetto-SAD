@@ -15,7 +15,7 @@ export class ErroreHttp extends Error {
     }
 }
 
-export async function api(url, { method = 'GET', body, contentType = 'application/json', headers: aggiuntive = {}, csrf } = {}) {
+export async function api(url, { method = 'GET', body, contentType = 'application/json', headers: aggiuntive = {}, csrf, decodificaJson } = {}) {
     const headers = { ...aggiuntive, Accept: 'application/json' };
     if (!['GET', 'HEAD', 'OPTIONS', 'TRACE'].includes(method)) {
         const { headerName, token } = csrf ?? await api('/api/auth/csrf');
@@ -29,7 +29,7 @@ export async function api(url, { method = 'GET', body, contentType = 'applicatio
         body: body !== undefined && contentType === 'application/json' ? JSON.stringify(body) : body
     });
     if (res.status === 204) return null;
-    const dati = await res.json().catch(() => null);
+    const dati = await (decodificaJson ? res.text().then(decodificaJson) : res.json()).catch(() => null);
     if (!res.ok) {
         throw new ErroreHttp(res.status, dati);
     }

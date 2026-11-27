@@ -1,0 +1,13 @@
+spring:
+  mail:
+    host: mailpit
+    port: 1025
+    username: ""
+    password: ""
+    properties:
+      "[mail.smtp.auth]": "false"
+      "[mail.smtp.starttls.enable]": "false"
+
+picus:
+  mail:
+    from: noreply@picus.test

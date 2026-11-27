@@ -32,3 +32,15 @@ test('traduce la sessione scaduta e accetta una risposta 204', async t => {
     globalThis.fetch = async () => new Response(null, { status: 204 });
     assert.equal(await api('/api/auth/logout'), null);
 });
+
+test('passa il corpo JSON integro alla decodifica opzionale', async t => {
+    const grezzo = '{"lungo":9223372036854775807}';
+    t.mock.method(globalThis, 'fetch', async () => new Response(
+        grezzo,
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+    ));
+    const parsed = await api('/api/monitoraggio/schede-operatore/sch-1', {
+        decodificaJson: testo => ({ testo })
+    });
+    assert.deepEqual(parsed, { testo: grezzo });
+});

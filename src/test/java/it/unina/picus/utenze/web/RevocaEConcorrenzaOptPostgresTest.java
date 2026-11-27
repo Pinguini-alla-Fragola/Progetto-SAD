@@ -17,6 +17,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -41,6 +45,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import javax.sql.DataSource;
+
 import it.unina.picus.shared.InvioEmail;
 import it.unina.picus.utenze.api.UtenzeApi;
 import it.unina.picus.utenze.api.UtenzeApi.StatoUtenza;
@@ -56,11 +62,24 @@ class RevocaEConcorrenzaOptPostgresTest extends IntegrazionePostgresBase {
     private static final String PASSWORD_TEST = "Password-Test-123";
     private static final Pattern PATTERN_ACCOUNT_ID = Pattern.compile("\"accountId\"\\s*:\\s*\"([^\"]+)\"");
 
+    /** Sessioni bloccate dal processo indicato, direttamente o attraverso altre sessioni in coda. */
+    private static final String SESSIONI_IN_CODA_DIETRO_AL_BLOCCO = """
+            with recursive in_coda(pid) as (
+                select a.pid from pg_stat_activity a where ? = any(pg_blocking_pids(a.pid))
+                union
+                select a.pid from pg_stat_activity a join in_coda c on c.pid = any(pg_blocking_pids(a.pid))
+            )
+            select count(*) from in_coda
+            """;
+
     @Autowired
     private MockMvc mvc;
 
     @Autowired
     private JdbcTemplate jdbc;
+
+    @Autowired
+    private DataSource dataSource;
 
     @Autowired
     private PasswordEncoder encoder;
@@ -293,15 +312,16 @@ class RevocaEConcorrenzaOptPostgresTest extends IntegrazionePostgresBase {
         assertEquals(StatoUtenza.REVOCATO, utenzeApi.cercaAccount(operatoreId).orElseThrow().stato());
     }
 
+    /**
+     * Revoca e attivazione serializzano sul lock dell'account, quindi l'ordine fra le due non è fissato:
+     * se arriva prima l'attivazione, l'account si attiva e subito dopo viene revocato; se arriva prima la
+     * revoca, l'attivazione è rifiutata. In entrambi i casi la revoca riesce e ha l'ultima parola.
+     * I due ordini sono verificati in modo deterministico dai test successivi.
+     */
     @Test
     @DisplayName("Revoca e attivazione simultanee: nessun deadlock e la revoca prevale")
     void revocaEAttivazioneSimultanee_nessunDeadlockERevocaPrevale() throws Exception {
-        String codice = "OPT-CONC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-        String emailOpt = "conc-" + UUID.randomUUID() + "@picus.test";
-        EsitoRegistrazioneOpt reg = registrazioneOptService.registraOpt(new ComandoRegistrazioneOpt(
-                codice, "OPT Concorrente", "napoli", "12345678903", emailOpt
-        ));
-
+        EsitoRegistrazioneOpt reg = registraOptInAttesa("OPT-CONC-");
         UUID accountId = reg.accountId();
         String token = reg.datiInvio().tokenInChiaro();
 
@@ -312,23 +332,13 @@ class RevocaEConcorrenzaOptPostgresTest extends IntegrazionePostgresBase {
             Callable<Throwable> taskRevoca = () -> {
                 pronti.countDown();
                 via.await(5, TimeUnit.SECONDS);
-                try {
-                    utenzeApi.revocaUtenzaOpt(accountId);
-                    return null;
-                } catch (Throwable t) {
-                    return t;
-                }
+                return esito(() -> utenzeApi.revocaUtenzaOpt(accountId));
             };
 
             Callable<Throwable> taskAttivazione = () -> {
                 pronti.countDown();
                 via.await(5, TimeUnit.SECONDS);
-                try {
-                    attivazioneUtenzaService.attivaAccount(token, "PasswordSicura123!");
-                    return null;
-                } catch (Throwable t) {
-                    return t;
-                }
+                return esito(() -> attivazioneUtenzaService.attivaAccount(token, "PasswordSicura123!"));
             };
 
             Future<Throwable> fRevoca = pool.submit(taskRevoca);
@@ -340,15 +350,136 @@ class RevocaEConcorrenzaOptPostgresTest extends IntegrazionePostgresBase {
             Throwable errRevoca = fRevoca.get(15, TimeUnit.SECONDS);
             Throwable errAttivazione = fAttivazione.get(15, TimeUnit.SECONDS);
 
-            assertNull(errRevoca);
-            if (errAttivazione != null) {
-                assertTrue(errAttivazione instanceof TokenAttivazioneNonValidoException,
-                        () -> "Eccezione inattesa dall'attivazione concorrente: " + errAttivazione);
-            }        }
+            assertNull(errRevoca, "la revoca riesce in qualunque ordine");
+            assertTrue(errAttivazione == null || errAttivazione instanceof TokenAttivazioneNonValidoException,
+                    "l'attivazione riesce se arriva prima della revoca, altrimenti è rifiutata: " + errAttivazione);
+        }
 
         assertEquals(StatoUtenza.REVOCATO, utenzeApi.cercaAccount(accountId).orElseThrow().stato());
         assertThrows(TokenAttivazioneNonValidoException.class,
                 () -> attivazioneUtenzaService.attivaAccount(token, "AltraPassword123!"));
+    }
+
+    @Test
+    @DisplayName("Revoca in attesa prima dell'attivazione: la revoca riesce e l'attivazione è rifiutata")
+    void revocaPrimaDellAttivazione_attivazioneRifiutata() throws Exception {
+        EsitoRegistrazioneOpt reg = registraOptInAttesa("OPT-REV1-");
+        UUID accountId = reg.accountId();
+        String token = reg.datiInvio().tokenInChiaro();
+
+        List<Throwable> esiti = inOrdineSulLockDellAccount(accountId,
+                () -> utenzeApi.revocaUtenzaOpt(accountId),
+                () -> attivazioneUtenzaService.attivaAccount(token, "PasswordSicura123!"));
+
+        assertNull(esiti.get(0), "la revoca riesce");
+        assertTrue(esiti.get(1) instanceof TokenAttivazioneNonValidoException,
+                "l'attivazione dopo la revoca è rifiutata: " + esiti.get(1));
+        assertEquals(StatoUtenza.REVOCATO, utenzeApi.cercaAccount(accountId).orElseThrow().stato());
+    }
+
+    @Test
+    @DisplayName("Attivazione in attesa prima della revoca: l'account si attiva e la revoca lo revoca comunque")
+    void attivazionePrimaDellaRevoca_revocaPrevale() throws Exception {
+        EsitoRegistrazioneOpt reg = registraOptInAttesa("OPT-ATT1-");
+        UUID accountId = reg.accountId();
+        String token = reg.datiInvio().tokenInChiaro();
+
+        List<Throwable> esiti = inOrdineSulLockDellAccount(accountId,
+                () -> attivazioneUtenzaService.attivaAccount(token, "PasswordSicura123!"),
+                () -> utenzeApi.revocaUtenzaOpt(accountId));
+
+        assertNull(esiti.get(0), "l'attivazione arrivata prima riesce");
+        assertNull(esiti.get(1), "la revoca di un account appena attivato riesce");
+        assertEquals(StatoUtenza.REVOCATO, utenzeApi.cercaAccount(accountId).orElseThrow().stato());
+        assertThrows(TokenAttivazioneNonValidoException.class,
+                () -> attivazioneUtenzaService.attivaAccount(token, "AltraPassword123!"));
+    }
+
+    private EsitoRegistrazioneOpt registraOptInAttesa(String prefissoCodice) {
+        String codice = prefissoCodice + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        String emailOpt = "conc-" + UUID.randomUUID() + "@picus.test";
+        return registrazioneOptService.registraOpt(new ComandoRegistrazioneOpt(
+                codice, "OPT Concorrente", "napoli", "12345678903", emailOpt
+        ));
+    }
+
+    /** Operazione del servizio eseguita da un thread del test. */
+    @FunctionalInterface
+    private interface Operazione {
+        void esegui() throws Exception;
+    }
+
+    private static Throwable esito(Operazione operazione) {
+        try {
+            operazione.esegui();
+            return null;
+        } catch (Throwable t) {
+            return t;
+        }
+    }
+
+    /**
+     * Esegue le operazioni nell'ordine dato, mettendole in coda sul lock della riga dell'account.
+     *
+     * Il test tiene {@code FOR UPDATE} sull'account, su cui revoca e attivazione prendono il loro primo
+     * lock. Avvia la prima operazione e attende che PostgreSQL la mostri in attesa di quel lock, poi
+     * fa lo stesso con la seconda, e infine rilascia: PostgreSQL concede il lock della riga nell'ordine
+     * di arrivo, quindi l'ordine non dipende dallo scheduler dei thread.
+     *
+     * @return esito di ogni operazione, nell'ordine; {@code null} se è riuscita
+     */
+    private List<Throwable> inOrdineSulLockDellAccount(UUID accountId, Operazione... operazioni)
+            throws Exception {
+        try (ExecutorService pool = Executors.newFixedThreadPool(operazioni.length)) {
+            List<Future<Throwable>> esiti = new CopyOnWriteArrayList<>();
+            try (Connection blocco = dataSource.getConnection()) {
+                blocco.setAutoCommit(false);
+                int processoDelBlocco;
+                try (PreparedStatement lock = blocco.prepareStatement(
+                        "select pg_backend_pid() from utenze_account where id = ? for update")) {
+                    lock.setObject(1, accountId);
+                    try (ResultSet riga = lock.executeQuery()) {
+                        assertTrue(riga.next(), "account da bloccare non trovato");
+                        processoDelBlocco = riga.getInt(1);
+                    }
+                }
+                try {
+                    for (int i = 0; i < operazioni.length; i++) {
+                        Operazione operazione = operazioni[i];
+                        esiti.add(pool.submit(() -> esito(operazione)));
+                        attendiInAttesaDiLock(processoDelBlocco, i + 1);
+                    }
+                } finally {
+                    blocco.rollback();
+                }
+            }
+            List<Throwable> risultati = new ArrayList<>();
+            for (Future<Throwable> esito : esiti) {
+                risultati.add(esito.get(15, TimeUnit.SECONDS));
+            }
+            return risultati;
+        }
+    }
+
+    /**
+     * Attende che almeno {@code attesi} sessioni siano in coda dietro al lock del test, al più 10 secondi.
+     *
+     * Conta solo le sessioni bloccate, direttamente o attraverso un'altra sessione in coda, dal processo
+     * che tiene il lock: un'attesa estranea nello stesso database non fa partire l'operazione successiva
+     * prima che la precedente sia davvero in coda sull'account.
+     */
+    private void attendiInAttesaDiLock(int processoDelBlocco, int attesi) throws InterruptedException {
+        long limite = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
+        int inCoda = 0;
+        while (System.nanoTime() < limite) {
+            inCoda = jdbc.queryForObject(SESSIONI_IN_CODA_DIETRO_AL_BLOCCO, Integer.class, processoDelBlocco);
+            if (inCoda >= attesi) {
+                return;
+            }
+            Thread.sleep(20);
+        }
+        throw new AssertionError("dopo 10 secondi solo " + inCoda + " operazioni su " + attesi
+                + " risultano in coda sul lock dell'account");
     }
 
     private MockHttpSession creaEAccedi(String ruolo) throws Exception {
