@@ -2,7 +2,11 @@ import { geoMercator, geoPath } from './vendor/d3-geo.js';
 
 export const SVG_NS = 'http://www.w3.org/2000/svg';
 export const URL_CONFINI_CAMPANIA = '/dati/comuni-campania-istat-2026.json';
-export const VIEWBOX_COMPLETO = { x: 0, y: 0, width: 800, height: 600 };
+export const VIEWBOX_COMPLETO = { x: 0, y: 0, width: 960, height: 540 };
+
+const RAPPORTO_ASPETTO = VIEWBOX_COMPLETO.height / VIEWBOX_COMPLETO.width;
+const LARGHEZZA_MIN_VIEWBOX = 24;
+const SOGLIA_TRASCINAMENTO_PX = 5;
 
 const ALIAS_STORICI_A_CATALOGO = new Map([
     ['063049', 'napoli'],
@@ -173,6 +177,49 @@ function descriviConteggiVoce(voce) {
     return parti.join(' · ');
 }
 
+function vincolaViewBox(vb) {
+    const width = Math.min(VIEWBOX_COMPLETO.width, Math.max(LARGHEZZA_MIN_VIEWBOX, vb.width));
+    const height = width * RAPPORTO_ASPETTO;
+    return {
+        x: Math.max(0, Math.min(VIEWBOX_COMPLETO.width - width, vb.x)),
+        y: Math.max(0, Math.min(VIEWBOX_COMPLETO.height - height, vb.y)),
+        width,
+        height
+    };
+}
+
+function metricaViewportSvg(svg, vb) {
+    const rect = typeof svg?.getBoundingClientRect === 'function' ? svg.getBoundingClientRect() : null;
+    const w = rect?.width > 0 ? rect.width : VIEWBOX_COMPLETO.width;
+    const h = rect?.height > 0 ? rect.height : VIEWBOX_COMPLETO.height;
+    const left = Number.isFinite(rect?.left) ? rect.left : 0;
+    const top = Number.isFinite(rect?.top) ? rect.top : 0;
+    const scale = Math.min(w / vb.width, h / vb.height) || 1;
+    const offsetX = (w - vb.width * scale) / 2;
+    const offsetY = (h - vb.height * scale) / 2;
+    return { left, top, scale, offsetX, offsetY };
+}
+
+function puntoClientInSvg(svg, clientX, clientY, vb) {
+    const m = metricaViewportSvg(svg, vb);
+    return {
+        x: vb.x + (clientX - m.left - m.offsetX) / m.scale,
+        y: vb.y + (clientY - m.top - m.offsetY) / m.scale
+    };
+}
+
+function calcolaViewBoxZoomSuPunto(svg, nuovaLarghezza, clientX, clientY, ancoraSvg, vbRiferimento) {
+    const width = Math.min(VIEWBOX_COMPLETO.width, Math.max(LARGHEZZA_MIN_VIEWBOX, nuovaLarghezza));
+    const height = width * RAPPORTO_ASPETTO;
+    const m = metricaViewportSvg(svg, { ...vbRiferimento, width, height });
+    return vincolaViewBox({
+        x: ancoraSvg.x - (clientX - m.left - m.offsetX) / m.scale,
+        y: ancoraSvg.y - (clientY - m.top - m.offsetY) / m.scale,
+        width,
+        height
+    });
+}
+
 function calcolaViewBoxZona(boundsList) {
     if (!boundsList.length) return { ...VIEWBOX_COMPLETO };
     let minX = Infinity;
@@ -190,15 +237,13 @@ function calcolaViewBoxZona(boundsList) {
 
     const cx = (minX + maxX) / 2;
     const cy = (minY + maxY) / 2;
-    let spanW = Math.max((maxX - minX) * 1.9, 150);
-    let spanH = Math.max((maxY - minY) * 1.9, spanW * 0.75);
-    spanW = Math.max(spanW, spanH * (4 / 3));
-    spanH = spanW * 0.75;
+    let spanW = Math.max((maxX - minX) * 1.9, 180);
+    let spanH = Math.max((maxY - minY) * 1.9, spanW * RAPPORTO_ASPETTO);
+    spanW = Math.max(spanW, spanH / RAPPORTO_ASPETTO);
+    spanH = spanW * RAPPORTO_ASPETTO;
     if (spanW >= VIEWBOX_COMPLETO.width) return { ...VIEWBOX_COMPLETO };
 
-    const x = Math.max(0, Math.min(VIEWBOX_COMPLETO.width - spanW, cx - spanW / 2));
-    const y = Math.max(0, Math.min(VIEWBOX_COMPLETO.height - spanH, cy - spanH / 2));
-    return { x, y, width: spanW, height: spanH };
+    return vincolaViewBox({ x: cx - spanW / 2, y: cy - spanH / 2, width: spanW, height: spanH });
 }
 
 function formatViewBox(vb) {
@@ -221,6 +266,10 @@ export async function avviaMappaErogatori({
 } = {}) {
     if (!sezione) return null;
     sezione.hidden = false;
+    sezione._mappaAbortController?.abort?.();
+    const controller = new AbortController();
+    sezione._mappaAbortController = controller;
+    const { signal } = controller;
 
     const riepilogo = riepilogaTerritoriCandidati({
         comuneCodice: sezione.dataset?.comuneCodice || '',
@@ -285,6 +334,7 @@ export async function avviaMappaErogatori({
     const bottoniElenco = new Map();
     let viewBoxZona = { ...VIEWBOX_COMPLETO };
     let viewBoxCorrente = { ...VIEWBOX_COMPLETO };
+    let ignoraClickDopoTrascinamento = false;
 
     const aggiornaStatoVisualeSelezione = () => {
         for (const [chiave, pathEl] of poligoniPerChiave) {
@@ -388,12 +438,7 @@ export async function avviaMappaErogatori({
     };
 
     const applicaViewBox = (vb, attivaAzione) => {
-        viewBoxCorrente = {
-            x: Math.max(0, Math.min(VIEWBOX_COMPLETO.width - vb.width, vb.x)),
-            y: Math.max(0, Math.min(VIEWBOX_COMPLETO.height - vb.height, vb.y)),
-            width: Math.min(VIEWBOX_COMPLETO.width, Math.max(60, vb.width)),
-            height: Math.min(VIEWBOX_COMPLETO.height, Math.max(45, vb.height))
-        };
+        viewBoxCorrente = vincolaViewBox(vb);
         svg?.setAttribute('viewBox', formatViewBox(viewBoxCorrente));
         if (controlli) {
             for (const b of controlli.querySelectorAll('[data-mappa-azione="zona"], [data-mappa-azione="regione"]')) {
@@ -402,12 +447,136 @@ export async function avviaMappaErogatori({
         }
     };
 
-    const scalaViewBox = fattore => {
-        const w = Math.min(VIEWBOX_COMPLETO.width, Math.max(80, viewBoxCorrente.width * fattore));
-        const h = w * 0.75;
+    const scalaViewBox = (fattore, clientX, clientY) => {
+        const nuovaLarghezza = viewBoxCorrente.width * fattore;
+        if (Number.isFinite(clientX) && Number.isFinite(clientY) && svg) {
+            const ancora = puntoClientInSvg(svg, clientX, clientY, viewBoxCorrente);
+            applicaViewBox(calcolaViewBoxZoomSuPunto(svg, nuovaLarghezza, clientX, clientY, ancora, viewBoxCorrente), '');
+            return;
+        }
+        const w = Math.min(VIEWBOX_COMPLETO.width, Math.max(LARGHEZZA_MIN_VIEWBOX, nuovaLarghezza));
+        const h = w * RAPPORTO_ASPETTO;
         const cx = viewBoxCorrente.x + viewBoxCorrente.width / 2;
         const cy = viewBoxCorrente.y + viewBoxCorrente.height / 2;
         applicaViewBox({ x: cx - w / 2, y: cy - h / 2, width: w, height: h }, '');
+    };
+
+    const collegaInterazionePuntatore = () => {
+        if (!svg) return;
+        const puntatori = new Map();
+        let statoGesto = null;
+        let mossoNelGesto = false;
+
+        const distanzaPuntatori = () => {
+            const [a, b] = Array.from(puntatori.values());
+            return {
+                dist: Math.hypot(b.clientX - a.clientX, b.clientY - a.clientY),
+                cx: (a.clientX + b.clientX) / 2,
+                cy: (a.clientY + b.clientY) / 2
+            };
+        };
+
+        const avviaPinch = () => {
+            const { dist, cx, cy } = distanzaPuntatori();
+            if (dist <= 0) return;
+            mossoNelGesto = true;
+            svg.classList?.add?.('mappa-trascinamento');
+            statoGesto = {
+                tipo: 'pinch',
+                distanzaIniziale: dist,
+                viewBoxIniziale: { ...viewBoxCorrente },
+                ancoraSvg: puntoClientInSvg(svg, cx, cy, viewBoxCorrente)
+            };
+        };
+
+        svg.addEventListener('wheel', event => {
+            event.preventDefault();
+            const moltiplicatore = event.deltaMode === 1 ? 32 : event.deltaMode === 2 ? 300 : 1;
+            const delta = Math.max(-240, Math.min(240, (event.deltaY || 0) * moltiplicatore));
+            if (!delta) return;
+            const fattore = Math.exp(delta * (event.ctrlKey ? 0.008 : 0.0022));
+            scalaViewBox(fattore, event.clientX, event.clientY);
+        }, { passive: false, signal });
+
+        svg.addEventListener('pointerdown', event => {
+            if (event.pointerType === 'mouse' && event.button !== 0) return;
+            ignoraClickDopoTrascinamento = false;
+            puntatori.set(event.pointerId, { clientX: event.clientX, clientY: event.clientY });
+            if (puntatori.size === 1) {
+                mossoNelGesto = false;
+                statoGesto = {
+                    tipo: 'pan',
+                    clientX: event.clientX,
+                    clientY: event.clientY,
+                    viewBoxIniziale: { ...viewBoxCorrente }
+                };
+            } else if (puntatori.size === 2) {
+                try { svg.setPointerCapture?.(event.pointerId); } catch {}
+                avviaPinch();
+            }
+        }, { signal });
+
+        svg.addEventListener('pointermove', event => {
+            if (!puntatori.has(event.pointerId)) return;
+            puntatori.set(event.pointerId, { clientX: event.clientX, clientY: event.clientY });
+            if (puntatori.size >= 2) {
+                if (statoGesto?.tipo !== 'pinch') {
+                    avviaPinch();
+                    return;
+                }
+                const { dist, cx, cy } = distanzaPuntatori();
+                if (dist <= 0 || statoGesto.distanzaIniziale <= 0) return;
+                const nuovaLarghezza = statoGesto.viewBoxIniziale.width * (statoGesto.distanzaIniziale / dist);
+                applicaViewBox(
+                    calcolaViewBoxZoomSuPunto(svg, nuovaLarghezza, cx, cy, statoGesto.ancoraSvg, statoGesto.viewBoxIniziale),
+                    ''
+                );
+                return;
+            }
+            if (statoGesto?.tipo === 'pan') {
+                const dx = event.clientX - statoGesto.clientX;
+                const dy = event.clientY - statoGesto.clientY;
+                if (!mossoNelGesto) {
+                    if (Math.hypot(dx, dy) < SOGLIA_TRASCINAMENTO_PX) return;
+                    mossoNelGesto = true;
+                    svg.classList?.add?.('mappa-trascinamento');
+                    try { svg.setPointerCapture?.(event.pointerId); } catch {}
+                }
+                const m = metricaViewportSvg(svg, statoGesto.viewBoxIniziale);
+                applicaViewBox({
+                    x: statoGesto.viewBoxIniziale.x - dx / m.scale,
+                    y: statoGesto.viewBoxIniziale.y - dy / m.scale,
+                    width: statoGesto.viewBoxIniziale.width,
+                    height: statoGesto.viewBoxIniziale.height
+                }, '');
+            }
+        }, { signal });
+
+        const terminaPuntatore = event => {
+            if (!puntatori.has(event.pointerId)) return;
+            puntatori.delete(event.pointerId);
+            if (puntatori.size === 1) {
+                const [rimasto] = puntatori.values();
+                statoGesto = {
+                    tipo: 'pan',
+                    clientX: rimasto.clientX,
+                    clientY: rimasto.clientY,
+                    viewBoxIniziale: { ...viewBoxCorrente }
+                };
+                return;
+            }
+            if (puntatori.size === 0) {
+                svg.classList?.remove?.('mappa-trascinamento');
+                if (mossoNelGesto) ignoraClickDopoTrascinamento = true;
+                mossoNelGesto = false;
+                statoGesto = null;
+            }
+        };
+
+        svg.addEventListener('pointerup', terminaPuntatore, { signal });
+        svg.addEventListener('pointercancel', terminaPuntatore, { signal });
+        svg.addEventListener('lostpointercapture', terminaPuntatore, { signal });
+        svg.addEventListener('click', () => { ignoraClickDopoTrascinamento = false; }, { signal });
     };
 
     costruisciElencoTastiera();
@@ -420,9 +589,10 @@ export async function avviaMappaErogatori({
                 else if (azione === 'regione') applicaViewBox(VIEWBOX_COMPLETO, 'regione');
                 else if (azione === 'zoom-in') scalaViewBox(0.72);
                 else if (azione === 'zoom-out') scalaViewBox(1.38);
-            });
+            }, { signal });
         }
     }
+    collegaInterazionePuntatore();
 
     if (!svg || !stratoComuni || !stratoEvidenza || !fetchFn) {
         if (quadro) quadro.hidden = true;
@@ -487,6 +657,10 @@ export async function avviaMappaErogatori({
                     `${voce.nome}${voce.territorio ? ', ' + voce.territorio : ''} · ${info.statoTesto} · ${descriviConteggiVoce(voce)}`
                 );
                 pathEl.addEventListener('click', () => {
+                    if (ignoraClickDopoTrascinamento) {
+                        ignoraClickDopoTrascinamento = false;
+                        return;
+                    }
                     mostraTooltip(voce);
                     selezionaComune(voce.chiave);
                 });

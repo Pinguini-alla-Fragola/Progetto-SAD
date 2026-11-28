@@ -52,9 +52,20 @@
     display: block;
     width: 100%;
     height: auto;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 16 / 9;
     background: #f2f6f7;
-    touch-action: manipulation;
+    touch-action: none;
+    user-select: none;
+    cursor: grab;
+}
+
+.mappa-svg.mappa-trascinamento {
+    cursor: grabbing;
+}
+
+.mappa-istruzioni {
+    margin: .5rem 0 0;
+    font-size: .8125rem;
 }
 
 .comune-forma {
@@ -280,4 +291,21 @@
     margin-top: .75rem;
     margin-bottom: 0;
     font-size: .75rem;
+}
+
+@media (min-width: 900px) {
+    .mappa-elenco-comuni {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+    }
+
+    .mappa-elenco-comuni > .mappa-comune-btn:first-child {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 660px) {
+    .mappa-svg {
+        aspect-ratio: 4 / 3;
+    }
 }

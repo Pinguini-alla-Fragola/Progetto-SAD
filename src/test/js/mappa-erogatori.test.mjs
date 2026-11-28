@@ -45,12 +45,15 @@ function creaNodo({ tagName = 'DIV', id = '' } = {}) {
         },
         getAttribute(k) { return this.attributes[k] ?? null; },
         removeAttribute(k) { delete this.attributes[k]; },
-        addEventListener(nome, fn) {
+        addEventListener(nome, fn, opzioni = {}) {
             this.eventi[nome] ??= [];
             this.eventi[nome].push(fn);
+            opzioni?.signal?.addEventListener?.('abort', () => {
+                this.eventi[nome] = (this.eventi[nome] || []).filter(f => f !== fn);
+            }, { once: true });
         },
         dispatchEvent(evt) {
-            for (const fn of this.eventi[evt.type] || []) fn(evt);
+            for (const fn of [...(this.eventi[evt.type] || [])]) fn(evt);
         },
         add(opt) {
             this.append(opt);
@@ -123,6 +126,7 @@ function combacia(nodo, selettore) {
     return selettore.split(',').some(parte => {
         const s = parte.trim();
         if (s === 'button') return nodo.tagName === 'BUTTON';
+        if (s === 'button[data-mappa-azione]') return nodo.tagName === 'BUTTON' && Boolean(nodo.dataset?.mappaAzione);
         if (s === 'input[type=checkbox]') return nodo.tagName === 'INPUT' && nodo.type === 'checkbox';
         if (s.startsWith('.')) return nodo.classList?.contains(s.slice(1));
         if (s.startsWith('[data-mappa-azione=')) {
@@ -164,7 +168,9 @@ function creaDomDettaglio(t, { comuneCodice = '061005', comuneIstat = '061005', 
     }
     reg('mappa-quadro', 'div');
     const svg = reg('mappa-campania-svg', 'svg');
-    svg.setAttribute('viewBox', '0 0 800 600');
+    svg.setAttribute('viewBox', '0 0 960 540');
+    svg.getBoundingClientRect = () => ({ left: 0, top: 0, width: 960, height: 540 });
+    svg.setPointerCapture = () => {};
     reg('mappa-strato-comuni', 'g');
     reg('mappa-strato-evidenza', 'g');
     reg('mappa-tooltip', 'p', { hidden: true });
@@ -212,7 +218,7 @@ function creaDomDettaglio(t, { comuneCodice = '061005', comuneIstat = '061005', 
 
 test('GeoJSON reale della Campania: 550 comuni con zeri iniziali, multipoligoni e area sferica positiva in d3-geo', () => {
     assert.equal(GEOJSON_REALE.features.length, 550);
-    const proiezione = geoMercator().fitExtent([[12, 12], [788, 588]], GEOJSON_REALE);
+    const proiezione = geoMercator().fitExtent([[12, 12], [948, 528]], GEOJSON_REALE);
     const pathGen = geoPath(proiezione);
 
     for (const f of GEOJSON_REALE.features) {
@@ -345,4 +351,128 @@ test('classificaComuneSuMappa distingue compatibilità territoriale da disponibi
     assert.equal(soloCompatibile.haConfermato, false);
     assert.equal(confermato.haConfermato, true);
     assert.notEqual(soloCompatibile.classeCss, confermato.classeCss);
+});
+
+function parseViewBox(svg) {
+    const [x, y, width, height] = svg.getAttribute('viewBox').split(/\s+/).map(Number);
+    return { x, y, width, height };
+}
+
+test('pan col puntatore: sposta la vista, sopprime il click residuo e mantiene attivo il click pulito', async t => {
+    const { pagina, idMap } = creaDomDettaglio(t);
+    const candidati = [
+        { erogatore: { accountId: 'e-1', nomeVisualizzato: 'Operatore Aversa', tipo: 'INTERNO_BANCO', comuneCodice: '061005', ambito: 'STESSO_COMUNE' }, caricoAppuntamenti: 0 },
+        { erogatore: { accountId: 'e-2', nomeVisualizzato: 'OPT Trentola', tipo: 'OPT', comuneCodice: '061094', ambito: 'COMUNE_LIMITROFO' }, caricoAppuntamenti: 0 }
+    ];
+    globalThis.fetch = async url => {
+        if (url.endsWith('/contatti')) return Response.json([]);
+        if (url.endsWith('/candidati')) return Response.json(candidati);
+        if (url.endsWith('/dati/comuni-campania-istat-2026.json')) return Response.json(GEOJSON_REALE);
+        throw new Error('URL imprevisto: ' + url);
+    };
+
+    await avviaCoordinamento(pagina);
+    const svg = idMap.get('mappa-campania-svg');
+    const polyTrentola = idMap.get('mappa-strato-evidenza').children.find(p => p.getAttribute('data-codice-istat') === '061094');
+    const vbInizio = parseViewBox(svg);
+
+    svg.dispatchEvent({ type: 'pointerdown', pointerId: 1, pointerType: 'mouse', button: 0, clientX: 400, clientY: 300 });
+    svg.dispatchEvent({ type: 'pointermove', pointerId: 1, pointerType: 'mouse', clientX: 460, clientY: 340 });
+    assert.ok(svg.classList.contains('mappa-trascinamento'));
+    svg.dispatchEvent({ type: 'pointerup', pointerId: 1, pointerType: 'mouse', clientX: 460, clientY: 340 });
+    assert.equal(svg.classList.contains('mappa-trascinamento'), false);
+
+    const vbDopoPan = parseViewBox(svg);
+    assert.ok(vbDopoPan.x < vbInizio.x || vbDopoPan.y < vbInizio.y, 'il trascinamento verso destra/basso trasla il viewBox');
+
+    // Click residuo dopo il drag non seleziona il comune.
+    polyTrentola.dispatchEvent({ type: 'click' });
+    assert.equal(idMap.get('filtro-comune-attivo').hidden, true);
+
+    // Click pulito seleziona regolarmente il comune.
+    svg.dispatchEvent({ type: 'pointerdown', pointerId: 2, pointerType: 'mouse', button: 0, clientX: 460, clientY: 340 });
+    svg.dispatchEvent({ type: 'pointerup', pointerId: 2, pointerType: 'mouse', clientX: 460, clientY: 340 });
+    polyTrentola.dispatchEvent({ type: 'click' });
+    assert.equal(idMap.get('filtro-comune-attivo').hidden, false);
+});
+
+test('rotellina del mouse: zoom in/out centrato sotto il puntatore', async t => {
+    const { pagina, idMap } = creaDomDettaglio(t);
+    globalThis.fetch = async url => {
+        if (url.endsWith('/contatti')) return Response.json([]);
+        if (url.endsWith('/candidati')) return Response.json([]);
+        if (url.endsWith('/dati/comuni-campania-istat-2026.json')) return Response.json(GEOJSON_REALE);
+        throw new Error('URL imprevisto: ' + url);
+    };
+
+    await avviaCoordinamento(pagina);
+    const svg = idMap.get('mappa-campania-svg');
+    idMap.get('mappa-controlli').querySelector('[data-mappa-azione="regione"]').dispatchEvent({ type: 'click' });
+    const vbPieno = parseViewBox(svg);
+    assert.equal(vbPieno.width, 960);
+
+    let prevented = false;
+    const cursorX = 640;
+    const cursorY = 360;
+    const ancoraPrimaX = vbPieno.x + (cursorX / 960) * vbPieno.width;
+    const ancoraPrimaY = vbPieno.y + (cursorY / 540) * vbPieno.height;
+
+    svg.dispatchEvent({
+        type: 'wheel',
+        deltaY: -120,
+        deltaMode: 0,
+        clientX: cursorX,
+        clientY: cursorY,
+        preventDefault() { prevented = true; }
+    });
+    assert.equal(prevented, true);
+    const vbZoomIn = parseViewBox(svg);
+    assert.ok(vbZoomIn.width < vbPieno.width);
+    const ancoraDopoX = vbZoomIn.x + (cursorX / 960) * vbZoomIn.width;
+    const ancoraDopoY = vbZoomIn.y + (cursorY / 540) * vbZoomIn.height;
+    assert.ok(Math.abs(ancoraDopoX - ancoraPrimaX) < 0.5);
+    assert.ok(Math.abs(ancoraDopoY - ancoraPrimaY) < 0.5);
+
+    svg.dispatchEvent({
+        type: 'wheel',
+        deltaY: 200,
+        deltaMode: 0,
+        clientX: cursorX,
+        clientY: cursorY,
+        preventDefault() {}
+    });
+    const vbZoomOut = parseViewBox(svg);
+    assert.ok(vbZoomOut.width > vbZoomIn.width);
+});
+
+test('gesto touch a due dita (pinch) e rilascio a un dito: ingrandisce e sposta senza salti', async t => {
+    const { pagina, idMap } = creaDomDettaglio(t);
+    globalThis.fetch = async url => {
+        if (url.endsWith('/contatti')) return Response.json([]);
+        if (url.endsWith('/candidati')) return Response.json([]);
+        if (url.endsWith('/dati/comuni-campania-istat-2026.json')) return Response.json(GEOJSON_REALE);
+        throw new Error('URL imprevisto: ' + url);
+    };
+
+    await avviaCoordinamento(pagina);
+    const svg = idMap.get('mappa-campania-svg');
+    idMap.get('mappa-controlli').querySelector('[data-mappa-azione="regione"]').dispatchEvent({ type: 'click' });
+    const vbPrima = parseViewBox(svg);
+    assert.equal(vbPrima.width, 960);
+
+    svg.dispatchEvent({ type: 'pointerdown', pointerId: 10, pointerType: 'touch', clientX: 430, clientY: 270 });
+    svg.dispatchEvent({ type: 'pointerdown', pointerId: 11, pointerType: 'touch', clientX: 530, clientY: 270 });
+    svg.dispatchEvent({ type: 'pointermove', pointerId: 10, pointerType: 'touch', clientX: 380, clientY: 270 });
+    svg.dispatchEvent({ type: 'pointermove', pointerId: 11, pointerType: 'touch', clientX: 580, clientY: 270 });
+
+    const vbPinch = parseViewBox(svg);
+    assert.ok(vbPinch.width < vbPrima.width * 0.6, 'allargare due dita raddoppia circa lo zoom');
+
+    // Sollevare un dito e muovere il superstite prosegue con il pan dal viewBox corrente senza salti.
+    svg.dispatchEvent({ type: 'pointerup', pointerId: 11, pointerType: 'touch', clientX: 580, clientY: 270 });
+    svg.dispatchEvent({ type: 'pointermove', pointerId: 10, pointerType: 'touch', clientX: 420, clientY: 270 });
+    const vbPanResiduo = parseViewBox(svg);
+    assert.equal(vbPanResiduo.width, vbPinch.width);
+    assert.ok(vbPanResiduo.x < vbPinch.x);
+    svg.dispatchEvent({ type: 'pointerup', pointerId: 10, pointerType: 'touch', clientX: 420, clientY: 270 });
 });
