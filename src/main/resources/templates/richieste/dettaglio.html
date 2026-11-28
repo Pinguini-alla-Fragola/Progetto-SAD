@@ -7,6 +7,7 @@
     <link rel="icon" href="/img/picus.svg" type="image/svg+xml">
     <link rel="stylesheet" href="/css/picus.css">
     <link rel="stylesheet" href="/css/integrazione-ui.css">
+    <link rel="stylesheet" href="/css/mappa-erogatori.css">
     <script src="/js/dettaglio-richiesta.js" type="module"></script>
 </head>
 <body class="flow-page request-page">
@@ -41,7 +42,7 @@
                 <dl class="request-facts-grid">
                     <div th:if="${nomeOptRichiedente != null}"><dt>OPT richiedente</dt><dd th:text="${nomeOptRichiedente}"></dd></div>
                     <div><dt>Data e ora di invio</dt><dd><time th:datetime="${richiesta.inviataIl}" th:text="${dataInvio}"></time></dd></div>
-                    <div><dt>Comune di intervento</dt><dd th:text="${comune}"></dd></div>
+                    <div><dt>Comune di intervento</dt><dd><span th:text="${comune}"></span><span class="picus-meta dettaglio-territorio" th:if="${comuneTerritorio != null and !comuneTerritorio.isEmpty()}" th:text="${comuneTerritorio}"></span></dd></div>
                     <div><dt>Destinatario della misura</dt><dd th:text="${dettaglio.tipoDestinatario.name() == 'NUCLEO' ? 'Nucleo familiare' : 'Persona'}"></dd></div>
                     <div th:if="${nomeErogatore != null}"><dt>Erogatore assegnato</dt><dd th:text="${nomeErogatore}"></dd></div>
                 </dl>
@@ -118,6 +119,51 @@
                     </fieldset>
                     <p id="esito-accordo" class="picus-esito" role="status" tabindex="-1"></p>
                 </form>
+            </section>
+            <section id="sezione-mappa-erogatori" class="request-map-section"
+                     th:if="${richiesta.stato.name() == 'PRESA_IN_CARICO'}"
+                     th:attr="data-comune-codice=${dettaglio.comuneCodice},data-comune-istat=${comuneIstat},data-comune-nome=${comune},data-comune-territorio=${comuneTerritorio}"
+                     aria-labelledby="titolo-mappa-erogatori" hidden>
+                <div class="mappa-intestazione">
+                    <div>
+                        <h3 id="titolo-mappa-erogatori">Copertura territoriale in Campania</h3>
+                        <p id="mappa-sottotitolo" class="picus-meta"></p>
+                    </div>
+                    <div id="mappa-controlli" class="mappa-controlli" role="toolbar" aria-label="Controlli inquadratura mappa">
+                        <button type="button" class="btn btn-secondary btn-sm" data-mappa-azione="zona">Zona richiesta</button>
+                        <button type="button" class="btn btn-secondary btn-sm" data-mappa-azione="regione">Tutta la Campania</button>
+                        <button type="button" class="btn btn-secondary btn-sm" data-mappa-azione="zoom-in" aria-label="Ingrandisci mappa">+</button>
+                        <button type="button" class="btn btn-secondary btn-sm" data-mappa-azione="zoom-out" aria-label="Riduci mappa">−</button>
+                    </div>
+                </div>
+                <div id="mappa-quadro" class="mappa-quadro">
+                    <svg id="mappa-campania-svg" class="mappa-svg" viewBox="0 0 800 600" role="group"
+                         aria-labelledby="titolo-mappa-erogatori mappa-descrizione-sr">
+                        <defs>
+                            <pattern id="trama-limitrofo" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                                <rect width="8" height="8" class="trama-limitrofo-fondo"></rect>
+                                <line x1="0" y1="0" x2="0" y2="8" class="trama-limitrofo-linea"></line>
+                            </pattern>
+                            <pattern id="trama-confermato" width="8" height="8" patternUnits="userSpaceOnUse">
+                                <rect width="8" height="8" class="trama-confermato-fondo"></rect>
+                                <circle cx="4" cy="4" r="1.6" class="trama-confermato-punto"></circle>
+                            </pattern>
+                        </defs>
+                        <g id="mappa-strato-comuni"></g>
+                        <g id="mappa-strato-evidenza"></g>
+                    </svg>
+                    <p id="mappa-tooltip" class="mappa-tooltip" role="status" aria-live="polite" hidden></p>
+                </div>
+                <p id="mappa-descrizione-sr" class="sr-only"></p>
+                <p id="mappa-errore" class="mappa-avviso-fallback" role="status" hidden></p>
+                <p id="mappa-stato-vuoto" class="mappa-stato-vuoto" role="status" hidden></p>
+                <ul id="mappa-legenda" class="mappa-legenda" aria-label="Legenda della mappa"></ul>
+                <div id="elenco-territoriale-wrap" class="mappa-elenco-wrap">
+                    <h4 id="titolo-elenco-territoriale" class="mappa-sottotitolo-sezione">Comuni ed erogatori locali (navigabile da tastiera)</h4>
+                    <div id="elenco-territoriale-comuni" class="mappa-elenco-comuni" role="group" aria-labelledby="titolo-elenco-territoriale"></div>
+                </div>
+                <div id="filtro-comune-attivo" class="mappa-filtro-attivo" role="status" aria-live="polite" hidden></div>
+                <p class="mappa-attribuzione picus-meta">Confini amministrativi: fonte ISTAT, 1° gennaio 2026 (licenza CC BY 4.0) · Proiezione locale d3-geo (ISC).</p>
             </section>
             <h3 id="titolo-candidati" hidden>Erogatori compatibili</h3>
             <div id="candidati" class="picus-list"></div>
