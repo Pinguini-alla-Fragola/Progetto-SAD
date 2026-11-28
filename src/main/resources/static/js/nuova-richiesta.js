@@ -1,12 +1,201 @@
 import { api } from './area-client.js';
 
-const form = document.getElementById('richiestaForm');
+const LIMITE_SUGGERIMENTI = 12;
+const TESTO_AIUTO_COMUNE = 'Digita il nome del comune per filtrare l’elenco e distinguerlo per provincia o città metropolitana.';
+
+export function normalizzaTestoComune(testo) {
+    return String(testo || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+export function collegaRicercaComune({ input, select, suggerimenti, stato, form } = {}) {
+    if (!input || !select) return null;
+    const opzioniIniziali = Array.from(select.options || [])
+        .filter(op => op.value)
+        .map(op => {
+            const nome = (op.dataset?.nome || op.textContent || '').trim();
+            const territorio = (op.dataset?.territorio || '').trim();
+            return {
+                codice: op.value,
+                nome,
+                territorio,
+                etichetta: (op.textContent || nome).trim(),
+                nomeNorm: normalizzaTestoComune(nome)
+            };
+        });
+    if (!opzioniIniziali.length) return null;
+
+    const mappa = new Map(opzioniIniziali.map(item => [item.codice, item]));
+    let visibili = [];
+    let indiceAttivo = -1;
+
+    const impostaStato = testo => {
+        if (stato) stato.textContent = testo;
+    };
+
+    const popolaSelect = (elementi, valoreSelezionato) => {
+        const placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = 'Seleziona un comune';
+        const frag = [placeholder];
+        for (const item of elementi) {
+            const op = document.createElement('option');
+            op.value = item.codice;
+            op.textContent = item.etichetta;
+            if (op.dataset) {
+                op.dataset.nome = item.nome;
+                op.dataset.territorio = item.territorio;
+            }
+            frag.push(op);
+        }
+        select.replaceChildren(...frag);
+        select.value = valoreSelezionato && elementi.some(e => e.codice === valoreSelezionato) ? valoreSelezionato : '';
+    };
+
+    const chiudiSuggerimenti = () => {
+        if (!suggerimenti) return;
+        suggerimenti.hidden = true;
+        suggerimenti.replaceChildren();
+        visibili = [];
+        indiceAttivo = -1;
+    };
+
+    const aggiornaEvidenza = nuovoIndice => {
+        if (!suggerimenti || !visibili.length) return;
+        indiceAttivo = (nuovoIndice + visibili.length) % visibili.length;
+        const bottoni = Array.from(suggerimenti.querySelectorAll('[role="option"]'));
+        bottoni.forEach((btn, idx) => {
+            const attivo = idx === indiceAttivo;
+            btn.setAttribute('aria-selected', attivo ? 'true' : 'false');
+            btn.classList.toggle('is-active', attivo);
+        });
+    };
+
+    const selezionaComune = codice => {
+        const scelto = mappa.get(codice);
+        if (!scelto) return;
+        popolaSelect(opzioniIniziali, scelto.codice);
+        select.value = scelto.codice;
+        input.value = scelto.nome;
+        chiudiSuggerimenti();
+        impostaStato(scelto.territorio ? `Selezionato: ${scelto.nome} — ${scelto.territorio}.` : `Selezionato: ${scelto.nome}.`);
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+    };
+
+    const filtra = () => {
+        const query = normalizzaTestoComune(input.value);
+        if (!query) {
+            popolaSelect(opzioniIniziali, select.value);
+            chiudiSuggerimenti();
+            impostaStato(TESTO_AIUTO_COMUNE);
+            return;
+        }
+        const prefissi = [];
+        const interni = [];
+        for (const item of opzioniIniziali) {
+            if (item.nomeNorm.startsWith(query)) prefissi.push(item);
+            else if (item.nomeNorm.includes(query)) interni.push(item);
+        }
+        const trovati = [...prefissi, ...interni];
+        const corrente = mappa.get(select.value);
+        const mantieniCorrente = corrente && corrente.nomeNorm === query ? corrente.codice : '';
+        popolaSelect(trovati, mantieniCorrente);
+
+        if (!trovati.length) {
+            chiudiSuggerimenti();
+            impostaStato(`Nessun comune campano trovato per «${input.value.trim()}».`);
+            return;
+        }
+
+        const esatti = trovati.length === 1 ? '1 comune trovato' : `${trovati.length} comuni trovati`;
+        impostaStato(`${esatti} per «${input.value.trim()}».`);
+
+        if (!suggerimenti) return;
+        visibili = trovati.slice(0, LIMITE_SUGGERIMENTI);
+        indiceAttivo = 0;
+        const nodi = visibili.map((item, idx) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'municipality-option' + (idx === 0 ? ' is-active' : '');
+            btn.setAttribute('role', 'option');
+            btn.setAttribute('aria-selected', idx === 0 ? 'true' : 'false');
+            btn.dataset.codice = item.codice;
+            const nomeEl = document.createElement('strong');
+            nomeEl.textContent = item.nome;
+            btn.append(nomeEl);
+            if (item.territorio) {
+                const terrEl = document.createElement('span');
+                terrEl.className = 'picus-meta';
+                terrEl.textContent = item.territorio;
+                btn.append(terrEl);
+            }
+            btn.addEventListener('click', () => selezionaComune(item.codice));
+            return btn;
+        });
+        suggerimenti.replaceChildren(...nodi);
+        suggerimenti.hidden = false;
+    };
+
+    input.addEventListener('input', filtra);
+    input.addEventListener('keydown', event => {
+        if (!suggerimenti || suggerimenti.hidden || !visibili.length) return;
+        if (event.key === 'ArrowDown') {
+            event.preventDefault();
+            aggiornaEvidenza(indiceAttivo + 1);
+        } else if (event.key === 'ArrowUp') {
+            event.preventDefault();
+            aggiornaEvidenza(indiceAttivo - 1);
+        } else if (event.key === 'Enter') {
+            const scelto = visibili[indiceAttivo >= 0 ? indiceAttivo : 0];
+            if (scelto) {
+                event.preventDefault();
+                selezionaComune(scelto.codice);
+            }
+        } else if (event.key === 'Escape') {
+            event.preventDefault();
+            chiudiSuggerimenti();
+        }
+    });
+
+    select.addEventListener('change', () => {
+        const scelto = mappa.get(select.value);
+        if (!scelto) return;
+        if (normalizzaTestoComune(input.value) !== scelto.nomeNorm) {
+            input.value = scelto.nome;
+        }
+        chiudiSuggerimenti();
+        impostaStato(scelto.territorio ? `Selezionato: ${scelto.nome} — ${scelto.territorio}.` : `Selezionato: ${scelto.nome}.`);
+    });
+
+    form?.addEventListener('reset', () => {
+        input.value = '';
+        popolaSelect(opzioniIniziali, '');
+        chiudiSuggerimenti();
+        impostaStato(TESTO_AIUTO_COMUNE);
+    });
+
+    return { filtra, selezionaComune, chiudiSuggerimenti };
+}
+
+const form = typeof document !== 'undefined' ? document.getElementById('richiestaForm') : null;
+if (form) {
 const campi = document.getElementById('campi-invio');
 const button = document.getElementById('btnInvia');
 const errore = document.getElementById('errore-invio');
 const incerto = document.getElementById('invio-incerto');
 const nuovo = document.getElementById('nuovo-invio');
 const precedenti = document.getElementById('invii-precedenti');
+const ricercaComune = collegaRicercaComune({
+    input: document.getElementById('ricerca-comune'),
+    select: document.getElementById('comune'),
+    suggerimenti: document.getElementById('risultati-comune'),
+    stato: document.getElementById('aiuto-comune'),
+    form
+});
 const chiaveMemoria = 'picus:invio-pendente:' + form.dataset.utente;
 // Il token renderizzato appartiene alla sessione che ha aperto il modulo.
 const csrf = {
@@ -153,4 +342,5 @@ try {
     document.getElementById('avvio-invio').hidden = true;
 } catch (causa) {
     errore.textContent = causa.message;
+}
 }

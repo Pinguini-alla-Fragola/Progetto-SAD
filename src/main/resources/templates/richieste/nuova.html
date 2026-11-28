@@ -54,11 +54,23 @@
                     <p id="errore-tipoDestinatario" class="form-text picus-errore"></p>
                 </fieldset>
 
-                <div class="form-group">
-                    <label class="form-label" for="comune">Comune di intervento</label>
-                    <select id="comune" name="comuneCodice" class="form-control" required aria-describedby="errore-comuneCodice">
+                <div class="form-group request-create-municipality">
+                    <label class="form-label" for="ricerca-comune">Comune di intervento</label>
+                    <div class="municipality-picker">
+                        <input id="ricerca-comune" type="search" class="form-control" autocomplete="off"
+                               placeholder="Cerca comune per nome (es. Aversa, Napoli, Procida)…"
+                               aria-controls="comune risultati-comune"
+                               aria-describedby="aiuto-comune errore-comuneCodice">
+                        <div id="risultati-comune" class="municipality-results" role="listbox"
+                             aria-label="Comuni campani corrispondenti" hidden></div>
+                    </div>
+                    <p id="aiuto-comune" class="form-text" role="status" aria-live="polite">Digita il nome del comune per filtrare l’elenco e distinguerlo per provincia o città metropolitana.</p>
+                    <label class="sr-only" for="comune">Elenco comuni campani</label>
+                    <select id="comune" name="comuneCodice" class="form-control" required aria-describedby="aiuto-comune errore-comuneCodice">
                         <option value="">Seleziona un comune</option>
-                        <option th:each="c : ${comuni}" th:value="${c.codice}" th:text="${c.nome}"></option>
+                        <option th:each="c : ${comuni}" th:value="${c.codice}"
+                                th:attr="data-nome=${c.nome},data-territorio=${c.descrizioneTerritoriale()},data-istat=${c.codiceIstat}"
+                                th:text="${c.etichettaCompleta()}"></option>
                     </select>
                     <p id="errore-comuneCodice" class="form-text picus-errore"></p>
                 </div>

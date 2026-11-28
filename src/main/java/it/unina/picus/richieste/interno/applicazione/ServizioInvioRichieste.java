@@ -89,8 +89,12 @@ public class ServizioInvioRichieste implements InvioRichiesteApi {
             }
             errori.put("misuraId", ERRORE_MISURA);
         }
-        if (catalogo.cercaComune(normalizzati.comuneCodice()).isEmpty()) {
+        var comuneCatalogo = catalogo.cercaComune(normalizzati.comuneCodice());
+        if (comuneCatalogo.isEmpty()) {
             errori.put("comuneCodice", "Seleziona un comune del catalogo");
+        } else if (!comuneCatalogo.get().codice().equals(normalizzati.comuneCodice())) {
+            normalizzati = new DatiInvio(normalizzati.misuraId(), normalizzati.tipoDestinatario(),
+                    comuneCatalogo.get().codice(), normalizzati.description());
         }
         if (!errori.isEmpty()) {
             throw new DatiRichiestaNonValidiException(errori);

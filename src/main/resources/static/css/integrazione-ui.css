@@ -106,3 +106,35 @@
 [data-funzione-inattiva]:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 4px; border-radius: var(--radius-sm); }
 /* Contatore delle comunicazioni da confermare accanto alla voce del menu (#140). */
 .contatore-notifiche { margin-left: auto; min-width: 1.5rem; padding: .1rem .45rem; border-radius: 999px; background: var(--color-danger); color: var(--color-white); font-size: .75rem; font-weight: 700; line-height: 1.4; text-align: center; }
+
+/* Ricerca comunale per nome con provincia / città metropolitana in Nuova richiesta (#251). */
+.request-create-municipality { grid-column: 1 / -1; }
+.municipality-picker { position: relative; margin-bottom: .5rem; }
+.municipality-results {
+    position: absolute;
+    z-index: 25;
+    inset: calc(100% + .25rem) 0 auto;
+    display: grid;
+    max-height: 18rem;
+    overflow-y: auto;
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-sm);
+    background: var(--color-white);
+    box-shadow: 0 10px 24px rgb(25 44 58 / .14);
+}
+.municipality-option {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .125rem;
+    width: 100%;
+    padding: .625rem .875rem;
+    border: 0;
+    border-bottom: 1px solid var(--color-line);
+    background: var(--color-white);
+    color: var(--color-deep);
+    text-align: left;
+}
+.municipality-option:last-child { border-bottom: 0; }
+.municipality-option:hover, .municipality-option.is-active { background: var(--color-mist); }
+.municipality-option .picus-meta { margin-top: 0; }

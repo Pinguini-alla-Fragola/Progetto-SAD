@@ -127,8 +127,54 @@ public interface CatalogoApi extends ConsultazioneCatalogoApi, RicercaErogatoriA
      *
      * @param codice identificativo usato nelle richieste e nei profili
      * @param nome denominazione visualizzata
+     * @param codiceIstat codice statistico ISTAT a sei cifre con eventuali zeri iniziali, oppure {@code null}
+     * @param provincia denominazione della provincia o città metropolitana, oppure {@code null}
+     * @param siglaProvincia sigla automobilistica a due lettere, oppure {@code null}
+     * @param cittaMetropolitana indica se l'ente sovracomunale è una città metropolitana
      */
-    record Comune(String codice, String nome) {}
+    record Comune(
+            String codice,
+            String nome,
+            String codiceIstat,
+            String provincia,
+            String siglaProvincia,
+            boolean cittaMetropolitana) {
+
+        /**
+         * Costruttore essenziale per i riferimenti privi di metadati provinciali.
+         *
+         * @param codice identificativo usato nelle richieste e nei profili
+         * @param nome denominazione visualizzata
+         */
+        public Comune(String codice, String nome) {
+            this(codice, nome, null, null, null, false);
+        }
+
+        /**
+         * Restituisce la descrizione della provincia o città metropolitana per distinguere eventuali omonimie.
+         *
+         * @return descrizione territoriale formattata oppure stringa vuota se assente
+         */
+        public String descrizioneTerritoriale() {
+            if (provincia == null || provincia.isBlank()) {
+                return "";
+            }
+            String prefisso = cittaMetropolitana ? "Città metropolitana di " : "Provincia di ";
+            return siglaProvincia != null && !siglaProvincia.isBlank()
+                    ? prefisso + provincia + " (" + siglaProvincia + ")"
+                    : prefisso + provincia;
+        }
+
+        /**
+         * Restituisce la denominazione completa del comune affiancata dal riferimento provinciale.
+         *
+         * @return nome del comune con provincia o città metropolitana quando disponibile
+         */
+        public String etichettaCompleta() {
+            String territorio = descrizioneTerritoriale();
+            return territorio.isEmpty() ? nome : nome + " — " + territorio;
+        }
+    }
 
     /**
      * Opzione di erogazione compatibile con la misura e il territorio.

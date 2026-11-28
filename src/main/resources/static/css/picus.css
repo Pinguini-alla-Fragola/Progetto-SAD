@@ -603,11 +603,10 @@ body[data-area] .picus-footer { background: var(--color-ground); }
 .request-heading p { margin-top: .625rem; color: var(--color-slate-600); }
 .request-heading .badge-stato { flex-shrink: 0; margin-top: .5rem; padding: .5rem .75rem; }
 .request-state-message { margin-bottom: 1.5rem; padding: 1rem 1.25rem; border-radius: var(--radius-sm); background: var(--color-mist); color: var(--color-primary); line-height: 1.6; }
-.request-layout { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(22rem, 1fr); align-items: start; gap: 1.5rem; }
-.request-layout:not(:has(.request-coordination)) { grid-template-columns: minmax(0, 1fr); }
+.request-layout { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: 1.5rem; }
 .request-information { min-width: 0; padding: clamp(1.25rem, 3vw, 2rem); border: 1px solid var(--color-line); border-radius: var(--radius-panel); background: var(--color-white); }
 .request-detail h2 { margin-bottom: 1.25rem; font-size: 1.1875rem; line-height: 1.35; font-weight: 650; }
-.request-facts-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; }
+.request-facts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1.5rem; }
 .request-facts-grid dt { margin-bottom: .375rem; font-size: .875rem; font-weight: 600; color: var(--color-slate-600); }
 .request-facts-grid dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
 .request-section { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--color-line); }
@@ -622,7 +621,7 @@ body[data-area] .picus-footer { background: var(--color-ground); }
 .request-coordination .picus-list-row .picus-meta { margin-top: .5rem; line-height: 1.6; }
 .agreement-editor { margin-block: 1.75rem; padding-top: 1.5rem; border-top: 1px solid var(--color-line); }
 .agreement-editor h3 { margin-top: 0; margin-bottom: .75rem; }
-.agreement-editor .picus-form { margin-top: 1.25rem; }
+.agreement-editor .picus-form { max-width: 44rem; margin-top: 1.25rem; }
 .agreement-editor fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
 .agreement-editor .campo { margin-top: 1rem; }
 .agreement-editor .campo:first-child { margin-top: 0; }
@@ -657,9 +656,6 @@ body[data-area] .picus-footer { background: var(--color-ground); }
     .request-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .875rem 1.25rem; }
     .request-measure, .request-organization, .request-actions { grid-column: 1 / -1; }
     .request-field-label { position: static; display: block; width: auto; height: auto; padding: 0; overflow: visible; clip-path: none; white-space: normal; margin-bottom: .375rem; color: var(--color-slate-600); font-size: .8125rem; font-weight: 600; }
-}
-@media (max-width: 900px) {
-    .request-layout { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 800px) {
     .auth-shell { grid-template-columns: minmax(0, 1fr); max-width: 34rem; }

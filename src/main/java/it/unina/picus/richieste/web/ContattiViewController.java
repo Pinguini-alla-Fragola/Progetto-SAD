@@ -69,8 +69,13 @@ class ContattiViewController {
         modello.addAttribute("dashboard", "/dashboard");
         modello.addAttribute("dettaglio", dettaglio);
         modello.addAttribute("richiesta", dettaglio.richiesta());
-        modello.addAttribute("comune", catalogo.cercaComune(dettaglio.comuneCodice())
+        var comuneCatalogo = catalogo.cercaComune(dettaglio.comuneCodice());
+        modello.addAttribute("comune", comuneCatalogo
                 .map(c -> c.nome()).orElse(dettaglio.comuneCodice()));
+        modello.addAttribute("comuneTerritorio", comuneCatalogo
+                .map(c -> c.descrizioneTerritoriale()).orElse(""));
+        modello.addAttribute("comuneIstat", comuneCatalogo
+                .map(c -> c.codiceIstat() != null ? c.codiceIstat() : "").orElse(""));
         modello.addAttribute("dataInvio", DATA.format(dettaglio.richiesta().inviataIl()));
         modello.addAttribute("banco", identita.ruolo() == RuoloUtente.BANCO);
         if (dettaglio.titolareId() != null) {

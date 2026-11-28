@@ -2,6 +2,7 @@ import { api } from './area-client.js';
 import { renderList, listRow } from './list-view.js';
 import { confermaPresaInCarico } from './conferma.js';
 import { aggiornaRifiuto } from './accordo.js';
+import { avviaMappaErogatori, normalizzaChiaveComune } from './mappa-erogatori.js';
 
 const etichette = {
     CREATA: 'Creata', PRESA_IN_CARICO: 'Presa in carico', IN_PROGRAMMAZIONE: 'In programmazione',
@@ -193,6 +194,15 @@ export async function avviaCoordinamento(pagina) {
         aggiornaRifiuto(contatti, candidati);
         const ultimi = new Map(contatti.map(c => [c.erogatoreId + '|' + c.ambito, c]));
         const attesa = contatti.find(c => c.esito === 'IN_ATTESA');
+        const opzioniListaCandidati = {
+            empty: 'Nessun erogatore compatibile al momento.',
+            searchLabel: 'Cerca nell’elenco',
+            filters: [{ key: 'ambito', label: 'Ambito', labels: etichette }]
+        };
+        const righeCandidati = [];
+        const boxCandidati = document.getElementById('candidati');
+        const mappaSezione = document.getElementById('sezione-mappa-erogatori');
+
         if (attesa) {
             esito.textContent = 'Richiesta di disponibilità inviata. Attendi il riscontro dell’erogatore prima di contattarne un altro.';
         } else {
@@ -201,7 +211,7 @@ export async function avviaCoordinamento(pagina) {
             await caricaLista('candidati', async () => {
                 const localiDaValutare = candidati.some(({ erogatore: e }) => e.ambito !== 'CENTRO_PICUS_A_DISTANZA'
                     && ultimi.get(e.accountId + '|' + e.ambito)?.esito !== 'NON_DISPONIBILE');
-                return candidati.map(c => {
+                const costruite = candidati.map(c => {
                     const e = c.erogatore;
                     const ultimo = ultimi.get(e.accountId + '|' + e.ambito);
                     const precedente = ultimo?.esito === 'DISPONIBILE' ? ultimo : null;
@@ -216,13 +226,44 @@ export async function avviaCoordinamento(pagina) {
                         location.reload();
                     }, esito)];
                     if (remotoBloccato) azione.forEach(button => { button.disabled = true; });
-                    return riga(e.nomeVisualizzato,
+                    const statoDisponibilita = ultimo
+                        ? (ultimo.esito === 'DISPONIBILE'
+                            ? 'Disponibilità confermata per la richiesta'
+                            : 'Ultima risposta: ' + etichetta(ultimo.esito))
+                        : 'Compatibilità territoriale (disponibilità da verificare)';
+                    const row = riga(e.nomeVisualizzato,
                         [etichetta(e.tipo), e.comuneCodice, etichetta(e.ambito), 'Appuntamenti confermati: ' + c.caricoAppuntamenti,
-                            ultimo ? 'Ultima risposta: ' + etichetta(ultimo.esito) : '',
+                            statoDisponibilita,
                             remotoBloccato ? 'Valuta prima le disponibilità locali.' : ''].filter(Boolean).join(' · '),
                         azione, { ambito: e.ambito });
+                    row.dataset.comuneChiave = e.ambito === 'CENTRO_PICUS_A_DISTANZA'
+                        ? '__remoto__'
+                        : normalizzaChiaveComune(e.comuneCodice);
+                    return row;
                 });
-            }, 'Nessun erogatore compatibile al momento.', ['ambito']);
+                righeCandidati.push(...costruite);
+                return costruite;
+            }, opzioniListaCandidati.empty, ['ambito']);
+        }
+
+        if (mappaSezione) {
+            await avviaMappaErogatori({
+                sezione: mappaSezione,
+                candidati,
+                contatti,
+                onSelezionaComune: chiave => {
+                    if (attesa || !boxCandidati) return;
+                    const filtrate = chiave
+                        ? righeCandidati.filter(r => r.dataset.comuneChiave === chiave)
+                        : righeCandidati;
+                    renderList(boxCandidati, filtrate, {
+                        ...opzioniListaCandidati,
+                        empty: chiave
+                            ? 'Nessun erogatore locale in questo comune. Seleziona «Tutti i candidati» per rivedere tutte le opzioni compatibili.'
+                            : opzioniListaCandidati.empty
+                    });
+                }
+            }).catch(() => {});
         }
         azioni.append(link('Aggiorna stato', location.pathname));
     } catch (causa) {
