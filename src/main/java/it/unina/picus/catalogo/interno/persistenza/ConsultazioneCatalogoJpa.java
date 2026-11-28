@@ -34,13 +34,29 @@ public class ConsultazioneCatalogoJpa implements ConsultazioneCatalogoApi {
 
     @Override
     public List<Comune> elencoComuni() {
-        return entityManager.createQuery("select c from ComuneJpa c order by c.nome", ComuneJpa.class)
+        return entityManager.createQuery(
+                "select c from ComuneJpa c order by lower(c.nome), c.siglaProvincia, c.codice", ComuneJpa.class)
                 .getResultList().stream().map(ComuneJpa::aDto).toList();
     }
 
     @Override
     public Optional<Comune> cercaComune(String codice) {
-        return codice == null ? Optional.empty()
-                : Optional.ofNullable(entityManager.find(ComuneJpa.class, codice)).map(ComuneJpa::aDto);
+        if (codice == null || codice.isBlank()) {
+            return Optional.empty();
+        }
+        String pulito = codice.strip();
+        ComuneJpa diretto = entityManager.find(ComuneJpa.class, pulito);
+        if (diretto != null) {
+            return Optional.of(diretto.aDto());
+        }
+        if (pulito.length() == 6 && pulito.chars().allMatch(Character::isDigit)) {
+            return entityManager.createQuery(
+                    "select c from ComuneJpa c where c.codiceIstat = :codiceIstat", ComuneJpa.class)
+                    .setParameter("codiceIstat", pulito)
+                    .getResultStream()
+                    .findFirst()
+                    .map(ComuneJpa::aDto);
+        }
+        return Optional.empty();
     }
 }

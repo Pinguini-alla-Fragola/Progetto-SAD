@@ -43,7 +43,12 @@ export function aggiornaScelteMisureOperatore(misure) {
 
 /** Comuni e misure arrivano dal catalogo: il Banco sceglie solo valori esistenti. */
 function popolaCatalogo(form, comuni, misure, versioneIniziale) {
-    for (const comune of comuni) form.elements.comune.append(new Option(comune.nome, comune.codice));
+    for (const comune of comuni) {
+        const etichetta = comune.provincia
+            ? `${comune.nome} — ${comune.cittaMetropolitana ? 'Città metropolitana di ' : 'Provincia di '}${comune.provincia}${comune.siglaProvincia ? ' (' + comune.siglaProvincia + ')' : ''}`
+            : comune.nome;
+        form.elements.comune.append(new Option(etichetta, comune.codice));
+    }
     if (versioneIniziale === versioneMisure) {
         applicaScelteMisure(form.querySelector('[data-misure] .picus-choices'), misure);
     }

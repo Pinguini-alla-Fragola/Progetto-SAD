@@ -34,17 +34,19 @@ public class ServizioRicercaErogatori implements RicercaErogatoriApi {
     public List<ErogatoreCompatibile> cercaErogatoriCompatibili(long misuraId, String comuneCodice) {
         var misura = catalogo.cercaMisura(misuraId).orElseThrow(() -> new NoSuchElementException("Misura non trovata"));
         if (comuneCodice == null || comuneCodice.length() > 50
-                || comuneCodice.codePoints().anyMatch(Character::isISOControl)
-                || catalogo.cercaComune(comuneCodice).isEmpty()) {
+                || comuneCodice.codePoints().anyMatch(Character::isISOControl)) {
             throw new NoSuchElementException("Comune non trovato");
         }
-        Set<String> limitrofi = Set.copyOf(offerta.comuniLimitrofi(comuneCodice));
+        String codiceCanonico = catalogo.cercaComune(comuneCodice)
+                .orElseThrow(() -> new NoSuchElementException("Comune non trovato"))
+                .codice();
+        Set<String> limitrofi = Set.copyOf(offerta.comuniLimitrofi(codiceCanonico));
         List<ErogatoreCompatibile> risultato = new ArrayList<>();
         for (var opt : utenze.elencoOptAttive(Set.copyOf(offerta.optAttivePerMisura(misuraId)))) {
-            aggiungiLocale(risultato, opt, comuneCodice, limitrofi);
+            aggiungiLocale(risultato, opt, codiceCanonico, limitrofi);
         }
         for (var operatore : utenze.elencoOperatoriAttiviPerMisura(misuraId)) {
-            aggiungiLocale(risultato, operatore, comuneCodice, limitrofi);
+            aggiungiLocale(risultato, operatore, codiceCanonico, limitrofi);
             if (operatore.centroPicus() && misura.dati().erogabileADistanza()) {
                 risultato.add(opzione(operatore, AmbitoErogazione.CENTRO_PICUS_A_DISTANZA));
             }
@@ -67,9 +69,11 @@ public class ServizioRicercaErogatori implements RicercaErogatoriApi {
         if (p.tipo() == UtenzeApi.TipoErogatore.OPT && !offerta.bloccaOfferta(accountId, misuraId)) {
             return false;
         }
+        String codiceCanonico = catalogo.cercaComune(comune).map(it.unina.picus.catalogo.api.CatalogoApi.Comune::codice)
+                .orElse(comune);
         return switch (ambito) {
-            case STESSO_COMUNE -> comune.equals(p.comuneCodice());
-            case COMUNE_LIMITROFO -> offerta.bloccaAdiacenza(comune, p.comuneCodice());
+            case STESSO_COMUNE -> codiceCanonico.equals(p.comuneCodice());
+            case COMUNE_LIMITROFO -> offerta.bloccaAdiacenza(codiceCanonico, p.comuneCodice());
             case CENTRO_PICUS_A_DISTANZA -> p.centroPicus() && misura.get().dati().erogabileADistanza();
         };
     }
